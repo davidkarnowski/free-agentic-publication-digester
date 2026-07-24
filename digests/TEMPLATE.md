@@ -184,6 +184,14 @@ Source: Federal Register (FR), issue of {fr_issue_date}, volume
   - Included because: {inclusion_rule} (e.g., "designated economically
     significant"; "document type: rule, all final rules are listed")
   - Source: [{package_id}/{granule_id}](https://www.govinfo.gov/app/details/{package_id}/{granule_id})
+  <!-- (repeat per embedded source graphic, when the document contains
+       graphics and the item was summarized; graphics carry the same
+       citation as the item. If some of the document's graphics are not
+       embedded, the disclosure line is REQUIRED — no silent omission.) -->
+  - ![{graphic_factual_caption}](assets/{digest_date}/{graphic_asset_filename})
+    *Source graphic {n} of {graphic_total} from {fr_doc_number}.*
+  - *Graphics not rendered here: {unrendered_graphic_count} of
+    {graphic_total} — see the [source PDF]({package_pdf_url}).*
 
 <!-- BEGIN EXAMPLE (fictional; format illustration only) -->
 #### EXAMPLE — Department of Transportation
@@ -284,6 +292,11 @@ requests; last watermarks as listed in the header.
   granules (prayer, pledge, adjournment) — excluded 8 granules";
   "FR-EX-02: notices without a significance designation or listing-rule
   match — counted in totals, not individually summarized — 143 documents")
+
+**Source graphics:** {graphics_total_observed} graphic(s) flagged across
+today's documents; {graphics_vision_analyzed} analyzed via vision pass;
+{graphics_embedded} embedded above; the remainder are viewable in the
+cited source PDFs.
 
 **Known gaps:** {known_gaps_or_none} (e.g., "govinfo returned 503 for 1
 granule; it will be retried next sync and appear in tomorrow's digest",

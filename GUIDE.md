@@ -146,17 +146,23 @@ without touching upstream:
 
 ```
 [1 FETCH]  scheduled sync → govinfo collections delta → download new/changed
-           packages → store raw (XML preferred) + metadata + fetch log
+           packages → store raw (XML preferred; PDF where graphics require)
+           + metadata + fetch log
                 │
 [2 EXTRACT] parse raw XML → normalized records (speaker, chamber, bill ids,
-           agency, doc type, dates, full text) → local store (SQLite to start)
+           agency, doc type, dates, full text) → local store (SQLite to
+           start). Graphics flagged in the source (FR <GPH>) are inventoried
+           per document and extracted as individual image assets.
                 │
 [3 ANALYZE] mechanical aggregation first (counts, stages, cross-references);
            LLM summarization second, constrained by §2 rules, always with
-           citations back to package/granule IDs
+           citations back to package/granule IDs. Selected items' graphics
+           get a vision pass (see §6) so visual content informs the summary.
                 │
 [4 REPORT]  daily digest (Markdown): headline activity, per-chamber summary,
-           new rules/laws, tracked-item updates, coverage statement
+           new rules/laws, tracked-item updates, coverage statement.
+           Digests embed relevant source graphics (stored under
+           digests/assets/, cited like text) rather than only linking out.
 ```
 
 - **Storage:** filesystem for raw documents (`data/raw/<collection>/<date>/`),
@@ -185,8 +191,14 @@ of the code, not of operator discipline.
 
 ### Rules (enforced in code when the analysis layer is built)
 
-1. **PDFs never reach a model.** The LLM consumes extracted text from XML
-   only. PDFs exist for the archival record.
+1. **Whole PDFs never reach a model.** Text always comes from XML — a PDF
+   page is ~an order of magnitude more tokens than its text. Graphics are
+   the exception, handled as *individual extracted images*, not PDF pages:
+   documents that flag graphics (FR `<GPH>`; measured 0–54/issue) get their
+   images extracted at the EXTRACT stage, and a **vision pass runs only on
+   graphics belonging to items already promoted by a selection rule** —
+   rule 4 applies to images exactly as to text. Image tokens count against
+   the daily cap and are logged in the ledger like any other call.
 2. **Mechanical work costs zero tokens.** Counts, stages, vote tallies,
    groupings, and the entire Coverage Statement are computed in code. An LLM
    call that could have been a SQL query is a bug.
@@ -213,7 +225,14 @@ of the code, not of operator discipline.
    ~half the verbatim ceiling and ~2× expected load). Overflow items stay
    queued for the next day and are named in the Coverage Statement's known
    gaps — a budget stop must never become a silent omission (§2).
-9. **Batch-friendly by design.** The daily job is not latency-sensitive:
+9. **Graphics in digests are cited evidence, not decoration.** A digest
+   embeds a source graphic only when it belongs to a summarized item, and
+   it carries the same citation discipline as text (package/granule ID +
+   permanent URL). Selected graphics are copied to `digests/assets/<date>/`
+   so the published digest is self-contained; items whose remaining
+   graphics were *not* rendered still disclose the count with a link to the
+   source PDF — the §2 no-silent-omission rule applies to images too.
+10. **Batch-friendly by design.** The daily job is not latency-sensitive:
    structure analysis as batchable per-item calls so it can run on
    discounted/off-peak capacity, and so a partial day's work is resumable —
    mirroring the fetch layer's pending-queue semantics.
@@ -224,9 +243,12 @@ of the code, not of operator discipline.
   obtain API key, verify access with a handful of hand-run requests.
 - **Phase 1 — Fetch & store:** rate-limited govinfo client, daily delta sync
   for CREC/BILLS/FR, raw archive + fetch log.
-- **Phase 2 — Extract:** XML parsers per collection, normalized SQLite schema.
+- **Phase 2 — Extract:** XML parsers per collection, normalized SQLite
+  schema; graphic inventory (`<GPH>` counts per document) and image-asset
+  extraction for flagged documents.
 - **Phase 3 — Analyze & report:** mechanical aggregation, citation-bound
-  summarization, first real daily digest; iterate on digest format.
+  summarization, vision pass on selected items' graphics, first real daily
+  digest with embedded source graphics; iterate on digest format.
 - **Phase 4 — Broaden & harden:** add PLAW/CHRG/CRPT/DCPD, Congress.gov
   metadata, backfill via bulk data, bias/faithfulness spot-audits
   (periodically diff a digest item against its full source).

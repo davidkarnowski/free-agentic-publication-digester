@@ -17,6 +17,59 @@ Entry format:
 
 ---
 
+## 2026-07-24 10:55 PDT — Scope change: graphics become first-class (multimodal analysis + embedded in digests)
+
+**Context:** Investigated whether XML-only extraction misses visual content.
+Empirical answer from our archive: CREC and BILLS are pure text (BILLS
+"graphic" grep hits were words like "geographic"); FR tables come through as
+structured `<GPOTABLE>` XML (better than PDF for analysis); but FR carries
+real graphics — 0–54 `<GPH>` elements per issue (maps, form facsimiles,
+labeling examples, diagrams) whose content exists only outside the XML.
+User direction: graphics are in scope — multimodal analysis, and final
+digests should include relevant source graphics.
+
+**Work performed (GUIDE first, per working agreement):**
+
+1. **GUIDE §5 architecture** updated across all four stages: FETCH may pull
+   PDF where graphics require it; EXTRACT inventories `<GPH>` per document
+   and extracts individual image assets; ANALYZE runs a vision pass on
+   selected items' graphics; REPORT embeds relevant graphics in digests
+   (self-contained under `digests/assets/<date>/`).
+2. **GUIDE §6 rule 1 amended** — was "PDFs never reach a model," now "whole
+   PDFs never reach a model": text still comes from XML only, but
+   individually-extracted graphics may go to vision, gated by the same
+   selection rules as text, with image tokens counted against the daily cap
+   and logged in the ledger.
+3. **GUIDE §6 new rule 9** — graphics in digests are cited evidence, not
+   decoration: embedded only for summarized items, carrying full citations;
+   unrendered graphics are disclosed with a count and source-PDF link (§2
+   no-silent-omission applies to images).
+4. **Roadmap** Phase 2/3 items updated (graphic inventory + asset
+   extraction; vision pass + embedding).
+5. **digests/TEMPLATE.md** — FR item slots gain embedded-graphic blocks with
+   captions, per-graphic citations, and a required disclosure line for
+   unrendered graphics; Coverage Statement gains a source-graphics
+   accounting line (observed / vision-analyzed / embedded).
+
+**Decisions:**
+- Graphics equal citizens editorially: same selection gating, citation
+  discipline, and omission accounting as text. Factual captions only
+  (§2 opinion-agnostic prose applies).
+- Digest self-containment: selected graphics are copied into
+  `digests/assets/` (committed) rather than hotlinked, so the published
+  archive stands alone; volume is naturally small (only summarized items'
+  graphics).
+
+**Open questions / next steps:**
+- [ ] Fetch-layer implication: FR currently downloads XML only. Phase 2 must
+      add "fetch the PDF (or graphic files) when a package's XML flags
+      `<GPH>`" — a second, conditional download per flagged package, well
+      within request budget (graphics-bearing FR issues are a handful/week).
+- [ ] Choose image-extraction approach from FR PDFs at Phase 2 build time
+      (e.g., pypdf/pdfplumber image extraction vs page-region rendering).
+
+---
+
 ## 2026-07-24 10:40 PDT — Token economics: measured the corpus, codified LLM budget rules
 
 **Context:** User raised the right pre-Phase-3 question: can a daily archive
