@@ -26,6 +26,15 @@ MAX_REQUESTS_PER_DAY = 2000
 # anything older is a deliberate, throttled bulkdata backfill.
 INITIAL_SYNC_LOOKBACK_DAYS = 3
 
+REQUEST_TIMEOUT = 30  # seconds
+MAX_ATTEMPTS = 5  # total tries per request, including the first
+BACKOFF_BASE_SECONDS = 2.0  # 2, 4, 8, 16 between retries
+# If the server reports fewer remaining requests than this, something is very
+# wrong with our usage pattern (our budget is ~1% of theirs) — halt the client.
+MIN_SERVER_REMAINING = 1000
+
+FETCH_LOG_DB = DATA_DIR / "fetch_log.db"
+
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")
 USER_AGENT = f"info-intel/0.1 (personal daily-digest research; contact: {CONTACT_EMAIL})"
 

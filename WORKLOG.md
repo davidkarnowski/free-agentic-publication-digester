@@ -17,6 +17,80 @@ Entry format:
 
 ---
 
+## 2026-07-24 09:10 PDT — Phase 1: rate-limited client (+ schema design, digest template)
+
+**Context:** Start of Phase 1 (Fetch & store). Core deliverable: the
+rate-limited govinfo HTTP client. Per user direction, independent
+work items were parallelized to sub-agents: the SQLite schema design and the
+daily digest template, both of which depend only on GUIDE.md, not on client
+code.
+
+**Work performed:**
+
+1. **`src/info_intel/client.py` — `GovinfoClient`.** GUIDE.md §4 enforced in
+   code:
+   - Paces requests to `MAX_REQUESTS_PER_SECOND` (1/sec) via monotonic-clock
+     interval enforcement.
+   - Daily budget (`MAX_REQUESTS_PER_DAY` = 2000) counted from the
+     *persistent* fetch log in `data/fetch_log.db` — a process restart cannot
+     reset the budget. Exceeding it raises `BudgetExceededError`.
+   - Every attempt (not just every logical request) is logged with UTC
+     timestamp, URL + params, status, bytes, elapsed ms, attempt number, and
+     error — with the API key stripped before logging.
+   - 429/5xx handling: honors `Retry-After` exactly when present; otherwise
+     exponential backoff (2/4/8/16 s); gives up after `MAX_ATTEMPTS` = 5.
+   - Safety halt: if the server ever reports `X-RateLimit-Remaining` below
+     `MIN_SERVER_REMAINING` (1000), the client refuses further requests
+     (`RateLimitFloorError`) — at ~1% budgeted usage we should never be near
+     the server's limit, so proximity means a bug on our side.
+   - `paginate()` follows `nextPage` links, always re-injecting our own key
+     and discarding any echoed `api_key` parameter.
+   - Session, sleep, and clock are constructor-injectable for testing.
+2. **`tests/test_client.py`** — 10 tests, no network (fake session +
+   deterministic clock, tmp-path DB): pacing, budget enforcement across a
+   simulated restart, Retry-After honored, backoff sequence, give-up after
+   max attempts, key redaction in logs, per-attempt logging, rate-floor halt,
+   pagination key-stripping, User-Agent presence. All pass; ruff clean.
+3. **Live dogfood:** `scripts/verify_key.py` rewritten to use the client.
+   One real request: HTTP 200, fetch-log row written correctly
+   (~4.8 KB, ~2.8 s elapsed), budget accounting 1/2000.
+4. **`docs/schema.md`** (sub-agent) — SQLite schema design for the metadata
+   store (`data/info_intel.db`): `packages` (natural key `package_id`,
+   change detection via `fetched_last_modified` vs `last_modified`, coarse
+   4-state `fetch_status`, partial index for the unfetched queue),
+   `granules` (composite-key `WITHOUT ROWID`), `sync_state` (per-collection
+   server-side `lastModified` watermark, advanced only after a listing
+   completes — crash recovery by harmless re-listing + idempotent upserts,
+   no journal). DDL was machine-validated against a real SQLite instance by
+   the designing agent. First-sync date bound (3 days) incorporated.
+5. **`digests/TEMPLATE.md`** (sub-agent) — the digest output contract:
+   mechanical section names, required "Included because: {rule}" line and
+   govinfo permanent-URL citation on every item slot, explicit "If none"
+   renderings so absence is never silent, mandatory Coverage Statement
+   reconciling all observed packages (summarized / counted-only / excluded
+   by named rule), methodology footer. Worked fictional EXAMPLE blocks per
+   section, clearly fenced.
+
+**Decisions:**
+- Fetch log stays a **separate DB file** from the pipeline metadata store
+  (different owner, append-only audit lifecycle; can't be rolled back by
+  pipeline transactions). Rationale in docs/schema.md.
+- Client halts (rather than warns) on low server-reported remaining quota:
+  proximity to the server limit at our budget level can only mean a client
+  bug, and the safe response to a suspected bug is stopping.
+- Watermark semantics: advance only on successful *listing*, not successful
+  *download* — failed downloads park as `pending` rows and never force
+  re-listing a window.
+
+**Open questions / next steps:**
+- [ ] Implement `db.py` (apply docs/schema.md DDL) and the delta-sync module
+      per the algorithm in docs/schema.md.
+- [ ] First real sync run (date-bounded, CREC/BILLS/FR).
+- [ ] Then Phase 2: XML parsers feeding the extraction layer that
+      TEMPLATE.md's slots require.
+
+---
+
 ## 2026-07-24 08:47 PDT — Repo scaffolding, API key verified, first-sync bound
 
 **Context:** Phase 0 continuation: turn the empty directory into a working

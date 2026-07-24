@@ -1,0 +1,307 @@
+<!--
+  TEMPLATE for daily digests (digests/YYYY-MM-DD.md).
+
+  This file is the target output contract for the pipeline's REPORT stage
+  (GUIDE.md §5) and therefore also defines what the EXTRACT/ANALYZE stages
+  must produce. Rules baked into this template (GUIDE.md §2):
+
+  - Section names are mechanical descriptions of document classes, never
+    judgments ("Floor Activity", not "Highlights").
+  - Every item carries a citation to a govinfo package/granule ID and its
+    permanent URL. No citation, no item.
+  - Every item states, inline, the mechanical rule that selected it
+    ("Included because: ..."). Rules are party-blind and subject-blind.
+  - The digest MUST end with a Coverage Statement accounting for everything
+    published that day: summarized vs. not summarized, with the exclusion
+    rule for each omission. The Coverage Statement section is mandatory and
+    may not be dropped even on empty days.
+  - Generated prose is descriptive only: no loaded adjectives, no motive
+    attribution, no outcome predictions.
+
+  Conventions used below:
+  - {curly_brace} tokens are machine-fillable slots.
+  - Blocks fenced by "BEGIN EXAMPLE" / "END EXAMPLE" comments are fully
+    worked FICTIONAL sample items showing the intended rendering of one
+    item. They are illustrations of format only — delete them in real
+    output; the pipeline emits one such block per real item.
+  - "(repeat per ...)" notes mark slots that expand to zero or more
+    instances. A section with zero instances still renders, with its
+    "none published" line, so absence is explicit rather than silent.
+-->
+
+# Daily Digest — {digest_date}
+
+| | |
+|---|---|
+| **Digest date** | {digest_date} |
+| **Data date range** | {data_start_date} to {data_end_date} |
+| **Generated at** | {generation_timestamp_utc} (UTC) |
+| **Pipeline version** | {pipeline_version} ({git_commit_short}) |
+| **Source watermarks** | CREC: {crec_watermark} · BILLS: {bills_watermark} · FR: {fr_watermark} |
+
+All items below cite the govinfo package (and granule, where applicable) they
+summarize. Selection is mechanical; each item states the rule that included
+it. See the Coverage Statement at the end for a full accounting of what was
+published, what was summarized, and what was excluded and why.
+
+---
+
+## 1. Congressional Floor Activity
+
+Source: Congressional Record (CREC), daily edition for {crec_issue_date}.
+Total issue size: {crec_total_pages} pages across {crec_granule_count}
+granules.
+
+### 1.1 Senate
+
+Session status: {senate_session_status}. Floor pages: {senate_page_range}
+({senate_page_count} pages).
+
+<!-- (repeat per selected Senate floor item) -->
+- **{item_title}** — {factual_summary_1_to_3_sentences}
+  - Included because: {inclusion_rule} (e.g., "floor time: {n} pages of CREC,
+    above the {threshold}-page threshold")
+  - Measures referenced: {bill_ids_or_none}
+  - Source: [{package_id} / {granule_id}](https://www.govinfo.gov/app/details/{package_id}/{granule_id})
+
+<!-- BEGIN EXAMPLE (fictional; format illustration only) -->
+- **EXAMPLE — Consideration of S. 9999, Interstate Bridge Inspection
+  Standards Act** — The Senate resumed consideration of S. 9999. Senators
+  from four states spoke; two amendments (S.Amdt. 501, S.Amdt. 502) were
+  offered and pending at adjournment. A cloture motion was filed.
+  - Included because: floor time: 14 pages of CREC, above the 5-page
+    threshold
+  - Measures referenced: S. 9999, S.Amdt. 501, S.Amdt. 502
+  - Source: [CREC-2026-07-23 / CREC-2026-07-23-pt1-PgS4101](https://www.govinfo.gov/app/details/CREC-2026-07-23/CREC-2026-07-23-pt1-PgS4101)
+<!-- END EXAMPLE -->
+
+*If no items met a selection rule:* No Senate floor items met the selection
+thresholds. {senate_unselected_count} floor granules are accounted for in the
+Coverage Statement.
+
+### 1.2 House of Representatives
+
+Session status: {house_session_status}. Floor pages: {house_page_range}
+({house_page_count} pages).
+
+<!-- (repeat per selected House floor item; same slot structure as 1.1) -->
+- **{item_title}** — {factual_summary_1_to_3_sentences}
+  - Included because: {inclusion_rule}
+  - Measures referenced: {bill_ids_or_none}
+  - Source: [{package_id} / {granule_id}](https://www.govinfo.gov/app/details/{package_id}/{granule_id})
+
+### 1.3 Recorded Votes
+
+<!-- (repeat per recorded vote; recorded votes are always included — the
+     inclusion rule is the vote itself, not its subject) -->
+- **{chamber} Roll Call {vote_number}: {question_text}** — Result:
+  {result} ({yeas}–{nays}, {not_voting} not voting). Measure:
+  {bill_id_or_none}.
+  - Included because: recorded vote (all recorded votes are listed)
+  - Source: [{package_id} / {granule_id}](https://www.govinfo.gov/app/details/{package_id}/{granule_id})
+
+<!-- BEGIN EXAMPLE (fictional; format illustration only) -->
+- **EXAMPLE — House Roll Call 512: On passage of H.R. 8888, Rural
+  Broadband Mapping Act** — Result: Passed (301–120, 12 not voting).
+  Measure: H.R. 8888.
+  - Included because: recorded vote (all recorded votes are listed)
+  - Source: [CREC-2026-07-23 / CREC-2026-07-23-pt1-PgH6220](https://www.govinfo.gov/app/details/CREC-2026-07-23/CREC-2026-07-23-pt1-PgH6220)
+<!-- END EXAMPLE -->
+
+*If none:* No recorded votes were published in this issue of the
+Congressional Record.
+
+---
+
+## 2. Legislation
+
+Source: Congressional Bills (BILLS), text versions published
+{data_start_date} to {data_end_date}.
+
+### 2.1 Counts by Stage
+
+| Stage (bill text version) | Count |
+|---|---|
+| Introduced (ih/is) | {count_introduced} |
+| Reported (rh/rs) | {count_reported} |
+| Engrossed (eh/es) | {count_engrossed} |
+| Enrolled (enr) | {count_enrolled} |
+| Other versions | {count_other_versions} |
+| **Total bill texts published** | **{count_bills_total}** |
+
+### 2.2 Bills Listed by Mechanical Rule
+
+Bills below are listed because they matched at least one listing rule; the
+matching rule is stated per item. All other bill texts are counted above and
+accounted for in the Coverage Statement.
+
+<!-- (repeat per selected bill) -->
+- **{bill_id} ({version_code}) — {official_title}** —
+  {factual_summary_1_to_2_sentences}
+  - Included because: {inclusion_rule} (e.g., "reached stage: enrolled";
+    "cosponsors: {n}, above the {threshold} threshold")
+  - Source: [{package_id}](https://www.govinfo.gov/app/details/{package_id})
+
+<!-- BEGIN EXAMPLE (fictional; format illustration only) -->
+- **EXAMPLE — H.R. 8888 (enr) — Rural Broadband Mapping Act** — An
+  enrolled bill directing the Federal Communications Commission to update
+  broadband coverage maps using on-site verification and to report to
+  Congress annually. Presented to the President following House and Senate
+  passage.
+  - Included because: reached stage: enrolled (all enrolled bills are
+    listed)
+  - Source: [BILLS-119hr8888enr](https://www.govinfo.gov/app/details/BILLS-119hr8888enr)
+<!-- END EXAMPLE -->
+
+*If none:* No bill texts published in this range matched a listing rule;
+all {count_bills_total} are accounted for in the Coverage Statement.
+
+---
+
+## 3. Federal Register
+
+Source: Federal Register (FR), issue of {fr_issue_date}, volume
+{fr_volume}, pages {fr_page_range}.
+
+### 3.1 Counts by Document Type
+
+| Document type | Count |
+|---|---|
+| Rules | {count_fr_rules} |
+| Proposed rules | {count_fr_proposed_rules} |
+| Notices | {count_fr_notices} |
+| Presidential documents | {count_fr_presidential} |
+| **Total FR documents** | **{count_fr_total}** |
+
+### 3.2 Rules Published
+
+<!-- (repeat per agency, agencies in alphabetical order) -->
+#### {agency_name}
+
+<!-- (repeat per selected rule under this agency) -->
+- **{document_title}** ({fr_doc_number}; {cfr_citation}) —
+  {factual_summary_1_to_3_sentences} Effective date: {effective_date}.
+  - Included because: {inclusion_rule} (e.g., "designated economically
+    significant"; "document type: rule, all final rules are listed")
+  - Source: [{package_id}/{granule_id}](https://www.govinfo.gov/app/details/{package_id}/{granule_id})
+
+<!-- BEGIN EXAMPLE (fictional; format illustration only) -->
+#### EXAMPLE — Department of Transportation
+
+- **EXAMPLE — Commercial Drone Corridor Operating Requirements**
+  (2026-99999; 14 CFR Part 108) — A final rule establishing operating,
+  equipage, and reporting requirements for unmanned aircraft operating in
+  designated low-altitude corridors. The rule takes effect 90 days after
+  publication and includes a phased compliance schedule for existing
+  operators. Effective date: 2026-10-21.
+  - Included because: designated economically significant (E.O. 12866
+    significance flag in document metadata)
+  - Source: [FR-2026-07-23/2026-99999](https://www.govinfo.gov/app/details/FR-2026-07-23/2026-99999)
+<!-- END EXAMPLE -->
+
+*If none:* No rules were published in this issue.
+
+### 3.3 Proposed Rules Published
+
+<!-- (same per-agency, per-item structure and slots as 3.2; comment-period
+     close date replaces effective date) -->
+#### {agency_name}
+
+- **{document_title}** ({fr_doc_number}; {cfr_citation}) —
+  {factual_summary_1_to_3_sentences} Comments due: {comment_close_date}.
+  - Included because: {inclusion_rule}
+  - Source: [{package_id}/{granule_id}](https://www.govinfo.gov/app/details/{package_id}/{granule_id})
+
+*If none:* No proposed rules were published in this issue.
+
+### 3.4 Notices and Presidential Documents
+
+Notices are summarized only when they match a listing rule; all are counted
+in 3.1 and in the Coverage Statement. Presidential documents in the FR are
+always listed.
+
+<!-- (repeat per selected item; same slot structure as 3.2) -->
+- **{document_title}** ({fr_doc_number}) — {factual_summary_1_to_2_sentences}
+  - Included because: {inclusion_rule} (e.g., "document type: presidential
+    document, always listed")
+  - Source: [{package_id}/{granule_id}](https://www.govinfo.gov/app/details/{package_id}/{granule_id})
+
+*If none:* No notices or presidential documents matched a listing rule.
+
+---
+
+## 4. Enacted Laws
+
+Source: Public and Private Laws (PLAW) published {data_start_date} to
+{data_end_date}. *(Collection scheduled for a later phase — until PLAW
+ingestion is live, this section renders the not-ingested line below and the
+Coverage Statement marks PLAW "not ingested".)*
+
+<!-- (repeat per law; enactment is the inclusion rule — all are listed) -->
+- **{law_number} — {official_title}** — {factual_summary_1_to_2_sentences}
+  Approved: {approval_date}. Originated as: {bill_id}.
+  - Included because: enacted into law (all public and private laws are
+    listed)
+  - Source: [{package_id}](https://www.govinfo.gov/app/details/{package_id})
+
+<!-- BEGIN EXAMPLE (fictional; format illustration only) -->
+- **EXAMPLE — Public Law 119-999 — Rural Broadband Mapping Act** —
+  Directs the Federal Communications Commission to update broadband
+  coverage maps using on-site verification and to report to Congress
+  annually. Approved: 2026-07-22. Originated as: H.R. 8888.
+  - Included because: enacted into law (all public and private laws are
+    listed)
+  - Source: [PLAW-119publ999](https://www.govinfo.gov/app/details/PLAW-119publ999)
+<!-- END EXAMPLE -->
+
+*If none:* No laws were published in this range.
+*If collection not yet ingested:* PLAW is not yet ingested by this pipeline
+version; enacted laws are not covered in this digest.
+
+---
+
+## Coverage Statement
+
+*This section is mandatory and appears in every digest, including days with
+no publications. It accounts for every package the sync observed in the data
+date range. "Excluded" always names the mechanical rule; there are no
+unexplained omissions.*
+
+**Sync summary:** {sync_run_count} sync run(s); {api_request_count} API
+requests; last watermarks as listed in the header.
+
+| Collection | Packages published | Granules/documents | Summarized | Counted only | Excluded by rule |
+|---|---|---|---|---|---|
+| CREC | {crec_pkg_count} | {crec_granule_count} | {crec_summarized_count} | {crec_counted_count} | {crec_excluded_count} |
+| BILLS | {bills_pkg_count} | — | {bills_summarized_count} | {bills_counted_count} | {bills_excluded_count} |
+| FR | {fr_pkg_count} | {fr_granule_count} | {fr_summarized_count} | {fr_counted_count} | {fr_excluded_count} |
+
+**Exclusion rules applied today:**
+
+<!-- (repeat per exclusion rule that fired, with count of items it excluded) -->
+- {exclusion_rule_id}: {exclusion_rule_description} — excluded
+  {excluded_item_count} item(s) (e.g., "CREC-EX-01: procedural boilerplate
+  granules (prayer, pledge, adjournment) — excluded 8 granules";
+  "FR-EX-02: notices without a significance designation or listing-rule
+  match — counted in totals, not individually summarized — 143 documents")
+
+**Known gaps:** {known_gaps_or_none} (e.g., "govinfo returned 503 for 1
+granule; it will be retried next sync and appear in tomorrow's digest",
+"PLAW collection not yet ingested — see §4").
+
+*Verification: any item above can be checked against its source in one
+click via its govinfo link. Totals in this table are reproducible from the
+fetch log for {digest_date}.*
+
+---
+
+## Methodology
+
+Selection rules, summarization prompts, and thresholds are versioned in this
+repository and identified by the pipeline version in the header
+({pipeline_version}). Editorial principles — primary sources only,
+opinion-agnostic prose, mechanical party-blind selection, full coverage
+accounting — are defined in [GUIDE.md](../GUIDE.md) §2. Ruleset in effect:
+{ruleset_version}. To reproduce this digest: re-run the report stage against
+the extracted records for {data_start_date}–{data_end_date}; no upstream
+re-fetch is required (GUIDE.md §5).
