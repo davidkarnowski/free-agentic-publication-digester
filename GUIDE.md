@@ -166,7 +166,59 @@ without touching upstream:
 - **Digest output:** `digests/YYYY-MM-DD.md` — accumulates as a browsable
   archive.
 
-## 6. Roadmap
+## 6. Token Economics (LLM Budget Discipline)
+
+The analysis layer (§5 stage 3) uses LLM calls, which are the pipeline's only
+meaningfully metered resource. Same philosophy as §4: budgets are properties
+of the code, not of operator discipline.
+
+### Measured reality (2026-07-24, from our own archive)
+
+- Raw archive size wildly overstates LLM-relevant volume: a ~49 MB CREC day
+  is ~46.6 MB PDF page images and only ~2 MB XML text.
+- Actual text per publication day: CREC ~2 MB, FR ~2.6 MB, BILLS ~2 MB
+  (~28 KB/bill × 60–70). Verbatim-everything ceiling ≈ **1.5–2M input
+  tokens/day**. A full day therefore exceeds every single-call context
+  window — per-item map-reduce is structurally required.
+- With mechanical selection and official-summary-first drafting, realistic
+  daily load is **~300–800K input / ~10–20K output tokens**.
+
+### Rules (enforced in code when the analysis layer is built)
+
+1. **PDFs never reach a model.** The LLM consumes extracted text from XML
+   only. PDFs exist for the archival record.
+2. **Mechanical work costs zero tokens.** Counts, stages, vote tallies,
+   groupings, and the entire Coverage Statement are computed in code. An LLM
+   call that could have been a SQL query is a bug.
+3. **Official summaries before our summaries.** FR agency abstracts, the
+   CREC Daily Digest section, and official bill titles/stage codes are the
+   first drafting inputs. We summarize verbatim primary text only for items
+   a selection rule promoted — this is cheaper *and* editorially safer.
+4. **Selection before summarization, always.** No model ever sees an item
+   that hasn't passed a §2 mechanical selection rule. The rules bound the
+   token spend; loosening a rule is a GUIDE change, not a tweak.
+5. **Summarize once, store forever.** Summaries are durable artifacts keyed
+   by package/granule ID + content version. Regeneration happens only when
+   the source's lastModified changes or the prompt version bumps —
+   never as a side effect of re-running the digest.
+6. **Tier the models.** Cheap/fast models for per-item map work
+   (classification, per-item compression); the strongest model only for the
+   final digest composition pass, which sees already-compressed input.
+7. **Token ledger, like the fetch log.** Every LLM call is logged (UTC
+   timestamp, model, purpose, input/output tokens, package IDs touched) to a
+   local ledger. A self-audit report (like `scripts/audit.py`) answers "what
+   did analysis cost this week?" at any time.
+8. **Daily token budget with a hard stop.** The analysis runner refuses to
+   exceed a configured daily input-token cap (initial: **1M tokens/day**,
+   ~half the verbatim ceiling and ~2× expected load). Overflow items stay
+   queued for the next day and are named in the Coverage Statement's known
+   gaps — a budget stop must never become a silent omission (§2).
+9. **Batch-friendly by design.** The daily job is not latency-sensitive:
+   structure analysis as batchable per-item calls so it can run on
+   discounted/off-peak capacity, and so a partial day's work is resumable —
+   mirroring the fetch layer's pending-queue semantics.
+
+## 7. Roadmap
 
 - **Phase 0 — Foundation (now):** this guide, worklog, repo scaffolding,
   obtain API key, verify access with a handful of hand-run requests.
@@ -179,7 +231,7 @@ without touching upstream:
   metadata, backfill via bulk data, bias/faithfulness spot-audits
   (periodically diff a digest item against its full source).
 
-## 7. Open-Source Readiness
+## 8. Open-Source Readiness
 
 This repo may be published on GitHub at any time. Everything committed is
 written as if it were already public:
@@ -204,7 +256,7 @@ written as if it were already public:
   dedicated project address (repo-local `git config user.email`), never a
   personal or GitHub-credential address.
 
-## 8. Working Agreements
+## 9. Working Agreements
 
 - `WORKLOG.md` gets a timestamped, verbose entry for every work session:
   what was done, why, decisions made, dead ends included.

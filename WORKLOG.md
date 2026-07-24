@@ -17,6 +17,52 @@ Entry format:
 
 ---
 
+## 2026-07-24 10:40 PDT — Token economics: measured the corpus, codified LLM budget rules
+
+**Context:** User raised the right pre-Phase-3 question: can a daily archive
+that measures 215 MB be summarized within a monthly Claude Code Max plan?
+Answered empirically, then codified the answer as guidance.
+
+**Work performed:**
+
+1. **Measured the real text volume** (from our own archive, not estimates):
+   a ~49 MB CREC day decomposes into ~46.6 MB of PDF page images and only
+   ~2 MB of XML text. Per publication day: CREC ~2 MB, FR ~2.6 MB, BILLS
+   ~2 MB text. Verbatim-everything ceiling ≈ 1.5–2M input tokens/day;
+   with mechanical selection + official-summary-first drafting, realistic
+   load is ~300–800K input / 10–20K output tokens/day. Conclusion: easily
+   within a Max plan's daily headless run (limits are shared with
+   interactive use and not token-denominated, so contention — not
+   feasibility — is the consideration); even API pay-per-token would be
+   ~$1–2/day, halved via batch processing.
+2. **New GUIDE.md §6 "Token Economics (LLM Budget Discipline)"** — mirrors
+   §4's philosophy (budgets as code): PDFs never reach a model; mechanical
+   work costs zero tokens (an LLM call that could be SQL is a bug);
+   official summaries (FR abstracts, CREC Daily Digest, bill titles) before
+   our own; selection always precedes summarization; summarize-once-store-
+   forever keyed by content version; model tiering (cheap map, strong final
+   compose); a token ledger paralleling the fetch log with its own audit
+   report; a hard daily input-token cap (initial 1M/day) whose overflow
+   queues to tomorrow and is named in the Coverage Statement (a budget stop
+   must never be a silent omission); batch-friendly, resumable analysis.
+3. **Renumbering:** Roadmap → §7, Open-Source Readiness → §8, Working
+   Agreements → §9. Cross-references updated in docs/schema.md; earlier
+   worklog entries citing "§7" refer to the numbering current at their
+   timestamps and are left as written.
+
+**Decisions:**
+- Daily LLM input cap set at 1M tokens (~half the verbatim ceiling, ~2×
+  expected load) — enforced by the analysis runner when built, same
+  hard-stop pattern as the HTTP client's request budget.
+- Token spend gets the same two-layer accountability as server access:
+  structured ledger + audit script.
+
+**Open questions / next steps:**
+- [ ] Phase 2 extraction unchanged; Phase 3 must implement the §6 rules as
+      code (ledger, cap, tiering) alongside the first digest generation.
+
+---
+
 ## 2026-07-24 10:15 PDT — First full sync complete: 220/220 fetched, zero errors
 
 **Context:** The background download run launched at 09:48 PDT finished

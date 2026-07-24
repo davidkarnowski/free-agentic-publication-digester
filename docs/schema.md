@@ -7,7 +7,7 @@ normalized records) will be added to this document when that phase begins;
 nothing here should need to change for them.
 
 - **Database file:** `data/info_intel.db` (repo-relative, like all paths in
-  this project — GUIDE §7).
+  this project — GUIDE §8).
 - **Raw documents are not stored in the database.** They live on the
   filesystem under `data/raw/<collection>/<dateIssued>/` (GUIDE §5); the
   database stores the *path* and the fetch bookkeeping.
@@ -82,7 +82,7 @@ CREATE TABLE packages (
   (re)download without another summary call, and to render a citation link.
   We record the one format we chose (XML preferred, GUIDE §5), not the full
   format matrix — this is an inventory, not a mirror of the API.
-- **`raw_path`** — repo-relative (GUIDE §7 bans absolute paths), NULL until
+- **`raw_path`** — repo-relative (GUIDE §8 bans absolute paths), NULL until
   the file is actually on disk.
 - **`fetch_status`** — the download lifecycle, deliberately coarse:
   - `pending` — known to exist; no current local copy (new, or the server's
