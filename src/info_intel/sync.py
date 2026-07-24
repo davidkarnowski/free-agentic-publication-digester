@@ -24,6 +24,11 @@ _FORMAT_PREFERENCE = (("xmlLink", "xml"), ("zipLink", "zip"), ("pdfLink", "pdf")
 # Collections whose packages have granules worth inventorying (docs/schema.md).
 _GRANULE_COLLECTIONS = {"CREC", "FR"}
 
+# Collections whose XML can flag graphics (GUIDE §5/§6: graphics are content;
+# their pixels live only in the PDF, so flagged packages get a companion PDF).
+_GRAPHICS_MARKER = b"<GPH"
+_GRAPHICS_COLLECTIONS = {"FR"}
+
 
 def utc_now_iso():
     return dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -176,6 +181,9 @@ def _download_package(client, conn, collection, package_id):
     raw_path = raw_dir / f"{package_id}.{fmt}"
     raw_path.write_bytes(resp.content)
 
+    if collection in _GRAPHICS_COLLECTIONS and fmt == "xml":
+        _maybe_fetch_graphics_pdf(client, package_id, resp.content, links, raw_dir)
+
     granule_count = None
     if collection in _GRANULE_COLLECTIONS:
         granule_count = _refresh_granules(client, conn, package_id)
@@ -202,6 +210,28 @@ def _download_package(client, conn, collection, package_id):
         ),
     )
     conn.commit()
+
+
+def _maybe_fetch_graphics_pdf(client, package_id, xml_bytes, links, raw_dir):
+    """Archive the companion PDF when the XML flags graphics (<GPH>), so the
+    graphic content is on disk for Phase 2 image extraction."""
+    count = xml_bytes.count(_GRAPHICS_MARKER)
+    if not count:
+        return
+    pdf_url = links.get("pdfLink")
+    if not pdf_url:
+        logger.warning("%s: %d graphics flagged but no pdfLink offered", package_id, count)
+        return
+    pdf_path = raw_dir / f"{package_id}.pdf"
+    if pdf_path.exists():
+        logger.debug("%s: companion PDF already on disk", package_id)
+        return
+    pdf_resp = client.get(pdf_url)
+    pdf_path.write_bytes(pdf_resp.content)
+    logger.info(
+        "%s: %d graphic(s) flagged — archived companion PDF (%d B)",
+        package_id, count, len(pdf_resp.content),
+    )
 
 
 def _refresh_granules(client, conn, package_id):

@@ -17,6 +17,41 @@ Entry format:
 
 ---
 
+## 2026-07-24 11:22 PDT — Graphics fetch implemented; FR re-synced with companion PDFs
+
+**Context:** Implementing the fetch-layer half of the graphics scope change,
+then re-syncing FR to backfill graphic content for already-held packages.
+
+**Work performed:**
+
+1. **`sync.py`: conditional companion-PDF fetch.** After an FR package's XML
+   is archived, the bytes are scanned for `<GPH>`; if flagged, the package's
+   PDF is also downloaded to a sibling path
+   (`data/raw/FR/<date>/<pid>.pdf`). XML remains the primary artifact
+   (`download_format` unchanged); no-graphics packages make no extra
+   request; an already-present PDF is not re-fetched (idempotent). CREC
+   needs no equivalent — its ZIPs already contain the PDFs.
+2. **2 new tests** (22 total, all passing): flagged FR package archives both
+   XML and PDF; unflagged package skips the PDF *and provably makes no PDF
+   request*.
+3. **FR re-sync** using the designed re-download path (flip `fetch_status`
+   to `pending`, run `--collections FR`): 7/7 re-fetched, 0 failures,
+   28 requests (day total 488/2000, ~24% of budget). Result: 6 of 7 issues
+   carry graphics — companion PDFs archived for all 6 (111 flagged graphics
+   total; FR-2026-07-23 alone has 54). FR-2026-07-24 (0 graphics) correctly
+   skipped its PDF — the conditional verified live, both directions.
+
+**Decisions:**
+- Companion PDF presence is derivable (sibling path exists) rather than a
+  new `packages` column — Phase 2's extractor checks the filesystem; if
+  extraction later needs richer bookkeeping (per-graphic rows), that
+  belongs in the Phase 2 schema addition, not a stopgap column now.
+
+**Open questions / next steps:** unchanged — Phase 2 extraction (parsers,
+graphic inventory + image-asset extraction from the now-present PDFs).
+
+---
+
 ## 2026-07-24 10:55 PDT — Scope change: graphics become first-class (multimodal analysis + embedded in digests)
 
 **Context:** Investigated whether XML-only extraction misses visual content.

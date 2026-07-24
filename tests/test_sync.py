@@ -215,6 +215,42 @@ def test_max_downloads_caps_run_leaving_rest_pending(conn, raw_dir):
     assert stats["pending_remaining"] == 1
 
 
+def fr_package(client, pid, xml_body):
+    client.pages["collections/FR/"] = listing(
+        [{"packageId": pid, "lastModified": "2026-07-24T02:00:00Z", "dateIssued": "2026-07-23"}]
+    )
+    client.json_by_path[f"packages/{pid}/summary"] = {
+        "dateIssued": "2026-07-23",
+        "title": "Federal Register issue",
+        "download": {"xmlLink": f"https://x/{pid}/xml", "pdfLink": f"https://x/{pid}/pdf"},
+    }
+    client.content_by_url[f"https://x/{pid}/xml"] = xml_body
+    client.content_by_url[f"https://x/{pid}/pdf"] = b"%PDF-fake"
+    client.pages[f"packages/{pid}/granules"] = [{"granules": []}]
+
+
+def test_fr_with_graphics_also_archives_companion_pdf(conn, raw_dir):
+    client = FakeClient()
+    fr_package(client, "FR-2026-07-23", b"<FR><RULE><GPH>img1</GPH><GPH>img2</GPH></RULE></FR>")
+    stats = sync.sync_collection(client, conn, "FR")
+    assert stats["downloaded"] == 1
+    day_dir = raw_dir / "FR" / "2026-07-23"
+    assert (day_dir / "FR-2026-07-23.xml").exists()
+    assert (day_dir / "FR-2026-07-23.pdf").read_bytes() == b"%PDF-fake"
+    row = conn.execute("SELECT download_format FROM packages").fetchone()
+    assert row["download_format"] == "xml"  # XML stays the primary artifact
+
+
+def test_fr_without_graphics_skips_pdf(conn, raw_dir):
+    client = FakeClient()
+    fr_package(client, "FR-2026-07-24", b"<FR><NOTICE>text only</NOTICE></FR>")
+    sync.sync_collection(client, conn, "FR")
+    day_dir = raw_dir / "FR" / "2026-07-23"
+    assert (day_dir / "FR-2026-07-24.xml").exists()
+    assert not (day_dir / "FR-2026-07-24.pdf").exists()
+    assert ("get", "https://x/FR-2026-07-24/pdf") not in client.calls  # no wasted request
+
+
 def test_crec_download_inventories_granules(conn, raw_dir):
     client = FakeClient()
     client.pages["collections/CREC/"] = listing(
