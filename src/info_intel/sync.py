@@ -10,6 +10,7 @@ per GUIDE.md §4.
 
 import datetime as dt
 import logging
+import re
 
 from . import config
 from .client import BudgetExceededError, RateLimitFloorError
@@ -26,8 +27,14 @@ _GRANULE_COLLECTIONS = {"CREC", "FR"}
 
 # Collections whose XML can flag graphics (GUIDE §5/§6: graphics are content;
 # their pixels live only in the PDF, so flagged packages get a companion PDF).
-_GRAPHICS_MARKER = b"<GPH"
 _GRAPHICS_COLLECTIONS = {"FR"}
+
+# FR graphic GIDs follow a section-coded pattern (e.g. EN23JY26.004) for
+# document content — equations, forms, maps, annex pages. Non-conforming GIDs
+# (e.g. Trump.EPS) are signatures/seals: boilerplate, never worth a PDF fetch,
+# a vision pass, or an embed (rule FR-GPH-01; GUIDE §6).
+_GID_RE = re.compile(rb"<GID>\s*([^<]*?)\s*</GID>")
+_SUBSTANTIVE_GID_RE = re.compile(rb"^E[A-Z]\d{2}[A-Z]{2}\d{2}\.\d+$")
 
 
 def utc_now_iso():
@@ -212,15 +219,38 @@ def _download_package(client, conn, collection, package_id):
     conn.commit()
 
 
+def classify_graphics(xml_bytes):
+    """Split a document's flagged graphics into content vs boilerplate.
+
+    Returns (substantive, boilerplate) counts. Substantive = GID matches the
+    FR section-coded naming pattern (equations, forms, maps, annex pages);
+    boilerplate = anything else (signatures, seals — rule FR-GPH-01).
+    """
+    substantive = boilerplate = 0
+    for gid in _GID_RE.findall(xml_bytes):
+        if _SUBSTANTIVE_GID_RE.match(gid):
+            substantive += 1
+        else:
+            boilerplate += 1
+    return substantive, boilerplate
+
+
 def _maybe_fetch_graphics_pdf(client, package_id, xml_bytes, links, raw_dir):
-    """Archive the companion PDF when the XML flags graphics (<GPH>), so the
-    graphic content is on disk for Phase 2 image extraction."""
-    count = xml_bytes.count(_GRAPHICS_MARKER)
-    if not count:
+    """Archive the companion PDF only when the XML flags *substantive*
+    graphics — signature/seal-only documents never cost a PDF fetch."""
+    substantive, boilerplate = classify_graphics(xml_bytes)
+    if not substantive:
+        if boilerplate:
+            logger.info(
+                "%s: %d graphic(s) are boilerplate only (FR-GPH-01) — no PDF fetched",
+                package_id, boilerplate,
+            )
         return
     pdf_url = links.get("pdfLink")
     if not pdf_url:
-        logger.warning("%s: %d graphics flagged but no pdfLink offered", package_id, count)
+        logger.warning(
+            "%s: %d substantive graphic(s) but no pdfLink offered", package_id, substantive
+        )
         return
     pdf_path = raw_dir / f"{package_id}.pdf"
     if pdf_path.exists():
@@ -229,8 +259,9 @@ def _maybe_fetch_graphics_pdf(client, package_id, xml_bytes, links, raw_dir):
     pdf_resp = client.get(pdf_url)
     pdf_path.write_bytes(pdf_resp.content)
     logger.info(
-        "%s: %d graphic(s) flagged — archived companion PDF (%d B)",
-        package_id, count, len(pdf_resp.content),
+        "%s: %d substantive graphic(s) (+%d boilerplate excluded by FR-GPH-01)"
+        " — archived companion PDF (%d B)",
+        package_id, substantive, boilerplate, len(pdf_resp.content),
     )
 
 

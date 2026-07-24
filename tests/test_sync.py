@@ -229,9 +229,14 @@ def fr_package(client, pid, xml_body):
     client.pages[f"packages/{pid}/granules"] = [{"granules": []}]
 
 
-def test_fr_with_graphics_also_archives_companion_pdf(conn, raw_dir):
+def test_fr_with_substantive_graphics_archives_companion_pdf(conn, raw_dir):
     client = FakeClient()
-    fr_package(client, "FR-2026-07-23", b"<FR><RULE><GPH>img1</GPH><GPH>img2</GPH></RULE></FR>")
+    fr_package(
+        client, "FR-2026-07-23",
+        b'<FR><RULE><GPH DEEP="30"><GID>EN23JY26.004</GID></GPH>'
+        b'<GPH DEEP="640"><GID>ED23JY26.063</GID></GPH></RULE>'
+        b'<PRESDOC><GPH DEEP="80"><GID>Trump.EPS</GID></GPH></PRESDOC></FR>',
+    )
     stats = sync.sync_collection(client, conn, "FR")
     assert stats["downloaded"] == 1
     day_dir = raw_dir / "FR" / "2026-07-23"
@@ -249,6 +254,27 @@ def test_fr_without_graphics_skips_pdf(conn, raw_dir):
     assert (day_dir / "FR-2026-07-24.xml").exists()
     assert not (day_dir / "FR-2026-07-24.pdf").exists()
     assert ("get", "https://x/FR-2026-07-24/pdf") not in client.calls  # no wasted request
+
+
+def test_fr_signature_only_graphics_skip_pdf(conn, raw_dir):
+    # Boilerplate-only (FR-GPH-01): a presidential signature is not content.
+    client = FakeClient()
+    fr_package(
+        client, "FR-2026-07-25",
+        b'<FR><PRESDOC><GPH DEEP="80" HTYPE="RIGHT"><GID>Trump.EPS</GID></GPH>'
+        b'<GPH DEEP="80" HTYPE="RIGHT"><GID>Trump.EPS</GID></GPH></PRESDOC></FR>',
+    )
+    sync.sync_collection(client, conn, "FR")
+    assert not (raw_dir / "FR" / "2026-07-23" / "FR-2026-07-25.pdf").exists()
+    assert ("get", "https://x/FR-2026-07-25/pdf") not in client.calls
+
+
+def test_classify_graphics_rule():
+    subs, boil = sync.classify_graphics(
+        b"<GID>EN23JY26.004</GID><GID> ER01JA26.123 </GID>"
+        b"<GID>Trump.EPS</GID><GID>SomeSeal.EPS</GID>"
+    )
+    assert (subs, boil) == (2, 2)
 
 
 def test_crec_download_inventories_granules(conn, raw_dir):

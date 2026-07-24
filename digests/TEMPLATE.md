@@ -294,7 +294,10 @@ requests; last watermarks as listed in the header.
   match — counted in totals, not individually summarized — 143 documents")
 
 **Source graphics:** {graphics_total_observed} graphic(s) flagged across
-today's documents; {graphics_vision_analyzed} analyzed via vision pass;
+today's documents: {graphics_substantive} content graphics (equations,
+forms, maps, annex pages) and {graphics_boilerplate} boilerplate
+(signatures/seals, excluded by rule FR-GPH-01). Of the content graphics,
+{graphics_vision_analyzed} were analyzed via vision pass and
 {graphics_embedded} embedded above; the remainder are viewable in the
 cited source PDFs.
 

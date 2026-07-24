@@ -199,6 +199,14 @@ of the code, not of operator discipline.
    graphics belonging to items already promoted by a selection rule** —
    rule 4 applies to images exactly as to text. Image tokens count against
    the daily cap and are logged in the ledger like any other call.
+   - **Rule FR-GPH-01 (boilerplate graphics).** FR content graphics carry
+     section-coded GIDs (e.g. `EN23JY26.004` — equations, forms, maps,
+     annex pages; measured 103 of 111 in our first window). Non-conforming
+     GIDs (e.g. `Trump.EPS` — signatures, seals) are boilerplate: they
+     never trigger a PDF fetch, never get a vision pass, and are never
+     embedded. Excluded counts are disclosed in the Coverage Statement —
+     the classification is mechanical (a filename pattern), party-blind,
+     and costs zero tokens.
 2. **Mechanical work costs zero tokens.** Counts, stages, vote tallies,
    groupings, and the entire Coverage Statement are computed in code. An LLM
    call that could have been a SQL query is a bug.

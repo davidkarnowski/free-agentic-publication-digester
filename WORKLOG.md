@@ -17,6 +17,50 @@ Entry format:
 
 ---
 
+## 2026-07-24 11:45 PDT — Graphics classification: rule FR-GPH-01 (boilerplate vs content)
+
+**Context:** User inspected the fetched FR PDFs and observed graphics that
+looked like boilerplate — the official seal, the President's signature —
+questioning whether the PDF fetch is warranted. Investigated empirically.
+
+**Work performed:**
+
+1. **Ground truth from the XML.** FR `<GPH>` elements carry a `<GID>`
+   filename that encodes what the graphic is. Content graphics use a
+   section-coded pattern (`EN23JY26.004` etc. — EN/ER/EP/ED + date + seq):
+   in our window these are *rate formulas rendered as images* (small,
+   DEEP=15–30), agency forms, and full-page executive-order annexes
+   (DEEP≈640). Signature graphics use non-conforming names — every
+   boilerplate instance found was `Trump.EPS` (DEEP=80, right-aligned,
+   following "IN WITNESS WHEREOF..." text). Key negative finding: image
+   *size* is NOT a usable signal (equations are tiny but substantive);
+   the GID naming convention is.
+2. **Classification across the archive:** 111 flagged graphics = 103
+   substantive + 8 signature boilerplate (all 8 in FR-2026-07-23's
+   presidential documents). So the user-observed signatures are real but
+   the minority; the companion PDFs remain justified — every one of the 6
+   archived PDFs has ≥1 substantive graphic, so no pruning or re-sync was
+   needed.
+3. **Rule FR-GPH-01 implemented** (`classify_graphics()` in sync.py): PDF
+   fetch now triggers only on ≥1 *substantive* graphic. Signature-only
+   documents never cost a request, never get vision, never get embedded;
+   boilerplate exclusions are logged and will be disclosed in the Coverage
+   Statement. Codified in GUIDE §6 rule 1; TEMPLATE.md coverage line now
+   splits observed graphics into content vs boilerplate-excluded.
+4. **Tests:** fixtures updated to real GID structures; new signature-only
+   test proves no PDF request is made; classifier unit test. 24 passing.
+
+**Decisions:**
+- Classification is by GID filename pattern — mechanical, party-blind, zero
+  tokens — not by image size (provably misleading) and not by an LLM.
+- The rule is named (FR-GPH-01) so digest exclusion disclosures can cite it,
+  per the §2 pattern of named mechanical rules.
+
+**Open questions / next steps:** unchanged (Phase 2 extraction; its graphic
+inventory now records the substantive/boilerplate split per document).
+
+---
+
 ## 2026-07-24 11:22 PDT — Graphics fetch implemented; FR re-synced with companion PDFs
 
 **Context:** Implementing the fetch-layer half of the graphics scope change,
