@@ -1,0 +1,176 @@
+# Work Production Log — Information Intelligence
+
+> Reverse-chronological log of all work on this project. Every session gets an
+> entry: timestamped, verbose, explanatory. Decisions include the *why*, and
+> dead ends are recorded alongside successes — the log should let a future
+> reader reconstruct not just what we built, but how we got there.
+
+Entry format:
+
+```
+## YYYY-MM-DD HH:MM TZ — <short title>
+**Context:** what prompted this session
+**Work performed:** narrative of what was done
+**Decisions:** choices made and rationale
+**Open questions / next steps:**
+```
+
+---
+
+## 2026-07-24 08:47 PDT — Repo scaffolding, API key verified, first-sync bound
+
+**Context:** Phase 0 continuation: turn the empty directory into a working
+repo and get govinfo API access confirmed.
+
+**Work performed:**
+
+1. **Repo scaffolding.** `git init` (branch `main`); directory layout per
+   GUIDE.md §5: `src/info_intel/` (pipeline code), `scripts/` (operational
+   one-offs), `data/` (git-ignored raw archive + future SQLite), `digests/`
+   (committed output), `tests/`. Added `.gitignore` (secrets, data, Python
+   artifacts), `README.md` (setup + layout), `pyproject.toml`.
+2. **Python project.** Managed with **uv** (Python 3.14 available; project
+   requires ≥3.12). Runtime deps kept minimal: `requests`, `python-dotenv`.
+   Dev deps: `pytest`, `ruff`. `uv sync` created `.venv` and lockfile.
+3. **Config module** (`src/info_intel/config.py`): loads `.env`, defines
+   paths, API base URLs, and — as code, not documentation — the GUIDE.md §4
+   access-policy constants (`MAX_REQUESTS_PER_SECOND = 1.0`,
+   `MAX_REQUESTS_PER_DAY = 2000`) plus a descriptive `User-Agent` with
+   contact email.
+4. **API key.** `.env.example` created; user obtained an api.data.gov key and
+   populated `.env` themselves. Wrote `scripts/verify_key.py` — a single GET
+   to the `collections` service. Result: **HTTP 200**, rate limit confirmed
+   at 36,000/hr, and all seven target collections visible with package
+   counts: BILLS ~289k, CRPT ~158k, CHRG ~47k, FR ~23k, PLAW ~6k, CREC ~6k.
+5. **First-sync date bound** (user directive mid-session): a sync with no
+   stored watermark must not walk open-ended history. Added
+   `INITIAL_SYNC_LOOKBACK_DAYS = 3` to config and a corresponding rule to
+   GUIDE.md §4. The package counts above make the risk concrete — an
+   unbounded first "delta" against BILLS would try to enumerate ~289k
+   packages.
+
+6. **Open-source readiness** (user directive mid-session): the repo may be
+   published on GitHub, so committed content must contain no private paths,
+   personal details, or other revealing information. Added GUIDE.md §7
+   ("Open-Source Readiness") codifying this: personal details only in
+   git-ignored `.env`, repo-relative paths only, public-ready worklog style,
+   pre-commit diff scan for emails/keys/home paths. Immediate fix required:
+   `.env.example` had the author's real contact email baked in — scrubbed to
+   a blank placeholder before first commit. Verified the rest of the tree
+   with a grep for emails and `/Users/` paths: clean.
+
+7. **Identity separation.** Configured a dedicated project email
+   (repo-local `git config user.email`) distinct from the author's personal
+   and GitHub-credential addresses; re-authored the initial commit with it.
+   The same dedicated address is used for `CONTACT_EMAIL` in `.env`, so the
+   User-Agent presented to GPO carries project contact info rather than a
+   personal account.
+
+8. **Attribution convention.** The repo will be published under the author's
+   normal GitHub account, so the goal is scrubbing incidental private details,
+   not anonymity. Convention adopted (GUIDE.md §7): author name is written
+   "David D. Karnowski" everywhere we control it (git identity, pyproject
+   authors metadata, future license/docs) to disambiguate from other people
+   with the same name in tech. Applied via repo-local git config and a
+   re-authored root commit.
+
+**Decisions:**
+- **Python + uv confirmed** as implementation stack (previously deferred).
+  Rationale: mature XML tooling, uv gives reproducible env with lockfile.
+- **First-run watermark = now − 3 days.** Small enough to be a trivial number
+  of requests, large enough to cover a weekend gap. Backfills beyond that are
+  bulkdata-only, per existing policy.
+- `data/` is git-ignored (regenerable, potentially large); `digests/` is
+  committed (it's the product and its archive).
+
+**Open questions / next steps:**
+- [ ] Phase 1: rate-limited client (token bucket + daily counter + request
+      log), then the collections delta sync for CREC/BILLS/FR.
+- [ ] Sketch SQLite schema (packages, granules, fetch_log, sync watermarks).
+- [ ] Draft digest template.
+
+---
+
+## 2026-07-24 08:33 PDT — Project inception: concept, guide, and worklog
+
+**Context:** New empty project directory (`Information_Intelligence`). Goal
+defined in conversation: programmatic access to US government official
+publications (congressional transcripts, bills, Federal Register, etc.),
+producing an automated daily analysis/digest that is non-political, unbiased,
+and opinion-agnostic, while preserving a full, unadulterated picture of the
+source record. Explicit constraint from the outset: be respectful of
+government servers — no abusive API usage.
+
+**Work performed:**
+
+1. **Source research.** Confirmed govinfo.gov (run by the U.S. Government
+   Publishing Office) as the primary data source. Reviewed GPO's official
+   developer documentation (github.com/usgpo/api and github.com/usgpo/bulk-data;
+   the api.govinfo.gov/docs site itself is a JavaScript app that doesn't yield
+   to simple fetching). Key findings:
+   - API requires a free key from **api.data.gov**; default limits are
+     36,000 requests/hour, 1,200/minute, 40/second — far more than we will
+     ever need, and we will self-impose much lower budgets anyway.
+   - The **collections service** supports listing packages by last-modified
+     timestamp. This is the architecturally important find: it enables a
+     clean "what changed since my last sync" delta poll — one cheap daily
+     query pattern instead of any re-scanning.
+   - Packages come in multiple formats (XML, PDF, HTML, MODS, PREMIS, ZIP);
+     XML is the preferred format for parsing. ZIP/MODS can return
+     503 + Retry-After while generated on demand.
+   - A separate **bulk data** repository (govinfo.gov/bulkdata) serves XML
+     for BILLS, FR, CFR/eCFR, and Congressional Record — the right channel
+     for any historical backfill, keeping the API for daily deltas.
+   - Noted secondary sources for later: Congress.gov API (bill status, votes,
+     cosponsors — same api.data.gov key) and the FederalRegister.gov API
+     (richer FR metadata, no key needed).
+
+2. **Wrote `GUIDE.md`**, the project's governing document, covering:
+   - Mission: the digestible-vs-faithful tension named explicitly as the core
+     design problem.
+   - Editorial principles: primary sources only; opinion-agnostic prose with
+     specific banned patterns (loaded adjectives, motive attribution);
+     mechanical, party-blind selection criteria; universal citations; a
+     per-digest "coverage statement" so omissions are never silent; layered
+     artifacts (raw → extracted → summary); versioned, reproducible methods.
+   - Initial collection scope: CREC (Congressional Record), BILLS, FR
+     (Federal Register) first; PLAW, CHRG, CRPT, DCPD once stable.
+   - Respectful access policy, enforced in code: ≤1 req/sec sustained,
+     ~2,000 req/day cap (~1% of permitted), single daily delta sync, cache
+     everything, honor Retry-After and rate-limit headers, descriptive
+     User-Agent with contact info, full request logging for self-audit.
+   - Four-stage architecture (FETCH → EXTRACT → ANALYZE → REPORT) with
+     durable artifacts between stages; filesystem + SQLite storage; digest
+     output as dated Markdown files.
+   - Roadmap phases 0–4.
+
+3. **Created this `WORKLOG.md`** with the entry format above.
+
+**Decisions:**
+- **govinfo as primary source; API for daily deltas, bulk data for
+  backfills.** Rationale: single authoritative origin (GPO) covering all
+  three branches; delta polling via the collections service is both the
+  cheapest and the most respectful access pattern.
+- **Start scope = CREC + BILLS + FR.** These cover the three highest-value
+  daily streams (floor transcripts, legislation text, executive/regulatory
+  actions) without overcommitting the parser work.
+- **Editorial rules written before any code.** Bias enters at the
+  summarization layer, so the constraints on that layer are defined first
+  and treated as non-negotiable in GUIDE.md §2.
+- **Self-imposed rate budget ~1% of GPO's allowance.** Daily-digest use case
+  simply doesn't need more, and it makes "respectful access" a property of
+  the client, not of operator discipline.
+- Deferred: implementation language (Python is the leading candidate — mature
+  XML tooling — but this gets decided and logged when Phase 1 starts).
+
+**Open questions / next steps:**
+- [ ] Obtain api.data.gov API key; store in `.env` (git-ignored).
+- [ ] Hand-run a few sample requests against `collections/CREC` and a single
+      package summary to verify assumptions about response shapes (small,
+      one-off, well within budget).
+- [ ] Decide repo scaffolding: git init, `.gitignore`, `data/` layout,
+      Python project skeleton.
+- [ ] Sketch the SQLite schema for package metadata + fetch log.
+- [ ] Draft the daily digest template (sections, coverage statement format)
+      before building the analysis layer, so reporting drives extraction
+      requirements rather than the reverse.

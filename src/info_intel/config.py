@@ -1,0 +1,40 @@
+"""Central configuration. Secrets come from .env; access-policy constants
+are code, per GUIDE.md §4 — respectful access is a property of the client,
+not operator discipline."""
+
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DATA_DIR = PROJECT_ROOT / "data"
+RAW_DIR = DATA_DIR / "raw"
+DIGEST_DIR = PROJECT_ROOT / "digests"
+
+load_dotenv(PROJECT_ROOT / ".env")
+
+API_BASE = "https://api.govinfo.gov"
+BULKDATA_BASE = "https://www.govinfo.gov/bulkdata"
+
+# GUIDE.md §4: ~1% of GPO's permitted rate. Do not raise without a GUIDE change.
+MAX_REQUESTS_PER_SECOND = 1.0
+MAX_REQUESTS_PER_DAY = 2000
+
+# GUIDE.md §4: a sync with no stored watermark must NOT walk open-ended history
+# (BILLS alone is ~289k packages). First pull starts at now minus this window;
+# anything older is a deliberate, throttled bulkdata backfill.
+INITIAL_SYNC_LOOKBACK_DAYS = 3
+
+CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")
+USER_AGENT = f"info-intel/0.1 (personal daily-digest research; contact: {CONTACT_EMAIL})"
+
+
+def api_key() -> str:
+    key = os.environ.get("GOVINFO_API_KEY", "").strip()
+    if not key:
+        raise RuntimeError(
+            "GOVINFO_API_KEY is not set. Copy .env.example to .env and add your "
+            "key from https://api.data.gov/signup/"
+        )
+    return key

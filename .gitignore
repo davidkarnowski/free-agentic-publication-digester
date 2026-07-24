@@ -1,0 +1,16 @@
+# Secrets — never commit
+.env
+
+# Fetched government documents & local database (regenerable; can get large)
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# OS
+.DS_Store
