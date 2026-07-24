@@ -228,11 +228,15 @@ of the code, not of operator discipline.
    timestamp, model, purpose, input/output tokens, package IDs touched) to a
    local ledger. A self-audit report (like `scripts/audit.py`) answers "what
    did analysis cost this week?" at any time.
-8. **Daily token budget with a hard stop.** The analysis runner refuses to
-   exceed a configured daily input-token cap (initial: **1M tokens/day**,
-   ~half the verbatim ceiling and ~2× expected load). Overflow items stay
-   queued for the next day and are named in the Coverage Statement's known
-   gaps — a budget stop must never become a silent omission (§2).
+8. **Measure first, then cap.** The token ledger (rule 7) runs from the
+   analysis layer's very first call, but **no hard cap is enforced until
+   real test runs establish a measured baseline** — capping against
+   estimates risks tuning the digest around a guess (decided 2026-07-24).
+   Once a few days of ledger data exist, a daily input-token cap is set
+   from observed load (working figure: ~1M/day) and enforced with a hard
+   stop: overflow items stay queued for the next day and are named in the
+   Coverage Statement's known gaps — a budget stop must never become a
+   silent omission (§2).
 9. **Graphics in digests are cited evidence, not decoration.** A digest
    embeds a source graphic only when it belongs to a summarized item, and
    it carries the same citation discipline as text (package/granule ID +
