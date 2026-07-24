@@ -88,6 +88,35 @@ CREATE TABLE IF NOT EXISTS graphic_assets (
 CREATE INDEX IF NOT EXISTS idx_graphic_assets_package
     ON graphic_assets (package_id);
 
+-- Phase 3: analysis layer ---------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS summaries (
+    package_id     TEXT NOT NULL,
+    granule_id     TEXT NOT NULL DEFAULT '',
+    prompt_version INTEGER NOT NULL,
+    method         TEXT NOT NULL CHECK (method IN ('official', 'llm')),
+    model          TEXT,                      -- model used when method='llm'
+    inclusion_rule TEXT NOT NULL,             -- e.g. 'FR-SEL-01'
+    summary        TEXT NOT NULL,
+    input_tokens   INTEGER NOT NULL DEFAULT 0,
+    output_tokens  INTEGER NOT NULL DEFAULT 0,
+    created_at     TEXT NOT NULL,
+
+    PRIMARY KEY (package_id, granule_id, prompt_version)
+) WITHOUT ROWID;
+
+CREATE TABLE IF NOT EXISTS day_summaries (
+    date           TEXT NOT NULL,             -- digest date YYYY-MM-DD
+    prompt_version INTEGER NOT NULL,
+    model          TEXT NOT NULL,
+    summary        TEXT NOT NULL,             -- the composed Day in Review
+    input_tokens   INTEGER NOT NULL DEFAULT 0,
+    output_tokens  INTEGER NOT NULL DEFAULT 0,
+    created_at     TEXT NOT NULL,
+
+    PRIMARY KEY (date, prompt_version)
+) WITHOUT ROWID;
+
 CREATE TABLE IF NOT EXISTS sync_state (
     collection              TEXT PRIMARY KEY,
     last_modified_watermark TEXT NOT NULL,

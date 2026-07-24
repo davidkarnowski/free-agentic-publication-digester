@@ -17,6 +17,81 @@ Entry format:
 
 ---
 
+## 2026-07-24 13:20 PDT — Phase 3 built; first digest generated (uncapped test run)
+
+**Context:** Phase 3 (Analyze & report) built and test-run in one session:
+LLM client + token ledger (main thread), analysis and rendering layers
+(two concurrent sub-agents), compose stage added mid-build on user
+direction (a full-day synthesis pass over the final outputs). Per GUIDE §6
+rule 8 (amended today): uncapped, measure-first.
+
+**Work performed:**
+
+1. **`llm.py`** — LLM client backed by the `claude` CLI in headless mode
+   (usage bills to the operator's Claude subscription; no API key), with a
+   persistent token ledger (`data/llm_ledger.db`) mirroring the fetch log:
+   every call recorded (model, purpose, package ids, tokens, duration,
+   errors). Smoke test surfaced the decisive measurement: **~25K input
+   tokens fixed overhead per headless call** — which dictated batching the
+   map stage (≤6 items/call) before any real run happened.
+2. **`rules.py` / `analyze.py`** (sub-agent): named mechanical rule
+   registry (CREC-SEL-01 floor-time ≥15K chars; CREC-SEL-02 recorded votes
+   always listed — regex calibrated on real Record text incl. a pinned
+   false-positive guard for demanded-but-not-taken votes; BILLS-SEL-01
+   reached-stage; FR-SEL-01/02/03 all rules/proposed/presidential) plus
+   named exclusions for coverage. Map stage: official-summary-first (FR
+   SUMMARY preambles stored verbatim at zero tokens), batched strict-JSON
+   Haiku calls for the rest, one-retry-then-honest-failure, idempotent by
+   (package, granule, prompt_version).
+3. **`compose.py`** (main thread, user-directed scope addition): one
+   strong-model "Day in Review" pass whose inputs are the stored item
+   summaries + mechanical counts only — never the raw corpus. Stored in
+   `day_summaries`; idempotent; rendered at the top of the digest; linted
+   UN-masked by the banned-lexicon validator.
+4. **`report.py` / `scripts/digest.py`** (sub-agent): fully deterministic
+   zero-LLM render of TEMPLATE.md — header with git version + watermarks,
+   CREC per chamber + votes, BILLS stage table, FR by agency with embedded
+   graphics (TIFF→PNG via Pillow, ≤2/item + disclosure), SQL-computed
+   Coverage Statement, methodology footer. Validation gate before any file
+   is written: citation resolution against the DB, coverage arithmetic
+   reconciliation (recomputed independently), banned-lexicon scan (official
+   summaries masked; LLM prose not), inclusion-rule line on every item.
+5. **Test run (uncapped), digest for 2026-07-23:** 51 items selected
+   (33 official / 18 LLM), 4 LLM calls total — 3 Haiku map batches + 1 Opus
+   compose — **148,571 input / 6,890 output tokens**, ~75 seconds of model
+   time. Validation passed; digests/2026-07-23.md written (366 lines,
+   51 inclusion-rule lines, 7 graphics embedded as PNG with the remainder
+   disclosed). Day in Review reads factual and party-blind on inspection
+   (recorded-vote tallies, proclamations, rule actions — no editorializing).
+6. **Test suite: 125 passing** (llm 4, compose 3, analyze 14, report 11 +
+   all prior), ruff clean.
+
+**Measured baseline (the point of running uncapped):**
+- ~150K input tokens/day for a full busy-day digest — **~15% of the 1M/day
+  working figure**; two-thirds of it is CLI fixed overhead (4 × ~25K), so
+  the marginal content cost is ~50K/day.
+- Implication for the future cap: 500K/day would already carry ~3× margin;
+  decision deferred until a few scheduled days accumulate in the ledger.
+
+**Decisions:**
+- Compose stage restored to the design (user direction; matches GUIDE §6
+  rule 6's original tiering) — synthesis over stored outputs, never over
+  raw corpus; strictest lint applied to it.
+- Backend choice (claude CLI vs API SDK) recorded as revisitable: the CLI
+  binds usage to the Max plan; if per-call overhead ever matters, an SDK
+  backend on `llm.py`'s interface is a drop-in change.
+
+**Open questions / next steps:**
+- [ ] Accumulate a few days of ledger data, then set the cap (§6 rule 8).
+- [ ] Schedule the daily pipeline: sync → extract → digest (launchd/cron,
+      overlap guard).
+- [ ] Vision pass on selected items' graphics (currently disclosed as "not
+      yet implemented" in the Coverage Statement).
+- [ ] Review the generated digest's editorial quality against §2 with fresh
+      eyes after a few days of output.
+
+---
+
 ## 2026-07-24 12:50 PDT — Phase 2 complete: extraction layer built and run over the full archive
 
 **Context:** Phase 2 (Extract) built in one session: three collection

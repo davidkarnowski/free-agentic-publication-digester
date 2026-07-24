@@ -36,6 +36,15 @@ MIN_SERVER_REMAINING = 1000
 FETCH_LOG_DB = DATA_DIR / "fetch_log.db"
 PIPELINE_DB = DATA_DIR / "info_intel.db"
 LOG_DIR = DATA_DIR / "logs"
+LLM_LEDGER_DB = DATA_DIR / "llm_ledger.db"
+
+# GUIDE §6 rule 6: tiered models — cheap map tier, strong compose tier.
+# Backend is the `claude` CLI (headless), billed to the operator's plan.
+MAP_MODEL = "haiku"
+COMPOSE_MODEL = "opus"
+# Bump when summarization prompts change; stored per summary row (§6 rule 5).
+PROMPT_VERSION = 1
+LLM_TIMEOUT = 300  # seconds per call
 
 # GUIDE.md §3: initial scope. Order is sync order.
 COLLECTIONS = ("CREC", "BILLS", "FR")
