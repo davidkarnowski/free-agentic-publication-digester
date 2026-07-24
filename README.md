@@ -18,6 +18,19 @@ uv run python scripts/verify_key.py    # one-request sanity check
 
 Get a free API key at https://api.data.gov/signup/ (emailed instantly).
 
+## Daily sync
+
+```sh
+uv run python scripts/sync.py                  # delta sync CREC, BILLS, FR
+uv run python scripts/sync.py --list-only      # inventory only, no downloads
+uv run python scripts/sync.py --max-downloads 50
+```
+
+Sync is watermark-based (only changes since the last run are listed) and
+rate-limited per [GUIDE.md](GUIDE.md) §4. A first run with no watermark is
+date-bounded to the last 3 days; deeper history comes from govinfo's bulkdata
+service, never the API.
+
 ## Layout
 
 ```

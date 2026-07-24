@@ -17,6 +17,65 @@ Entry format:
 
 ---
 
+## 2026-07-24 09:55 PDT — Delta sync implemented + first real sync; accountability logging
+
+**Context:** Continuing Phase 1: the metadata store and delta-sync engine,
+the first real data pull, and (user directive) deeper verbosity/logging so
+every API interaction is accountable.
+
+**Work performed:**
+
+1. **`src/info_intel/db.py`** — metadata store, DDL exactly per docs/schema.md
+   (packages / granules / sync_state, WAL mode, foreign keys on, partial
+   unfetched index).
+2. **`src/info_intel/sync.py`** — the delta-sync algorithm as designed:
+   watermark (or date-bounded start on first run) → paged listing → idempotent
+   upserts (newer lastModified flips a fetched row back to pending; equal is
+   a no-op) → watermark advanced only after listing success → downloads from
+   the pending queue (XML preferred, ZIP fallback for CREC, PDF last resort),
+   granule inventory refresh for CREC/FR, per-package failure isolation,
+   budget/rate-floor aborts preserve the queue. `scripts/sync.py` CLI with
+   `--list-only`, `--max-downloads`, `--verbose`.
+3. **10 new tests** (20 total, all passing, still zero network): date-bounded
+   first start, watermark resume/advance, listing-failure leaves watermark,
+   pending-flip semantics, download bookkeeping incl. repo-relative raw_path,
+   failure isolation, budget abort, download cap, CREC granule inventory.
+4. **First real sync.** `--list-only` first: 3-day window held 220 changed
+   packages (CREC 4, BILLS 209, FR 7) — the date bound working as intended
+   (an unbounded BILLS listing would have been ~289k). Then a full download
+   run (~460 requests projected, ~23% of daily budget) launched in the
+   background at the enforced 1 req/s.
+5. **Accountability logging** (user directive). Two layers, documented in
+   GUIDE.md §4:
+   - `data/fetch_log.db` remains the canonical per-request record (client-
+     written, key-redacted).
+   - New `info_intel/logging_setup.py`: console (INFO, or DEBUG with
+     `--verbose`) + daily file `data/logs/access-YYYY-MM-DD.log` that always
+     captures DEBUG — every request with running budget count ("[today:
+     N/2000]"), pacing sleeps, retries with cause (Retry-After vs backoff),
+     budget refusals, rate-floor halts, watermark moves, per-package archive
+     outcomes with byte and granule counts.
+   - New `scripts/audit.py`: self-audit report from the fetch log — per-UTC-day
+     requests vs. budget, status mix, MB transferred, avg latency, retry
+     count, recent errors, busiest endpoints. First real run: 23 requests,
+     1.1% of budget, zero errors/retries; CREC ZIPs dominate bytes (whole
+     daily Congressional Record issues, ~190 MB total — expected).
+   - Verified offline (fake session): redaction holds in both log layers.
+
+**Decisions:**
+- File log always records DEBUG regardless of console verbosity — the
+  narrative must be complete on disk even when the console is quiet.
+- Audit script opens the fetch log read-only (`mode=ro`) — the auditor cannot
+  modify the record it audits.
+- Deferred: log rotation/retention (daily files are small; revisit if bulk).
+
+**Open questions / next steps:**
+- [ ] Confirm background sync completion; check final audit + pending queue.
+- [ ] Phase 2: XML parsers (CREC granules, BILLS text, FR docs) feeding the
+      extraction schema.
+
+---
+
 ## 2026-07-24 09:10 PDT — Phase 1: rate-limited client (+ schema design, digest template)
 
 **Context:** Start of Phase 1 (Fetch & store). Core deliverable: the

@@ -128,8 +128,16 @@ discipline:
   history uses the bulkdata endpoints (built for this), run off-peak
   (overnight US Eastern), throttled.
 - **Identify ourselves:** descriptive `User-Agent` with contact email.
-- **Log every request** (URL, timestamp, status, bytes) so we can audit our
-  own footprint at any time.
+- **Log every request, twice.** Accountability has two layers, both with the
+  API key redacted:
+  1. `data/fetch_log.db` — the canonical, queryable record of every outbound
+     request (URL, UTC timestamp, status, bytes, elapsed ms, attempt, error),
+     written by the HTTP client itself so nothing can bypass it.
+  2. `data/logs/access-YYYY-MM-DD.log` — a human-readable narrative at DEBUG
+     level (every request, pacing sleeps, retries and why, watermark moves,
+     per-package outcomes), regardless of console verbosity.
+  `scripts/audit.py` reports our footprint from layer 1 at any time:
+  requests/day vs. budget, status mix, bytes, retries, recent errors.
 
 ## 5. Architecture Concept
 

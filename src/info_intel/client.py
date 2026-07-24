@@ -11,6 +11,7 @@ GUIDE.md §4 enforced as code, not discipline:
 """
 
 import datetime as dt
+import logging
 import sqlite3
 import time
 from urllib.parse import parse_qsl, urlencode, urlsplit
@@ -18,6 +19,8 @@ from urllib.parse import parse_qsl, urlencode, urlsplit
 import requests
 
 from . import config
+
+logger = logging.getLogger("info_intel.client")
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS fetch_log (
@@ -64,10 +67,12 @@ class GovinfoClient:
         url = path if path.startswith("http") else f"{config.API_BASE}/{path.lstrip('/')}"
         qp = dict(params or {})
         qp["api_key"] = config.api_key()
+        shown_url = self._redacted_url(url, qp)
 
         for attempt in range(1, config.MAX_ATTEMPTS + 1):
             self._check_daily_budget()
             self._pace()
+            logger.debug("GET %s (attempt %d/%d)", shown_url, attempt, config.MAX_ATTEMPTS)
             started = self._monotonic()
             try:
                 resp = self._session.get(
@@ -77,19 +82,41 @@ class GovinfoClient:
                     timeout=config.REQUEST_TIMEOUT,
                 )
             except requests.RequestException as exc:
-                self._log(url, qp, None, 0, None, attempt, error=repr(exc))
+                self._log(shown_url, None, 0, None, attempt, error=repr(exc))
                 if attempt == config.MAX_ATTEMPTS:
+                    logger.error("GET %s failed after %d attempts: %r", shown_url, attempt, exc)
                     raise
-                self._sleep(self._backoff(attempt))
+                delay = self._backoff(attempt)
+                logger.warning(
+                    "GET %s: %r — backing off %.0fs before retry", shown_url, exc, delay
+                )
+                self._sleep(delay)
                 continue
 
             elapsed_ms = int((self._monotonic() - started) * 1000)
-            self._log(url, qp, resp.status_code, len(resp.content or b""), elapsed_ms, attempt)
+            nbytes = len(resp.content or b"")
+            self._log(shown_url, resp.status_code, nbytes, elapsed_ms, attempt)
+            logger.info(
+                "GET %s -> %d (%d B, %d ms) [today: %d/%d]",
+                shown_url,
+                resp.status_code,
+                nbytes,
+                elapsed_ms,
+                self.requests_today(),
+                config.MAX_REQUESTS_PER_DAY,
+            )
 
             if resp.status_code == 429 or resp.status_code >= 500:
                 if attempt == config.MAX_ATTEMPTS:
+                    logger.error("GET %s: HTTP %d, out of attempts", shown_url, resp.status_code)
                     resp.raise_for_status()
-                self._sleep(self._retry_delay(resp, attempt))
+                delay = self._retry_delay(resp, attempt)
+                source = "Retry-After" if "Retry-After" in resp.headers else "backoff"
+                logger.warning(
+                    "GET %s: HTTP %d — waiting %.0fs (%s) before retry %d/%d",
+                    shown_url, resp.status_code, delay, source, attempt + 1, config.MAX_ATTEMPTS,
+                )
+                self._sleep(delay)
                 continue
 
             self._check_server_remaining(resp)
@@ -142,6 +169,10 @@ class GovinfoClient:
     def _check_daily_budget(self):
         n = self.requests_today()
         if n >= config.MAX_REQUESTS_PER_DAY:
+            logger.error(
+                "daily budget exhausted: %d/%d requests (UTC day) — refusing further requests",
+                n, config.MAX_REQUESTS_PER_DAY,
+            )
             raise BudgetExceededError(
                 f"{n} requests already made today (UTC); daily budget is "
                 f"{config.MAX_REQUESTS_PER_DAY} per GUIDE.md §4"
@@ -152,7 +183,10 @@ class GovinfoClient:
             min_interval = 1.0 / config.MAX_REQUESTS_PER_SECOND
             elapsed = self._monotonic() - self._last_request_at
             if elapsed < min_interval:
-                self._sleep(min_interval - elapsed)
+                wait = min_interval - elapsed
+                logger.debug("pacing: sleeping %.2fs to hold %.1f req/s",
+                             wait, config.MAX_REQUESTS_PER_SECOND)
+                self._sleep(wait)
         self._last_request_at = self._monotonic()
 
     @staticmethod
@@ -173,10 +207,14 @@ class GovinfoClient:
                 f"{config.MIN_SERVER_REMAINING}); halting — our usage pattern "
                 "should never get near the server limit"
             )
+            logger.error("HALT: %s", self._halt_reason)
 
-    def _log(self, url, params, status, nbytes, elapsed_ms, attempt, error=None):
+    @staticmethod
+    def _redacted_url(url, params):
         shown = {k: v for k, v in (params or {}).items() if k != "api_key"}
-        logged_url = url + (f"?{urlencode(shown)}" if shown else "")
+        return url + (f"?{urlencode(shown)}" if shown else "")
+
+    def _log(self, logged_url, status, nbytes, elapsed_ms, attempt, error=None):
         self._db.execute(
             "INSERT INTO fetch_log (ts_utc, url, status, bytes, elapsed_ms, attempt, error)"
             " VALUES (?, ?, ?, ?, ?, ?, ?)",

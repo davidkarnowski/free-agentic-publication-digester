@@ -34,6 +34,11 @@ BACKOFF_BASE_SECONDS = 2.0  # 2, 4, 8, 16 between retries
 MIN_SERVER_REMAINING = 1000
 
 FETCH_LOG_DB = DATA_DIR / "fetch_log.db"
+PIPELINE_DB = DATA_DIR / "info_intel.db"
+LOG_DIR = DATA_DIR / "logs"
+
+# GUIDE.md §3: initial scope. Order is sync order.
+COLLECTIONS = ("CREC", "BILLS", "FR")
 
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")
 USER_AGENT = f"info-intel/0.1 (personal daily-digest research; contact: {CONTACT_EMAIL})"

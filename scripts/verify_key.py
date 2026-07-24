@@ -8,10 +8,12 @@ Usage: uv run python scripts/verify_key.py
 
 import sys
 
+from info_intel import logging_setup
 from info_intel.client import GovinfoClient
 
 
 def main() -> int:
+    logging_setup.setup(verbose=True)
     with GovinfoClient() as client:
         resp = client.get("collections")
         print(f"HTTP {resp.status_code}")
