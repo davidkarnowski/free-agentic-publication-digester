@@ -17,6 +17,75 @@ Entry format:
 
 ---
 
+## 2026-07-24 12:50 PDT — Phase 2 complete: extraction layer built and run over the full archive
+
+**Context:** Phase 2 (Extract) built in one session: three collection
+parsers and the graphics asset extractor developed concurrently by four
+sub-agents against the real archive, with schema + orchestrator built in
+the main thread, then integrated and run end-to-end.
+
+**Work performed:**
+
+1. **Schema** (db.py + docs/schema.md "Extraction layer" section):
+   `extracted_texts` — one row per FR document / CREC granule / whole bill,
+   composite key (package_id, granule_id), doc_type as the selection axis,
+   JSON metadata (incl. official FR `SUMMARY:` abstracts per GUIDE §6),
+   FR-GPH-01 graphic counts, extracted_at + extractor_version for
+   staleness; `graphic_assets` — per-`<GPH>` inventory with classification,
+   printed page, repo-relative asset path, status.
+2. **Orchestrator** (`extract.py` + `scripts/extract.py`): staleness query
+   (missing / raw re-fetched / version bump), per-package replace-on-rerun,
+   per-package failure isolation, FR graphics inventory + image extraction
+   to `data/assets/FR/<date>/<pid>/`. 6 orchestrator tests via fake parsers.
+3. **Parsers** (sub-agents; pure functions, no DB; stdlib only):
+   - `parsers/fr.py` — walks the full tree (sections are NOT reliably
+     top-level: `NEWPART` nesting, `PRESDOC` wrappers); FRDOC regex
+     extraction (PRESDOCU splits the wrapper across siblings); DATES vs
+     EFFDATE variants; official SUMMARY captured to metadata. 743 documents
+     across 7 issues, doc count == FRDOC count in every file.
+   - `parsers/crec.py` — granule htm from the daily ZIP (files live under
+     `html/` despite docs saying `htm/`; matched by filename pattern);
+     verbatim text with line structure and page markers preserved, GPO
+     header boilerplate dropped; issue-order sorting. 838 granules over 4
+     days, 100% section-typed, zero empty texts. Granule `<title>` tags are
+     issue-level boilerplate → titles come from our granules table instead.
+   - `parsers/bills.py` — longest-type-first package-id decomposition
+     (hconres before hr), stage attribute from either root form, sponsors
+     (absent on 50/209 — post-introduction versions drop the block).
+     209/209 parse; 9 stage values; two 118th-Congress bills present
+     (lastModified revision tracking, same effect as the old FR issues).
+4. **Graphics** (`graphics.py`, sub-agent): 103/103 substantive graphics
+   extracted from the six companion PDFs (~10.5 MB; 100 TIFF, 3 PNG), all
+   verified pixel-decodable; 8 boilerplate correctly skipped without
+   opening a PDF. Notable engineering: pypdf's CCITT `get_data()` writes a
+   corrupt TIFF header (missing next-IFD terminator) — module builds its
+   own minimal TIFF around the raw Group-4 stream; FR PDFs carry no
+   /PageLabels, so printed pages are recovered by scanning page-header text
+   (a constant offset is provably wrong: unnumbered part-divider pages
+   interleave mid-issue).
+5. **Full run:** 220/220 packages extracted, **1,790 records, 22.7M chars,
+   0 failures**; DB totals reconcile exactly with each agent's
+   independently-reported per-file counts. FR doc-type distribution:
+   566 NOTICE / 102 RULE / 67 PRORULE / 8 PRESDOCU.
+6. **Test suite: 90 passing** (client 10, sync 14, extract 6, parsers 48,
+   graphics 12), ruff clean.
+
+**Decisions:**
+- Parsers are pure `parse(raw_path, package) -> iter[record]` functions;
+  the orchestrator owns all DB writes. Kept parsers standalone (FR-GPH-01
+  regex duplicated locally rather than importing sync).
+- Graphic assets stored as extracted (TIFF/PNG); conversion to
+  web-embeddable format is a Phase 3 (REPORT) concern, at embed time.
+
+**Open questions / next steps:**
+- [ ] Phase 3: selection rules → mechanical aggregation → token ledger +
+      1M/day cap → tiered summarization → digest generation per
+      TEMPLATE.md (convert embedded graphics TIFF→PNG at embed time).
+- [ ] Schedule the daily pipeline (sync → extract) via launchd/cron with
+      the run-overlap guard.
+
+---
+
 ## 2026-07-24 11:45 PDT — Graphics classification: rule FR-GPH-01 (boilerplate vs content)
 
 **Context:** User inspected the fetched FR PDFs and observed graphics that

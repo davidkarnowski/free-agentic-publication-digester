@@ -1,10 +1,9 @@
-# SQLite Schema — Fetch-Stage Metadata Store
+# SQLite Schema — Pipeline Metadata Store
 
-Status: design document for Phase 1 (Fetch & store), per GUIDE.md §5.
-Scope: the **metadata database** backing the fetch stage — package inventory,
-granule inventory, and delta-sync watermarks. Extraction tables (Phase 2,
-normalized records) will be added to this document when that phase begins;
-nothing here should need to change for them.
+Status: living design document, per GUIDE.md §5. Covers Phase 1 (Fetch &
+store: package inventory, granule inventory, delta-sync watermarks) and
+Phase 2 (Extraction: normalized text records and graphic assets — see the
+Extraction section at the end).
 
 - **Database file:** `data/info_intel.db` (repo-relative, like all paths in
   this project — GUIDE §8).
@@ -289,3 +288,45 @@ it:
   can be inspected, archived, or truncated independently of the inventory.
 - The only "join" ever needed is human (correlating a `last_error` with its
   request rows by URL and timestamp), which needs no shared schema.
+
+---
+
+## Extraction layer (Phase 2)
+
+Two tables written by the extraction orchestrator
+(`src/info_intel/extract.py`); parsers themselves are pure functions
+(`parsers/{fr,crec,bills}.py: parse(raw_path, package) -> iter[record]`)
+that never touch the database.
+
+### `extracted_texts`
+
+One row per extracted document: an FR document, a CREC granule, or a whole
+bill (`granule_id = ''`). Composite natural key `(package_id, granule_id)`,
+`WITHOUT ROWID`, mirroring `granules`.
+
+Columns beyond the obvious: `doc_type` (FR document class / CREC section /
+bill version code) is the digest's mechanical-selection axis;
+`metadata` is a sorted-key JSON bag for collection-specific extras (CFR
+refs, sponsors, page ranges, official `<SUM>` summaries per GUIDE §6);
+`graphics_substantive` / `graphics_boilerplate` carry the FR-GPH-01 split;
+`extracted_at` + `extractor_version` drive staleness.
+
+**Staleness rule** (query in `extract.pending_packages`): a fetched package
+needs (re-)extraction iff it has no rows, `extracted_at < fetched_at`
+(raw was re-fetched), or `extractor_version < EXTRACTOR_VERSION` (parser
+logic changed). Re-extraction is replace-on-rerun per package
+(delete + insert) — idempotent, partial failures re-run harmlessly, and one
+bad package never blocks the rest (per-package isolation in `extract.run`).
+
+Index: `(collection, doc_type)` for digest selection queries.
+
+### `graphic_assets`
+
+One row per `<GPH>` occurrence in an FR issue (rowid PK — GIDs repeat, e.g.
+a signature graphic appearing in several documents). `classification` is
+the FR-GPH-01 result; `page` is the printed page from `PRTPAGE`;
+`asset_path` (repo-relative, under `data/assets/FR/<date>/<package>/`)
+is set when the image was extracted from the companion PDF; `status`:
+`inventoried` (known, not yet extracted), `extracted`, `failed`, `skipped`
+(boilerplate is always skipped). Replace-on-rerun alongside the package's
+text rows. Index on `package_id`.

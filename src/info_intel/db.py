@@ -48,6 +48,46 @@ CREATE TABLE IF NOT EXISTS granules (
 CREATE INDEX IF NOT EXISTS idx_granules_class
     ON granules (granule_class);
 
+-- Phase 2: extraction layer (docs/schema.md, Extraction section) -----------
+
+CREATE TABLE IF NOT EXISTS extracted_texts (
+    package_id    TEXT NOT NULL REFERENCES packages (package_id),
+    granule_id    TEXT NOT NULL DEFAULT '',   -- '' for whole-package docs (BILLS)
+    collection    TEXT NOT NULL,
+    doc_type      TEXT,                       -- FR: RULE/PRORULE/NOTICE/PRESDOCU;
+                                              -- CREC: granule class; BILLS: version code
+    title         TEXT,
+    agency        TEXT,                       -- FR only
+    metadata      TEXT NOT NULL DEFAULT '{}', -- JSON: collection-specific extras
+    text          TEXT NOT NULL,
+    char_count    INTEGER NOT NULL,
+    graphics_substantive INTEGER NOT NULL DEFAULT 0,
+    graphics_boilerplate INTEGER NOT NULL DEFAULT 0,
+    extracted_at  TEXT NOT NULL,
+    extractor_version INTEGER NOT NULL,
+
+    PRIMARY KEY (package_id, granule_id)
+) WITHOUT ROWID;
+
+CREATE INDEX IF NOT EXISTS idx_extracted_collection_type
+    ON extracted_texts (collection, doc_type);
+
+CREATE TABLE IF NOT EXISTS graphic_assets (
+    id            INTEGER PRIMARY KEY,
+    package_id    TEXT NOT NULL REFERENCES packages (package_id),
+    granule_id    TEXT NOT NULL DEFAULT '',
+    gid           TEXT NOT NULL,              -- FR graphic filename, e.g. EN23JY26.004
+    classification TEXT NOT NULL
+                  CHECK (classification IN ('substantive', 'boilerplate')),
+    page          TEXT,                       -- printed page (PRTPAGE) when known
+    asset_path    TEXT,                       -- extracted image file, NULL until extracted
+    status        TEXT NOT NULL DEFAULT 'inventoried'
+                  CHECK (status IN ('inventoried', 'extracted', 'failed', 'skipped'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_graphic_assets_package
+    ON graphic_assets (package_id);
+
 CREATE TABLE IF NOT EXISTS sync_state (
     collection              TEXT PRIMARY KEY,
     last_modified_watermark TEXT NOT NULL,
