@@ -17,6 +17,54 @@ Entry format:
 
 ---
 
+## 2026-07-24 10:15 PDT — First full sync complete: 220/220 fetched, zero errors
+
+**Context:** The background download run launched at 09:48 PDT finished
+(exit 0). This entry records the verified results of the project's first
+complete data acquisition.
+
+**Work performed / results:**
+
+1. **Final state:** all 220 packages in the 3-day window fetched — BILLS 209,
+   FR 7, CREC 4. Zero failures, zero packages left pending.
+2. **Footprint (from scripts/audit.py, i.e., our own canonical record):**
+   460 requests on 2026-07-24 UTC = 23.0% of the self-imposed daily budget
+   (and ~1.3% of one *hour* of GPO's actual allowance). 460/460 responses
+   were 2xx; zero errors, zero retries needed; 215 MB transferred; average
+   response 987 ms.
+3. **Raw archive:** 215 MB on disk — CREC 191 MB (whole daily Congressional
+   Record issues as ZIP), FR 18 MB, BILLS 6 MB.
+4. **Granule inventory:** 838 CREC granules classified (430 HOUSE,
+   258 SENATE, 125 EXTENSIONS, 25 DAILYDIGEST).
+5. **Watermarks:** all three collections now hold server-side lastModified
+   watermarks (BILLS 2026-07-24T16:07:05Z, FR 2026-07-24T16:11:21Z, CREC
+   2026-07-24T11:53:38Z); the next sync is a true delta.
+6. **Algorithm observations from the live run:**
+   - The download run's own listing (after the earlier list-only pass had
+     advanced watermarks) re-listed exactly 1 boundary package per
+     collection — the inclusive-watermark overlap being absorbed by
+     idempotent upserts, as designed.
+   - The lastModified delta also surfaced three *old* FR issues
+     (FR-2024-06-18, FR-2025-04-11, FR-2026-04-02) that GPO recently
+     reprocessed — revision tracking working, not a bug.
+
+**Decisions:** none new; this entry is verification of the design under real
+conditions.
+
+**Open questions / next steps:**
+- [ ] Schedule the daily sync run (launchd/cron); include a run-level
+      wall-clock guard so a pathologically slow run can't overlap the next
+      day's (noted 2026-07-24; guard protects our scheduling, not the server).
+- [ ] Phase 2: XML parsers — CREC granules (from the package ZIPs), BILLS
+      bill text, FR documents — feeding the extraction schema.
+- [ ] CHRG lag note for Phase 4: committee hearing transcripts publish weeks
+      to months after the hearing (witness/member review, committee
+      clearance, GPO typesetting). They will be digested as "newly
+      published" with the original hearing date shown — never presented as
+      same-day coverage. Floor transcripts (CREC) are next-morning.
+
+---
+
 ## 2026-07-24 09:55 PDT — Delta sync implemented + first real sync; accountability logging
 
 **Context:** Continuing Phase 1: the metadata store and delta-sync engine,
