@@ -105,6 +105,20 @@ CREATE TABLE IF NOT EXISTS summaries (
     PRIMARY KEY (package_id, granule_id, prompt_version)
 ) WITHOUT ROWID;
 
+CREATE TABLE IF NOT EXISTS plain_summaries (
+    package_id            TEXT NOT NULL,
+    granule_id            TEXT NOT NULL DEFAULT '',
+    plain_version         INTEGER NOT NULL,   -- config.PLAIN_PROMPT_VERSION
+    source_prompt_version INTEGER NOT NULL,   -- summaries.prompt_version restated
+    model                 TEXT,
+    plain                 TEXT NOT NULL,
+    input_tokens          INTEGER NOT NULL DEFAULT 0,
+    output_tokens         INTEGER NOT NULL DEFAULT 0,
+    created_at            TEXT NOT NULL,
+
+    PRIMARY KEY (package_id, granule_id, plain_version, source_prompt_version)
+) WITHOUT ROWID;
+
 CREATE TABLE IF NOT EXISTS day_summaries (
     date           TEXT NOT NULL,             -- digest date YYYY-MM-DD
     prompt_version INTEGER NOT NULL,

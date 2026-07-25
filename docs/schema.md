@@ -330,3 +330,14 @@ is set when the image was extracted from the companion PDF; `status`:
 `inventoried` (known, not yet extracted), `extracted`, `failed`, `skipped`
 (boilerplate is always skipped). Replace-on-rerun alongside the package's
 text rows. Index on `package_id`.
+
+### `plain_summaries` (plain-speak layer)
+
+One row per plain-language restatement of a `summaries` row. Keyed by
+`(package_id, granule_id, plain_version, source_prompt_version)` —
+`plain_version` tracks `config.PLAIN_PROMPT_VERSION` (the restatement
+prompt), `source_prompt_version` the summaries row it restates, so plain
+rows self-invalidate if factual summaries regenerate, and phrasing
+iterations never touch the summaries table. Rows are written by
+`analyze.run_plain` (batched, cheap tier); a missing row simply renders the
+item without its "In plain terms" line — presentation aid, never coverage.

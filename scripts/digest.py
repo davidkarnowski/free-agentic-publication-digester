@@ -51,8 +51,13 @@ def main() -> int:
         with llm.LLMClient() as client:
             before = client.tokens_today()
             analyze.run(conn, client, date)
+            plain_stats = analyze.run_plain(conn, client, date)
             compose.compose_day(conn, client, date)
             after = client.tokens_today()
+        print(
+            f"plain: {plain_stats['plain_written']}/{plain_stats['plain_pending']} written"
+            f" ({len(plain_stats['failed_items'])} failed)"
+        )
         run_input = after[0] - before[0]
         run_output = after[1] - before[1]
         day_tokens = after

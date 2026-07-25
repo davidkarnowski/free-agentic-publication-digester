@@ -208,7 +208,7 @@ def test_citations_and_titles(digest):
     assert f"https://www.govinfo.gov/app/details/{FR_PKG}/2026-11111" in md
     # Title from granules.title when present; from the first text line otherwise.
     assert "**Consideration of S. 9999, Interstate Bridge Inspection Act**" in md
-    assert "**ROLL CALL 512 ON PASSAGE OF H.R. 8888**" in md
+    assert "**Roll Call 512 on Passage of H.R. 8888**" in md  # display-cased
     # FR item carries doc number, CFR citation, and preamble metadata.
     assert "(2026-11111; 10 CFR Part 430)" in md
     assert "Dates: Effective 2026-09-01." in md
@@ -320,3 +320,61 @@ def test_empty_day_still_renders_mandatory_sections(project):
         assert "No bill texts published in this range matched a listing rule; all 0 are" in md
     finally:
         connection.close()
+
+
+# ---------------------------------------------------------------------------
+# Plain-speak layer, title normalization, glossary
+# ---------------------------------------------------------------------------
+
+
+def seed_plain(conn, pid, gid, plain):
+    conn.execute(
+        "INSERT INTO plain_summaries (package_id, granule_id, plain_version,"
+        " source_prompt_version, plain, created_at) VALUES (?, ?, ?, ?, ?, 'x')",
+        (pid, gid, config.PLAIN_PROMPT_VERSION, config.PROMPT_VERSION, plain),
+    )
+    conn.commit()
+
+
+def test_plain_line_rendered_when_present(conn, tmp_path):
+    seed_plain(conn, FR_PKG, "2026-11111",
+               "A one-sentence plain rendering of the rule.")
+    path = report.render(conn, DATE, out_dir=tmp_path)
+    text = path.read_text()
+    assert "*In plain terms:* A one-sentence plain rendering of the rule." in text
+
+
+def test_missing_plain_degrades_gracefully(conn, tmp_path):
+    path = report.render(conn, DATE, out_dir=tmp_path)
+    assert "*In plain terms:*" not in path.read_text()  # omitted, never fabricated
+
+
+def test_banned_term_in_plain_line_fails_validation(conn, tmp_path):
+    seed_plain(conn, FR_PKG, "2026-11111",
+               "A landmark change to the rules.")
+    with pytest.raises(report.ValidationError):
+        report.render(conn, DATE, out_dir=tmp_path)
+
+
+def test_display_title_normalizes_all_caps():
+    assert report._display_title(
+        "DIRECTING THE REMOVAL OF UNITED STATES ARMED FORCES FROM HOSTILITIES"
+    ) == "Directing the Removal of United States Armed Forces from Hostilities"
+    # acronyms, digits, and dotted tokens survive
+    assert report._display_title("NDAA FOR FY 2027 UNDER H.R. 5334") == (
+        "NDAA for FY 2027 Under H.R. 5334"
+    )
+    # mixed-case titles pass through untouched
+    assert report._display_title("Special Local Regulation; Lake Erie") == (
+        "Special Local Regulation; Lake Erie"
+    )
+
+
+def test_glossary_lists_only_present_terms(conn, tmp_path):
+    seed_plain(conn, FR_PKG, "2026-11111",
+               "A rule that takes effect now; this interim final rule accepts comments.")
+    path = report.render(conn, DATE, out_dir=tmp_path)
+    text = path.read_text()
+    assert "## Terms Used Today" in text
+    assert "- *interim final rule* —" in text
+    assert "cloture" not in text  # absent terms are not listed

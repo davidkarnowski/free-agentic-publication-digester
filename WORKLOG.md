@@ -17,6 +17,65 @@ Entry format:
 
 ---
 
+## 2026-07-25 10:20 PDT — Plain-speak layer: per-item plain-language renderings + readability mechanics
+
+**Context:** User assessment of the first digest: accurate but hard to
+parse as a human (verbatim official FR summaries are acronym-dense;
+ALL-CAPS Record headings; unexplained procedural jargon). Planned in plan
+mode with a design-review sub-agent; user chose per-item plain lines
+covering all summarized items.
+
+**Work performed:**
+
+1. **Design deviation (improvement) from the approved plan, adopted from
+   the design-review agent:** instead of extending the map-call contract +
+   a summaries column + a PROMPT_VERSION bump, the plain layer is a
+   **decoupled restatement pass**: new `plain_summaries` table keyed by
+   (package, granule, PLAIN_PROMPT_VERSION, source_prompt_version), fed
+   only by *stored summaries*. Wins: no migration (table auto-creates);
+   phrasing iterations never regenerate factual summaries (~85K vs ~180K+
+   tokens per iteration); editorially stronger — every plain line is
+   checkable against the adjacent summary it restates; the 07-23 re-run
+   cost only the plain pass. PROMPT_VERSION stays 1.
+2. **GUIDE first** (§2 + §6 rule 9): plain renderings are labeled
+   interpretation — derived only from the stored summary, no new facts, no
+   significance judgments, visually distinct, linted un-masked, and an
+   item whose restatement fails renders without one (presentation aid,
+   never fabricated, never blocks the digest).
+3. **`analyze.run_plain`**: batched (25 items/call — inputs are ~170-token
+   summaries), cheap tier, strict-JSON, one-retry-then-honest-failure,
+   idempotent; ledger purposes `plain:batchN`/`plain:retry`.
+4. **Renderer**: `*In plain terms:*` line under every item (CREC, BILLS,
+   FR); smart display-casing for ALL-CAPS headings (acronym/digit/dotted
+   tokens preserved; disclosed in Methodology); static 15-term procedural
+   glossary → "Terms Used Today" section listing only terms present
+   (zero tokens); Methodology now states both version numbers and the
+   plain-layer provenance. Banned list extended with plain-register
+   evaluative framing (red tape, crackdown, slams, loophole).
+5. **Validator caught my own bug during development:** glossary entries
+   formatted `- **term**` matched the item-block pattern and were rejected
+   for lacking inclusion-rule lines — exactly the class of error the gate
+   exists for. Fixed by italic term formatting.
+6. **Verification run:** only the plain pass executed (map + compose
+   idempotent) — 3 Haiku calls, 86,311 in / 10,959 out tokens, **51/51
+   plain lines, 0 failures**, validation passed. Spot-check: the
+   suppressors interim final rule now reads "The Commerce Department is
+   revising export controls to transfer firearm silencers ... to less
+   restrictive Commerce controls..." — factual, jargon-free, neutral.
+7. **Tests: 131 passing** (+4 run_plain, +5 report incl. un-masked-lint
+   proof: a banned term in a plain line fails validation; a banned term in
+   an official summary does not).
+
+**Measured:** full-day bill with plain layer ≈ 235K in / 18K out
+(149K map+compose + 86K plain) — ~24% of the 1M working figure; still
+overhead-dominated (25K/call × ~7 calls).
+
+**Open questions / next steps:** unchanged (cap after more ledger days;
+scheduling; vision pass; periodic §2 editorial spot-audit — now including
+plain lines).
+
+---
+
 ## 2026-07-24 13:20 PDT — Phase 3 built; first digest generated (uncapped test run)
 
 **Context:** Phase 3 (Analyze & report) built and test-run in one session:

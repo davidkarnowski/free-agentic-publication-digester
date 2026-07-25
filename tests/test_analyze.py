@@ -318,3 +318,104 @@ def test_failed_items_recorded_and_never_written(conn):
     fake2 = FakeLLM()
     stats2 = analyze.run(conn, fake2, DATE)
     assert stats2["llm_summarized"] == 2 and stats2["failed_items"] == []
+
+
+# ---------------------------------------------------------------------------
+# Plain-speak pass (run_plain)
+# ---------------------------------------------------------------------------
+
+
+class PlainFakeLLM:
+    """Returns a strict-JSON mapping covering every key found in the prompt."""
+
+    def __init__(self, garbage_first=False, omit_keys=()):
+        self.calls = []
+        self.garbage_first = garbage_first
+        self.omit_keys = set(omit_keys)
+
+    def complete(self, prompt, **kw):
+        self.calls.append({"prompt": prompt, **kw})
+        if self.garbage_first:
+            self.garbage_first = False
+            return {"text": "not json", "input_tokens": 100, "output_tokens": 5,
+                    "model": kw.get("model", "x")}
+        import json as _json
+        import re as _re
+
+        keys = _re.findall(r"key=([^\s]+)", prompt)
+        reply = {k: f"plain for {k}" for k in keys if k not in self.omit_keys}
+        return {"text": _json.dumps(reply), "input_tokens": 1000, "output_tokens": 200,
+                "model": kw.get("model", "x")}
+
+
+def seed_summary(conn, pid, gid, summary="An official summary.", date="2026-07-23"):
+    conn.execute(
+        "INSERT OR IGNORE INTO packages (package_id, collection, last_modified,"
+        " first_seen_at, date_issued, fetch_status)"
+        " VALUES (?, 'FR', 'x', 'x', ?, 'fetched')",
+        (pid, date),
+    )
+    conn.execute(
+        "INSERT OR IGNORE INTO extracted_texts (package_id, granule_id, collection,"
+        " doc_type, title, text, char_count, extracted_at, extractor_version)"
+        " VALUES (?, ?, 'FR', 'RULE', 'A title', 'body', 4, 'x', 1)",
+        (pid, gid),
+    )
+    conn.execute(
+        "INSERT INTO summaries (package_id, granule_id, prompt_version, method,"
+        " inclusion_rule, summary, created_at)"
+        " VALUES (?, ?, ?, 'official', 'FR-SEL-01', ?, 'x')",
+        (pid, gid, config.PROMPT_VERSION, summary),
+    )
+    conn.commit()
+
+
+def test_run_plain_batches_and_stores(conn):
+    for i in range(30):  # more than one batch at MAX_PLAIN_BATCH_ITEMS=25
+        seed_summary(conn, "FR-2026-07-23", f"2026-{i:05d}")
+    llm = PlainFakeLLM()
+    stats = analyze.run_plain(conn, llm, "2026-07-23")
+    assert stats["plain_pending"] == 30
+    assert stats["plain_written"] == 30
+    assert stats["llm_calls"] == 2  # 25 + 5, not 30 calls
+    row = conn.execute(
+        "SELECT plain, plain_version, source_prompt_version FROM plain_summaries LIMIT 1"
+    ).fetchone()
+    assert row["plain"].startswith("plain for ")
+    assert row["plain_version"] == config.PLAIN_PROMPT_VERSION
+    assert row["source_prompt_version"] == config.PROMPT_VERSION
+
+
+def test_run_plain_idempotent(conn):
+    seed_summary(conn, "FR-2026-07-23", "2026-1")
+    analyze.run_plain(conn, PlainFakeLLM(), "2026-07-23")
+    llm2 = PlainFakeLLM()
+    stats = analyze.run_plain(conn, llm2, "2026-07-23")
+    assert stats["plain_pending"] == 0 and not llm2.calls
+
+
+def test_run_plain_retry_then_honest_failure(conn):
+    seed_summary(conn, "FR-2026-07-23", "2026-1")
+    seed_summary(conn, "FR-2026-07-23", "2026-2")
+    # First call garbage -> both items retried singly; retry omits one key.
+    llm = PlainFakeLLM(garbage_first=True, omit_keys={"FR-2026-07-23|2026-2"})
+    stats = analyze.run_plain(conn, llm, "2026-07-23")
+    assert stats["plain_written"] == 1
+    assert stats["failed_items"] == [
+        {"package_id": "FR-2026-07-23", "granule_id": "2026-2"}
+    ]
+    # Failed item has NO row (never fabricated) and is retried on rerun.
+    n = conn.execute("SELECT COUNT(*) FROM plain_summaries").fetchone()[0]
+    assert n == 1
+    stats2 = analyze.run_plain(conn, PlainFakeLLM(), "2026-07-23")
+    assert stats2["plain_pending"] == 1 and stats2["plain_written"] == 1
+
+
+def test_run_plain_uses_cheap_tier_and_purpose(conn):
+    seed_summary(conn, "FR-2026-07-23", "2026-1")
+    llm = PlainFakeLLM()
+    analyze.run_plain(conn, llm, "2026-07-23")
+    call = llm.calls[0]
+    assert call["model"] == config.PLAIN_MODEL
+    assert call["purpose"] == "plain:batch1"
+    assert "An official summary." in call["prompt"]  # input is the STORED summary

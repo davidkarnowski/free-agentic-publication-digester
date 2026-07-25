@@ -72,8 +72,13 @@ granules.
 Session status: {senate_session_status}. Floor pages: {senate_page_range}
 ({senate_page_count} pages).
 
-<!-- (repeat per selected Senate floor item) -->
+<!-- (repeat per selected Senate floor item. The optional "In plain terms"
+     line is a model-generated restatement of the item's stored summary —
+     labeled interpretation per GUIDE §2: derived only from the adjacent
+     summary text, no new facts, linted un-masked, omitted when no usable
+     restatement exists.) -->
 - **{item_title}** — {factual_summary_1_to_3_sentences}
+  - *In plain terms:* {plain_language_restatement_of_the_summary}
   - Included because: {inclusion_rule} (e.g., "floor time: {n} pages of CREC,
     above the {threshold}-page threshold")
   - Measures referenced: {bill_ids_or_none}
@@ -280,6 +285,15 @@ Coverage Statement marks PLAW "not ingested".)*
 *If none:* No laws were published in this range.
 *If collection not yet ingested:* PLAW is not yet ingested by this pipeline
 version; enacted laws are not covered in this digest.
+
+---
+
+## Terms Used Today
+
+<!-- Static, repo-versioned plain definitions of procedural terms; only
+     terms that actually appear in this digest are listed. Zero tokens —
+     mechanical detection against a curated glossary. -->
+- **{term}** — {neutral_one_line_definition}
 
 ---
 

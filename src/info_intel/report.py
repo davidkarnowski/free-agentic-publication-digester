@@ -73,6 +73,13 @@ _BANNED_TERMS = (
     "alarming",
     "in an attempt to",
     "aims to appease",
+    # Plain-register evaluative framing (the plain-speak layer's failure
+    # modes) — GUIDE §2 plain-language rules.
+    "red tape",
+    "crackdown",
+    "cracks down",
+    "slams",
+    "loophole",
 )
 _BANNED_RE = re.compile(
     r"\b(?:" + "|".join(re.escape(t).replace(" ", r"\s+") for t in _BANNED_TERMS) + r")\b",
@@ -181,17 +188,21 @@ def _load_items(conn, date):
                COALESCE(e.collection, p.collection) AS collection,
                e.doc_type, e.title, e.agency, e.metadata, e.char_count,
                substr(e.text, 1, 400) AS text_head,
-               g.title AS granule_title
+               g.title AS granule_title,
+               ps.plain AS plain
         FROM summaries s
         JOIN packages p ON p.package_id = s.package_id
         LEFT JOIN extracted_texts e
                ON e.package_id = s.package_id AND e.granule_id = s.granule_id
         LEFT JOIN granules g
                ON g.package_id = s.package_id AND g.granule_id = s.granule_id
+        LEFT JOIN plain_summaries ps
+               ON ps.package_id = s.package_id AND ps.granule_id = s.granule_id
+              AND ps.plain_version = ? AND ps.source_prompt_version = s.prompt_version
         WHERE s.prompt_version = ? AND p.date_issued = ?
         ORDER BY s.package_id, s.granule_id
         """,
-        (config.PROMPT_VERSION, date),
+        (config.PLAIN_PROMPT_VERSION, config.PROMPT_VERSION, date),
     ).fetchall()
     items = []
     for row in rows:
@@ -326,11 +337,51 @@ def _header_lines(conn, date, git_short):
     ]
 
 
+def _plain_line(item):
+    """The labeled plain-language rendering (GUIDE §2): omitted entirely
+    when no plain restatement exists — never fabricated."""
+    plain = item.get("plain")
+    if not plain:
+        return []
+    return [f"  - *In plain terms:* {_one_line(plain)}"]
+
+
+# Display-only case normalization for ALL-CAPS source headings (disclosed in
+# the Methodology section). Tokens with digits/periods and known acronyms
+# keep their casing; everything else is title-cased with small words lowered.
+_SMALL_WORDS = {
+    "of", "the", "to", "for", "and", "in", "on", "a", "an", "or",
+    "with", "from", "within", "against", "by", "at", "as",
+}
+_ACRONYMS = {
+    "US", "USA", "USMCA", "NDAA", "FY", "FAA", "EPA", "NRC", "ERISA", "NASA",
+    "FEMA", "FCC", "FDA", "FERC", "DOD", "DOE", "DHS", "HHS", "IRS", "VA",
+    "AI", "II", "III", "IV", "COVID", "GAO", "CBO", "NATO", "UN", "EO",
+}
+
+
+def _display_title(raw):
+    text = _one_line(raw)
+    letters = [c for c in text if c.isalpha()]
+    if not letters or sum(c.isupper() for c in letters) / len(letters) < 0.8:
+        return text  # mixed-case source titles pass through untouched
+    words = []
+    for i, word in enumerate(text.split()):
+        if any(ch.isdigit() for ch in word) or "." in word or word in _ACRONYMS:
+            words.append(word)
+        elif word.lower() in _SMALL_WORDS and i != 0:
+            words.append(word.lower())
+        else:
+            words.append(word[:1].upper() + word[1:].lower())
+    return " ".join(words)
+
+
 def _crec_item_lines(item):
     raw = item["granule_title"] or _first_nonempty_line(item["text_head"]) or item["granule_id"]
-    title = _truncate(_one_line(raw))
+    title = _truncate(_display_title(raw))
     return [
         f"- **{title}** — {_one_line(item['summary'])}",
+        *_plain_line(item),
         _included_line(item),
         _source_line(item["package_id"], item["granule_id"]),
     ]
@@ -452,6 +503,7 @@ def _bills_lines(conn, date, items):
             title = _one_line(item["title"]) or "(untitled)"
             lines += [
                 f"- **{label} ({version}) — {title}** — {_one_line(item['summary'])}",
+                *_plain_line(item),
                 _included_line(item),
                 _source_line(item["package_id"]),
             ]
@@ -519,7 +571,8 @@ def _fr_item_lines(item, date, out_dir, assets):
         value = metadata.get(key)
         if value:
             head += f" {label}: {_one_line(value).rstrip('.')}."
-    lines = [head, _included_line(item), _source_line(package_id, granule_id)]
+    lines = [head, *_plain_line(item), _included_line(item),
+             _source_line(package_id, granule_id)]
 
     matched = _item_graphics(assets, metadata.get("pages"))
     total = len(matched)
@@ -762,6 +815,60 @@ def _coverage_lines(conn, date, cov, embedded_total):
     ]
 
 
+# Static, repo-versioned plain definitions of procedural terms (GUIDE §2
+# method transparency). Neutral register — these pass the lexicon scan like
+# all generated prose. Keys are matched case-insensitively on word
+# boundaries against the rendered document body.
+_GLOSSARY = {
+    "cloture": "a Senate vote to end debate so a final vote can happen",
+    "motion to proceed": "a Senate vote on whether to start considering a bill",
+    "engrossed": "the official text of a bill as passed by one chamber",
+    "enrolled": "the final text of a bill passed by both chambers, sent to the President",
+    "interim final rule": (
+        "a rule that takes effect without waiting for public comment,"
+        " though comments are still accepted"
+    ),
+    "direct final rule": (
+        "a rule that takes effect automatically unless significant objections arrive"
+    ),
+    "proposed rule": "a draft regulation published for public comment before adoption",
+    "concurrent resolution": (
+        "a measure passed by both chambers that does not go to the President"
+        " and does not have the force of law"
+    ),
+    "joint resolution": "a measure that, like a bill, becomes law if passed and signed",
+    "incorporation by reference": (
+        "making an outside document legally part of a rule without reprinting it"
+    ),
+    "state implementation plan": (
+        "a state's federally-approved plan for meeting national air quality standards"
+    ),
+    "certificate of compliance": (
+        "an official approval that a specific design meets regulatory requirements"
+    ),
+    "notice of proposed rulemaking": "the formal announcement of a draft regulation",
+    "discharge": "a motion to pull a measure out of committee for floor consideration",
+    "safety zone": "a temporary area of water that vessels may not enter without permission",
+}
+
+
+def _glossary_lines(body_markdown):
+    """'Terms Used Today' — only terms that actually appear in the body.
+    Zero tokens: static definitions, mechanical detection."""
+    present = [
+        term for term in sorted(_GLOSSARY)
+        if re.search(rf"\b{re.escape(term)}\b", body_markdown, re.IGNORECASE)
+    ]
+    if not present:
+        return []
+    lines = ["## Terms Used Today", ""]
+    # Italic terms, not bold: `- **` is the item-block marker that the
+    # inclusion-rule validator keys on; glossary entries are not items.
+    lines += [f"- *{term}* — {_GLOSSARY[term]}" for term in present]
+    lines += ["", "---", ""]
+    return lines
+
+
 def _methodology_lines(date, git_short):
     return [
         "## Methodology",
@@ -772,10 +879,17 @@ def _methodology_lines(date, git_short):
         "party-blind selection, full coverage accounting — are defined in",
         (
             "[GUIDE.md](../GUIDE.md) §2. Ruleset in effect: prompt version"
-            f" {config.PROMPT_VERSION}. To reproduce this digest: re-run the report stage"
+            f" {config.PROMPT_VERSION}; plain-language version"
+            f" {config.PLAIN_PROMPT_VERSION}. To reproduce this digest: re-run the"
         ),
-        f"against the extracted records for {date}; no upstream re-fetch is required",
-        "(GUIDE.md §5).",
+        f"report stage against the extracted records for {date}; no upstream re-fetch",
+        "is required (GUIDE.md §5).",
+        "",
+        '*"In plain terms" lines are model-generated restatements of the stored',
+        "summaries, derived only from the summary text shown beside them; items",
+        "without one had no usable restatement. ALL-CAPS source headings are",
+        "case-normalized for display; original casing is preserved at the source",
+        "link. Term definitions above are static, repo-versioned prose.*",
     ]
 
 
@@ -940,6 +1054,7 @@ def render(conn, date, out_dir=None):
     fr_lines, embedded_total = _fr_lines(conn, date, items, out_dir)
     lines += fr_lines
     lines += _SECTION4_LINES
+    lines += _glossary_lines("\n".join(lines))
     lines += _coverage_lines(conn, date, _coverage(conn, date), embedded_total)
     lines += _methodology_lines(date, git_short)
 

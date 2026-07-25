@@ -44,6 +44,11 @@ MAP_MODEL = "haiku"
 COMPOSE_MODEL = "opus"
 # Bump when summarization prompts change; stored per summary row (§6 rule 5).
 PROMPT_VERSION = 1
+# Plain-speak layer versions independently (§6 rule 9): phrasing iterations
+# never regenerate factual summaries.
+PLAIN_PROMPT_VERSION = 1
+PLAIN_MODEL = MAP_MODEL  # restatement is compression work — cheap tier
+MAX_PLAIN_BATCH_ITEMS = 25  # inputs are stored summaries (~170 tokens each)
 LLM_TIMEOUT = 300  # seconds per call
 
 # GUIDE.md §3: initial scope. Order is sync order.

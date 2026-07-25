@@ -166,6 +166,147 @@ def _call(llm, stats, entries, purpose):
     return _parse_reply(result["text"]), result
 
 
+# GUIDE §2/§6 rule 9: plain-language restatement of STORED summaries only —
+# derived text checkable against the adjacent summary; adds no facts.
+_PLAIN_PREAMBLE = """\
+You are restating summaries of official United States government documents
+in plain everyday English for a labeled "In plain terms" line. For EACH
+item below, restate its summary in ONE sentence (at most ~35 words).
+
+Hard constraints (mandatory, non-negotiable):
+- Use ONLY facts present in the given summary. Add nothing. You may drop
+  qualifiers, but never numbers or dates in a way that changes meaning.
+- Expand procedural jargon into ordinary words (for example, "interim
+  final rule" -> "a rule that takes effect now while public comments are
+  still accepted"; "cloture" -> "a vote to end debate").
+- Keep effective dates and comment deadlines when the summary states them.
+- Strictly factual and opinion-agnostic: never whether something is good
+  or bad. NO loaded adjectives (such as "controversial", "landmark",
+  "extreme"), NO evaluative framing (such as "cuts red tape",
+  "crackdown"), NO motive attribution (such as "in an attempt to ..."),
+  NO predictions, NO opinions.
+
+Output format: reply with STRICT JSON and nothing else -- a single JSON
+object mapping each item's key (the exact string after "key=" in its
+header) to its one-sentence plain restatement. No markdown fences, no
+commentary, no other keys.
+"""
+
+
+def _build_plain_prompt(entries):
+    """entries: list of summaries-row dicts with package_id, granule_id,
+    summary, doc_type, title."""
+    blocks = [
+        f"=== ITEM key={_key(row)} ===\n"
+        f"doc_type: {row['doc_type'] or ''}  title: {row['title'] or ''}\n"
+        f"summary: {row['summary']}\n"
+        f"=== END ITEM ==="
+        for row in entries
+    ]
+    return _PLAIN_PREAMBLE + "\n" + "\n\n".join(blocks) + "\n"
+
+
+def _store_plain(conn, row, *, plain, model, input_tokens=0, output_tokens=0):
+    conn.execute(
+        "INSERT INTO plain_summaries (package_id, granule_id, plain_version,"
+        " source_prompt_version, model, plain, input_tokens, output_tokens, created_at)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            row["package_id"],
+            row["granule_id"],
+            config.PLAIN_PROMPT_VERSION,
+            config.PROMPT_VERSION,
+            model,
+            plain,
+            input_tokens,
+            output_tokens,
+            dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
+        ),
+    )
+    conn.commit()
+
+
+def _plain_call(llm, stats, entries, purpose):
+    result = llm.complete(
+        _build_plain_prompt(entries),
+        purpose=purpose,
+        model=config.PLAIN_MODEL,
+        package_id=",".join(sorted({row["package_id"] for row in entries})),
+    )
+    stats["llm_calls"] += 1
+    stats["input_tokens"] += result["input_tokens"]
+    stats["output_tokens"] += result["output_tokens"]
+    return _parse_reply(result["text"]), result
+
+
+def _harvest_plain(conn, stats, entries, mapping, result):
+    share_in = result["input_tokens"] // len(entries)
+    share_out = result["output_tokens"] // len(entries)
+    missing = []
+    for row in entries:
+        plain = mapping.get(_key(row))
+        if isinstance(plain, str) and plain.strip():
+            _store_plain(
+                conn, row, plain=" ".join(plain.split()), model=result["model"],
+                input_tokens=share_in, output_tokens=share_out,
+            )
+            stats["plain_written"] += 1
+        else:
+            missing.append(row)
+    return missing
+
+
+def run_plain(conn, llm, date):
+    """Plain-speak pass: restate the date's stored summaries (all methods)
+    as one-sentence plain lines. Idempotent by (package, granule,
+    PLAIN_PROMPT_VERSION, PROMPT_VERSION); reruns make zero calls. A failed
+    item simply has no plain line — presentation aid, never fabricated."""
+    stats = {
+        "plain_pending": 0,
+        "plain_written": 0,
+        "llm_calls": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "failed_items": [],
+    }
+    pending = [
+        dict(r)
+        for r in conn.execute(
+            """
+            SELECT s.package_id, s.granule_id, s.summary, e.doc_type, e.title
+            FROM summaries s
+            JOIN packages p ON p.package_id = s.package_id
+            LEFT JOIN extracted_texts e USING (package_id, granule_id)
+            WHERE p.date_issued = ? AND s.prompt_version = ?
+              AND NOT EXISTS (
+                  SELECT 1 FROM plain_summaries ps
+                  WHERE ps.package_id = s.package_id
+                    AND ps.granule_id = s.granule_id
+                    AND ps.plain_version = ?
+                    AND ps.source_prompt_version = s.prompt_version)
+            ORDER BY s.package_id, s.granule_id
+            """,
+            (date, config.PROMPT_VERSION, config.PLAIN_PROMPT_VERSION),
+        ).fetchall()
+    ]
+    stats["plain_pending"] = len(pending)
+
+    retry_queue = []
+    for start in range(0, len(pending), config.MAX_PLAIN_BATCH_ITEMS):
+        batch = pending[start : start + config.MAX_PLAIN_BATCH_ITEMS]
+        batch_no = start // config.MAX_PLAIN_BATCH_ITEMS + 1
+        mapping, result = _plain_call(llm, stats, batch, f"plain:batch{batch_no}")
+        retry_queue.extend(_harvest_plain(conn, stats, batch, mapping, result))
+
+    for row in retry_queue:
+        mapping, result = _plain_call(llm, stats, [row], "plain:retry")
+        if _harvest_plain(conn, stats, [row], mapping, result):
+            stats["failed_items"].append(
+                {"package_id": row["package_id"], "granule_id": row["granule_id"]}
+            )
+    return stats
+
+
 def run(conn, llm, date):
     """Summarize every rule-selected document for the date. Idempotent:
     items already summarized under config.PROMPT_VERSION are skipped before
