@@ -31,7 +31,7 @@ def conn(tmp_path):
     c.execute(
         "INSERT INTO summaries (package_id, granule_id, prompt_version, method,"
         " inclusion_rule, summary, created_at)"
-        " VALUES ('FR-2026-07-23','2026-1',?, 'official','FR-SEL-01','Official summary text.','x')",
+        " VALUES ('FR-2026-07-23','2026-1',?, 'official','FR-SEL-01','Official summary text.','2026-07-23T00:00:00Z')",
         (config.PROMPT_VERSION,),
     )
     c.commit()
@@ -65,3 +65,33 @@ def test_no_items_no_call(conn):
     stats = compose.compose_day(conn, llm, "2020-01-01")
     assert stats["composed"] == 0 and not llm.calls
     assert compose.get_day_summary(conn, "2020-01-01") is None
+
+
+def test_recomposes_when_newer_summaries_arrive(conn, monkeypatch):
+    clock = iter(["2026-07-23T10:00:00Z", "2026-07-23T12:00:00Z"])
+    monkeypatch.setattr(compose, "utc_now_iso", lambda: next(clock))
+    llm = FakeLLM()
+    compose.compose_day(conn, llm, "2026-07-23")  # stored at 10:00
+    # Late-arriving item (e.g. Record published after first digest run)
+    conn.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection, doc_type,"
+        " title, text, char_count, extracted_at, extractor_version)"
+        " VALUES ('FR-2026-07-23','2026-2','FR','RULE','Late title','body',4,'x',1)"
+    )
+    conn.execute(
+        "INSERT INTO summaries (package_id, granule_id, prompt_version, method,"
+        " inclusion_rule, summary, created_at)"
+        " VALUES ('FR-2026-07-23','2026-2',?, 'official','FR-SEL-01',"
+        " 'Late-arriving summary.','2026-07-23T11:00:00Z')",
+        (config.PROMPT_VERSION,),
+    )
+    conn.commit()
+    llm2 = FakeLLM(text="Refreshed synthesis.")
+    stats = compose.compose_day(conn, llm2, "2026-07-23")
+    assert stats["composed"] == 1
+    assert "Late-arriving summary." in llm2.calls[0]["prompt"]
+    assert compose.get_day_summary(conn, "2026-07-23")["summary"] == "Refreshed synthesis."
+    # And it settles: a further rerun with nothing new skips again.
+    llm3 = FakeLLM()
+    assert compose.compose_day(conn, llm3, "2026-07-23")["skipped_existing"] == 1
+    assert not llm3.calls

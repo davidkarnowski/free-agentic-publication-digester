@@ -43,14 +43,35 @@ Reply with the two paragraphs only.
 
 
 def compose_day(conn, llm, date):
-    """Create (or reuse) the Day in Review for a date. Idempotent by
-    (date, PROMPT_VERSION). Returns stats dict."""
+    """Create (or refresh) the Day in Review for a date. Idempotent by
+    (date, PROMPT_VERSION) — but a stored composition is invalidated when
+    any item summary for the date is newer than it (late-arriving data,
+    e.g. a Record issue published after the first digest run, must never
+    leave the synthesis stale against its own items). Returns stats dict."""
     existing = conn.execute(
-        "SELECT 1 FROM day_summaries WHERE date = ? AND prompt_version = ?",
+        "SELECT created_at FROM day_summaries WHERE date = ? AND prompt_version = ?",
         (date, config.PROMPT_VERSION),
     ).fetchone()
     if existing:
-        return {"composed": 0, "skipped_existing": 1, "input_tokens": 0, "output_tokens": 0}
+        # Timestamp formats differ in suffix (Z vs +00:00); compare the
+        # common YYYY-MM-DDTHH:MM:SS prefix.
+        newer = conn.execute(
+            """
+            SELECT 1 FROM summaries s JOIN packages p ON p.package_id = s.package_id
+            WHERE p.date_issued = ? AND s.prompt_version = ?
+              AND substr(s.created_at, 1, 19) > substr(?, 1, 19)
+            LIMIT 1
+            """,
+            (date, config.PROMPT_VERSION, existing["created_at"]),
+        ).fetchone()
+        if not newer:
+            return {"composed": 0, "skipped_existing": 1,
+                    "input_tokens": 0, "output_tokens": 0}
+        conn.execute(
+            "DELETE FROM day_summaries WHERE date = ? AND prompt_version = ?",
+            (date, config.PROMPT_VERSION),
+        )
+        logger.info("%s: newer item summaries found — recomposing Day in Review", date)
 
     counts = _mechanical_counts(conn, date)
     items = conn.execute(

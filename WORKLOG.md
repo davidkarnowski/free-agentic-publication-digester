@@ -17,6 +17,43 @@ Entry format:
 
 ---
 
+## 2026-07-25 11:05 PDT — First full daily pipeline run; compose staleness fix
+
+**Context:** First end-to-end rehearsal of the daily job (sync → extract →
+digest) on live data, then a fix for a design gap the run exposed.
+
+**Work performed:**
+
+1. **Pipeline run:** sync 124 requests (58 new bill texts, 2 FR packages
+   incl. FR-2026-07-25, zero failures); extract 59 packages → 235 records +
+   17 graphic assets; digest generated for 2026-07-24 (newest complete day
+   — the Record lags a morning).
+2. **No CREC-2026-07-24 exists on govinfo** (chambers apparently not in
+   session Friday). The system handled absence correctly: "no items" lines
+   rendered, and the Day in Review states "no floor activity in the
+   materials available" — then gives a clean account of the 82-document FR
+   day (Title VI disparate-impact rescissions at three departments, four
+   FDA device classifications, fishery closures, airworthiness directives).
+   All 23 selected items carried official summaries — zero map calls; a
+   quiet FR-only day costs ~57K tokens (1 plain batch + 1 compose).
+3. **Design gap exposed and fixed:** day_summaries idempotency would have
+   kept a stale Day in Review if the missing Record arrived in a later
+   sync. compose_day now invalidates the stored composition when any item
+   summary for the date is newer than it (timestamp-prefix comparison
+   across the two stored formats), recomposes, and settles — proven by a
+   clock-controlled test (compose → late summary → recompose → settle).
+   133 tests passing.
+
+**Decisions:** digest date for the daily run = newest *complete* day
+(Record availability), not newest date with any data — an FR-only digest
+for today would misrepresent a day whose congressional record hasn't
+published yet.
+
+**Open questions / next steps:** unchanged (scheduling with overlap guard;
+cap from ledger data; vision pass; editorial spot-audit).
+
+---
+
 ## 2026-07-25 10:20 PDT — Plain-speak layer: per-item plain-language renderings + readability mechanics
 
 **Context:** User assessment of the first digest: accurate but hard to
