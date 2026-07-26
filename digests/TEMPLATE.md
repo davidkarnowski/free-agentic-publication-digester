@@ -37,7 +37,7 @@
 | **Data date range** | {data_start_date} to {data_end_date} |
 | **Generated at** | {generation_timestamp_utc} (UTC) |
 | **Pipeline version** | {pipeline_version} ({git_commit_short}) |
-| **Source watermarks** | CREC: {crec_watermark} · BILLS: {bills_watermark} · FR: {fr_watermark} |
+| **Source watermarks** | CREC: {crec_watermark} · BILLS: {bills_watermark} · FR: {fr_watermark} · USCOURTS: {uscourts_watermark} |
 
 All items below cite the govinfo package (and granule, where applicable) they
 summarize. Selection is mechanical; each item states the rule that included
@@ -288,6 +288,74 @@ version; enacted laws are not covered in this digest.
 
 ---
 
+## 5. Judicial Activity
+
+Source: United States Courts Opinions (USCOURTS): opinions issued
+{digest_date} by participating federal courts.
+
+<!-- The completeness disclosure below is MANDATORY and STANDING (GUIDE.md
+     §3, Judicial branch coverage): it appears verbatim in every digest's
+     judicial section — USCOURTS is participation-based, not the complete
+     federal judicial record. -->
+Completeness disclosure (standing): USCOURTS carries opinions from
+approximately 140 participating appellate, district, bankruptcy, and
+national federal courts. Unlike the Congressional Record and the Federal
+Register, which are the complete official record of their branches,
+USCOURTS is participation-based and is NOT the complete federal judicial
+record. Courts post opinions with delay; opinions filed on this date may
+appear in later digests.
+
+### 5.1 Appellate and National Court Opinions
+
+Appellate and national court opinions are summarized; district and
+bankruptcy opinions are counted in 5.2 and in the Coverage Statement.
+
+<!-- (repeat per court, courts in alphabetical order by court_name) -->
+#### {court_name}
+
+<!-- (repeat per selected opinion under this court; same plain-line rules
+     as 1.1) -->
+- **{case_name}** (No. {case_number}; filed {date_filed}) —
+  {factual_summary_1_to_3_sentences}
+  - *In plain terms:* {plain_language_restatement_of_the_summary}
+  - Included because: {inclusion_rule} (e.g., "USCOURTS-SEL-01 — appellate
+    court opinion (all listed)")
+  - Source: [{package_id} / {granule_id}](https://www.govinfo.gov/app/details/{package_id}/{granule_id})
+
+<!-- BEGIN EXAMPLE (fictional; format illustration only) -->
+#### EXAMPLE — United States Court of Appeals for the Ninth Circuit
+
+- **EXAMPLE — Doe v. Example Agency** (No. 26-00123; filed 2026-07-23) —
+  The court affirmed the district court's grant of summary judgment,
+  holding that the agency's permit decision satisfied the statute's
+  notice requirements. One judge filed a concurring opinion.
+  - Included because: USCOURTS-SEL-01 — appellate court opinion (all
+    listed)
+  - Source: [USCOURTS-ca9-26-00123 / USCOURTS-ca9-26-00123-0](https://www.govinfo.gov/app/details/USCOURTS-ca9-26-00123/USCOURTS-ca9-26-00123-0)
+<!-- END EXAMPLE -->
+
+*If none:* No appellate or national court opinions matched a listing rule
+for this date; all opinions are counted in 5.2 and accounted for in the
+Coverage Statement.
+
+### 5.2 Counts by Court Category
+
+| Court category | Opinions |
+|---|---|
+| Appellate | {count_uscourts_appellate} |
+| District | {count_uscourts_district} |
+| Bankruptcy | {count_uscourts_bankruptcy} |
+| National | {count_uscourts_national} |
+| **Total opinions extracted** | **{count_uscourts_total}** |
+
+Archive-window disclosure (rule USCOURTS-FETCH-01):
+{uscourts_skipped_total} USCOURTS package(s) have been listed in delta
+syncs but fell outside the {uscourts_fetch_window_days}-day archive window
+and were not fetched (global running count across all syncs, not limited
+to this date).
+
+---
+
 ## Terms Used Today
 
 <!-- Static, repo-versioned plain definitions of procedural terms; only
@@ -312,6 +380,7 @@ requests; last watermarks as listed in the header.
 | CREC | {crec_pkg_count} | {crec_granule_count} | {crec_summarized_count} | {crec_counted_count} | {crec_excluded_count} |
 | BILLS | {bills_pkg_count} | — | {bills_summarized_count} | {bills_counted_count} | {bills_excluded_count} |
 | FR | {fr_pkg_count} | {fr_granule_count} | {fr_summarized_count} | {fr_counted_count} | {fr_excluded_count} |
+| USCOURTS | {uscourts_pkg_count} | {uscourts_opinion_count} | {uscourts_summarized_count} | {uscourts_counted_count} | {uscourts_excluded_count} |
 
 **Exclusion rules applied today:**
 
@@ -332,7 +401,10 @@ cited source PDFs.
 
 **Known gaps:** {known_gaps_or_none} (e.g., "govinfo returned 503 for 1
 granule; it will be retried next sync and appear in tomorrow's digest",
-"PLAW collection not yet ingested — see §4").
+"PLAW collection not yet ingested — see §4". The judicial publication-lag
+line — "courts post opinions with delay; opinions filed on this date may
+appear in later syncs" — is STANDING whenever the USCOURTS coverage row is
+nonzero or the collection is synced).
 
 *Verification: any item above can be checked against its source in one
 click via its govinfo link. Totals in this table are reproducible from the

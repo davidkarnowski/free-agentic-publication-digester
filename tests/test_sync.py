@@ -300,3 +300,37 @@ def test_crec_download_inventories_granules(conn, raw_dir):
     assert [r["granule_class"] for r in rows] == ["HOUSE", "SENATE"]
     pkg = conn.execute("SELECT download_format FROM packages").fetchone()
     assert pkg["download_format"] == "zip"  # CREC has no package-level XML
+
+
+def test_uscourts_fetch_policy_skips_old_cases(conn):
+    # Rule USCOURTS-FETCH-01: churn on old cases is listed but not archived.
+    client = FakeClient()
+    client.pages["collections/USCOURTS/"] = listing([
+        {"packageId": "USCOURTS-ca9-1_26-cv-1", "lastModified": "2026-07-25T01:00:00Z",
+         "dateIssued": "2026-07-24"},
+        {"packageId": "USCOURTS-idb-1_04-bk-1", "lastModified": "2026-07-25T01:00:00Z",
+         "dateIssued": "2011-03-02"},
+    ])
+    sync.sync_collection(client, conn, "USCOURTS", list_only=True)
+    rows = dict(conn.execute("SELECT package_id, fetch_status FROM packages"))
+    assert rows["USCOURTS-ca9-1_26-cv-1"] == "pending"
+    assert rows["USCOURTS-idb-1_04-bk-1"] == "skipped"
+    err = conn.execute(
+        "SELECT last_error FROM packages WHERE package_id='USCOURTS-idb-1_04-bk-1'"
+    ).fetchone()[0]
+    assert "USCOURTS-FETCH-01" in err
+
+
+def test_download_order_is_newest_first(conn, raw_dir):
+    client = FakeClient()
+    client.pages["collections/BILLS/"] = listing([
+        bill("BILLS-119hr1ih", "2026-07-23T10:00:00Z", date="2026-07-20"),
+        bill("BILLS-119s2is", "2026-07-23T11:00:00Z", date="2026-07-24"),
+    ])
+    for p in ("BILLS-119hr1ih", "BILLS-119s2is"):
+        with_summary(client, p)
+    sync.sync_collection(client, conn, "BILLS", max_downloads=1)
+    fetched = conn.execute(
+        "SELECT package_id FROM packages WHERE fetch_status='fetched'"
+    ).fetchall()
+    assert [r[0] for r in fetched] == ["BILLS-119s2is"]  # newest date first

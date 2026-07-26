@@ -25,6 +25,7 @@ _PARSER_MODULES = {
     "FR": "info_intel.parsers.fr",
     "CREC": "info_intel.parsers.crec",
     "BILLS": "info_intel.parsers.bills",
+    "USCOURTS": "info_intel.parsers.uscourts",
 }
 
 

@@ -102,8 +102,33 @@ reporting component must comply.
 | `CHRG` | Congressional Hearings | Committee transcripts (published with lag) |
 | `CRPT` | Congressional Reports | Committee analysis accompanying bills |
 | `DCPD` | Daily Compilation of Presidential Documents | Executive statements, orders, remarks |
+| `USCOURTS` | United States Courts Opinions | Judicial branch: opinions from participating federal courts |
 
 Start with `CREC`, `BILLS`, `FR`; add the rest once the pipeline is stable.
+
+### Judicial branch coverage (amended 2026-07-25)
+
+The digest covers all three branches. Judicial coverage is phased:
+
+- **J1 (active):** the govinfo `USCOURTS` collection — opinions from ~140
+  participating appellate, district, bankruptcy, and national courts.
+  **Structural completeness disclosure (mandatory, standing):** unlike CREC
+  and FR, which are the complete official record of their branches,
+  USCOURTS is participation-based and is *not* the complete federal
+  judicial record. Every digest's judicial section and Coverage Statement
+  must carry this disclosure. Mechanical selection leans on the courts' own
+  published/precedential designations and court type (appellate summarized;
+  district/bankruptcy counted).
+- **J2 (planned):** Supreme Court slip opinions and order lists directly
+  from supremecourt.gov — our first non-govinfo primary source, admitted
+  deliberately because SCOTUS does not publish via USCOURTS; the official
+  syllabus serves as the zero-token drafting input (§6 rule 3).
+- **J3 (deferred):** docket/filing activity (PACER/RECAP/CourtListener) —
+  partial by nature and outside the official-publication model; revisit
+  only with a deliberate GUIDE change.
+- **Date semantics:** court packages are case-shaped, not day-shaped; a
+  digest's judicial items are opinions *filed* on the digest date, and
+  publication lag (courts post with delay) is disclosed under Known gaps.
 
 ### Secondary (later phases)
 
@@ -276,6 +301,12 @@ of the code, not of operator discipline.
 - **Phase 3 — Analyze & report:** mechanical aggregation, citation-bound
   summarization, vision pass on selected items' graphics, first real daily
   digest with embedded source graphics; iterate on digest format.
+- **Phase J1 — Judicial via govinfo (active):** USCOURTS collection through
+  the existing pipeline; opinion extraction from case packages; selection by
+  court type + published designation; digest section 5 with the standing
+  completeness disclosure.
+- **Phase J2 — Supreme Court direct:** supremecourt.gov slip opinions and
+  orders, syllabus-first drafting.
 - **Phase 4 — Broaden & harden:** add PLAW/CHRG/CRPT/DCPD, Congress.gov
   metadata, backfill via bulk data, bias/faithfulness spot-audits
   (periodically diff a digest item against its full source).

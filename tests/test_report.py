@@ -19,11 +19,11 @@ SENATE_GID = "CREC-2026-07-23-pt1-PgS4101"
 VOTE_GID = "CREC-2026-07-23-pt1-PgH6220"
 
 
-def add_package(conn, package_id, collection, status="fetched"):
+def add_package(conn, package_id, collection, status="fetched", date=DATE):
     conn.execute(
         "INSERT INTO packages (package_id, collection, date_issued, last_modified,"
         " first_seen_at, fetch_status) VALUES (?, ?, ?, ?, ?, ?)",
-        (package_id, collection, DATE, "2026-07-23T12:00:00Z", "2026-07-23T12:00:00Z", status),
+        (package_id, collection, date, "2026-07-23T12:00:00Z", "2026-07-23T12:00:00Z", status),
     )
 
 
@@ -114,6 +114,55 @@ def seed(conn, project_root):
     add_summary(conn, FR_PKG, "2026-66666", "FR-SEL-03",
                 "A proclamation designating National Parks Month.", method="official")
 
+    # --- USCOURTS: 2 appellate opinions (summarized, with plain lines),
+    # 1 district (USCOURTS-EX-01) and 1 bankruptcy (USCOURTS-EX-02) counted
+    # only, plus a package outside the archive window (USCOURTS-FETCH-01,
+    # fetch_status='skipped', earlier date_issued).
+    add_package(conn, "USCOURTS-ca1-26-00042", "USCOURTS")
+    add_text(conn, "USCOURTS-ca1-26-00042", "USCOURTS-ca1-26-00042-0",
+             "USCOURTS", "APPELLATE", title="Doe v. Example Agency",
+             metadata={"court_code": "ca1",
+                       "court_name": "United States Court of Appeals"
+                                     " for the First Circuit",
+                       "case_number": "26-00042", "date_filed": DATE},
+             chars=18000)
+    add_summary(conn, "USCOURTS-ca1-26-00042", "USCOURTS-ca1-26-00042-0",
+                "USCOURTS-SEL-01",
+                "The court affirmed the district court's grant of summary judgment.")
+    seed_plain(conn, "USCOURTS-ca1-26-00042", "USCOURTS-ca1-26-00042-0",
+               "The appeals court agreed with the lower court's decision.")
+    add_package(conn, "USCOURTS-ca9-26-01234", "USCOURTS")
+    add_text(conn, "USCOURTS-ca9-26-01234", "USCOURTS-ca9-26-01234-0",
+             "USCOURTS", "APPELLATE", title="Roe v. Sample Board",
+             metadata={"court_code": "ca9",
+                       "court_name": "United States Court of Appeals"
+                                     " for the Ninth Circuit",
+                       "case_number": "26-01234", "date_filed": DATE},
+             chars=22000)
+    add_summary(conn, "USCOURTS-ca9-26-01234", "USCOURTS-ca9-26-01234-0",
+                "USCOURTS-SEL-01",
+                "The court reversed and remanded for further proceedings.")
+    seed_plain(conn, "USCOURTS-ca9-26-01234", "USCOURTS-ca9-26-01234-0",
+               "The appeals court sent the case back to the lower court.")
+    add_package(conn, "USCOURTS-txnd-26-00777", "USCOURTS")
+    add_text(conn, "USCOURTS-txnd-26-00777", "USCOURTS-txnd-26-00777-0",
+             "USCOURTS", "DISTRICT", title="Smith v. Jones",
+             metadata={"court_code": "txnd",
+                       "court_name": "United States District Court for the"
+                                     " Northern District of Texas",
+                       "case_number": "26-00777", "date_filed": DATE},
+             chars=6000)
+    add_package(conn, "USCOURTS-nysb-26-00888", "USCOURTS")
+    add_text(conn, "USCOURTS-nysb-26-00888", "USCOURTS-nysb-26-00888-0",
+             "USCOURTS", "BANKRUPTCY", title="In re Example Corp.",
+             metadata={"court_code": "nysb",
+                       "court_name": "United States Bankruptcy Court for the"
+                                     " Southern District of New York",
+                       "case_number": "26-00888", "date_filed": DATE},
+             chars=4000)
+    add_package(conn, "USCOURTS-ca9-19-99999", "USCOURTS", status="skipped",
+                date="2019-01-15")
+
     # --- Graphics: 3 substantive extracted TIFFs on the rule's pages, 1
     # boilerplate signature (skipped by FR-GPH-01).
     assets_dir = project_root / "data" / "assets" / "FR" / DATE / FR_PKG
@@ -126,7 +175,7 @@ def seed(conn, project_root):
     add_graphic(conn, FR_PKG, "Trump.EPS", "103", None, status="skipped",
                 classification="boilerplate")
 
-    for collection in ("CREC", "BILLS", "FR"):
+    for collection in ("CREC", "BILLS", "FR", "USCOURTS"):
         conn.execute(
             "INSERT INTO sync_state (collection, last_modified_watermark,"
             " last_sync_completed_at, last_sync_package_count) VALUES (?, ?, ?, 3)",
@@ -174,6 +223,9 @@ def test_render_structure(digest):
         "### 3.3 Proposed Rules Published",
         "### 3.4 Notices and Presidential Documents",
         "## 4. Enacted Laws",
+        "## 5. Judicial Activity",
+        "### 5.1 Appellate and National Court Opinions",
+        "### 5.2 Counts by Court Category",
         "## Coverage Statement",
         "## Methodology",
     ):
@@ -222,12 +274,14 @@ def test_every_item_states_its_inclusion_rule(digest):
     _, md = digest
     items = md.count("\n- **")
     because = md.count("Included because:")
-    assert items == because == 7  # 1 floor + 1 vote + 1 bill + 2 rules + 1 prorule + 1 presdocu
+    # 1 floor + 1 vote + 1 bill + 2 rules + 1 prorule + 1 presdocu + 2 appellate
+    assert items == because == 9
     # CREC-SEL-01 carries its mechanical evidence (the actual char count).
     assert "CREC-SEL-01 — floor item ≥ threshold floor time (20,000 characters)" in md
     assert "CREC-SEL-02 — recorded vote (all recorded votes are listed)" in md
     assert "BILLS-SEL-01 — reached stage: reported/enrolled/calendar" in md
     assert "FR-SEL-01 — document type: final rule (all listed)" in md
+    assert "USCOURTS-SEL-01 — appellate court opinion (all listed)" in md
 
 
 def test_graphics_embedded_with_disclosure(digest):
@@ -256,15 +310,73 @@ def test_coverage_statement_reconciles(digest):
     assert "| CREC | 1 | 5 | 2 | 2 | 1 |" in md
     assert "| BILLS | 2 | — | 1 | 1 | 0 |" in md
     assert "| FR | 1 | 6 | 4 | 2 | 0 |" in md
+    # 4 packages for the date (the skipped one is 2019); 4 opinions =
+    # 2 summarized appellate + 2 counted (district + bankruptcy).
+    assert "| USCOURTS | 4 | 4 | 2 | 2 | 0 |" in md
     assert "CREC-EX-01: floor granule below floor-time threshold — 1 item(s)" in md
     assert "CREC-EX-02: extensions/daily-digest sections (counted) — 2 item(s)" in md
     assert "FR-EX-01: notices counted, not individually summarized — 2 item(s)" in md
+    assert ("USCOURTS-EX-01: district court opinions counted, not individually"
+            " summarized — 1 item(s)") in md
+    assert ("USCOURTS-EX-02: bankruptcy court opinions counted, not individually"
+            " summarized — 1 item(s)") in md
     assert "4 graphic(s) flagged" in md
     assert "3 content graphic(s)" in md
     assert "1 boilerplate" in md
     assert "0 were analyzed via vision pass (vision pass not yet implemented)" in md
     assert "2 embedded above" in md
-    assert "**Known gaps:** none identified." in md
+    # The judicial publication-lag line is a STANDING known-gaps entry
+    # whenever USCOURTS data is present.
+    assert ("**Known gaps:** courts post opinions with delay; opinions filed on"
+            " this date may appear in later syncs." in md)
+
+
+def test_judicial_section_disclosure_and_items(digest):
+    _, md = digest
+    # Section 5 sits between Enacted Laws and the Coverage Statement, and
+    # carries the MANDATORY standing completeness disclosure (GUIDE §3).
+    assert (md.index("## 4. Enacted Laws")
+            < md.index("## 5. Judicial Activity")
+            < md.index("## Coverage Statement"))
+    assert "approximately 140 participating" in md
+    assert "USCOURTS is participation-based and is NOT the complete federal judicial" in md
+    # Opinions grouped by court, courts alphabetical.
+    first = md.index("#### United States Court of Appeals for the First Circuit")
+    ninth = md.index("#### United States Court of Appeals for the Ninth Circuit")
+    assert first < ninth
+    assert ("**Doe v. Example Agency** (No. 26-00042; filed 2026-07-23) — The"
+            " court affirmed the district court's grant of summary judgment.") in md
+    assert "*In plain terms:* The appeals court agreed with the lower court's decision." in md
+    # Citations resolve to package/granule details URLs like every other item.
+    assert ("https://www.govinfo.gov/app/details/USCOURTS-ca1-26-00042/"
+            "USCOURTS-ca1-26-00042-0") in md
+    assert ("https://www.govinfo.gov/app/details/USCOURTS-ca9-26-01234/"
+            "USCOURTS-ca9-26-01234-0") in md
+
+
+def test_judicial_counts_table_and_skipped_disclosure(digest):
+    _, md = digest
+    assert "| Appellate | 2 |" in md
+    assert "| District | 1 |" in md
+    assert "| Bankruptcy | 1 |" in md
+    assert "| National | 0 |" in md
+    assert "| **Total opinions extracted** | **4** |" in md
+    # USCOURTS-FETCH-01: the skipped package is disclosed as a global
+    # running count, not a per-date figure.
+    assert "Archive-window disclosure (rule USCOURTS-FETCH-01): 1 USCOURTS" in md
+    assert "global running count across all syncs" in md
+
+
+def test_judicial_if_none_line_and_coverage(conn, tmp_path):
+    conn.execute("DELETE FROM summaries WHERE package_id LIKE 'USCOURTS%'")
+    conn.execute("DELETE FROM plain_summaries WHERE package_id LIKE 'USCOURTS%'")
+    conn.commit()
+    path = report.render(conn, DATE, out_dir=tmp_path)
+    md = path.read_text(encoding="utf-8")
+    assert "No appellate or national court opinions matched a listing rule" in md
+    # Unsummarized appellate opinions land in the excluded remainder;
+    # district + bankruptcy stay counted-only. 0 + 2 + 2 == 4 units.
+    assert "| USCOURTS | 4 | 4 | 0 | 2 | 2 |" in md
 
 
 def test_validator_rejects_unknown_citation(digest, conn):
@@ -315,9 +427,16 @@ def test_empty_day_still_renders_mandatory_sections(project):
         md = path.read_text(encoding="utf-8")
         assert "## Coverage Statement" in md
         assert "| CREC | 0 | 0 | 0 | 0 | 0 |" in md
+        assert "| USCOURTS | 0 | 0 | 0 | 0 | 0 |" in md
         assert "No recorded votes were published" in md
         assert "No rules were published in this issue." in md
         assert "No bill texts published in this range matched a listing rule; all 0 are" in md
+        # Section 5 and its standing disclosure render even on an empty day.
+        assert "## 5. Judicial Activity" in md
+        assert "NOT the complete federal judicial record" in " ".join(md.split())
+        assert "No appellate or national court opinions matched a listing rule" in md
+        # No USCOURTS data and no sync_state row: no publication-lag gap line.
+        assert "**Known gaps:** none identified." in md
     finally:
         connection.close()
 
@@ -345,6 +464,8 @@ def test_plain_line_rendered_when_present(conn, tmp_path):
 
 
 def test_missing_plain_degrades_gracefully(conn, tmp_path):
+    conn.execute("DELETE FROM plain_summaries")  # drop the seeded USCOURTS plain rows
+    conn.commit()
     path = report.render(conn, DATE, out_dir=tmp_path)
     assert "*In plain terms:*" not in path.read_text()  # omitted, never fabricated
 

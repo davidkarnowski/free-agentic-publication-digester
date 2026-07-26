@@ -21,6 +21,11 @@ logger = logging.getLogger("info_intel.sync")
 # fallback for collections (like CREC) whose package-level content is only
 # offered zipped; PDF is last resort, kept for archive completeness only.
 _FORMAT_PREFERENCE = (("xmlLink", "xml"), ("zipLink", "zip"), ("pdfLink", "pdf"))
+# USCOURTS case packages: the ZIP bundles opinion PDFs + mods.xml case
+# metadata in one request — preferred over the bare PDF.
+_FORMAT_PREFERENCE_BY_COLLECTION = {
+    "USCOURTS": (("zipLink", "zip"), ("pdfLink", "pdf")),
+}
 
 # Collections whose packages have granules worth inventorying (docs/schema.md).
 _GRANULE_COLLECTIONS = {"CREC", "FR"}
@@ -87,6 +92,7 @@ def sync_collection(client, conn, collection, *, list_only=False, max_downloads=
     )
 
     stats = {"collection": collection, "listed": listed, "downloaded": 0, "failed": 0}
+    _apply_fetch_policy(conn, collection, stats)
     if not list_only:
         _download_pending(client, conn, collection, stats, max_downloads)
     stats["pending_remaining"] = conn.execute(
@@ -134,10 +140,38 @@ def _upsert_package(conn, collection, pkg):
     )
 
 
+def _apply_fetch_policy(conn, collection, stats):
+    """Named per-collection fetch policies (GUIDE §4 'skipped': listed for
+    the record, deliberately not archived, always disclosed)."""
+    if collection != "USCOURTS":
+        return
+    cutoff = (
+        dt.datetime.now(dt.UTC)
+        - dt.timedelta(days=config.USCOURTS_FETCH_WINDOW_DAYS)
+    ).strftime("%Y-%m-%d")
+    cur = conn.execute(
+        "UPDATE packages SET fetch_status = 'skipped',"
+        " last_error = 'USCOURTS-FETCH-01: outside archive window'"
+        " WHERE collection = 'USCOURTS' AND fetch_status = 'pending'"
+        " AND (date_issued IS NULL OR date_issued < ?)",
+        (cutoff,),
+    )
+    conn.commit()
+    if cur.rowcount:
+        stats["policy_skipped"] = cur.rowcount
+        logger.info(
+            "USCOURTS: %d package(s) outside the %d-day archive window marked"
+            " skipped (rule USCOURTS-FETCH-01)",
+            cur.rowcount, config.USCOURTS_FETCH_WINDOW_DAYS,
+        )
+
+
 def _download_pending(client, conn, collection, stats, max_downloads):
+    # Newest first: digest-relevant days get covered before the queue tail.
     rows = conn.execute(
         "SELECT package_id FROM packages WHERE collection = ?"
-        " AND fetch_status IN ('pending', 'failed') ORDER BY package_id",
+        " AND fetch_status IN ('pending', 'failed')"
+        " ORDER BY date_issued DESC, package_id",
         (collection,),
     ).fetchall()
     capped = rows if max_downloads is None else rows[: max_downloads - stats["downloaded"]]
@@ -175,7 +209,8 @@ def _download_package(client, conn, collection, package_id):
     date_issued = summary.get("dateIssued")
     links = summary.get("download") or {}
     url, fmt = None, None
-    for key, ext in _FORMAT_PREFERENCE:
+    preference = _FORMAT_PREFERENCE_BY_COLLECTION.get(collection, _FORMAT_PREFERENCE)
+    for key, ext in preference:
         if links.get(key):
             url, fmt = links[key], ext
             break

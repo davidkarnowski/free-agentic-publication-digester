@@ -43,9 +43,13 @@ RULE_DESCRIPTIONS = {
     "FR-SEL-01": "document type: final rule (all listed)",
     "FR-SEL-02": "document type: proposed rule (all listed)",
     "FR-SEL-03": "presidential document (all listed)",
+    "USCOURTS-SEL-01": "appellate court opinion (all listed)",
+    "USCOURTS-SEL-02": "national court opinion (all listed)",
     "FR-EX-01": "notices counted, not individually summarized",
     "CREC-EX-01": "floor granule below floor-time threshold",
     "CREC-EX-02": "extensions/daily-digest sections (counted)",
+    "USCOURTS-EX-01": "district court opinions counted, not individually summarized",
+    "USCOURTS-EX-02": "bankruptcy court opinions counted, not individually summarized",
 }
 
 # CREC-EX-01 mechanical evidence threshold (characters of extracted floor text).
@@ -236,13 +240,14 @@ def _coverage(conn, date):
     """Per-collection accounting, all SQL (GUIDE §2 completeness accounting).
 
     Unit of account: extracted documents for CREC/FR (granule level),
-    published packages for BILLS (whole-package documents). "Counted only"
-    is the remainder so the table always names every unit; the exclusion
-    rules list carries the per-rule mechanical counts.
+    published packages for BILLS (whole-package documents), extracted
+    opinions for USCOURTS. "Counted only" is the remainder so the table
+    always names every unit; the exclusion rules list carries the per-rule
+    mechanical counts.
     """
     pv = config.PROMPT_VERSION
     cov = {}
-    for coll in ("CREC", "BILLS", "FR"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS"):
         cov[coll] = {
             "packages": _scalar(
                 conn,
@@ -303,6 +308,22 @@ def _coverage(conn, date):
     fr["counted"] = notices
     fr["excluded"] = fr["units"] - fr["summarized"] - notices
     fr["rules"] = {"FR-EX-01": notices}
+
+    us_counts = dict(
+        conn.execute(
+            "SELECT e.doc_type, COUNT(*) FROM extracted_texts e"
+            " JOIN packages p USING (package_id)"
+            " WHERE e.collection = 'USCOURTS' AND p.date_issued = ?"
+            " GROUP BY e.doc_type",
+            (date,),
+        )
+    )
+    district = us_counts.get("DISTRICT", 0)
+    bankruptcy = us_counts.get("BANKRUPTCY", 0)
+    uscourts = cov["USCOURTS"]
+    uscourts["counted"] = district + bankruptcy
+    uscourts["excluded"] = uscourts["units"] - uscourts["summarized"] - uscourts["counted"]
+    uscourts["rules"] = {"USCOURTS-EX-01": district, "USCOURTS-EX-02": bankruptcy}
     return cov
 
 
@@ -695,6 +716,124 @@ _SECTION4_LINES = [
 ]
 
 
+def _by_court(subset):
+    """Yield (court heading, opinions) alphabetically; unstated court last."""
+    groups: dict = {}
+    for item in subset:
+        groups.setdefault(item["metadata"].get("court_name") or None, []).append(item)
+
+    def _ordered(group):
+        return sorted(group, key=lambda i: (i["package_id"], i["granule_id"]))
+
+    for court in sorted((c for c in groups if c), key=str.lower):
+        yield court, _ordered(groups[court])
+    if None in groups:
+        yield "(court not stated)", _ordered(groups[None])
+
+
+def _uscourts_item_lines(item):
+    metadata = item["metadata"]
+    title = _one_line(item["title"]) or "(untitled)"
+    details = []
+    if metadata.get("case_number"):
+        details.append(f"No. {metadata['case_number']}")
+    if metadata.get("date_filed"):
+        details.append(f"filed {metadata['date_filed']}")
+    head = f"- **{title}**"
+    if details:
+        head += f" ({'; '.join(details)})"
+    head += f" — {_one_line(item['summary'])}"
+    return [
+        head,
+        *_plain_line(item),
+        _included_line(item),
+        _source_line(item["package_id"], item["granule_id"]),
+    ]
+
+
+def _uscourts_lines(conn, date, items):
+    """Section 5 — judicial branch (Phase J1). Carries the MANDATORY standing
+    completeness disclosure (GUIDE §3): USCOURTS is participation-based and
+    is not the complete federal judicial record."""
+    cat_counts = dict(
+        conn.execute(
+            "SELECT e.doc_type, COUNT(*) FROM extracted_texts e"
+            " JOIN packages p USING (package_id)"
+            " WHERE e.collection = 'USCOURTS' AND p.date_issued = ?"
+            " GROUP BY e.doc_type",
+            (date,),
+        )
+    )
+    total = sum(cat_counts.values())
+    skipped = _scalar(
+        conn,
+        "SELECT COUNT(*) FROM packages"
+        " WHERE collection = 'USCOURTS' AND fetch_status = 'skipped'",
+    )
+    selected = [
+        i
+        for i in items
+        if i["collection"] == "USCOURTS"
+        and (i["inclusion_rule"] or "").startswith("USCOURTS-SEL")
+    ]
+    lines = [
+        "## 5. Judicial Activity",
+        "",
+        f"Source: United States Courts Opinions (USCOURTS): opinions issued {date}",
+        "by participating federal courts.",
+        "",
+        "Completeness disclosure (standing): USCOURTS carries opinions from",
+        "approximately 140 participating appellate, district, bankruptcy, and",
+        "national federal courts. Unlike the Congressional Record and the Federal",
+        "Register, which are the complete official record of their branches,",
+        "USCOURTS is participation-based and is NOT the complete federal judicial",
+        "record. Courts post opinions with delay; opinions filed on this date may",
+        "appear in later digests.",
+        "",
+        "### 5.1 Appellate and National Court Opinions",
+        "",
+        "Appellate and national court opinions are summarized; district and",
+        "bankruptcy opinions are counted in 5.2 and in the Coverage Statement.",
+        "",
+    ]
+    if selected:
+        for court, group in _by_court(selected):
+            lines += [f"#### {court}", ""]
+            for item in group:
+                lines += _uscourts_item_lines(item)
+            lines.append("")
+    else:
+        lines += [
+            "No appellate or national court opinions matched a listing rule for this",
+            "date; all opinions are counted in 5.2 and accounted for in the Coverage",
+            "Statement.",
+            "",
+        ]
+    lines += [
+        "### 5.2 Counts by Court Category",
+        "",
+        "| Court category | Opinions |",
+        "|---|---|",
+        f"| Appellate | {cat_counts.get('APPELLATE', 0)} |",
+        f"| District | {cat_counts.get('DISTRICT', 0)} |",
+        f"| Bankruptcy | {cat_counts.get('BANKRUPTCY', 0)} |",
+        f"| National | {cat_counts.get('NATIONAL', 0)} |",
+        f"| **Total opinions extracted** | **{total}** |",
+        "",
+        (
+            f"Archive-window disclosure (rule USCOURTS-FETCH-01): {skipped} USCOURTS"
+            " package(s) have been listed in delta syncs but fell outside the"
+            f" {config.USCOURTS_FETCH_WINDOW_DAYS}-day archive window and were not"
+            " fetched (global running count across all syncs, not limited to this"
+            " date)."
+        ),
+        "",
+        "---",
+        "",
+    ]
+    return lines
+
+
 def _coverage_lines(conn, date, cov, embedded_total):
     sync_rows = conn.execute(
         "SELECT collection, last_sync_completed_at FROM sync_state ORDER BY collection"
@@ -711,7 +850,7 @@ def _coverage_lines(conn, date, cov, embedded_total):
         )
 
     rows = []
-    for coll in ("CREC", "BILLS", "FR"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS"):
         d = cov[coll]
         units = "—" if coll == "BILLS" else str(d["units"])
         rows.append(
@@ -724,7 +863,13 @@ def _coverage_lines(conn, date, cov, embedded_total):
         rule_counts.update(coll["rules"])
     fired = [
         f"- {rid}: {RULE_DESCRIPTIONS[rid]} — {n} item(s)"
-        for rid in ("CREC-EX-01", "CREC-EX-02", "FR-EX-01")
+        for rid in (
+            "CREC-EX-01",
+            "CREC-EX-02",
+            "FR-EX-01",
+            "USCOURTS-EX-01",
+            "USCOURTS-EX-02",
+        )
         if (n := rule_counts.get(rid, 0))
     ]
     if not fired:
@@ -771,6 +916,21 @@ def _coverage_lines(conn, date, cov, embedded_total):
     if graphics_failed:
         gaps.append(
             f"{graphics_failed} graphic asset(s) failed extraction; see the source PDFs"
+        )
+    # Standing judicial publication-lag disclosure (GUIDE §3 date semantics):
+    # rendered whenever USCOURTS data exists for the date or the collection
+    # is synced at all.
+    uscourts_cov = cov.get("USCOURTS", {})
+    uscourts_synced = (
+        conn.execute(
+            "SELECT 1 FROM sync_state WHERE collection = 'USCOURTS'"
+        ).fetchone()
+        is not None
+    )
+    if uscourts_cov.get("packages") or uscourts_cov.get("units") or uscourts_synced:
+        gaps.append(
+            "courts post opinions with delay; opinions filed on this date may"
+            " appear in later syncs"
         )
     known_gaps = "; ".join(gaps) + "." if gaps else "none identified."
 
@@ -919,7 +1079,7 @@ def _validate_coverage(markdown, conn, date):
         raise ValidationError("Coverage Statement section is missing")
     section = markdown.split("## Coverage Statement", 1)[1]
     cov = _coverage(conn, date)
-    for coll in ("CREC", "BILLS", "FR"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS"):
         match = re.search(rf"^\| {coll} \| (.+) \|$", section, re.MULTILINE)
         if match is None:
             raise ValidationError(f"coverage row for {coll} is missing")
@@ -1054,6 +1214,7 @@ def render(conn, date, out_dir=None):
     fr_lines, embedded_total = _fr_lines(conn, date, items, out_dir)
     lines += fr_lines
     lines += _SECTION4_LINES
+    lines += _uscourts_lines(conn, date, items)
     lines += _glossary_lines("\n".join(lines))
     lines += _coverage_lines(conn, date, _coverage(conn, date), embedded_total)
     lines += _methodology_lines(date, git_short)

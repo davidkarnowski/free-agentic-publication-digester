@@ -74,6 +74,15 @@ RULES = {
             "Federal Register presidential document (doc_type PRESDOCU); all are listed."
         ),
     },
+    "USCOURTS-SEL-01": {
+        "description": "appellate court opinion (doc_type APPELLATE); all listed.",
+    },
+    "USCOURTS-SEL-02": {
+        "description": (
+            "national court opinion (doc_type NATIONAL — e.g. Court of "
+            "International Trade, Court of Federal Claims); all listed."
+        ),
+    },
 }
 
 EXCLUSIONS = {
@@ -94,6 +103,18 @@ EXCLUSIONS = {
         "description": (
             "EXTENSIONS and DAILYDIGEST granules: counted; Daily Digest "
             "text feeds the compose stage as input, not as a listed item."
+        ),
+    },
+    "USCOURTS-EX-01": {
+        "description": (
+            "District court opinions (doc_type DISTRICT): counted in "
+            "totals, not individually summarized."
+        ),
+    },
+    "USCOURTS-EX-02": {
+        "description": (
+            "Bankruptcy court opinions (doc_type BANKRUPTCY): counted in "
+            "totals, not individually summarized."
         ),
     },
 }
@@ -125,6 +146,10 @@ def _match_fr(doc_type):
     return lambda row: row["collection"] == "FR" and row["doc_type"] == doc_type
 
 
+def _match_uscourts(doc_type):
+    return lambda row: row["collection"] == "USCOURTS" and row["doc_type"] == doc_type
+
+
 # Same keys, same order as RULES — precedence is registry order.
 _MATCHERS = {
     "CREC-SEL-01": _match_crec_sel_01,
@@ -133,6 +158,8 @@ _MATCHERS = {
     "FR-SEL-01": _match_fr("RULE"),
     "FR-SEL-02": _match_fr("PRORULE"),
     "FR-SEL-03": _match_fr("PRESDOCU"),
+    "USCOURTS-SEL-01": _match_uscourts("APPELLATE"),
+    "USCOURTS-SEL-02": _match_uscourts("NATIONAL"),
 }
 
 assert list(_MATCHERS) == list(RULES)
@@ -189,4 +216,8 @@ def exclusion_counts(conn, date):
             counts["CREC-EX-01"] += 1
         elif row["collection"] == "CREC" and row["doc_type"] in _CREC_COUNTED_TYPES:
             counts["CREC-EX-02"] += 1
+        elif row["collection"] == "USCOURTS" and row["doc_type"] == "DISTRICT":
+            counts["USCOURTS-EX-01"] += 1
+        elif row["collection"] == "USCOURTS" and row["doc_type"] == "BANKRUPTCY":
+            counts["USCOURTS-EX-02"] += 1
     return counts

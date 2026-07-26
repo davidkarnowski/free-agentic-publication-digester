@@ -17,6 +17,77 @@ Entry format:
 
 ---
 
+## 2026-07-25 18:05 PDT — Phase J1: judicial branch coverage via USCOURTS
+
+**Context:** User direction to extend coverage to the judicial branch.
+GUIDE §3 amended first (judicial coverage section: J1/J2/J3 phasing, the
+MANDATORY completeness disclosure, filed-date semantics), then built.
+
+**Empirical findings that shaped the build:**
+- USCOURTS packages are case-shaped: one package per case,
+  `pdf/<granule>.pdf` per opinion + mods.xml metadata; listing carries
+  date_issued (opinion date) — both the digest date axis and a fetch
+  filter for free.
+- **9,401 changed packages in a 3-day delta window, 76% lastModified churn
+  on years-old cases** (GPO backfill). Named rule **USCOURTS-FETCH-01**:
+  only packages issued within 7 days are archived; churn is listed, marked
+  'skipped' (the §4 status built for this), disclosed in the digest.
+- **Publication lag confirmed live:** 8 packages for 07-24 vs 468 for
+  07-23 at fetch time (Friday's opinions largely unposted) — the §3 lag
+  disclosure is not theoretical.
+- USCOURTS ZIPs are generated on-demand: ~9–22% of download requests
+  returned 503+Retry-After, all honored (slow but respectful; ~38–60
+  retries logged). Two user-initiated stops of the fetch were absorbed
+  losslessly by the pending-queue design; 353 packages (07-23/24) archived,
+  2,035 pending drain in future daily runs or age out of the window.
+- Downloads now run newest-first across all collections.
+
+**Built:**
+1. `parsers/uscourts.py` (sub-agent): case ZIP → per-opinion records
+   (granule = opinion id, doc_type = APPELLATE/DISTRICT/BANKRUPTCY/NATIONAL
+   from mods with package-id fallback, case metadata incl. per-opinion
+   date_filed, PDF text via pypdf, never aborts a package for one bad PDF).
+2. Rules + renderer (sub-agent): USCOURTS-SEL-01/02 (appellate + national
+   all listed), USCOURTS-EX-01/02 (district/bankruptcy counted); digest
+   section "5. Judicial Activity" with the standing completeness
+   disclosure, per-court item groups, category counts + FETCH-01 skipped
+   disclosure; Coverage row + publication-lag known-gap; TEMPLATE updated.
+3. Both build agents were killed mid-flight by a session usage limit;
+   their on-disk work was verified directly (parser complete with 15
+   passing tests; renderer complete, one line-wrap test assertion fixed).
+4. **Extraction:** 353 packages → 1,264 opinion records, 16.2M chars, 0
+   failures. Distribution: 49 APPELLATE / 1,207 DISTRICT / 8 BANKRUPTCY.
+5. **Digests regenerated.** 07-24: judicial counts section, zero LLM cost.
+   07-23: 101 items selected (was 51), 49 appellate opinions summarized +
+   plain-lined (1 plain failure rendered without its line, per design);
+   **compose invalidation fired in production** ("newer item summaries
+   found — recomposing").
+6. **Compose defect found and fixed:** the Day in Review prompt hard-coded
+   a two-paragraph floor+executive structure, so judicial items were fed in
+   but structurally squeezed out. Fix: three-branch prompt (judicial
+   paragraph only when items exist) + **COMPOSE_PROMPT_VERSION** decoupled
+   from PROMPT_VERSION (same lesson as the plain layer: prompt iterations
+   must never regenerate item summaries). Recomposed both dates; 07-23 now
+   opens with all three branches incl. Fourth Circuit holdings.
+7. **Tests: 153 passing.**
+
+**Measured (uncapped by design):** the judicial-heavy 07-23 re-run cost
+**1.30M input / 88K output tokens (43 calls)** — the first day to exceed
+the 1M working figure. Composition: ~50 opinions × 12K-char map inputs at
+6/batch dominates. Cap-setting note: either the cap lands nearer 1.5–2M,
+or opinion map inputs get a tighter excerpt strategy (opening + disposition
+instead of first 12K chars) — decide after more ledger days. A normal
+(non-backfill) judicial day is projected far lower (~49 appellate was a
+full day's circuit output; the backfill doubled everything else on top).
+
+**Open questions / next steps:**
+- [ ] Cap decision with judicial data in the ledger (see above); consider
+      opinion excerpt strategy for map inputs.
+- [ ] J2: SCOTUS direct source (syllabus-first). Scheduling. Vision pass.
+      Editorial spot-audit incl. judicial summaries (highest-risk prose).
+
+---
+
 ## 2026-07-25 11:05 PDT — First full daily pipeline run; compose staleness fix
 
 **Context:** First end-to-end rehearsal of the daily job (sync → extract →

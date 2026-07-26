@@ -26,13 +26,16 @@ Hard rules (non-negotiable):
   unprecedented, sweeping, radical, extreme, momentous, alarming), motive
   attribution ("in an attempt to"), predictions of outcomes.
 - Party-blind, neutral register, plain prose.
-- 2 short paragraphs maximum (~120-180 words total): first the
-  congressional floor picture (both chambers, recorded votes), then the
+- Up to 3 short paragraphs (~130-220 words total): first the congressional
+  floor picture (both chambers, recorded votes); then the
   executive/regulatory picture (rules, proposed rules, presidential
-  documents). Weave in the counts naturally.
+  documents); then, ONLY when judicial items appear below, the judicial
+  picture (appellate/national court opinions — name the courts and what
+  each ruling decided, factually). Omit any paragraph whose branch has no
+  items. Weave in the counts naturally.
 - No headers, no bullet lists, no citations (items below carry their own).
 
-Reply with the two paragraphs only.
+Reply with the paragraphs only.
 
 === MECHANICAL COUNTS ===
 {counts}
@@ -50,7 +53,7 @@ def compose_day(conn, llm, date):
     leave the synthesis stale against its own items). Returns stats dict."""
     existing = conn.execute(
         "SELECT created_at FROM day_summaries WHERE date = ? AND prompt_version = ?",
-        (date, config.PROMPT_VERSION),
+        (date, config.COMPOSE_PROMPT_VERSION),
     ).fetchone()
     if existing:
         # Timestamp formats differ in suffix (Z vs +00:00); compare the
@@ -69,7 +72,7 @@ def compose_day(conn, llm, date):
                     "input_tokens": 0, "output_tokens": 0}
         conn.execute(
             "DELETE FROM day_summaries WHERE date = ? AND prompt_version = ?",
-            (date, config.PROMPT_VERSION),
+            (date, config.COMPOSE_PROMPT_VERSION),
         )
         logger.info("%s: newer item summaries found — recomposing Day in Review", date)
 
@@ -106,7 +109,7 @@ def compose_day(conn, llm, date):
     conn.execute(
         "INSERT INTO day_summaries (date, prompt_version, model, summary,"
         " input_tokens, output_tokens, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (date, config.PROMPT_VERSION, result["model"], result["text"],
+        (date, config.COMPOSE_PROMPT_VERSION, result["model"], result["text"],
          result["input_tokens"], result["output_tokens"], utc_now_iso()),
     )
     conn.commit()
@@ -132,6 +135,6 @@ def _mechanical_counts(conn, date):
 def get_day_summary(conn, date):
     row = conn.execute(
         "SELECT summary, model FROM day_summaries WHERE date = ? AND prompt_version = ?",
-        (date, config.PROMPT_VERSION),
+        (date, config.COMPOSE_PROMPT_VERSION),
     ).fetchone()
     return dict(row) if row else None

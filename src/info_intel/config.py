@@ -47,12 +47,21 @@ PROMPT_VERSION = 1
 # Plain-speak layer versions independently (§6 rule 9): phrasing iterations
 # never regenerate factual summaries.
 PLAIN_PROMPT_VERSION = 1
+# Day-in-Review compose prompt versions independently for the same reason.
+# v2: adds the judicial paragraph (J1).
+COMPOSE_PROMPT_VERSION = 2
 PLAIN_MODEL = MAP_MODEL  # restatement is compression work — cheap tier
 MAX_PLAIN_BATCH_ITEMS = 25  # inputs are stored summaries (~170 tokens each)
 LLM_TIMEOUT = 300  # seconds per call
 
-# GUIDE.md §3: initial scope. Order is sync order.
-COLLECTIONS = ("CREC", "BILLS", "FR")
+# GUIDE.md §3: scope. Order is sync order. USCOURTS added 2026-07-25 (J1).
+COLLECTIONS = ("CREC", "BILLS", "FR", "USCOURTS")
+
+# Rule USCOURTS-FETCH-01 (GUIDE §3 judicial): USCOURTS delta listings carry
+# heavy lastModified churn on years-old cases (measured 7,178 of 9,401 in a
+# 3-day window). Only packages whose date_issued falls within this window
+# are archived; older ones are listed, marked 'skipped', and disclosed.
+USCOURTS_FETCH_WINDOW_DAYS = 7
 
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")
 USER_AGENT = f"info-intel/0.1 (personal daily-digest research; contact: {CONTACT_EMAIL})"

@@ -111,6 +111,23 @@ def seed_corpus(conn):
     seed_item(conn, fr, "2026-10006", "FR", "RULE")                        # llm (RULE, no SUMMARY)
     seed_item(conn, "FR-2026-07-22", "2026-09999", "FR", "RULE",
               date="2026-07-22")                                           # other date, ignored
+    seed_item(conn, "USCOURTS-ca9-26-01234", "USCOURTS-ca9-26-01234-0",
+              "USCOURTS", "APPELLATE", "The court affirmed the judgment. " * 20,
+              metadata={"court_code": "ca9",
+                        "court_name": "United States Court of Appeals"
+                                      " for the Ninth Circuit",
+                        "case_number": "26-01234",
+                        "date_filed": DATE})                               # USCOURTS-SEL-01
+    seed_item(conn, "USCOURTS-cit-26-00099", "USCOURTS-cit-26-00099-0",
+              "USCOURTS", "NATIONAL", "Judgment entered for the plaintiff. " * 20,
+              metadata={"court_code": "cit",
+                        "court_name": "United States Court of International Trade",
+                        "case_number": "26-00099",
+                        "date_filed": DATE})                               # USCOURTS-SEL-02
+    seed_item(conn, "USCOURTS-txnd-26-00777", "USCOURTS-txnd-26-00777-0",
+              "USCOURTS", "DISTRICT", "The motion is denied. " * 20)      # USCOURTS-EX-01
+    seed_item(conn, "USCOURTS-nysb-26-00888", "USCOURTS-nysb-26-00888-0",
+              "USCOURTS", "BANKRUPTCY", "The claim is allowed. " * 20)    # USCOURTS-EX-02
 
 
 EXPECTED_RULES = {
@@ -125,6 +142,8 @@ EXPECTED_RULES = {
     ("FR-2026-07-23", "2026-10006"): "FR-SEL-01",
     ("FR-2026-07-23", "2026-10003"): "FR-SEL-02",
     ("FR-2026-07-23", "2026-10004"): "FR-SEL-03",
+    ("USCOURTS-ca9-26-01234", "USCOURTS-ca9-26-01234-0"): "USCOURTS-SEL-01",
+    ("USCOURTS-cit-26-00099", "USCOURTS-cit-26-00099-0"): "USCOURTS-SEL-02",
 }
 
 
@@ -151,15 +170,18 @@ def test_selection_rule_assignment_and_no_duplicates(conn):
 def test_exclusion_counts(conn):
     seed_corpus(conn)
     assert rules.exclusion_counts(conn, DATE) == {
-        "FR-EX-01": 1,      # the NOTICE, official summary notwithstanding
-        "CREC-EX-01": 2,    # PgH2 (14999 chars) and PgH4 (postponed vote)
-        "CREC-EX-02": 2,    # EXTENSIONS + DAILYDIGEST
+        "FR-EX-01": 1,        # the NOTICE, official summary notwithstanding
+        "CREC-EX-01": 2,      # PgH2 (14999 chars) and PgH4 (postponed vote)
+        "CREC-EX-02": 2,      # EXTENSIONS + DAILYDIGEST
+        "USCOURTS-EX-01": 1,  # the DISTRICT opinion
+        "USCOURTS-EX-02": 1,  # the BANKRUPTCY opinion
     }
 
 
 def test_exclusion_counts_empty_day_has_all_keys(conn):
     assert rules.exclusion_counts(conn, DATE) == {
         "FR-EX-01": 0, "CREC-EX-01": 0, "CREC-EX-02": 0,
+        "USCOURTS-EX-01": 0, "USCOURTS-EX-02": 0,
     }
 
 
@@ -176,15 +198,15 @@ def test_official_vs_llm_split(conn):
     seed_corpus(conn)
     fake = FakeLLM()
     stats = analyze.run(conn, fake, DATE)
-    assert stats["selected"] == 11
+    assert stats["selected"] == 13
     assert stats["official"] == 3
-    assert stats["llm_summarized"] == 8
+    assert stats["llm_summarized"] == 10
     assert stats["skipped_existing"] == 0
     assert stats["failed_items"] == []
     rows = conn.execute(
         "SELECT * FROM summaries ORDER BY package_id, granule_id"
     ).fetchall()
-    assert len(rows) == 11
+    assert len(rows) == 13
     by_key = {(r["package_id"], r["granule_id"]): r for r in rows}
     # No summary row for the counted-only NOTICE, even though it has one.
     assert ("FR-2026-07-23", "2026-10005") not in by_key
@@ -222,9 +244,9 @@ def test_batching_at_most_six_items_per_call(conn):
     seed_corpus(conn)
     fake = FakeLLM()
     stats = analyze.run(conn, fake, DATE)
-    assert stats["llm_calls"] == 2  # 8 llm items -> 6 + 2, not 8 calls
+    assert stats["llm_calls"] == 2  # 10 llm items -> 6 + 4, not 10 calls
     per_call = [len(re.findall(r"DOCUMENT key=(\S+) ", p)) for p in fake.prompts]
-    assert per_call == [6, 2]
+    assert per_call == [6, 4]
     assert all(p.startswith("map:batch") for p in fake.purposes)
     # Tokens split evenly across a call's items (600 in / 60 out per call).
     first_batch_row = conn.execute(
@@ -235,7 +257,7 @@ def test_batching_at_most_six_items_per_call(conn):
     second_batch_row = conn.execute(
         "SELECT input_tokens, output_tokens FROM summaries WHERE granule_id='2026-10004'"
     ).fetchone()
-    assert tuple(second_batch_row) == (300, 30)
+    assert tuple(second_batch_row) == (150, 15)
 
 
 def test_six_items_make_exactly_one_call(conn):
@@ -263,9 +285,9 @@ def test_idempotent_rerun_makes_zero_llm_calls(conn):
     stats2 = analyze.run(conn, fake2, DATE)
     assert fake2.prompts == []  # ZERO llm calls on rerun
     assert stats2["llm_calls"] == 0
-    assert stats2["skipped_existing"] == 11
+    assert stats2["skipped_existing"] == 13
     assert stats2["official"] == 0 and stats2["llm_summarized"] == 0
-    assert conn.execute("SELECT COUNT(*) FROM summaries").fetchone()[0] == 11
+    assert conn.execute("SELECT COUNT(*) FROM summaries").fetchone()[0] == 13
 
 
 def test_missing_key_retried_once_in_single_item_call(conn):
