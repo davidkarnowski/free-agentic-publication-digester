@@ -234,7 +234,26 @@ def _nav_for(dates, i):
     if i < len(dates) - 1:
         links.append(f'<a href="{dates[i + 1]}.html">{dates[i + 1]} &rarr;</a>')
     links.append('<a href="index.html">All digests</a>')
+    links.append('<a href="sources.html">Sources</a>')
     return "".join(links)
+
+
+def _build_sources_page(out_dir):
+    """Render the source guide (SOURCES.md, generated from the registry)
+    into the site. Returns True if the page was built."""
+    sources_md = config.PROJECT_ROOT / "SOURCES.md"
+    if not sources_md.exists():
+        return False
+    _MD.reset()
+    body = _MD.convert(sources_md.read_text(encoding="utf-8"))
+    page = _render_page(
+        f"Sources — {SITE_TITLE}",
+        body,
+        '<a href="index.html">All digests</a>',
+        "SOURCES.md (generated from sources/registry.yaml)",
+    )
+    (out_dir / "sources.html").write_text(page, encoding="utf-8")
+    return True
 
 
 def build_site(digest_dir=None, out_dir=None):
@@ -280,12 +299,23 @@ def build_site(digest_dir=None, out_dir=None):
             f'<li><a class="date" href="{date}.html">Daily Digest — {date}</a>'
             f"{teaser_html}</li>"
         )
+    sources_built = _build_sources_page(out_dir)
+    sources_link = (
+        '<p class="tagline"><a href="sources.html">Source guide</a> — every '
+        "federal source we ingest, plan to ingest, or have evaluated, with "
+        "method and status.</p>" if sources_built else ""
+    )
     index_body = (
         f"<h1>{html.escape(SITE_TITLE)}</h1>"
         f'<p class="tagline">{html.escape(SITE_TAGLINE)}</p>'
+        f"{sources_link}"
         f'<ul class="digest-list">{"".join(cards)}</ul>'
     )
-    index = _render_page(SITE_TITLE, index_body, "", "digests/")
+    index = _render_page(
+        SITE_TITLE, index_body,
+        '<a href="sources.html">Sources</a>' if sources_built else "",
+        "digests/",
+    )
     (out_dir / "index.html").write_text(index, encoding="utf-8")
 
     (out_dir / "style.css").write_text(_STYLE, encoding="utf-8")

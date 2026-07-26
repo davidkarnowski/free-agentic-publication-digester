@@ -180,6 +180,61 @@ direct HTML index pages where no feed exists). Governing rules:
   digest citations must point to the originating agency's document, and
   the aggregator's role is disclosed.
 
+### Source onboarding lifecycle (amended 2026-07-26)
+
+Adding a source is an evaluation, not a URL paste. Every source moves
+through these gates, each recorded in the registry entry:
+
+1. **Registered** (`planned`): identity, description, best-known URLs,
+   tier — added to the registry so the gap is visible.
+2. **Probed:** `scripts/check_sources.py` exercises the *whole* ingestion
+   chain through our identified client — robots verdict, fetch (captured
+   into provenance), format detection with feed autodiscovery, item
+   enumeration with field inventory (GUIDs? dates? full text or
+   teasers?), and one sample article fetched and text-extracted. Findings
+   are stored as structured JSON; failures record exactly what was
+   observed (never retried into submission, never evaded).
+3. **Content-evaluated:** before activation, someone (human or model)
+   reviews the probe findings and answers, in the registry entry's notes:
+   *what does this source publish in total, and what fraction will our
+   ingestion see?* (e.g. a feed carrying only the latest 10 items of a
+   40/day newsroom under-covers it; an index page may expose categories
+   the feed omits). Under-coverage is disclosed, not discovered later.
+4. **Active:** ingestion wired, appearing in digests, coverage-statement
+   accounting includes it.
+5. **Re-evaluated:** any persistent fetch failure or site redesign drops
+   the source to `unavailable`/re-probe; status changes are worklog
+   events.
+
+## 3a. Prompt Governance (amended 2026-07-26)
+
+All LLM prompts are code, versioned, and change through procedure:
+
+- **Inventory.** Three prompt surfaces exist: the map/summarization
+  preamble (`analyze._PREAMBLE`, versioned by `PROMPT_VERSION`), the
+  plain-speak restatement preamble (`analyze._PLAIN_PREAMBLE`,
+  `PLAIN_PROMPT_VERSION`), and the Day-in-Review compose prompt
+  (`compose._PROMPT`, `COMPOSE_PROMPT_VERSION`). Each layer versions
+  independently — a deliberate design so iterating on one never
+  regenerates the artifacts of another.
+- **The plain-speak contract specifically** (the most iterated surface):
+  input is ONLY the stored summary (never raw text, never outside
+  knowledge); output is one sentence ≤ ~35 words; jargon is expanded into
+  ordinary words; dates/deadlines preserved; the §2 banned list restated
+  inside the prompt AND enforced un-masked by the render-time lexicon
+  gate — two independent layers, prompt-side and validator-side.
+- **Iteration procedure:** (1) edit the prompt text in code; (2) bump
+  that surface's version constant; (3) state the regeneration scope in
+  the worklog entry (what re-runs, what it costs — the version keying
+  makes this precise); (4) the validation gates are never loosened to
+  accommodate a prompt change — if new prose trips the lexicon, the
+  prompt is wrong, not the gate; (5) spot-audit a sample of regenerated
+  output against §2 before the next digest publishes.
+- **Measured-cost discipline:** prompt iterations are cheap by design
+  (plain-layer rephrase ≈ 85K tokens/day of data; compose ≈ 30K) —
+  this cheapness exists because of the version decoupling and must be
+  preserved by it.
+
 ### Secondary (later phases)
 
 - **Congress.gov API** (`api.congress.gov`, same api.data.gov key) — bill

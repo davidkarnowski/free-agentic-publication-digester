@@ -17,6 +17,65 @@ Entry format:
 
 ---
 
+## 2026-07-26 18:30 PDT — Source probe sprint: 72 sources verified end-to-end; guidelines shored up
+
+**Context:** User direction: poll every newly added source verifying full
+retrieve→ingest, spend analysis effort liberally on input/output
+evaluation, ensure comprehensive content evaluation at onboarding, shore
+up guidelines for source iteration and plain-speak prompting, produce
+guide-quality source descriptions, and render the source guide into the
+site.
+
+**Built & run:**
+
+1. **`probe.py` + `scripts/check_sources.py`:** end-to-end source probe —
+   robots verdict, fetch (captured into provenance: our first real
+   mutable-source observations, incl. refusals/errors per the
+   absence-is-an-assertion rule), format sniffing with RSS/Atom
+   autodiscovery, item enumeration with field inventory, one sample
+   article fetched + text-extracted. 4 probe tests; crash-isolated sweep.
+2. **The sweep:** 72 sources, 193 requests (~39% of the agency bucket),
+   all paced/logged/captured; committed manifest for 2026-07-26 carries
+   every observation. Verdicts: **10 feed-ok / 34 html-only / 13 WAF-403 /
+   6 wrong-URL-404 / 9 robots-refused.**
+3. **Analysis report** (`docs/source-probe-2026-07.md`): the
+   ingestion-ready cohort (GAO best-in-class with near-full-text feed;
+   FDA/SEC/FTC/NASA/Fed/Labor/VA clean; Defense feed-only — articles
+   WAF'd, feed links resolve to war.gov; USPS script-rendered articles +
+   0/668 GUIDs = identity handling required); and the accountability
+   finding: **31% of the Tier 1–2 universe (22/72) is closed to
+   honestly-identified automated access** — all military service branches
+   + Treasury/USDA/EPA via robots.txt; CBO and CRS (the public-analysis
+   agencies!) via WAF 403. Zero evasion; every refusal honored and
+   recorded.
+4. **Registry rewritten from ground truth** (sub-agent; JSON-wins
+   discipline): 23 sources → `unavailable` with observed behavior;
+   feed-ok cohort carries verified feed URLs + probe metrics; 404 cohort
+   flagged correct-and-re-probe; **all 81 descriptions rewritten to guide
+   quality** (institution + content types + form/cadence, probe-informed).
+   Notable JSON-won corrections: FDA teaser-not-fulltext; VA feed mixes
+   feature stories with releases.
+5. **Guidelines (GUIDE):** §3 Source Onboarding Lifecycle (5 gates;
+   gate 3 = content evaluation answering "what does the source publish
+   vs what will we see", disclosed before activation); §3a Prompt
+   Governance (inventory of the three prompt surfaces + independent
+   versions; the plain-speak contract spelled out; iteration procedure —
+   version bump, worklog regeneration-scope statement, gates never
+   loosened, spot-audit before next publish).
+6. **Site:** SOURCES.md now renders as styled `site/sources.html`, linked
+   from index + digest nav (graceful when absent; 2 new publish tests).
+7. **Suite: 194 passing.**
+
+**Decisions:** unavailable-to-honest-clients is published data, not a
+problem to engineer around; USPS type corrected to rss (verified);
+military-branch fallback (GovDelivery/DVIDS) noted for later evaluation.
+
+**Next:** S2 ingestion pilot over the 8-clean-feed cohort (+Defense
+feed-only), Wayback corroboration live, digest section 6; re-probe 404
+cohort after URL corrections; monthly re-probe of unavailable cohort.
+
+---
+
 ## 2026-07-26 16:10 PDT — Registry extended to the Tier 1–2 universe (81 sources)
 
 **Context:** Sources review found seven systematic gap clusters

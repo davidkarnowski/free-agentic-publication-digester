@@ -3,6 +3,9 @@
 # then regenerate. Schema is enforced by src/info_intel/sources.py:
 #   id (kebab, unique), name, branch, parent_org, description, type,
 #   tier (int 1|2|3), urls, method, status, added, notes.
+#
+# Probe results (data/probe/2026-07-26/*.json) applied 2026-07-26: statuses,
+# verified feed URLs, and probe findings recorded per entry.
 
 # ---------------------------------------------------------------- active ----
 
@@ -10,7 +13,7 @@
   name: Congressional Record (CREC)
   branch: legislative
   parent_org: U.S. Congress
-  description: "The daily edition of the Congressional Record: the official verbatim transcript of House and Senate floor proceedings and debate, plus Extensions of Remarks and the Daily Digest."
+  description: "The Congressional Record is the official verbatim record of congressional proceedings, published by the Government Publishing Office each day a chamber is in session. This collection carries the daily edition — House and Senate floor debate, Extensions of Remarks, and the Daily Digest — as structured XML (~2 MB of text on a typical session day) with PDF page images."
   type: govinfo-collection
   tier: 1
   urls:
@@ -24,7 +27,7 @@
   name: Congressional Bills (BILLS)
   branch: legislative
   parent_org: U.S. Congress
-  description: "Full text of congressional bills and resolutions at each printed stage (introduced, engrossed, enrolled, and others)."
+  description: "Congress publishes bill and resolution text through the Government Publishing Office at each printed stage (introduced, engrossed, enrolled, and others). This collection carries the full text as XML, with roughly 60-70 new or revised bill printings on a typical publication day (~28 KB of text each)."
   type: govinfo-collection
   tier: 1
   urls:
@@ -38,7 +41,7 @@
   name: Federal Register (FR)
   branch: executive
   parent_org: National Archives and Records Administration
-  description: "The daily journal of the federal government: final rules, proposed rules, notices, and presidential documents, compiled by the Office of the Federal Register."
+  description: "The Federal Register is the executive branch's daily journal, compiled by the Office of the Federal Register and published each business day. This collection carries final rules, proposed rules, notices, and presidential documents as structured XML (~2.6 MB of text per issue), with an agency-written abstract per document."
   type: govinfo-collection
   tier: 1
   urls:
@@ -52,7 +55,7 @@
   name: U.S. Courts Opinions (USCOURTS)
   branch: judicial
   parent_org: Federal judiciary
-  description: "Opinions from participating federal appellate, district, bankruptcy, and national courts, provided through a GPO partnership with the Administrative Office of the U.S. Courts."
+  description: "The federal judiciary provides opinions to the Government Publishing Office through a partnership with the Administrative Office of the U.S. Courts. This collection carries opinions from ~140 participating appellate, district, bankruptcy, and national courts as case-shaped packages, posted with a lag after filing; it is participation-based, not the complete federal judicial record."
   type: govinfo-collection
   tier: 1
   urls:
@@ -68,7 +71,7 @@
   name: Public and Private Laws (PLAW)
   branch: legislative
   parent_org: U.S. Congress
-  description: "Enacted slip-law text of public and private laws after presidential signature or veto override."
+  description: "After a bill becomes law by presidential signature or veto override, the Government Publishing Office publishes the enacted text as a slip law. This collection carries public and private law text, typically appearing weeks after enactment; same-day text is available through the BILLS enrolled stage."
   type: govinfo-collection
   tier: 1
   urls:
@@ -82,7 +85,7 @@
   name: Congressional Hearings (CHRG)
   branch: legislative
   parent_org: U.S. Congress
-  description: "Transcripts of congressional committee hearings, published with a lag after the hearing date."
+  description: "Congressional committees publish their hearing records through the Government Publishing Office. This collection carries printed hearing transcripts — witness testimony and member questioning — released weeks to months after the hearing date."
   type: govinfo-collection
   tier: 1
   urls:
@@ -96,7 +99,7 @@
   name: Congressional Reports (CRPT)
   branch: legislative
   parent_org: U.S. Congress
-  description: "House, Senate, and conference committee reports accompanying legislation."
+  description: "House, Senate, and conference committees report legislation with written analyses. This collection carries committee reports — a committee's explanation of a bill's purpose, provisions, and cost — published through the Government Publishing Office as bills advance."
   type: govinfo-collection
   tier: 1
   urls:
@@ -110,7 +113,7 @@
   name: Daily Compilation of Presidential Documents (DCPD)
   branch: executive
   parent_org: Executive Office of the President
-  description: "Presidential statements, remarks, executive orders, proclamations, and other materials released by the White House press secretary, compiled by the Office of the Federal Register."
+  description: "The Office of the Federal Register compiles presidential materials released by the White House press secretary. This collection carries that compilation — statements, remarks, executive orders, proclamations, and nominations — published on a lag behind the events themselves."
   type: govinfo-collection
   tier: 1
   urls:
@@ -126,7 +129,7 @@
   name: Supreme Court Slip Opinions
   branch: judicial
   parent_org: Supreme Court of the United States
-  description: "Slip opinions and order lists published by the Supreme Court on its own site; the Court does not publish through the govinfo USCOURTS collection."
+  description: "The Supreme Court of the United States is the highest federal court; it does not publish through govinfo's USCOURTS collection. Its site posts slip opinions and order lists as PDFs on per-term HTML index pages, with opinions concentrated in the October-June term and each opinion led by an official syllabus."
   type: html-index
   tier: 1
   urls:
@@ -135,7 +138,7 @@
   method: Would parse the current term's slip-opinion HTML index and fetch opinion PDFs, drafting syllabus-first (GUIDE §3 phase J2).
   status: planned
   added: "2026-07-26"
-  notes: "First planned non-govinfo primary source, admitted deliberately per GUIDE §3. Slip-opinion index is per-term; the stable .aspx alias should resolve to the current term (verify at activation)."
+  notes: "First planned non-govinfo primary source, admitted deliberately per GUIDE §3. Slip-opinion index is per-term; the stable .aspx alias should resolve to the current term (verify at activation). Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 # ------------------------------------ planned: cabinet department newsrooms ----
 
@@ -143,7 +146,7 @@
   name: State Press Releases
   branch: executive
   parent_org: Department of State
-  description: "Press releases, statements, and remarks from the Department of State, including the Secretary's diplomatic announcements and travel."
+  description: "The Department of State conducts U.S. foreign policy and diplomacy. Its press-release index carries departmental press statements, media notes, and the Secretary's remarks and travel announcements, typically several items per business day."
   type: html-index
   tier: 1
   urls:
@@ -151,27 +154,27 @@
   method: Would parse the press-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Site is WordPress-based; an RSS feed likely exists (unverified) — check at viability probe."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: treasury-newsroom
   name: Treasury Press Releases
   branch: executive
   parent_org: Department of the Treasury
-  description: "Press releases from the Department of the Treasury, including sanctions designations, economic policy announcements, and debt-management statements."
+  description: "The Department of the Treasury manages federal finances, collects revenue, and administers economic sanctions. Its press-release index carries sanctions designations, debt-management statements, and economic-policy announcements, typically multiple items per business day."
   type: html-index
   tier: 1
   urls:
     home: https://home.treasury.gov/news/press-releases
   method: Would parse the press-release HTML index daily for new items.
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate."
 
 - id: defense-newsroom
   name: Defense News Releases
   branch: executive
   parent_org: Department of Defense
-  description: "News releases and advisories from the Department of Defense covering operations, contracts, and personnel announcements."
+  description: "The Department of Defense directs the armed forces and military policy. This RSS feed carries its news releases and stories — operations, contracts, and personnel announcements — as title-only items (10 most recent; no description text), with full text only on article pages that block automated clients."
   type: rss
   tier: 1
   urls:
@@ -180,13 +183,13 @@
   method: Would poll the news-release RSS feed daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Feed URL taken from defense.gov's published RSS module; verify exact parameters at viability probe."
+  notes: "Probed 2026-07-26: RSS verified — 10 items with GUIDs and dates, avg description 0 chars (title-only); sample article fetch returned HTTP 403: feed accessible; article pages blocked to identified clients — feed-only ingestion candidate. Feed item links resolve to www.war.gov."
 
 - id: justice-newsroom
   name: Justice Press Releases
   branch: executive
   parent_org: Department of Justice
-  description: "Press releases from the Department of Justice Office of Public Affairs, including indictments, settlements, and enforcement actions."
+  description: "The Department of Justice enforces federal law and represents the United States in court. Its Office of Public Affairs channel carries national press releases — indictments, plea agreements, settlements, and policy announcements — typically many items per business day across litigating divisions."
   type: rss
   tier: 1
   urls:
@@ -195,13 +198,13 @@
   method: Would poll the Office of Public Affairs RSS feed daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: HTTP 404 at registered feed URL — path likely wrong or moved; correct URL and re-probe before concluding availability."
 
 - id: interior-newsroom
   name: Interior Press Releases
   branch: executive
   parent_org: Department of the Interior
-  description: "Press releases from the Department of the Interior on public lands, wildlife, and natural-resource management."
+  description: "The Department of the Interior manages public lands, national parks, and wildlife programs, and administers tribal trust responsibilities. Its press-release index carries departmental announcements on land management, species decisions, and grants, typically a few items per business day."
   type: html-index
   tier: 1
   urls:
@@ -209,41 +212,41 @@
   method: Would parse the press-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: HTTP 404 at registered URL — path likely wrong or moved; correct URL and re-probe before concluding availability."
 
 - id: agriculture-newsroom
   name: USDA Press Releases
   branch: executive
   parent_org: Department of Agriculture
-  description: "Press releases from the Department of Agriculture on farm programs, food safety, nutrition assistance, and rural development."
+  description: "The Department of Agriculture administers farm programs, food-safety inspection, nutrition assistance, and rural development. Its press-release index carries departmental announcements on program funding, disaster designations, and regulatory actions, typically a few items per business day."
   type: html-index
   tier: 1
   urls:
     home: https://www.usda.gov/about-usda/news/press-releases
   method: Would parse the press-release HTML index daily for new items.
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: "Path reflects the redesigned usda.gov; older /media/press-releases may redirect — confirm at viability probe."
+  notes: "Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate."
 
 - id: commerce-newsroom
   name: Commerce Press Releases
   branch: executive
   parent_org: Department of Commerce
-  description: "Press releases from the Department of Commerce, including trade actions and economic program announcements."
+  description: "The Department of Commerce promotes trade and economic growth and houses the federal statistical and standards agencies. Its press-release index carries departmental announcements, including trade-enforcement actions and program launches, typically a few items per week."
   type: html-index
   tier: 1
   urls:
     home: https://www.commerce.gov/news/press-releases
   method: Would parse the press-release HTML index daily for new items.
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
 
 - id: labor-newsroom
   name: Labor News Releases
   branch: executive
   parent_org: Department of Labor
-  description: "News releases from the Department of Labor on employment data, workplace enforcement, and benefits programs."
+  description: "The Department of Labor administers wage, workplace-safety, and benefits law and publishes major employment statistics. This RSS feed carries its national news releases — enforcement actions, rulemakings, and program announcements — with near-full-text descriptions (10 most recent items, ~1,800 characters each; article pages extract at ~6,000 characters)."
   type: rss
   tier: 1
   urls:
@@ -252,55 +255,55 @@
   method: Would poll the news-release RSS feed daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Feed URL from DOL's historical RSS offerings; verify at viability probe."
+  notes: "Probed 2026-07-26: RSS verified end-to-end — 10 items, avg description 1765 chars, sample article extracted (6033 chars text)."
 
 - id: hhs-newsroom
   name: HHS Press Releases
   branch: executive
   parent_org: Department of Health and Human Services
-  description: "Press releases from the Department of Health and Human Services on public health, biomedical research, and health programs."
+  description: "The Department of Health and Human Services oversees federal health programs and the public-health agencies. Its newsroom index carries departmental press releases on health policy, program actions, and secretarial announcements, typically several items per week."
   type: html-index
   tier: 1
   urls:
     home: https://www.hhs.gov/about/news/index.html
   method: Would parse the newsroom HTML index daily for new items.
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
 
 - id: hud-newsroom
   name: HUD Press Releases
   branch: executive
   parent_org: Department of Housing and Urban Development
-  description: "Press releases from the Department of Housing and Urban Development on housing programs, grants, and enforcement."
+  description: "The Department of Housing and Urban Development administers housing finance, rental assistance, and community-development programs. Its press index carries departmental releases on grants, enforcement actions, and housing policy, typically several items per week."
   type: html-index
   tier: 1
   urls:
     home: https://www.hud.gov/press
   method: Would parse the press-release HTML index daily for new items.
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
 
 - id: transportation-newsroom
   name: DOT Press Releases
   branch: executive
   parent_org: Department of Transportation
-  description: "Press releases from the Department of Transportation on infrastructure funding, safety rules, and aviation actions."
+  description: "The Department of Transportation sets national transportation policy and houses the modal safety administrations. Its newsroom index carries departmental press releases on infrastructure funding, safety rules, and enforcement, typically several items per week."
   type: html-index
   tier: 1
   urls:
     home: https://www.transportation.gov/newsroom
   method: Would parse the newsroom HTML index daily for new items.
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: "Press releases may live under /briefing-room; confirm the canonical index at viability probe."
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
 
 - id: energy-newsroom
   name: Energy Press Releases
   branch: executive
   parent_org: Department of Energy
-  description: "Press releases from the Department of Energy on energy programs, national laboratories, and nuclear security."
+  description: "The Department of Energy manages energy research, the national laboratories, and the nuclear weapons stockpile. Its newsroom index carries departmental press releases on funding awards, energy programs, and nuclear security, typically several items per week."
   type: html-index
   tier: 1
   urls:
@@ -308,13 +311,13 @@
   method: Would parse the newsroom HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: education-newsroom
   name: Education Press Releases
   branch: executive
   parent_org: Department of Education
-  description: "Press releases from the Department of Education on federal student aid, grants, and education policy."
+  description: "The Department of Education administers federal student aid and elementary, secondary, and higher-education programs. Its press-release index carries departmental announcements on grants, regulations, and enforcement, typically several items per week."
   type: html-index
   tier: 1
   urls:
@@ -322,13 +325,13 @@
   method: Would parse the press-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Path reflects the redesigned ed.gov; older /news/press-releases may redirect — confirm at viability probe."
+  notes: "Probed 2026-07-26: HTTP 404 at registered URL — path likely wrong or moved; correct URL and re-probe before concluding availability. Candidate correction: the pre-redesign /news/press-releases path."
 
 - id: va-newsroom
   name: VA News Releases
   branch: executive
   parent_org: Department of Veterans Affairs
-  description: "News releases from the Department of Veterans Affairs on veterans' benefits, health care, and memorial affairs."
+  description: "The Department of Veterans Affairs provides health care, benefits, and memorial services to veterans. This WordPress feed carries VA news releases and feature stories with teaser-length descriptions (30 most recent items, ~140 characters each; article pages extract at ~6,000 characters)."
   type: rss
   tier: 1
   urls:
@@ -337,13 +340,13 @@
   method: Would poll the VA news site RSS feed daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "news.va.gov is WordPress-based; /feed/ is the conventional WordPress feed path — verify at viability probe."
+  notes: "Probed 2026-07-26: RSS verified end-to-end — 30 items, avg description 144 chars, sample article extracted (6366 chars text). Sampled item was a feature story, not a press release — the feed mixes both; a content evaluation should decide filtering."
 
 - id: dhs-newsroom
   name: DHS News Releases
   branch: executive
   parent_org: Department of Homeland Security
-  description: "Press releases from the Department of Homeland Security on border security, cybersecurity, disaster response, and immigration enforcement."
+  description: "The Department of Homeland Security oversees border security, immigration enforcement, cybersecurity, and disaster response. Its news-release index carries departmental press releases and secretarial statements, typically several items per week; component agencies publish separately."
   type: html-index
   tier: 1
   urls:
@@ -351,7 +354,7 @@
   method: Would parse the news-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 # --------------------------------------- planned: independent agencies ----
 
@@ -359,22 +362,22 @@
   name: EPA News Releases
   branch: executive
   parent_org: Independent agency
-  description: "News releases from the Environmental Protection Agency on rules, enforcement actions, and grants."
+  description: "The Environmental Protection Agency writes and enforces environmental regulations. Its news-release channel carries announcements of rules, enforcement actions, and grants, typically several items per business day."
   type: rss
   tier: 1
   urls:
     home: https://www.epa.gov/newsreleases
     feed: https://www.epa.gov/newsreleases/search/rss
   method: Would poll the news-release RSS feed daily for new items.
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate."
 
 - id: sec-newsroom
   name: SEC Press Releases
   branch: executive
   parent_org: Independent agency
-  description: "Press releases from the Securities and Exchange Commission, including enforcement actions and rulemaking announcements."
+  description: "The Securities and Exchange Commission regulates securities markets and public-company disclosure. This RSS feed carries its press releases — enforcement actions, rulemakings, and commission announcements — as teaser descriptions (25 recent items, ~250 characters each; article pages extract at ~5,000 characters)."
   type: rss
   tier: 1
   urls:
@@ -383,28 +386,28 @@
   method: Would poll the press-release RSS feed daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "sec.gov was redesigned in 2024; confirm both the newsroom path and the legacy feed URL at viability probe."
+  notes: "Probed 2026-07-26: RSS verified end-to-end — 25 items, avg description 251 chars, sample article extracted (5315 chars text)."
 
 - id: fcc-newsroom
   name: FCC Headlines
   branch: executive
   parent_org: Independent agency
-  description: "Headlines and releases from the Federal Communications Commission, including orders, rulemakings, and enforcement actions."
+  description: "The Federal Communications Commission regulates interstate communications by radio, television, wire, and broadband. Its headlines channel carries the daily flow of released orders, rulemakings, public notices, and enforcement actions."
   type: rss
   tier: 1
   urls:
     home: https://www.fcc.gov/news-events/headlines
     feed: https://www.fcc.gov/news-events/headlines.rss
   method: Would poll the headlines RSS feed daily for new items.
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: "FCC publishes RSS feeds; exact feed URL unverified — confirm at viability probe."
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
 
 - id: ftc-newsroom
   name: FTC Press Releases
   branch: executive
   parent_org: Independent agency
-  description: "Press releases from the Federal Trade Commission on antitrust and consumer-protection actions."
+  description: "The Federal Trade Commission enforces antitrust and consumer-protection law. This RSS feed carries its press releases — complaints, settlements, rule actions, and consumer-refund programs — with paragraph-length descriptions (10 most recent items, ~500 characters each; article pages extract at ~9,000 characters)."
   type: rss
   tier: 1
   urls:
@@ -413,13 +416,13 @@
   method: Would poll the press-release RSS feed daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: RSS verified end-to-end — 10 items, avg description 520 chars, sample article extracted (9347 chars text)."
 
 - id: nasa-newsroom
   name: NASA News Releases
   branch: executive
   parent_org: Independent agency
-  description: "News releases from NASA on missions, launches, and research."
+  description: "NASA conducts the civil space program and aeronautics research. This RSS feed carries the agency's breaking-news releases — missions, launches, crew activities, and research announcements — as teaser descriptions (10 most recent items, ~300 characters each; article pages extract at ~9,000 characters)."
   type: rss
   tier: 1
   urls:
@@ -428,27 +431,27 @@
   method: Would poll the breaking-news RSS feed daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "nasa.gov was redesigned in 2023; the legacy feed URL has historically persisted — confirm at viability probe."
+  notes: "Probed 2026-07-26: RSS verified end-to-end — 10 items, avg description 313 chars, sample article extracted (9439 chars text)."
 
 - id: ssa-newsroom
   name: SSA Press Releases
   branch: executive
   parent_org: Independent agency
-  description: "Press releases from the Social Security Administration on benefits, policy, and program administration."
+  description: "The Social Security Administration administers retirement, disability, and survivor benefits. Its newsroom carries press releases on benefit amounts, policy changes, and program administration, typically a few items per month."
   type: html-index
   tier: 1
   urls:
     home: https://www.ssa.gov/news/
   method: Would parse the newsroom HTML index daily for new items.
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
 
 - id: nlrb-newsroom
   name: NLRB News Releases
   branch: executive
   parent_org: Independent agency
-  description: "News releases from the National Labor Relations Board on decisions, elections, and enforcement."
+  description: "The National Labor Relations Board adjudicates private-sector labor-relations cases and conducts union elections. Its news-release index carries announcements of board decisions, election results, and enforcement actions, typically a few items per week."
   type: html-index
   tier: 1
   urls:
@@ -456,13 +459,13 @@
   method: Would parse the news-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: fec-newsroom
   name: FEC Press Releases
   branch: executive
   parent_org: Independent agency
-  description: "Press releases from the Federal Election Commission on campaign-finance rules, advisory opinions, and enforcement."
+  description: "The Federal Election Commission administers and enforces federal campaign-finance law. Its updates index carries press releases, commission meeting agendas, and closed enforcement matters, typically a few items per week."
   type: html-index
   tier: 1
   urls:
@@ -470,13 +473,13 @@
   method: Would parse the updates HTML index (filtered to press releases) daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: gsa-newsroom
   name: GSA News Releases
   branch: executive
   parent_org: Independent agency
-  description: "News releases from the General Services Administration on federal procurement, real estate, and technology programs."
+  description: "The General Services Administration manages federal procurement, real estate, and shared technology services. Its news-release index carries announcements on contracts, federal buildings, and government-wide programs, typically a few items per week."
   type: html-index
   tier: 1
   urls:
@@ -484,13 +487,13 @@
   method: Would parse the news-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: opm-newsroom
   name: OPM News Releases
   branch: executive
   parent_org: Independent agency
-  description: "News releases from the Office of Personnel Management on federal workforce policy, hiring, and benefits."
+  description: "The Office of Personnel Management sets federal civilian workforce policy and administers federal employee benefits. Its newsroom index carries releases on hiring policy, pay, and benefits programs, typically a few items per week."
   type: html-index
   tier: 1
   urls:
@@ -498,7 +501,7 @@
   method: Would parse the newsroom HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 # ------------------------------------------------------------ cross-branch ----
 
@@ -506,7 +509,7 @@
   name: govinfo Bulk Data
   branch: cross-branch
   parent_org: U.S. Government Publishing Office
-  description: "GPO's bulk data repository: direct XML directory trees for BILLS, the Federal Register, the Congressional Record, CFR/eCFR, and bill status, built for large transfers."
+  description: "The Government Publishing Office operates a bulk-data repository alongside the govinfo API. It serves complete XML directory trees for BILLS, the Federal Register, the Congressional Record, CFR/eCFR, and bill status — the intended channel for multi-day historical backfills rather than item-by-item API calls."
   type: govinfo-collection
   tier: 1
   urls:
@@ -522,44 +525,44 @@
   name: GAO Reports & Testimonies
   branch: legislative
   parent_org: Government Accountability Office
-  description: "Audit, evaluation, and investigative reports and congressional testimonies published by the Government Accountability Office, Congress's audit and oversight arm."
+  description: "The Government Accountability Office is Congress's audit and oversight arm. This RSS feed carries its reports and testimonies — program audits, evaluations, and legal decisions — with long report-summary descriptions (25 recent items, ~4,000 characters each; report pages extract at ~9,000 characters)."
   type: rss
   tier: 1
   urls:
     home: https://www.gao.gov/reports-testimonies
     feed: https://www.gao.gov/rss/reports.xml
-  method: RSS poll via AgencyClient (pending viability check)
+  method: RSS poll via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "GAO offers RSS feeds; the exact reports-feed URL is unverified (low confidence) — confirm at viability probe."
+  notes: "Probed 2026-07-26: RSS verified end-to-end — 25 items, avg description 4083 chars, sample article extracted (8987 chars text)."
 
 - id: cbo-publications
   name: CBO Publications
   branch: legislative
   parent_org: Congressional Budget Office
-  description: "Cost estimates for pending legislation, budget and economic outlook reports, and analytic studies published by the Congressional Budget Office."
+  description: "The Congressional Budget Office produces nonpartisan budget and economic analysis for Congress. Its publications index carries cost estimates for pending legislation, baseline and outlook reports, and analytic studies, typically several items per week."
   type: html-index
   tier: 1
   urls:
     home: https://www.cbo.gov/publications
   method: HTML index diff via AgencyClient (pending viability check)
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: "CBO likely offers an RSS feed for publications (unverified) — check at viability probe."
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
 
 - id: crs-reports
   name: CRS Reports
   branch: legislative
   parent_org: Congressional Research Service
-  description: "Nonpartisan policy and legal analysis reports prepared by the Congressional Research Service for members and committees of Congress, released publicly at crsreports.congress.gov."
+  description: "The Congressional Research Service provides nonpartisan policy and legal analysis to members and committees of Congress. Its public site carries new and updated CRS reports, released under 2018 appropriations law, typically several items per business day."
   type: html-index
   tier: 1
   urls:
     home: https://crsreports.congress.gov/
   method: HTML index diff via AgencyClient (pending viability check)
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: "Public release of CRS reports began in 2018 under appropriations law. The site is search-driven; whether a stable browsable index exists for diffing is unverified (low confidence) — confirm at viability probe."
+  notes: "Site is search-driven; whether a stable browsable index exists for diffing remains unverified. Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
 
 # ------------------------------------------ planned: White House (tier 1) ----
 
@@ -567,15 +570,15 @@
   name: White House Briefing Room
   branch: executive
   parent_org: Executive Office of the President
-  description: "Statements, releases, remarks, and presidential actions posted to the White House briefing room, including executive orders and proclamations as first announced."
+  description: "The White House briefing room is the Executive Office of the President's direct publication channel. It carries statements, releases, remarks, and presidential actions — executive orders and proclamations as first announced, ahead of their official compilation in DCPD — typically several items per day."
   type: html-index
   tier: 1
   urls:
     home: https://www.whitehouse.gov/briefing-room/
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Fast channel: the official compilation of the same material arrives later via the planned govinfo DCPD collection. WordPress-based, so an RSS feed likely exists (unverified) — check at viability probe."
+  notes: "Fast channel: the official compilation of the same material arrives later via the planned govinfo DCPD collection. Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 # --------------------------------- planned: IG report aggregator (tier 1) ----
 
@@ -583,15 +586,15 @@
   name: Oversight.gov IG Reports
   branch: executive
   parent_org: Council of the Inspectors General on Integrity and Efficiency
-  description: "Central aggregation of audit, inspection, and investigative reports from roughly 70 federal Offices of Inspector General, operated by CIGIE. Republishes reports that originate on individual IG sites."
+  description: "The Council of the Inspectors General on Integrity and Efficiency operates oversight.gov as a central aggregator. It republishes audit, inspection, and investigative reports from roughly 70 federal Offices of Inspector General, with new reports posted most business days; every item originates on an individual IG's own site."
   type: aggregator
   tier: 1
   urls:
     home: https://www.oversight.gov/
-  method: "HTML index diff via AgencyClient (pending viability check); aggregator rule: every ingested item must cite the originating Inspector General as its origin, never oversight.gov itself."
+  method: "HTML index diff via AgencyClient (pending content evaluation); aggregator rule: every ingested item must cite the originating Inspector General as its origin, never oversight.gov itself."
   status: planned
   added: "2026-07-26"
-  notes: "Aggregator source class: content is republished, so digest citations must point to the originating IG. Report-listing structure unverified — confirm at viability probe."
+  notes: "Aggregator source class: content is republished, so digest citations must point to the originating IG. Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 # --------------------------------- planned: financial regulators (tier 2) ----
 
@@ -599,100 +602,100 @@
   name: Federal Reserve Press Releases
   branch: executive
   parent_org: Independent agency
-  description: "Press releases from the Board of Governors of the Federal Reserve System, including FOMC statements, monetary policy actions, and banking regulation and enforcement announcements."
+  description: "The Board of Governors of the Federal Reserve System conducts monetary policy and regulates bank holding companies. This RSS feed carries all board press releases — FOMC statements, monetary-policy actions, banking regulation, and enforcement — as title-plus-teaser items (20 recent, ~110 characters of description; article pages extract at ~10,000 characters)."
   type: rss
   tier: 2
   urls:
     home: https://www.federalreserve.gov/newsevents/pressreleases.htm
     feed: https://www.federalreserve.gov/feeds/press_all.xml
-  method: RSS poll via AgencyClient (pending viability check)
+  method: RSS poll via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: RSS verified end-to-end — 20 items, avg description 109 chars, sample article extracted (10066 chars text)."
 
 - id: fdic-news
   name: FDIC Press Releases
   branch: executive
   parent_org: Independent agency
-  description: "Press releases from the Federal Deposit Insurance Corporation on bank supervision, bank failures and resolutions, and deposit-insurance actions."
+  description: "The Federal Deposit Insurance Corporation insures bank deposits and supervises state-chartered banks. Its press-release index carries announcements on bank supervision, failures and resolutions, and rulemaking, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.fdic.gov/news/press-releases
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "fdic.gov was redesigned circa 2024; press-release path unverified (low confidence) — confirm at viability probe."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: occ-news
   name: OCC News Releases
   branch: executive
   parent_org: Department of the Treasury
-  description: "News releases from the Office of the Comptroller of the Currency on national-bank and federal-savings-association supervision and enforcement actions."
+  description: "The Office of the Comptroller of the Currency, a Treasury bureau, charters and supervises national banks and federal savings associations. Its news-release index carries supervision and enforcement announcements, including monthly enforcement-action lists, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.occ.gov/news-issuances/news-releases/
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "OCC also publishes RSS feeds (URL unverified) — check at viability probe."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: cfpb-newsroom
   name: CFPB Newsroom
   branch: executive
   parent_org: Independent agency
-  description: "Press releases and statements from the Consumer Financial Protection Bureau on consumer-finance rules, supervision, and enforcement actions."
+  description: "The Consumer Financial Protection Bureau regulates consumer financial products and services. Its newsroom index carries press releases and statements on rules, supervision, and enforcement actions, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.consumerfinance.gov/about-us/newsroom/
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: cftc-press
   name: CFTC Press Releases
   branch: executive
   parent_org: Independent agency
-  description: "Press releases from the Commodity Futures Trading Commission on derivatives-market rulemaking and enforcement actions."
+  description: "The Commodity Futures Trading Commission regulates U.S. derivatives markets. Its press-release index carries enforcement actions, rulemaking announcements, and commissioner statements, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.cftc.gov/PressRoom/PressReleases
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: ncua-news
   name: NCUA Press Releases
   branch: executive
   parent_org: Independent agency
-  description: "Press releases from the National Credit Union Administration on credit-union supervision, share insurance, and conservatorship actions."
+  description: "The National Credit Union Administration charters and supervises federal credit unions and insures share deposits. Its press-release index carries announcements on supervision, conservatorships, and board actions, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://ncua.gov/newsroom/press-releases
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Newsroom path unverified (low confidence) — confirm at viability probe."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: fhfa-news
   name: FHFA News Releases
   branch: executive
   parent_org: Independent agency
-  description: "News releases from the Federal Housing Finance Agency, regulator and conservator of Fannie Mae, Freddie Mac, and the Federal Home Loan Bank System."
+  description: "The Federal Housing Finance Agency regulates Fannie Mae, Freddie Mac, and the Federal Home Loan Bank System, and acts as conservator of the enterprises. Its news index carries releases on housing-finance policy, house-price data, and enterprise oversight, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.fhfa.gov/news
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "fhfa.gov was redesigned circa 2024; news path unverified (low confidence) — confirm at viability probe."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 # --------------------------- planned: other regulators/independents (tier 2) ----
 
@@ -700,99 +703,100 @@
   name: NRC News Releases
   branch: executive
   parent_org: Independent agency
-  description: "News releases from the Nuclear Regulatory Commission on reactor licensing, oversight, and enforcement."
+  description: "The Nuclear Regulatory Commission licenses and oversees civilian nuclear reactors and materials. Its news index carries releases on licensing actions, inspections, and enforcement, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.nrc.gov/reading-rm/doc-collections/news/
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Legacy document-collection path; may have moved in a site refresh (low confidence) — confirm at viability probe."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: ferc-news
   name: FERC News Releases
   branch: executive
   parent_org: Independent agency
-  description: "News releases from the Federal Energy Regulatory Commission on wholesale electricity markets, natural-gas pipelines, and hydropower licensing."
+  description: "The Federal Energy Regulatory Commission regulates wholesale electricity markets, natural-gas pipelines, and hydropower licensing. Its news index carries orders, rulemaking announcements, and meeting summaries, concentrated around the Commission's monthly open meetings."
   type: html-index
   tier: 2
   urls:
     home: https://www.ferc.gov/news-events/news
   method: HTML index diff via AgencyClient (pending viability check)
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: "Independent commission organizationally within the DOE orbit; its decisions are its own, not the Department's."
+  notes: "Independent commission organizationally within the DOE orbit; its decisions are its own, not the Department's. Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
 
 - id: eeoc-newsroom
   name: EEOC Newsroom
   branch: executive
   parent_org: Independent agency
-  description: "Press releases from the Equal Employment Opportunity Commission on discrimination lawsuits, settlements, and enforcement guidance."
+  description: "The Equal Employment Opportunity Commission enforces federal workplace anti-discrimination law. Its newsroom index carries press releases on lawsuits, settlements, and enforcement guidance, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.eeoc.gov/newsroom
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: sba-newsroom
   name: SBA Newsroom
   branch: executive
   parent_org: Independent agency
-  description: "News releases from the Small Business Administration on loan programs, disaster assistance, and small-business policy."
+  description: "The Small Business Administration guarantees small-business loans and runs disaster-assistance and federal-contracting programs. Its newsroom index carries national press releases on loan programs, disaster declarations, and policy, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.sba.gov/about-sba/sba-newsroom
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Newsroom path unverified (low confidence) — confirm at viability probe."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: nsf-news
   name: NSF News
   branch: executive
   parent_org: Independent agency
-  description: "News releases from the National Science Foundation on research funding, scientific findings, and agency programs."
+  description: "The National Science Foundation funds basic research across science and engineering. Its news index carries agency announcements on funding programs, research findings, and facilities, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.nsf.gov/news
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "nsf.gov was redesigned in 2023; news path unverified (low confidence) — confirm at viability probe."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: ustr-press
   name: USTR Press Releases
   branch: executive
   parent_org: Executive Office of the President
-  description: "Press releases from the Office of the United States Trade Representative on trade negotiations, agreements, and enforcement actions."
+  description: "The Office of the United States Trade Representative, in the Executive Office of the President, negotiates trade agreements and leads trade enforcement. Its press-release index carries announcements on negotiations, tariff actions, and dispute proceedings, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://ustr.gov/about-us/policy-offices/press-office/press-releases
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: usps-newsroom
   name: USPS Newsroom
   branch: executive
   parent_org: Independent establishment
-  description: "National news releases from the United States Postal Service on rates, service changes, and operations."
-  type: html-index
+  description: "The United States Postal Service is an independent establishment providing mail and package delivery. This autodiscovered RSS feed carries national news releases — stamp issuances, rates, service changes, and operations — as teaser descriptions with unusually deep history (668 items, ~270 characters each, no GUIDs); feed links route through interstitial pages from which article text does not extract."
+  type: rss
   tier: 2
   urls:
     home: https://about.usps.com/newsroom/national-releases/
-  method: HTML index diff via AgencyClient (pending viability check)
+    feed: https://about.usps.com/news/latestnews.rss
+  method: RSS poll via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: autodiscovered RSS feed verified — 668 items, avg description 268 chars, no GUIDs; sample article text extraction yielded 16 chars: article pages likely script-rendered; feed metadata usable, full-text extraction not — needs evaluation."
 
 # ---------------------------------------- planned: HHS components (tier 2) ----
 
@@ -800,58 +804,58 @@
   name: CDC Newsroom
   branch: executive
   parent_org: Department of Health and Human Services
-  description: "Press releases and media statements from the Centers for Disease Control and Prevention on outbreaks, health advisories, and public-health guidance."
+  description: "The Centers for Disease Control and Prevention is the national public-health agency within HHS. Its media index carries press releases, media statements, and telebriefing transcripts on outbreaks, advisories, and health guidance, typically several items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.cdc.gov/media/index.html
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "cdc.gov underwent a major redesign in 2024; newsroom path unverified (low confidence) — confirm at viability probe."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: fda-press
   name: FDA Press Announcements
   branch: executive
   parent_org: Department of Health and Human Services
-  description: "Press announcements from the Food and Drug Administration on drug and device approvals, recalls, warning letters, and enforcement."
+  description: "The Food and Drug Administration regulates drugs, medical devices, food safety, and tobacco. This RSS feed carries its press announcements — approvals, recalls, enforcement actions, and public-health advisories — as teaser descriptions (20 recent items, ~230 characters each; article pages extract cleanly at ~7,000 characters)."
   type: rss
   tier: 2
   urls:
     home: https://www.fda.gov/news-events/fda-newsroom/press-announcements
     feed: https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml
-  method: RSS poll via AgencyClient (pending viability check)
+  method: RSS poll via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "FDA publishes official RSS feeds; the long feed path is from its RSS directory and unverified (low confidence) — confirm at viability probe."
+  notes: "Probed 2026-07-26: RSS verified end-to-end — 20 items, avg description 233 chars, sample article extracted (7227 chars text)."
 
 - id: nih-news
   name: NIH News Releases
   branch: executive
   parent_org: Department of Health and Human Services
-  description: "News releases from the National Institutes of Health on research findings, grants, and institute announcements."
+  description: "The National Institutes of Health is the federal biomedical research agency within HHS. Its news-release index carries announcements of research findings, grant programs, and institute actions, typically one or more items per business day."
   type: html-index
   tier: 2
   urls:
     home: https://www.nih.gov/news-events/news-releases
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: cms-newsroom
   name: CMS Newsroom
   branch: executive
   parent_org: Department of Health and Human Services
-  description: "Press releases and fact sheets from the Centers for Medicare & Medicaid Services on Medicare, Medicaid, and health-insurance-marketplace policy."
+  description: "The Centers for Medicare & Medicaid Services administers Medicare, Medicaid, and the health-insurance marketplaces within HHS. Its newsroom index carries press releases and fact sheets on payment rules, coverage policy, and program data, typically several items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.cms.gov/newsroom
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 # ----------------------------------- planned: Treasury component (tier 2) ----
 
@@ -859,15 +863,15 @@
   name: IRS Newsroom
   branch: executive
   parent_org: Department of the Treasury
-  description: "News releases from the Internal Revenue Service on filing seasons, tax guidance, and enforcement programs."
+  description: "The Internal Revenue Service, a Treasury bureau, administers federal tax law. Its newsroom index carries news releases on filing seasons, tax guidance, and enforcement programs, typically one or more items per business day."
   type: html-index
   tier: 2
   urls:
     home: https://www.irs.gov/newsroom
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 # ------------------------------------ planned: Justice components (tier 2) ----
 
@@ -875,43 +879,43 @@
   name: FBI Press Releases
   branch: executive
   parent_org: Department of Justice
-  description: "National press releases from the Federal Bureau of Investigation on investigations, arrests, and public alerts."
+  description: "The Federal Bureau of Investigation is the Justice Department's principal investigative agency. Its national press-release index carries announcements on investigations, arrests, and public alerts; most case-level news appears instead on field-office pages and in DOJ releases."
   type: html-index
   tier: 2
   urls:
     home: https://www.fbi.gov/news/press-releases
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Most FBI case news is published by field offices and by DOJ; the national index is a subset."
+  notes: "Most FBI case news is published by field offices and by DOJ; the national index is a subset. Probed 2026-07-26: index reachable (HTTP 200); an autodiscovered feed (https://www.fbi.gov/news/press-releases/RSS) was fetched but the advertised feed did not parse as RSS/Atom; investigate."
 
 - id: dea-press
   name: DEA Press Releases
   branch: executive
   parent_org: Department of Justice
-  description: "Press releases from the Drug Enforcement Administration on enforcement operations, drug-scheduling actions, and public-safety alerts."
+  description: "The Drug Enforcement Administration, within the Justice Department, enforces federal controlled-substances law. Its press-release index carries enforcement operations, drug-scheduling actions, and public-safety alerts, typically several items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.dea.gov/press-releases
   method: HTML index diff via AgencyClient (pending viability check)
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
 
 - id: atf-news
   name: ATF Press Releases
   branch: executive
   parent_org: Department of Justice
-  description: "Press releases from the Bureau of Alcohol, Tobacco, Firearms and Explosives on enforcement operations and firearms and explosives regulation."
+  description: "The Bureau of Alcohol, Tobacco, Firearms and Explosives, within the Justice Department, enforces federal firearms and explosives law. Its press-release index carries enforcement operations and regulatory announcements, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.atf.gov/news/press-releases
   method: HTML index diff via AgencyClient (pending viability check)
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: "Press-release path unverified — confirm at viability probe."
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
 
 # ---------------------------------------- planned: DHS components (tier 2) ----
 
@@ -919,85 +923,85 @@
   name: FEMA Press Releases
   branch: executive
   parent_org: Department of Homeland Security
-  description: "Press releases from the Federal Emergency Management Agency on disaster declarations, response operations, and assistance programs."
+  description: "The Federal Emergency Management Agency, within DHS, coordinates federal disaster response and recovery. Its national press-release index carries disaster declarations, response updates, and assistance-program announcements; volume rises sharply during active disasters."
   type: html-index
   tier: 2
   urls:
     home: https://www.fema.gov/about/news-multimedia/press-releases
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Path unverified (low confidence); FEMA also posts per-disaster releases — confirm the national index at viability probe."
+  notes: "FEMA also posts per-disaster releases; the national index is a subset. Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: ice-newsroom
   name: ICE Newsroom
   branch: executive
   parent_org: Department of Homeland Security
-  description: "News releases from U.S. Immigration and Customs Enforcement on enforcement and removal operations and homeland-security investigations."
+  description: "U.S. Immigration and Customs Enforcement, within DHS, enforces immigration and customs law in the interior. Its newsroom index carries news releases on enforcement and removal operations and Homeland Security Investigations cases, typically several items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.ice.gov/newsroom
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: cbp-newsroom
   name: CBP Media Releases
   branch: executive
   parent_org: Department of Homeland Security
-  description: "National media releases from U.S. Customs and Border Protection on border enforcement, trade, and travel operations."
+  description: "U.S. Customs and Border Protection, within DHS, controls the borders and ports of entry. Its national media-release index carries announcements on border enforcement, trade actions, and travel operations, typically several items per week; field offices publish additional local releases."
   type: html-index
   tier: 2
   urls:
     home: https://www.cbp.gov/newsroom/media-releases
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Newsroom is filterable by release type; exact media-release index path unverified — confirm at viability probe."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: tsa-press
   name: TSA Press Releases
   branch: executive
   parent_org: Department of Homeland Security
-  description: "Press releases from the Transportation Security Administration on screening policy, technology deployments, and enforcement."
+  description: "The Transportation Security Administration, within DHS, secures transportation systems, chiefly through aviation screening. Its press-release index carries announcements on screening policy, checkpoint technology, and enforcement, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.tsa.gov/news/press/releases
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: uscis-newsroom
   name: USCIS Newsroom
   branch: executive
   parent_org: Department of Homeland Security
-  description: "News releases and alerts from U.S. Citizenship and Immigration Services on immigration-benefits processing and policy updates."
+  description: "U.S. Citizenship and Immigration Services, within DHS, adjudicates immigration benefits. Its newsroom index carries news releases and alerts on benefits processing, fees, and policy updates, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.uscis.gov/newsroom
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: uscg-news
   name: Coast Guard News Releases
   branch: executive
   parent_org: Department of Homeland Security
-  description: "News releases from the U.S. Coast Guard on search-and-rescue cases, law-enforcement operations, and maritime safety."
+  description: "The U.S. Coast Guard, within DHS, performs maritime safety, security, and law-enforcement missions. Its news site carries district and headquarters releases on search-and-rescue cases, interdictions, and maritime safety, typically several items per day."
   type: html-index
   tier: 2
   urls:
     home: https://www.news.uscg.mil/
   method: HTML index diff via AgencyClient (pending viability check)
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: "Runs on the DoD DVIDS-backed news platform (news.uscg.mil), separate from uscg.mil; structure unverified (low confidence) — confirm at viability probe."
+  notes: "Runs on the DoD DVIDS-backed news platform (news.uscg.mil), separate from uscg.mil. Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate."
 
 # ------------------------------ planned: Transportation components (tier 2) ----
 
@@ -1005,29 +1009,29 @@
   name: FAA Newsroom
   branch: executive
   parent_org: Department of Transportation
-  description: "Press releases and statements from the Federal Aviation Administration on aviation safety, airspace, and certification actions."
+  description: "The Federal Aviation Administration, within DOT, regulates civil aviation and operates air traffic control. Its newsroom carries press releases and statements on safety actions, airspace, certification, and airport grants, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.faa.gov/newsroom
   method: HTML index diff via AgencyClient (pending viability check)
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
 
 - id: nhtsa-press
   name: NHTSA Press Releases
   branch: executive
   parent_org: Department of Transportation
-  description: "Press releases from the National Highway Traffic Safety Administration on vehicle-safety standards, recalls, and defect investigations."
+  description: "The National Highway Traffic Safety Administration, within DOT, sets vehicle-safety standards and orders recalls. Its press-release index carries announcements on standards, recalls, defect investigations, and crash data, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.nhtsa.gov/press-releases
   method: HTML index diff via AgencyClient (pending viability check)
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
 
 # ----------------------------------- planned: Commerce components (tier 2) ----
 
@@ -1035,57 +1039,57 @@
   name: Census Bureau Press Releases
   branch: executive
   parent_org: Department of Commerce
-  description: "Press releases from the U.S. Census Bureau announcing data releases from its demographic and economic statistical programs."
+  description: "The U.S. Census Bureau, within Commerce, is the principal federal statistical agency for population and the economy. Its press-release index announces data releases from its demographic and economic programs on a published schedule, typically one or more items per business day."
   type: html-index
   tier: 2
   urls:
     home: https://www.census.gov/newsroom/press-releases.html
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: noaa-news
   name: NOAA News Releases
   branch: executive
   parent_org: Department of Commerce
-  description: "News releases from the National Oceanic and Atmospheric Administration on weather, climate, fisheries, and ocean programs."
+  description: "The National Oceanic and Atmospheric Administration, within Commerce, runs the National Weather Service and ocean, climate, and fisheries programs. Its news-release index carries announcements on weather, climate data, fisheries rules, and research, typically several items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.noaa.gov/news-releases
   method: HTML index diff via AgencyClient (pending viability check)
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
 
 - id: nist-news
   name: NIST News
   branch: executive
   parent_org: Department of Commerce
-  description: "News announcements from the National Institute of Standards and Technology on measurement science, standards, and technology programs."
+  description: "The National Institute of Standards and Technology, within Commerce, develops measurement science and technical standards. Its news index carries announcements on standards publications, research results, and technology programs, typically several items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.nist.gov/news-events/news
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 - id: uspto-press
   name: USPTO News Updates
   branch: executive
   parent_org: Department of Commerce
-  description: "Press releases and news updates from the United States Patent and Trademark Office on intellectual-property policy and operations."
+  description: "The United States Patent and Trademark Office, within Commerce, examines patents and registers trademarks. Its news-updates index carries press releases and notices on intellectual-property policy, fees, and operations, typically a few items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.uspto.gov/about-us/news-updates
-  method: HTML index diff via AgencyClient (pending viability check)
+  method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
 
 # ------------------------------------ planned: Defense components (tier 2) ----
 
@@ -1093,71 +1097,71 @@
   name: Army News Releases
   branch: executive
   parent_org: Department of Defense
-  description: "Official news releases from the U.S. Army on operations, modernization, and personnel."
+  description: "The U.S. Army is the land service of the Department of Defense. Its news index mixes official press releases with feature articles on operations, modernization, and personnel, typically many items per day."
   type: html-index
   tier: 2
   urls:
     home: https://www.army.mil/news
   method: HTML index diff via AgencyClient (pending viability check)
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: "army.mil mixes press releases with feature articles; a releases-only index is unverified — confirm at viability probe."
+  notes: "A releases-only index (separate from feature articles) is unverified. Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate."
 
 - id: navy-news
   name: Navy Press Releases
   branch: executive
   parent_org: Department of Defense
-  description: "Press releases from the U.S. Navy Office of Information on fleet operations and service announcements."
+  description: "The U.S. Navy is the sea service of the Department of Defense. Its Office of Information press page carries press releases and statements on fleet operations and service announcements, typically several items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.navy.mil/Press-Office/
   method: HTML index diff via AgencyClient (pending viability check)
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: "Press-office section structure unverified (low confidence) — confirm the releases index at viability probe."
+  notes: "Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate."
 
 - id: air-force-news
   name: Air Force News
   branch: executive
   parent_org: Department of Defense
-  description: "News articles and releases from the Department of the Air Force on operations, acquisitions, and personnel."
+  description: "The Department of the Air Force organizes, trains, and equips U.S. air forces. Its news index carries articles and releases on operations, acquisitions, and personnel, typically several items per day."
   type: html-index
   tier: 2
   urls:
     home: https://www.af.mil/News/
   method: HTML index diff via AgencyClient (pending viability check)
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: "Runs the same ArticleCS platform as defense.gov, which exposes RSS.ashx feeds; exact feed parameters unverified — check at viability probe."
+  notes: "ArticleCS platform; an RSS.ashx feed likely exists (unverified). Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate."
 
 - id: marines-news
   name: Marine Corps News
   branch: executive
   parent_org: Department of Defense
-  description: "News stories and releases from the U.S. Marine Corps on operations, exercises, and service announcements."
+  description: "The U.S. Marine Corps is the naval expeditionary service of the Department of Defense. Its news index carries stories and releases on operations, exercises, and service announcements, typically several items per day."
   type: html-index
   tier: 2
   urls:
     home: https://www.marines.mil/News/
   method: HTML index diff via AgencyClient (pending viability check)
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: "ArticleCS platform; an RSS.ashx feed likely exists (unverified) — check at viability probe."
+  notes: "ArticleCS platform; an RSS.ashx feed likely exists (unverified). Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate."
 
 - id: space-force-news
   name: Space Force News
   branch: executive
   parent_org: Department of Defense
-  description: "News articles and releases from the U.S. Space Force on launches, space operations, and organizational announcements."
+  description: "The U.S. Space Force organizes, trains, and equips space forces within the Department of the Air Force. Its news index carries articles and releases on launches, space operations, and organizational changes, typically several items per week."
   type: html-index
   tier: 2
   urls:
     home: https://www.spaceforce.mil/News/
   method: HTML index diff via AgencyClient (pending viability check)
-  status: planned
+  status: unavailable
   added: "2026-07-26"
-  notes: "ArticleCS platform; an RSS.ashx feed likely exists (unverified) — check at viability probe."
+  notes: "ArticleCS platform; an RSS.ashx feed likely exists (unverified). Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate."
 
 # ----------------------------------- planned: judicial newsrooms (tier 2) ----
 
@@ -1165,7 +1169,7 @@
   name: U.S. Courts News
   branch: judicial
   parent_org: Administrative Office of the U.S. Courts
-  description: "News articles published on uscourts.gov by the Administrative Office of the U.S. Courts on judiciary operations, rulemaking, and Judicial Conference actions."
+  description: "The Administrative Office of the U.S. Courts supports the federal judiciary's administration. Its news index on uscourts.gov carries articles on judiciary operations, rulemaking, and Judicial Conference actions, typically a few items per week."
   type: html-index
   tier: 2
   urls:
@@ -1173,13 +1177,13 @@
   method: HTML index diff via AgencyClient (pending viability check)
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: "Probed 2026-07-26: HTTP 404 at registered URL — path likely wrong or moved; correct URL and re-probe before concluding availability."
 
 - id: ussc-news
   name: Sentencing Commission News
   branch: judicial
   parent_org: U.S. Sentencing Commission
-  description: "News releases from the United States Sentencing Commission on guideline amendments, public hearings, and research reports."
+  description: "The United States Sentencing Commission, an independent judicial-branch agency, sets federal sentencing guidelines. Its news index carries releases on guideline amendments, public hearings, and research reports, typically a few items per month."
   type: html-index
   tier: 2
   urls:
@@ -1187,4 +1191,4 @@
   method: HTML index diff via AgencyClient (pending viability check)
   status: planned
   added: "2026-07-26"
-  notes: "News path unverified (low confidence) — confirm at viability probe."
+  notes: "Probed 2026-07-26: HTTP 404 at registered URL — path likely wrong or moved; correct URL and re-probe before concluding availability."

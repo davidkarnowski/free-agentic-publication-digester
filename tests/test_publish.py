@@ -114,3 +114,34 @@ def test_real_digests_build(tmp_path):
     assert stats["assets"] >= 7
     index = (tmp_path / "site" / "index.html").read_text()
     assert "Daily Digest — 2026-07-23" in index
+
+
+def test_sources_page_built_and_linked(digests, tmp_path, monkeypatch):
+    from info_intel import config
+
+    root = tmp_path / "root"
+    root.mkdir()
+    (root / "SOURCES.md").write_text(
+        "# Sources\n\n| Name | Status |\n|---|---|\n| GAO | planned |\n"
+    )
+    monkeypatch.setattr(config, "PROJECT_ROOT", root)
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "sources.html").read_text()
+    assert "<table>" in page and "GAO" in page
+    index = (out / "index.html").read_text()
+    assert 'href="sources.html"' in index
+    digest_page = (out / "2026-07-01.html").read_text()
+    assert 'href="sources.html">Sources</a>' in digest_page
+
+
+def test_no_sources_md_degrades_gracefully(digests, tmp_path, monkeypatch):
+    from info_intel import config
+
+    empty_root = tmp_path / "empty"
+    empty_root.mkdir()
+    monkeypatch.setattr(config, "PROJECT_ROOT", empty_root)
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    assert not (out / "sources.html").exists()
+    assert 'href="sources.html"' not in (out / "index.html").read_text()
