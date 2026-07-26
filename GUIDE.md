@@ -50,6 +50,13 @@ reporting component must comply.
 - **Method transparency.** Prompts, selection rules, and ranking heuristics
   live in this repo, versioned. If someone asks "why did this item make the
   digest?", the answer must be reproducible.
+- **Agency statements are attributed speech, never established fact.**
+  Press releases and newsroom content are primary sources for what an
+  agency *said* — official advocacy, not neutral record. All digest prose
+  derived from them must attribute ("the Department stated…", "according
+  to the release…") and must never repackage an agency's claims as
+  facts the digest itself asserts. Titles quoted verbatim are quoted, not
+  endorsed.
 - **Plain-language renderings are labeled interpretation.** A digest may
   carry a model-generated "In plain terms" line per item to make official
   register parseable. Constraints: it is derived ONLY from the item's
@@ -129,6 +136,30 @@ The digest covers all three branches. Judicial coverage is phased:
 - **Date semantics:** court packages are case-shaped, not day-shaped; a
   digest's judicial items are opinions *filed* on the digest date, and
   publication lag (courts post with delay) is disclosed under Known gaps.
+
+### Agency newsrooms (amended 2026-07-26)
+
+A second non-GPO source class: official agency press releases, statements,
+and announcements published on agency websites (RSS feeds preferred;
+direct HTML index pages where no feed exists). Governing rules:
+
+- **The registry is the scope authority.** `sources/registry.yaml` (and
+  its generated `SOURCES.md`) records every source ingested, planned,
+  evaluated-excluded, or unavailable — coverage of the federal source
+  universe is measured there, never assumed.
+- **Viability is checked, not presumed, and never forced.** A source
+  becomes `active` only after a passing robots.txt + feed check through
+  our identified client. **No WAF evasion ever** — no browser user-agent
+  spoofing, no header games. A site that blocks honestly-identified
+  automated access is recorded `unavailable` with the observed behavior:
+  that fact is itself accountability data.
+- **Mutable-source disclosure.** Unlike the GPO record, agency web content
+  can be edited or removed without notice. Digest sections built on this
+  class carry a standing disclosure, and §7 (Provenance) governs how
+  captures are preserved and how changes are detected and disclosed.
+- Ingestion obeys §4 unchanged: paced, budgeted (its own daily bucket),
+  fully logged, conditional requests wherever the server supports them,
+  robots.txt honored via an RFC 9309 parser with crawl-delay respected.
 
 ### Secondary (later phases)
 
@@ -293,7 +324,43 @@ of the code, not of operator discipline.
    discounted/off-peak capacity, and so a partial day's work is resumable —
    mirroring the fetch layer's pending-queue semantics.
 
-## 7. Roadmap
+## 7. Provenance & Tamper-Evidence
+
+For mutable sources (§3 agency newsrooms), the archive must support the
+claim: *this content was served at this URL at this time, and here is
+exactly what it said.* Anticipated interference and mitigations:
+
+| Threat | Mitigation |
+|---|---|
+| Stealth edit after publication | two-hash captures + re-check pass → `modified` events with both versions retained |
+| Silent removal | conservative `missing`→`removed` promotion (≥3 failures over ≥48h), captures retained; `restored` tracked |
+| Backdating / retro-insertion | `claimed_published_at` vs our `first_seen_at`, always stored separately; claimed dates inside a demonstrably covered window are a flagged anomaly |
+| URL churn | document identity keyed by stable id (feed GUID / normalized URL); url + final_url recorded |
+| Content served differently to us | Wayback Machine snapshot per new capture — an independent second witness |
+| "You fabricated the archive" | attempt-level daily manifests (committed) with a previous-day hash chain; git/GitHub history ordering; Wayback corroboration |
+
+Mechanics:
+- **Two hashes per capture:** `content_sha256` (exact decoded entity
+  bytes — the evidentiary hash; bytes stored content-addressed under
+  `data/captures/`) and `text_sha256` (normalized extracted text,
+  versioned by `normalizer_version` — drives change detection, because
+  raw agency HTML churns with tokens and asset URLs). Both recorded, so
+  both "the bytes changed" and "the words changed" are supportable and
+  distinguishable.
+- **Attempt-level manifests:** `provenance/manifests/YYYY-MM-DD.jsonl`
+  (committed) records every *attempt* — captures, 304s, robots refusals,
+  errors — because absence must be an assertion (§2): a gap in monitoring
+  is on the record as a gap, never ambiguous. Each manifest's header
+  carries the previous manifest's sha256 (deletion or reordering of days
+  is detectable from the files alone).
+- **Honest limits (stated wherever provenance is claimed):** hashes prove
+  what was served **to our identified client** — not what every visitor
+  saw; our timestamps are backed by git/GitHub history and Wayback
+  corroboration, not third-party notarization (external anchoring, e.g.
+  OpenTimestamps, was considered and declined 2026-07-26; revisitable).
+  Full statement in `PROVENANCE.md`.
+
+## 8. Roadmap
 
 - **Phase 0 — Foundation (now):** this guide, worklog, repo scaffolding,
   obtain API key, verify access with a handful of hand-run requests.
@@ -315,7 +382,7 @@ of the code, not of operator discipline.
   metadata, backfill via bulk data, bias/faithfulness spot-audits
   (periodically diff a digest item against its full source).
 
-## 8. Open-Source Readiness
+## 9. Open-Source Readiness
 
 This repo may be published on GitHub at any time. Everything committed is
 written as if it were already public:
@@ -340,7 +407,7 @@ written as if it were already public:
   dedicated project address (repo-local `git config user.email`), never a
   personal or GitHub-credential address.
 
-## 9. Working Agreements
+## 10. Working Agreements
 
 - `WORKLOG.md` gets a timestamped, verbose entry for every work session:
   what was done, why, decisions made, dead ends included.

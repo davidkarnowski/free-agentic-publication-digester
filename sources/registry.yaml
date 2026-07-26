@@ -1,0 +1,482 @@
+# Living registry of federal publication sources (GUIDE.md §3).
+# SOURCES.md is generated from this file by scripts/sources_doc.py — edit here,
+# then regenerate. Schema is enforced by src/info_intel/sources.py:
+#   id (kebab, unique), name, branch, parent_org, description, type, urls,
+#   method, status, added, notes.
+
+# ---------------------------------------------------------------- active ----
+
+- id: govinfo-crec
+  name: Congressional Record (CREC)
+  branch: legislative
+  parent_org: U.S. Congress
+  description: "The daily edition of the Congressional Record: the official verbatim transcript of House and Senate floor proceedings and debate, plus Extensions of Remarks and the Daily Digest."
+  type: govinfo-collection
+  urls:
+    collection: https://www.govinfo.gov/app/collection/CREC
+  method: govinfo collections API delta sync
+  status: active
+  added: "2026-07-26"
+  notes: ""
+
+- id: govinfo-bills
+  name: Congressional Bills (BILLS)
+  branch: legislative
+  parent_org: U.S. Congress
+  description: "Full text of congressional bills and resolutions at each printed stage (introduced, engrossed, enrolled, and others)."
+  type: govinfo-collection
+  urls:
+    collection: https://www.govinfo.gov/app/collection/BILLS
+  method: govinfo collections API delta sync
+  status: active
+  added: "2026-07-26"
+  notes: ""
+
+- id: govinfo-fr
+  name: Federal Register (FR)
+  branch: executive
+  parent_org: National Archives and Records Administration
+  description: "The daily journal of the federal government: final rules, proposed rules, notices, and presidential documents, compiled by the Office of the Federal Register."
+  type: govinfo-collection
+  urls:
+    collection: https://www.govinfo.gov/app/collection/FR
+  method: govinfo collections API delta sync
+  status: active
+  added: "2026-07-26"
+  notes: ""
+
+- id: govinfo-uscourts
+  name: U.S. Courts Opinions (USCOURTS)
+  branch: judicial
+  parent_org: Federal judiciary
+  description: "Opinions from participating federal appellate, district, bankruptcy, and national courts, provided through a GPO partnership with the Administrative Office of the U.S. Courts."
+  type: govinfo-collection
+  urls:
+    collection: https://www.govinfo.gov/app/collection/USCOURTS
+  method: govinfo collections API delta sync
+  status: active
+  added: "2026-07-26"
+  notes: "Rule USCOURTS-FETCH-01: courts post opinions with delay, so each sync re-checks a trailing 7-day archive window rather than a single date. Participation-based (~140 courts), not the complete federal judicial record — every digest's judicial section carries the standing completeness disclosure (GUIDE §3)."
+
+# ------------------------------------------- planned: govinfo collections ----
+
+- id: govinfo-plaw
+  name: Public and Private Laws (PLAW)
+  branch: legislative
+  parent_org: U.S. Congress
+  description: "Enacted slip-law text of public and private laws after presidential signature or veto override."
+  type: govinfo-collection
+  urls:
+    collection: https://www.govinfo.gov/app/collection/PLAW
+  method: Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4).
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: govinfo-chrg
+  name: Congressional Hearings (CHRG)
+  branch: legislative
+  parent_org: U.S. Congress
+  description: "Transcripts of congressional committee hearings, published with a lag after the hearing date."
+  type: govinfo-collection
+  urls:
+    collection: https://www.govinfo.gov/app/collection/CHRG
+  method: Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4).
+  status: planned
+  added: "2026-07-26"
+  notes: "Publication lag means hearing transcripts are not day-shaped; date semantics need a rule before activation."
+
+- id: govinfo-crpt
+  name: Congressional Reports (CRPT)
+  branch: legislative
+  parent_org: U.S. Congress
+  description: "House, Senate, and conference committee reports accompanying legislation."
+  type: govinfo-collection
+  urls:
+    collection: https://www.govinfo.gov/app/collection/CRPT
+  method: Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4).
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: govinfo-dcpd
+  name: Daily Compilation of Presidential Documents (DCPD)
+  branch: executive
+  parent_org: Executive Office of the President
+  description: "Presidential statements, remarks, executive orders, proclamations, and other materials released by the White House press secretary, compiled by the Office of the Federal Register."
+  type: govinfo-collection
+  urls:
+    collection: https://www.govinfo.gov/app/collection/DCPD
+  method: Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4).
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+# ----------------------------------------------------- planned: judicial ----
+
+- id: scotus-slip-opinions
+  name: Supreme Court Slip Opinions
+  branch: judicial
+  parent_org: Supreme Court of the United States
+  description: "Slip opinions and order lists published by the Supreme Court on its own site; the Court does not publish through the govinfo USCOURTS collection."
+  type: html-index
+  urls:
+    index: https://www.supremecourt.gov/opinions/slipopinions.aspx
+    home: https://www.supremecourt.gov/
+  method: Would parse the current term's slip-opinion HTML index and fetch opinion PDFs, drafting syllabus-first (GUIDE §3 phase J2).
+  status: planned
+  added: "2026-07-26"
+  notes: "First planned non-govinfo primary source, admitted deliberately per GUIDE §3. Slip-opinion index is per-term; the stable .aspx alias should resolve to the current term (verify at activation)."
+
+# ------------------------------------ planned: cabinet department newsrooms ----
+
+- id: state-newsroom
+  name: State Press Releases
+  branch: executive
+  parent_org: Department of State
+  description: "Press releases, statements, and remarks from the Department of State, including the Secretary's diplomatic announcements and travel."
+  type: html-index
+  urls:
+    home: https://www.state.gov/press-releases/
+  method: Would parse the press-release HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: "Site is WordPress-based; an RSS feed likely exists (unverified) — check at viability probe."
+
+- id: treasury-newsroom
+  name: Treasury Press Releases
+  branch: executive
+  parent_org: Department of the Treasury
+  description: "Press releases from the Department of the Treasury, including sanctions designations, economic policy announcements, and debt-management statements."
+  type: html-index
+  urls:
+    home: https://home.treasury.gov/news/press-releases
+  method: Would parse the press-release HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: defense-newsroom
+  name: Defense News Releases
+  branch: executive
+  parent_org: Department of Defense
+  description: "News releases and advisories from the Department of Defense covering operations, contracts, and personnel announcements."
+  type: rss
+  urls:
+    home: https://www.defense.gov/News/
+    feed: https://www.defense.gov/DesktopModules/ArticleCS/RSS.ashx?ContentType=1&Site=945&max=10
+  method: Would poll the news-release RSS feed daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: "Feed URL taken from defense.gov's published RSS module; verify exact parameters at viability probe."
+
+- id: justice-newsroom
+  name: Justice Press Releases
+  branch: executive
+  parent_org: Department of Justice
+  description: "Press releases from the Department of Justice Office of Public Affairs, including indictments, settlements, and enforcement actions."
+  type: rss
+  urls:
+    home: https://www.justice.gov/news
+    feed: https://www.justice.gov/feeds/opa/justice-news.xml
+  method: Would poll the Office of Public Affairs RSS feed daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: interior-newsroom
+  name: Interior Press Releases
+  branch: executive
+  parent_org: Department of the Interior
+  description: "Press releases from the Department of the Interior on public lands, wildlife, and natural-resource management."
+  type: html-index
+  urls:
+    home: https://www.doi.gov/pressreleases
+  method: Would parse the press-release HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: agriculture-newsroom
+  name: USDA Press Releases
+  branch: executive
+  parent_org: Department of Agriculture
+  description: "Press releases from the Department of Agriculture on farm programs, food safety, nutrition assistance, and rural development."
+  type: html-index
+  urls:
+    home: https://www.usda.gov/about-usda/news/press-releases
+  method: Would parse the press-release HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: "Path reflects the redesigned usda.gov; older /media/press-releases may redirect — confirm at viability probe."
+
+- id: commerce-newsroom
+  name: Commerce Press Releases
+  branch: executive
+  parent_org: Department of Commerce
+  description: "Press releases from the Department of Commerce, including trade actions and economic program announcements."
+  type: html-index
+  urls:
+    home: https://www.commerce.gov/news/press-releases
+  method: Would parse the press-release HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: labor-newsroom
+  name: Labor News Releases
+  branch: executive
+  parent_org: Department of Labor
+  description: "News releases from the Department of Labor on employment data, workplace enforcement, and benefits programs."
+  type: rss
+  urls:
+    home: https://www.dol.gov/newsroom/releases
+    feed: https://www.dol.gov/rss/releases.xml
+  method: Would poll the news-release RSS feed daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: "Feed URL from DOL's historical RSS offerings; verify at viability probe."
+
+- id: hhs-newsroom
+  name: HHS Press Releases
+  branch: executive
+  parent_org: Department of Health and Human Services
+  description: "Press releases from the Department of Health and Human Services on public health, biomedical research, and health programs."
+  type: html-index
+  urls:
+    home: https://www.hhs.gov/about/news/index.html
+  method: Would parse the newsroom HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: hud-newsroom
+  name: HUD Press Releases
+  branch: executive
+  parent_org: Department of Housing and Urban Development
+  description: "Press releases from the Department of Housing and Urban Development on housing programs, grants, and enforcement."
+  type: html-index
+  urls:
+    home: https://www.hud.gov/press
+  method: Would parse the press-release HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: transportation-newsroom
+  name: DOT Press Releases
+  branch: executive
+  parent_org: Department of Transportation
+  description: "Press releases from the Department of Transportation on infrastructure funding, safety rules, and aviation actions."
+  type: html-index
+  urls:
+    home: https://www.transportation.gov/newsroom
+  method: Would parse the newsroom HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: "Press releases may live under /briefing-room; confirm the canonical index at viability probe."
+
+- id: energy-newsroom
+  name: Energy Press Releases
+  branch: executive
+  parent_org: Department of Energy
+  description: "Press releases from the Department of Energy on energy programs, national laboratories, and nuclear security."
+  type: html-index
+  urls:
+    home: https://www.energy.gov/newsroom
+  method: Would parse the newsroom HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: education-newsroom
+  name: Education Press Releases
+  branch: executive
+  parent_org: Department of Education
+  description: "Press releases from the Department of Education on federal student aid, grants, and education policy."
+  type: html-index
+  urls:
+    home: https://www.ed.gov/about/news/press-releases
+  method: Would parse the press-release HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: "Path reflects the redesigned ed.gov; older /news/press-releases may redirect — confirm at viability probe."
+
+- id: va-newsroom
+  name: VA News Releases
+  branch: executive
+  parent_org: Department of Veterans Affairs
+  description: "News releases from the Department of Veterans Affairs on veterans' benefits, health care, and memorial affairs."
+  type: rss
+  urls:
+    home: https://news.va.gov/
+    feed: https://news.va.gov/feed/
+  method: Would poll the VA news site RSS feed daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: "news.va.gov is WordPress-based; /feed/ is the conventional WordPress feed path — verify at viability probe."
+
+- id: dhs-newsroom
+  name: DHS News Releases
+  branch: executive
+  parent_org: Department of Homeland Security
+  description: "Press releases from the Department of Homeland Security on border security, cybersecurity, disaster response, and immigration enforcement."
+  type: html-index
+  urls:
+    home: https://www.dhs.gov/news-releases
+  method: Would parse the news-release HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+# --------------------------------------- planned: independent agencies ----
+
+- id: epa-newsroom
+  name: EPA News Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "News releases from the Environmental Protection Agency on rules, enforcement actions, and grants."
+  type: rss
+  urls:
+    home: https://www.epa.gov/newsreleases
+    feed: https://www.epa.gov/newsreleases/search/rss
+  method: Would poll the news-release RSS feed daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: sec-newsroom
+  name: SEC Press Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "Press releases from the Securities and Exchange Commission, including enforcement actions and rulemaking announcements."
+  type: rss
+  urls:
+    home: https://www.sec.gov/newsroom/press-releases
+    feed: https://www.sec.gov/news/pressreleases.rss
+  method: Would poll the press-release RSS feed daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: "sec.gov was redesigned in 2024; confirm both the newsroom path and the legacy feed URL at viability probe."
+
+- id: fcc-newsroom
+  name: FCC Headlines
+  branch: executive
+  parent_org: Independent agency
+  description: "Headlines and releases from the Federal Communications Commission, including orders, rulemakings, and enforcement actions."
+  type: rss
+  urls:
+    home: https://www.fcc.gov/news-events/headlines
+    feed: https://www.fcc.gov/news-events/headlines.rss
+  method: Would poll the headlines RSS feed daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: "FCC publishes RSS feeds; exact feed URL unverified — confirm at viability probe."
+
+- id: ftc-newsroom
+  name: FTC Press Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "Press releases from the Federal Trade Commission on antitrust and consumer-protection actions."
+  type: rss
+  urls:
+    home: https://www.ftc.gov/news-events/news/press-releases
+    feed: https://www.ftc.gov/feeds/press-release.xml
+  method: Would poll the press-release RSS feed daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: nasa-newsroom
+  name: NASA News Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "News releases from NASA on missions, launches, and research."
+  type: rss
+  urls:
+    home: https://www.nasa.gov/news/
+    feed: https://www.nasa.gov/rss/dyn/breaking_news.rss
+  method: Would poll the breaking-news RSS feed daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: "nasa.gov was redesigned in 2023; the legacy feed URL has historically persisted — confirm at viability probe."
+
+- id: ssa-newsroom
+  name: SSA Press Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "Press releases from the Social Security Administration on benefits, policy, and program administration."
+  type: html-index
+  urls:
+    home: https://www.ssa.gov/news/
+  method: Would parse the newsroom HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: nlrb-newsroom
+  name: NLRB News Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "News releases from the National Labor Relations Board on decisions, elections, and enforcement."
+  type: html-index
+  urls:
+    home: https://www.nlrb.gov/news-publications/news/news-releases
+  method: Would parse the news-release HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: fec-newsroom
+  name: FEC Press Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "Press releases from the Federal Election Commission on campaign-finance rules, advisory opinions, and enforcement."
+  type: html-index
+  urls:
+    home: https://www.fec.gov/updates/
+  method: Would parse the updates HTML index (filtered to press releases) daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: gsa-newsroom
+  name: GSA News Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "News releases from the General Services Administration on federal procurement, real estate, and technology programs."
+  type: html-index
+  urls:
+    home: https://www.gsa.gov/about-us/newsroom/news-releases
+  method: Would parse the news-release HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: opm-newsroom
+  name: OPM News Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "News releases from the Office of Personnel Management on federal workforce policy, hiring, and benefits."
+  type: html-index
+  urls:
+    home: https://www.opm.gov/news/
+  method: Would parse the newsroom HTML index daily for new items.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+# ------------------------------------------------------------ cross-branch ----
+
+- id: govinfo-bulkdata
+  name: govinfo Bulk Data
+  branch: cross-branch
+  parent_org: U.S. Government Publishing Office
+  description: "GPO's bulk data repository: direct XML directory trees for BILLS, the Federal Register, the Congressional Record, CFR/eCFR, and bill status, built for large transfers."
+  type: govinfo-collection
+  urls:
+    home: https://www.govinfo.gov/bulkdata
+  method: bulk XML for historical backfill
+  status: planned
+  added: "2026-07-26"
+  notes: "Preferred over the API for any backfill of more than a few days (GUIDE §4); run off-peak, throttled."

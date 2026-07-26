@@ -13,6 +13,10 @@ class FakeResponse:
         self.headers = headers or {}
         self.content = body
 
+    @property
+    def text(self):
+        return self.content.decode("utf-8", errors="replace")
+
     def json(self):
         import json
 
@@ -20,7 +24,9 @@ class FakeResponse:
 
     def raise_for_status(self):
         if self.status_code >= 400:
-            raise RuntimeError(f"HTTP {self.status_code}")
+            import requests
+
+            raise requests.HTTPError(f"HTTP {self.status_code}", response=self)
 
 
 class FakeSession:
@@ -110,7 +116,9 @@ def test_5xx_exponential_backoff_then_success(tmp_path):
 
 def test_gives_up_after_max_attempts(tmp_path):
     client, session, _ = make_client(tmp_path, [FakeResponse(500)] * config.MAX_ATTEMPTS)
-    with pytest.raises(RuntimeError, match="HTTP 500"):
+    import requests
+
+    with pytest.raises(requests.HTTPError, match="HTTP 500"):
         client.get("collections")
     assert len(session.calls) == config.MAX_ATTEMPTS
 
@@ -163,3 +171,118 @@ def test_user_agent_sent(tmp_path):
     client, session, _ = make_client(tmp_path, [FakeResponse()])
     client.get("collections")
     assert session.calls[0]["headers"]["User-Agent"].startswith("info-intel/")
+
+
+# ---------------------------------------------------------------------------
+# HttpClient base extensions + AgencyClient (sources expansion)
+# ---------------------------------------------------------------------------
+
+from info_intel.client import AgencyClient, RobotsDisallowedError
+
+
+def make_agency(tmp_path, responses):
+    clock = FakeClock()
+    session = FakeSession(responses)
+    client = AgencyClient(
+        db_path=tmp_path / "fetch_log.db", session=session,
+        sleep=clock.sleep, monotonic=clock.monotonic,
+    )
+    return client, session, clock
+
+
+def robots_resp(body, status=200):
+    return FakeResponse(status=status, body=body.encode(), headers={})
+
+
+def test_budget_buckets_are_separate(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "MAX_REQUESTS_PER_DAY", 1)
+    monkeypatch.setattr(config, "MAX_AGENCY_REQUESTS_PER_DAY", 3)
+    gov = GovinfoClient(db_path=tmp_path / "fetch_log.db",
+                        session=FakeSession([FakeResponse()]))
+    gov.get("collections")  # govinfo bucket now full (1/1)
+    agency, _, _ = make_agency(
+        tmp_path,
+        [robots_resp("User-agent: *\nAllow: /"), FakeResponse()],
+    )
+    resp = agency.get("https://example.gov/news/item")  # must NOT be blocked
+    assert resp.status_code == 200
+    assert gov.requests_today() == 1
+    assert agency.requests_today() == 2  # robots fetch + page fetch
+
+
+def test_legacy_null_client_rows_count_as_govinfo(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "MAX_REQUESTS_PER_DAY", 2)
+    import datetime as dt
+    import sqlite3
+
+    db = sqlite3.connect(tmp_path / "fetch_log.db")
+    db.execute("CREATE TABLE fetch_log (id INTEGER PRIMARY KEY, ts_utc TEXT NOT NULL,"
+               " url TEXT NOT NULL, status INTEGER, bytes INTEGER NOT NULL DEFAULT 0,"
+               " elapsed_ms INTEGER, attempt INTEGER NOT NULL, error TEXT)")
+    db.execute("INSERT INTO fetch_log (ts_utc, url, attempt) VALUES (?, 'x', 1)",
+               (dt.datetime.now(dt.UTC).isoformat(),))
+    db.commit(); db.close()
+    gov = GovinfoClient(db_path=tmp_path / "fetch_log.db",
+                        session=FakeSession([FakeResponse(), FakeResponse()]))
+    assert gov.requests_today() == 1  # pre-migration row counted for govinfo
+    gov.get("collections")
+    with pytest.raises(BudgetExceededError):
+        gov.get("collections")  # 2/2 reached incl. legacy row
+
+
+def test_robots_disallow_blocks_and_logs(tmp_path):
+    client, session, _ = make_agency(
+        tmp_path, [robots_resp("User-agent: *\nDisallow: /news/")]
+    )
+    with pytest.raises(RobotsDisallowedError):
+        client.get("https://example.gov/news/item")
+    assert len(session.calls) == 1  # only robots.txt was fetched
+    rows = client._db.execute(
+        "SELECT url, error FROM fetch_log ORDER BY id"
+    ).fetchall()
+    assert rows[-1][1] == "robots disallowed"
+
+
+def test_robots_404_treated_as_allow(tmp_path):
+    client, _, _ = make_agency(
+        tmp_path,
+        [FakeResponse(status=404, body=b"nope"), FakeResponse()],
+    )
+    assert client.get("https://example.gov/news/item").status_code == 200
+
+
+def test_robots_cached_across_requests(tmp_path):
+    client, session, _ = make_agency(
+        tmp_path,
+        [robots_resp("User-agent: *\nAllow: /"), FakeResponse(), FakeResponse()],
+    )
+    client.get("https://example.gov/a")
+    client.get("https://example.gov/b")
+    robots_fetches = [c for c in session.calls if "robots.txt" in c["url"]]
+    assert len(robots_fetches) == 1
+
+
+def test_conditional_get_304_returned(tmp_path):
+    client, session, _ = make_agency(
+        tmp_path,
+        [robots_resp("User-agent: *\nAllow: /"),
+         FakeResponse(status=304, body=b"")],
+    )
+    resp = client.get("https://example.gov/feed.xml",
+                      headers={"If-None-Match": '"abc"'})
+    assert resp.status_code == 304
+    assert session.calls[-1]["headers"]["If-None-Match"] == '"abc"'
+
+
+def test_retry_after_http_date_form(tmp_path):
+    import datetime as dt
+    import email.utils
+
+    when = email.utils.format_datetime(
+        dt.datetime.now(dt.UTC) + dt.timedelta(seconds=90)
+    )
+    client, _, clock = make_client(
+        tmp_path, [FakeResponse(503, headers={"Retry-After": when}), FakeResponse()]
+    )
+    client.get("collections")
+    assert any(80 <= s <= 91 for s in clock.sleeps)  # honored the date form

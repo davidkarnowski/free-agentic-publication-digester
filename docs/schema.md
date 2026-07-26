@@ -6,7 +6,7 @@ Phase 2 (Extraction: normalized text records and graphic assets — see the
 Extraction section at the end).
 
 - **Database file:** `data/info_intel.db` (repo-relative, like all paths in
-  this project — GUIDE §8).
+  this project — GUIDE §9).
 - **Raw documents are not stored in the database.** They live on the
   filesystem under `data/raw/<collection>/<dateIssued>/` (GUIDE §5); the
   database stores the *path* and the fetch bookkeeping.
@@ -81,7 +81,7 @@ CREATE TABLE packages (
   (re)download without another summary call, and to render a citation link.
   We record the one format we chose (XML preferred, GUIDE §5), not the full
   format matrix — this is an inventory, not a mirror of the API.
-- **`raw_path`** — repo-relative (GUIDE §8 bans absolute paths), NULL until
+- **`raw_path`** — repo-relative (GUIDE §9 bans absolute paths), NULL until
   the file is actually on disk.
 - **`fetch_status`** — the download lifecycle, deliberately coarse:
   - `pending` — known to exist; no current local copy (new, or the server's
@@ -341,3 +341,31 @@ rows self-invalidate if factual summaries regenerate, and phrasing
 iterations never touch the summaries table. Rows are written by
 `analyze.run_plain` (batched, cheap tier); a missing row simply renders the
 item without its "In plain terms" line — presentation aid, never coverage.
+
+---
+
+## Provenance layer (sources expansion, GUIDE §7)
+
+`documents` — stable identity for mutable-source items: keyed
+(source_id, stable_id = feed GUID else normalized URL); stores the
+source's `claimed_published_at` and our `first_seen_at` separately
+(backdating detection depends on never conflating them); lifecycle
+`state` present/missing/removed/restored with conservative promotion
+(handled by the future re-check pass).
+
+`captures` — one row per fetch **attempt** (including 304s, robots
+refusals, errors — absence must be an assertion): two hashes
+(content_sha256 = decoded entity bytes stored content-addressed under
+data/captures/<sha[:2]>/; text_sha256 = normalized text, tagged
+normalizer_version), response-header subset JSON, change_kind enum
+(new/unchanged/unchanged_304/bytes_changed/modified/missing/removed/
+restored/error/robots_refused), prev_capture_id chain, Wayback
+corroboration columns. Daily attempt-level manifests are exported to
+provenance/manifests/ (committed) with a previous-day hash chain.
+
+`feed_state` — per-source conditional-GET validators (ETag/Last-Modified)
+for the agency poller.
+
+`fetch_log` (fetch_log.db) gained a `client` column via additive
+migration: NULL rows are historical govinfo traffic; budgets are counted
+per client bucket (govinfo vs agency vs wayback).

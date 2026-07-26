@@ -88,6 +88,55 @@ CREATE TABLE IF NOT EXISTS graphic_assets (
 CREATE INDEX IF NOT EXISTS idx_graphic_assets_package
     ON graphic_assets (package_id);
 
+-- Sources expansion: mutable-source provenance (GUIDE §7, docs/schema.md) --
+
+CREATE TABLE IF NOT EXISTS documents (
+    id            INTEGER PRIMARY KEY,
+    source_id     TEXT NOT NULL,              -- sources/registry.yaml id
+    stable_id     TEXT NOT NULL,              -- feed GUID, else normalized URL
+    url           TEXT NOT NULL,              -- as first discovered
+    title         TEXT,
+    claimed_published_at TEXT,                -- the source's own claim (T3/T4)
+    first_seen_at TEXT NOT NULL,              -- our observation, never theirs
+    state         TEXT NOT NULL DEFAULT 'present'
+                  CHECK (state IN ('present', 'missing', 'removed', 'restored')),
+    UNIQUE (source_id, stable_id)
+);
+
+CREATE TABLE IF NOT EXISTS captures (
+    id            INTEGER PRIMARY KEY,
+    document_id   INTEGER NOT NULL REFERENCES documents (id),
+    ts_utc        TEXT NOT NULL,
+    url           TEXT NOT NULL,
+    final_url     TEXT,                       -- after redirects
+    http_status   INTEGER,
+    content_sha256 TEXT,                      -- decoded entity bytes (evidence)
+    text_sha256   TEXT,                       -- normalized text (change signal)
+    normalizer_version INTEGER,
+    content_type  TEXT,
+    bytes         INTEGER NOT NULL DEFAULT 0,
+    response_headers TEXT,                    -- JSON subset (Date, Server, ETag...)
+    change_kind   TEXT NOT NULL
+                  CHECK (change_kind IN ('new', 'unchanged', 'unchanged_304',
+                                         'bytes_changed', 'modified',
+                                         'missing', 'removed', 'restored',
+                                         'error', 'robots_refused')),
+    prev_capture_id INTEGER REFERENCES captures (id),
+    wayback_url   TEXT,
+    wayback_status TEXT,
+    note          TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_captures_document ON captures (document_id, ts_utc);
+CREATE INDEX IF NOT EXISTS idx_captures_ts ON captures (ts_utc);
+
+CREATE TABLE IF NOT EXISTS feed_state (
+    source_id     TEXT PRIMARY KEY,
+    etag          TEXT,
+    last_modified TEXT,
+    last_polled_at TEXT
+);
+
 -- Phase 3: analysis layer ---------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS summaries (

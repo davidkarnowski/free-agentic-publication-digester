@@ -17,6 +17,76 @@ Entry format:
 
 ---
 
+## 2026-07-26 14:40 PDT — Sources expansion S1: registry, provenance layer, client generalization
+
+**Context:** User direction: a living sources document tracking every
+fedgov source (ingesting or not, with method); agency newsroom ingestion
+(RSS + direct HTML, respectfully); content preservation + hashing for
+mutable sources with tamper-evidence in mind ("information fuckery":
+stealth edits, removals, backdating, fabrication accusations); storage
+leaning on GitHub. Branding/design explicitly on hold. Planned in plan
+mode; user chose Wayback Machine corroboration and declined
+OpenTimestamps. An adversarial design review (sub-agent) landed post-
+approval; nearly all findings adopted (noted below).
+
+**Built (S1):**
+
+1. **GUIDE:** §2 attributed-speech rule (agency statements are official
+   advocacy — always attributed, never repackaged as fact); §3 agency-
+   newsrooms source class (registry as scope authority; viability checked
+   never presumed; NO WAF evasion — blocked-to-honest-clients is itself
+   recorded accountability data); new **§7 Provenance & Tamper-Evidence**
+   (threat table T1–T7, two-hash strategy, attempt-level manifests with
+   prev-day hash chain, honest limits). Sections renumbered (Roadmap→8,
+   Open-Source→9, Working Agreements→10; cross-refs fixed).
+2. **Sources registry** (sub-agent): sources/registry.yaml — 35 entries
+   spanning the known universe (4 active: CREC/BILLS/FR/USCOURTS; planned:
+   govinfo collections, SCOTUS J2, 15 cabinet newsrooms, 10 independents)
+   with per-entry method/status/notes; sources.py loader w/ strict
+   validation; generated SOURCES.md (coverage stats per branch) with a
+   sync-guard test so the doc can never drift from the registry. Seeded
+   URLs carry confidence notes; the viability-check phase upgrades them.
+3. **Provenance core** (provenance.py): content-addressed capture store
+   (data/captures/<sha[:2]>/<sha>.bin, dedupes); documents table keyed by
+   stable identity (feed GUID else URL) with claimed_published_at vs
+   first_seen_at kept separate; captures record every ATTEMPT (304s,
+   robots refusals, errors) with two hashes (raw bytes = evidence;
+   normalized text = change signal, normalizer-versioned), response-header
+   subset, split change_kind enum (incl. bytes_changed for template noise
+   and conservative missing/removed states for the future re-check pass);
+   daily manifests to provenance/manifests/ with previous-day hash chain;
+   verify_stored() self-check. PROVENANCE.md states exactly what the
+   records prove and — prominently — what they do not ("as served to our
+   identified client"; first-seen ≠ published-at; anchoring declined and
+   revisitable).
+4. **Client generalization:** HttpClient base extracted (pacing, budget,
+   logging, retries incl. HTTP-date Retry-After — a pre-existing gap);
+   GovinfoClient behavior identical (all 12 pre-existing tests passed
+   unchanged as the refactor gate); new AgencyClient: robots.txt fetched
+   through the client itself (paced/budgeted/logged), parsed with protego
+   (RFC 9309 — stdlib robotparser mishandles wildcards), 4xx=allow /
+   5xx=temporary-disallow, crawl-delay honored, per-host cache;
+   conditional-GET (304 passthrough); **separate daily budget buckets**
+   via additive fetch_log migration (client column; NULL = historical
+   govinfo rows) so agency crawling can never consume the govinfo budget.
+5. **Review-agent findings adopted:** attempt-level manifests, hash
+   chain, documents-not-URLs identity, two-hash split change semantics,
+   unchanged_304 distinction, normalizer_version, header forensics,
+   per-client budgets, protego, robots-via-client, Retry-After date form,
+   S1-scope inversion (GH Releases + activation deferred to S2). Declined:
+   promoting OpenTimestamps to S1 (user decision stands; recorded in
+   PROVENANCE.md as revisitable).
+6. **Tests: 181 passing** (+9 sources, +6 provenance, +7 client/agency,
+   fixture fidelity improved to raise real requests.HTTPError).
+
+**Next (S2):** agencies.py feed poller + article ingestion through
+AgencyClient with capture; viability check script upgrading registry
+statuses from live probes; Wayback SPN submission; digest section 6
+(zero-LLM: counts + attributed titles); first real ingest run; site
+rebuild. Then S3 re-check/change-detection pass, S4 GH Release bundles.
+
+---
+
 ## 2026-07-26 10:30 PDT — Static HTML site: derived presentation layer
 
 **Context:** Digests read poorly as raw Markdown in a browser; user wants

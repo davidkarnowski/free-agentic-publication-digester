@@ -37,6 +37,18 @@ MIN_SERVER_REMAINING = 1000
 FETCH_LOG_DB = DATA_DIR / "fetch_log.db"
 PIPELINE_DB = DATA_DIR / "info_intel.db"
 LOG_DIR = DATA_DIR / "logs"
+CAPTURE_DIR = DATA_DIR / "captures"  # content-addressed raw bytes (gitignored)
+MANIFEST_DIR = PROJECT_ROOT / "provenance" / "manifests"  # committed
+SOURCES_REGISTRY = PROJECT_ROOT / "sources" / "registry.yaml"
+
+# GUIDE §3/§4: agency newsrooms get their own daily request bucket so agency
+# crawling can never consume the govinfo budget (or vice versa).
+MAX_AGENCY_REQUESTS_PER_DAY = 500
+# GUIDE §7: bump when the text-normalization/extraction logic changes;
+# text_sha256 values are only comparable within one normalizer version.
+NORMALIZER_VERSION = 1
+# Wayback Save-Page-Now corroboration budget (its own tiny bucket).
+MAX_WAYBACK_REQUESTS_PER_DAY = 100
 LLM_LEDGER_DB = DATA_DIR / "llm_ledger.db"
 
 # GUIDE §6 rule 6: tiered models — cheap map tier, strong compose tier.
