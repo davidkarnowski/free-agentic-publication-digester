@@ -12,65 +12,117 @@ stays in sync.*
 
 | Branch | Active | Planned | Excluded | Unavailable | Total |
 |---|---:|---:|---:|---:|---:|
-| Legislative | 2 | 3 | 0 | 0 | 5 |
-| Executive | 1 | 26 | 0 | 0 | 27 |
-| Judicial | 1 | 1 | 0 | 0 | 2 |
+| Legislative | 2 | 6 | 0 | 0 | 8 |
+| Executive | 1 | 67 | 0 | 0 | 68 |
+| Judicial | 1 | 3 | 0 | 0 | 4 |
 | Cross-branch | 0 | 1 | 0 | 0 | 1 |
-| **Total** | 4 | 31 | 0 | 0 | 35 |
+| **Total** | 4 | 77 | 0 | 0 | 81 |
 
-**4 of 35 sources active.**
+**4 of 81 sources active.**
+
+Per tier:
+
+- **Tier 1** (cabinet departments, top independents, legislative support agencies, the White House, and core govinfo collections): 40 of 81 registered, 4 active
+- **Tier 2** (major sub-agency newsrooms and regulator clusters): 41 of 81 registered, 0 active
+- **Tier 3** (long tail, added opportunistically): 0 of 81 registered, 0 active
 
 ## Legislative
 
-| Name | Parent | Type | Status | Method | Notes |
-|---|---|---|---|---|---|
-| [Congressional Record (CREC)](https://www.govinfo.gov/app/collection/CREC) | U.S. Congress | govinfo-collection | **ACTIVE** | govinfo collections API delta sync |  |
-| [Congressional Bills (BILLS)](https://www.govinfo.gov/app/collection/BILLS) | U.S. Congress | govinfo-collection | **ACTIVE** | govinfo collections API delta sync |  |
-| [Public and Private Laws (PLAW)](https://www.govinfo.gov/app/collection/PLAW) | U.S. Congress | govinfo-collection | planned | Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4). |  |
-| [Congressional Hearings (CHRG)](https://www.govinfo.gov/app/collection/CHRG) | U.S. Congress | govinfo-collection | planned | Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4). | Publication lag means hearing transcripts are not day-shaped; date semantics need a rule before activation. |
-| [Congressional Reports (CRPT)](https://www.govinfo.gov/app/collection/CRPT) | U.S. Congress | govinfo-collection | planned | Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4). |  |
+| Name | Parent | Tier | Type | Status | Method | Notes |
+|---|---|---:|---|---|---|---|
+| [Congressional Record (CREC)](https://www.govinfo.gov/app/collection/CREC) | U.S. Congress | 1 | govinfo-collection | **ACTIVE** | govinfo collections API delta sync |  |
+| [Congressional Bills (BILLS)](https://www.govinfo.gov/app/collection/BILLS) | U.S. Congress | 1 | govinfo-collection | **ACTIVE** | govinfo collections API delta sync |  |
+| [Public and Private Laws (PLAW)](https://www.govinfo.gov/app/collection/PLAW) | U.S. Congress | 1 | govinfo-collection | planned | Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4). |  |
+| [Congressional Hearings (CHRG)](https://www.govinfo.gov/app/collection/CHRG) | U.S. Congress | 1 | govinfo-collection | planned | Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4). | Publication lag means hearing transcripts are not day-shaped; date semantics need a rule before activation. |
+| [Congressional Reports (CRPT)](https://www.govinfo.gov/app/collection/CRPT) | U.S. Congress | 1 | govinfo-collection | planned | Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4). |  |
+| [GAO Reports & Testimonies](https://www.gao.gov/reports-testimonies) | Government Accountability Office | 1 | rss | planned | RSS poll via AgencyClient (pending viability check) | GAO offers RSS feeds; the exact reports-feed URL is unverified (low confidence) — confirm at viability probe. |
+| [CBO Publications](https://www.cbo.gov/publications) | Congressional Budget Office | 1 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | CBO likely offers an RSS feed for publications (unverified) — check at viability probe. |
+| [CRS Reports](https://crsreports.congress.gov/) | Congressional Research Service | 1 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | Public release of CRS reports began in 2018 under appropriations law. The site is search-driven; whether a stable browsable index exists for diffing is unverified (low confidence) — confirm at viability probe. |
 
 ## Executive
 
-| Name | Parent | Type | Status | Method | Notes |
-|---|---|---|---|---|---|
-| [Federal Register (FR)](https://www.govinfo.gov/app/collection/FR) | National Archives and Records Administration | govinfo-collection | **ACTIVE** | govinfo collections API delta sync |  |
-| [Daily Compilation of Presidential Documents (DCPD)](https://www.govinfo.gov/app/collection/DCPD) | Executive Office of the President | govinfo-collection | planned | Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4). |  |
-| [State Press Releases](https://www.state.gov/press-releases/) | Department of State | html-index | planned | Would parse the press-release HTML index daily for new items. | Site is WordPress-based; an RSS feed likely exists (unverified) — check at viability probe. |
-| [Treasury Press Releases](https://home.treasury.gov/news/press-releases) | Department of the Treasury | html-index | planned | Would parse the press-release HTML index daily for new items. |  |
-| [Defense News Releases](https://www.defense.gov/News/) | Department of Defense | rss | planned | Would poll the news-release RSS feed daily for new items. | Feed URL taken from defense.gov's published RSS module; verify exact parameters at viability probe. |
-| [Justice Press Releases](https://www.justice.gov/news) | Department of Justice | rss | planned | Would poll the Office of Public Affairs RSS feed daily for new items. |  |
-| [Interior Press Releases](https://www.doi.gov/pressreleases) | Department of the Interior | html-index | planned | Would parse the press-release HTML index daily for new items. |  |
-| [USDA Press Releases](https://www.usda.gov/about-usda/news/press-releases) | Department of Agriculture | html-index | planned | Would parse the press-release HTML index daily for new items. | Path reflects the redesigned usda.gov; older /media/press-releases may redirect — confirm at viability probe. |
-| [Commerce Press Releases](https://www.commerce.gov/news/press-releases) | Department of Commerce | html-index | planned | Would parse the press-release HTML index daily for new items. |  |
-| [Labor News Releases](https://www.dol.gov/newsroom/releases) | Department of Labor | rss | planned | Would poll the news-release RSS feed daily for new items. | Feed URL from DOL's historical RSS offerings; verify at viability probe. |
-| [HHS Press Releases](https://www.hhs.gov/about/news/index.html) | Department of Health and Human Services | html-index | planned | Would parse the newsroom HTML index daily for new items. |  |
-| [HUD Press Releases](https://www.hud.gov/press) | Department of Housing and Urban Development | html-index | planned | Would parse the press-release HTML index daily for new items. |  |
-| [DOT Press Releases](https://www.transportation.gov/newsroom) | Department of Transportation | html-index | planned | Would parse the newsroom HTML index daily for new items. | Press releases may live under /briefing-room; confirm the canonical index at viability probe. |
-| [Energy Press Releases](https://www.energy.gov/newsroom) | Department of Energy | html-index | planned | Would parse the newsroom HTML index daily for new items. |  |
-| [Education Press Releases](https://www.ed.gov/about/news/press-releases) | Department of Education | html-index | planned | Would parse the press-release HTML index daily for new items. | Path reflects the redesigned ed.gov; older /news/press-releases may redirect — confirm at viability probe. |
-| [VA News Releases](https://news.va.gov/) | Department of Veterans Affairs | rss | planned | Would poll the VA news site RSS feed daily for new items. | news.va.gov is WordPress-based; /feed/ is the conventional WordPress feed path — verify at viability probe. |
-| [DHS News Releases](https://www.dhs.gov/news-releases) | Department of Homeland Security | html-index | planned | Would parse the news-release HTML index daily for new items. |  |
-| [EPA News Releases](https://www.epa.gov/newsreleases) | Independent agency | rss | planned | Would poll the news-release RSS feed daily for new items. |  |
-| [SEC Press Releases](https://www.sec.gov/newsroom/press-releases) | Independent agency | rss | planned | Would poll the press-release RSS feed daily for new items. | sec.gov was redesigned in 2024; confirm both the newsroom path and the legacy feed URL at viability probe. |
-| [FCC Headlines](https://www.fcc.gov/news-events/headlines) | Independent agency | rss | planned | Would poll the headlines RSS feed daily for new items. | FCC publishes RSS feeds; exact feed URL unverified — confirm at viability probe. |
-| [FTC Press Releases](https://www.ftc.gov/news-events/news/press-releases) | Independent agency | rss | planned | Would poll the press-release RSS feed daily for new items. |  |
-| [NASA News Releases](https://www.nasa.gov/news/) | Independent agency | rss | planned | Would poll the breaking-news RSS feed daily for new items. | nasa.gov was redesigned in 2023; the legacy feed URL has historically persisted — confirm at viability probe. |
-| [SSA Press Releases](https://www.ssa.gov/news/) | Independent agency | html-index | planned | Would parse the newsroom HTML index daily for new items. |  |
-| [NLRB News Releases](https://www.nlrb.gov/news-publications/news/news-releases) | Independent agency | html-index | planned | Would parse the news-release HTML index daily for new items. |  |
-| [FEC Press Releases](https://www.fec.gov/updates/) | Independent agency | html-index | planned | Would parse the updates HTML index (filtered to press releases) daily for new items. |  |
-| [GSA News Releases](https://www.gsa.gov/about-us/newsroom/news-releases) | Independent agency | html-index | planned | Would parse the news-release HTML index daily for new items. |  |
-| [OPM News Releases](https://www.opm.gov/news/) | Independent agency | html-index | planned | Would parse the newsroom HTML index daily for new items. |  |
+| Name | Parent | Tier | Type | Status | Method | Notes |
+|---|---|---:|---|---|---|---|
+| [Federal Register (FR)](https://www.govinfo.gov/app/collection/FR) | National Archives and Records Administration | 1 | govinfo-collection | **ACTIVE** | govinfo collections API delta sync |  |
+| [Daily Compilation of Presidential Documents (DCPD)](https://www.govinfo.gov/app/collection/DCPD) | Executive Office of the President | 1 | govinfo-collection | planned | Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4). |  |
+| [State Press Releases](https://www.state.gov/press-releases/) | Department of State | 1 | html-index | planned | Would parse the press-release HTML index daily for new items. | Site is WordPress-based; an RSS feed likely exists (unverified) — check at viability probe. |
+| [Treasury Press Releases](https://home.treasury.gov/news/press-releases) | Department of the Treasury | 1 | html-index | planned | Would parse the press-release HTML index daily for new items. |  |
+| [Defense News Releases](https://www.defense.gov/News/) | Department of Defense | 1 | rss | planned | Would poll the news-release RSS feed daily for new items. | Feed URL taken from defense.gov's published RSS module; verify exact parameters at viability probe. |
+| [Justice Press Releases](https://www.justice.gov/news) | Department of Justice | 1 | rss | planned | Would poll the Office of Public Affairs RSS feed daily for new items. |  |
+| [Interior Press Releases](https://www.doi.gov/pressreleases) | Department of the Interior | 1 | html-index | planned | Would parse the press-release HTML index daily for new items. |  |
+| [USDA Press Releases](https://www.usda.gov/about-usda/news/press-releases) | Department of Agriculture | 1 | html-index | planned | Would parse the press-release HTML index daily for new items. | Path reflects the redesigned usda.gov; older /media/press-releases may redirect — confirm at viability probe. |
+| [Commerce Press Releases](https://www.commerce.gov/news/press-releases) | Department of Commerce | 1 | html-index | planned | Would parse the press-release HTML index daily for new items. |  |
+| [Labor News Releases](https://www.dol.gov/newsroom/releases) | Department of Labor | 1 | rss | planned | Would poll the news-release RSS feed daily for new items. | Feed URL from DOL's historical RSS offerings; verify at viability probe. |
+| [HHS Press Releases](https://www.hhs.gov/about/news/index.html) | Department of Health and Human Services | 1 | html-index | planned | Would parse the newsroom HTML index daily for new items. |  |
+| [HUD Press Releases](https://www.hud.gov/press) | Department of Housing and Urban Development | 1 | html-index | planned | Would parse the press-release HTML index daily for new items. |  |
+| [DOT Press Releases](https://www.transportation.gov/newsroom) | Department of Transportation | 1 | html-index | planned | Would parse the newsroom HTML index daily for new items. | Press releases may live under /briefing-room; confirm the canonical index at viability probe. |
+| [Energy Press Releases](https://www.energy.gov/newsroom) | Department of Energy | 1 | html-index | planned | Would parse the newsroom HTML index daily for new items. |  |
+| [Education Press Releases](https://www.ed.gov/about/news/press-releases) | Department of Education | 1 | html-index | planned | Would parse the press-release HTML index daily for new items. | Path reflects the redesigned ed.gov; older /news/press-releases may redirect — confirm at viability probe. |
+| [VA News Releases](https://news.va.gov/) | Department of Veterans Affairs | 1 | rss | planned | Would poll the VA news site RSS feed daily for new items. | news.va.gov is WordPress-based; /feed/ is the conventional WordPress feed path — verify at viability probe. |
+| [DHS News Releases](https://www.dhs.gov/news-releases) | Department of Homeland Security | 1 | html-index | planned | Would parse the news-release HTML index daily for new items. |  |
+| [EPA News Releases](https://www.epa.gov/newsreleases) | Independent agency | 1 | rss | planned | Would poll the news-release RSS feed daily for new items. |  |
+| [SEC Press Releases](https://www.sec.gov/newsroom/press-releases) | Independent agency | 1 | rss | planned | Would poll the press-release RSS feed daily for new items. | sec.gov was redesigned in 2024; confirm both the newsroom path and the legacy feed URL at viability probe. |
+| [FCC Headlines](https://www.fcc.gov/news-events/headlines) | Independent agency | 1 | rss | planned | Would poll the headlines RSS feed daily for new items. | FCC publishes RSS feeds; exact feed URL unverified — confirm at viability probe. |
+| [FTC Press Releases](https://www.ftc.gov/news-events/news/press-releases) | Independent agency | 1 | rss | planned | Would poll the press-release RSS feed daily for new items. |  |
+| [NASA News Releases](https://www.nasa.gov/news/) | Independent agency | 1 | rss | planned | Would poll the breaking-news RSS feed daily for new items. | nasa.gov was redesigned in 2023; the legacy feed URL has historically persisted — confirm at viability probe. |
+| [SSA Press Releases](https://www.ssa.gov/news/) | Independent agency | 1 | html-index | planned | Would parse the newsroom HTML index daily for new items. |  |
+| [NLRB News Releases](https://www.nlrb.gov/news-publications/news/news-releases) | Independent agency | 1 | html-index | planned | Would parse the news-release HTML index daily for new items. |  |
+| [FEC Press Releases](https://www.fec.gov/updates/) | Independent agency | 1 | html-index | planned | Would parse the updates HTML index (filtered to press releases) daily for new items. |  |
+| [GSA News Releases](https://www.gsa.gov/about-us/newsroom/news-releases) | Independent agency | 1 | html-index | planned | Would parse the news-release HTML index daily for new items. |  |
+| [OPM News Releases](https://www.opm.gov/news/) | Independent agency | 1 | html-index | planned | Would parse the newsroom HTML index daily for new items. |  |
+| [White House Briefing Room](https://www.whitehouse.gov/briefing-room/) | Executive Office of the President | 1 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | Fast channel: the official compilation of the same material arrives later via the planned govinfo DCPD collection. WordPress-based, so an RSS feed likely exists (unverified) — check at viability probe. |
+| [Oversight.gov IG Reports](https://www.oversight.gov/) | Council of the Inspectors General on Integrity and Efficiency | 1 | aggregator | planned | HTML index diff via AgencyClient (pending viability check); aggregator rule: every ingested item must cite the originating Inspector General as its origin, never oversight.gov itself. | Aggregator source class: content is republished, so digest citations must point to the originating IG. Report-listing structure unverified — confirm at viability probe. |
+| [Federal Reserve Press Releases](https://www.federalreserve.gov/newsevents/pressreleases.htm) | Independent agency | 2 | rss | planned | RSS poll via AgencyClient (pending viability check) |  |
+| [FDIC Press Releases](https://www.fdic.gov/news/press-releases) | Independent agency | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | fdic.gov was redesigned circa 2024; press-release path unverified (low confidence) — confirm at viability probe. |
+| [OCC News Releases](https://www.occ.gov/news-issuances/news-releases/) | Department of the Treasury | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | OCC also publishes RSS feeds (URL unverified) — check at viability probe. |
+| [CFPB Newsroom](https://www.consumerfinance.gov/about-us/newsroom/) | Independent agency | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [CFTC Press Releases](https://www.cftc.gov/PressRoom/PressReleases) | Independent agency | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [NCUA Press Releases](https://ncua.gov/newsroom/press-releases) | Independent agency | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | Newsroom path unverified (low confidence) — confirm at viability probe. |
+| [FHFA News Releases](https://www.fhfa.gov/news) | Independent agency | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | fhfa.gov was redesigned circa 2024; news path unverified (low confidence) — confirm at viability probe. |
+| [NRC News Releases](https://www.nrc.gov/reading-rm/doc-collections/news/) | Independent agency | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | Legacy document-collection path; may have moved in a site refresh (low confidence) — confirm at viability probe. |
+| [FERC News Releases](https://www.ferc.gov/news-events/news) | Independent agency | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | Independent commission organizationally within the DOE orbit; its decisions are its own, not the Department's. |
+| [EEOC Newsroom](https://www.eeoc.gov/newsroom) | Independent agency | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [SBA Newsroom](https://www.sba.gov/about-sba/sba-newsroom) | Independent agency | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | Newsroom path unverified (low confidence) — confirm at viability probe. |
+| [NSF News](https://www.nsf.gov/news) | Independent agency | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | nsf.gov was redesigned in 2023; news path unverified (low confidence) — confirm at viability probe. |
+| [USTR Press Releases](https://ustr.gov/about-us/policy-offices/press-office/press-releases) | Executive Office of the President | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [USPS Newsroom](https://about.usps.com/newsroom/national-releases/) | Independent establishment | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [CDC Newsroom](https://www.cdc.gov/media/index.html) | Department of Health and Human Services | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | cdc.gov underwent a major redesign in 2024; newsroom path unverified (low confidence) — confirm at viability probe. |
+| [FDA Press Announcements](https://www.fda.gov/news-events/fda-newsroom/press-announcements) | Department of Health and Human Services | 2 | rss | planned | RSS poll via AgencyClient (pending viability check) | FDA publishes official RSS feeds; the long feed path is from its RSS directory and unverified (low confidence) — confirm at viability probe. |
+| [NIH News Releases](https://www.nih.gov/news-events/news-releases) | Department of Health and Human Services | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [CMS Newsroom](https://www.cms.gov/newsroom) | Department of Health and Human Services | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [IRS Newsroom](https://www.irs.gov/newsroom) | Department of the Treasury | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [FBI Press Releases](https://www.fbi.gov/news/press-releases) | Department of Justice | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | Most FBI case news is published by field offices and by DOJ; the national index is a subset. |
+| [DEA Press Releases](https://www.dea.gov/press-releases) | Department of Justice | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [ATF Press Releases](https://www.atf.gov/news/press-releases) | Department of Justice | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | Press-release path unverified — confirm at viability probe. |
+| [FEMA Press Releases](https://www.fema.gov/about/news-multimedia/press-releases) | Department of Homeland Security | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | Path unverified (low confidence); FEMA also posts per-disaster releases — confirm the national index at viability probe. |
+| [ICE Newsroom](https://www.ice.gov/newsroom) | Department of Homeland Security | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [CBP Media Releases](https://www.cbp.gov/newsroom/media-releases) | Department of Homeland Security | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | Newsroom is filterable by release type; exact media-release index path unverified — confirm at viability probe. |
+| [TSA Press Releases](https://www.tsa.gov/news/press/releases) | Department of Homeland Security | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [USCIS Newsroom](https://www.uscis.gov/newsroom) | Department of Homeland Security | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [Coast Guard News Releases](https://www.news.uscg.mil/) | Department of Homeland Security | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | Runs on the DoD DVIDS-backed news platform (news.uscg.mil), separate from uscg.mil; structure unverified (low confidence) — confirm at viability probe. |
+| [FAA Newsroom](https://www.faa.gov/newsroom) | Department of Transportation | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [NHTSA Press Releases](https://www.nhtsa.gov/press-releases) | Department of Transportation | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [Census Bureau Press Releases](https://www.census.gov/newsroom/press-releases.html) | Department of Commerce | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [NOAA News Releases](https://www.noaa.gov/news-releases) | Department of Commerce | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [NIST News](https://www.nist.gov/news-events/news) | Department of Commerce | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [USPTO News Updates](https://www.uspto.gov/about-us/news-updates) | Department of Commerce | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [Army News Releases](https://www.army.mil/news) | Department of Defense | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | army.mil mixes press releases with feature articles; a releases-only index is unverified — confirm at viability probe. |
+| [Navy Press Releases](https://www.navy.mil/Press-Office/) | Department of Defense | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | Press-office section structure unverified (low confidence) — confirm the releases index at viability probe. |
+| [Air Force News](https://www.af.mil/News/) | Department of Defense | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | Runs the same ArticleCS platform as defense.gov, which exposes RSS.ashx feeds; exact feed parameters unverified — check at viability probe. |
+| [Marine Corps News](https://www.marines.mil/News/) | Department of Defense | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | ArticleCS platform; an RSS.ashx feed likely exists (unverified) — check at viability probe. |
+| [Space Force News](https://www.spaceforce.mil/News/) | Department of Defense | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | ArticleCS platform; an RSS.ashx feed likely exists (unverified) — check at viability probe. |
 
 ## Judicial
 
-| Name | Parent | Type | Status | Method | Notes |
-|---|---|---|---|---|---|
-| [U.S. Courts Opinions (USCOURTS)](https://www.govinfo.gov/app/collection/USCOURTS) | Federal judiciary | govinfo-collection | **ACTIVE** | govinfo collections API delta sync | Rule USCOURTS-FETCH-01: courts post opinions with delay, so each sync re-checks a trailing 7-day archive window rather than a single date. Participation-based (~140 courts), not the complete federal judicial record — every digest's judicial section carries the standing completeness disclosure (GUIDE §3). |
-| [Supreme Court Slip Opinions](https://www.supremecourt.gov/) | Supreme Court of the United States | html-index | planned | Would parse the current term's slip-opinion HTML index and fetch opinion PDFs, drafting syllabus-first (GUIDE §3 phase J2). | First planned non-govinfo primary source, admitted deliberately per GUIDE §3. Slip-opinion index is per-term; the stable .aspx alias should resolve to the current term (verify at activation). |
+| Name | Parent | Tier | Type | Status | Method | Notes |
+|---|---|---:|---|---|---|---|
+| [U.S. Courts Opinions (USCOURTS)](https://www.govinfo.gov/app/collection/USCOURTS) | Federal judiciary | 1 | govinfo-collection | **ACTIVE** | govinfo collections API delta sync | Rule USCOURTS-FETCH-01: courts post opinions with delay, so each sync re-checks a trailing 7-day archive window rather than a single date. Participation-based (~140 courts), not the complete federal judicial record — every digest's judicial section carries the standing completeness disclosure (GUIDE §3). |
+| [Supreme Court Slip Opinions](https://www.supremecourt.gov/) | Supreme Court of the United States | 1 | html-index | planned | Would parse the current term's slip-opinion HTML index and fetch opinion PDFs, drafting syllabus-first (GUIDE §3 phase J2). | First planned non-govinfo primary source, admitted deliberately per GUIDE §3. Slip-opinion index is per-term; the stable .aspx alias should resolve to the current term (verify at activation). |
+| [U.S. Courts News](https://www.uscourts.gov/news) | Administrative Office of the U.S. Courts | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) |  |
+| [Sentencing Commission News](https://www.ussc.gov/about/news) | U.S. Sentencing Commission | 2 | html-index | planned | HTML index diff via AgencyClient (pending viability check) | News path unverified (low confidence) — confirm at viability probe. |
 
 ## Cross-branch
 
-| Name | Parent | Type | Status | Method | Notes |
-|---|---|---|---|---|---|
-| [govinfo Bulk Data](https://www.govinfo.gov/bulkdata) | U.S. Government Publishing Office | govinfo-collection | planned | bulk XML for historical backfill | Preferred over the API for any backfill of more than a few days (GUIDE §4); run off-peak, throttled. |
+| Name | Parent | Tier | Type | Status | Method | Notes |
+|---|---|---:|---|---|---|---|
+| [govinfo Bulk Data](https://www.govinfo.gov/bulkdata) | U.S. Government Publishing Office | 1 | govinfo-collection | planned | bulk XML for historical backfill | Preferred over the API for any backfill of more than a few days (GUIDE §4); run off-peak, throttled. |

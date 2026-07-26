@@ -17,6 +17,40 @@ Entry format:
 
 ---
 
+## 2026-07-26 16:10 PDT — Registry extended to the Tier 1–2 universe (81 sources)
+
+**Context:** Sources review found seven systematic gap clusters
+(legislative support agencies; sub-agency newsrooms that don't flow
+through parent departments; financial regulators; other regulators; the
+White House briefing room; the IG/oversight aggregator; judicial
+administration). User direction: seed the extended universe.
+
+**Work performed:**
+
+1. **GUIDE §3 amendments:** tier definitions (comprehensiveness is
+   claimed per tier against a defined universe — the full federal agency
+   count is famously unknowable, FR ~441 vs ACUS 115 vs FOIA.gov 252);
+   report-publisher class (GAO/CBO/CRS — official analyses, attributed,
+   nonpartisan mandate noted); aggregator class (oversight.gov —
+   transport not origin; citations must point to the originating IG).
+2. **Registry** (sub-agent): tier field with strict validation (bool
+   rejected), aggregator type; 46 new planned entries — 5 Tier 1
+   (GAO, CBO, CRS, White House briefing room, oversight.gov) and 41
+   Tier 2 (Fed/FDIC/OCC/CFPB/CFTC/NCUA/FHFA; NRC/FERC/EEOC/SBA/NSF/
+   USTR/USPS; CDC/FDA/NIH/CMS; IRS; FBI/DEA/ATF; FEMA/ICE/CBP/TSA/
+   USCIS/USCG; FAA/NHTSA; Census/NOAA/NIST/USPTO; five service
+   branches; uscourts-news, USSC). **Totals: 81 sources — Tier 1:
+   40 (4 active), Tier 2: 41 (0 active).** ~16 URLs flagged
+   low-confidence in notes (post-2023 site redesigns), to be resolved by
+   the S2 viability probe, per the no-guessing convention.
+3. SOURCES.md regenerated with per-tier coverage lines; sync guard
+   holding; **188 tests passing.**
+
+**Next:** unchanged — S2 (viability probe upgrading these 77 planned
+statuses from live checks, feed poller, first ingest, digest section 6).
+
+---
+
 ## 2026-07-26 14:40 PDT — Sources expansion S1: registry, provenance layer, client generalization
 
 **Context:** User direction: a living sources document tracking every

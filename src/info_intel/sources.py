@@ -24,6 +24,7 @@ REQUIRED_FIELDS = (
     "parent_org",
     "description",
     "type",
+    "tier",
     "urls",
     "method",
     "status",
@@ -32,7 +33,8 @@ REQUIRED_FIELDS = (
 )
 BRANCHES = ("legislative", "executive", "judicial", "cross-branch")
 STATUSES = ("active", "planned", "evaluated-excluded", "unavailable")
-TYPES = ("govinfo-collection", "rss", "html-index")
+TYPES = ("govinfo-collection", "rss", "html-index", "aggregator")
+TIERS = (1, 2, 3)
 URL_KEYS = ("collection", "feed", "index", "home")
 
 _KEBAB_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -49,6 +51,14 @@ _BRANCH_TITLES = {
     "executive": "Executive",
     "judicial": "Judicial",
     "cross-branch": "Cross-branch",
+}
+_TIER_SEMANTICS = {
+    1: (
+        "cabinet departments, top independents, legislative support agencies, "
+        "the White House, and core govinfo collections"
+    ),
+    2: "major sub-agency newsrooms and regulator clusters",
+    3: "long tail, added opportunistically",
 }
 
 
@@ -69,7 +79,7 @@ def _validate(entry: dict, seen_ids: set[str]) -> None:
         _fail(entry, f"unknown field(s) {', '.join(unknown)}")
 
     for field in REQUIRED_FIELDS:
-        if field == "urls":
+        if field in ("urls", "tier"):
             continue
         if not isinstance(entry[field], str):
             _fail(entry, f"field {field!r} must be a string")
@@ -87,6 +97,8 @@ def _validate(entry: dict, seen_ids: set[str]) -> None:
         _fail(entry, f"status {entry['status']!r} not in {STATUSES}")
     if entry["type"] not in TYPES:
         _fail(entry, f"type {entry['type']!r} not in {TYPES}")
+    if isinstance(entry["tier"], bool) or entry["tier"] not in TIERS:
+        _fail(entry, f"tier {entry['tier']!r} not in {TIERS}")
     if not _DATE_RE.match(entry["added"]):
         _fail(entry, f"added {entry['added']!r} is not YYYY-MM-DD")
 
@@ -117,12 +129,18 @@ def load_registry(path: str | Path | None = None) -> list[dict]:
 
 
 def coverage_stats(entries: list[dict]) -> dict:
-    """Per-branch counts by status: {branch: {status: count}}."""
-    stats: dict[str, dict[str, int]] = {}
+    """Counts by status, per branch and per tier.
+
+    Returns {"branch": {branch: {status: count}}, "tier": {tier: {status: count}}}
+    — enough to state, e.g., "Tier 1: X of Y registered, Z active".
+    """
+    by_branch: dict[str, dict[str, int]] = {}
+    by_tier: dict[int, dict[str, int]] = {}
     for entry in entries:
-        by_status = stats.setdefault(entry["branch"], {})
-        by_status[entry["status"]] = by_status.get(entry["status"], 0) + 1
-    return stats
+        for stats, key in ((by_branch, entry["branch"]), (by_tier, entry["tier"])):
+            by_status = stats.setdefault(key, {})
+            by_status[entry["status"]] = by_status.get(entry["status"], 0) + 1
+    return {"branch": by_branch, "tier": by_tier}
 
 
 def _cell(text: str) -> str:
@@ -139,8 +157,10 @@ def _linked_name(entry: dict) -> str:
 def render_doc(entries: list[dict]) -> str:
     """Render the full SOURCES.md markdown (deterministic — no timestamps)."""
     stats = coverage_stats(entries)
+    branch_stats = stats["branch"]
+    tier_stats = stats["tier"]
     total = len(entries)
-    active = sum(by.get("active", 0) for by in stats.values())
+    active = sum(by.get("active", 0) for by in branch_stats.values())
 
     lines = [
         "# Sources",
@@ -159,13 +179,20 @@ def render_doc(entries: list[dict]) -> str:
         "|---|---:|---:|---:|---:|---:|",
     ]
     for branch in BRANCHES:
-        by = stats.get(branch, {})
+        by = branch_stats.get(branch, {})
         counts = [by.get(status, 0) for status in STATUSES]
         row = " | ".join(str(c) for c in counts)
         lines.append(f"| {_BRANCH_TITLES[branch]} | {row} | {sum(counts)} |")
-    totals = [sum(by.get(status, 0) for by in stats.values()) for status in STATUSES]
+    totals = [sum(by.get(status, 0) for by in branch_stats.values()) for status in STATUSES]
     lines.append(f"| **Total** | {' | '.join(str(c) for c in totals)} | {total} |")
-    lines += ["", f"**{active} of {total} sources active.**"]
+    lines += ["", f"**{active} of {total} sources active.**", "", "Per tier:", ""]
+    for tier in TIERS:
+        by = tier_stats.get(tier, {})
+        registered = sum(by.values())
+        lines.append(
+            f"- **Tier {tier}** ({_TIER_SEMANTICS[tier]}): "
+            f"{registered} of {total} registered, {by.get('active', 0)} active"
+        )
 
     for branch in BRANCHES:
         branch_entries = [e for e in entries if e["branch"] == branch]
@@ -175,8 +202,8 @@ def render_doc(entries: list[dict]) -> str:
             "",
             f"## {_BRANCH_TITLES[branch]}",
             "",
-            "| Name | Parent | Type | Status | Method | Notes |",
-            "|---|---|---|---|---|---|",
+            "| Name | Parent | Tier | Type | Status | Method | Notes |",
+            "|---|---|---:|---|---|---|---|",
         ]
         for e in branch_entries:
             lines.append(
@@ -185,6 +212,7 @@ def render_doc(entries: list[dict]) -> str:
                     [
                         _linked_name(e),
                         _cell(e["parent_org"]),
+                        str(e["tier"]),
                         _cell(e["type"]),
                         _STATUS_BADGES[e["status"]],
                         _cell(e["method"]),

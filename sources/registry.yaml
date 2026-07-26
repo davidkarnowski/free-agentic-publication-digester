@@ -1,8 +1,8 @@
 # Living registry of federal publication sources (GUIDE.md §3).
 # SOURCES.md is generated from this file by scripts/sources_doc.py — edit here,
 # then regenerate. Schema is enforced by src/info_intel/sources.py:
-#   id (kebab, unique), name, branch, parent_org, description, type, urls,
-#   method, status, added, notes.
+#   id (kebab, unique), name, branch, parent_org, description, type,
+#   tier (int 1|2|3), urls, method, status, added, notes.
 
 # ---------------------------------------------------------------- active ----
 
@@ -12,6 +12,7 @@
   parent_org: U.S. Congress
   description: "The daily edition of the Congressional Record: the official verbatim transcript of House and Senate floor proceedings and debate, plus Extensions of Remarks and the Daily Digest."
   type: govinfo-collection
+  tier: 1
   urls:
     collection: https://www.govinfo.gov/app/collection/CREC
   method: govinfo collections API delta sync
@@ -25,6 +26,7 @@
   parent_org: U.S. Congress
   description: "Full text of congressional bills and resolutions at each printed stage (introduced, engrossed, enrolled, and others)."
   type: govinfo-collection
+  tier: 1
   urls:
     collection: https://www.govinfo.gov/app/collection/BILLS
   method: govinfo collections API delta sync
@@ -38,6 +40,7 @@
   parent_org: National Archives and Records Administration
   description: "The daily journal of the federal government: final rules, proposed rules, notices, and presidential documents, compiled by the Office of the Federal Register."
   type: govinfo-collection
+  tier: 1
   urls:
     collection: https://www.govinfo.gov/app/collection/FR
   method: govinfo collections API delta sync
@@ -51,6 +54,7 @@
   parent_org: Federal judiciary
   description: "Opinions from participating federal appellate, district, bankruptcy, and national courts, provided through a GPO partnership with the Administrative Office of the U.S. Courts."
   type: govinfo-collection
+  tier: 1
   urls:
     collection: https://www.govinfo.gov/app/collection/USCOURTS
   method: govinfo collections API delta sync
@@ -66,6 +70,7 @@
   parent_org: U.S. Congress
   description: "Enacted slip-law text of public and private laws after presidential signature or veto override."
   type: govinfo-collection
+  tier: 1
   urls:
     collection: https://www.govinfo.gov/app/collection/PLAW
   method: Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4).
@@ -79,6 +84,7 @@
   parent_org: U.S. Congress
   description: "Transcripts of congressional committee hearings, published with a lag after the hearing date."
   type: govinfo-collection
+  tier: 1
   urls:
     collection: https://www.govinfo.gov/app/collection/CHRG
   method: Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4).
@@ -92,6 +98,7 @@
   parent_org: U.S. Congress
   description: "House, Senate, and conference committee reports accompanying legislation."
   type: govinfo-collection
+  tier: 1
   urls:
     collection: https://www.govinfo.gov/app/collection/CRPT
   method: Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4).
@@ -105,6 +112,7 @@
   parent_org: Executive Office of the President
   description: "Presidential statements, remarks, executive orders, proclamations, and other materials released by the White House press secretary, compiled by the Office of the Federal Register."
   type: govinfo-collection
+  tier: 1
   urls:
     collection: https://www.govinfo.gov/app/collection/DCPD
   method: Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4).
@@ -120,6 +128,7 @@
   parent_org: Supreme Court of the United States
   description: "Slip opinions and order lists published by the Supreme Court on its own site; the Court does not publish through the govinfo USCOURTS collection."
   type: html-index
+  tier: 1
   urls:
     index: https://www.supremecourt.gov/opinions/slipopinions.aspx
     home: https://www.supremecourt.gov/
@@ -136,6 +145,7 @@
   parent_org: Department of State
   description: "Press releases, statements, and remarks from the Department of State, including the Secretary's diplomatic announcements and travel."
   type: html-index
+  tier: 1
   urls:
     home: https://www.state.gov/press-releases/
   method: Would parse the press-release HTML index daily for new items.
@@ -149,6 +159,7 @@
   parent_org: Department of the Treasury
   description: "Press releases from the Department of the Treasury, including sanctions designations, economic policy announcements, and debt-management statements."
   type: html-index
+  tier: 1
   urls:
     home: https://home.treasury.gov/news/press-releases
   method: Would parse the press-release HTML index daily for new items.
@@ -162,6 +173,7 @@
   parent_org: Department of Defense
   description: "News releases and advisories from the Department of Defense covering operations, contracts, and personnel announcements."
   type: rss
+  tier: 1
   urls:
     home: https://www.defense.gov/News/
     feed: https://www.defense.gov/DesktopModules/ArticleCS/RSS.ashx?ContentType=1&Site=945&max=10
@@ -176,6 +188,7 @@
   parent_org: Department of Justice
   description: "Press releases from the Department of Justice Office of Public Affairs, including indictments, settlements, and enforcement actions."
   type: rss
+  tier: 1
   urls:
     home: https://www.justice.gov/news
     feed: https://www.justice.gov/feeds/opa/justice-news.xml
@@ -190,6 +203,7 @@
   parent_org: Department of the Interior
   description: "Press releases from the Department of the Interior on public lands, wildlife, and natural-resource management."
   type: html-index
+  tier: 1
   urls:
     home: https://www.doi.gov/pressreleases
   method: Would parse the press-release HTML index daily for new items.
@@ -203,6 +217,7 @@
   parent_org: Department of Agriculture
   description: "Press releases from the Department of Agriculture on farm programs, food safety, nutrition assistance, and rural development."
   type: html-index
+  tier: 1
   urls:
     home: https://www.usda.gov/about-usda/news/press-releases
   method: Would parse the press-release HTML index daily for new items.
@@ -216,6 +231,7 @@
   parent_org: Department of Commerce
   description: "Press releases from the Department of Commerce, including trade actions and economic program announcements."
   type: html-index
+  tier: 1
   urls:
     home: https://www.commerce.gov/news/press-releases
   method: Would parse the press-release HTML index daily for new items.
@@ -229,6 +245,7 @@
   parent_org: Department of Labor
   description: "News releases from the Department of Labor on employment data, workplace enforcement, and benefits programs."
   type: rss
+  tier: 1
   urls:
     home: https://www.dol.gov/newsroom/releases
     feed: https://www.dol.gov/rss/releases.xml
@@ -243,6 +260,7 @@
   parent_org: Department of Health and Human Services
   description: "Press releases from the Department of Health and Human Services on public health, biomedical research, and health programs."
   type: html-index
+  tier: 1
   urls:
     home: https://www.hhs.gov/about/news/index.html
   method: Would parse the newsroom HTML index daily for new items.
@@ -256,6 +274,7 @@
   parent_org: Department of Housing and Urban Development
   description: "Press releases from the Department of Housing and Urban Development on housing programs, grants, and enforcement."
   type: html-index
+  tier: 1
   urls:
     home: https://www.hud.gov/press
   method: Would parse the press-release HTML index daily for new items.
@@ -269,6 +288,7 @@
   parent_org: Department of Transportation
   description: "Press releases from the Department of Transportation on infrastructure funding, safety rules, and aviation actions."
   type: html-index
+  tier: 1
   urls:
     home: https://www.transportation.gov/newsroom
   method: Would parse the newsroom HTML index daily for new items.
@@ -282,6 +302,7 @@
   parent_org: Department of Energy
   description: "Press releases from the Department of Energy on energy programs, national laboratories, and nuclear security."
   type: html-index
+  tier: 1
   urls:
     home: https://www.energy.gov/newsroom
   method: Would parse the newsroom HTML index daily for new items.
@@ -295,6 +316,7 @@
   parent_org: Department of Education
   description: "Press releases from the Department of Education on federal student aid, grants, and education policy."
   type: html-index
+  tier: 1
   urls:
     home: https://www.ed.gov/about/news/press-releases
   method: Would parse the press-release HTML index daily for new items.
@@ -308,6 +330,7 @@
   parent_org: Department of Veterans Affairs
   description: "News releases from the Department of Veterans Affairs on veterans' benefits, health care, and memorial affairs."
   type: rss
+  tier: 1
   urls:
     home: https://news.va.gov/
     feed: https://news.va.gov/feed/
@@ -322,6 +345,7 @@
   parent_org: Department of Homeland Security
   description: "Press releases from the Department of Homeland Security on border security, cybersecurity, disaster response, and immigration enforcement."
   type: html-index
+  tier: 1
   urls:
     home: https://www.dhs.gov/news-releases
   method: Would parse the news-release HTML index daily for new items.
@@ -337,6 +361,7 @@
   parent_org: Independent agency
   description: "News releases from the Environmental Protection Agency on rules, enforcement actions, and grants."
   type: rss
+  tier: 1
   urls:
     home: https://www.epa.gov/newsreleases
     feed: https://www.epa.gov/newsreleases/search/rss
@@ -351,6 +376,7 @@
   parent_org: Independent agency
   description: "Press releases from the Securities and Exchange Commission, including enforcement actions and rulemaking announcements."
   type: rss
+  tier: 1
   urls:
     home: https://www.sec.gov/newsroom/press-releases
     feed: https://www.sec.gov/news/pressreleases.rss
@@ -365,6 +391,7 @@
   parent_org: Independent agency
   description: "Headlines and releases from the Federal Communications Commission, including orders, rulemakings, and enforcement actions."
   type: rss
+  tier: 1
   urls:
     home: https://www.fcc.gov/news-events/headlines
     feed: https://www.fcc.gov/news-events/headlines.rss
@@ -379,6 +406,7 @@
   parent_org: Independent agency
   description: "Press releases from the Federal Trade Commission on antitrust and consumer-protection actions."
   type: rss
+  tier: 1
   urls:
     home: https://www.ftc.gov/news-events/news/press-releases
     feed: https://www.ftc.gov/feeds/press-release.xml
@@ -393,6 +421,7 @@
   parent_org: Independent agency
   description: "News releases from NASA on missions, launches, and research."
   type: rss
+  tier: 1
   urls:
     home: https://www.nasa.gov/news/
     feed: https://www.nasa.gov/rss/dyn/breaking_news.rss
@@ -407,6 +436,7 @@
   parent_org: Independent agency
   description: "Press releases from the Social Security Administration on benefits, policy, and program administration."
   type: html-index
+  tier: 1
   urls:
     home: https://www.ssa.gov/news/
   method: Would parse the newsroom HTML index daily for new items.
@@ -420,6 +450,7 @@
   parent_org: Independent agency
   description: "News releases from the National Labor Relations Board on decisions, elections, and enforcement."
   type: html-index
+  tier: 1
   urls:
     home: https://www.nlrb.gov/news-publications/news/news-releases
   method: Would parse the news-release HTML index daily for new items.
@@ -433,6 +464,7 @@
   parent_org: Independent agency
   description: "Press releases from the Federal Election Commission on campaign-finance rules, advisory opinions, and enforcement."
   type: html-index
+  tier: 1
   urls:
     home: https://www.fec.gov/updates/
   method: Would parse the updates HTML index (filtered to press releases) daily for new items.
@@ -446,6 +478,7 @@
   parent_org: Independent agency
   description: "News releases from the General Services Administration on federal procurement, real estate, and technology programs."
   type: html-index
+  tier: 1
   urls:
     home: https://www.gsa.gov/about-us/newsroom/news-releases
   method: Would parse the news-release HTML index daily for new items.
@@ -459,6 +492,7 @@
   parent_org: Independent agency
   description: "News releases from the Office of Personnel Management on federal workforce policy, hiring, and benefits."
   type: html-index
+  tier: 1
   urls:
     home: https://www.opm.gov/news/
   method: Would parse the newsroom HTML index daily for new items.
@@ -474,9 +508,683 @@
   parent_org: U.S. Government Publishing Office
   description: "GPO's bulk data repository: direct XML directory trees for BILLS, the Federal Register, the Congressional Record, CFR/eCFR, and bill status, built for large transfers."
   type: govinfo-collection
+  tier: 1
   urls:
     home: https://www.govinfo.gov/bulkdata
   method: bulk XML for historical backfill
   status: planned
   added: "2026-07-26"
   notes: "Preferred over the API for any backfill of more than a few days (GUIDE §4); run off-peak, throttled."
+
+# ------------------------------ planned: legislative support agencies (tier 1) ----
+
+- id: gao-reports
+  name: GAO Reports & Testimonies
+  branch: legislative
+  parent_org: Government Accountability Office
+  description: "Audit, evaluation, and investigative reports and congressional testimonies published by the Government Accountability Office, Congress's audit and oversight arm."
+  type: rss
+  tier: 1
+  urls:
+    home: https://www.gao.gov/reports-testimonies
+    feed: https://www.gao.gov/rss/reports.xml
+  method: RSS poll via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "GAO offers RSS feeds; the exact reports-feed URL is unverified (low confidence) — confirm at viability probe."
+
+- id: cbo-publications
+  name: CBO Publications
+  branch: legislative
+  parent_org: Congressional Budget Office
+  description: "Cost estimates for pending legislation, budget and economic outlook reports, and analytic studies published by the Congressional Budget Office."
+  type: html-index
+  tier: 1
+  urls:
+    home: https://www.cbo.gov/publications
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "CBO likely offers an RSS feed for publications (unverified) — check at viability probe."
+
+- id: crs-reports
+  name: CRS Reports
+  branch: legislative
+  parent_org: Congressional Research Service
+  description: "Nonpartisan policy and legal analysis reports prepared by the Congressional Research Service for members and committees of Congress, released publicly at crsreports.congress.gov."
+  type: html-index
+  tier: 1
+  urls:
+    home: https://crsreports.congress.gov/
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "Public release of CRS reports began in 2018 under appropriations law. The site is search-driven; whether a stable browsable index exists for diffing is unverified (low confidence) — confirm at viability probe."
+
+# ------------------------------------------ planned: White House (tier 1) ----
+
+- id: whitehouse-briefing-room
+  name: White House Briefing Room
+  branch: executive
+  parent_org: Executive Office of the President
+  description: "Statements, releases, remarks, and presidential actions posted to the White House briefing room, including executive orders and proclamations as first announced."
+  type: html-index
+  tier: 1
+  urls:
+    home: https://www.whitehouse.gov/briefing-room/
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "Fast channel: the official compilation of the same material arrives later via the planned govinfo DCPD collection. WordPress-based, so an RSS feed likely exists (unverified) — check at viability probe."
+
+# --------------------------------- planned: IG report aggregator (tier 1) ----
+
+- id: oversight-gov
+  name: Oversight.gov IG Reports
+  branch: executive
+  parent_org: Council of the Inspectors General on Integrity and Efficiency
+  description: "Central aggregation of audit, inspection, and investigative reports from roughly 70 federal Offices of Inspector General, operated by CIGIE. Republishes reports that originate on individual IG sites."
+  type: aggregator
+  tier: 1
+  urls:
+    home: https://www.oversight.gov/
+  method: "HTML index diff via AgencyClient (pending viability check); aggregator rule: every ingested item must cite the originating Inspector General as its origin, never oversight.gov itself."
+  status: planned
+  added: "2026-07-26"
+  notes: "Aggregator source class: content is republished, so digest citations must point to the originating IG. Report-listing structure unverified — confirm at viability probe."
+
+# --------------------------------- planned: financial regulators (tier 2) ----
+
+- id: federal-reserve-news
+  name: Federal Reserve Press Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "Press releases from the Board of Governors of the Federal Reserve System, including FOMC statements, monetary policy actions, and banking regulation and enforcement announcements."
+  type: rss
+  tier: 2
+  urls:
+    home: https://www.federalreserve.gov/newsevents/pressreleases.htm
+    feed: https://www.federalreserve.gov/feeds/press_all.xml
+  method: RSS poll via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: fdic-news
+  name: FDIC Press Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "Press releases from the Federal Deposit Insurance Corporation on bank supervision, bank failures and resolutions, and deposit-insurance actions."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.fdic.gov/news/press-releases
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "fdic.gov was redesigned circa 2024; press-release path unverified (low confidence) — confirm at viability probe."
+
+- id: occ-news
+  name: OCC News Releases
+  branch: executive
+  parent_org: Department of the Treasury
+  description: "News releases from the Office of the Comptroller of the Currency on national-bank and federal-savings-association supervision and enforcement actions."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.occ.gov/news-issuances/news-releases/
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "OCC also publishes RSS feeds (URL unverified) — check at viability probe."
+
+- id: cfpb-newsroom
+  name: CFPB Newsroom
+  branch: executive
+  parent_org: Independent agency
+  description: "Press releases and statements from the Consumer Financial Protection Bureau on consumer-finance rules, supervision, and enforcement actions."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.consumerfinance.gov/about-us/newsroom/
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: cftc-press
+  name: CFTC Press Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "Press releases from the Commodity Futures Trading Commission on derivatives-market rulemaking and enforcement actions."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.cftc.gov/PressRoom/PressReleases
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: ncua-news
+  name: NCUA Press Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "Press releases from the National Credit Union Administration on credit-union supervision, share insurance, and conservatorship actions."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://ncua.gov/newsroom/press-releases
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "Newsroom path unverified (low confidence) — confirm at viability probe."
+
+- id: fhfa-news
+  name: FHFA News Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "News releases from the Federal Housing Finance Agency, regulator and conservator of Fannie Mae, Freddie Mac, and the Federal Home Loan Bank System."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.fhfa.gov/news
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "fhfa.gov was redesigned circa 2024; news path unverified (low confidence) — confirm at viability probe."
+
+# --------------------------- planned: other regulators/independents (tier 2) ----
+
+- id: nrc-news
+  name: NRC News Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "News releases from the Nuclear Regulatory Commission on reactor licensing, oversight, and enforcement."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.nrc.gov/reading-rm/doc-collections/news/
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "Legacy document-collection path; may have moved in a site refresh (low confidence) — confirm at viability probe."
+
+- id: ferc-news
+  name: FERC News Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "News releases from the Federal Energy Regulatory Commission on wholesale electricity markets, natural-gas pipelines, and hydropower licensing."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.ferc.gov/news-events/news
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "Independent commission organizationally within the DOE orbit; its decisions are its own, not the Department's."
+
+- id: eeoc-newsroom
+  name: EEOC Newsroom
+  branch: executive
+  parent_org: Independent agency
+  description: "Press releases from the Equal Employment Opportunity Commission on discrimination lawsuits, settlements, and enforcement guidance."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.eeoc.gov/newsroom
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: sba-newsroom
+  name: SBA Newsroom
+  branch: executive
+  parent_org: Independent agency
+  description: "News releases from the Small Business Administration on loan programs, disaster assistance, and small-business policy."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.sba.gov/about-sba/sba-newsroom
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "Newsroom path unverified (low confidence) — confirm at viability probe."
+
+- id: nsf-news
+  name: NSF News
+  branch: executive
+  parent_org: Independent agency
+  description: "News releases from the National Science Foundation on research funding, scientific findings, and agency programs."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.nsf.gov/news
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "nsf.gov was redesigned in 2023; news path unverified (low confidence) — confirm at viability probe."
+
+- id: ustr-press
+  name: USTR Press Releases
+  branch: executive
+  parent_org: Executive Office of the President
+  description: "Press releases from the Office of the United States Trade Representative on trade negotiations, agreements, and enforcement actions."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://ustr.gov/about-us/policy-offices/press-office/press-releases
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: usps-newsroom
+  name: USPS Newsroom
+  branch: executive
+  parent_org: Independent establishment
+  description: "National news releases from the United States Postal Service on rates, service changes, and operations."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://about.usps.com/newsroom/national-releases/
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+# ---------------------------------------- planned: HHS components (tier 2) ----
+
+- id: cdc-newsroom
+  name: CDC Newsroom
+  branch: executive
+  parent_org: Department of Health and Human Services
+  description: "Press releases and media statements from the Centers for Disease Control and Prevention on outbreaks, health advisories, and public-health guidance."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.cdc.gov/media/index.html
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "cdc.gov underwent a major redesign in 2024; newsroom path unverified (low confidence) — confirm at viability probe."
+
+- id: fda-press
+  name: FDA Press Announcements
+  branch: executive
+  parent_org: Department of Health and Human Services
+  description: "Press announcements from the Food and Drug Administration on drug and device approvals, recalls, warning letters, and enforcement."
+  type: rss
+  tier: 2
+  urls:
+    home: https://www.fda.gov/news-events/fda-newsroom/press-announcements
+    feed: https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml
+  method: RSS poll via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "FDA publishes official RSS feeds; the long feed path is from its RSS directory and unverified (low confidence) — confirm at viability probe."
+
+- id: nih-news
+  name: NIH News Releases
+  branch: executive
+  parent_org: Department of Health and Human Services
+  description: "News releases from the National Institutes of Health on research findings, grants, and institute announcements."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.nih.gov/news-events/news-releases
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: cms-newsroom
+  name: CMS Newsroom
+  branch: executive
+  parent_org: Department of Health and Human Services
+  description: "Press releases and fact sheets from the Centers for Medicare & Medicaid Services on Medicare, Medicaid, and health-insurance-marketplace policy."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.cms.gov/newsroom
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+# ----------------------------------- planned: Treasury component (tier 2) ----
+
+- id: irs-newsroom
+  name: IRS Newsroom
+  branch: executive
+  parent_org: Department of the Treasury
+  description: "News releases from the Internal Revenue Service on filing seasons, tax guidance, and enforcement programs."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.irs.gov/newsroom
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+# ------------------------------------ planned: Justice components (tier 2) ----
+
+- id: fbi-news
+  name: FBI Press Releases
+  branch: executive
+  parent_org: Department of Justice
+  description: "National press releases from the Federal Bureau of Investigation on investigations, arrests, and public alerts."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.fbi.gov/news/press-releases
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "Most FBI case news is published by field offices and by DOJ; the national index is a subset."
+
+- id: dea-press
+  name: DEA Press Releases
+  branch: executive
+  parent_org: Department of Justice
+  description: "Press releases from the Drug Enforcement Administration on enforcement operations, drug-scheduling actions, and public-safety alerts."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.dea.gov/press-releases
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: atf-news
+  name: ATF Press Releases
+  branch: executive
+  parent_org: Department of Justice
+  description: "Press releases from the Bureau of Alcohol, Tobacco, Firearms and Explosives on enforcement operations and firearms and explosives regulation."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.atf.gov/news/press-releases
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "Press-release path unverified — confirm at viability probe."
+
+# ---------------------------------------- planned: DHS components (tier 2) ----
+
+- id: fema-news
+  name: FEMA Press Releases
+  branch: executive
+  parent_org: Department of Homeland Security
+  description: "Press releases from the Federal Emergency Management Agency on disaster declarations, response operations, and assistance programs."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.fema.gov/about/news-multimedia/press-releases
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "Path unverified (low confidence); FEMA also posts per-disaster releases — confirm the national index at viability probe."
+
+- id: ice-newsroom
+  name: ICE Newsroom
+  branch: executive
+  parent_org: Department of Homeland Security
+  description: "News releases from U.S. Immigration and Customs Enforcement on enforcement and removal operations and homeland-security investigations."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.ice.gov/newsroom
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: cbp-newsroom
+  name: CBP Media Releases
+  branch: executive
+  parent_org: Department of Homeland Security
+  description: "National media releases from U.S. Customs and Border Protection on border enforcement, trade, and travel operations."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.cbp.gov/newsroom/media-releases
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "Newsroom is filterable by release type; exact media-release index path unverified — confirm at viability probe."
+
+- id: tsa-press
+  name: TSA Press Releases
+  branch: executive
+  parent_org: Department of Homeland Security
+  description: "Press releases from the Transportation Security Administration on screening policy, technology deployments, and enforcement."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.tsa.gov/news/press/releases
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: uscis-newsroom
+  name: USCIS Newsroom
+  branch: executive
+  parent_org: Department of Homeland Security
+  description: "News releases and alerts from U.S. Citizenship and Immigration Services on immigration-benefits processing and policy updates."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.uscis.gov/newsroom
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: uscg-news
+  name: Coast Guard News Releases
+  branch: executive
+  parent_org: Department of Homeland Security
+  description: "News releases from the U.S. Coast Guard on search-and-rescue cases, law-enforcement operations, and maritime safety."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.news.uscg.mil/
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "Runs on the DoD DVIDS-backed news platform (news.uscg.mil), separate from uscg.mil; structure unverified (low confidence) — confirm at viability probe."
+
+# ------------------------------ planned: Transportation components (tier 2) ----
+
+- id: faa-newsroom
+  name: FAA Newsroom
+  branch: executive
+  parent_org: Department of Transportation
+  description: "Press releases and statements from the Federal Aviation Administration on aviation safety, airspace, and certification actions."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.faa.gov/newsroom
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: nhtsa-press
+  name: NHTSA Press Releases
+  branch: executive
+  parent_org: Department of Transportation
+  description: "Press releases from the National Highway Traffic Safety Administration on vehicle-safety standards, recalls, and defect investigations."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.nhtsa.gov/press-releases
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+# ----------------------------------- planned: Commerce components (tier 2) ----
+
+- id: census-newsroom
+  name: Census Bureau Press Releases
+  branch: executive
+  parent_org: Department of Commerce
+  description: "Press releases from the U.S. Census Bureau announcing data releases from its demographic and economic statistical programs."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.census.gov/newsroom/press-releases.html
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: noaa-news
+  name: NOAA News Releases
+  branch: executive
+  parent_org: Department of Commerce
+  description: "News releases from the National Oceanic and Atmospheric Administration on weather, climate, fisheries, and ocean programs."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.noaa.gov/news-releases
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: nist-news
+  name: NIST News
+  branch: executive
+  parent_org: Department of Commerce
+  description: "News announcements from the National Institute of Standards and Technology on measurement science, standards, and technology programs."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.nist.gov/news-events/news
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: uspto-press
+  name: USPTO News Updates
+  branch: executive
+  parent_org: Department of Commerce
+  description: "Press releases and news updates from the United States Patent and Trademark Office on intellectual-property policy and operations."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.uspto.gov/about-us/news-updates
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+# ------------------------------------ planned: Defense components (tier 2) ----
+
+- id: army-news
+  name: Army News Releases
+  branch: executive
+  parent_org: Department of Defense
+  description: "Official news releases from the U.S. Army on operations, modernization, and personnel."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.army.mil/news
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "army.mil mixes press releases with feature articles; a releases-only index is unverified — confirm at viability probe."
+
+- id: navy-news
+  name: Navy Press Releases
+  branch: executive
+  parent_org: Department of Defense
+  description: "Press releases from the U.S. Navy Office of Information on fleet operations and service announcements."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.navy.mil/Press-Office/
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "Press-office section structure unverified (low confidence) — confirm the releases index at viability probe."
+
+- id: air-force-news
+  name: Air Force News
+  branch: executive
+  parent_org: Department of Defense
+  description: "News articles and releases from the Department of the Air Force on operations, acquisitions, and personnel."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.af.mil/News/
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "Runs the same ArticleCS platform as defense.gov, which exposes RSS.ashx feeds; exact feed parameters unverified — check at viability probe."
+
+- id: marines-news
+  name: Marine Corps News
+  branch: executive
+  parent_org: Department of Defense
+  description: "News stories and releases from the U.S. Marine Corps on operations, exercises, and service announcements."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.marines.mil/News/
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "ArticleCS platform; an RSS.ashx feed likely exists (unverified) — check at viability probe."
+
+- id: space-force-news
+  name: Space Force News
+  branch: executive
+  parent_org: Department of Defense
+  description: "News articles and releases from the U.S. Space Force on launches, space operations, and organizational announcements."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.spaceforce.mil/News/
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "ArticleCS platform; an RSS.ashx feed likely exists (unverified) — check at viability probe."
+
+# ----------------------------------- planned: judicial newsrooms (tier 2) ----
+
+- id: uscourts-news
+  name: U.S. Courts News
+  branch: judicial
+  parent_org: Administrative Office of the U.S. Courts
+  description: "News articles published on uscourts.gov by the Administrative Office of the U.S. Courts on judiciary operations, rulemaking, and Judicial Conference actions."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.uscourts.gov/news
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+
+- id: ussc-news
+  name: Sentencing Commission News
+  branch: judicial
+  parent_org: U.S. Sentencing Commission
+  description: "News releases from the United States Sentencing Commission on guideline amendments, public hearings, and research reports."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://www.ussc.gov/about/news
+  method: HTML index diff via AgencyClient (pending viability check)
+  status: planned
+  added: "2026-07-26"
+  notes: "News path unverified (low confidence) — confirm at viability probe."

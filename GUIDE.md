@@ -160,6 +160,25 @@ direct HTML index pages where no feed exists). Governing rules:
 - Ingestion obeys §4 unchanged: paced, budgeted (its own daily bucket),
   fully logged, conditional requests wherever the server supports them,
   robots.txt honored via an RFC 9309 parser with crawl-delay respected.
+- **Tiers (amended 2026-07-26).** The registry classifies sources by tier
+  so comprehensiveness is measurable against a defined universe rather
+  than the famously uncountable full agency list: **Tier 1** — cabinet
+  departments, top independents, legislative support agencies (GAO, CBO,
+  CRS), the White House briefing room, and core govinfo collections;
+  **Tier 2** — major sub-agency newsrooms (CDC, FDA, IRS, FBI, FEMA,
+  FAA, service branches, …) and regulator clusters (Federal Reserve,
+  FDIC, CFPB, NRC, …) whose output does not flow through their parent
+  department's newsroom; **Tier 3** — the long tail, added
+  opportunistically. Coverage claims are always stated per tier.
+- **Report publishers.** GAO, CBO, and CRS publish *reports*, not press
+  releases — closer in character to the GPO record than to newsrooms.
+  They are ingested through the same registry/capture machinery, and
+  their documents are treated editorially like official analyses:
+  attributed to their institution, with its nonpartisan mandate noted.
+- **Aggregator sources.** An aggregator (e.g. oversight.gov, which
+  collects reports from ~70 Inspectors General) is transport, not origin:
+  digest citations must point to the originating agency's document, and
+  the aggregator's role is disclosed.
 
 ### Secondary (later phases)
 
