@@ -17,6 +17,42 @@ Entry format:
 
 ---
 
+## 2026-07-26 10:30 PDT — Static HTML site: derived presentation layer
+
+**Context:** Digests read poorly as raw Markdown in a browser; user wants
+modern HTML output for local viewing and the envisioned GitHub Pages
+publication. Planned in plan mode; implemented per approved plan.
+
+**Work performed:**
+
+1. **`publish.py` + `scripts/build_site.py`:** canonical digests/*.md →
+   `site/` — one HTML page per digest + index, via the `markdown` library
+   (tables extension; new dependency). Strictly derived output: zero LLM,
+   zero network, idempotent, regenerable.
+2. **Design:** no JavaScript, no external resources — renders identically
+   from file://, GitHub Pages, or any static host. Shared `style.css`:
+   system font stack, 46rem reading measure, deep-blue accent, automatic
+   light/dark via prefers-color-scheme, striped scrollable tables (mobile-
+   safe), responsive images, card-style index with Day-in-Review teaser
+   sentences (extracted from the md), prev/next navigation, footer naming
+   the canonical Markdown source and GUIDE §2. `.nojekyll` written for
+   Pages.
+3. **Asset handling:** digests' relative `assets/<date>/` layout is
+   preserved by copying — no path rewriting of the canonical Markdown.
+4. **Tests:** 6 new (structure, table/image conversion, nav, teasers
+   newest-first, TEMPLATE exclusion, idempotent rebuild, real-data smoke);
+   **suite: 159 passing.** Real build: 2 pages + 7 assets.
+
+**Decisions:** `site/` is committed (published artifact, like digests/);
+canonical output remains the Markdown — the GUIDE §5 REPORT paragraph now
+says so explicitly. build_site is a separate stage, appended to the future
+scheduled chain rather than run inside digest.py.
+
+**Open questions / next steps:** unchanged, plus: GH Pages deploy workflow
+(actions/deploy-pages over site/) when the repo goes public.
+
+---
+
 ## 2026-07-25 18:05 PDT — Phase J1: judicial branch coverage via USCOURTS
 
 **Context:** User direction to extend coverage to the judicial branch.

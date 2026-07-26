@@ -31,6 +31,13 @@ rate-limited per [GUIDE.md](GUIDE.md) §4. A first run with no watermark is
 date-bounded to the last 3 days; deeper history comes from govinfo's bulkdata
 service, never the API.
 
+## HTML site
+
+```sh
+uv run python scripts/build_site.py   # digests/*.md -> site/ (static HTML)
+open site/index.html                  # view locally; light/dark, mobile-ready
+```
+
 ## Layout
 
 ```

@@ -198,6 +198,10 @@ without touching upstream:
            new rules/laws, tracked-item updates, coverage statement.
            Digests embed relevant source graphics (stored under
            digests/assets/, cited like text) rather than only linking out.
+           A static HTML site (site/, built by scripts/build_site.py) is a
+           derived, zero-LLM presentation layer over the canonical
+           Markdown — regenerable at any time, suitable for local viewing
+           and GitHub Pages.
 ```
 
 - **Storage:** filesystem for raw documents (`data/raw/<collection>/<date>/`),
