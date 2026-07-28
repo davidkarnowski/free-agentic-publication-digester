@@ -51,7 +51,10 @@ def digests(tmp_path):
 def test_builds_pages_index_and_assets(digests, tmp_path):
     out = tmp_path / "site"
     stats = publish.build_site(digests, out)
-    assert stats == {"pages": 2, "assets": 1, "out_dir": out}
+    assert stats["pages"] == 2
+    assert stats["assets"] == 1
+    assert stats["out_dir"] == out
+    assert stats["doc_pages"] >= 2  # real docs/site: about.md + methods.md
     assert (out / "2026-07-01.html").exists()
     assert (out / "2026-07-02.html").exists()
     assert (out / "index.html").exists()
@@ -145,6 +148,79 @@ def test_no_sources_md_degrades_gracefully(digests, tmp_path, monkeypatch):
     publish.build_site(digests, out)
     assert not (out / "sources.html").exists()
     assert 'href="sources.html"' not in (out / "index.html").read_text()
+
+
+def test_doc_pages_built_from_docs_site(digests, tmp_path, monkeypatch):
+    """docs/site/*.md render generically: title from the first h1, canonical
+    footer naming the markdown source."""
+    from info_intel import config
+
+    root = tmp_path / "root"
+    (root / "docs" / "site").mkdir(parents=True)
+    (root / "docs" / "site" / "about.md").write_text("# About this project\n\nBody A.\n")
+    (root / "docs" / "site" / "zzz.md").write_text("no h1 here\n")
+    monkeypatch.setattr(config, "PROJECT_ROOT", root)
+    out = tmp_path / "site"
+    stats = publish.build_site(digests, out)
+    assert stats["doc_pages"] == 2
+    about = (out / "about.html").read_text()
+    assert "<title>About this project" in about  # title from first h1
+    assert "Body A." in about
+    assert "docs/site/about.md" in about  # canonical-source footer
+    zzz = (out / "zzz.html").read_text()
+    assert "<title>Zzz" in zzz  # stem fallback when no h1
+
+
+def test_doc_nav_links_on_digest_pages_and_index(digests, tmp_path):
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    for name in ("2026-07-01.html", "index.html"):
+        page = (out / name).read_text()
+        assert 'href="about.html">About</a>' in page
+        assert 'href="methods.html">Methods</a>' in page
+
+
+def test_llms_and_sitemap_include_doc_pages(digests, tmp_path):
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    llms = (out / "llms.txt").read_text()
+    assert "(/about.html)" in llms and "(/methods.html)" in llms
+    sitemap = (out / "sitemap.xml").read_text()
+    assert "/about.html" in sitemap and "/methods.html" in sitemap
+
+
+def test_no_docs_site_degrades_gracefully(digests, tmp_path, monkeypatch):
+    from info_intel import config
+
+    empty_root = tmp_path / "empty"
+    empty_root.mkdir()
+    monkeypatch.setattr(config, "PROJECT_ROOT", empty_root)
+    out = tmp_path / "site"
+    stats = publish.build_site(digests, out)
+    assert stats["doc_pages"] == 0
+    assert not (out / "about.html").exists()
+    assert 'href="about.html"' not in (out / "2026-07-01.html").read_text()
+    assert 'href="about.html"' not in (out / "index.html").read_text()
+    assert "about.html" not in (out / "sitemap.xml").read_text()
+    assert "about.html" not in (out / "llms.txt").read_text()
+
+
+def test_about_and_methods_content(digests, tmp_path):
+    """Spot-check the real explanatory pages for their load-bearing claims."""
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    about = (out / "about.html").read_text()
+    assert "in order to be public" in about  # GUIDE §1 legitimacy framing
+    assert "cite the underlying official" in about  # onward-citation ask
+    methods = (out / "methods.html").read_text()
+    assert "two-hash" in methods
+    assert "Directed programmatic access" in methods  # access hierarchy
+    assert "Basic web access" in methods
+    assert "browser impersonation" in methods
+    assert "Coverage Statement" in methods
+    # section-wise structure for agent ingestion
+    for h2 in ("Sourcing", "Ingestion", "Inference", "Publication"):
+        assert f">{h2}<" in methods or f">{h2}</h2>" in methods
 
 
 def test_agent_surfaces_built(digests, tmp_path):

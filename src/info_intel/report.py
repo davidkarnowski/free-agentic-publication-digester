@@ -44,6 +44,8 @@ RULE_DESCRIPTIONS = {
     "FR-SEL-02": "document type: proposed rule (all listed)",
     "FR-SEL-03": "presidential document (all listed)",
     "PLAW-SEL-01": "enacted into law (all public and private laws are listed)",
+    "AGENCYPR-SEL-01": "official agency release (all releases from active"
+                       " sources are listed; titles only in the pilot)",
     "USCOURTS-SEL-01": "appellate court opinion (all listed)",
     "USCOURTS-SEL-02": "national court opinion (all listed)",
     "FR-EX-01": "notices counted, not individually summarized",
@@ -248,7 +250,7 @@ def _coverage(conn, date):
     """
     pv = config.PROMPT_VERSION
     cov = {}
-    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR"):
         cov[coll] = {
             "packages": _scalar(
                 conn,
@@ -303,6 +305,11 @@ def _coverage(conn, date):
     plaw["excluded"] = 0
     plaw["counted"] = plaw["units"] - plaw["summarized"]
     plaw["rules"] = {}
+
+    agencypr = cov["AGENCYPR"]
+    agencypr["excluded"] = 0
+    agencypr["counted"] = agencypr["units"] - agencypr["summarized"]
+    agencypr["rules"] = {}
 
     notices = _scalar(
         conn,
@@ -385,6 +392,60 @@ _ACRONYMS = {
     "FEMA", "FCC", "FDA", "FERC", "DOD", "DOE", "DHS", "HHS", "IRS", "VA",
     "AI", "II", "III", "IV", "COVID", "GAO", "CBO", "NATO", "UN", "EO",
 }
+
+
+
+def _agency_lines(conn, date):
+    """Section 6: attributed agency release titles (GUIDE §2 attributed
+    speech; §3 mutable-source disclosure). Zero LLM in the pilot."""
+    rows = [dict(r) for r in conn.execute(
+        """
+        SELECT e.title, e.agency, e.metadata
+        FROM extracted_texts e JOIN packages p USING (package_id)
+        WHERE e.collection = 'AGENCYPR' AND p.date_issued = ?
+        ORDER BY e.agency, e.title
+        """,
+        (date,),
+    )]
+    lines = [
+        "## 6. Agency Announcements",
+        "",
+        "Official press releases and statements observed on agency newsrooms",
+        f"on {date} (sources listed in the source guide). These are the",
+        "agencies' own announcements — official advocacy, quoted and",
+        "attributed, not findings of this digest. Agency web content can be",
+        "edited or removed without notice; captures and hashes are preserved",
+        "per the provenance policy.",
+        "",
+    ]
+    if not rows:
+        lines += ["No releases were observed from active sources on this date.",
+                  "", "---", ""]
+        return lines
+    by_agency = {}
+    for r in rows:
+        by_agency.setdefault(r["agency"] or "(unattributed)", []).append(r)
+    for agency in sorted(by_agency, key=str.lower):
+        lines += [f"#### {agency}", ""]
+        for r in by_agency[agency]:
+            meta = json.loads(r["metadata"] or "{}")
+            claimed = (meta.get("claimed_published_at") or "")[:16]
+            head = f"- **[{_one_line(r['title'])}]({meta.get('url', '')})**"
+            if claimed:
+                head += f" — dated {claimed} by the agency"
+            lines += [
+                head,
+                "  - Included because: AGENCYPR-SEL-01 — "
+                + RULE_DESCRIPTIONS["AGENCYPR-SEL-01"],
+            ]
+            if meta.get("wayback_url"):
+                lines.append(
+                    f"  - Source: agency newsroom (above) · "
+                    f"[independent archive]({meta['wayback_url']})"
+                )
+        lines.append("")
+    lines += ["---", ""]
+    return lines
 
 
 def _display_title(raw):
@@ -867,7 +928,7 @@ def _coverage_lines(conn, date, cov, embedded_total):
         )
 
     rows = []
-    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR"):
         d = cov[coll]
         units = "—" if coll == "BILLS" else str(d["units"])
         rows.append(
@@ -1096,7 +1157,7 @@ def _validate_coverage(markdown, conn, date):
         raise ValidationError("Coverage Statement section is missing")
     section = markdown.split("## Coverage Statement", 1)[1]
     cov = _coverage(conn, date)
-    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR"):
         match = re.search(rf"^\| {coll} \| (.+) \|$", section, re.MULTILINE)
         if match is None:
             raise ValidationError(f"coverage row for {coll} is missing")
@@ -1137,7 +1198,22 @@ def _validate_lexicon(markdown, conn, date):
             (config.PROMPT_VERSION, date),
         )
     ]
-    scan = markdown
+    # Agency release titles are attributed official speech, quoted verbatim
+    # in section 6 (GUIDE §2: "Titles quoted verbatim are quoted, not
+    # endorsed") — the gate polices our prose, not the government's.
+    officials += [
+        row[0]
+        for row in conn.execute(
+            "SELECT DISTINCT et.title FROM extracted_texts et"
+            " JOIN packages p USING (package_id)"
+            " WHERE et.collection = 'AGENCYPR' AND p.date_issued = ?",
+            (date,),
+        )
+    ]
+    # URLs are citations, not prose — link slugs echo source headlines
+    # (".../historic-multinational-medical-team...") and must not trip the
+    # gate. Strip markdown link destinations before scanning.
+    scan = re.sub(r"\]\(([^)\s]+)\)", "]( )", markdown)
     for text in officials:
         if not text:
             continue
@@ -1283,6 +1359,7 @@ def render(conn, date, out_dir=None):
     lines += fr_lines
     lines += _plaw_lines(conn, date, items)
     lines += _uscourts_lines(conn, date, items)
+    lines += _agency_lines(conn, date)
     lines += _glossary_lines("\n".join(lines))
     lines += _coverage_lines(conn, date, _coverage(conn, date), embedded_total)
     lines += _methodology_lines(date, git_short)

@@ -9,6 +9,8 @@
 - [Machine-readable digest index](/digests.json)
 - [Atom feed of digests](/feed.xml)
 - [Source guide — what we ingest and why](/sources.html)
+- [About this project](/about.html)
+- [Methods](/methods.html)
 - [Access guide for agents](/agents.html)
 
 ## Notes

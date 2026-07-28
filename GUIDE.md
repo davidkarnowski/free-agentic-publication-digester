@@ -14,6 +14,16 @@ related primary sources — and produces a **daily digest** that a single person
 can ingest with reasonable effort, while preserving a path back to the full,
 unadulterated source record for every claim made.
 
+**Why this is legitimate infrastructure:** this project exists to give
+citizens ease of access to their government's actions, and it is built
+*exclusively* on official government publications — the record a
+government produces precisely in order to make it public. We do not
+uncover anything; we make what is already published easier to find, read,
+verify, and (for AI agents) ingest. The same design generalizes: the
+pipeline's source registry, adapters, and editorial gates are intended to
+be pointable at *any* government's official publication interfaces by
+anyone who forks this codebase for their own jurisdiction.
+
 Two goals in tension, both mandatory:
 
 1. **Digestible** — summarized and aggregated so the day's most significant
@@ -216,6 +226,66 @@ direct HTML index pages where no feed exists). Governing rules:
   digest citations must point to the originating agency's document, and
   the aggregator's role is disclosed.
 
+### Source adapters (amended 2026-07-28)
+
+Real publication interfaces are irregular: feeds without GUIDs, article
+pages that block identified clients, script-rendered sites whose content
+lives in embedded JSON, report indexes instead of newsrooms. The pipeline
+absorbs this irregularity at **one seam**: the `SourceAdapter` abstraction
+(`agencies.py`). A registry entry may name an adapter (`adapter:` field;
+default `rss`), and the adapter owns exactly four decisions while the
+shared loop owns everything else (conditional GETs, robots, budgets,
+capture, provenance, storage, disclosure):
+
+1. **Identity** (`stable_id`) — what makes two sightings the same
+   document (feed GUID; else normalized URL).
+2. **Fetch posture** (`wants_article`) — full article fetch, or
+   feed-metadata-only (e.g. a source whose articles refuse identified
+   clients: we ingest what is offered, never force what is refused).
+3. **Text extraction** (`extract_text`) — how served bytes become plain
+   text (default HTML stripping; specializations may parse content the
+   server embeds statically, e.g. JSON-LD `articleBody` — parsing bytes
+   we were sent is legitimate; executing scripts or impersonating a
+   browser is not).
+4. **Fallback** (`fallback_text`) — what to store when no article text is
+   available (title + feed description), always disclosed via the stored
+   mode.
+
+**Access hierarchy (amended 2026-07-28).** An adapter reaches for access
+methods in this order, and records which rung it stands on:
+
+1. **Directed programmatic access** — whatever the agency itself offers
+   for machines: a documented API, bulk data, RSS/Atom feeds, sitemaps.
+   Using the channel the publisher built for the purpose is both the most
+   respectful and the most stable choice.
+2. **Basic web access** — plain fetches of the same HTML pages a citizen
+   reads, through the robots-enforcing client, only where no directed
+   channel exists.
+3. Never: browser impersonation, script execution, or any access the
+   source refuses to identified clients.
+
+**Transformation ownership.** The adapter owns the shaping of source data
+into the pipeline's schema (documents/captures → packages/extracted_texts
+and the analysis context). That shaping should be **as smart as the
+source data allows, deterministically**: exploit every structure the
+source provides — feed fields, embedded structured data (JSON-LD,
+microdata), consistent markup, official metadata — before falling back to
+generic text stripping. **LLM inference is the secondary tool**, used
+only where programmatic transformation genuinely cannot recover the
+context (e.g. classifying an unstructured page's document type, or
+repairing text order from a hostile layout) — and when used, it is
+budgeted, ledgered, versioned like every other prompt surface (§3a), and
+its output is marked model-derived in metadata, never laundered into
+fields that read as source-provided.
+
+General guidance (see `docs/adding-sources.md` for the how-to): prefer
+configuration (registry fields) over code; write an adapter only when
+identity, posture, or transformation genuinely differ; ground it in probe
+evidence (captured bytes, not assumptions); keep §2/§7 invariants —
+attribution, capture-before-extract, honest disclosure of what could not
+be extracted. The worked example is the USPS adapter (no GUIDs +
+redirect-interstitial links).
+
 ### Source onboarding lifecycle (amended 2026-07-26)
 
 Adding a source is an evaluation, not a URL paste. Every source moves
@@ -283,9 +353,19 @@ All LLM prompts are code, versioned, and change through procedure:
 We are guests on public infrastructure. Rules, enforced in code, not by
 discipline:
 
-- **Self-imposed budget:** max **1 request/second sustained** and a daily cap
-  (start: 2,000 requests/day) — roughly 1% of what GPO permits. The client
-  refuses to exceed it.
+- **Self-imposed budget:** max **1 request/second sustained per host** and a
+  daily cap (start: 2,000 requests/day) — roughly 1% of what GPO permits. The
+  client refuses to exceed it.
+- **Concurrency across hosts only — never against one.** Ingestion may poll
+  distinct hosts in parallel (added 2026-07-28: one worker per host group,
+  each with its own client), because politeness is a promise made to each
+  server individually: every host still sees at most 1 request/second, its
+  robots.txt crawl-delay, and conditional requests, exactly as if it were
+  the only source. Two sources sharing a host always share one worker and
+  one client, so their pacing clocks are common. Daily budgets remain
+  global across workers (counted from the shared fetch log); the check is
+  read-before-request, so concurrency can overshoot a cap by at most the
+  worker count — budgets are set with headroom for exactly this reason.
 - **Poll, don't hammer:** one scheduled sync per day (a second late-day pass
   is acceptable later). Use the `collections` service's last-modified
   filtering so each sync asks only "what changed since my last watermark."
@@ -446,7 +526,7 @@ exactly what it said.* Anticipated interference and mitigations:
 | Silent removal | conservative `missing`→`removed` promotion (≥3 failures over ≥48h), captures retained; `restored` tracked |
 | Backdating / retro-insertion | `claimed_published_at` vs our `first_seen_at`, always stored separately; claimed dates inside a demonstrably covered window are a flagged anomaly |
 | URL churn | document identity keyed by stable id (feed GUID / normalized URL); url + final_url recorded |
-| Content served differently to us | Wayback Machine snapshot per new capture — an independent second witness |
+| Content served differently to us | Wayback Machine snapshot for new captures, within its daily budget (§4) — an independent second witness; best-effort, never blocking, gaps topped up by later passes |
 | "You fabricated the archive" | attempt-level daily manifests (committed) with a previous-day hash chain; git/GitHub history ordering; Wayback corroboration |
 
 Mechanics:

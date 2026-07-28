@@ -54,7 +54,12 @@ def test_registry_loads_and_validates():
 def test_registry_seeds_expected_active_sources():
     entries = sources.load_registry()
     active = {e["id"] for e in entries if e["status"] == "active"}
-    assert active == {"govinfo-crec", "govinfo-bills", "govinfo-fr", "govinfo-uscourts", "govinfo-plaw"}
+    assert active == {"govinfo-crec", "govinfo-bills", "govinfo-fr", "govinfo-uscourts", "govinfo-plaw", "gao-reports", "fda-press",
+        "sec-newsroom", "ftc-newsroom", "nasa-newsroom", "federal-reserve-news",
+        "labor-newsroom", "va-newsroom", "defense-newsroom",
+        # activated 2026-07-28 after documentation-led re-probes:
+        "justice-newsroom", "nist-news", "uscourts-news", "cisa-advisories",
+        "noaa-news"}
 
 
 # ------------------------------------------------------------ coverage_stats --
@@ -87,7 +92,7 @@ def test_coverage_stats_per_tier_on_real_registry():
     assert set(by_tier) <= set(sources.TIERS)
     assert sum(sum(by.values()) for by in by_tier.values()) == len(entries)
     # Tier 1 carries the active govinfo collections seeded at project start.
-    assert by_tier[1].get("active", 0) == 5  # PLAW activated 2026-07-28
+    assert by_tier[1].get("active", 0) == 13  # govinfo 5 + 7 S2 pilots + DOJ (2026-07-28)
 
 
 def test_coverage_stats_empty():

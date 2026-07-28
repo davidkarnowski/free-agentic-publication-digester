@@ -53,6 +53,21 @@ def main() -> int:
     timings["sync"] = time.monotonic() - t0
     done(t0)
 
+    t0 = stage("STAGE 1b/5 — AGENCY NEWSROOMS (RSS poll + capture + Wayback)")
+    from info_intel import agencies
+    from info_intel.client import AgencyClient
+    from info_intel.sources import load_registry
+
+    entries = [e for e in load_registry()
+               if e["status"] == "active" and e["type"] == "rss"]
+    with AgencyClient() as aclient, agencies.WaybackClient() as wclient:
+        aresults = agencies.run(aclient, wclient, conn, entries)
+        print(f"   {len(entries)} source(s) polled, "
+              f"{sum(r['new_items'] for r in aresults)} new item(s), "
+              f"{sum(r['wayback_submitted'] for r in aresults)} wayback", flush=True)
+    timings["agencies"] = time.monotonic() - t0
+    done(t0)
+
     t0 = stage("STAGE 2/5 — EXTRACT (raw archive -> normalized records)")
     from info_intel import extract
 

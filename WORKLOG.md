@@ -17,6 +17,186 @@ Entry format:
 
 ---
 
+## 2026-07-28 14:20 PDT — Bootstrap ingest landed (282 items, 14 sources); five sources activated by probe; DOJ challenge lesson; GAO feed-only economics; digest + S2 commit
+
+**Context:** Closing out the day's arc: the S2 bootstrap ingest, the probe
+wave over research candidates, the DVIDS multi-modal deep dive, and the
+operator's directives to speed GAO within server limits and commit S2.
+
+**Work performed:**
+- **Probes (gate 2)** on nine documented-feed candidates: five passed
+  end-to-end and were activated (justice-newsroom, nist-news,
+  uscourts-news, cisa-advisories — where the researched RSS-retirement
+  turned out not to apply, the feed is alive with full advisory text —
+  and noaa-news feed-only, articles WAF'd). USSC's feed is live but
+  currently empty (stays planned); BLS and ODNI URL guesses 404'd (real
+  feed URLs to be read from their docs pages); FCC's api2 host answered
+  504 (retry later, not a verdict). Registry notes carry the evidence.
+- **DOJ challenge lesson:** first full ingest revealed justice.gov answers
+  sustained article fetching with Akamai bm-verify challenge interstitials
+  (single probes pass; 25 sequential fetches get challenged). Following
+  the challenge URL is bot-check circumvention — never. DOJ flipped to
+  feed-only; the 25 mis-stored items repaired via targeted re-poll
+  (--ids flag added to ingest_agencies.py); challenge pages retained as
+  captured evidence. Generic fix: empty extraction can never be stored as
+  mode 'full' — loop-level fallback with disclosure, tested.
+- **GAO economics:** operator asked for a shorter rhythm within server
+  limits. GAO's User-agent:* Crawl-delay: 420 IS the server limit — not
+  shortenable honestly. Chosen instead: fewer requests — gao-reports
+  flipped to feed-only permanently (its ~4,000-char descriptions are
+  GAO's own report summaries); remaining 12 backfill items ingested in
+  one feed request instead of 84 minutes of paced fetches.
+- **DVIDS deep dive** (sub-agent, resumed across a session limit):
+  docs/dvids-multimodal-research-2026-07-28.md — API/TOS/copyright read
+  verbatim ('free for commercial use'; public domain unless indicated;
+  no-endorsement rule), VIRIN documented, stable_id design
+  (dvids:{type}:{id}), video posture (captions+thumbnail+metadata, no
+  A/V), asset_posture as a proposed fifth adapter decision, six proposed
+  GUIDE amendments awaiting operator approval, and a survey verdict:
+  DVIDS is structurally unique; NASA Image Library is second. Registry
+  97 sources (nasa-image-library, nps-api planned; nara-catalog, loc-api
+  evaluated-excluded as archives).
+- **Final ingest accounting:** 282 AGENCYPR items across 14 active
+  sources; 193 full-text; footprint 360/500 agency, 100/100 wayback (40
+  corroborations recorded before exhaustion), 420/2000 govinfo.
+- **Digest 2026-07-28 re-rendered** — and the validation gate earned its
+  keep twice before passing: (1) agency titles are attributed official
+  speech and are now masked like official summaries (live trigger: DoD's
+  'Historic Multinational Medical Team...'); (2) link URLs are citations,
+  not prose — slugs echoing source headlines (war.gov/.../historic-...)
+  are stripped before the lexicon scan. Both fixes tested. Final digest:
+  21 selected items, 19 official summaries, 282-item agency section with
+  reconciled coverage row.
+- **Site rebuilt:** 4 digests + about/methods/agents/sources + machine
+  surfaces. 224 tests passing.
+
+**Decisions:** No fetch-rhythm ever set below a server's declared limit —
+speed comes from fewer requests, not faster ones. The lexicon gate
+polices only our prose: official titles masked, URLs never scanned.
+DVIDS build gated on operator key signup + GUIDE amendment approval.
+
+**Open questions / next steps:** Wayback top-up for today's ~180
+uncorroborated captures (later days' budgets); FCC api2 re-probe; BLS/ODNI
+feed-URL reads; USSC activation when its feed populates; DVIDS key +
+amendments; GovDelivery-pattern probe (FDIC); S3 re-check pass.
+
+## 2026-07-28 11:45 PDT — Per-host concurrency; ingest observability; public site pages; source-research sprint (81→93)
+
+**Context:** The S2 bootstrap ingest surfaced gao.gov's 420-second robots
+crawl-delay, which serialized the entire nine-source run behind one host's
+sleep timer (~3h projected). Operator asked for (a) a safe speed-up, (b) more
+live verbosity in the ingest, (c) sub-agent research to expand the source
+universe including re-evaluating previously-discounted sources, and (d)
+blog-ready development notes. Separately, the public-pages sub-agent
+delivered About/Methods, and the Wayback URL was manually verifiable after a
+firewall fix.
+
+**Work performed:**
+- **GUIDE §4 amendment first**: pacing is per host; concurrency across
+  hosts only, never against one; budgets stay global (read-before-request
+  check can overshoot by ≤ worker count — documented). Then
+  `agencies.host_groups()` + `run_concurrent()`: one worker per feed-host
+  group, each with its own AgencyClient/WaybackClient (own pacing clock,
+  own crawl-delay obedience) and own SQLite connection (WAL +
+  busy_timeout added to both DBs). Manifest still exports once after all
+  workers join. `ingest_agencies.py` concurrent by default, `--serial`
+  fallback. Result: 8 of 9 newsrooms done in <1 min; GAO takes GAO's time.
+- **Resume trap found and handled**: interrupted runs leave feed ETags in
+  feed_state; the next poll 304s and silently skips unfinished feeds.
+  Restarts now clear the pilot feed_state rows (cheap re-fetch; item-level
+  dedupe absorbs overlap). Two restarts performed losslessly.
+- **Observability**: per-source "feed has N items; M new" + "[i/N] ingested"
+  + per-source done-summaries; worker start/finish lines; crawl-delay
+  announced once per host at INFO; pacing sleeps ≥30s at INFO with reason.
+- **Wayback verified end-to-end**: recorded snapshot (DOL/ETA release,
+  16:46:22 UTC) resolves HTTP 200 with `x-archive-orig-*` headers and a
+  title identical to our captured item. Budget reality: 100/day exhausted
+  after 40 corroborations on bootstrap volume; GUIDE §7 threat-table wording
+  softened to match PROVENANCE.md ("within its daily budget, best-effort").
+- **Public pages** (sub-agent, reviewed line-by-line): docs/site/about.md +
+  methods.md → about.html/methods.html via a generalized publish.py
+  (any docs/site/*.md becomes a nav-linked page; llms.txt + sitemap wired).
+  One factual fix: "cosponsor counts" → "recorded votes taken" (no
+  cosponsor rule exists in code; GUIDE §2's example list is aspirational).
+- **Source-research sprint** (three parallel sub-agents, documentation-first,
+  no probing): synthesis in docs/source-research-2026-07-28.md. Registry
+  81→93: 12 new planned entries (federal-register-api incl. public
+  inspection, regulations-gov-api, congress-gov-api, govinfo-billstatus,
+  senate-xml, house-clerk-votes, docs-house-gov, dvids, bls-news, odni-news,
+  cisa-advisories, ofac-recent-actions) + 17 corrections (DOJ/uscourts/USSC
+  were moved-not-blocked with documented feeds; FCC/Commerce/NOAA have
+  documented channels on non-WAF hosts/paths; NIST feed documented but not
+  autodiscoverable; CRS re-pointed to the api.congress.gov crsreport
+  endpoint; GovDelivery likely email-only — one FDIC probe settles it).
+  Schema: TYPES += api, xml-index, bulkdata. Key negative findings recorded
+  (no CHRG/CRPT in bulkdata; HUD has no press RSS; supremecourt.gov has no
+  feed; PACER parked pending J3 + fee policy).
+- **Devnotes series started** (docs/devnotes/): blog-ready narrative of the
+  adapter seam, the USPS interstitial, the GAO crawl-delay economics, the
+  resume trap, and the Wayback budget-vs-promise correction.
+
+**Decisions:** Politeness is per-server — concurrency across hosts is
+consistent with §4 and now codified there. govinfo rate NOT raised (not a
+bottleneck; 420/2000 requests used). GAO's 7-minute pace honored without
+exception. Probes of the 12 new candidates await operator go-ahead
+(onboarding gate 2 is operator-visible by design).
+
+**Open questions / next steps:** ingest completion → digest re-render with
+section 6 → site rebuild → privacy scan → S2 commit (single bundle). Probe
+shortlist Tier A: federal-register-api, congress-gov-api, dvids,
+justice-newsroom, uscourts-news/ussc-news. GovDelivery email-adapter class
+needs a GUIDE decision if the FDIC feed probe fails. Wayback top-up for
+today's 60 uncorroborated captures on a later day's budget.
+
+## 2026-07-28 10:30 PDT — S2 built; SourceAdapter abstraction; USPS adapter; access/transformation philosophy
+<!-- timestamp corrected 11:45 PDT: originally logged as 17:30 PDT, which was the UTC clock time -->
+
+
+**Context:** User approved S2 implementation, then directed: a source-
+level abstraction for unique publication interfaces (USPS as the worked
+case, via sub-agent), extensibility docs for pointing the codebase at
+other governments, mission framing (citizens' ease of access to what
+governments publish to be public), and — final refinement — the codified
+access hierarchy (directed programmatic access first, basic web access
+second, impersonation never) with adapter-owned smart deterministic
+transformation and LLM inference strictly secondary.
+
+**Built:**
+
+1. **S2 agency ingestion:** `agencies.py` — conditional feed polls
+   (feed_state ETags), items through provenance documents/captures, the
+   AGENCYPR collection, per-source isolation, daily manifest export;
+   `WaybackClient` (own budget bucket) submits every new capture to
+   Save-Page-Now, snapshot URLs recorded; digest **section 6 "Agency
+   Announcements"** (zero-LLM: attributed linked titles by agency,
+   claimed dates, independent-archive links, AGENCYPR coverage row,
+   mutability disclosure); `scripts/ingest_agencies.py` + run_pipeline
+   stage 1b; 9 pilot sources → active (14 active total).
+2. **SourceAdapter abstraction:** identity / fetch-posture / extraction /
+   fallback as the single seam for interface irregularity; registry
+   `adapter:` field; defense-newsroom = first adapter (rss-feed-only).
+3. **USPS adapter (sub-agent), with a probe correction:** the "script-
+   rendered article" was actually a JS redirect interstitial —
+   `/newsroom/rssrequest.htm` carries no content; real article pages were
+   never reached (extractability unknown, not proven bad; registry says
+   so). Adapter: statically mirrors the redirect arithmetic for identity
+   (668 GUID-less items stay distinct while URL noise collapses),
+   feed-metadata-only posture (never re-fetch known-contentless bytes),
+   defensive extract with lede-paragraph fallback. Speculative JSON-LD
+   parsing explicitly declined — findings-free code refused.
+4. **Docs:** GUIDE §1 legitimacy framing (official publications = the
+   record made to be public; we ease access, incl. agentic; forkable per
+   jurisdiction); GUIDE §3 Source adapters section incl. the **access
+   hierarchy** and **transformation ownership** rules (deterministic
+   smart shaping first; LLM secondary, budgeted/ledgered/versioned and
+   marked model-derived); `docs/adding-sources.md` how-to (five gates,
+   adapter table, other-government layering map); README links.
+5. **Tests: 212 passing.** Bootstrap ingest run in progress at time of
+   entry (first-run Wayback submissions are the slow tail); results
+   recorded in the next entry.
+
+---
+
 ## 2026-07-28 15:10 PDT — Dual-audience philosophy: an agentic publishing house
 
 **Context:** User direction: codify that this project publishes for

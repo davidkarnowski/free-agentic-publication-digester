@@ -65,6 +65,7 @@ def parse_feed(body: bytes):
                 "guid": (it.findtext("guid") or "").strip() or None,
                 "claimed_date": (it.findtext("pubDate") or "").strip() or None,
                 "description_chars": len((it.findtext("description") or "").strip()),
+                "description": (it.findtext("description") or "").strip(),
             })
         return "rss", items
     if root.tag == f"{_ATOM_NS}feed":
@@ -83,6 +84,8 @@ def parse_feed(body: bytes):
                     (it.findtext(f"{_ATOM_NS}summary")
                      or it.findtext(f"{_ATOM_NS}content") or "").strip()
                 ),
+                "description": (it.findtext(f"{_ATOM_NS}summary")
+                                or it.findtext(f"{_ATOM_NS}content") or "").strip(),
             })
         return "atom", items
     return None, []

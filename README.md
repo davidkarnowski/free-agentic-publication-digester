@@ -10,6 +10,11 @@ Atom feed) instead of crawling official sites themselves; see the site's
 
 - **[GUIDE.md](GUIDE.md)** — governing document: mission, editorial
   principles, data sources, respectful-access policy, architecture, roadmap.
+- **[SOURCES.md](SOURCES.md)** — the living source guide (generated).
+- **[docs/adding-sources.md](docs/adding-sources.md)** — how to onboard a
+  new source or adapt the pipeline to another government's publication
+  interfaces (source adapters, the five onboarding gates).
+- **[PROVENANCE.md](PROVENANCE.md)** — what our capture hashes prove.
 - **[WORKLOG.md](WORKLOG.md)** — timestamped log of all work sessions.
 
 ## Setup

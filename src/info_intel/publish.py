@@ -197,6 +197,7 @@ img {
 
 _DATE_MD_RE = re.compile(r"^\d{4}-\d{2}-\d{2}\.md$")
 _TEASER_RE = re.compile(r"^## Day in Review\s*$", re.MULTILINE)
+_H1_RE = re.compile(r"^#\s+(.+?)\s*$", re.MULTILINE)
 
 
 def _digest_files(digest_dir):
@@ -227,7 +228,15 @@ def _render_page(title, body_html, nav_links, canonical):
     )
 
 
-def _nav_for(dates, i):
+def _doc_nav_links(doc_pages):
+    """Nav anchors for the docs/site explanatory pages (About, Methods, …)."""
+    return "".join(
+        f'<a href="{stem}.html">{html.escape(stem.capitalize())}</a>'
+        for stem, _title in doc_pages
+    )
+
+
+def _nav_for(dates, i, doc_pages=()):
     links = []
     if i > 0:
         links.append(f'<a href="{dates[i - 1]}.html">&larr; {dates[i - 1]}</a>')
@@ -235,11 +244,41 @@ def _nav_for(dates, i):
         links.append(f'<a href="{dates[i + 1]}.html">{dates[i + 1]} &rarr;</a>')
     links.append('<a href="index.html">All digests</a>')
     links.append('<a href="sources.html">Sources</a>')
+    links.append(_doc_nav_links(doc_pages))
     links.append('<a href="agents.html">For agents</a>')
     return "".join(links)
 
 
-def _build_sources_page(out_dir):
+def _build_doc_pages(out_dir):
+    """Render every docs/site/*.md explanatory page (About, Methods, …) to
+    site/<stem>.html. Returns a sorted list of (stem, title) for pages built;
+    an absent docs/site directory simply yields no pages."""
+    doc_dir = config.PROJECT_ROOT / "docs" / "site"
+    if not doc_dir.is_dir():
+        return []
+    docs = []
+    for path in sorted(doc_dir.glob("*.md"), key=lambda p: p.stem):
+        md_text = path.read_text(encoding="utf-8")
+        match = _H1_RE.search(md_text)
+        title = match.group(1) if match else path.stem.capitalize()
+        docs.append((path, md_text, path.stem, title))
+    doc_pages = [(stem, title) for _p, _t, stem, title in docs]
+    for path, md_text, stem, title in docs:
+        _MD.reset()
+        body = _MD.convert(md_text)
+        page = _render_page(
+            f"{title} — {SITE_TITLE}",
+            body,
+            '<a href="index.html">All digests</a><a href="sources.html">Sources</a>'
+            + _doc_nav_links(p for p in doc_pages if p[0] != stem)
+            + '<a href="agents.html">For agents</a>',
+            f"docs/site/{path.name}",
+        )
+        (out_dir / f"{stem}.html").write_text(page, encoding="utf-8")
+    return doc_pages
+
+
+def _build_sources_page(out_dir, doc_pages=()):
     """Render the source guide (SOURCES.md, generated from the registry)
     into the site. Returns True if the page was built."""
     sources_md = config.PROJECT_ROOT / "SOURCES.md"
@@ -250,7 +289,7 @@ def _build_sources_page(out_dir):
     page = _render_page(
         f"Sources — {SITE_TITLE}",
         body,
-        '<a href="index.html">All digests</a>',
+        '<a href="index.html">All digests</a>' + _doc_nav_links(doc_pages),
         "SOURCES.md (generated from sources/registry.yaml)",
     )
     (out_dir / "sources.html").write_text(page, encoding="utf-8")
@@ -267,6 +306,7 @@ def build_site(digest_dir=None, out_dir=None):
     dates = [p.stem for p in files]
     teasers = {}
     assets_copied = 0
+    doc_pages = _build_doc_pages(out_dir)
 
     for i, path in enumerate(files):
         md_text = path.read_text(encoding="utf-8")
@@ -276,7 +316,7 @@ def build_site(digest_dir=None, out_dir=None):
         page = _render_page(
             f"Daily Digest {path.stem} — {SITE_TITLE}",
             body,
-            _nav_for(dates, i),
+            _nav_for(dates, i, doc_pages),
             f"digests/{path.name}",
         )
         (out_dir / f"{path.stem}.html").write_text(page, encoding="utf-8")
@@ -300,8 +340,8 @@ def build_site(digest_dir=None, out_dir=None):
             f'<li><a class="date" href="{date}.html">Daily Digest — {date}</a>'
             f"{teaser_html}</li>"
         )
-    sources_built = _build_sources_page(out_dir)
-    _build_agent_surfaces(out_dir, dates, teasers)
+    sources_built = _build_sources_page(out_dir, doc_pages)
+    _build_agent_surfaces(out_dir, dates, teasers, doc_pages)
     sources_link = (
         '<p class="tagline"><a href="sources.html">Source guide</a> — every '
         "federal source we ingest, plan to ingest, or have evaluated, with "
@@ -315,7 +355,8 @@ def build_site(digest_dir=None, out_dir=None):
     )
     index = _render_page(
         SITE_TITLE, index_body,
-        '<a href="sources.html">Sources</a>' if sources_built else "",
+        ('<a href="sources.html">Sources</a>' if sources_built else "")
+        + _doc_nav_links(doc_pages),
         "digests/",
     )
     (out_dir / "index.html").write_text(index, encoding="utf-8")
@@ -323,7 +364,12 @@ def build_site(digest_dir=None, out_dir=None):
     (out_dir / "style.css").write_text(_STYLE, encoding="utf-8")
     (out_dir / ".nojekyll").write_text("", encoding="utf-8")
 
-    return {"pages": len(files), "assets": assets_copied, "out_dir": out_dir}
+    return {
+        "pages": len(files),
+        "assets": assets_copied,
+        "doc_pages": len(doc_pages),
+        "out_dir": out_dir,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -383,7 +429,7 @@ def _atom_escape(text):
     return html.escape(text or "", quote=True)
 
 
-def _build_agent_surfaces(out_dir, dates, teasers, base=""):
+def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
     """llms.txt, digests.json, feed.xml, robots.txt, sitemap.xml, agents.html."""
     import json as _json
 
@@ -411,6 +457,9 @@ def _build_agent_surfaces(out_dir, dates, teasers, base=""):
         "- [Machine-readable digest index](/digests.json)",
         "- [Atom feed of digests](/feed.xml)",
         "- [Source guide — what we ingest and why](/sources.html)",
+    ] + [
+        f"- [{title}](/{stem}.html)" for stem, title in doc_pages
+    ] + [
         "- [Access guide for agents](/agents.html)",
         "",
         "## Notes",
@@ -460,7 +509,11 @@ def _build_agent_surfaces(out_dir, dates, teasers, base=""):
         "User-agent: *\nAllow: /\n\nSitemap: /sitemap.xml\n",
         encoding="utf-8",
     )
-    urls = ["index.html", "sources.html", "agents.html"] + [f"{d}.html" for d in dates]
+    urls = (
+        ["index.html", "sources.html", "agents.html"]
+        + [f"{stem}.html" for stem, _title in doc_pages]
+        + [f"{d}.html" for d in dates]
+    )
     sitemap = (
         '<?xml version="1.0" encoding="utf-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'

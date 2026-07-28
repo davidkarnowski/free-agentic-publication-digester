@@ -208,7 +208,8 @@ def connect(db_path=None):
     path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    conn.execute("PRAGMA journal_mode = WAL")
+    conn.execute("PRAGMA busy_timeout = 30000")  # before WAL switch: that PRAGMA
+    conn.execute("PRAGMA foreign_keys = ON")     # needs an exclusive lock, and
+    conn.execute("PRAGMA journal_mode = WAL")    # concurrent host workers (GUIDE §4) race on it
     conn.executescript(_DDL)
     return conn

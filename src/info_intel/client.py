@@ -67,6 +67,7 @@ class HttpClient:
         self._db_path = db_path or config.FETCH_LOG_DB
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._db = sqlite3.connect(self._db_path)
+        self._db.execute("PRAGMA busy_timeout = 30000")  # one writer per host worker
         self._db.executescript(_SCHEMA)
         self._migrate()
         self._session = session or requests.Session()
@@ -198,7 +199,11 @@ class HttpClient:
             elapsed = self._monotonic() - self._last_request_at
             if elapsed < interval:
                 wait = interval - elapsed
-                logger.debug("pacing: sleeping %.2fs", wait)
+                # long crawl-delay waits are operationally interesting; plain
+                # 1 req/s pacing is noise
+                logger.log(logging.INFO if wait >= 30 else logging.DEBUG,
+                           "pacing: sleeping %.2fs%s", wait,
+                           " (host crawl-delay)" if wait >= 30 else "")
                 self._sleep(wait)
         self._last_request_at = self._monotonic()
 
@@ -291,6 +296,7 @@ class AgencyClient(HttpClient):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._robots = {}  # host -> (Protego|None(=allow)|False(=temp disallow), fetched_monotonic)
+        self._delay_announced = set()  # hosts whose crawl-delay we've logged
 
     def _daily_budget(self):
         return config.MAX_AGENCY_REQUESTS_PER_DAY
@@ -302,6 +308,12 @@ class AgencyClient(HttpClient):
                       error="robots disallowed")
             logger.info("robots.txt disallows %s — skipped, not fetched", url)
             raise RobotsDisallowedError(url)
+        host = urlsplit(url).netloc
+        if crawl_delay and crawl_delay > 1.0 and host not in self._delay_announced:
+            self._delay_announced.add(host)
+            logger.info("%s robots.txt sets crawl-delay %.0fs — honoring it"
+                        " (one request per %.0fs to this host)",
+                        host, crawl_delay, crawl_delay)
         return super().get(url, params, headers=headers, min_interval=crawl_delay)
 
     def _robots_verdict(self, url):

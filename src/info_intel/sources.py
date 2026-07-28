@@ -17,6 +17,7 @@ import yaml
 
 REGISTRY_PATH = Path(__file__).resolve().parents[2] / "sources" / "registry.yaml"
 
+OPTIONAL_FIELDS = ("adapter",)  # per-source strategy (GUIDE §3 Source adapters)
 REQUIRED_FIELDS = (
     "id",
     "name",
@@ -33,7 +34,8 @@ REQUIRED_FIELDS = (
 )
 BRANCHES = ("legislative", "executive", "judicial", "cross-branch")
 STATUSES = ("active", "planned", "evaluated-excluded", "unavailable")
-TYPES = ("govinfo-collection", "rss", "html-index", "aggregator")
+TYPES = ("govinfo-collection", "rss", "html-index", "aggregator",
+         "api", "xml-index", "bulkdata")
 TIERS = (1, 2, 3)
 URL_KEYS = ("collection", "feed", "index", "home")
 
@@ -74,7 +76,7 @@ def _validate(entry: dict, seen_ids: set[str]) -> None:
     missing = [f for f in REQUIRED_FIELDS if f not in entry]
     if missing:
         _fail(entry, f"missing required field(s) {', '.join(missing)}")
-    unknown = [k for k in entry if k not in REQUIRED_FIELDS]
+    unknown = [k for k in entry if k not in REQUIRED_FIELDS + OPTIONAL_FIELDS]
     if unknown:
         _fail(entry, f"unknown field(s) {', '.join(unknown)}")
 

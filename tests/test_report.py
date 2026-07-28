@@ -535,3 +535,80 @@ def test_plaw_item_renders_in_section_4(conn, tmp_path):
     assert "- **Public Law 119-101 — Public Law 119-101: Housing supply.**" in md
     assert "Approved: 2026-07-11." in md
     assert "PLAW-SEL-01 — enacted into law" in md
+
+
+def test_agency_announcements_section(conn, tmp_path):
+    now = "2026-07-23T15:00:00Z"
+    conn.execute(
+        "INSERT INTO packages (package_id, collection, date_issued, last_modified,"
+        " first_seen_at, fetch_status) VALUES ('PR-gao-reports-abc12345',"
+        " 'AGENCYPR', ?, ?, ?, 'fetched')", (DATE, now, now))
+    conn.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection, doc_type,"
+        " title, agency, metadata, text, char_count, extracted_at, extractor_version)"
+        " VALUES ('PR-gao-reports-abc12345', '', 'AGENCYPR', 'PRESS',"
+        " 'Audit of Example Program', 'Government Accountability Office',"
+        " ?, 'body', 4, ?, 1)",
+        (json.dumps({"source_id": "gao-reports", "url": "https://gao.gov/x",
+                     "claimed_published_at": "2026-07-23T09:00:00",
+                     "wayback_url": "https://web.archive.org/web/20260723/https://gao.gov/x"}),
+         now))
+    conn.commit()
+    path = report.render(conn, DATE, out_dir=tmp_path)
+    md = path.read_text()
+    assert "## 6. Agency Announcements" in md
+    assert "official advocacy, quoted and" in md
+    assert "**[Audit of Example Program](https://gao.gov/x)**" in md
+    assert "AGENCYPR-SEL-01" in md
+    assert "[independent archive](https://web.archive.org/web/20260723/https://gao.gov/x)" in md
+    assert "- [6. Agency Announcements](#6-agency-announcements)" in md  # ToC
+    assert "| AGENCYPR |" in md  # coverage row
+
+
+def test_banned_word_in_agency_title_is_masked(conn, tmp_path):
+    # Agency titles are attributed official speech quoted verbatim (§2);
+    # the lexicon gate polices our prose, not the government's (found live
+    # 2026-07-28: a DoD release titled "Historic Multinational...").
+    now = "2026-07-23T15:00:00Z"
+    conn.execute(
+        "INSERT INTO packages (package_id, collection, date_issued, last_modified,"
+        " first_seen_at, fetch_status) VALUES ('PR-defense-newsroom-def67890',"
+        " 'AGENCYPR', ?, ?, ?, 'fetched')", (DATE, now, now))
+    conn.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection, doc_type,"
+        " title, agency, metadata, text, char_count, extracted_at, extractor_version)"
+        " VALUES ('PR-defense-newsroom-def67890', '', 'AGENCYPR', 'PRESS',"
+        " 'Historic Landmark Exercise Concludes', 'Department of Defense',"
+        " ?, 'body', 4, ?, 1)",
+        (json.dumps({"source_id": "defense-newsroom", "url": "https://x.gov/hx",
+                     "claimed_published_at": None, "wayback_url": None}), now))
+    conn.commit()
+    path = report.render(conn, DATE, out_dir=tmp_path)
+    assert "Historic Landmark Exercise Concludes" in path.read_text()
+
+
+def test_banned_word_in_link_url_is_not_prose(conn, tmp_path):
+    # Link slugs echo source headlines (found live 2026-07-28:
+    # war.gov/.../historic-multinational-.../) — URLs are citations, never
+    # scanned as our prose.
+    now = "2026-07-23T15:00:00Z"
+    conn.execute(
+        "INSERT INTO packages (package_id, collection, date_issued, last_modified,"
+        " first_seen_at, fetch_status) VALUES ('PR-nist-news-aaa11111',"
+        " 'AGENCYPR', ?, ?, ?, 'fetched')", (DATE, now, now))
+    conn.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection, doc_type,"
+        " title, agency, metadata, text, char_count, extracted_at, extractor_version)"
+        " VALUES ('PR-nist-news-aaa11111', '', 'AGENCYPR', 'PRESS',"
+        " 'Chip Packaging Advance', 'NIST', ?, 'body', 4, ?, 1)",
+        (json.dumps({"source_id": "nist-news",
+                     "url": "https://x.gov/withstand-extreme-sweeping-crackdown",
+                     "claimed_published_at": None, "wayback_url": None}), now))
+    conn.commit()
+    path = report.render(conn, DATE, out_dir=tmp_path)
+    assert "withstand-extreme-sweeping-crackdown" in path.read_text()
+
+
+def test_agency_section_empty_renders_none_line(digest):
+    _, md = digest
+    assert "No releases were observed from active sources" in md
