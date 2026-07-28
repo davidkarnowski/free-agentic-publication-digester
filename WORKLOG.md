@@ -17,6 +17,46 @@ Entry format:
 
 ---
 
+## 2026-07-28 12:40 PDT — Digest refinement: PLAW active, section quick-reads, table of contents
+
+**Context:** User direction: full coverage for Enacted Laws (section 4 was
+a placeholder), plain-speak quick-reads under section titles (user chose
+keeping per-item lines too), a clickable ToC leading each digest, and
+confirmation that agency newsroom ingestion is still pre-S2 (it is —
+probed, not yet wired; answered honestly).
+
+**Built:**
+
+1. **PLAW activated (delta-only per user choice):** collection added to
+   sync scope with USLM format preference (uslmLink — PLAW has no plain
+   xmlLink; empirically sampled PLAW-119publ101); `parsers/plaw.py`
+   (USLM meta: citation, docNumber, approvedDate; txt fallback);
+   PLAW-SEL-01 (all laws listed); real section 4 renderer with citations
+   and approval dates; PLAW coverage row; registry entry → active
+   (5 active sources); watermark bootstrapped (3-day window — empty, as
+   expected between enactments; newest law was 07-11).
+2. **Section quick-reads:** `compose.compose_sections` — one batched
+   cheap-tier call per date producing one-sentence synopses per populated
+   section (strict JSON, stored in new section_summaries keyed by date +
+   key + SECTION_PROMPT_VERSION, invalidated when newer item summaries
+   arrive). Rendered as "*In plain terms: …*" directly under each section
+   heading via post-processing injection — per-item plain lines retained
+   per user choice. LLM prose → linted un-masked automatically.
+3. **Table of contents:** mechanical post-processing pass building a
+   clickable Contents block from the digest's actual top-level headings,
+   placed ahead of Day in Review; `toc` extension added to the site
+   renderer so heading ids exist and anchors work in HTML (verified: 9
+   live in-page links).
+4. **Both digests regenerated** under the new layout (~54K tokens total —
+   map/plain idempotent; only section synopses + re-render ran). TEMPLATE
+   updated (ToC slot, quick-read slots, active section 4).
+5. **Tests: 199 passing** (PLAW parser ×2, section-4 render, ToC+blurb
+   placement, updated active-source counts).
+
+**Next:** unchanged — S2 agency ingestion pilot; scheduling; cap decision.
+
+---
+
 ## 2026-07-28 09:50 PDT — run_pipeline entrypoint; API key incident; newest-complete-day fix; two digests
 
 **Context:** User requested a full verbose pipeline run for "today" with

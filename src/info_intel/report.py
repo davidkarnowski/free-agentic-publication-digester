@@ -43,6 +43,7 @@ RULE_DESCRIPTIONS = {
     "FR-SEL-01": "document type: final rule (all listed)",
     "FR-SEL-02": "document type: proposed rule (all listed)",
     "FR-SEL-03": "presidential document (all listed)",
+    "PLAW-SEL-01": "enacted into law (all public and private laws are listed)",
     "USCOURTS-SEL-01": "appellate court opinion (all listed)",
     "USCOURTS-SEL-02": "national court opinion (all listed)",
     "FR-EX-01": "notices counted, not individually summarized",
@@ -247,7 +248,7 @@ def _coverage(conn, date):
     """
     pv = config.PROMPT_VERSION
     cov = {}
-    for coll in ("CREC", "BILLS", "FR", "USCOURTS"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW"):
         cov[coll] = {
             "packages": _scalar(
                 conn,
@@ -297,6 +298,11 @@ def _coverage(conn, date):
     bills["excluded"] = 0
     bills["counted"] = bills["packages"] - bills["summarized"]
     bills["rules"] = {}
+
+    plaw = cov["PLAW"]
+    plaw["excluded"] = 0
+    plaw["counted"] = plaw["units"] - plaw["summarized"]
+    plaw["rules"] = {}
 
     notices = _scalar(
         conn,
@@ -705,15 +711,26 @@ def _fr_lines(conn, date, items, out_dir):
     return lines, embedded_total
 
 
-_SECTION4_LINES = [
-    "## 4. Enacted Laws",
-    "",
-    "Source: Public and Private Laws (PLAW). PLAW is not yet ingested by this",
-    "pipeline version; enacted laws are not covered in this digest.",
-    "",
-    "---",
-    "",
-]
+def _plaw_lines(conn, date, items):
+    laws = sorted((i for i in items if i["inclusion_rule"] == "PLAW-SEL-01"),
+                  key=lambda i: i["package_id"])
+    lines = ["## 4. Enacted Laws", "",
+             f"Source: Public and Private Laws (PLAW) published {date}.", ""]
+    if laws:
+        for item in laws:
+            metadata = item["metadata"]
+            cite = (metadata.get("citations") or [item["package_id"]])[0]
+            head = f"- **{cite} — {_one_line(item['title'] or '(untitled)')}** — " \
+                   f"{_one_line(item['summary'])}"
+            if metadata.get("approved_date"):
+                head += f" Approved: {metadata['approved_date']}."
+            lines += [head, *_plain_line(item), _included_line(item),
+                      _source_line(item["package_id"])]
+        lines.append("")
+    else:
+        lines += ["No laws were published in this range.", ""]
+    lines += ["---", ""]
+    return lines
 
 
 def _by_court(subset):
@@ -850,7 +867,7 @@ def _coverage_lines(conn, date, cov, embedded_total):
         )
 
     rows = []
-    for coll in ("CREC", "BILLS", "FR", "USCOURTS"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW"):
         d = cov[coll]
         units = "—" if coll == "BILLS" else str(d["units"])
         rows.append(
@@ -1079,7 +1096,7 @@ def _validate_coverage(markdown, conn, date):
         raise ValidationError("Coverage Statement section is missing")
     section = markdown.split("## Coverage Statement", 1)[1]
     cov = _coverage(conn, date)
-    for coll in ("CREC", "BILLS", "FR", "USCOURTS"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW"):
         match = re.search(rf"^\| {coll} \| (.+) \|$", section, re.MULTILINE)
         if match is None:
             raise ValidationError(f"coverage row for {coll} is missing")
@@ -1193,6 +1210,57 @@ def _day_in_review_lines(conn, date):
     ]
 
 
+
+# ---------------------------------------------------------------------------
+# Post-processing: section quick-reads + table of contents
+# ---------------------------------------------------------------------------
+
+# Heading line -> section_summaries key (compose.SECTION_KEYS).
+_BLURB_HEADINGS = {
+    "### 1.1 Senate": "senate",
+    "### 1.2 House of Representatives": "house",
+    "### 2.2 Bills Listed by Mechanical Rule": "legislation",
+    "### 3.2 Rules Published": "rules",
+    "### 3.3 Proposed Rules Published": "proposed",
+    "### 3.4 Notices and Presidential Documents": "presidential",
+    "## 4. Enacted Laws": "laws",
+    "### 5.1 Appellate and National Court Opinions": "judicial",
+}
+
+
+def _inject_section_blurbs(lines, synopses):
+    """Insert the stored quick-read synopsis directly under each section
+    heading (LLM prose: linted un-masked like all generated text). Sections
+    without a stored synopsis render unchanged — never fabricated."""
+    if not synopses:
+        return lines
+    out = []
+    for line in lines:
+        out.append(line)
+        key = _BLURB_HEADINGS.get(line.strip())
+        if key and synopses.get(key):
+            out += ["", f"*In plain terms: {_one_line(synopses[key])}*"]
+    return out
+
+
+def _slug(heading):
+    text = re.sub(r"[^\w\s-]", "", heading.lower())
+    return re.sub(r"[\s]+", "-", text).strip("-")
+
+
+def _inject_toc(lines):
+    """Clickable Contents block leading the digest (before Day in Review).
+    Anchors follow the python-markdown/GitHub slug convention."""
+    headings = [ln[3:] for ln in lines if ln.startswith("## ") and ln != "## Contents"]
+    if not headings:
+        return lines
+    toc = ["## Contents", ""]
+    toc += [f"- [{h}](#{_slug(h)})" for h in headings]
+    toc += ["", "---", ""]
+    first = next(i for i, ln in enumerate(lines) if ln.startswith("## "))
+    return lines[:first] + toc + lines[first:]
+
+
 def render(conn, date, out_dir=None):
     """Render the digest for ``date`` and return the written path.
 
@@ -1213,11 +1281,16 @@ def render(conn, date, out_dir=None):
     lines += _bills_lines(conn, date, items)
     fr_lines, embedded_total = _fr_lines(conn, date, items, out_dir)
     lines += fr_lines
-    lines += _SECTION4_LINES
+    lines += _plaw_lines(conn, date, items)
     lines += _uscourts_lines(conn, date, items)
     lines += _glossary_lines("\n".join(lines))
     lines += _coverage_lines(conn, date, _coverage(conn, date), embedded_total)
     lines += _methodology_lines(date, git_short)
+
+    from .compose import get_section_synopses
+
+    lines = _inject_section_blurbs(lines, get_section_synopses(conn, date))
+    lines = _inject_toc(lines)
 
     markdown = "\n".join(lines) + "\n"
     validate(markdown, conn, date)

@@ -23,7 +23,7 @@ SITE_TAGLINE = (
     "judicial — built only from primary sources."
 )
 
-_MD = markdown.Markdown(extensions=["tables"])
+_MD = markdown.Markdown(extensions=["tables", "toc"])
 
 _PAGE = """<!DOCTYPE html>
 <html lang="en">

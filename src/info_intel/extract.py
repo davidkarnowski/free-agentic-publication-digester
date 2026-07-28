@@ -26,6 +26,7 @@ _PARSER_MODULES = {
     "CREC": "info_intel.parsers.crec",
     "BILLS": "info_intel.parsers.bills",
     "USCOURTS": "info_intel.parsers.uscourts",
+    "PLAW": "info_intel.parsers.plaw",
 }
 
 

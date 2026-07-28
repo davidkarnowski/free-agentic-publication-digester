@@ -77,7 +77,7 @@
   urls:
     collection: https://www.govinfo.gov/app/collection/PLAW
   method: Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4).
-  status: planned
+  status: active
   added: "2026-07-26"
   notes: ""
 

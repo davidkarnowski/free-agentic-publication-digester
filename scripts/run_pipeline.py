@@ -79,6 +79,9 @@ def main() -> int:
         print(f"   plain: {p['plain_written']}/{p['plain_pending']} written "
               f"({len(p['failed_items'])} failed)", flush=True)
         c = compose.compose_day(conn, lclient, date)
+        s = compose.compose_sections(conn, lclient, date)
+        print(f"   sections: {s['composed']} synopsis(es) "
+              f"(skipped={s['skipped_existing']})", flush=True)
         print(f"   compose: composed={c['composed']} "
               f"skipped_existing={c['skipped_existing']}", flush=True)
         after = lclient.tokens_today()

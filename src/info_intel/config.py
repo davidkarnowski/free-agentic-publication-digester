@@ -63,12 +63,14 @@ PLAIN_PROMPT_VERSION = 1
 # Day-in-Review compose prompt versions independently for the same reason.
 # v2: adds the judicial paragraph (J1).
 COMPOSE_PROMPT_VERSION = 2
+# Section quick-read synopses version independently (§3a).
+SECTION_PROMPT_VERSION = 1
 PLAIN_MODEL = MAP_MODEL  # restatement is compression work — cheap tier
 MAX_PLAIN_BATCH_ITEMS = 25  # inputs are stored summaries (~170 tokens each)
 LLM_TIMEOUT = 300  # seconds per call
 
 # GUIDE.md §3: scope. Order is sync order. USCOURTS added 2026-07-25 (J1).
-COLLECTIONS = ("CREC", "BILLS", "FR", "USCOURTS")
+COLLECTIONS = ("CREC", "BILLS", "FR", "USCOURTS", "PLAW")
 
 # Rule USCOURTS-FETCH-01 (GUIDE §3 judicial): USCOURTS delta listings carry
 # heavy lastModified churn on years-old cases (measured 7,178 of 9,401 in a

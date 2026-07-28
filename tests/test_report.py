@@ -235,7 +235,7 @@ def test_render_structure(digest):
     assert "CREC: 2026-07-23T18:00:00Z" in md
     # An empty subsection renders its explicit none-line, never silence.
     assert "No House floor items met the selection thresholds" in md
-    assert "PLAW is not yet ingested" in md
+    assert "No laws were published in this range." in md  # PLAW active, empty day
     # No template scaffolding leaks into real output.
     assert "EXAMPLE" not in md
     assert "<!--" not in md
@@ -499,3 +499,39 @@ def test_glossary_lists_only_present_terms(conn, tmp_path):
     assert "## Terms Used Today" in text
     assert "- *interim final rule* —" in text
     assert "cloture" not in text  # absent terms are not listed
+
+
+def test_toc_and_section_blurbs(conn, tmp_path):
+    conn.execute(
+        "INSERT INTO section_summaries (date, section_key, prompt_version, model,"
+        " synopsis, created_at) VALUES (?, 'rules', ?, 'haiku',"
+        " 'Two final rules today, led by an export-control change.', 'x')",
+        (DATE, config.SECTION_PROMPT_VERSION),
+    )
+    conn.commit()
+    path = report.render(conn, DATE, out_dir=tmp_path)
+    md = path.read_text()
+    # ToC leads the digest and links to real anchors
+    assert md.index("## Contents") < md.index("## Day in Review") if "## Day in Review" in md else True
+    assert "- [4. Enacted Laws](#4-enacted-laws)" in md
+    assert "- [Coverage Statement](#coverage-statement)" in md
+    # Blurb sits under its section heading
+    rules_pos = md.index("### 3.2 Rules Published")
+    blurb_pos = md.index("*In plain terms: Two final rules today")
+    assert 0 < blurb_pos - rules_pos < 120
+
+
+def test_plaw_item_renders_in_section_4(conn, tmp_path):
+    add_package(conn, "PLAW-119publ101", "PLAW")
+    conn.execute("UPDATE packages SET date_issued = ? WHERE package_id = 'PLAW-119publ101'",
+                 (DATE,))
+    add_text(conn, "PLAW-119publ101", "", "PLAW", "PUBLIC",
+             title="Public Law 119-101: Housing supply.",
+             metadata={"citations": ["Public Law 119-101"], "approved_date": "2026-07-11"})
+    add_summary(conn, "PLAW-119publ101", "", "PLAW-SEL-01",
+                "Directs agencies to increase housing supply.", method="llm")
+    path = report.render(conn, DATE, out_dir=tmp_path)
+    md = path.read_text()
+    assert "- **Public Law 119-101 — Public Law 119-101: Housing supply.**" in md
+    assert "Approved: 2026-07-11." in md
+    assert "PLAW-SEL-01 — enacted into law" in md

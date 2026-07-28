@@ -25,6 +25,8 @@ _FORMAT_PREFERENCE = (("xmlLink", "xml"), ("zipLink", "zip"), ("pdfLink", "pdf")
 # metadata in one request — preferred over the bare PDF.
 _FORMAT_PREFERENCE_BY_COLLECTION = {
     "USCOURTS": (("zipLink", "zip"), ("pdfLink", "pdf")),
+    # PLAW offers USLM XML (no plain xmlLink); text as last-resort parse.
+    "PLAW": (("uslmLink", "xml"), ("txtLink", "txt"), ("pdfLink", "pdf")),
 }
 
 # Collections whose packages have granules worth inventorying (docs/schema.md).

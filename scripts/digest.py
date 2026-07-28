@@ -62,6 +62,7 @@ def main() -> int:
             analyze.run(conn, client, date)
             plain_stats = analyze.run_plain(conn, client, date)
             compose.compose_day(conn, client, date)
+            compose.compose_sections(conn, client, date)
             after = client.tokens_today()
         print(
             f"plain: {plain_stats['plain_written']}/{plain_stats['plain_pending']} written"

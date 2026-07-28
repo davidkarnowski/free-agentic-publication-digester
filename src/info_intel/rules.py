@@ -57,6 +57,9 @@ RULES = {
             "included regardless of length."
         ),
     },
+    "PLAW-SEL-01": {
+        "description": "enacted into law (all public and private laws are listed)",
+    },
     "BILLS-SEL-01": {
         "description": (
             "Bill text at a reached stage: Enrolled, Reported, or "
@@ -154,6 +157,7 @@ def _match_uscourts(doc_type):
 _MATCHERS = {
     "CREC-SEL-01": _match_crec_sel_01,
     "CREC-SEL-02": _match_crec_sel_02,
+    "PLAW-SEL-01": lambda item: item["collection"] == "PLAW",
     "BILLS-SEL-01": _match_bills_sel_01,
     "FR-SEL-01": _match_fr("RULE"),
     "FR-SEL-02": _match_fr("PRORULE"),

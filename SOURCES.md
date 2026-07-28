@@ -12,17 +12,17 @@ stays in sync.*
 
 | Branch | Active | Planned | Excluded | Unavailable | Total |
 |---|---:|---:|---:|---:|---:|
-| Legislative | 2 | 4 | 0 | 2 | 8 |
+| Legislative | 3 | 3 | 0 | 2 | 8 |
 | Executive | 1 | 46 | 0 | 21 | 68 |
 | Judicial | 1 | 3 | 0 | 0 | 4 |
 | Cross-branch | 0 | 1 | 0 | 0 | 1 |
-| **Total** | 4 | 54 | 0 | 23 | 81 |
+| **Total** | 5 | 53 | 0 | 23 | 81 |
 
-**4 of 81 sources active.**
+**5 of 81 sources active.**
 
 Per tier:
 
-- **Tier 1** (cabinet departments, top independents, legislative support agencies, the White House, and core govinfo collections): 40 of 81 registered, 4 active
+- **Tier 1** (cabinet departments, top independents, legislative support agencies, the White House, and core govinfo collections): 40 of 81 registered, 5 active
 - **Tier 2** (major sub-agency newsrooms and regulator clusters): 41 of 81 registered, 0 active
 - **Tier 3** (long tail, added opportunistically): 0 of 81 registered, 0 active
 
@@ -32,7 +32,7 @@ Per tier:
 |---|---|---:|---|---|---|---|
 | [Congressional Record (CREC)](https://www.govinfo.gov/app/collection/CREC) | U.S. Congress | 1 | govinfo-collection | **ACTIVE** | govinfo collections API delta sync |  |
 | [Congressional Bills (BILLS)](https://www.govinfo.gov/app/collection/BILLS) | U.S. Congress | 1 | govinfo-collection | **ACTIVE** | govinfo collections API delta sync |  |
-| [Public and Private Laws (PLAW)](https://www.govinfo.gov/app/collection/PLAW) | U.S. Congress | 1 | govinfo-collection | planned | Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4). |  |
+| [Public and Private Laws (PLAW)](https://www.govinfo.gov/app/collection/PLAW) | U.S. Congress | 1 | govinfo-collection | **ACTIVE** | Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4). |  |
 | [Congressional Hearings (CHRG)](https://www.govinfo.gov/app/collection/CHRG) | U.S. Congress | 1 | govinfo-collection | planned | Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4). | Publication lag means hearing transcripts are not day-shaped; date semantics need a rule before activation. |
 | [Congressional Reports (CRPT)](https://www.govinfo.gov/app/collection/CRPT) | U.S. Congress | 1 | govinfo-collection | planned | Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4). |  |
 | [GAO Reports & Testimonies](https://www.gao.gov/reports-testimonies) | Government Accountability Office | 1 | rss | planned | RSS poll via AgencyClient (pending content evaluation) | Probed 2026-07-26: RSS verified end-to-end — 25 items, avg description 4083 chars, sample article extracted (8987 chars text). |

@@ -168,6 +168,19 @@ CREATE TABLE IF NOT EXISTS plain_summaries (
     PRIMARY KEY (package_id, granule_id, plain_version, source_prompt_version)
 ) WITHOUT ROWID;
 
+CREATE TABLE IF NOT EXISTS section_summaries (
+    date           TEXT NOT NULL,
+    section_key    TEXT NOT NULL,
+    prompt_version INTEGER NOT NULL,
+    model          TEXT NOT NULL,
+    synopsis       TEXT NOT NULL,
+    input_tokens   INTEGER NOT NULL DEFAULT 0,
+    output_tokens  INTEGER NOT NULL DEFAULT 0,
+    created_at     TEXT NOT NULL,
+
+    PRIMARY KEY (date, section_key, prompt_version)
+) WITHOUT ROWID;
+
 CREATE TABLE IF NOT EXISTS day_summaries (
     date           TEXT NOT NULL,             -- digest date YYYY-MM-DD
     prompt_version INTEGER NOT NULL,
