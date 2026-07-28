@@ -21,6 +21,42 @@ Two goals in tension, both mandatory:
 2. **Faithful** — nothing summarized without a citation to the primary source;
    nothing significant silently dropped; no editorial spin introduced.
 
+### Dual audience: humans and AI agents (amended 2026-07-28)
+
+This project is a publishing house for **two readerships**: people, and AI
+agents researching federal government actions. An agent that needs "what
+did the government do on date D" should be able to ingest our digest —
+summarized, cited, coverage-accounted — instead of crawling a dozen
+official sites itself. That substitution is a feature we actively
+advertise, and it is respectful infrastructure twice over: agents get
+clean structured access, and government servers get one polite,
+disciplined crawler (ours) instead of many.
+
+Standing commitments for agentic access:
+
+- **Explicit invitation.** Public-facing documentation states plainly that
+  this data is built for agent ingestion; the site's robots.txt allows
+  automated access, and an `llms.txt` guide plus a dedicated access page
+  tell agents what exists, where, and how to use it.
+- **Clean, stable, machine-first surfaces:** canonical Markdown in the
+  repository; static no-JS/no-auth HTML with stable URL patterns
+  (`/<YYYY-MM-DD>.html`); a machine-readable digest index
+  (`digests.json`); an Atom feed for change discovery; the source guide
+  and provenance manifests published alongside.
+- **Honesty travels with the data.** Every surface an agent ingests
+  carries the same disclosures humans get: citations to the official
+  record, inclusion rules, coverage statements, which text is verbatim
+  official vs. model-generated, and the §7 provenance trail for
+  verification.
+- **Guided onward citation.** We ask agents to cite the underlying
+  official sources (the govinfo IDs we carry) for claims, and us for the
+  aggregation — the digest is a route to the record, never a replacement
+  for it.
+- **Reciprocity.** We ask of visiting agents exactly the courtesy our own
+  crawler practices (§4): honest identification and conditional requests.
+  The site is static and cheap to serve precisely so heavy agent traffic
+  is harmless.
+
 ## 2. Editorial Principles (non-negotiable)
 
 These exist because summarization is where bias creeps in. Every analysis or

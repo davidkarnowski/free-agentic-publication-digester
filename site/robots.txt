@@ -1,0 +1,5 @@
+# AI agents and crawlers are welcome here — see /agents.html
+User-agent: *
+Allow: /
+
+Sitemap: /sitemap.xml

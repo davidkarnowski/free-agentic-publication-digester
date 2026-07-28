@@ -17,6 +17,41 @@ Entry format:
 
 ---
 
+## 2026-07-28 15:10 PDT — Dual-audience philosophy: an agentic publishing house
+
+**Context:** User direction: codify that this project publishes for
+humans AND AI agents — agents researching fedgov actions should ingest
+our summarized, cited digests instead of crawling official sites — and
+make agentic access clean, guided, and explicitly advertised (domain →
+GH Pages planned).
+
+**Work performed:**
+
+1. **GUIDE §1 "Dual audience" amendment:** the substitution argument
+   (one polite disciplined crawler feeding many agents beats many
+   crawlers hitting government servers), plus five standing commitments:
+   explicit invitation, machine-first stable surfaces, honesty travels
+   with the data (labels/citations/coverage in every ingested surface),
+   guided onward citation (cite govinfo for claims, us for aggregation),
+   and reciprocity (we ask visiting agents the courtesy our crawler
+   practices).
+2. **Agent surfaces built into the site** (publish.py, tested):
+   `llms.txt` (agent guidance convention), `digests.json` (machine
+   index), `feed.xml` (Atom, change discovery), `robots.txt` (explicit
+   welcome + sitemap), `sitemap.xml`, and `/agents.html` — a full access
+   guide covering URL patterns, official-vs-generated text labeling,
+   citation guidance, and courtesy expectations. "For agents" in site
+   nav; README rewritten dual-audience. 200 tests passing.
+
+**Flagged for user decision before domain launch:** a content license
+(the underlying government text is public domain; our compilation/
+summaries need an explicit grant — CC0 or CC-BY recommended for the
+agent-ingestion mission).
+
+**Next:** S2 pilot implementation (plan revised this session).
+
+---
+
 ## 2026-07-28 12:40 PDT — Digest refinement: PLAW active, section quick-reads, table of contents
 
 **Context:** User direction: full coverage for Enacted Laws (section 4 was

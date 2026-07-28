@@ -145,3 +145,30 @@ def test_no_sources_md_degrades_gracefully(digests, tmp_path, monkeypatch):
     publish.build_site(digests, out)
     assert not (out / "sources.html").exists()
     assert 'href="sources.html"' not in (out / "index.html").read_text()
+
+
+def test_agent_surfaces_built(digests, tmp_path):
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    llms = (out / "llms.txt").read_text()
+    assert "AI-agent" in llms and "/digests.json" in llms
+    assert "2026-07-02.html" in llms  # latest digest linked
+
+    import json as _json
+
+    idx = _json.loads((out / "digests.json").read_text())
+    assert [d["date"] for d in idx["digests"]] == ["2026-07-02", "2026-07-01"]
+    assert idx["digests"][1]["canonical_markdown"] == "digests/2026-07-01.md"
+
+    feed = (out / "feed.xml").read_text()
+    assert "<feed" in feed and "Daily Digest — 2026-07-02" in feed
+
+    robots = (out / "robots.txt").read_text()
+    assert "Allow: /" in robots and "welcome" in robots
+    assert "2026-07-01.html" in (out / "sitemap.xml").read_text()
+
+    agents = (out / "agents.html").read_text()
+    assert "welcome to ingest" in agents
+    assert "Coverage Statement" in agents
+    # navigation reaches the agents page from digest pages
+    assert 'href="agents.html">For agents</a>' in (out / "2026-07-01.html").read_text()

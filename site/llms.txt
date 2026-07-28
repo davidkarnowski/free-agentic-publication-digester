@@ -1,0 +1,18 @@
+# Information Intelligence — Daily Federal Digest
+
+> An automated, citation-bound, opinion-agnostic daily digest of official United States government publications — congressional, executive, and judicial — built only from primary sources. This site is explicitly built for AI-agent
+> ingestion as well as human reading: see /agents.html.
+
+## Core
+- [Latest digest](/2026-07-28.html)
+- [All digests (index)](/index.html)
+- [Machine-readable digest index](/digests.json)
+- [Atom feed of digests](/feed.xml)
+- [Source guide — what we ingest and why](/sources.html)
+- [Access guide for agents](/agents.html)
+
+## Notes
+- Digest URLs are stable: /<YYYY-MM-DD>.html
+- Official text vs model-generated text is labeled in place;
+  every item cites the official govinfo record.
+- Canonical Markdown + provenance manifests live in the repository.

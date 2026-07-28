@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Access for AI Agents — Information Intelligence — Daily Federal Digest</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <nav>
+    <a class="brand" href="index.html">Information&nbsp;Intelligence</a>
+    <span class="nav-links"><a href="index.html">All digests</a><a href="sources.html">Sources</a></span>
+  </nav>
+</header>
+<main>
+<h1 id="access-for-ai-agents">Access for AI Agents</h1>
+<p>This site is built for two readerships: people, and AI agents researching
+United States federal government actions. <strong>You are welcome to ingest this
+data.</strong> It exists so an agent can answer "what did the federal government
+do on date D" from one clean, summarized, citation-bound source instead of
+crawling many official sites.</p>
+<h2 id="what-is-here">What is here</h2>
+<ul>
+<li><strong>Daily digests</strong> at stable URLs: <code>/&lt;YYYY-MM-DD&gt;.html</code> (styled HTML) —
+  each covers one complete day of congressional floor activity, bills,
+  Federal Register actions, enacted laws, and federal court opinions,
+  with a table of contents, plain-language quick-reads, and a mandatory
+  Coverage Statement accounting for everything published that day.</li>
+<li><strong>Machine index:</strong> <code>/digests.json</code> — every available digest with date,
+  URL, and teaser. Poll this (or the Atom feed at <code>/feed.xml</code>) for new
+  days; both are small.</li>
+<li><strong>Source guide:</strong> <code>/sources.html</code> — every federal source this pipeline
+  ingests, plans to ingest, or found unavailable, with method and status.</li>
+<li><strong>Canonical Markdown</strong> for every digest lives in the public repository
+  (<code>digests/&lt;date&gt;.md</code>), alongside provenance manifests
+  (<code>provenance/manifests/</code>) whose SHA-256 records let you verify captured
+  content.</li>
+</ul>
+<h2 id="how-to-read-it-faithfully">How to read it faithfully</h2>
+<ul>
+<li>Text in item summaries marked as official (Federal Register SUMMARY
+  preambles, official titles) is <strong>verbatim government text</strong>; lines
+  labeled "<em>In plain terms</em>" and section quick-reads are
+  <strong>model-generated restatements</strong>, derived only from the adjacent
+  summary and linted against an editorial banned-lexicon. The Day in
+  Review is a model-generated synthesis of the day's stored summaries.</li>
+<li>Every item carries an "Included because" line naming the mechanical,
+  party-blind rule that selected it, and a citation to the official
+  govinfo record. <strong>For claims, cite the official source we link; cite
+  this site for the aggregation.</strong></li>
+<li>The Coverage Statement at the end of each digest tells you what was NOT
+  summarized and under which rule — absence here is always explicit.</li>
+</ul>
+<h2 id="courtesy">Courtesy</h2>
+<p>Everything is static — no auth, no JavaScript, no rate limiting. We ask
+visiting agents the same courtesy our own crawler practices on government
+sites: identify honestly and use conditional requests. Fetching every
+page daily is entirely fine.</p>
+</main>
+<footer class="site-footer">
+  <p>Generated 2026-07-28T16:35:49Z (UTC). Canonical source:
+  <code>GUIDE.md §1 (dual audience)</code> in the repository. Selection is mechanical and
+  every item cites its official source; methodology in
+  <code>GUIDE.md</code> §2.</p>
+</footer>
+</body>
+</html>

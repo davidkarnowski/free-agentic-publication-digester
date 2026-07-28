@@ -1,8 +1,12 @@
 # Information Intelligence
 
-Automated monitoring of official US government publications (Congressional
-Record, bills, Federal Register) producing a cited, opinion-agnostic daily
-digest.
+Automated monitoring of official US government publications — Congressional
+Record, bills, Federal Register, enacted laws, and federal court opinions —
+producing a cited, opinion-agnostic daily digest **for two readerships:
+people, and AI agents**. Agents researching federal actions are explicitly
+welcome to ingest the digests (stable URLs, `llms.txt`, machine index,
+Atom feed) instead of crawling official sites themselves; see the site's
+`/agents.html` and GUIDE.md §1.
 
 - **[GUIDE.md](GUIDE.md)** — governing document: mission, editorial
   principles, data sources, respectful-access policy, architecture, roadmap.

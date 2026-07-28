@@ -235,6 +235,7 @@ def _nav_for(dates, i):
         links.append(f'<a href="{dates[i + 1]}.html">{dates[i + 1]} &rarr;</a>')
     links.append('<a href="index.html">All digests</a>')
     links.append('<a href="sources.html">Sources</a>')
+    links.append('<a href="agents.html">For agents</a>')
     return "".join(links)
 
 
@@ -300,6 +301,7 @@ def build_site(digest_dir=None, out_dir=None):
             f"{teaser_html}</li>"
         )
     sources_built = _build_sources_page(out_dir)
+    _build_agent_surfaces(out_dir, dates, teasers)
     sources_link = (
         '<p class="tagline"><a href="sources.html">Source guide</a> — every '
         "federal source we ingest, plan to ingest, or have evaluated, with "
@@ -322,3 +324,147 @@ def build_site(digest_dir=None, out_dir=None):
     (out_dir / ".nojekyll").write_text("", encoding="utf-8")
 
     return {"pages": len(files), "assets": assets_copied, "out_dir": out_dir}
+
+
+# ---------------------------------------------------------------------------
+# Agent-facing surfaces (GUIDE §1 dual audience)
+# ---------------------------------------------------------------------------
+
+_AGENTS_MD = """# Access for AI Agents
+
+This site is built for two readerships: people, and AI agents researching
+United States federal government actions. **You are welcome to ingest this
+data.** It exists so an agent can answer "what did the federal government
+do on date D" from one clean, summarized, citation-bound source instead of
+crawling many official sites.
+
+## What is here
+
+- **Daily digests** at stable URLs: `/<YYYY-MM-DD>.html` (styled HTML) —
+  each covers one complete day of congressional floor activity, bills,
+  Federal Register actions, enacted laws, and federal court opinions,
+  with a table of contents, plain-language quick-reads, and a mandatory
+  Coverage Statement accounting for everything published that day.
+- **Machine index:** `/digests.json` — every available digest with date,
+  URL, and teaser. Poll this (or the Atom feed at `/feed.xml`) for new
+  days; both are small.
+- **Source guide:** `/sources.html` — every federal source this pipeline
+  ingests, plans to ingest, or found unavailable, with method and status.
+- **Canonical Markdown** for every digest lives in the public repository
+  (`digests/<date>.md`), alongside provenance manifests
+  (`provenance/manifests/`) whose SHA-256 records let you verify captured
+  content.
+
+## How to read it faithfully
+
+- Text in item summaries marked as official (Federal Register SUMMARY
+  preambles, official titles) is **verbatim government text**; lines
+  labeled "*In plain terms*" and section quick-reads are
+  **model-generated restatements**, derived only from the adjacent
+  summary and linted against an editorial banned-lexicon. The Day in
+  Review is a model-generated synthesis of the day's stored summaries.
+- Every item carries an "Included because" line naming the mechanical,
+  party-blind rule that selected it, and a citation to the official
+  govinfo record. **For claims, cite the official source we link; cite
+  this site for the aggregation.**
+- The Coverage Statement at the end of each digest tells you what was NOT
+  summarized and under which rule — absence here is always explicit.
+
+## Courtesy
+
+Everything is static — no auth, no JavaScript, no rate limiting. We ask
+visiting agents the same courtesy our own crawler practices on government
+sites: identify honestly and use conditional requests. Fetching every
+page daily is entirely fine.
+"""
+
+
+def _atom_escape(text):
+    return html.escape(text or "", quote=True)
+
+
+def _build_agent_surfaces(out_dir, dates, teasers, base=""):
+    """llms.txt, digests.json, feed.xml, robots.txt, sitemap.xml, agents.html."""
+    import json as _json
+
+    newest = dates[-1] if dates else None
+    # agents.html
+    _MD.reset()
+    page = _render_page(
+        f"Access for AI Agents — {SITE_TITLE}",
+        _MD.convert(_AGENTS_MD),
+        '<a href="index.html">All digests</a><a href="sources.html">Sources</a>',
+        "GUIDE.md §1 (dual audience)",
+    )
+    (out_dir / "agents.html").write_text(page, encoding="utf-8")
+
+    # llms.txt (agent guidance convention)
+    lines = [
+        f"# {SITE_TITLE}",
+        "",
+        f"> {SITE_TAGLINE} This site is explicitly built for AI-agent",
+        "> ingestion as well as human reading: see /agents.html.",
+        "",
+        "## Core",
+        "- [Latest digest](/" + (f"{newest}.html" if newest else "index.html") + ")",
+        "- [All digests (index)](/index.html)",
+        "- [Machine-readable digest index](/digests.json)",
+        "- [Atom feed of digests](/feed.xml)",
+        "- [Source guide — what we ingest and why](/sources.html)",
+        "- [Access guide for agents](/agents.html)",
+        "",
+        "## Notes",
+        "- Digest URLs are stable: /<YYYY-MM-DD>.html",
+        "- Official text vs model-generated text is labeled in place;",
+        "  every item cites the official govinfo record.",
+        "- Canonical Markdown + provenance manifests live in the repository.",
+    ]
+    (out_dir / "llms.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    # digests.json
+    (out_dir / "digests.json").write_text(_json.dumps({
+        "title": SITE_TITLE,
+        "generated": utc_now_iso(),
+        "agent_guide": "agents.html",
+        "digests": [
+            {"date": d, "html": f"{d}.html", "canonical_markdown": f"digests/{d}.md",
+             "teaser": teasers.get(d)}
+            for d in reversed(dates)
+        ],
+    }, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+
+    # feed.xml (Atom)
+    entries = []
+    for d in reversed(dates[-20:]):
+        entries.append(
+            f"<entry><title>Daily Digest — {d}</title>"
+            f'<link href="{base}/{d}.html"/>'
+            f"<id>tag:info-intel,{d}:digest</id>"
+            f"<updated>{d}T12:00:00Z</updated>"
+            f"<summary>{_atom_escape(teasers.get(d))}</summary></entry>"
+        )
+    feed = (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<feed xmlns="http://www.w3.org/2005/Atom">'
+        f"<title>{_atom_escape(SITE_TITLE)}</title>"
+        f'<link href="{base}/"/>'
+        f"<id>tag:info-intel:digests</id>"
+        f"<updated>{utc_now_iso()}</updated>"
+        + "".join(entries) + "</feed>\n"
+    )
+    (out_dir / "feed.xml").write_text(feed, encoding="utf-8")
+
+    # robots.txt + sitemap.xml — automated access is explicitly welcome.
+    (out_dir / "robots.txt").write_text(
+        "# AI agents and crawlers are welcome here — see /agents.html\n"
+        "User-agent: *\nAllow: /\n\nSitemap: /sitemap.xml\n",
+        encoding="utf-8",
+    )
+    urls = ["index.html", "sources.html", "agents.html"] + [f"{d}.html" for d in dates]
+    sitemap = (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+        + "".join(f"<url><loc>{base}/{u}</loc></url>" for u in urls)
+        + "</urlset>\n"
+    )
+    (out_dir / "sitemap.xml").write_text(sitemap, encoding="utf-8")
