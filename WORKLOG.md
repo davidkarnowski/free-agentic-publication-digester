@@ -17,6 +17,51 @@ Entry format:
 
 ---
 
+## 2026-07-28 09:50 PDT — run_pipeline entrypoint; API key incident; newest-complete-day fix; two digests
+
+**Context:** User requested a full verbose pipeline run for "today" with
+live per-call visibility.
+
+**Work performed:**
+
+1. **`scripts/run_pipeline.py`** — the daily entrypoint: all five stages
+   (sync → extract → analyze/plain/compose → render+validate → site) with
+   stage banners, forced-verbose per-call narration (console + the daily
+   access log), per-stage timings, and an end-of-run detail report
+   (requests by client incl. errors, LLM tokens by purpose, validation
+   outcome).
+2. **API key incident (2026-07-27):** first run attempt failed immediately
+   with govinfo `API_KEY_INVALID` — server-side invalidation of the
+   original key after ~1,300 successful requests over three days. Crash
+   safety held (listing 401 → watermark untouched, failure logged). User
+   provisioned a new key; single-request verification passed.
+3. **Healthy full run (07-28):** sync 415 requests (Monday's Record,
+   3 FR packages, 56 bills, USCOURTS delta of 7,800 listed — churn
+   auto-skipped, 100 newest downloaded); extract 160 packages → 703
+   records + 413 graphics, 0 failures; FR-day digest for 07-28 generated
+   and validated at 86.5K in / 11K out over 3 LLM calls.
+4. **Date-logic defect found in the run and fixed:** default digest date
+   was MAX(date_issued) — which selects *today* once the same-morning FR
+   issue arrives, contradicting the recorded newest-complete-day decision
+   (2026-07-25). Both entrypoints now use MAX(date_issued) strictly
+   before today (UTC). The premature-but-honest 07-28 FR-only digest is
+   retained; tomorrow's run completes it via summary idempotency +
+   compose invalidation.
+5. **Proper daily digest for 2026-07-27 generated:** first complete
+   three-branch digest under the full source stack — House floor +
+   recorded votes, FR (5 rules/6 proposed/85 notices), judicial section;
+   15 items (11 official / 4 LLM), 15/15 plain lines, validation passed;
+   89K in / 10.5K out. Site rebuilt: 4 digest pages + sources guide.
+6. **Test recalibration:** CREC real-day smoke asserted >150 granules;
+   Monday's light session has 124 (parser correct) — threshold lowered to
+   >50 with comment. **Suite: 195 passing.**
+
+**Measured:** a normal weekday full-pipeline day ≈ 415 govinfo requests
+(~21% budget) + ~176K LLM in / 21.5K out for two digest dates — cap
+discussion data accumulating.
+
+---
+
 ## 2026-07-26 18:30 PDT — Source probe sprint: 72 sources verified end-to-end; guidelines shored up
 
 **Context:** User direction: poll every newly added source verifying full

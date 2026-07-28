@@ -17,9 +17,18 @@ from info_intel import config, db, logging_setup, report
 
 
 def default_date(conn):
-    """Latest date_issued with extracted records, or None."""
+    """Newest COMPLETE day: the latest date_issued strictly before today
+    (UTC). A date's record is only complete once the day has ended and the
+    next-morning publications (esp. the Congressional Record) have had a
+    sync to arrive — digesting today's date early would misrepresent it
+    (worklog 2026-07-25)."""
+    import datetime as dt
+
+    today = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d")
     return conn.execute(
-        "SELECT MAX(p.date_issued) FROM packages p JOIN extracted_texts e USING (package_id)"
+        "SELECT MAX(p.date_issued) FROM packages p"
+        " JOIN extracted_texts e USING (package_id)"
+        " WHERE p.date_issued < ?", (today,)
     ).fetchone()[0]
 
 
