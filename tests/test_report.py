@@ -6,6 +6,7 @@ assets are tiny real TIFFs generated with Pillow.
 """
 
 import json
+import re
 
 import pytest
 from PIL import Image
@@ -609,6 +610,53 @@ def test_banned_word_in_link_url_is_not_prose(conn, tmp_path):
     assert "withstand-extreme-sweeping-crackdown" in path.read_text()
 
 
+def _insert_agency_item(conn, pkg_id, title, claimed, source="gao-reports"):
+    now = "2026-07-23T15:00:00Z"
+    conn.execute(
+        "INSERT INTO packages (package_id, collection, date_issued, last_modified,"
+        " first_seen_at, fetch_status) VALUES (?, 'AGENCYPR', ?, ?, ?, 'fetched')",
+        (pkg_id, DATE, now, now))
+    conn.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection, doc_type,"
+        " title, agency, metadata, text, char_count, extracted_at, extractor_version)"
+        " VALUES (?, '', 'AGENCYPR', 'PRESS', ?, 'Test Agency', ?, 'body', 4, ?, 1)",
+        (pkg_id, title,
+         json.dumps({"source_id": source, "url": f"https://x.gov/{pkg_id}",
+                     "claimed_published_at": claimed, "wayback_url": None}), now))
+    conn.commit()
+
+
+def test_agency_dating_rule_excludes_backfill(conn, tmp_path):
+    """GUIDE §3 dating rule: only releases the agency dates on the digest
+    day are listed; observed-today-but-dated-earlier items are counted
+    under AGENCYPR-EX-01, never listed as today's news."""
+    _insert_agency_item(conn, "PR-t-today001", "Todays Release",
+                        "Thu, 23 Jul 2026 09:00:00 +0000")
+    _insert_agency_item(conn, "PR-t-backfil1", "March Release",
+                        "Mon, 30 Mar 2026 12:00:00 +0000")
+    _insert_agency_item(conn, "PR-t-nodate01", "Undated Release", None)
+    path = report.render(conn, DATE, out_dir=tmp_path)
+    md = path.read_text()
+    assert "Todays Release" in md
+    assert "Undated Release" in md  # no claimed date -> observed-day fallback
+    assert "dated by first observation" in md
+    assert "March Release" not in md  # backfill: never listed
+    assert "1 release(s) the agencies date on other days" in md
+    assert "AGENCYPR-EX-01" in md
+    # coverage reconciles: 3 units = 0 summarized + 2 counted + 1 excluded
+    assert re.search(r"^\| AGENCYPR \| 3 \| 3 \| 0 \| 2 \| 1 \|$", md, re.MULTILINE)
+
+
+def test_agency_claimed_day_parses_both_forms():
+    assert report._claimed_day(
+        {"claimed_published_at": "Tue, 28 Jul 2026 23:30:00 -0400"}
+    ) == "2026-07-29"  # timezone conversion to UTC day
+    assert report._claimed_day(
+        {"claimed_published_at": "2026-07-28T09:00:00"}) == "2026-07-28"
+    assert report._claimed_day({"claimed_published_at": "gibberish"}) is None
+    assert report._claimed_day({}) is None
+
+
 def test_agency_section_empty_renders_none_line(digest):
     _, md = digest
-    assert "No releases were observed from active sources" in md
+    assert "No releases dated this day were observed from active" in md

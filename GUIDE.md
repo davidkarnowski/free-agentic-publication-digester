@@ -203,6 +203,18 @@ direct HTML index pages where no feed exists). Governing rules:
   can be edited or removed without notice. Digest sections built on this
   class carry a standing disclosure, and §7 (Provenance) governs how
   captures are preserved and how changes are detected and disclosed.
+- **Dating rule (added 2026-07-28).** A digest for day D lists only
+  releases the agency itself dates on D (claimed publication date, parsed
+  to a UTC day). Items *first observed* on D but claimed earlier — feed
+  backfill, newly activated sources, bootstrap sweeps — are **not**
+  today's news and are excluded from the listing under `AGENCYPR-EX-01`,
+  but they are never silent: the coverage accounting names their count,
+  and their captures/documents are stored normally. An item carrying no
+  parseable claimed date falls back to the observed date (listed on the
+  day we first saw it, disclosed as dated by observation — the only
+  honest option). Claimed dates and observed dates remain separately
+  stored, always (§7 T3/T4: a claimed date is the agency's assertion, not
+  our finding).
 - Ingestion obeys §4 unchanged: paced, budgeted (its own daily bucket),
   fully logged, conditional requests wherever the server supports them,
   robots.txt honored via an RFC 9309 parser with crawl-delay respected.

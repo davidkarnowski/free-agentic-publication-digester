@@ -22,6 +22,7 @@ the source PDF — the no-silent-omission rule applies to images too.
 from __future__ import annotations
 
 import datetime as dt
+import email.utils
 import json
 import re
 import subprocess
@@ -44,8 +45,9 @@ RULE_DESCRIPTIONS = {
     "FR-SEL-02": "document type: proposed rule (all listed)",
     "FR-SEL-03": "presidential document (all listed)",
     "PLAW-SEL-01": "enacted into law (all public and private laws are listed)",
-    "AGENCYPR-SEL-01": "official agency release (all releases from active"
-                       " sources are listed; titles only in the pilot)",
+    "AGENCYPR-SEL-01": "official agency release dated this day by the agency"
+                       " (all such releases from active sources are listed;"
+                       " titles only in the pilot)",
     "USCOURTS-SEL-01": "appellate court opinion (all listed)",
     "USCOURTS-SEL-02": "national court opinion (all listed)",
     "FR-EX-01": "notices counted, not individually summarized",
@@ -53,6 +55,8 @@ RULE_DESCRIPTIONS = {
     "CREC-EX-02": "extensions/daily-digest sections (counted)",
     "USCOURTS-EX-01": "district court opinions counted, not individually summarized",
     "USCOURTS-EX-02": "bankruptcy court opinions counted, not individually summarized",
+    "AGENCYPR-EX-01": "release dated outside this day by the agency (feed"
+                      " backfill / newly activated source) — counted, not listed",
 }
 
 # CREC-EX-01 mechanical evidence threshold (characters of extracted floor text).
@@ -307,9 +311,11 @@ def _coverage(conn, date):
     plaw["rules"] = {}
 
     agencypr = cov["AGENCYPR"]
-    agencypr["excluded"] = 0
-    agencypr["counted"] = agencypr["units"] - agencypr["summarized"]
-    agencypr["rules"] = {}
+    _, agency_backfill = _agency_rows(conn, date)
+    agencypr["excluded"] = len(agency_backfill)  # AGENCYPR-EX-01 (dating rule)
+    agencypr["counted"] = (agencypr["units"] - agencypr["summarized"]
+                           - agencypr["excluded"])
+    agencypr["rules"] = {"AGENCYPR-EX-01": len(agency_backfill)}
 
     notices = _scalar(
         conn,
@@ -395,9 +401,32 @@ _ACRONYMS = {
 
 
 
-def _agency_lines(conn, date):
-    """Section 6: attributed agency release titles (GUIDE §2 attributed
-    speech; §3 mutable-source disclosure). Zero LLM in the pilot."""
+def _claimed_day(meta):
+    """Agency-claimed publication date as 'YYYY-MM-DD' (UTC), or None.
+    Feeds use RFC 822 pubDates; some sources emit ISO. The claimed date is
+    the agency's assertion (GUIDE §7 T3/T4) — parsed, never trusted over
+    the separately stored observation date."""
+    raw = (meta.get("claimed_published_at") or "").strip()
+    if not raw:
+        return None
+    try:
+        parsed = email.utils.parsedate_to_datetime(raw)
+    except (TypeError, ValueError):
+        parsed = None
+    if parsed is not None:
+        if parsed.tzinfo is not None:
+            parsed = parsed.astimezone(dt.UTC)
+        return parsed.strftime("%Y-%m-%d")
+    if re.match(r"^\d{4}-\d{2}-\d{2}", raw):
+        return raw[:10]
+    return None
+
+
+def _agency_rows(conn, date):
+    """(listed, backfill) for digest day `date` (GUIDE §3 dating rule):
+    listed = claimed publication day == date, or no parseable claimed date
+    and first observed on date; backfill = observed on date but agency-dated
+    another day (AGENCYPR-EX-01) — counted, never listed as today's news."""
     rows = [dict(r) for r in conn.execute(
         """
         SELECT e.title, e.agency, e.metadata
@@ -407,10 +436,24 @@ def _agency_lines(conn, date):
         """,
         (date,),
     )]
+    listed, backfill = [], []
+    for r in rows:
+        meta = json.loads(r["metadata"] or "{}")
+        claimed = _claimed_day(meta)
+        r["_meta"], r["_claimed_day"] = meta, claimed
+        (listed if claimed == date or claimed is None else backfill).append(r)
+    return listed, backfill
+
+
+def _agency_lines(conn, date):
+    """Section 6: attributed agency release titles (GUIDE §2 attributed
+    speech; §3 mutable-source disclosure + dating rule). Zero LLM in the
+    pilot."""
+    rows, backfill = _agency_rows(conn, date)
     lines = [
         "## 6. Agency Announcements",
         "",
-        "Official press releases and statements observed on agency newsrooms",
+        "Official press releases and statements the agencies themselves date",
         f"on {date} (sources listed in the source guide). These are the",
         "agencies' own announcements — official advocacy, quoted and",
         "attributed, not findings of this digest. Agency web content can be",
@@ -419,20 +462,21 @@ def _agency_lines(conn, date):
         "",
     ]
     if not rows:
-        lines += ["No releases were observed from active sources on this date.",
-                  "", "---", ""]
-        return lines
+        lines += [("No releases dated this day were observed from active"
+                   " sources."), ""]
     by_agency = {}
     for r in rows:
         by_agency.setdefault(r["agency"] or "(unattributed)", []).append(r)
     for agency in sorted(by_agency, key=str.lower):
         lines += [f"#### {agency}", ""]
         for r in by_agency[agency]:
-            meta = json.loads(r["metadata"] or "{}")
+            meta = r["_meta"]
             claimed = (meta.get("claimed_published_at") or "")[:16]
             head = f"- **[{_one_line(r['title'])}]({meta.get('url', '')})**"
             if claimed:
                 head += f" — dated {claimed} by the agency"
+            else:
+                head += " — dated by first observation (no agency date given)"
             lines += [
                 head,
                 "  - Included because: AGENCYPR-SEL-01 — "
@@ -444,6 +488,14 @@ def _agency_lines(conn, date):
                     f"[independent archive]({meta['wayback_url']})"
                 )
         lines.append("")
+    if backfill:
+        lines += [
+            (f"Also observed this day, not listed above: {len(backfill)}"
+             " release(s) the agencies date on other days (feed backfill from"
+             " newly activated sources). Excluded under AGENCYPR-EX-01;"
+             " counted in the Coverage Statement; captures preserved."),
+            "",
+        ]
     lines += ["---", ""]
     return lines
 

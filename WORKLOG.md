@@ -17,6 +17,31 @@ Entry format:
 
 ---
 
+## 2026-07-28 15:05 PDT — Agency dating rule: digests list what was published that day, not what we first observed
+
+**Context:** Operator caught the bootstrap defect in the committed digest:
+section 6 keyed on observation date, so newly activated sources' feed
+backfill (releases dated as far back as March) rendered as "today's"
+announcements.
+
+**Work performed:** GUIDE §3 dating rule first, then code: a digest for
+day D lists only releases the agency itself dates on D (claimed
+publication date parsed to a UTC day — RFC 822 and ISO forms; timezone
+converted). Observed-on-D-but-dated-elsewhere items are excluded under
+new rule **AGENCYPR-EX-01** — never silently: section 6 discloses the
+count in place, the Coverage Statement carries it as excluded, and the
+validator reconciles it (single source of truth: `_agency_rows`).
+Items with no parseable agency date fall back to observation date,
+disclosed per item as "dated by first observation". Claimed vs observed
+dates remain separately stored per §7 T3/T4. Tests: backfill exclusion +
+coverage arithmetic, RFC822/ISO/garbage date parsing, fallback listing.
+226 passing. Real effect on 2026-07-28: 282 observed → 41 listed (dated
+today) + 241 disclosed backfill. Digest re-rendered, site rebuilt.
+
+**Decisions:** The digest answers "what did the government publish on day
+D per its own dating," with our observation record as the audit trail —
+not the reverse. Backfill is accounting data, not news.
+
 ## 2026-07-28 14:20 PDT — Bootstrap ingest landed (282 items, 14 sources); five sources activated by probe; DOJ challenge lesson; GAO feed-only economics; digest + S2 commit
 
 **Context:** Closing out the day's arc: the S2 bootstrap ingest, the probe
