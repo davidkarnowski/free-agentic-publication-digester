@@ -17,6 +17,49 @@ Entry format:
 
 ---
 
+## 2026-07-29 13:10 PDT — Scheduling deliberation resolved: GH-native runtime plan, evaluated on a branch
+
+**Context:** After the licensing and access-research work, the
+scheduling question came to a head through three shapes in one
+afternoon: self-hosted runner on the operator machine → Dockerized
+runner on a VPS (consistent IPv4 + rDNS as crawler identity) → plain
+VPS cron with results pushed to the repo. Assessing the last, we
+established that GitHub Actions run logs are operational convenience,
+not accountability (90-day retention, admin-deletable, private-scoped)
+— our committed manifests + fetch logs already outclass them, and a
+committed daily run-summary would give the public better execution
+transparency than Actions logs ever could. The operator's direction:
+not settled on the VPS; the real desire is for FAPD to **live
+completely on GitHub**. Decision: pursue a GH-Actions-only runtime,
+built and proven on a branch before main changes at all.
+
+**Work performed:** docs/gh-native-plan.md written and adopted as the
+active track — design principle "git history for evidence, Releases for
+state" (measured: fapd.db 80 MB, raw 800 MB — rolling pipeline-state
+Release assets, monthly S4-style bundles; evidence commits stay in
+git with a bot identity; new committed run-summary artifact); LLM stage
+via an AnthropicBackend behind LLM_BACKEND=api|cli (cli default
+locally); workflows ci/pipeline/pages born on the gh-native branch;
+the honest trade stated (shared runner IPs vs our identified-client
+posture) with a measurement plan (per-source 403 delta in T4) and a
+decision rule (material coverage loss + signing doesn't recover it →
+revisit VPS with evidence). Branch isolation is a hard rule: main gets
+documentation only until T1–T5 pass and a reviewed PR promotes the
+runtime. VPS shape documented in the plan as the considered,
+not-settled alternative. gh-native branch scaffolded with ci.yml
+(complete) + pipeline.yml skeleton; first CI run on GitHub
+infrastructure verified from the branch.
+
+**Decisions:** Accountability lives in our own committed artifacts, not
+platform logs. State is public (Releases) — the fetch log was built
+key-redacted from day one for exactly this kind of exposure. Web Bot
+Auth signing rises in priority: on hosted runners, cryptographic
+identity must do what stable IP identity can't.
+
+**Open questions / next steps:** branch backlog in the plan doc
+(AnthropicBackend, run-summary emitter, state steps, T2–T5); the
+per-source 403 measurement will decide the architecture with data.
+
 ## 2026-07-29 08:40 PDT — Publication-readiness: audit passed, access-advocacy pillar, AI-transparency page, launch TODO
 
 **Context:** NotebookLM renderings of the project (audio overview +

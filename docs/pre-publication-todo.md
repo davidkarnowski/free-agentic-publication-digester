@@ -36,24 +36,20 @@ close (check them off with dates).
   backend behind the existing interface (the `claude` CLI binds runs to
   the local machine/subscription and cannot run hosted). Blocks any
   hosted scheduling; local scheduling does not need it.
-- [ ] **Daily scheduling** with overlap guard. Chosen shape
-  (operator, 2026-07-29): **self-hosted GitHub Actions runner in a
-  Docker container on a VPS** — overnight runs, persistent data/ volume
-  as state, and a consistent public IPv4 that doubles as identity
-  infrastructure: set **reverse DNS** on the address (rDNS + stable UA +
-  published IP is exactly what verified-bot programs and M-23-22
-  letters want; publish the crawler IP/UA on the agents page like
-  search engines do). LLM stage on the VPS: claude CLI headless with a
-  long-lived token works, but the API backend is cleaner unattended.
-  **Security requirement — runner never attaches to the public repo**
-  (GitHub warns fork PRs can execute on self-hosted runners): create a
-  separate private ops repo (fapd-ops) holding the scheduled workflows;
-  the runner registers only there; jobs check out the public repo and
-  push digests/manifests back. Public repo gets hosted-runner CI + site
-  deploy only. Caveats: datacenter-ASN IP reputation (check blacklists
-  before settling; Web Bot Auth signing is the long-term mitigation);
-  VPS hardening becomes part of the accountability story (.env and
-  mailbox credentials live there). Open since Phase 1.
+- [ ] **Daily scheduling — active track: GH-native runtime**
+  (docs/gh-native-plan.md, adopted 2026-07-29): the pipeline runs
+  entirely on hosted GitHub Actions — rolling `pipeline-state` Release
+  as the state store, evidence + a new committed daily run-summary in
+  git (bot commit identity), AnthropicBackend for the LLM stage,
+  ci/pipeline/pages workflows. Built and evaluated on the **gh-native
+  branch** (T1–T5 in the plan doc, incl. the per-source 403-delta
+  measurement that decides the IP-reputation question); main's runtime
+  changes only by reviewed PR after the evaluation passes. The
+  VPS/self-hosted-runner shape (consistent IPv4 + rDNS as crawler
+  identity; private ops repo requirement) is documented in the plan doc
+  as the considered, not-settled alternative — revisited only if the
+  measured 403 delta materially shrinks agency coverage and Web Bot
+  Auth signing doesn't recover it. Open since Phase 1.
 
 ### Community files
 - [ ] `SECURITY.md` — contact route (hustleyourcity address), what's in
