@@ -618,6 +618,14 @@ Mechanics:
 This repo may be published on GitHub at any time. Everything committed is
 written as if it were already public:
 
+- **Licensing (decided 2026-07-29).** Code: **Apache-2.0** (`LICENSE` +
+  `NOTICE`; the patent grant and contribution clarity suit the
+  fork-this-for-your-government mission). Content — digests, site,
+  explanatory docs: **CC BY 4.0** (`LICENSE-CONTENT.md`; attribution is
+  exactly the onward-citation ask we already make of agents). Quoted
+  official government text is public domain (17 U.S.C. § 105) and is
+  never claimed. Stated in the site footer, llms.txt, the agents page,
+  and each digest's methodology footer.
 - **How this project is built is itself public (decided 2026-07-29).**
   FAPD is developed with generative AI (Claude agents; every commit
   carries a co-author trailer), and we say so plainly rather than

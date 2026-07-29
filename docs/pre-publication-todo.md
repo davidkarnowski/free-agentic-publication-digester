@@ -8,17 +8,13 @@ close (check them off with dates).
 
 ## Decisions (operator)
 
-- [ ] **[decision] Code license.** MIT (maximally simple) vs Apache-2.0
-  (adds an explicit patent grant and NOTICE conventions).
-  Recommendation: **Apache-2.0** — the fork-this-for-your-government
-  mission benefits from the patent grant and contribution clarity.
-  Then: `LICENSE` file, `license` field + classifier in pyproject.
-- [ ] **[decision] Content license for digests/site text.** CC0 (public
-  domain dedication, zero friction) vs CC-BY 4.0 (requires attribution).
-  Recommendation: **CC-BY 4.0** — attribution aligns exactly with the
-  onward-citation ask we already make of agents. Then: site footer
-  statement, llms.txt reuse note, README section, digest methodology
-  footer line.
+- [x] 2026-07-29 **[decision] Code license: Apache-2.0** (operator).
+  `LICENSE` (canonical text) + `NOTICE` committed; pyproject
+  `license`/`license-files` set.
+- [x] 2026-07-29 **[decision] Content license: CC BY 4.0** (operator).
+  `LICENSE-CONTENT.md` committed; stated in site footer, llms.txt Reuse
+  note, agents-page Reuse section, README Licensing section, and each
+  digest's methodology footer (all digests re-rendered).
 - [ ] **[decision] Domain.** Choose and register the public domain (or
   decide user-site `davidkarnowski.github.io`). Then: `CNAME` in site/,
   set `SITE_BASE_URL` in the build environment (machinery landed

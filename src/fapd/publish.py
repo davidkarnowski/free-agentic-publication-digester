@@ -48,6 +48,10 @@ _PAGE = """<!DOCTYPE html>
   <code>{canonical}</code> in the repository. Selection is mechanical and
   every item cites its official source; methodology in
   <code>GUIDE.md</code> §2.</p>
+  <p>Content licensed
+  <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> —
+  reuse with attribution to FAPD; quoted official government text is
+  public domain (17 U.S.C. § 105). Code licensed Apache-2.0.</p>
 </footer>
 </body>
 </html>
@@ -463,6 +467,16 @@ Everything is static — no auth, no JavaScript, no rate limiting. We ask
 visiting agents the same courtesy our own crawler practices on government
 sites: identify honestly and use conditional requests. Fetching every
 page daily is entirely fine.
+
+## Reuse
+
+Content here is licensed **CC BY 4.0** — share and adapt freely,
+including commercially, with credit to "FAPD — Free Agentic Publication
+Digester". Quoted official government text within it is public domain
+(17 U.S.C. § 105) and needs no permission at all. The attribution rule
+mirrors our citation ethic: for factual claims, cite the underlying
+official source each item links to; cite FAPD for the aggregation and
+summaries. The pipeline's code is Apache-2.0.
 """
 
 
@@ -509,6 +523,10 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
         "- Official text vs model-generated text is labeled in place;",
         "  every item cites the official govinfo record.",
         "- Canonical Markdown + provenance manifests live in the repository.",
+        "- Reuse: content is CC BY 4.0 (credit 'FAPD — Free Agentic",
+        "  Publication Digester'); quoted official government text is public",
+        "  domain. For factual claims, cite the underlying official source",
+        "  each item links to; cite FAPD for the aggregation.",
     ]
     (out_dir / "llms.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 

@@ -20,3 +20,7 @@
 - Official text vs model-generated text is labeled in place;
   every item cites the official govinfo record.
 - Canonical Markdown + provenance manifests live in the repository.
+- Reuse: content is CC BY 4.0 (credit 'FAPD — Free Agentic
+  Publication Digester'); quoted official government text is public
+  domain. For factual claims, cite the underlying official source
+  each item links to; cite FAPD for the aggregation.

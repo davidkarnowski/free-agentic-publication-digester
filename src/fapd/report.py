@@ -1180,6 +1180,11 @@ def _methodology_lines(date, git_short):
         "without one had no usable restatement. ALL-CAPS source headings are",
         "case-normalized for display; original casing is preserved at the source",
         "link. Term definitions above are static, repo-versioned prose.*",
+        "",
+        "License: this digest's compilation and prose are",
+        "[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (credit",
+        "\"FAPD — Free Agentic Publication Digester\"); quoted official",
+        "government text is public domain (17 U.S.C. § 105).",
     ]
 
 

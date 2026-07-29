@@ -307,6 +307,17 @@ including what AI assistance changed about where design attention went,
 is at [docs/site/ai-development.md](docs/site/ai-development.md)
 (published on the site as "How AI Built This").
 
+## Licensing
+
+- **Code:** [Apache-2.0](LICENSE) (with [NOTICE](NOTICE)).
+- **Content** — digests, site pages, explanatory documents:
+  [CC BY 4.0](LICENSE-CONTENT.md). Reuse freely with credit to "FAPD —
+  Free Agentic Publication Digester"; the attribution rule mirrors the
+  project's own citation ethic (cite the official source for claims,
+  FAPD for the aggregation).
+- **Quoted official government text** is public domain
+  (17 U.S.C. § 105) — it was never ours to license.
+
 ## The documents that govern this project
 
 - **[GUIDE.md](GUIDE.md)** — the governing document: mission, editorial
