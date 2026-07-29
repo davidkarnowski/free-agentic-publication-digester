@@ -267,6 +267,68 @@ direct HTML index pages where no feed exists). Governing rules:
   digest citations must point to the originating agency's document, and
   the aggregator's role is disclosed.
 
+### Email-distributed sources (added 2026-07-29)
+
+A third non-GPO source class: official publications an agency *pushes*
+to subscribers — GovDelivery/Granicus bulletins and agency-run
+listservs. This is the consent-maximal channel (the publisher
+affirmatively transmits the content over its own chosen distribution
+system) and the primary path for re-opening newsroom sources whose web
+channels refuse identified clients (see
+`docs/access-alternatives-research-2026-07-29.md`). Governing rules:
+
+- **Subscribe as ourselves, like any citizen.** One dedicated project
+  mailbox, held under the public attribution identity (§9) — never a
+  personal address — subscribes through each agency's own signup flow.
+  The mailbox address is project infrastructure: recorded in `.env`
+  (git-ignored) like other credentials, never committed.
+- **Registry integration.** Each subscription is its own registry entry
+  (`type: email`, adapter named per platform, e.g. `govdelivery`),
+  sibling to — never replacing — the blocked web entry, whose
+  `unavailable` record stands as accountability data. The five
+  onboarding gates apply, adapted: the "probe" is subscribing and
+  parsing the first real bulletins end-to-end; the content evaluation
+  compares bulletin coverage against the agency's visible newsroom
+  output and discloses the gap (per-topic subscriptions rarely equal
+  the full newsroom).
+- **The raw message is the capture.** The full RFC-5322 message bytes
+  are stored content-addressed, exactly like a web capture:
+  `content_sha256` over the raw message is the evidentiary hash;
+  normalized extracted text drives change detection as usual.
+- **DKIM verification is the corroboration layer (§7).** Each message's
+  DKIM signature is verified at ingest and the result recorded; the
+  selector's DNS public key is archived alongside the capture (keys
+  rotate — the key that verified must be preserved, or the signature
+  becomes uncheckable later). A verifying signature over stored raw
+  bytes is cryptographic evidence that the agency's chosen distributor
+  sent exactly this content — this replaces Wayback corroboration,
+  which does not apply to email (GovDelivery's bulletin archives are
+  login-walled). Messages that fail DKIM are still ingested but marked
+  `dkim: fail` and excluded from any tamper-evidence claims.
+- **Dating.** The message's `Date` header (and any bulletin-stated
+  date) is `claimed_published_at`; receipt time is our observation.
+  The §3 dating rule applies unchanged: digests list what the agency
+  dates on the digest day; backfill (e.g. a subscription's welcome
+  batch) is disclosed under AGENCYPR-EX-01, never passed off as news.
+- **Ingest what is offered — the web refusal still stands.** Bulletins
+  are often teasers linking to the newsroom page that refuses our
+  client. We ingest the bulletin's own content (mode disclosed:
+  `email-full` vs `email-teaser`) and never fetch a link whose host
+  blocks us — receiving an email is not consent to crawl the site it
+  links to. If the agency later opens the web channel, the adapter
+  posture is re-evaluated (gate 5).
+- **Our mailbox, our budget.** Polling our own mailbox costs government
+  servers nothing; §4's request budgets don't apply to it. It is still
+  paced (a few polls per day), logged in the access narrative, and
+  per-message ingest events are recorded like any fetch attempt in the
+  daily manifest — absence must remain an assertion.
+- **Consent is revocable.** An unsubscribe request, list removal, or
+  bounce-out by the agency is honored immediately and recorded in the
+  registry notes — the same standing the no-evasion rule gives a 403.
+- **Attribution and register are unchanged.** Bulletins are agency
+  advocacy: §2's attributed-speech rule applies exactly as it does to
+  newsroom releases.
+
 ### Source adapters (amended 2026-07-28)
 
 Real publication interfaces are irregular: feeds without GUIDs, article
@@ -584,6 +646,16 @@ Mechanics:
   is on the record as a gap, never ambiguous. Each manifest's header
   carries the previous manifest's sha256 (deletion or reordering of days
   is detectable from the files alone).
+- **DKIM as corroboration for email-distributed sources (added
+  2026-07-29):** for the §3 email class, the stored raw message plus a
+  verifying DKIM signature — with the verifying DNS public key archived
+  at ingest, since selectors rotate — is cryptographic evidence that the
+  agency's chosen distributor sent exactly these bytes. It plays the
+  independent-witness role Wayback plays for web captures (and is
+  arguably stronger: the signature covers the content itself). Honest
+  limit: DKIM proves the *distributor* (e.g. GovDelivery on the
+  agency's behalf) signed the message, not that the agency's newsroom
+  page said the same thing.
 - **Honest limits (stated wherever provenance is claimed):** hashes prove
   what was served **to our identified client** — not what every visitor
   saw; our timestamps are backed by git/GitHub history and Wayback

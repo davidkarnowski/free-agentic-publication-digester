@@ -79,11 +79,13 @@ close (check them off with dates).
   GovDelivery-pattern probe (FDIC topic feed).
 - [ ] **Blocked-source access program** (ranked plan in
   docs/access-alternatives-research-2026-07-29.md):
-  1. Email-ingestion adapter over GovDelivery — GUIDE amendment (mailbox
-     identity, DKIM verify-and-archive, teaser posture), project mailbox
-     under the public identity, subscribe USTREAS/USSSA/USDOJDEA/USAFAA/
-     HHS first. Broadest coverage per unit effort; DKIM signatures
-     upgrade §7 provenance.
+  1. Email-ingestion adapter over GovDelivery — ~~GUIDE amendment~~
+     **done 2026-07-29** (§3 "Email-distributed sources" + §7 DKIM
+     corroboration). Remaining: project mailbox under the public
+     identity (operator: create + put credentials in .env), then the
+     adapter build (type: email registry entries, IMAP poll, raw-message
+     captures, DKIM verify-and-archive, email-full/email-teaser modes),
+     then subscribe USTREAS/USSSA/USDOJDEA/USAFAA/HHS first.
   2. M-23-22 template letters to the 11 WAF-blocked agencies (quote the
      "shall permit web scraping … unimpeded" language; offer
      Friendly-Bots/Web-Bot-Auth verification; cc GSA/TTS Digital.gov);
