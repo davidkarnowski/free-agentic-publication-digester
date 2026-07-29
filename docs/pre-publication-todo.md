@@ -89,6 +89,16 @@ close (check them off with dates).
   asset_posture), FCC api2 re-probe (504 was possibly transient),
   BLS/ODNI feed-URL reads, USSC activation when its feed populates,
   GovDelivery-pattern probe (FDIC topic feed).
+- [ ] **Official-video transcripts** (research complete 2026-07-29:
+  docs/youtube-transcripts-research-2026-07-29.md — YouTube captions
+  are not legitimately reachable by non-owners and the scraper path
+  fails the consent test, finally; the transcripts' authoritative homes
+  are .gov pages): adopt the four GUIDE amendments (commercial-platform
+  mirrors rule, Digital Registry verification, signal-class sources,
+  ASR ≠ official text), then probe/register the GovTranscript pages
+  (state.gov briefings feed, whitehouse.gov, war.gov transcripts) and
+  build the Touchpoints Digital-Registry verifier (api.data.gov key we
+  already hold).
 - [ ] **Blocked-source access program** (ranked plan in
   docs/access-alternatives-research-2026-07-29.md):
   1. Email-ingestion adapter over GovDelivery — ~~GUIDE amendment~~
