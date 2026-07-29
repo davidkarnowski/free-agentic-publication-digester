@@ -16,7 +16,7 @@ import markdown
 from . import config
 from .sync import utc_now_iso
 
-SITE_TITLE = "Information Intelligence — Daily Federal Digest"
+SITE_TITLE = "Free Agentic Publication Digester — Daily Federal Digest"
 SITE_TAGLINE = (
     "An automated, citation-bound, opinion-agnostic daily digest of official "
     "United States government publications — congressional, executive, and "
@@ -36,7 +36,7 @@ _PAGE = """<!DOCTYPE html>
 <body>
 <header class="site-header">
   <nav>
-    <a class="brand" href="index.html">Information&nbsp;Intelligence</a>
+    <a class="brand" href="index.html">FAPD</a>
     <span class="nav-links">{nav_links}</span>
   </nav>
 </header>
@@ -488,7 +488,7 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
         entries.append(
             f"<entry><title>Daily Digest — {d}</title>"
             f'<link href="{base}/{d}.html"/>'
-            f"<id>tag:info-intel,{d}:digest</id>"
+            f"<id>tag:fapd,{d}:digest</id>"
             f"<updated>{d}T12:00:00Z</updated>"
             f"<summary>{_atom_escape(teasers.get(d))}</summary></entry>"
         )
@@ -497,7 +497,7 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
         '<feed xmlns="http://www.w3.org/2005/Atom">'
         f"<title>{_atom_escape(SITE_TITLE)}</title>"
         f'<link href="{base}/"/>'
-        f"<id>tag:info-intel:digests</id>"
+        f"<id>tag:fapd:digests</id>"
         f"<updated>{utc_now_iso()}</updated>"
         + "".join(entries) + "</feed>\n"
     )

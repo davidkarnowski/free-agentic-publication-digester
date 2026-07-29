@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from info_intel import config, db, probe
+from fapd import config, db, probe
 
 RSS = b"""<?xml version="1.0"?><rss version="2.0"><channel><title>N</title>
 <item><title>Release One</title><link>https://x.gov/one</link>

@@ -2,7 +2,7 @@
 
 import pytest
 
-from info_intel import agencies, config, db
+from fapd import agencies, config, db
 
 RSS = b"""<?xml version="1.0"?><rss version="2.0"><channel>
 <item><title>Release A</title><link>https://x.gov/a</link><guid>g-a</guid>

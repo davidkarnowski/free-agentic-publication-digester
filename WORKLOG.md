@@ -1,4 +1,4 @@
-# Work Production Log — Information Intelligence
+# Work Production Log — Free Agentic Publication Digester (FAPD)
 
 > Reverse-chronological log of all work on this project. Every session gets an
 > entry: timestamped, verbose, explanatory. Decisions include the *why*, and
@@ -16,6 +16,33 @@ Entry format:
 ```
 
 ---
+
+## 2026-07-28 19:20 PDT — Rebrand: Free Agentic Publication Digester (FAPD)
+
+**Context:** Repo pushed to GitHub (private) as
+`davidkarnowski/free-agentic-publication-digester`; the user settled the
+project name — **Free Agentic Publication Digester (FAPD)** — replacing
+the working title "Information Intelligence". Full scrub approved in plan
+mode.
+
+**Work performed:** Package renamed `info_intel` → `fapd` (src dir,
+imports across scripts/tests, logger names, dynamic parser-import
+strings, pyproject distribution name, lockfile; `data/info_intel.db`
+moved to `data/fapd.db` — audit.py smoke-verified against the moved
+file). Display surfaces: SITE_TITLE "Free Agentic Publication Digester —
+Daily Federal Digest", nav brand "FAPD", README/GUIDE/WORKLOG H1s,
+about.md opening. Wire identity changed now, in the only free window
+(site unpublished, zero feed subscribers): User-Agent
+`fapd/0.1 (Free Agentic Publication Digester; …)` and Atom IDs
+`tag:fapd…`. Docs path refs (schema.md, registry comment) updated;
+SOURCES.md + site regenerated. **Worklog history deliberately untouched**
+— older entries keep the working name (falsifying a timestamped record is
+not a rebrand); a naming note in GUIDE §1 bridges the two. 226 tests
+passing.
+
+**Decisions:** Feed IDs and UA are permanent identity once anyone
+subscribes or servers profile us — changing them pre-publication was the
+whole reason to do this now rather than later.
 
 ## 2026-07-28 15:05 PDT — Agency dating rule: digests list what was published that day, not what we first observed
 

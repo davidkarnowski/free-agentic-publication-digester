@@ -2,7 +2,7 @@
 
 import pytest
 
-from info_intel import publish
+from fapd import publish
 
 DIGEST_A = """# Daily Digest — 2026-07-01
 
@@ -108,7 +108,7 @@ def test_rebuild_is_idempotent(digests, tmp_path):
 
 
 def test_real_digests_build(tmp_path):
-    from info_intel import config
+    from fapd import config
 
     if not any(config.DIGEST_DIR.glob("2026-*.md")):
         pytest.skip("no real digests on disk")
@@ -120,7 +120,7 @@ def test_real_digests_build(tmp_path):
 
 
 def test_sources_page_built_and_linked(digests, tmp_path, monkeypatch):
-    from info_intel import config
+    from fapd import config
 
     root = tmp_path / "root"
     root.mkdir()
@@ -139,7 +139,7 @@ def test_sources_page_built_and_linked(digests, tmp_path, monkeypatch):
 
 
 def test_no_sources_md_degrades_gracefully(digests, tmp_path, monkeypatch):
-    from info_intel import config
+    from fapd import config
 
     empty_root = tmp_path / "empty"
     empty_root.mkdir()
@@ -153,7 +153,7 @@ def test_no_sources_md_degrades_gracefully(digests, tmp_path, monkeypatch):
 def test_doc_pages_built_from_docs_site(digests, tmp_path, monkeypatch):
     """docs/site/*.md render generically: title from the first h1, canonical
     footer naming the markdown source."""
-    from info_intel import config
+    from fapd import config
 
     root = tmp_path / "root"
     (root / "docs" / "site").mkdir(parents=True)
@@ -190,7 +190,7 @@ def test_llms_and_sitemap_include_doc_pages(digests, tmp_path):
 
 
 def test_no_docs_site_degrades_gracefully(digests, tmp_path, monkeypatch):
-    from info_intel import config
+    from fapd import config
 
     empty_root = tmp_path / "empty"
     empty_root.mkdir()

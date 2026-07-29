@@ -22,7 +22,7 @@ from html.parser import HTMLParser
 from . import config
 from .sync import utc_now_iso
 
-logger = logging.getLogger("info_intel.provenance")
+logger = logging.getLogger("fapd.provenance")
 
 # Response headers preserved as forensic context (server's own claims).
 _HEADER_KEEP = (

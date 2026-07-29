@@ -1,4 +1,4 @@
-"""Metadata store (data/info_intel.db). Schema per docs/schema.md — that
+"""Metadata store (data/fapd.db). Schema per docs/schema.md — that
 document is the design authority; keep the two in sync."""
 
 import sqlite3

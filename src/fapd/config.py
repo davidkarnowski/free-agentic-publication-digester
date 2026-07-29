@@ -35,7 +35,7 @@ BACKOFF_BASE_SECONDS = 2.0  # 2, 4, 8, 16 between retries
 MIN_SERVER_REMAINING = 1000
 
 FETCH_LOG_DB = DATA_DIR / "fetch_log.db"
-PIPELINE_DB = DATA_DIR / "info_intel.db"
+PIPELINE_DB = DATA_DIR / "fapd.db"
 LOG_DIR = DATA_DIR / "logs"
 CAPTURE_DIR = DATA_DIR / "captures"  # content-addressed raw bytes (gitignored)
 MANIFEST_DIR = PROJECT_ROOT / "provenance" / "manifests"  # committed
@@ -79,7 +79,8 @@ COLLECTIONS = ("CREC", "BILLS", "FR", "USCOURTS", "PLAW")
 USCOURTS_FETCH_WINDOW_DAYS = 7
 
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")
-USER_AGENT = f"info-intel/0.1 (personal daily-digest research; contact: {CONTACT_EMAIL})"
+USER_AGENT = (f"fapd/0.1 (Free Agentic Publication Digester; personal"
+              f" daily-digest research; contact: {CONTACT_EMAIL})")
 
 
 def api_key() -> str:

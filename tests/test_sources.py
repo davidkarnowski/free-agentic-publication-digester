@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from info_intel import sources
+from fapd import sources
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 

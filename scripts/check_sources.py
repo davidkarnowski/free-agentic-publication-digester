@@ -10,10 +10,10 @@ Usage:
 import argparse
 import sys
 
-from info_intel import db, logging_setup
-from info_intel.client import AgencyClient
-from info_intel.probe import run
-from info_intel.sources import load_registry
+from fapd import db, logging_setup
+from fapd.client import AgencyClient
+from fapd.probe import run
+from fapd.sources import load_registry
 
 
 def main() -> int:

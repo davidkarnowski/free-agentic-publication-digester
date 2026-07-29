@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from info_intel import config, db, provenance
+from fapd import config, db, provenance
 
 
 class Resp:

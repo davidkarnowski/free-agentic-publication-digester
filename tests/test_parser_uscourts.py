@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 from pypdf import PdfWriter
 
-from info_intel.parsers import uscourts
+from fapd.parsers import uscourts
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "raw" / "USCOURTS"
 

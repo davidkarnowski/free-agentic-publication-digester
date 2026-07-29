@@ -8,8 +8,8 @@ Usage: uv run python scripts/verify_key.py
 
 import sys
 
-from info_intel import logging_setup
-from info_intel.client import GovinfoClient
+from fapd import logging_setup
+from fapd.client import GovinfoClient
 
 
 def main() -> int:

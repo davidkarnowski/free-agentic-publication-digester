@@ -15,7 +15,7 @@ import re
 from . import config
 from .client import BudgetExceededError, RateLimitFloorError
 
-logger = logging.getLogger("info_intel.sync")
+logger = logging.getLogger("fapd.sync")
 
 # Package-level download preference. XML is what Phase 2 parses; ZIP is the
 # fallback for collections (like CREC) whose package-level content is only

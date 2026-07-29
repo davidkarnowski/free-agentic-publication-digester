@@ -4,8 +4,8 @@ metadata DB is real SQLite at a tmp path."""
 
 import pytest
 
-from info_intel import config, db, sync
-from info_intel.client import BudgetExceededError
+from fapd import config, db, sync
+from fapd.client import BudgetExceededError
 
 
 class FakeClient:

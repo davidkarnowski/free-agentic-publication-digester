@@ -11,7 +11,7 @@ import argparse
 import sqlite3
 import sys
 
-from info_intel import config
+from fapd import config
 
 
 def main() -> int:

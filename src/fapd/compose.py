@@ -13,7 +13,7 @@ import logging
 from . import config
 from .sync import utc_now_iso
 
-logger = logging.getLogger("info_intel.compose")
+logger = logging.getLogger("fapd.compose")
 
 _PROMPT = """You are writing the "Day in Review" opening of a daily digest of official
 US government publications. Your ONLY inputs are the item summaries and

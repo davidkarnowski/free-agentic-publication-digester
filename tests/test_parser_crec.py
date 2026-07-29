@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from info_intel.parsers import crec
+from fapd.parsers import crec
 
 PKG = {
     "package_id": "CREC-2026-07-23",

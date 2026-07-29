@@ -7,7 +7,7 @@ import re
 
 import pytest
 
-from info_intel import analyze, config, db, rules
+from fapd import analyze, config, db, rules
 
 DATE = "2026-07-23"
 LONG_TEXT = ("floor debate " * 1200)[:16000]  # above the 15000-char threshold

@@ -17,7 +17,7 @@ import time
 
 from . import config
 
-logger = logging.getLogger("info_intel.llm")
+logger = logging.getLogger("fapd.llm")
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS llm_calls (

@@ -16,17 +16,17 @@ from pathlib import Path
 from . import config
 from .sync import utc_now_iso
 
-logger = logging.getLogger("info_intel.extract")
+logger = logging.getLogger("fapd.extract")
 
 # Bump to force re-extraction of everything (recorded per row).
 EXTRACTOR_VERSION = 1
 
 _PARSER_MODULES = {
-    "FR": "info_intel.parsers.fr",
-    "CREC": "info_intel.parsers.crec",
-    "BILLS": "info_intel.parsers.bills",
-    "USCOURTS": "info_intel.parsers.uscourts",
-    "PLAW": "info_intel.parsers.plaw",
+    "FR": "fapd.parsers.fr",
+    "CREC": "fapd.parsers.crec",
+    "BILLS": "fapd.parsers.bills",
+    "USCOURTS": "fapd.parsers.uscourts",
+    "PLAW": "fapd.parsers.plaw",
 }
 
 

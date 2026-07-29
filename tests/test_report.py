@@ -11,7 +11,7 @@ import re
 import pytest
 from PIL import Image
 
-from info_intel import config, db, report
+from fapd import config, db, report
 
 DATE = "2026-07-23"
 CREC_PKG = "CREC-2026-07-23"
@@ -194,7 +194,7 @@ def project(tmp_path, monkeypatch):
 
 @pytest.fixture
 def conn(project):
-    connection = db.connect(project / "data" / "info_intel.db")
+    connection = db.connect(project / "data" / "fapd.db")
     seed(connection, project)
     yield connection
     connection.close()

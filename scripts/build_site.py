@@ -8,7 +8,7 @@ any time. Output: site/ (index + one page per digest + copied assets).
 
 import sys
 
-from info_intel.publish import build_site
+from fapd.publish import build_site
 
 
 def main() -> int:

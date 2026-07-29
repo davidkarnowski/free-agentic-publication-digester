@@ -5,7 +5,7 @@ store: package inventory, granule inventory, delta-sync watermarks) and
 Phase 2 (Extraction: normalized text records and graphic assets — see the
 Extraction section at the end).
 
-- **Database file:** `data/info_intel.db` (repo-relative, like all paths in
+- **Database file:** `data/fapd.db` (repo-relative, like all paths in
   this project — GUIDE §9).
 - **Raw documents are not stored in the database.** They live on the
   filesystem under `data/raw/<collection>/<dateIssued>/` (GUIDE §5); the
@@ -233,7 +233,7 @@ Per collection, one scheduled run per day (GUIDE §4):
    - **No row (first sync or deliberate reset)** → per GUIDE §4, the sync is
      date-bounded, never open-ended:
      `start = now_utc - INITIAL_SYNC_LOOKBACK_DAYS` (currently 3 days,
-     defined in `src/info_intel/config.py`). Older history is only ever
+     defined in `src/fapd/config.py`). Older history is only ever
      acquired via a deliberate bulkdata backfill, never by widening this
      window.
 2. **Write** `last_sync_started_at = now` (upserting the row if new).
@@ -294,7 +294,7 @@ it:
 ## Extraction layer (Phase 2)
 
 Two tables written by the extraction orchestrator
-(`src/info_intel/extract.py`); parsers themselves are pure functions
+(`src/fapd/extract.py`); parsers themselves are pure functions
 (`parsers/{fr,crec,bills}.py: parse(raw_path, package) -> iter[record]`)
 that never touch the database.
 

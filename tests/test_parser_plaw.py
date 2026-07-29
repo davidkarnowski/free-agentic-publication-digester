@@ -11,7 +11,7 @@ USLM = b"""<?xml version="1.0"?>
 
 
 def test_uslm_law_record(tmp_path):
-    from info_intel.parsers import plaw
+    from fapd.parsers import plaw
 
     f = tmp_path / "PLAW-119publ101.xml"
     f.write_bytes(USLM)
@@ -27,7 +27,7 @@ def test_uslm_law_record(tmp_path):
 
 
 def test_txt_fallback(tmp_path):
-    from info_intel.parsers import plaw
+    from fapd.parsers import plaw
 
     f = tmp_path / "PLAW-119pvtl1.txt"
     f.write_bytes(b"An Act for the relief of a private party.")

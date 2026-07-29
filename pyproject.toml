@@ -1,5 +1,5 @@
 [project]
-name = "info-intel"
+name = "fapd"
 version = "0.1.0"
 description = "Automated, cited, opinion-agnostic daily digest of official US government publications"
 authors = [{ name = "David D. Karnowski" }]
@@ -25,7 +25,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/info_intel"]
+packages = ["src/fapd"]
 
 [tool.ruff]
 line-length = 100

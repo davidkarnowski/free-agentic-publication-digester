@@ -14,8 +14,8 @@ import datetime as dt
 import sqlite3
 import sys
 
-from info_intel import agencies, config, db, logging_setup
-from info_intel.client import AgencyClient
+from fapd import agencies, config, db, logging_setup
+from fapd.client import AgencyClient
 
 
 def _footprint_today():
@@ -39,7 +39,7 @@ def main() -> int:
     args = ap.parse_args()
     logging_setup.setup(verbose=args.verbose)
 
-    from info_intel.sources import load_registry
+    from fapd.sources import load_registry
     entries = [e for e in load_registry()
                if e["status"] == "active" and e["type"] == "rss"]
     if args.ids:

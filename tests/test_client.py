@@ -3,8 +3,8 @@ faked, and the fetch-log DB goes to a tmp path."""
 
 import pytest
 
-from info_intel import config
-from info_intel.client import BudgetExceededError, GovinfoClient, RateLimitFloorError
+from fapd import config
+from fapd.client import BudgetExceededError, GovinfoClient, RateLimitFloorError
 
 
 class FakeResponse:
@@ -170,14 +170,14 @@ def test_paginate_follows_next_page_and_strips_echoed_key(tmp_path):
 def test_user_agent_sent(tmp_path):
     client, session, _ = make_client(tmp_path, [FakeResponse()])
     client.get("collections")
-    assert session.calls[0]["headers"]["User-Agent"].startswith("info-intel/")
+    assert session.calls[0]["headers"]["User-Agent"].startswith("fapd/")
 
 
 # ---------------------------------------------------------------------------
 # HttpClient base extensions + AgencyClient (sources expansion)
 # ---------------------------------------------------------------------------
 
-from info_intel.client import AgencyClient, RobotsDisallowedError
+from fapd.client import AgencyClient, RobotsDisallowedError
 
 
 def make_agency(tmp_path, responses):

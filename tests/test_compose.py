@@ -2,7 +2,7 @@
 
 import pytest
 
-from info_intel import compose, config, db
+from fapd import compose, config, db
 
 
 class FakeLLM:

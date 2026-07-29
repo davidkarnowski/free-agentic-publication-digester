@@ -14,10 +14,10 @@ import sqlite3
 import sys
 import time
 
-from info_intel import analyze, compose, config, db, llm, logging_setup, report
-from info_intel.client import GovinfoClient
-from info_intel.publish import build_site
-from info_intel.sync import sync_collection
+from fapd import analyze, compose, config, db, llm, logging_setup, report
+from fapd.client import GovinfoClient
+from fapd.publish import build_site
+from fapd.sync import sync_collection
 
 
 def banner(title):
@@ -54,9 +54,9 @@ def main() -> int:
     done(t0)
 
     t0 = stage("STAGE 1b/5 — AGENCY NEWSROOMS (RSS poll + capture + Wayback)")
-    from info_intel import agencies
-    from info_intel.client import AgencyClient
-    from info_intel.sources import load_registry
+    from fapd import agencies
+    from fapd.client import AgencyClient
+    from fapd.sources import load_registry
 
     entries = [e for e in load_registry()
                if e["status"] == "active" and e["type"] == "rss"]
@@ -69,7 +69,7 @@ def main() -> int:
     done(t0)
 
     t0 = stage("STAGE 2/5 — EXTRACT (raw archive -> normalized records)")
-    from info_intel import extract
+    from fapd import extract
 
     ex = extract.run(conn)
     print(f"   packages={ex['packages']} records={ex['records']} "

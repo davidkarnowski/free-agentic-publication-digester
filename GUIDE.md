@@ -1,4 +1,4 @@
-# Information Intelligence — Project Guide
+# Free Agentic Publication Digester (FAPD) — Project Guide
 
 > The governing document for this project. All design, code, and editorial
 > decisions should be checkable against this guide. When we change direction,
@@ -7,6 +7,10 @@
 ---
 
 ## 1. Mission
+
+*Naming: built under the working title "Information Intelligence";
+renamed **Free Agentic Publication Digester (FAPD)** on 2026-07-28 —
+older worklog entries use the working name.*
 
 Build an automated pipeline that monitors official United States government
 publications — congressional transcripts, bills, the Federal Register, and

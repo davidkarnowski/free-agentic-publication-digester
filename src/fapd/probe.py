@@ -21,7 +21,7 @@ from . import config, provenance
 from .client import RobotsDisallowedError
 from .sync import utc_now_iso
 
-logger = logging.getLogger("info_intel.probe")
+logger = logging.getLogger("fapd.probe")
 
 _ATOM_NS = "{http://www.w3.org/2005/Atom}"
 

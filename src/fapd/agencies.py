@@ -20,7 +20,7 @@ from .client import HttpClient, RobotsDisallowedError
 from .probe import parse_feed
 from .sync import utc_now_iso
 
-logger = logging.getLogger("info_intel.agencies")
+logger = logging.getLogger("fapd.agencies")
 
 class SourceAdapter:
     """Per-source ingestion strategy (GUIDE §3 "Source adapters").

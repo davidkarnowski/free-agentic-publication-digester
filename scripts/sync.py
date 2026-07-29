@@ -13,9 +13,9 @@ downloads per collection for this run; the remainder stays queued as
 import argparse
 import sys
 
-from info_intel import config, db, logging_setup
-from info_intel.client import GovinfoClient
-from info_intel.sync import sync_collection
+from fapd import config, db, logging_setup
+from fapd.client import GovinfoClient
+from fapd.sync import sync_collection
 
 
 def main() -> int:

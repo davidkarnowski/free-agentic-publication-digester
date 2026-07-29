@@ -11,7 +11,7 @@ No network access — extraction reads only the local archive.
 import argparse
 import sys
 
-from info_intel import config, db, extract, logging_setup
+from fapd import config, db, extract, logging_setup
 
 
 def main() -> int:

@@ -9,7 +9,7 @@ Usage: uv run python scripts/sources_doc.py
 
 from pathlib import Path
 
-from info_intel import sources
+from fapd import sources
 
 
 def main() -> int:

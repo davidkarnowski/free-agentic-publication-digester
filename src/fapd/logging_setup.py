@@ -18,7 +18,7 @@ from . import config
 
 
 def setup(verbose=False):
-    root = logging.getLogger("info_intel")
+    root = logging.getLogger("fapd")
     root.setLevel(logging.DEBUG)
     if root.handlers:  # idempotent across repeated calls in one process
         return root

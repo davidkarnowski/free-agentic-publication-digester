@@ -28,7 +28,7 @@ from protego import Protego
 
 from . import config
 
-logger = logging.getLogger("info_intel.client")
+logger = logging.getLogger("fapd.client")
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS fetch_log (

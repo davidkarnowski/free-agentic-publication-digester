@@ -1,4 +1,4 @@
-"""Tests for info_intel.graphics: FR <GPH> inventory and image asset extraction."""
+"""Tests for fapd.graphics: FR <GPH> inventory and image asset extraction."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from info_intel.graphics import extract_assets, inventory
+from fapd.graphics import extract_assets, inventory
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "raw" / "FR"
 

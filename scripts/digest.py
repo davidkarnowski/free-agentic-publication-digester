@@ -13,7 +13,7 @@ calls (GUIDE.md §6 rule 2).
 import argparse
 import sys
 
-from info_intel import config, db, logging_setup, report
+from fapd import config, db, logging_setup, report
 
 
 def default_date(conn):
@@ -50,7 +50,7 @@ def main() -> int:
     day_tokens = None
     try:
         # Built concurrently with this script; report-only runs must still work.
-        from info_intel import analyze, compose, llm
+        from fapd import analyze, compose, llm
     except ImportError as exc:
         print(
             f"analysis layer unavailable ({exc}); "

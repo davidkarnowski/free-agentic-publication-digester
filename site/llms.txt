@@ -1,4 +1,4 @@
-# Information Intelligence — Daily Federal Digest
+# Free Agentic Publication Digester — Daily Federal Digest
 
 > An automated, citation-bound, opinion-agnostic daily digest of official United States government publications — congressional, executive, and judicial — built only from primary sources. This site is explicitly built for AI-agent
 > ingestion as well as human reading: see /agents.html.

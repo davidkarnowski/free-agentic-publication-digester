@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from info_intel.parsers import bills
+from fapd.parsers import bills
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "raw" / "BILLS"
 

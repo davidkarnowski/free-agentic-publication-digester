@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from info_intel import db, extract
+from fapd import db, extract
 
 
 class FakeParserModule:

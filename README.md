@@ -1,4 +1,4 @@
-# Information Intelligence
+# Free Agentic Publication Digester (FAPD)
 
 Automated monitoring of official US government publications — Congressional
 Record, bills, Federal Register, enacted laws, and federal court opinions —
@@ -50,7 +50,7 @@ open site/index.html                  # view locally; light/dark, mobile-ready
 ## Layout
 
 ```
-src/info_intel/   pipeline code (fetch → extract → analyze → report)
+src/fapd/         pipeline code (fetch → extract → analyze → report)
 scripts/          one-off / operational scripts
 data/             raw document archive + SQLite (git-ignored)
 digests/          generated daily digests (committed)

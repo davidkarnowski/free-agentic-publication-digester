@@ -1,6 +1,7 @@
 # About this project
 
-Information Intelligence is an automated pipeline that reads the official
+The Free Agentic Publication Digester (FAPD) is an automated pipeline
+that reads the official
 publications of the United States federal government — congressional floor
 proceedings, bills, Federal Register documents, enacted laws, federal
 court opinions, and agency releases — and publishes a daily digest built

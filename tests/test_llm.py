@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from info_intel.llm import LLMClient, LLMError
+from fapd.llm import LLMClient, LLMError
 
 
 class FakeProc:

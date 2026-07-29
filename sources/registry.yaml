@@ -1,6 +1,6 @@
 # Living registry of federal publication sources (GUIDE.md §3).
 # SOURCES.md is generated from this file by scripts/sources_doc.py — edit here,
-# then regenerate. Schema is enforced by src/info_intel/sources.py:
+# then regenerate. Schema is enforced by src/fapd/sources.py:
 #   id (kebab, unique), name, branch, parent_org, description, type,
 #   tier (int 1|2|3), urls, method, status, added, notes.
 #
