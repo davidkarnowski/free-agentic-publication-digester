@@ -110,6 +110,16 @@ Lessons from the adapters built so far, in the order they will bite you:
   a browser would do, or fetching what robots.txt refuses is not, no
   matter how mechanical the workaround looks.
 
+## Email-distributed sources
+
+Publications an agency *pushes* by email (GovDelivery bulletins,
+listservs) are their own source class — the consent-maximal channel,
+and often the first door worth opening for sources whose web channels
+refuse identified clients. Full normative guide, from mailbox setup
+through DKIM key archival to the fork checklist:
+**[docs/email-sources.md](email-sources.md)** (rules: GUIDE §3
+"Email-distributed sources" + §7 DKIM corroboration).
+
 ## Pointing at another government entirely
 
 The layering to reuse: `HttpClient` (pacing/budget/logging) →
