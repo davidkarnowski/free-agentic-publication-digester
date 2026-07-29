@@ -24,7 +24,17 @@ Not every official channel is open to us yet. A substantial share of
 agency websites currently block or challenge honestly-identified
 automated readers, and we never evade that — each closed source is
 recorded publicly as `unavailable`, which makes the registry both an
-accountability record and our standing outreach list. Opening those
+accountability record and our standing outreach list.
+
+Sometimes the same agency holds a different door open. Most federal
+departments distribute their announcements by email to anyone who
+subscribes, so this project subscribes — with one clearly identified
+mailbox, through each agency's own signup form, exactly as any citizen
+would. As of July 2026 that channel gives eleven agencies whose
+websites refuse us a working path for the first time. It is a
+different door, not a way around a closed one: a bulletin arriving in
+our inbox is never treated as permission to crawl the site that turned
+us away, and the recorded refusal stands. Opening those
 doors is continuing work: we keep reading publishers' own access
 documentation for channels we missed, re-probe as sites change, and
 engage agency web and API teams directly to advocate for safe, sane

@@ -71,6 +71,14 @@ fixed order and record which rung they stand on:</p>
 <li><strong>Basic web access</strong> — plain fetches of the same HTML pages a citizen
    reads, through the robots-enforcing client, only where no directed
    channel exists.</li>
+<li><strong>Subscription channels</strong> — agency email bulletins (GovDelivery
+   accounts, listservs), where a single identified project mailbox
+   subscribes through the agency's own signup form. This is the
+   consent-maximal channel: the publisher sends each item to us. What
+   arrives is ingested; what it links to on a site that refuses our
+   client is not fetched. Where a web source is blocked and an email
+   subscription exists, both are registered — the email entry as a
+   sibling, the refusal left standing on the record.</li>
 <li><strong>Never</strong> browser impersonation, script execution, or any access the
    source refuses to identified clients. Parsing structured data a
    server sent us (for example, JSON-LD embedded in a page) is
@@ -188,7 +196,7 @@ rule. A digest that fails any check is not published — there is no
 override.</p>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-07-29T15:39:27Z (UTC). Canonical source:
+  <p>Generated 2026-07-29T21:45:54Z (UTC). Canonical source:
   <code>docs/site/methods.md</code> in the repository. Selection is mechanical and
   every item cites its official source; methodology in
   <code>GUIDE.md</code> §2.</p>

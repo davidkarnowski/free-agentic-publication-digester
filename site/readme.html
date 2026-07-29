@@ -113,6 +113,13 @@ candidates); verdicts are re-probed as sites change; and we engage
 agency web and API teams directly to advocate for safe, sane automated
 access to what they already publish for the public. Coverage grows by
 doors opening — never by evasion.</p>
+<p>That effort produced its first result in July 2026: <strong>11 agencies whose
+web channels refuse us now have a working input path through their own
+email bulletins</strong> — Treasury, USDA, EPA, SSA, DOT, FAA, NHTSA, DEA,
+ATF, the Coast Guard, and HUD's Inspector General. The blocked web
+entries stay in the registry exactly as they were; the email entries
+sit beside them as siblings. A refusal recorded is never quietly
+erased by a success elsewhere.</p>
 <h3 id="five-onboarding-gates">Five onboarding gates</h3>
 <p>No source is ingested on a hunch. Each one is (1) <strong>registered</strong> with
 identity, tier, and URLs; (2) <strong>probed</strong> end-to-end through the
@@ -142,6 +149,14 @@ conditional requests, robots enforcement, budgets, capture, storage.</p>
    is the channel the publisher built for exactly this.</li>
 <li><strong>Basic web access</strong> — the same HTML a citizen reads, through the
    robots-enforcing client, only where no directed channel exists.</li>
+<li><strong>Subscription channels the publisher pushes</strong> — agency email
+   bulletins (GovDelivery, listservs), where a project mailbox
+   subscribes through the agency's own signup form like any citizen.
+   This is consent at its clearest: the publisher transmits each item
+   to us. It is not a way around a web refusal — receiving a bulletin
+   is never treated as permission to crawl a site that turned us away,
+   and the refusal stays on the record. See
+   <code>docs/email-sources.md</code>.</li>
 <li><strong>Never impersonation.</strong> No browser user-agent spoofing, no script
    execution, no WAF or bot-check circumvention — ever. Parsing
    structured data a server chose to send us is legitimate; pretending
@@ -302,7 +317,7 @@ is at <code>docs/site/ai-development.md</code>
 </ul>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-07-29T15:39:27Z (UTC). Canonical source:
+  <p>Generated 2026-07-29T21:45:54Z (UTC). Canonical source:
   <code>README.md</code> in the repository. Selection is mechanical and
   every item cites its official source; methodology in
   <code>GUIDE.md</code> §2.</p>

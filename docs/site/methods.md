@@ -60,7 +60,15 @@ fixed order and record which rung they stand on:
 2. **Basic web access** — plain fetches of the same HTML pages a citizen
    reads, through the robots-enforcing client, only where no directed
    channel exists.
-3. **Never** browser impersonation, script execution, or any access the
+3. **Subscription channels** — agency email bulletins (GovDelivery
+   accounts, listservs), where a single identified project mailbox
+   subscribes through the agency's own signup form. This is the
+   consent-maximal channel: the publisher sends each item to us. What
+   arrives is ingested; what it links to on a site that refuses our
+   client is not fetched. Where a web source is blocked and an email
+   subscription exists, both are registered — the email entry as a
+   sibling, the refusal left standing on the record.
+4. **Never** browser impersonation, script execution, or any access the
    source refuses to identified clients. Parsing structured data a
    server sent us (for example, JSON-LD embedded in a page) is
    legitimate; pretending to be a browser is not.

@@ -17,6 +17,61 @@ Entry format:
 
 ---
 
+## 2026-07-29 16:05 PDT — Email subscriptions confirmed and registered: 30 sources, 11 blocked agencies re-opened
+
+**Context:** The operator completed the manual subscription pass using
+the project mailbox (the public attribution identity) and confirmed
+IMAP access. This session verified the mailbox against ground truth and
+brought the source registry into alignment with what is actually
+subscribed.
+
+**Work performed:**
+- **Mailbox verification (read-only):** 178 messages since 2026-07-29
+  across ~85 senders; classified 77 confirmed subscriptions against 9
+  still awaiting the publisher's confirmation click (HHS departmental,
+  SEC, DHS main, ICE, E-Verify, Census, DEA Diversion Control, and two
+  others). Real bulletins already arriving from U.S. Attorneys and the
+  USPS Inspector General.
+- **Schema:** `TYPES` gained `email`; `URL_KEYS` gained `signup`.
+- **Registry 97 -> 127:** 30 `type: email` entries, all `status:
+  planned` (the adapter has not parsed a bulletin yet, so gate 2 is
+  incomplete and activation would be a false claim). 22 web entries
+  cross-reference their new email sibling; **11 sources previously
+  carrying no working input now have one** (Treasury, USDA, EPA, SSA,
+  DOT, FAA, NHTSA, DEA, ATF, USCG, HUD-OIG partial).
+- **Correction to earlier research:** ATF *does* operate its own
+  bulletin account; the 2026-07-29 access-alternatives report concluded
+  it did not, because the guessed account code 404'd. Recorded in the
+  entry notes.
+- **Self-audit against project standards, prompted mid-session.** Two
+  real defects in my own work, both fixed before commit: (1) I had
+  populated `signup:` URLs by inferring account codes from sender
+  addresses rather than verifying them — a live check found 8 of them
+  404, so those URLs were removed and the entries now assert only the
+  confirmed sender, with a note saying exactly that; the HUD-OIG signup
+  page 403s our client and is recorded as observed, not evaded. (2)
+  Four descriptions carried unverified superlatives or rhetorical
+  framing ("the largest single stream", "roughly a third of national
+  health spending", "determine payments to tens of millions") — all
+  replaced with plain statements, and the whole email set was scanned
+  against the banned lexicon (clean).
+- **Public alignment:** README, About, and Methods described only web
+  and API access; all three now describe the subscription channel and
+  its bright line — a bulletin is not permission to crawl the site that
+  refused us, and the refusal stays on the record.
+
+**Decisions:** Email entries are siblings, never replacements; a
+success on one channel never erases a recorded refusal on another.
+Program-outreach newsletters (MyPlate, Ticket to Work, education
+campaigns) were deliberately not registered — the registry lists
+sources of official actions, and that scope line is worth holding.
+
+**Open questions / next steps:** operator to clear the 9 pending
+confirmations (HHS matters most) and retry HUD-NEWS-L, CBO, and FERC in
+a browser; then the adapter build (IMAP poll, raw-message captures,
+DKIM verify-and-archive, email-full/email-teaser modes) against the
+bulletins now accumulating in the mailbox.
+
 ## 2026-07-29 13:10 PDT — Scheduling deliberation resolved: GH-native runtime plan, evaluated on a branch
 
 **Context:** After the licensing and access-research work, the

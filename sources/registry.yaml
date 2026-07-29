@@ -154,7 +154,7 @@
   method: Would parse the press-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: State documents feeds at state.gov/rss-feeds; an indexed live feed exists at state.gov/rss-feed/department-press-briefings/feed/ (implying .../press-releases/feed/). Site soft-blocks some non-browser clients but served our identified client HTTP 200 in July — re-probe the /rss-feed/<category>/feed/ URLs."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: State documents feeds at state.gov/rss-feeds; an indexed live feed exists at state.gov/rss-feed/department-press-briefings/feed/ (implying .../press-releases/feed/). Site soft-blocks some non-browser clients but served our identified client HTTP 200 in July — re-probe the /rss-feed/<category>/feed/ URLs. Email sibling registered 2026-07-29: state-week-email (partial: weekly newsletter, not the press-statement stream) (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: treasury-newsroom
   name: Treasury Press Releases
@@ -168,7 +168,7 @@
   method: Would parse the press-release HTML index daily for new items.
   status: unavailable
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Research 2026-07-28: no web feed alternative found — GovDelivery email (code USTREAS) is the documented channel, and modern GovDelivery exposes no public per-topic RSS (bulletins archive is login-walled), so the fallback means an email-ingestion adapter. OFAC sanctions actions live on a separate host (see ofac-recent-actions); OFAC formally retired its RSS 2025-01-31 in favor of GovDelivery email."
+  notes: "Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Research 2026-07-28: no web feed alternative found — GovDelivery email (code USTREAS) is the documented channel, and modern GovDelivery exposes no public per-topic RSS (bulletins archive is login-walled), so the fallback means an email-ingestion adapter. OFAC sanctions actions live on a separate host (see ofac-recent-actions); OFAC formally retired its RSS 2025-01-31 in favor of GovDelivery email. Email sibling registered 2026-07-29: treasury-email (departmental bulletins; FinCEN, IRS, TTB, BEP, CDFI, TIGTA and OFR lists also subscribed) (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: defense-newsroom
   adapter: rss-feed-only
@@ -200,7 +200,7 @@
   method: Polls the Drupal views news feed (component parameter filters to Office of Public Affairs) via AgencyClient, feed metadata only.
   status: active
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 404 at the old /feeds/opa/justice-news.xml path — a stale path, not a block. Re-probed 2026-07-28 at the corrected URL: feed verified — 25 items, ~250-char descriptions; the probe's single sample article extracted (3,117 chars). First full ingest 2026-07-28 revealed the catch: sustained article fetching (25 pages at the host's own 10s crawl-delay) is answered with Akamai bm-verify challenge interstitials (~2.5 KB, no content) — captured as evidence. Following the challenge URL would be bot-check circumvention, which we never do, so the posture is feed-only (adapter rss-feed-only): titles + descriptions, honestly disclosed per item. Content evaluation: DOJ publishes many items per business day; 25-item feed depth can under-cover heavy days — disclosed; division/USAO sibling feeds are the expansion path. A working DOJ feed also partially covers DEA and ATF (their enforcement news is republished here, DOJ-attributed). Activated 2026-07-28 (feed-only)."
+  notes: "Probed 2026-07-26: HTTP 404 at the old /feeds/opa/justice-news.xml path — a stale path, not a block. Re-probed 2026-07-28 at the corrected URL: feed verified — 25 items, ~250-char descriptions; the probe's single sample article extracted (3,117 chars). First full ingest 2026-07-28 revealed the catch: sustained article fetching (25 pages at the host's own 10s crawl-delay) is answered with Akamai bm-verify challenge interstitials (~2.5 KB, no content) — captured as evidence. Following the challenge URL would be bot-check circumvention, which we never do, so the posture is feed-only (adapter rss-feed-only): titles + descriptions, honestly disclosed per item. Content evaluation: DOJ publishes many items per business day; 25-item feed depth can under-cover heavy days — disclosed; division/USAO sibling feeds are the expansion path. A working DOJ feed also partially covers DEA and ATF (their enforcement news is republished here, DOJ-attributed). Activated 2026-07-28 (feed-only). Email sibling registered 2026-07-29: justice-email and usattorneys-email (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: interior-newsroom
   name: Interior Press Releases
@@ -228,7 +228,7 @@
   method: Would parse the press-release HTML index daily for new items.
   status: unavailable
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Research 2026-07-28: USDA maintains an official RSS-feeds page at usda.gov/about-usda/policies-and-links/digital/rss-feeds — robots verdicts are per-path, so the feed paths may be allowed where the press index is not; re-probe that page. Component channels (FSIS GovDelivery, FNS feeds page, NASS) are healthy tier-3 sibling candidates."
+  notes: "Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Research 2026-07-28: USDA maintains an official RSS-feeds page at usda.gov/about-usda/policies-and-links/digital/rss-feeds — robots verdicts are per-path, so the feed paths may be allowed where the press index is not; re-probe that page. Component channels (FSIS GovDelivery, FNS feeds page, NASS) are healthy tier-3 sibling candidates. Email sibling registered 2026-07-29: agriculture-email (plus fsis-email and the component lists) (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: commerce-newsroom
   name: Commerce Press Releases
@@ -242,7 +242,7 @@
   method: Would query the Commerce.gov content API /news endpoint (api.data.gov key family) for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF) on the web index. Research 2026-07-28: Commerce publishes a content API at api.commerce.gov/api with a /news endpoint, documented at commerce.gov/data-and-reports/developer-resources/commercegov-api and in the official CommerceGov GitHub repo — a rung-1 door around the WAF. Staleness risk: repo changelog last touched Oct 2019. Re-probe the API with our api.data.gov key; status returns to unavailable if the API is dead."
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF) on the web index. Research 2026-07-28: Commerce publishes a content API at api.commerce.gov/api with a /news endpoint, documented at commerce.gov/data-and-reports/developer-resources/commercegov-api and in the official CommerceGov GitHub repo — a rung-1 door around the WAF. Staleness risk: repo changelog last touched Oct 2019. Re-probe the API with our api.data.gov key; status returns to unavailable if the API is dead. Email sibling registered 2026-07-29: commercial-service-email (partial: trade promotion only, not the press office) (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: labor-newsroom
   name: Labor News Releases
@@ -285,7 +285,7 @@
   method: Would parse the press-release HTML index daily for new items.
   status: unavailable
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Email sibling registered 2026-07-29: hud-oig-email (partial: Inspector General oversight material only; the HUD-NEWS-L press listserv signup did not complete) (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: transportation-newsroom
   name: DOT Press Releases
@@ -299,7 +299,7 @@
   method: Would parse the newsroom HTML index daily for new items.
   status: unavailable
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Email sibling registered 2026-07-29: transportation-email (plus the modal-administration lists) (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: energy-newsroom
   name: Energy Press Releases
@@ -342,7 +342,7 @@
   method: Would poll the VA news site RSS feed daily for new items.
   status: active
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: RSS verified end-to-end — 30 items, avg description 144 chars, sample article extracted (6366 chars text). Sampled item was a feature story, not a press release — the feed mixes both; a content evaluation should decide filtering."
+  notes: "Probed 2026-07-26: RSS verified end-to-end — 30 items, avg description 144 chars, sample article extracted (6366 chars text). Sampled item was a feature story, not a press release — the feed mixes both; a content evaluation should decide filtering. Email sibling registered 2026-07-29: va-email (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: dhs-newsroom
   name: DHS News Releases
@@ -373,7 +373,7 @@
   method: Would poll the news-release RSS feed daily for new items.
   status: unavailable
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate."
+  notes: "Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate. Email sibling registered 2026-07-29: epa-email (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: sec-newsroom
   name: SEC Press Releases
@@ -447,7 +447,7 @@
   method: Would parse the newsroom HTML index daily for new items.
   status: unavailable
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Research 2026-07-28: press index moved to /news/en/press/releases/ (recorded for any future re-probe); no feed or API alternative found — GovDelivery email (USSSA) is the documented channel. SSA OIG has RSS at oig.ssa.gov/rss/ and is also covered by the planned oversight.gov aggregator."
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Research 2026-07-28: press index moved to /news/en/press/releases/ (recorded for any future re-probe); no feed or API alternative found — GovDelivery email (USSSA) is the documented channel. SSA OIG has RSS at oig.ssa.gov/rss/ and is also covered by the planned oversight.gov aggregator. Email sibling registered 2026-07-29: ssa-email (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: nlrb-newsroom
   name: NLRB News Releases
@@ -615,7 +615,7 @@
   method: RSS poll via AgencyClient (pending content evaluation)
   status: active
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: RSS verified end-to-end — 20 items, avg description 109 chars, sample article extracted (10066 chars text)."
+  notes: "Probed 2026-07-26: RSS verified end-to-end — 20 items, avg description 109 chars, sample article extracted (10066 chars text). Email sibling registered 2026-07-29: federal-reserve-email (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: fdic-news
   name: FDIC Press Releases
@@ -629,7 +629,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: conflicting evidence on a GovDelivery-hosted press RSS (public.govdelivery.com/topics/USFDIC_26/feed.rss cited by an integration vendor, but the modern GovDelivery platform generally exposes no public per-topic RSS) — one probe of that URL settles both this source and the GovDelivery-pattern question for every agency marked 'GovDelivery to evaluate'. Separately, BankFind Suite API at api.fdic.gov/banks/docs offers structured bank data (not press)."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: conflicting evidence on a GovDelivery-hosted press RSS (public.govdelivery.com/topics/USFDIC_26/feed.rss cited by an integration vendor, but the modern GovDelivery platform generally exposes no public per-topic RSS) — one probe of that URL settles both this source and the GovDelivery-pattern question for every agency marked 'GovDelivery to evaluate'. Separately, BankFind Suite API at api.fdic.gov/banks/docs offers structured bank data (not press). Email sibling registered 2026-07-29: fdic-email (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: occ-news
   name: OCC News Releases
@@ -832,7 +832,7 @@
   method: RSS poll via AgencyClient (pending content evaluation)
   status: active
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: RSS verified end-to-end — 20 items, avg description 233 chars, sample article extracted (7227 chars text)."
+  notes: "Probed 2026-07-26: RSS verified end-to-end — 20 items, avg description 233 chars, sample article extracted (7227 chars text). Email sibling registered 2026-07-29: fda-email (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: nih-news
   name: NIH News Releases
@@ -860,7 +860,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Email sibling registered 2026-07-29: cms-email (GUIDE §3 email class; the web status here is unchanged)."
 
 # ----------------------------------- planned: Treasury component (tier 2) ----
 
@@ -876,7 +876,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Email sibling registered 2026-07-29: irs-email (GUIDE §3 email class; the web status here is unchanged)."
 
 # ------------------------------------ planned: Justice components (tier 2) ----
 
@@ -906,7 +906,7 @@
   method: HTML index diff via AgencyClient (pending viability check)
   status: unavailable
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Research 2026-07-29: confirmed live GovDelivery subscription account (USDOJDEA) — best consent-based path pending the email-ingestion adapter (docs/access-alternatives-research-2026-07-29.md)."
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Research 2026-07-29: confirmed live GovDelivery subscription account (USDOJDEA) — best consent-based path pending the email-ingestion adapter (docs/access-alternatives-research-2026-07-29.md). Email sibling registered 2026-07-29: dea-email (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: atf-news
   name: ATF Press Releases
@@ -920,7 +920,7 @@
   method: HTML index diff via AgencyClient (pending viability check)
   status: unavailable
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Email sibling registered 2026-07-29: atf-email (GUIDE §3 email class; the web status here is unchanged)."
 
 # ---------------------------------------- planned: DHS components (tier 2) ----
 
@@ -992,7 +992,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Email sibling registered 2026-07-29: uscis-email (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: uscg-news
   name: Coast Guard News Releases
@@ -1006,7 +1006,7 @@
   method: HTML index diff via AgencyClient (pending viability check)
   status: unavailable
   added: "2026-07-26"
-  notes: "Runs on the DoD DVIDS-backed news platform (news.uscg.mil), separate from uscg.mil. Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate."
+  notes: "Runs on the DoD DVIDS-backed news platform (news.uscg.mil), separate from uscg.mil. Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate. Email sibling registered 2026-07-29: uscg-email (GUIDE §3 email class; the web status here is unchanged)."
 
 # ------------------------------ planned: Transportation components (tier 2) ----
 
@@ -1022,7 +1022,7 @@
   method: HTML index diff via AgencyClient (pending viability check)
   status: unavailable
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Research 2026-07-29: confirmed live GovDelivery accounts (USAFAA; USFAARGL for airworthiness/regulatory) — best consent-based path pending the email-ingestion adapter (docs/access-alternatives-research-2026-07-29.md)."
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Research 2026-07-29: confirmed live GovDelivery accounts (USAFAA; USFAARGL for airworthiness/regulatory) — best consent-based path pending the email-ingestion adapter (docs/access-alternatives-research-2026-07-29.md). Email sibling registered 2026-07-29: faa-email (GUIDE §3 email class; the web status here is unchanged)."
 
 - id: nhtsa-press
   name: NHTSA Press Releases
@@ -1036,7 +1036,7 @@
   method: HTML index diff via AgencyClient (pending viability check)
   status: unavailable
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded."
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Email sibling registered 2026-07-29: nhtsa-email (GUIDE §3 email class; the web status here is unchanged)."
 
 # ----------------------------------- planned: Commerce components (tier 2) ----
 
@@ -1201,7 +1201,7 @@
   method: Would poll the documented press-release RSS feed daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 404 — page moved, not blocked. Re-probed 2026-07-28 at the documented feed (per USSC's own RSS FAQ): HTTP 200 but zero items — the press-release feed is live and currently empty (742 bytes; USSC publishes a few items/month, feed may only carry recent window). Stays planned; re-check when USSC next publishes, then activate."
+  notes: "Probed 2026-07-26: HTTP 404 — page moved, not blocked. Re-probed 2026-07-28 at the documented feed (per USSC's own RSS FAQ): HTTP 200 but zero items — the press-release feed is live and currently empty (742 bytes; USSC publishes a few items/month, feed may only carry recent window). Stays planned; re-check when USSC next publishes, then activate. Email sibling registered 2026-07-29: ussc-email (GUIDE §3 email class; the web status here is unchanged)."
 
 # ---------------- planned: 2026-07-28 access-documentation research sprint ----
 # Candidates identified by documentation-first web research (three parallel
@@ -1447,3 +1447,480 @@
   status: evaluated-excluded
   added: "2026-07-28"
   notes: "Evaluated 2026-07-28: keyless documented API with enforced rate limits (429s under load), but archival; rights vary per item (LoC holdings are not uniformly public domain). Current legislative-data needs are met by api.congress.gov. Revisit for historical features only."
+
+# ---------------------------------------------------------------------------
+# Email-distributed sources (added 2026-07-29; GUIDE §3 "Email-distributed
+# sources"; method guide docs/email-sources.md). The project mailbox is
+# subscribed and confirmed for every entry below; all remain `planned` until
+# the email-ingestion adapter parses real bulletins end-to-end (gate 2) and
+# their bulletin coverage is evaluated against each agency's visible output
+# (gate 3). Each is a SIBLING of the corresponding web entry, never a
+# replacement: where a web channel refused our identified client, that
+# refusal stands on the record.
+# ---------------------------------------------------------------------------
+
+- id: treasury-email
+  adapter: govdelivery
+  name: Treasury Press Releases (email)
+  branch: executive
+  parent_org: Department of the Treasury
+  description: "The Department of the Treasury manages federal finances, collects revenue, and administers economic sanctions. Its subscription bulletins carry press releases as the department distributes them directly to the public — sanctions designations, debt-management statements, and economic-policy announcements — reaching subscribers on the same day they are issued."
+  type: email
+  tier: 1
+  urls:
+    home: https://home.treasury.gov/news/press-releases
+    signup: https://service.govdelivery.com/service/multi_subscribe.html?code=USTREAS
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender subscriptions@subscriptions.treas.gov). Sibling of treasury-newsroom, whose web path robots.txt disallows — that refusal stands unchanged. Treasury component subscriptions also confirmed and registered separately or noted here: FinCEN (fincen-email), TTB, BEP, CDFI Fund, TIGTA, Office of Financial Research (ofr-email), and the Federal Reserve Bank of New York alerts."
+
+- id: fincen-email
+  adapter: govdelivery
+  name: FinCEN Updates (email)
+  branch: executive
+  parent_org: Department of the Treasury (FinCEN)
+  description: "The Financial Crimes Enforcement Network administers the Bank Secrecy Act and issues advisories, alerts, and enforcement actions on money laundering, sanctions evasion, and illicit finance. Its bulletins carry those advisories and enforcement announcements directly, a document class that reaches the Federal Register only in part."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.fincen.gov/news-room
+    signup: https://public.govdelivery.com/accounts/USFINCEN/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender fincenupdates@public.govdelivery.com)."
+
+- id: ofr-email
+  adapter: govdelivery
+  name: Office of Financial Research (email)
+  branch: executive
+  parent_org: Department of the Treasury (OFR)
+  description: "The Office of Financial Research supports the Financial Stability Oversight Council with data and analysis on risks to the financial system. Its bulletins carry working papers, financial-stability monitors, and data releases."
+  type: email
+  tier: 3
+  urls:
+    home: https://www.financialresearch.gov/
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender updates@subscribe.financialresearch.gov). Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+
+- id: irs-email
+  adapter: govdelivery
+  name: IRS Newswire (email)
+  branch: executive
+  parent_org: Department of the Treasury (IRS)
+  description: "The Internal Revenue Service administers federal tax law. Its newswire bulletins carry filing-season guidance, revenue procedures and rulings as announced, tax-scam alerts, and enforcement announcements — the agency's primary channel for reaching taxpayers and practitioners quickly."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.irs.gov/newsroom
+    signup: https://www.irs.gov/newsroom/e-news-subscriptions
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender irs@service.govdelivery.com). Sibling of the planned irs-newsroom web entry."
+
+- id: ssa-email
+  adapter: govdelivery
+  name: SSA Press Releases (email)
+  branch: executive
+  parent_org: Social Security Administration
+  description: "The Social Security Administration administers retirement, disability, and survivor benefits. Its bulletins carry press releases on benefit amounts, cost-of-living adjustments, policy changes, and program administration."
+  type: email
+  tier: 1
+  urls:
+    home: https://www.ssa.gov/news/en/press/releases/index.html
+    signup: https://public.govdelivery.com/accounts/USSSA/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender subscription.service@subscriptions.ssa.gov). Sibling of ssa-newsroom, which returns HTTP 403 to our identified client — the first working input for this agency."
+
+- id: justice-email
+  adapter: govdelivery
+  name: Justice Department News (email)
+  branch: executive
+  parent_org: Department of Justice
+  description: "The Department of Justice enforces federal law. Its departmental bulletins carry Office of Public Affairs releases — indictments, plea agreements, settlements, and policy announcements — as the department distributes them, providing a second independent channel alongside the department's news feed."
+  type: email
+  tier: 1
+  urls:
+    home: https://www.justice.gov/news
+    signup: https://public.govdelivery.com/accounts/USDOJ/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender usdoj@public.govdelivery.com). Corroborating sibling of the active justice-newsroom feed, whose 25-item depth can under-cover heavy days; the bulletin stream is expected to close part of that gap."
+
+- id: usattorneys-email
+  adapter: govdelivery
+  name: U.S. Attorneys News (email)
+  branch: executive
+  parent_org: Department of Justice (Executive Office for U.S. Attorneys)
+  description: "The 93 United States Attorneys prosecute federal criminal cases and represent the United States in civil litigation across every district. Their combined news bulletins carry district-level charging announcements, convictions, and sentencings. Volume is high relative to departmental releases; the content evaluation will measure it rather than estimate it."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.justice.gov/usao/pressreleases
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender usattorneys@public.govdelivery.com); a real news bulletin arrived the same day. High expected volume — content evaluation must establish whether the digest lists these individually or aggregates them by district, and the answer will be disclosed in the coverage statement. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+
+- id: dea-email
+  adapter: govdelivery
+  name: DEA Updates (email)
+  branch: executive
+  parent_org: Department of Justice (DEA)
+  description: "The Drug Enforcement Administration enforces controlled-substance law. Its bulletins carry enforcement announcements, scheduling actions, and public-safety alerts on emerging drug threats."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.dea.gov/press-releases
+    signup: https://public.govdelivery.com/accounts/USDOJDEA/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender dea@public.govdelivery.com). Sibling of dea-press, which returns HTTP 403 to our identified client — the first working input for this agency. The Diversion Control Division list is subscribed but awaiting email confirmation."
+
+- id: atf-email
+  adapter: govdelivery
+  name: ATF News (email)
+  branch: executive
+  parent_org: Department of Justice (ATF)
+  description: "The Bureau of Alcohol, Tobacco, Firearms and Explosives regulates the firearms and explosives industries and investigates related crime. Its bulletins carry enforcement announcements, industry rulings and open letters to licensees, and regulatory guidance."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.atf.gov/news
+    signup: https://public.govdelivery.com/accounts/USATF/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender atf@service.govdelivery.com). Sibling of atf-news, which returns HTTP 403 to our identified client — the first working input for this agency. Corrects the 2026-07-29 access research, which concluded no ATF-specific bulletin account existed; the account exists under a different code than the one guessed."
+
+- id: transportation-email
+  adapter: govdelivery
+  name: Transportation Press Releases (email)
+  branch: executive
+  parent_org: Department of Transportation
+  description: "The Department of Transportation sets national transportation policy and oversees the modal administrations governing aviation, highways, rail, transit, pipelines, and maritime commerce. Its departmental bulletins carry press releases, grant awards, and safety announcements."
+  type: email
+  tier: 1
+  urls:
+    home: https://www.transportation.gov/briefing-room
+    signup: https://public.govdelivery.com/accounts/USDOT/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender usdot@info.dot.gov). Sibling of transportation-newsroom, which returns HTTP 403 to our identified client. Modal-administration lists also subscribed and confirmed under the same platform, to be split into their own entries if content evaluation shows distinct action streams: FRA, FHWA, FTA, FMCSA, PHMSA, MARAD, and the DOT Inspector General."
+
+- id: faa-email
+  adapter: govdelivery
+  name: FAA Updates (email)
+  branch: executive
+  parent_org: Department of Transportation (FAA)
+  description: "The Federal Aviation Administration regulates civil aviation and operates the national airspace system. Its bulletins carry press releases, airworthiness and regulatory notices, and safety announcements affecting operators, manufacturers, and travelers."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.faa.gov/newsroom
+    signup: https://public.govdelivery.com/accounts/USAFAA/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender usafaa@info.dot.gov). Sibling of faa-newsroom, which returns HTTP 403 to our identified client — the first working input for this agency."
+
+- id: nhtsa-email
+  adapter: govdelivery
+  name: NHTSA Press Releases (email)
+  branch: executive
+  parent_org: Department of Transportation (NHTSA)
+  description: "The National Highway Traffic Safety Administration regulates vehicle safety and investigates defects. Its bulletins carry press releases, recall announcements, defect investigations, and crash-data releases — safety actions with direct consequences for vehicle owners."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.nhtsa.gov/press-releases
+    signup: https://public.govdelivery.com/accounts/USDOTNHTSA/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender nhtsa@service.govdelivery.com). Sibling of nhtsa-press, which returns HTTP 403 to our identified client. NHTSA operates its own bulletin account rather than sharing the departmental one, giving finer topic control than expected."
+
+- id: epa-email
+  adapter: govdelivery
+  name: EPA News Releases (email)
+  branch: executive
+  parent_org: Environmental Protection Agency
+  description: "The Environmental Protection Agency administers federal environmental law. Its bulletins carry news releases on enforcement settlements, permit and rule announcements, grant awards, and regional actions affecting specific communities."
+  type: email
+  tier: 1
+  urls:
+    home: https://www.epa.gov/newsreleases
+    signup: https://www.epa.gov/newsroom/email-subscriptions-epa-headquarters-new-releases
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender epa.admin@govdelivery.epa.gov). Sibling of epa-newsroom, whose web path robots.txt disallows — the first working input for this agency."
+
+- id: agriculture-email
+  adapter: govdelivery
+  name: USDA News (email)
+  branch: executive
+  parent_org: Department of Agriculture
+  description: "The Department of Agriculture administers farm programs, food-safety inspection, nutrition assistance, and rural development. Its departmental bulletins carry press releases on program funding, disaster designations, trade actions, and regulatory decisions."
+  type: email
+  tier: 1
+  urls:
+    home: https://www.usda.gov/about-usda/news/press-releases
+    signup: https://public.govdelivery.com/accounts/USDAOC/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender usda@public.govdelivery.com). Sibling of agriculture-newsroom, whose web path robots.txt disallows — the first working input for this department. Component lists also subscribed and confirmed, to be split into their own entries if content evaluation shows distinct action streams: Foreign Agricultural Service, Food and Nutrition Service, Agricultural Marketing Service, APHIS, NIFA, Agricultural Research Service, Rural Development, and Farmers.gov."
+
+- id: fsis-email
+  adapter: govdelivery
+  name: FSIS Recalls and Public Health Alerts (email)
+  branch: executive
+  parent_org: Department of Agriculture (FSIS)
+  description: "The Food Safety and Inspection Service inspects meat, poultry, and egg products. Its bulletins carry recall notices and public-health alerts naming specific products and establishments, a document class distinct from departmental press releases."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.fsis.usda.gov/recalls
+    signup: https://public.govdelivery.com/accounts/USFSIS/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender usfsis@public.govdelivery.com). Registered separately from agriculture-email because recalls are a distinct, time-critical document class rather than press material."
+
+- id: uscg-email
+  adapter: govdelivery
+  name: Coast Guard News (email)
+  branch: executive
+  parent_org: Department of Homeland Security (U.S. Coast Guard)
+  description: "The United States Coast Guard conducts maritime search and rescue, law enforcement, and marine safety and environmental response. Its bulletins carry operational announcements, safety alerts, and marine-casualty and enforcement news."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.news.uscg.mil/
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender uscoastguard@service.govdelivery.com). Sibling of uscg-news, whose robots.txt disallows our client. A second consent-based path alongside the planned DVIDS API integration; content evaluation will determine which carries the fuller record. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+
+- id: uscis-email
+  adapter: govdelivery
+  name: USCIS Updates (email)
+  branch: executive
+  parent_org: Department of Homeland Security (USCIS)
+  description: "United States Citizenship and Immigration Services adjudicates immigration and naturalization benefits. Its bulletins carry policy-manual updates, form revisions, filing-fee and processing changes, and program announcements that determine how applications are handled."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.uscis.gov/newsroom
+    signup: https://public.govdelivery.com/accounts/USDHSCIS/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender uscis@messages.dhs.gov). Sibling of the planned uscis-newsroom web entry. Department-level DHS and ICE subscriptions are awaiting email confirmation."
+
+- id: fda-email
+  adapter: govdelivery
+  name: FDA Email Updates (email)
+  branch: executive
+  parent_org: Department of Health and Human Services (FDA)
+  description: "The Food and Drug Administration regulates food, drugs, medical devices, and tobacco. Its bulletins carry approvals, safety communications, recalls, and warning letters as the agency issues them."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.fda.gov/news-events/fda-newsroom
+    signup: https://public.govdelivery.com/accounts/USFDA/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender usfda@public.govdelivery.com). Corroborating sibling of the active fda-press feed; content evaluation will establish whether the bulletins carry material the feed omits."
+
+- id: cms-email
+  adapter: govdelivery
+  name: CMS Newsroom (email)
+  branch: executive
+  parent_org: Department of Health and Human Services (CMS)
+  description: "The Centers for Medicare and Medicaid Services administer Medicare, Medicaid, and the health-insurance marketplaces. Its bulletins carry payment-rule announcements, coverage decisions, program guidance to states and providers, and enrollment data."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.cms.gov/newsroom
+    signup: https://public.govdelivery.com/accounts/USCMS/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender cmslists@subscriptions.cms.hhs.gov). Sibling of the planned cms-newsroom web entry. The HHS departmental subscription is awaiting email confirmation; NIH Office of Research on Women's Health, the Office on Women's Health, and ODPHP lists are also confirmed and may be registered after evaluation."
+
+- id: va-email
+  adapter: govdelivery
+  name: VA Updates (email)
+  branch: executive
+  parent_org: Department of Veterans Affairs
+  description: "The Department of Veterans Affairs administers veterans' health care, benefits, and memorial services. Its bulletins carry benefit-policy announcements, claims and eligibility changes, and health-system news reaching veterans directly."
+  type: email
+  tier: 1
+  urls:
+    home: https://news.va.gov/
+    signup: https://public.govdelivery.com/accounts/USVA/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (senders veteransaffairs@messages.va.gov and veteransbenefits@messages.va.gov). Corroborating sibling of the active va-newsroom feed."
+
+- id: commercial-service-email
+  adapter: govdelivery
+  name: U.S. Commercial Service (email)
+  branch: executive
+  parent_org: Department of Commerce (International Trade Administration)
+  description: "The U.S. Commercial Service is the trade-promotion arm of the International Trade Administration. Its bulletins carry export-assistance announcements, trade-mission notices, and market guidance for U.S. exporters."
+  type: email
+  tier: 3
+  urls:
+    home: https://www.trade.gov/commercial-service
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender u.s.commercialservice@public.govdelivery.com). Partial coverage only for commerce-newsroom, which returns HTTP 403 to our identified client: this is a trade-promotion channel, not the department's press office. A departmental Commerce subscription remains to be found. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+
+- id: state-week-email
+  adapter: govdelivery
+  name: The Week at State (email)
+  branch: executive
+  parent_org: Department of State
+  description: "The Department of State conducts U.S. foreign policy and diplomacy. The Week at State is the department's weekly public newsletter, summarizing diplomatic engagements, program announcements, and Secretary travel — a digest of the week rather than the press-statement stream itself."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.state.gov/week-at-state/
+    signup: https://public.govdelivery.com/accounts/USSTATEBPA/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender usstatebpa@public.govdelivery.com). Only partial coverage for state-newsroom: weekly and summarized, not the daily press statements or briefing transcripts. The documented state.gov press-release and briefing feeds remain the target for full coverage."
+
+- id: federal-reserve-email
+  name: Federal Reserve Board Announcements (email)
+  branch: executive
+  parent_org: Federal Reserve Board
+  description: "The Board of Governors of the Federal Reserve System conducts monetary policy and supervises banks. Its announcement notifications carry press releases, enforcement actions, policy statements, and speeches as the Board posts them."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.federalreserve.gov/newsevents.htm
+  method: Subscription notifications to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender frb-webannouncements@announcements.federalreserve.gov). The Board runs its own notification system rather than GovDelivery, so the adapter must not assume a single platform. Corroborating sibling of the active federal-reserve-news feed. Federal Reserve Bank of New York alerts are also confirmed. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+
+- id: fdic-email
+  name: FDIC Press Releases (email)
+  branch: executive
+  parent_org: Federal Deposit Insurance Corporation
+  description: "The Federal Deposit Insurance Corporation insures bank deposits and supervises state-chartered banks. Its subscription bulletins carry press releases, financial institution letters, enforcement decisions, and failure and resolution announcements."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.fdic.gov/news/press-releases
+    signup: https://www.fdic.gov/about/subscriptions/
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender subscriptions@subscriptions.fdic.gov). Sibling of the planned fdic-news web entry, and it settles the open GovDelivery-topic-RSS question in favor of the email channel for this agency."
+
+- id: cpsc-email
+  name: CPSC Recalls and News (email)
+  branch: executive
+  parent_org: Consumer Product Safety Commission
+  description: "The Consumer Product Safety Commission regulates consumer product safety and orders recalls. Its bulletins carry recall announcements naming specific products and hazards, safety warnings, and civil-penalty settlements."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.cpsc.gov/Newsroom
+    signup: https://www.cpsc.gov/Newsroom/Subscribe
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender uscpsc@info.cpsc.gov). New coverage: the commission had no registered source before this subscription."
+
+- id: pbgc-email
+  name: PBGC Updates (email)
+  branch: executive
+  parent_org: Pension Benefit Guaranty Corporation
+  description: "The Pension Benefit Guaranty Corporation insures private-sector defined-benefit pension plans and takes over failed plans. Its bulletins carry trusteeship announcements, premium and interest-rate notices, and policy guidance affecting plan sponsors and retirees."
+  type: email
+  tier: 3
+  urls:
+    home: https://www.pbgc.gov/news
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender pbgc@subscriptions.pbgc.gov). New coverage: no registered source before this subscription. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+
+- id: eac-email
+  name: Election Assistance Commission (email)
+  branch: executive
+  parent_org: U.S. Election Assistance Commission
+  description: "The Election Assistance Commission supports state and local election administration, certifies voting systems, and distributes election-security funding. Its bulletins carry certification decisions, guidance to election officials, grant announcements, and survey data releases."
+  type: email
+  tier: 3
+  urls:
+    home: https://www.eac.gov/newsroom
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender newsletter@updates.eac.gov). New coverage: no registered source before this subscription. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+
+- id: ussc-email
+  adapter: govdelivery
+  name: Sentencing Commission News (email)
+  branch: judicial
+  parent_org: U.S. Sentencing Commission
+  description: "The United States Sentencing Commission sets federal sentencing guidelines. Its bulletins carry guideline amendments, public hearing notices, and research reports on federal sentencing practice."
+  type: email
+  tier: 2
+  urls:
+    home: https://www.ussc.gov/topic/news
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender ussc@public.govdelivery.com). Sibling of ussc-news, whose documented RSS feed was reachable but empty at probe — the bulletin channel may prove the more reliable input for this judicial-branch agency. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+
+- id: usps-oig-email
+  adapter: govdelivery
+  name: USPS Inspector General (email)
+  branch: executive
+  parent_org: U.S. Postal Service Office of Inspector General
+  description: "The Postal Service Office of Inspector General audits and investigates postal operations. Its bulletins carry audit reports, investigative findings, and white papers on postal finances, delivery performance, and program integrity."
+  type: email
+  tier: 3
+  urls:
+    home: https://www.uspsoig.gov/
+    signup: https://public.govdelivery.com/accounts/USPSOIG/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender uspsoig@public.govdelivery.com); a real audit-release bulletin arrived the same day. Overlaps the planned oversight.gov aggregator, which collects IG reports government-wide; the aggregator rule applies if both are activated."
+
+- id: hud-oig-email
+  name: HUD Inspector General (email)
+  branch: executive
+  parent_org: Department of Housing and Urban Development, Office of Inspector General
+  description: "The HUD Office of Inspector General audits and investigates housing programs. Its bulletins carry audit reports, investigative results, and fraud alerts concerning public housing, mortgage insurance, and disaster-recovery funds."
+  type: email
+  tier: 3
+  urls:
+    home: https://www.hudoig.gov/newsroom
+    signup: https://www.hudoig.gov/subscribe
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  status: planned
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender hudoig@info.hudoig.gov). The signup page returns HTTP 403 to our identified client; recorded as observed, not evaded. Partial coverage for the department: hud-newsroom returns HTTP 403 to our identified client and the HUD-NEWS-L press listserv signup did not complete — the IG stream is oversight material, not the department's own announcements."

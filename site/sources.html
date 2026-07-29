@@ -45,18 +45,18 @@ stays in sync.</em></p>
 <tr>
 <td>Executive</td>
 <td style="text-align: right;">13</td>
-<td style="text-align: right;">46</td>
+<td style="text-align: right;">75</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">18</td>
-<td style="text-align: right;">78</td>
+<td style="text-align: right;">107</td>
 </tr>
 <tr>
 <td>Judicial</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">5</td>
 </tr>
 <tr>
 <td>Cross-branch</td>
@@ -69,19 +69,19 @@ stays in sync.</em></p>
 <tr>
 <td><strong>Total</strong></td>
 <td style="text-align: right;">19</td>
-<td style="text-align: right;">57</td>
+<td style="text-align: right;">87</td>
 <td style="text-align: right;">2</td>
 <td style="text-align: right;">19</td>
-<td style="text-align: right;">97</td>
+<td style="text-align: right;">127</td>
 </tr>
 </tbody>
 </table>
-<p><strong>19 of 97 sources active.</strong></p>
+<p><strong>19 of 127 sources active.</strong></p>
 <p>Per tier:</p>
 <ul>
-<li><strong>Tier 1</strong> (cabinet departments, top independents, legislative support agencies, the White House, and core govinfo collections): 47 of 97 registered, 13 active</li>
-<li><strong>Tier 2</strong> (major sub-agency newsrooms and regulator clusters): 47 of 97 registered, 6 active</li>
-<li><strong>Tier 3</strong> (long tail, added opportunistically): 3 of 97 registered, 0 active</li>
+<li><strong>Tier 1</strong> (cabinet departments, top independents, legislative support agencies, the White House, and core govinfo collections): 54 of 127 registered, 13 active</li>
+<li><strong>Tier 2</strong> (major sub-agency newsrooms and regulator clusters): 64 of 127 registered, 6 active</li>
+<li><strong>Tier 3</strong> (long tail, added opportunistically): 9 of 127 registered, 0 active</li>
 </ul>
 <h2 id="legislative">Legislative</h2>
 <table>
@@ -264,7 +264,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>planned</td>
 <td>Would parse the press-release HTML index daily for new items.</td>
-<td>Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: State documents feeds at state.gov/rss-feeds; an indexed live feed exists at state.gov/rss-feed/department-press-briefings/feed/ (implying .../press-releases/feed/). Site soft-blocks some non-browser clients but served our identified client HTTP 200 in July — re-probe the /rss-feed/<category>/feed/ URLs.</td>
+<td>Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: State documents feeds at state.gov/rss-feeds; an indexed live feed exists at state.gov/rss-feed/department-press-briefings/feed/ (implying .../press-releases/feed/). Site soft-blocks some non-browser clients but served our identified client HTTP 200 in July — re-probe the /rss-feed/<category>/feed/ URLs. Email sibling registered 2026-07-29: state-week-email (partial: weekly newsletter, not the press-statement stream) (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://home.treasury.gov/news/press-releases">Treasury Press Releases</a></td>
@@ -273,7 +273,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>UNAVAILABLE</td>
 <td>Would parse the press-release HTML index daily for new items.</td>
-<td>Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Research 2026-07-28: no web feed alternative found — GovDelivery email (code USTREAS) is the documented channel, and modern GovDelivery exposes no public per-topic RSS (bulletins archive is login-walled), so the fallback means an email-ingestion adapter. OFAC sanctions actions live on a separate host (see ofac-recent-actions); OFAC formally retired its RSS 2025-01-31 in favor of GovDelivery email.</td>
+<td>Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Research 2026-07-28: no web feed alternative found — GovDelivery email (code USTREAS) is the documented channel, and modern GovDelivery exposes no public per-topic RSS (bulletins archive is login-walled), so the fallback means an email-ingestion adapter. OFAC sanctions actions live on a separate host (see ofac-recent-actions); OFAC formally retired its RSS 2025-01-31 in favor of GovDelivery email. Email sibling registered 2026-07-29: treasury-email (departmental bulletins; FinCEN, IRS, TTB, BEP, CDFI, TIGTA and OFR lists also subscribed) (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.defense.gov/News/">Defense News Releases</a></td>
@@ -291,7 +291,7 @@ stays in sync.</em></p>
 <td>rss</td>
 <td><strong>ACTIVE</strong></td>
 <td>Polls the Drupal views news feed (component parameter filters to Office of Public Affairs) via AgencyClient, feed metadata only.</td>
-<td>Probed 2026-07-26: HTTP 404 at the old /feeds/opa/justice-news.xml path — a stale path, not a block. Re-probed 2026-07-28 at the corrected URL: feed verified — 25 items, ~250-char descriptions; the probe's single sample article extracted (3,117 chars). First full ingest 2026-07-28 revealed the catch: sustained article fetching (25 pages at the host's own 10s crawl-delay) is answered with Akamai bm-verify challenge interstitials (~2.5 KB, no content) — captured as evidence. Following the challenge URL would be bot-check circumvention, which we never do, so the posture is feed-only (adapter rss-feed-only): titles + descriptions, honestly disclosed per item. Content evaluation: DOJ publishes many items per business day; 25-item feed depth can under-cover heavy days — disclosed; division/USAO sibling feeds are the expansion path. A working DOJ feed also partially covers DEA and ATF (their enforcement news is republished here, DOJ-attributed). Activated 2026-07-28 (feed-only).</td>
+<td>Probed 2026-07-26: HTTP 404 at the old /feeds/opa/justice-news.xml path — a stale path, not a block. Re-probed 2026-07-28 at the corrected URL: feed verified — 25 items, ~250-char descriptions; the probe's single sample article extracted (3,117 chars). First full ingest 2026-07-28 revealed the catch: sustained article fetching (25 pages at the host's own 10s crawl-delay) is answered with Akamai bm-verify challenge interstitials (~2.5 KB, no content) — captured as evidence. Following the challenge URL would be bot-check circumvention, which we never do, so the posture is feed-only (adapter rss-feed-only): titles + descriptions, honestly disclosed per item. Content evaluation: DOJ publishes many items per business day; 25-item feed depth can under-cover heavy days — disclosed; division/USAO sibling feeds are the expansion path. A working DOJ feed also partially covers DEA and ATF (their enforcement news is republished here, DOJ-attributed). Activated 2026-07-28 (feed-only). Email sibling registered 2026-07-29: justice-email and usattorneys-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.doi.gov/pressreleases">Interior Press Releases</a></td>
@@ -309,7 +309,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>UNAVAILABLE</td>
 <td>Would parse the press-release HTML index daily for new items.</td>
-<td>Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Research 2026-07-28: USDA maintains an official RSS-feeds page at usda.gov/about-usda/policies-and-links/digital/rss-feeds — robots verdicts are per-path, so the feed paths may be allowed where the press index is not; re-probe that page. Component channels (FSIS GovDelivery, FNS feeds page, NASS) are healthy tier-3 sibling candidates.</td>
+<td>Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Research 2026-07-28: USDA maintains an official RSS-feeds page at usda.gov/about-usda/policies-and-links/digital/rss-feeds — robots verdicts are per-path, so the feed paths may be allowed where the press index is not; re-probe that page. Component channels (FSIS GovDelivery, FNS feeds page, NASS) are healthy tier-3 sibling candidates. Email sibling registered 2026-07-29: agriculture-email (plus fsis-email and the component lists) (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.commerce.gov/news/press-releases">Commerce Press Releases</a></td>
@@ -318,7 +318,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>planned</td>
 <td>Would query the Commerce.gov content API /news endpoint (api.data.gov key family) for new items.</td>
-<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF) on the web index. Research 2026-07-28: Commerce publishes a content API at api.commerce.gov/api with a /news endpoint, documented at commerce.gov/data-and-reports/developer-resources/commercegov-api and in the official CommerceGov GitHub repo — a rung-1 door around the WAF. Staleness risk: repo changelog last touched Oct 2019. Re-probe the API with our api.data.gov key; status returns to unavailable if the API is dead.</td>
+<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF) on the web index. Research 2026-07-28: Commerce publishes a content API at api.commerce.gov/api with a /news endpoint, documented at commerce.gov/data-and-reports/developer-resources/commercegov-api and in the official CommerceGov GitHub repo — a rung-1 door around the WAF. Staleness risk: repo changelog last touched Oct 2019. Re-probe the API with our api.data.gov key; status returns to unavailable if the API is dead. Email sibling registered 2026-07-29: commercial-service-email (partial: trade promotion only, not the press office) (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.dol.gov/newsroom/releases">Labor News Releases</a></td>
@@ -345,7 +345,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>UNAVAILABLE</td>
 <td>Would parse the press-release HTML index daily for new items.</td>
-<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded.</td>
+<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Email sibling registered 2026-07-29: hud-oig-email (partial: Inspector General oversight material only; the HUD-NEWS-L press listserv signup did not complete) (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.transportation.gov/newsroom">DOT Press Releases</a></td>
@@ -354,7 +354,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>UNAVAILABLE</td>
 <td>Would parse the newsroom HTML index daily for new items.</td>
-<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded.</td>
+<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Email sibling registered 2026-07-29: transportation-email (plus the modal-administration lists) (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.energy.gov/newsroom">Energy Press Releases</a></td>
@@ -381,7 +381,7 @@ stays in sync.</em></p>
 <td>rss</td>
 <td><strong>ACTIVE</strong></td>
 <td>Would poll the VA news site RSS feed daily for new items.</td>
-<td>Probed 2026-07-26: RSS verified end-to-end — 30 items, avg description 144 chars, sample article extracted (6366 chars text). Sampled item was a feature story, not a press release — the feed mixes both; a content evaluation should decide filtering.</td>
+<td>Probed 2026-07-26: RSS verified end-to-end — 30 items, avg description 144 chars, sample article extracted (6366 chars text). Sampled item was a feature story, not a press release — the feed mixes both; a content evaluation should decide filtering. Email sibling registered 2026-07-29: va-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.dhs.gov/news-releases">DHS News Releases</a></td>
@@ -399,7 +399,7 @@ stays in sync.</em></p>
 <td>rss</td>
 <td>UNAVAILABLE</td>
 <td>Would poll the news-release RSS feed daily for new items.</td>
-<td>Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate.</td>
+<td>Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate. Email sibling registered 2026-07-29: epa-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.sec.gov/newsroom/press-releases">SEC Press Releases</a></td>
@@ -444,7 +444,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>UNAVAILABLE</td>
 <td>Would parse the newsroom HTML index daily for new items.</td>
-<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Research 2026-07-28: press index moved to /news/en/press/releases/ (recorded for any future re-probe); no feed or API alternative found — GovDelivery email (USSSA) is the documented channel. SSA OIG has RSS at oig.ssa.gov/rss/ and is also covered by the planned oversight.gov aggregator.</td>
+<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Research 2026-07-28: press index moved to /news/en/press/releases/ (recorded for any future re-probe); no feed or API alternative found — GovDelivery email (USSSA) is the documented channel. SSA OIG has RSS at oig.ssa.gov/rss/ and is also covered by the planned oversight.gov aggregator. Email sibling registered 2026-07-29: ssa-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.nlrb.gov/news-publications/news/news-releases">NLRB News Releases</a></td>
@@ -507,7 +507,7 @@ stays in sync.</em></p>
 <td>rss</td>
 <td><strong>ACTIVE</strong></td>
 <td>RSS poll via AgencyClient (pending content evaluation)</td>
-<td>Probed 2026-07-26: RSS verified end-to-end — 20 items, avg description 109 chars, sample article extracted (10066 chars text).</td>
+<td>Probed 2026-07-26: RSS verified end-to-end — 20 items, avg description 109 chars, sample article extracted (10066 chars text). Email sibling registered 2026-07-29: federal-reserve-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.fdic.gov/news/press-releases">FDIC Press Releases</a></td>
@@ -516,7 +516,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>planned</td>
 <td>HTML index diff via AgencyClient (pending content evaluation)</td>
-<td>Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: conflicting evidence on a GovDelivery-hosted press RSS (public.govdelivery.com/topics/USFDIC_26/feed.rss cited by an integration vendor, but the modern GovDelivery platform generally exposes no public per-topic RSS) — one probe of that URL settles both this source and the GovDelivery-pattern question for every agency marked 'GovDelivery to evaluate'. Separately, BankFind Suite API at api.fdic.gov/banks/docs offers structured bank data (not press).</td>
+<td>Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: conflicting evidence on a GovDelivery-hosted press RSS (public.govdelivery.com/topics/USFDIC_26/feed.rss cited by an integration vendor, but the modern GovDelivery platform generally exposes no public per-topic RSS) — one probe of that URL settles both this source and the GovDelivery-pattern question for every agency marked 'GovDelivery to evaluate'. Separately, BankFind Suite API at api.fdic.gov/banks/docs offers structured bank data (not press). Email sibling registered 2026-07-29: fdic-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.occ.gov/news-issuances/news-releases/">OCC News Releases</a></td>
@@ -642,7 +642,7 @@ stays in sync.</em></p>
 <td>rss</td>
 <td><strong>ACTIVE</strong></td>
 <td>RSS poll via AgencyClient (pending content evaluation)</td>
-<td>Probed 2026-07-26: RSS verified end-to-end — 20 items, avg description 233 chars, sample article extracted (7227 chars text).</td>
+<td>Probed 2026-07-26: RSS verified end-to-end — 20 items, avg description 233 chars, sample article extracted (7227 chars text). Email sibling registered 2026-07-29: fda-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.nih.gov/news-events/news-releases">NIH News Releases</a></td>
@@ -660,7 +660,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>planned</td>
 <td>HTML index diff via AgencyClient (pending content evaluation)</td>
-<td>Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required.</td>
+<td>Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Email sibling registered 2026-07-29: cms-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.irs.gov/newsroom">IRS Newsroom</a></td>
@@ -669,7 +669,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>planned</td>
 <td>HTML index diff via AgencyClient (pending content evaluation)</td>
-<td>Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required.</td>
+<td>Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Email sibling registered 2026-07-29: irs-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.fbi.gov/news/press-releases">FBI Press Releases</a></td>
@@ -687,7 +687,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>UNAVAILABLE</td>
 <td>HTML index diff via AgencyClient (pending viability check)</td>
-<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Research 2026-07-29: confirmed live GovDelivery subscription account (USDOJDEA) — best consent-based path pending the email-ingestion adapter (docs/access-alternatives-research-2026-07-29.md).</td>
+<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Research 2026-07-29: confirmed live GovDelivery subscription account (USDOJDEA) — best consent-based path pending the email-ingestion adapter (docs/access-alternatives-research-2026-07-29.md). Email sibling registered 2026-07-29: dea-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.atf.gov/news/press-releases">ATF Press Releases</a></td>
@@ -696,7 +696,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>UNAVAILABLE</td>
 <td>HTML index diff via AgencyClient (pending viability check)</td>
-<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded.</td>
+<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Email sibling registered 2026-07-29: atf-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.fema.gov/about/news-multimedia/press-releases">FEMA Press Releases</a></td>
@@ -741,7 +741,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>planned</td>
 <td>HTML index diff via AgencyClient (pending content evaluation)</td>
-<td>Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required.</td>
+<td>Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Email sibling registered 2026-07-29: uscis-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.news.uscg.mil/">Coast Guard News Releases</a></td>
@@ -750,7 +750,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>UNAVAILABLE</td>
 <td>HTML index diff via AgencyClient (pending viability check)</td>
-<td>Runs on the DoD DVIDS-backed news platform (news.uscg.mil), separate from uscg.mil. Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate.</td>
+<td>Runs on the DoD DVIDS-backed news platform (news.uscg.mil), separate from uscg.mil. Probed 2026-07-26: robots.txt disallows our identified client for this path. Not fetched, per GUIDE §3 (no evasion). Fallback channels (GovDelivery email) to evaluate. Email sibling registered 2026-07-29: uscg-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.faa.gov/newsroom">FAA Newsroom</a></td>
@@ -759,7 +759,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>UNAVAILABLE</td>
 <td>HTML index diff via AgencyClient (pending viability check)</td>
-<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Research 2026-07-29: confirmed live GovDelivery accounts (USAFAA; USFAARGL for airworthiness/regulatory) — best consent-based path pending the email-ingestion adapter (docs/access-alternatives-research-2026-07-29.md).</td>
+<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Research 2026-07-29: confirmed live GovDelivery accounts (USAFAA; USFAARGL for airworthiness/regulatory) — best consent-based path pending the email-ingestion adapter (docs/access-alternatives-research-2026-07-29.md). Email sibling registered 2026-07-29: faa-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.nhtsa.gov/press-releases">NHTSA Press Releases</a></td>
@@ -768,7 +768,7 @@ stays in sync.</em></p>
 <td>html-index</td>
 <td>UNAVAILABLE</td>
 <td>HTML index diff via AgencyClient (pending viability check)</td>
-<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded.</td>
+<td>Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF). Recorded, not evaded. Email sibling registered 2026-07-29: nhtsa-email (GUIDE §3 email class; the web status here is unchanged).</td>
 </tr>
 <tr>
 <td><a href="https://www.census.gov/newsroom/press-releases.html">Census Bureau Press Releases</a></td>
@@ -941,6 +941,267 @@ stays in sync.</em></p>
 <td>Not applicable to the daily flow — archive, not news-flow.</td>
 <td>Evaluated 2026-07-28 in the multi-modal survey: documented API (key by email to Catalog_API@nara.gov, 10,000 queries/month default) but archival by nature — nothing it publishes constitutes a new government action on a given day. Revisit only for deliberate historical-context or backfill features.</td>
 </tr>
+<tr>
+<td><a href="https://home.treasury.gov/news/press-releases">Treasury Press Releases (email)</a></td>
+<td>Department of the Treasury</td>
+<td style="text-align: right;">1</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender subscriptions@subscriptions.treas.gov). Sibling of treasury-newsroom, whose web path robots.txt disallows — that refusal stands unchanged. Treasury component subscriptions also confirmed and registered separately or noted here: FinCEN (fincen-email), TTB, BEP, CDFI Fund, TIGTA, Office of Financial Research (ofr-email), and the Federal Reserve Bank of New York alerts.</td>
+</tr>
+<tr>
+<td><a href="https://www.fincen.gov/news-room">FinCEN Updates (email)</a></td>
+<td>Department of the Treasury (FinCEN)</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender fincenupdates@public.govdelivery.com).</td>
+</tr>
+<tr>
+<td><a href="https://www.financialresearch.gov/">Office of Financial Research (email)</a></td>
+<td>Department of the Treasury (OFR)</td>
+<td style="text-align: right;">3</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender updates@subscribe.financialresearch.gov). Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here.</td>
+</tr>
+<tr>
+<td><a href="https://www.irs.gov/newsroom">IRS Newswire (email)</a></td>
+<td>Department of the Treasury (IRS)</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender irs@service.govdelivery.com). Sibling of the planned irs-newsroom web entry.</td>
+</tr>
+<tr>
+<td><a href="https://www.ssa.gov/news/en/press/releases/index.html">SSA Press Releases (email)</a></td>
+<td>Social Security Administration</td>
+<td style="text-align: right;">1</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender subscription.service@subscriptions.ssa.gov). Sibling of ssa-newsroom, which returns HTTP 403 to our identified client — the first working input for this agency.</td>
+</tr>
+<tr>
+<td><a href="https://www.justice.gov/news">Justice Department News (email)</a></td>
+<td>Department of Justice</td>
+<td style="text-align: right;">1</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender usdoj@public.govdelivery.com). Corroborating sibling of the active justice-newsroom feed, whose 25-item depth can under-cover heavy days; the bulletin stream is expected to close part of that gap.</td>
+</tr>
+<tr>
+<td><a href="https://www.justice.gov/usao/pressreleases">U.S. Attorneys News (email)</a></td>
+<td>Department of Justice (Executive Office for U.S. Attorneys)</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender usattorneys@public.govdelivery.com); a real news bulletin arrived the same day. High expected volume — content evaluation must establish whether the digest lists these individually or aggregates them by district, and the answer will be disclosed in the coverage statement. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here.</td>
+</tr>
+<tr>
+<td><a href="https://www.dea.gov/press-releases">DEA Updates (email)</a></td>
+<td>Department of Justice (DEA)</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender dea@public.govdelivery.com). Sibling of dea-press, which returns HTTP 403 to our identified client — the first working input for this agency. The Diversion Control Division list is subscribed but awaiting email confirmation.</td>
+</tr>
+<tr>
+<td><a href="https://www.atf.gov/news">ATF News (email)</a></td>
+<td>Department of Justice (ATF)</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender atf@service.govdelivery.com). Sibling of atf-news, which returns HTTP 403 to our identified client — the first working input for this agency. Corrects the 2026-07-29 access research, which concluded no ATF-specific bulletin account existed; the account exists under a different code than the one guessed.</td>
+</tr>
+<tr>
+<td><a href="https://www.transportation.gov/briefing-room">Transportation Press Releases (email)</a></td>
+<td>Department of Transportation</td>
+<td style="text-align: right;">1</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender usdot@info.dot.gov). Sibling of transportation-newsroom, which returns HTTP 403 to our identified client. Modal-administration lists also subscribed and confirmed under the same platform, to be split into their own entries if content evaluation shows distinct action streams: FRA, FHWA, FTA, FMCSA, PHMSA, MARAD, and the DOT Inspector General.</td>
+</tr>
+<tr>
+<td><a href="https://www.faa.gov/newsroom">FAA Updates (email)</a></td>
+<td>Department of Transportation (FAA)</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender usafaa@info.dot.gov). Sibling of faa-newsroom, which returns HTTP 403 to our identified client — the first working input for this agency.</td>
+</tr>
+<tr>
+<td><a href="https://www.nhtsa.gov/press-releases">NHTSA Press Releases (email)</a></td>
+<td>Department of Transportation (NHTSA)</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender nhtsa@service.govdelivery.com). Sibling of nhtsa-press, which returns HTTP 403 to our identified client. NHTSA operates its own bulletin account rather than sharing the departmental one, giving finer topic control than expected.</td>
+</tr>
+<tr>
+<td><a href="https://www.epa.gov/newsreleases">EPA News Releases (email)</a></td>
+<td>Environmental Protection Agency</td>
+<td style="text-align: right;">1</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender epa.admin@govdelivery.epa.gov). Sibling of epa-newsroom, whose web path robots.txt disallows — the first working input for this agency.</td>
+</tr>
+<tr>
+<td><a href="https://www.usda.gov/about-usda/news/press-releases">USDA News (email)</a></td>
+<td>Department of Agriculture</td>
+<td style="text-align: right;">1</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender usda@public.govdelivery.com). Sibling of agriculture-newsroom, whose web path robots.txt disallows — the first working input for this department. Component lists also subscribed and confirmed, to be split into their own entries if content evaluation shows distinct action streams: Foreign Agricultural Service, Food and Nutrition Service, Agricultural Marketing Service, APHIS, NIFA, Agricultural Research Service, Rural Development, and Farmers.gov.</td>
+</tr>
+<tr>
+<td><a href="https://www.fsis.usda.gov/recalls">FSIS Recalls and Public Health Alerts (email)</a></td>
+<td>Department of Agriculture (FSIS)</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender usfsis@public.govdelivery.com). Registered separately from agriculture-email because recalls are a distinct, time-critical document class rather than press material.</td>
+</tr>
+<tr>
+<td><a href="https://www.news.uscg.mil/">Coast Guard News (email)</a></td>
+<td>Department of Homeland Security (U.S. Coast Guard)</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender uscoastguard@service.govdelivery.com). Sibling of uscg-news, whose robots.txt disallows our client. A second consent-based path alongside the planned DVIDS API integration; content evaluation will determine which carries the fuller record. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here.</td>
+</tr>
+<tr>
+<td><a href="https://www.uscis.gov/newsroom">USCIS Updates (email)</a></td>
+<td>Department of Homeland Security (USCIS)</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender uscis@messages.dhs.gov). Sibling of the planned uscis-newsroom web entry. Department-level DHS and ICE subscriptions are awaiting email confirmation.</td>
+</tr>
+<tr>
+<td><a href="https://www.fda.gov/news-events/fda-newsroom">FDA Email Updates (email)</a></td>
+<td>Department of Health and Human Services (FDA)</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender usfda@public.govdelivery.com). Corroborating sibling of the active fda-press feed; content evaluation will establish whether the bulletins carry material the feed omits.</td>
+</tr>
+<tr>
+<td><a href="https://www.cms.gov/newsroom">CMS Newsroom (email)</a></td>
+<td>Department of Health and Human Services (CMS)</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender cmslists@subscriptions.cms.hhs.gov). Sibling of the planned cms-newsroom web entry. The HHS departmental subscription is awaiting email confirmation; NIH Office of Research on Women's Health, the Office on Women's Health, and ODPHP lists are also confirmed and may be registered after evaluation.</td>
+</tr>
+<tr>
+<td><a href="https://news.va.gov/">VA Updates (email)</a></td>
+<td>Department of Veterans Affairs</td>
+<td style="text-align: right;">1</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (senders veteransaffairs@messages.va.gov and veteransbenefits@messages.va.gov). Corroborating sibling of the active va-newsroom feed.</td>
+</tr>
+<tr>
+<td><a href="https://www.trade.gov/commercial-service">U.S. Commercial Service (email)</a></td>
+<td>Department of Commerce (International Trade Administration)</td>
+<td style="text-align: right;">3</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender u.s.commercialservice@public.govdelivery.com). Partial coverage only for commerce-newsroom, which returns HTTP 403 to our identified client: this is a trade-promotion channel, not the department's press office. A departmental Commerce subscription remains to be found. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here.</td>
+</tr>
+<tr>
+<td><a href="https://www.state.gov/week-at-state/">The Week at State (email)</a></td>
+<td>Department of State</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender usstatebpa@public.govdelivery.com). Only partial coverage for state-newsroom: weekly and summarized, not the daily press statements or briefing transcripts. The documented state.gov press-release and briefing feeds remain the target for full coverage.</td>
+</tr>
+<tr>
+<td><a href="https://www.federalreserve.gov/newsevents.htm">Federal Reserve Board Announcements (email)</a></td>
+<td>Federal Reserve Board</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription notifications to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender frb-webannouncements@announcements.federalreserve.gov). The Board runs its own notification system rather than GovDelivery, so the adapter must not assume a single platform. Corroborating sibling of the active federal-reserve-news feed. Federal Reserve Bank of New York alerts are also confirmed. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here.</td>
+</tr>
+<tr>
+<td><a href="https://www.fdic.gov/news/press-releases">FDIC Press Releases (email)</a></td>
+<td>Federal Deposit Insurance Corporation</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender subscriptions@subscriptions.fdic.gov). Sibling of the planned fdic-news web entry, and it settles the open GovDelivery-topic-RSS question in favor of the email channel for this agency.</td>
+</tr>
+<tr>
+<td><a href="https://www.cpsc.gov/Newsroom">CPSC Recalls and News (email)</a></td>
+<td>Consumer Product Safety Commission</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender uscpsc@info.cpsc.gov). New coverage: the commission had no registered source before this subscription.</td>
+</tr>
+<tr>
+<td><a href="https://www.pbgc.gov/news">PBGC Updates (email)</a></td>
+<td>Pension Benefit Guaranty Corporation</td>
+<td style="text-align: right;">3</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender pbgc@subscriptions.pbgc.gov). New coverage: no registered source before this subscription. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here.</td>
+</tr>
+<tr>
+<td><a href="https://www.eac.gov/newsroom">Election Assistance Commission (email)</a></td>
+<td>U.S. Election Assistance Commission</td>
+<td style="text-align: right;">3</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender newsletter@updates.eac.gov). New coverage: no registered source before this subscription. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here.</td>
+</tr>
+<tr>
+<td><a href="https://www.uspsoig.gov/">USPS Inspector General (email)</a></td>
+<td>U.S. Postal Service Office of Inspector General</td>
+<td style="text-align: right;">3</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender uspsoig@public.govdelivery.com); a real audit-release bulletin arrived the same day. Overlaps the planned oversight.gov aggregator, which collects IG reports government-wide; the aggregator rule applies if both are activated.</td>
+</tr>
+<tr>
+<td><a href="https://www.hudoig.gov/newsroom">HUD Inspector General (email)</a></td>
+<td>Department of Housing and Urban Development, Office of Inspector General</td>
+<td style="text-align: right;">3</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender hudoig@info.hudoig.gov). The signup page returns HTTP 403 to our identified client; recorded as observed, not evaded. Partial coverage for the department: hud-newsroom returns HTTP 403 to our identified client and the HUD-NEWS-L press listserv signup did not complete — the IG stream is oversight material, not the department's own announcements.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="judicial">Judicial</h2>
@@ -991,7 +1252,16 @@ stays in sync.</em></p>
 <td>rss</td>
 <td>planned</td>
 <td>Would poll the documented press-release RSS feed daily for new items.</td>
-<td>Probed 2026-07-26: HTTP 404 — page moved, not blocked. Re-probed 2026-07-28 at the documented feed (per USSC's own RSS FAQ): HTTP 200 but zero items — the press-release feed is live and currently empty (742 bytes; USSC publishes a few items/month, feed may only carry recent window). Stays planned; re-check when USSC next publishes, then activate.</td>
+<td>Probed 2026-07-26: HTTP 404 — page moved, not blocked. Re-probed 2026-07-28 at the documented feed (per USSC's own RSS FAQ): HTTP 200 but zero items — the press-release feed is live and currently empty (742 bytes; USSC publishes a few items/month, feed may only carry recent window). Stays planned; re-check when USSC next publishes, then activate. Email sibling registered 2026-07-29: ussc-email (GUIDE §3 email class; the web status here is unchanged).</td>
+</tr>
+<tr>
+<td><a href="https://www.ussc.gov/topic/news">Sentencing Commission News (email)</a></td>
+<td>U.S. Sentencing Commission</td>
+<td style="text-align: right;">2</td>
+<td>email</td>
+<td>planned</td>
+<td>Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).</td>
+<td>Subscribed and confirmed 2026-07-29 (sender ussc@public.govdelivery.com). Sibling of ussc-news, whose documented RSS feed was reachable but empty at probe — the bulletin channel may prove the more reliable input for this judicial-branch agency. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here.</td>
 </tr>
 </tbody>
 </table>
@@ -1022,7 +1292,7 @@ stays in sync.</em></p>
 </table>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-07-29T15:39:27Z (UTC). Canonical source:
+  <p>Generated 2026-07-29T21:45:55Z (UTC). Canonical source:
   <code>SOURCES.md (generated from sources/registry.yaml)</code> in the repository. Selection is mechanical and
   every item cites its official source; methodology in
   <code>GUIDE.md</code> §2.</p>

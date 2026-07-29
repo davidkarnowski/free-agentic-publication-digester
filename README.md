@@ -117,6 +117,14 @@ agency web and API teams directly to advocate for safe, sane automated
 access to what they already publish for the public. Coverage grows by
 doors opening — never by evasion.
 
+That effort produced its first result in July 2026: **11 agencies whose
+web channels refuse us now have a working input path through their own
+email bulletins** — Treasury, USDA, EPA, SSA, DOT, FAA, NHTSA, DEA,
+ATF, the Coast Guard, and HUD's Inspector General. The blocked web
+entries stay in the registry exactly as they were; the email entries
+sit beside them as siblings. A refusal recorded is never quietly
+erased by a success elsewhere.
+
 ### Five onboarding gates
 
 No source is ingested on a hunch. Each one is (1) **registered** with
@@ -150,7 +158,15 @@ Adapters reach for access in a fixed order:
    is the channel the publisher built for exactly this.
 2. **Basic web access** — the same HTML a citizen reads, through the
    robots-enforcing client, only where no directed channel exists.
-3. **Never impersonation.** No browser user-agent spoofing, no script
+3. **Subscription channels the publisher pushes** — agency email
+   bulletins (GovDelivery, listservs), where a project mailbox
+   subscribes through the agency's own signup form like any citizen.
+   This is consent at its clearest: the publisher transmits each item
+   to us. It is not a way around a web refusal — receiving a bulletin
+   is never treated as permission to crawl a site that turned us away,
+   and the refusal stays on the record. See
+   [docs/email-sources.md](docs/email-sources.md).
+4. **Never impersonation.** No browser user-agent spoofing, no script
    execution, no WAF or bot-check circumvention — ever. Parsing
    structured data a server chose to send us is legitimate; pretending
    to be something we are not is not. When justice.gov answered
