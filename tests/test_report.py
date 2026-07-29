@@ -689,3 +689,13 @@ def test_email_channel_item_cites_the_captured_bulletin(conn, tmp_path):
     assert "**[Release for PR-fsis-email-bbb](https://www.fsis.usda.gov/recalls/x)**" in md
     assert "**Release for PR-treasury-email-aaa**" in md  # unlinked, not [x](None)
     assert "](None)" not in md
+
+
+def test_agency_claimed_date_renders_as_a_real_date(conn, tmp_path):
+    """RFC-822 headers must render as the parsed day, never truncated
+    mid-year (live defect 2026-07-29: 'Tue, 28 Jul 26 1')."""
+    _insert_agency_item(conn, "PR-t-datefmt1", "Dated Release",
+                        "Tue, 23 Jul 2026 12:00:00 +0000")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "dated 2026-07-23 by the agency" in md
+    assert "Jul 26 1" not in md

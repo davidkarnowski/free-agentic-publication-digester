@@ -17,6 +17,52 @@ Entry format:
 
 ---
 
+## 2026-07-29 23:20 PDT — Full pipeline run with email sources wired in; token ledger yields its first real cap baseline
+
+**Context:** First end-to-end run including the new email channel.
+
+**Work performed:**
+- **Wired stage 1c (EMAIL BULLETINS) into run_pipeline** between the RSS
+  poll and extract; degrades to a reported skip when the mailbox is not
+  configured, and a mailbox outage is reported without costing the run.
+- **Fixed a live gap found while watching the run:** stage 1b still
+  called the serial `agencies.run()`, so gao.gov's 420-second
+  crawl-delay serialized every other agency behind it — the exact
+  problem per-host concurrency solved. Stage 1b now uses
+  `run_concurrent()`. The observed cost of the bug: 1,091s for a stage
+  that should take under a minute.
+- **Run result (validation PASSED):** govinfo sync 448 requests
+  (USCOURTS listed 6,085, 100 downloaded, 2,312 still queued — the
+  resumable pending queue holding); agency RSS 47 new items; email 4
+  bulletins; extract 179 packages / 420 records / 5.6M chars; analyze
+  114 selected, 93 model summaries; digest 2026-07-28 rendered and site
+  rebuilt.
+- **Two presentation/data defects fixed:** agency claimed dates rendered
+  as truncated RFC-822 headers ("Tue, 28 Jul 26 1" — misstating the
+  year); now the parsed UTC day. And two real-data smoke tests broke on
+  newly synced data, both correctly: the Federal Register issue for
+  07-29 contains a **correction document** (`C1-2026-13124`), a granule
+  shape we had never seen, and CREC returned 47 granules on a light
+  session day. The FR pattern now accepts the `C<n>-` correction prefix;
+  the CREC volume floor was removed entirely — issue size is a property
+  of Congress, not of the parser.
+
+**Token finding — the measure-first baseline the GUIDE was waiting
+for.** This run cost **1,532,325 input / 128,455 output tokens**, the
+largest yet, on a judicial-heavy day (90 court opinions summarized).
+The ledger exposed where it went: `plain:retry` consumed **645,778
+input tokens across 25 single-item retries — 42% of the day's total**.
+The plain-speak layer batches 25 items per call, and when an item comes
+back unparseable it is retried alone, re-paying the fixed ~25K prompt
+overhead each time. Reliability is fine (93/93 written, 0 failures);
+the cost is not. Retrying in small groups instead of singly would cut
+roughly 500K tokens off a day like this. Recorded as the top token
+finding; not changed in this run.
+
+**Open questions / next steps:** batch the plain-speak retries; set the
+§6 rule-8 cap from this baseline now that a judicial-heavy day is
+measured; activate email sources after gate-3 coverage evaluation.
+
 ## 2026-07-29 22:15 PDT — Email adapter built, tested, and running: 37 items from 9 agencies
 
 **Context:** With the mailbox subscribed and registered, the email

@@ -471,7 +471,10 @@ def _agency_lines(conn, date):
         lines += [f"#### {agency}", ""]
         for r in by_agency[agency]:
             meta = r["_meta"]
-            claimed = (meta.get("claimed_published_at") or "")[:16]
+            # The parsed UTC day, not a truncated raw header: slicing an
+            # RFC-822 date rendered "Tue, 28 Jul 2026 ..." as "Tue, 28 Jul 26 1",
+            # which misstates the year.
+            claimed = r.get("_claimed_day") or _claimed_day(meta)
             title = _one_line(r["title"])
             url = meta.get("url")
             # An email bulletin sometimes carries a release that names no

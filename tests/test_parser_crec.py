@@ -207,7 +207,10 @@ def test_real_day_smoke():
     }
     records = list(crec.parse(zip_path, package))
 
-    assert len(records) > 50  # light session days (e.g. Monday pro forma) run ~120
+    # No volume floor: real days range from pro-forma sessions (47 granules
+    # observed 2026-07-29) to full legislative days (~250). Volume is a
+    # property of Congress, not of the parser — assert structure instead.
+    assert records, "a published issue must yield at least one granule"
     assert all(r["text"] for r in records), "every granule must yield non-empty text"
     assert all(r["granule_id"].startswith(package_id) for r in records)
     typed = sum(1 for r in records if r["doc_type"] is not None)

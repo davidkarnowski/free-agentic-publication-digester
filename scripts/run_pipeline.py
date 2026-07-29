@@ -55,17 +55,44 @@ def main() -> int:
 
     t0 = stage("STAGE 1b/5 — AGENCY NEWSROOMS (RSS poll + capture + Wayback)")
     from fapd import agencies
-    from fapd.client import AgencyClient
     from fapd.sources import load_registry
 
     entries = [e for e in load_registry()
                if e["status"] == "active" and e["type"] == "rss"]
-    with AgencyClient() as aclient, agencies.WaybackClient() as wclient:
-        aresults = agencies.run(aclient, wclient, conn, entries)
-        print(f"   {len(entries)} source(s) polled, "
-              f"{sum(r['new_items'] for r in aresults)} new item(s), "
-              f"{sum(r['wayback_submitted'] for r in aresults)} wayback", flush=True)
+    # Per-host workers (GUIDE §4): every host still sees at most 1 req/s and
+    # its own crawl-delay, but no host waits behind another's pacing clock —
+    # gao.gov asks for 420s between requests, and serial polling made every
+    # other agency wait it out.
+    groups = agencies.host_groups(entries)
+    print(f"   {len(entries)} source(s) across {len(groups)} host(s)", flush=True)
+    aresults = agencies.run_concurrent(entries)
+    print(f"   {sum(r['new_items'] for r in aresults)} new item(s), "
+          f"{sum(r['wayback_submitted'] for r in aresults)} wayback", flush=True)
     timings["agencies"] = time.monotonic() - t0
+    done(t0)
+
+    t0 = stage("STAGE 1c/5 — EMAIL BULLETINS (project mailbox, registered senders)")
+    from fapd import email_sources
+
+    if not (config.IMAP_HOST and config.IMAP_USER and config.IMAP_PASSWORD):
+        print("   mailbox not configured (.env) — skipped", flush=True)
+    else:
+        mail_entries = [e for e in load_registry()
+                        if e["type"] == "email"
+                        and e["status"] in ("active", "planned")
+                        and e.get("sender")]
+        try:
+            with email_sources.MailboxClient() as mbox:
+                mresults = email_sources.poll_mailbox(mbox, conn, mail_entries)
+            print(f"   {len(mail_entries)} subscription(s), "
+                  f"{sum(r['messages'] for r in mresults)} bulletin(s), "
+                  f"{sum(r['items'] for r in mresults)} new item(s), "
+                  f"{sum(r['administrative'] for r in mresults)} administrivia skipped",
+                  flush=True)
+        except Exception as exc:  # noqa: BLE001 — a mailbox outage must not
+            # cost the rest of the run; the gap is reported, not hidden.
+            print(f"   mailbox poll failed: {exc!r} — continuing", flush=True)
+    timings["email"] = time.monotonic() - t0
     done(t0)
 
     t0 = stage("STAGE 2/5 — EXTRACT (raw archive -> normalized records)")

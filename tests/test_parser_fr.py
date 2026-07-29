@@ -211,7 +211,10 @@ def test_real_issue_smoke(path):
     import re
 
     for rec in records:
-        assert re.fullmatch(r"\d{4}-\d+", rec["granule_id"])
+        # Corrections to already-published documents carry a C<n>- prefix
+        # (first seen in FR-2026-07-29: C1-2026-13124). Real-issue shape,
+        # not an anomaly.
+        assert re.fullmatch(r"(C\d+-)?\d{4}-\d+", rec["granule_id"])
         assert rec["doc_type"] in {"RULE", "PRORULE", "NOTICE", "PRESDOCU"}
         assert rec["text"]
     counts = Counter(r["doc_type"] for r in records)

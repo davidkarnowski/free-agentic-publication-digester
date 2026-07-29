@@ -71,6 +71,16 @@ close (check them off with dates).
 - [ ] Announce-facing check of SOURCES.md rendering (it is the public
   accountability artifact).
 
+### Token economics (baseline now measured)
+- [ ] **Batch the plain-speak retries.** Measured 2026-07-29: 25
+  single-item retries cost 645,778 input tokens — 42% of a 1.53M-token
+  day — because each retry re-pays the ~25K fixed prompt overhead.
+  Retrying in groups of ~5 should recover most of it. Reliability is
+  already fine (0 failures); this is pure waste.
+- [ ] **Set the GUIDE §6 rule-8 daily cap** from real baselines now that
+  a judicial-heavy day is measured (1.53M in / 128K out; ordinary days
+  ran ~90K in). Rule 8 deferred the cap until exactly this data existed.
+
 ### Accuracy & freshness
 - [ ] **Dated STATUS snapshot** (README section or STATUS.md,
   regenerated with the site): registry counts, active sources, test
