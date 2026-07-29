@@ -36,8 +36,16 @@ close (check them off with dates).
   backend behind the existing interface (the `claude` CLI binds runs to
   the local machine/subscription and cannot run hosted). Blocks any
   hosted scheduling; local scheduling does not need it.
-- [ ] **Daily scheduling** with overlap guard (launchd/cron locally
-  first; hosted later once the backend swap lands). Open since Phase 1.
+- [ ] **Daily scheduling** with overlap guard. Recommended shape
+  (2026-07-29): a **self-hosted GitHub Actions runner** on the operator
+  machine — GH provides cron/logs/run-history, execution stays local
+  (local DBs = state, local .env, local claude CLI, and our stable IP
+  identity, which shared hosted-runner IPs would undermine with gov
+  WAFs). Hosted runners suit only stateless stages: the email-adapter
+  poll (IMAP creds in Actions secrets; mailbox \Seen/UID state lives
+  server-side) and site deploy could go hosted early; gov-crawling and
+  LLM stages stay local until the API-backend swap and a state-store
+  decision. Open since Phase 1.
 
 ### Community files
 - [ ] `SECURITY.md` — contact route (hustleyourcity address), what's in
