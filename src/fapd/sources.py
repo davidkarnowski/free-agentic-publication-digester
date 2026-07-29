@@ -17,7 +17,10 @@ import yaml
 
 REGISTRY_PATH = Path(__file__).resolve().parents[2] / "sources" / "registry.yaml"
 
-OPTIONAL_FIELDS = ("adapter",)  # per-source strategy (GUIDE §3 Source adapters)
+OPTIONAL_FIELDS = ("adapter", "sender")  # per-source strategy (GUIDE §3);
+# `sender`: for type: email, the confirmed From address(es) — a string or a
+# list. It is the allowlist the mailbox adapter matches against: a message
+# whose sender maps to no registered source is never parsed.
 REQUIRED_FIELDS = (
     "id",
     "name",

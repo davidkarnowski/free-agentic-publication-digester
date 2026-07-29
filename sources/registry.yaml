@@ -1466,6 +1466,7 @@
   parent_org: Department of the Treasury
   description: "The Department of the Treasury manages federal finances, collects revenue, and administers economic sanctions. Its subscription bulletins carry press releases as the department distributes them directly to the public — sanctions designations, debt-management statements, and economic-policy announcements — reaching subscribers on the same day they are issued."
   type: email
+  sender: subscriptions@subscriptions.treas.gov
   tier: 1
   urls:
     home: https://home.treasury.gov/news/press-releases
@@ -1482,6 +1483,7 @@
   parent_org: Department of the Treasury (FinCEN)
   description: "The Financial Crimes Enforcement Network administers the Bank Secrecy Act and issues advisories, alerts, and enforcement actions on money laundering, sanctions evasion, and illicit finance. Its bulletins carry those advisories and enforcement announcements directly, a document class that reaches the Federal Register only in part."
   type: email
+  sender: fincenupdates@public.govdelivery.com
   tier: 2
   urls:
     home: https://www.fincen.gov/news-room
@@ -1498,13 +1500,14 @@
   parent_org: Department of the Treasury (OFR)
   description: "The Office of Financial Research supports the Financial Stability Oversight Council with data and analysis on risks to the financial system. Its bulletins carry working papers, financial-stability monitors, and data releases."
   type: email
+  sender: updates@subscribe.financialresearch.gov
   tier: 3
   urls:
     home: https://www.financialresearch.gov/
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender updates@subscribe.financialresearch.gov). Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+  notes: "Subscribed and confirmed 2026-07-29 (sender updates@subscribe.financialresearch.gov). Signup URL recovered from the bulletin List-Unsubscribe header and verified (account USDOJUSAO); the earlier inferred address had not resolved."
 
 - id: irs-email
   adapter: govdelivery
@@ -1513,6 +1516,7 @@
   parent_org: Department of the Treasury (IRS)
   description: "The Internal Revenue Service administers federal tax law. Its newswire bulletins carry filing-season guidance, revenue procedures and rulings as announced, tax-scam alerts, and enforcement announcements — the agency's primary channel for reaching taxpayers and practitioners quickly."
   type: email
+  sender: irs@service.govdelivery.com
   tier: 2
   urls:
     home: https://www.irs.gov/newsroom
@@ -1529,6 +1533,7 @@
   parent_org: Social Security Administration
   description: "The Social Security Administration administers retirement, disability, and survivor benefits. Its bulletins carry press releases on benefit amounts, cost-of-living adjustments, policy changes, and program administration."
   type: email
+  sender: subscription.service@subscriptions.ssa.gov
   tier: 1
   urls:
     home: https://www.ssa.gov/news/en/press/releases/index.html
@@ -1545,6 +1550,7 @@
   parent_org: Department of Justice
   description: "The Department of Justice enforces federal law. Its departmental bulletins carry Office of Public Affairs releases — indictments, plea agreements, settlements, and policy announcements — as the department distributes them, providing a second independent channel alongside the department's news feed."
   type: email
+  sender: usdoj@public.govdelivery.com
   tier: 1
   urls:
     home: https://www.justice.gov/news
@@ -1559,11 +1565,13 @@
   name: U.S. Attorneys News (email)
   branch: executive
   parent_org: Department of Justice (Executive Office for U.S. Attorneys)
-  description: "The 93 United States Attorneys prosecute federal criminal cases and represent the United States in civil litigation across every district. Their combined news bulletins carry district-level charging announcements, convictions, and sentencings. Volume is high relative to departmental releases; the content evaluation will measure it rather than estimate it."
+  description: "The 93 United States Attorneys prosecute federal criminal cases and represent the United States in civil litigation across every district. Their combined news bulletins carry district-level charging announcements, convictions, and sentencings. Volume is high relative to departmental releases; the content evaluation will measure it rather than estimate it. Bulletins are multi-item digests: one message carries many district releases."
   type: email
+  sender: usattorneys@public.govdelivery.com
   tier: 2
   urls:
     home: https://www.justice.gov/usao/pressreleases
+    signup: https://public.govdelivery.com/accounts/USDOJUSAO/subscriber/new
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
   status: planned
   added: "2026-07-29"
@@ -1576,6 +1584,7 @@
   parent_org: Department of Justice (DEA)
   description: "The Drug Enforcement Administration enforces controlled-substance law. Its bulletins carry enforcement announcements, scheduling actions, and public-safety alerts on emerging drug threats."
   type: email
+  sender: dea@public.govdelivery.com
   tier: 2
   urls:
     home: https://www.dea.gov/press-releases
@@ -1592,6 +1601,7 @@
   parent_org: Department of Justice (ATF)
   description: "The Bureau of Alcohol, Tobacco, Firearms and Explosives regulates the firearms and explosives industries and investigates related crime. Its bulletins carry enforcement announcements, industry rulings and open letters to licensees, and regulatory guidance."
   type: email
+  sender: atf@service.govdelivery.com
   tier: 2
   urls:
     home: https://www.atf.gov/news
@@ -1608,6 +1618,7 @@
   parent_org: Department of Transportation
   description: "The Department of Transportation sets national transportation policy and oversees the modal administrations governing aviation, highways, rail, transit, pipelines, and maritime commerce. Its departmental bulletins carry press releases, grant awards, and safety announcements."
   type: email
+  sender: usdot@info.dot.gov
   tier: 1
   urls:
     home: https://www.transportation.gov/briefing-room
@@ -1624,6 +1635,7 @@
   parent_org: Department of Transportation (FAA)
   description: "The Federal Aviation Administration regulates civil aviation and operates the national airspace system. Its bulletins carry press releases, airworthiness and regulatory notices, and safety announcements affecting operators, manufacturers, and travelers."
   type: email
+  sender: usafaa@info.dot.gov
   tier: 2
   urls:
     home: https://www.faa.gov/newsroom
@@ -1640,6 +1652,7 @@
   parent_org: Department of Transportation (NHTSA)
   description: "The National Highway Traffic Safety Administration regulates vehicle safety and investigates defects. Its bulletins carry press releases, recall announcements, defect investigations, and crash-data releases — safety actions with direct consequences for vehicle owners."
   type: email
+  sender: nhtsa@service.govdelivery.com
   tier: 2
   urls:
     home: https://www.nhtsa.gov/press-releases
@@ -1656,6 +1669,7 @@
   parent_org: Environmental Protection Agency
   description: "The Environmental Protection Agency administers federal environmental law. Its bulletins carry news releases on enforcement settlements, permit and rule announcements, grant awards, and regional actions affecting specific communities."
   type: email
+  sender: epa.admin@govdelivery.epa.gov
   tier: 1
   urls:
     home: https://www.epa.gov/newsreleases
@@ -1672,6 +1686,7 @@
   parent_org: Department of Agriculture
   description: "The Department of Agriculture administers farm programs, food-safety inspection, nutrition assistance, and rural development. Its departmental bulletins carry press releases on program funding, disaster designations, trade actions, and regulatory decisions."
   type: email
+  sender: usda@public.govdelivery.com
   tier: 1
   urls:
     home: https://www.usda.gov/about-usda/news/press-releases
@@ -1688,6 +1703,7 @@
   parent_org: Department of Agriculture (FSIS)
   description: "The Food Safety and Inspection Service inspects meat, poultry, and egg products. Its bulletins carry recall notices and public-health alerts naming specific products and establishments, a document class distinct from departmental press releases."
   type: email
+  sender: usfsis@public.govdelivery.com
   tier: 2
   urls:
     home: https://www.fsis.usda.gov/recalls
@@ -1704,6 +1720,7 @@
   parent_org: Department of Homeland Security (U.S. Coast Guard)
   description: "The United States Coast Guard conducts maritime search and rescue, law enforcement, and marine safety and environmental response. Its bulletins carry operational announcements, safety alerts, and marine-casualty and enforcement news."
   type: email
+  sender: uscoastguard@service.govdelivery.com
   tier: 2
   urls:
     home: https://www.news.uscg.mil/
@@ -1719,6 +1736,7 @@
   parent_org: Department of Homeland Security (USCIS)
   description: "United States Citizenship and Immigration Services adjudicates immigration and naturalization benefits. Its bulletins carry policy-manual updates, form revisions, filing-fee and processing changes, and program announcements that determine how applications are handled."
   type: email
+  sender: uscis@messages.dhs.gov
   tier: 2
   urls:
     home: https://www.uscis.gov/newsroom
@@ -1735,6 +1753,7 @@
   parent_org: Department of Health and Human Services (FDA)
   description: "The Food and Drug Administration regulates food, drugs, medical devices, and tobacco. Its bulletins carry approvals, safety communications, recalls, and warning letters as the agency issues them."
   type: email
+  sender: usfda@public.govdelivery.com
   tier: 2
   urls:
     home: https://www.fda.gov/news-events/fda-newsroom
@@ -1751,6 +1770,7 @@
   parent_org: Department of Health and Human Services (CMS)
   description: "The Centers for Medicare and Medicaid Services administer Medicare, Medicaid, and the health-insurance marketplaces. Its bulletins carry payment-rule announcements, coverage decisions, program guidance to states and providers, and enrollment data."
   type: email
+  sender: cmslists@subscriptions.cms.hhs.gov
   tier: 2
   urls:
     home: https://www.cms.gov/newsroom
@@ -1767,6 +1787,7 @@
   parent_org: Department of Veterans Affairs
   description: "The Department of Veterans Affairs administers veterans' health care, benefits, and memorial services. Its bulletins carry benefit-policy announcements, claims and eligibility changes, and health-system news reaching veterans directly."
   type: email
+  sender: [veteransaffairs@messages.va.gov, veteransbenefits@messages.va.gov]
   tier: 1
   urls:
     home: https://news.va.gov/
@@ -1783,6 +1804,7 @@
   parent_org: Department of Commerce (International Trade Administration)
   description: "The U.S. Commercial Service is the trade-promotion arm of the International Trade Administration. Its bulletins carry export-assistance announcements, trade-mission notices, and market guidance for U.S. exporters."
   type: email
+  sender: u.s.commercialservice@public.govdelivery.com
   tier: 3
   urls:
     home: https://www.trade.gov/commercial-service
@@ -1798,6 +1820,7 @@
   parent_org: Department of State
   description: "The Department of State conducts U.S. foreign policy and diplomacy. The Week at State is the department's weekly public newsletter, summarizing diplomatic engagements, program announcements, and Secretary travel — a digest of the week rather than the press-statement stream itself."
   type: email
+  sender: usstatebpa@public.govdelivery.com
   tier: 2
   urls:
     home: https://www.state.gov/week-at-state/
@@ -1813,6 +1836,7 @@
   parent_org: Federal Reserve Board
   description: "The Board of Governors of the Federal Reserve System conducts monetary policy and supervises banks. Its announcement notifications carry press releases, enforcement actions, policy statements, and speeches as the Board posts them."
   type: email
+  sender: frb-webannouncements@announcements.federalreserve.gov
   tier: 2
   urls:
     home: https://www.federalreserve.gov/newsevents.htm
@@ -1827,6 +1851,7 @@
   parent_org: Federal Deposit Insurance Corporation
   description: "The Federal Deposit Insurance Corporation insures bank deposits and supervises state-chartered banks. Its subscription bulletins carry press releases, financial institution letters, enforcement decisions, and failure and resolution announcements."
   type: email
+  sender: subscriptions@subscriptions.fdic.gov
   tier: 2
   urls:
     home: https://www.fdic.gov/news/press-releases
@@ -1842,6 +1867,7 @@
   parent_org: Consumer Product Safety Commission
   description: "The Consumer Product Safety Commission regulates consumer product safety and orders recalls. Its bulletins carry recall announcements naming specific products and hazards, safety warnings, and civil-penalty settlements."
   type: email
+  sender: uscpsc@info.cpsc.gov
   tier: 2
   urls:
     home: https://www.cpsc.gov/Newsroom
@@ -1857,6 +1883,7 @@
   parent_org: Pension Benefit Guaranty Corporation
   description: "The Pension Benefit Guaranty Corporation insures private-sector defined-benefit pension plans and takes over failed plans. Its bulletins carry trusteeship announcements, premium and interest-rate notices, and policy guidance affecting plan sponsors and retirees."
   type: email
+  sender: pbgc@subscriptions.pbgc.gov
   tier: 3
   urls:
     home: https://www.pbgc.gov/news
@@ -1871,6 +1898,7 @@
   parent_org: U.S. Election Assistance Commission
   description: "The Election Assistance Commission supports state and local election administration, certifies voting systems, and distributes election-security funding. Its bulletins carry certification decisions, guidance to election officials, grant announcements, and survey data releases."
   type: email
+  sender: newsletter@updates.eac.gov
   tier: 3
   urls:
     home: https://www.eac.gov/newsroom
@@ -1886,6 +1914,7 @@
   parent_org: U.S. Sentencing Commission
   description: "The United States Sentencing Commission sets federal sentencing guidelines. Its bulletins carry guideline amendments, public hearing notices, and research reports on federal sentencing practice."
   type: email
+  sender: ussc@public.govdelivery.com
   tier: 2
   urls:
     home: https://www.ussc.gov/topic/news
@@ -1901,6 +1930,7 @@
   parent_org: U.S. Postal Service Office of Inspector General
   description: "The Postal Service Office of Inspector General audits and investigates postal operations. Its bulletins carry audit reports, investigative findings, and white papers on postal finances, delivery performance, and program integrity."
   type: email
+  sender: uspsoig@public.govdelivery.com
   tier: 3
   urls:
     home: https://www.uspsoig.gov/
@@ -1916,6 +1946,7 @@
   parent_org: Department of Housing and Urban Development, Office of Inspector General
   description: "The HUD Office of Inspector General audits and investigates housing programs. Its bulletins carry audit reports, investigative results, and fraud alerts concerning public housing, mortgage insurance, and disaster-recovery funds."
   type: email
+  sender: hudoig@info.hudoig.gov
   tier: 3
   urls:
     home: https://www.hudoig.gov/newsroom

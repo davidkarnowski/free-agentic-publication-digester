@@ -17,6 +17,57 @@ Entry format:
 
 ---
 
+## 2026-07-29 22:15 PDT — Email adapter built, tested, and running: 37 items from 9 agencies
+
+**Context:** With the mailbox subscribed and registered, the email
+channel needed its adapter.
+
+**Work performed:**
+- **Probed before coding** (GUIDE §3 gate 2): pulled real bulletins
+  read-only and read their bytes. Findings that shaped everything —
+  bulletins are often *multi-item digests* (one U.S. Attorneys message
+  carried sixteen district releases); the plain-text part has clean
+  canonical .gov URLs but runs titles and summaries together with no
+  delimiter; the HTML part carries the exact title as anchor text and
+  the canonical URL percent-encoded inside the platform tracking
+  wrapper. Decoding that wrapper statically is the same technique the
+  USPS adapter uses — never a redirect fetch.
+- **`src/fapd/email_sources.py`**: read-only IMAP client (readonly
+  select, BODY.PEEK — the mailbox is never mutated; our watermark lives
+  in a new `mailbox_state` table), registry-driven sender allowlist
+  **applied to headers before any body is downloaded**, raw RFC-5322
+  bytes as the content-addressed capture, DKIM verification with the
+  verifying DNS key archived beside it, per-item dating, cross-channel
+  dedup, and per-message error isolation.
+- **`scripts/ingest_email.py`** with `--dry-run`, `--limit`, `--ids`,
+  and `--since-uid` (first run skips mail predating the subscriptions).
+- **Two defects caught by verifying the live output rather than
+  trusting green tests.** (1) For single-release bulletins the anchor
+  rule fabricated items from inline citations and footer links —
+  "Contact us" became a publication. Fixed with the date-marker
+  discriminator between digest and article shapes. (2) Worse, a
+  single-release item could cite a page the release merely linked to;
+  now an anchor is used only when it plainly refers to the release, and
+  otherwise the item carries no URL with the captured bulletin as its
+  source of record. A missing citation is honest; a wrong one is not.
+  Both runs were purged and re-ingested.
+- **Administrivia filter**: welcome and confirmation mail is counted and
+  disclosed, never ingested — platform plumbing is not government
+  action.
+- **report.py** renders email items with their channel and DKIM state,
+  and unlinked when no canonical page exists.
+
+**Live result:** 37 items from 9 agencies (U.S. Attorneys 25, Treasury
+5, Agriculture 2, Justice 2, FSIS 1, USCIS 1, USPS OIG 1), 30 with
+canonical citations, DKIM verified 37/37 with every key archived, 36
+messages ignored without their bodies ever leaving the server. 249
+tests passing.
+
+**Open questions / next steps:** activate the email sources once a few
+days of bulletins confirm coverage (gate 3), then wire the poll into
+run_pipeline; the nine pending confirmations still gate HHS, SEC, DHS
+and others.
+
 ## 2026-07-29 16:05 PDT — Email subscriptions confirmed and registered: 30 sources, 11 blocked agencies re-opened
 
 **Context:** The operator completed the manual subscription pass using

@@ -130,6 +130,13 @@ CREATE TABLE IF NOT EXISTS captures (
 CREATE INDEX IF NOT EXISTS idx_captures_document ON captures (document_id, ts_utc);
 CREATE INDEX IF NOT EXISTS idx_captures_ts ON captures (ts_utc);
 
+CREATE TABLE IF NOT EXISTS mailbox_state (
+    mailbox       TEXT PRIMARY KEY,           -- IMAP folder polled
+    uid_validity  INTEGER,                    -- resets invalidate last_uid
+    last_uid      INTEGER NOT NULL DEFAULT 0, -- highest processed UID
+    last_polled_at TEXT
+) WITHOUT ROWID;
+
 CREATE TABLE IF NOT EXISTS feed_state (
     source_id     TEXT PRIMARY KEY,
     etag          TEXT,

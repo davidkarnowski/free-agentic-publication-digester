@@ -3,9 +3,9 @@
 *How FAPD ingests official publications that agencies push by email —
 and how to do the same for your own government's bulletin services.
 Governing rules: GUIDE §3 "Email-distributed sources" and §7 (DKIM
-corroboration), adopted 2026-07-29. Status: the source class is
-codified and this guide is normative for it; the adapter implementation
-follows the design here.*
+corroboration), adopted 2026-07-29. Status: **implemented**
+(`src/fapd/email_sources.py`, `scripts/ingest_email.py`); first live
+ingest 2026-07-29.*
 
 ## 1. Why email is a legitimate source class — arguably the most legitimate
 
@@ -179,6 +179,36 @@ The adapter therefore, per message:
 - **Not a private channel.** Everything ingested is what the publisher
   mass-distributes to any subscriber. FAPD never ingests
   correspondence, replies, or anything addressed to it individually.
+
+## 6a. What the first live run taught us
+
+Two bulletin shapes exist, and the parser must tell them apart — a
+finding from real captured messages, not from planning:
+
+* **Digest bulletins** carry many syndicated releases in one message
+  (one U.S. Attorneys message held sixteen district releases). The
+  platform renders each as ``Title [ url ] MM/DD/YYYY HH:MM AM/PM TZ``
+  in the plain-text part.
+* **Single-release bulletins** carry one article whose body cites other
+  pages.
+
+The date marker is the discriminator: it appears for syndicated items
+and never for a link inside an article's body. The first implementation
+lacked this rule and fabricated items out of inline citations and
+footer links ("Contact us" as a publication). It also risked the worse
+failure of attributing a release to a page it merely linked to, so a
+single-release bulletin now cites an anchor only when that anchor
+plainly refers to the release; otherwise the item carries **no URL and
+the captured message is its source of record**, disclosed as such in
+the digest. A missing citation is honest; a wrong one is not.
+
+Two further rules came out of the same run. Subscription administrivia
+— welcome mail, confirmation notices, preference changes — is counted
+and disclosed but never ingested: it is platform plumbing, not
+government action. And the canonical URL is recovered by **statically
+decoding** the platform's tracking wrapper, which carries the real
+address percent-encoded in its path; following that wrapper would be a
+fetch to the platform and then to a host that may refuse us.
 
 ## 7. For forks: pointing this at your government
 

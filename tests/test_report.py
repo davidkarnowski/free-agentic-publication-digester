@@ -660,3 +660,32 @@ def test_agency_claimed_day_parses_both_forms():
 def test_agency_section_empty_renders_none_line(digest):
     _, md = digest
     assert "No releases dated this day were observed from active" in md
+
+
+def test_email_channel_item_cites_the_captured_bulletin(conn, tmp_path):
+    """Email items disclose their channel and DKIM state; one that names no
+    canonical page renders unlinked rather than citing something unrelated."""
+    now = "2026-07-23T15:00:00Z"
+    for pkg, url in (("PR-treasury-email-aaa", None),
+                     ("PR-fsis-email-bbb", "https://www.fsis.usda.gov/recalls/x")):
+        conn.execute(
+            "INSERT INTO packages (package_id, collection, date_issued,"
+            " last_modified, first_seen_at, fetch_status) VALUES (?, 'AGENCYPR',"
+            " ?, ?, ?, 'fetched')", (pkg, DATE, now, now))
+        conn.execute(
+            "INSERT INTO extracted_texts (package_id, granule_id, collection,"
+            " doc_type, title, agency, metadata, text, char_count, extracted_at,"
+            " extractor_version) VALUES (?, '', 'AGENCYPR', 'PRESS', ?, 'Agency',"
+            " ?, 'body', 4, ?, 1)",
+            (pkg, f"Release for {pkg}",
+             json.dumps({"source_id": "x-email", "url": url, "channel": "email",
+                         "claimed_published_at": "Thu, 23 Jul 2026 09:00:00 +0000",
+                         "dkim": {"result": "pass"}, "mode": "email-full"}), now))
+    conn.commit()
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "agency email bulletin to this project's subscription" in md
+    assert "DKIM-verified" in md
+    assert "the bulletin named no canonical page" in md
+    assert "**[Release for PR-fsis-email-bbb](https://www.fsis.usda.gov/recalls/x)**" in md
+    assert "**Release for PR-treasury-email-aaa**" in md  # unlinked, not [x](None)
+    assert "](None)" not in md

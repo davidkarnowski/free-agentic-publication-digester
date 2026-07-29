@@ -16,6 +16,7 @@ dependencies = [
     "markdown>=3.6",
     "pyyaml>=6.0.3",
     "protego>=0.6.2",
+    "dkimpy>=1.1.8",
 ]
 
 [project.urls]

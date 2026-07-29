@@ -472,7 +472,12 @@ def _agency_lines(conn, date):
         for r in by_agency[agency]:
             meta = r["_meta"]
             claimed = (meta.get("claimed_published_at") or "")[:16]
-            head = f"- **[{_one_line(r['title'])}]({meta.get('url', '')})**"
+            title = _one_line(r["title"])
+            url = meta.get("url")
+            # An email bulletin sometimes carries a release that names no
+            # canonical page. Citing an unrelated link would be worse than
+            # citing none: the captured message is the source of record.
+            head = (f"- **[{title}]({url})**" if url else f"- **{title}**")
             if claimed:
                 head += f" — dated {claimed} by the agency"
             else:
@@ -482,7 +487,16 @@ def _agency_lines(conn, date):
                 "  - Included because: AGENCYPR-SEL-01 — "
                 + RULE_DESCRIPTIONS["AGENCYPR-SEL-01"],
             ]
-            if meta.get("wayback_url"):
+            if meta.get("channel") == "email":
+                dkim = (meta.get("dkim") or {}).get("result")
+                signed = ("DKIM-verified" if dkim == "pass"
+                          else f"DKIM {dkim}" if dkim else "unsigned")
+                lines.append(
+                    "  - Source: agency email bulletin to this project's"
+                    f" subscription, captured and {signed}"
+                    + ("" if url else " (the bulletin named no canonical page)")
+                )
+            elif meta.get("wayback_url"):
                 lines.append(
                     f"  - Source: agency newsroom (above) · "
                     f"[independent archive]({meta['wayback_url']})"
