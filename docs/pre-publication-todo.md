@@ -77,11 +77,23 @@ close (check them off with dates).
   asset_posture), FCC api2 re-probe (504 was possibly transient),
   BLS/ODNI feed-URL reads, USSC activation when its feed populates,
   GovDelivery-pattern probe (FDIC topic feed).
-- [ ] First agency-engagement outreach: pick 2–3 `unavailable` cabinet
-  newsrooms (Treasury, USDA, HHS) and write to their published web/API
-  contacts describing the project and requesting a machine-readable
-  channel; record outcomes in registry notes (GUIDE §3 continued-
-  engagement rule).
+- [ ] **Blocked-source access program** (ranked plan in
+  docs/access-alternatives-research-2026-07-29.md):
+  1. Email-ingestion adapter over GovDelivery — GUIDE amendment (mailbox
+     identity, DKIM verify-and-archive, teaser posture), project mailbox
+     under the public identity, subscribe USTREAS/USSSA/USDOJDEA/USAFAA/
+     HHS first. Broadest coverage per unit effort; DKIM signatures
+     upgrade §7 provenance.
+  2. M-23-22 template letters to the 11 WAF-blocked agencies (quote the
+     "shall permit web scraping … unimpeded" language; offer
+     Friendly-Bots/Web-Bot-Auth verification; cc GSA/TTS Digital.gov);
+     record all outcomes, including silence, in registry notes.
+  3. Web Bot Auth request signing (Ed25519 + /.well-known JWKS on the
+     site) + Cloudflare Verified/Friendly Bots submission; reference in
+     every letter. IETF WG specs due April/August 2026.
+  Interim: Wayback CDX read-path for WAF-403 sources, pre-existing
+  captures only (bright line: never Save-Page-Now-as-proxy), labeled
+  archive-sourced. GUIDE amendments precede each implementation.
 
 ## Done (for the record)
 - [x] 2026-07-29 — Sensitive-content audit of full history: PASS.
