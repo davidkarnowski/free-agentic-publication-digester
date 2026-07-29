@@ -85,6 +85,12 @@ COLLECTIONS = ("CREC", "BILLS", "FR", "USCOURTS", "PLAW")
 USCOURTS_FETCH_WINDOW_DAYS = 7
 
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")
+
+# Project mailbox for email-distributed sources (GUIDE §3 email class;
+# docs/email-sources.md). Credentials live only in .env.
+IMAP_HOST = os.environ.get("IMAP_HOST", "")
+IMAP_USER = os.environ.get("IMAP_USER", "")
+IMAP_PASSWORD = os.environ.get("IMAP_PASSWORD", "")
 USER_AGENT = (f"fapd/0.1 (Free Agentic Publication Digester; personal"
               f" daily-digest research; contact: {CONTACT_EMAIL})")
 
