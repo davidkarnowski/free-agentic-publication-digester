@@ -14,3 +14,8 @@ __pycache__/
 
 # OS
 .DS_Store
+
+# Local research/analysis material (NotebookLM bundles etc.) — never published
+research/
+# Assistant-harness local settings
+.claude/

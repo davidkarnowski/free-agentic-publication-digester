@@ -21,8 +21,13 @@ registry currently spans Tiers 1 and 2. Statuses are honest: alongside
 `active` and `planned`, a source that blocks our honestly-identified
 client is recorded `unavailable` with the observed behavior — that fact
 is itself accountability data, and such a source is never evaded or
-retried into submission. The published [source guide](sources.html)
-renders the full registry.
+retried into submission. It is also not abandoned: every `unavailable`
+verdict feeds a standing engagement effort — searching the publisher's
+own access documentation for doors on other hosts or paths (which alone
+has re-opened several sources), re-probing as sites change, and direct
+outreach to agency web and API teams advocating for machine-readable
+channels. The published [source guide](sources.html) renders the full
+registry, closed doors included.
 
 **Five onboarding gates.** Adding a source is an evaluation, not a URL
 paste: (1) *Registered* — identity, tier, URLs, status `planned`, so the

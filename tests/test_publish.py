@@ -220,6 +220,31 @@ def test_readme_rendered_with_repo_links_rewritten(digests, tmp_path, monkeypatc
     assert 'href="readme.html">Readme</a>' in (out / "2026-07-01.html").read_text()
 
 
+def test_site_base_url_absolutizes_machine_surfaces(digests, tmp_path, monkeypatch):
+    """With SITE_BASE_URL set, sitemap/feed/robots/llms.txt/digests.json emit
+    absolute URLs (sitemaps and robots Sitemap directives require them);
+    unset, everything stays root-relative for local viewing."""
+    from fapd import config
+
+    monkeypatch.setattr(config, "SITE_BASE_URL", "https://example.org")
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    assert "<loc>https://example.org/index.html</loc>" in (out / "sitemap.xml").read_text()
+    assert 'href="https://example.org/2026-07-02.html"' in (out / "feed.xml").read_text()
+    assert "Sitemap: https://example.org/sitemap.xml" in (out / "robots.txt").read_text()
+    llms = (out / "llms.txt").read_text()
+    assert "(https://example.org/digests.json)" in llms
+    assert "](/index.html)" not in llms  # no root-relative leftovers in Core
+    assert '"html": "https://example.org/2026-07-02.html"' in (out / "digests.json").read_text()
+
+    monkeypatch.setattr(config, "SITE_BASE_URL", "")
+    out2 = tmp_path / "site2"
+    publish.build_site(digests, out2)
+    assert "<loc>/index.html</loc>" in (out2 / "sitemap.xml").read_text()
+    assert "Sitemap: /sitemap.xml" in (out2 / "robots.txt").read_text()
+    assert '"html": "2026-07-02.html"' in (out2 / "digests.json").read_text()
+
+
 def test_no_docs_site_degrades_gracefully(digests, tmp_path, monkeypatch):
     from fapd import config
 

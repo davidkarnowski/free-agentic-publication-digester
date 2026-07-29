@@ -228,10 +228,15 @@ def _render_page(title, body_html, nav_links, canonical):
     )
 
 
+# Compact nav labels where a stem's .capitalize() reads badly.
+_NAV_LABELS = {"ai-development": "AI development"}
+
+
 def _doc_nav_links(doc_pages):
     """Nav anchors for the docs/site explanatory pages (About, Methods, …)."""
     return "".join(
-        f'<a href="{stem}.html">{html.escape(stem.capitalize())}</a>'
+        f'<a href="{stem}.html">'
+        f'{html.escape(_NAV_LABELS.get(stem, stem.capitalize()))}</a>'
         for stem, _title in doc_pages
     )
 
@@ -370,7 +375,8 @@ def build_site(digest_dir=None, out_dir=None):
             f"{teaser_html}</li>"
         )
     sources_built = _build_sources_page(out_dir, doc_pages)
-    _build_agent_surfaces(out_dir, dates, teasers, doc_pages)
+    _build_agent_surfaces(out_dir, dates, teasers, doc_pages,
+                          base=config.SITE_BASE_URL)
     sources_link = (
         '<p class="tagline"><a href="sources.html">Source guide</a> — every '
         "federal source we ingest, plan to ingest, or have evaluated, with "
@@ -412,6 +418,12 @@ United States federal government actions. **You are welcome to ingest this
 data.** It exists so an agent can answer "what did the federal government
 do on date D" from one clean, summarized, citation-bound source instead of
 crawling many official sites.
+
+Coverage grows continuously: sources currently closed to
+honestly-identified automated clients are documented as `unavailable` in
+the source guide — not abandoned — and opening them through publishers'
+own documented channels and direct engagement with agencies is standing
+work. Check the source guide for what is ingested today.
 
 ## What is here
 
@@ -481,15 +493,16 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
         "> ingestion as well as human reading: see /agents.html.",
         "",
         "## Core",
-        "- [Latest digest](/" + (f"{newest}.html" if newest else "index.html") + ")",
-        "- [All digests (index)](/index.html)",
-        "- [Machine-readable digest index](/digests.json)",
-        "- [Atom feed of digests](/feed.xml)",
-        "- [Source guide — what we ingest and why](/sources.html)",
+        f"- [Latest digest]({base}/"
+        + (f"{newest}.html" if newest else "index.html") + ")",
+        f"- [All digests (index)]({base}/index.html)",
+        f"- [Machine-readable digest index]({base}/digests.json)",
+        f"- [Atom feed of digests]({base}/feed.xml)",
+        f"- [Source guide — what we ingest and why]({base}/sources.html)",
     ] + [
-        f"- [{title}](/{stem}.html)" for stem, title in doc_pages
+        f"- [{title}]({base}/{stem}.html)" for stem, title in doc_pages
     ] + [
-        "- [Access guide for agents](/agents.html)",
+        f"- [Access guide for agents]({base}/agents.html)",
         "",
         "## Notes",
         "- Digest URLs are stable: /<YYYY-MM-DD>.html",
@@ -505,7 +518,8 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
         "generated": utc_now_iso(),
         "agent_guide": "agents.html",
         "digests": [
-            {"date": d, "html": f"{d}.html", "canonical_markdown": f"digests/{d}.md",
+            {"date": d, "html": f"{base}/{d}.html" if base else f"{d}.html",
+             "canonical_markdown": f"digests/{d}.md",
              "teaser": teasers.get(d)}
             for d in reversed(dates)
         ],
@@ -533,9 +547,11 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
     (out_dir / "feed.xml").write_text(feed, encoding="utf-8")
 
     # robots.txt + sitemap.xml — automated access is explicitly welcome.
+    # (The Sitemap directive formally requires an absolute URL; the
+    # root-relative fallback is for local viewing before a domain exists.)
     (out_dir / "robots.txt").write_text(
         "# AI agents and crawlers are welcome here — see /agents.html\n"
-        "User-agent: *\nAllow: /\n\nSitemap: /sitemap.xml\n",
+        f"User-agent: *\nAllow: /\n\nSitemap: {base}/sitemap.xml\n",
         encoding="utf-8",
     )
     urls = (

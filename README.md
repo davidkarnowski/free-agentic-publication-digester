@@ -105,6 +105,18 @@ measurement, not a claim. Honest statuses matter: a source that blocks
 our honestly-identified client is recorded `unavailable` with the
 observed behavior. That fact is itself published accountability data.
 
+**The closed third — and the standing effort to open it.** A measured
+share of the federal source universe currently refuses
+honestly-identified automated access (the July 2026 probe found 22 of 72
+non-govinfo sources closed behind WAFs or robots disallows). We treat
+that as the project's ongoing engagement agenda, not its boundary:
+publishers' own access documentation keeps revealing doors on other
+hosts and paths (that alone re-opened FCC, Commerce, and NOAA
+candidates); verdicts are re-probed as sites change; and we engage
+agency web and API teams directly to advocate for safe, sane automated
+access to what they already publish for the public. Coverage grows by
+doors opening — never by evasion.
+
 ### Five onboarding gates
 
 No source is ingested on a hunch. Each one is (1) **registered** with
@@ -283,6 +295,17 @@ docs/             schema, research reports, dev notes, how to add sources
 data/             raw archive + SQLite (local, git-ignored)
 tests/
 ```
+
+## How this project is built
+
+FAPD is developed with generative AI — Claude agents writing code,
+running documentation-first source research, and drafting governing
+documents under the operator's direction, with every commit carrying a
+co-author trailer. A project that labels machine-generated prose in its
+digests does not hide its own machine authorship; the full statement,
+including what AI assistance changed about where design attention went,
+is at [docs/site/ai-development.md](docs/site/ai-development.md)
+(published on the site as "How AI Built This").
 
 ## The documents that govern this project
 

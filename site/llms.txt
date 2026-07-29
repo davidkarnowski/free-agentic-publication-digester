@@ -10,6 +10,7 @@
 - [Atom feed of digests](/feed.xml)
 - [Source guide — what we ingest and why](/sources.html)
 - [About this project](/about.html)
+- [How AI Built This](/ai-development.html)
 - [Methods](/methods.html)
 - [Free Agentic Publication Digester (FAPD)](/readme.html)
 - [Access guide for agents](/agents.html)

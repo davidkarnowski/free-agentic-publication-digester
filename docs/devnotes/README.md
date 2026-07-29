@@ -14,3 +14,9 @@ Conventions: one file per arc, dated (`YYYY-MM-DD-slug.md`); written in the
 project's register (GUIDE §2 applies to our own prose — no marketing
 superlatives); real numbers, real URLs, real failures included. Nothing
 private (§9): no local paths, no personal addresses.
+
+Standing theme (2026-07-29): FAPD is built *with* AI agents and *for*
+agentic readers — lean into that symmetry where an arc genuinely shows
+it (agents designing agent surfaces, documentation-first research
+sprints, prompts under version control), per the transparency statement
+in `docs/site/ai-development.md`. Named honestly, never as marketing.

@@ -17,6 +17,59 @@ Entry format:
 
 ---
 
+## 2026-07-29 08:40 PDT — Publication-readiness: audit passed, access-advocacy pillar, AI-transparency page, launch TODO
+
+**Context:** NotebookLM renderings of the project (audio overview +
+briefing doc, archived under research/) prompted a full pre-publication
+review. The operator's key takeaway from the audio: our safety-conscious
+access methods leave significant agency sourcing closed, and our public
+philosophy said nothing about doing anything about it. Second operator
+decision: own the AI-assisted development story openly, with a dedicated
+public page.
+
+**Work performed:**
+- **History audit: PASS.** All 26 commits, blobs, dangling objects,
+  reflog: no personal email, no local paths, no secrets, no databases —
+  the §9 discipline held end to end. Two structural gaps fixed:
+  research/ and .claude/ were ignored only by non-cloneable local
+  mechanisms; both now in tracked .gitignore.
+- **Access-advocacy pillar** (GUIDE §1 + §3 first, then About, Methods,
+  agents surface, README): the closed share of the source universe
+  (22/72 non-govinfo at the 07-26 probe) is the standing engagement
+  agenda — documented-channel research, re-probes, direct agency
+  outreach; `unavailable` records double as the outreach worklist;
+  coverage grows by doors opening, never evasion.
+- **AI-transparency page**: docs/site/ai-development.md → site
+  ("How AI Built This"): the operator/agent division of labor, the
+  past-syntax-toward-intent thesis, built-for-agents/built-with-agents
+  symmetry, and what it does NOT mean. GUIDE §9 records the policy;
+  README points to it; devnotes README carries the standing theme.
+  Worklog stays unrewritten, on principle.
+- **Public-register cleanup**: "operator's call"/"Operator steps"
+  phrasing removed from registry notes that render on sources.html.
+- **SITE_BASE_URL** (config + publish): sitemap <loc>, feed links,
+  robots Sitemap directive, llms.txt links, digests.json html values all
+  absolutize when a domain is set (they formally require absolute URLs);
+  root-relative fallback unchanged for local viewing. Tested both ways.
+- **pyproject**: readme, urls (repo/issues), keywords added; license
+  field deliberately waits on the license decision.
+- **Two documents**: docs/publication-readiness-2026-07-29.md (audit +
+  NotebookLM briefing fact-check: 227 tests not 226; NO token cap exists
+  — measure-first, ~1M is a working figure; 31% = 22/72 @07-26 snapshot,
+  partly superseded; tier/active counts confirmed) and
+  docs/pre-publication-todo.md (launch checklist: license decisions
+  [rec: Apache-2.0 code, CC-BY 4.0 content], domain, Pages + CI
+  workflows, LLM backend swap, scheduling, community files, flip-time
+  edits, STATUS snapshot, probe shortlist, first agency outreach).
+
+**Decisions:** Transparency over curation for the AI narrative; the
+worklog is never retroactively edited. Continued engagement is
+philosophy, not marketing garnish. External-AI misreadings traced to our
+own stale numbers → dated STATUS snapshot queued.
+
+**Open questions / next steps:** the two operator decisions (licenses,
+domain), then the build items in pre-publication-todo.md, then the flip.
+
 ## 2026-07-28 19:20 PDT — Rebrand: Free Agentic Publication Digester (FAPD)
 
 **Context:** Repo pushed to GitHub (private) as

@@ -28,6 +28,20 @@ pipeline's source registry, adapters, and editorial gates are intended to
 be pointable at *any* government's official publication interfaces by
 anyone who forks this codebase for their own jurisdiction.
 
+**Opening the closed sources is standing work (added 2026-07-29).** A
+substantial share of federal publication channels is currently closed to
+honestly-identified automated clients — WAFs, robots disallows, bot
+challenges (the 2026-07-26 probe measured 22 of 72 non-govinfo sources
+closed). We treat that not as a final state but as the project's ongoing
+engagement agenda: keep reading each publisher's own access
+documentation for doors we missed; re-probe on documented channels as
+sites change; and engage agency web and API teams directly through their
+published contact routes to advocate for safe, sane automated access to
+what they already publish for the public. The registry's `unavailable`
+records are simultaneously accountability data and the outreach
+worklist. Coverage is expected to grow continuously after launch — by
+agencies opening doors, never by us picking locks.
+
 Two goals in tension, both mandatory:
 
 1. **Digestible** — summarized and aggregated so the day's most significant
@@ -203,6 +217,17 @@ direct HTML index pages where no feed exists). Governing rules:
   spoofing, no header games. A site that blocks honestly-identified
   automated access is recorded `unavailable` with the observed behavior:
   that fact is itself accountability data.
+- **Continued engagement (added 2026-07-29).** An `unavailable` verdict
+  is a snapshot, not a sentence. For each closed source, the standing
+  playbook is: (1) search the publisher's own access documentation for a
+  door on another host or path (this alone re-opened FCC, Commerce, and
+  NOAA candidates); (2) re-probe when documentation, site redesigns, or
+  time suggest the verdict may be stale; (3) engage the agency directly
+  — webmaster/developer contacts, API feedback addresses, GovDelivery
+  teams — to request or encourage a machine-readable channel, always as
+  an identified project with a stated public-interest purpose. Outcomes,
+  including refusals, are recorded in the registry notes. §1's rule
+  governs throughout: coverage grows by doors opening, never by evasion.
 - **Mutable-source disclosure.** Unlike the GPO record, agency web content
   can be edited or removed without notice. Digest sections built on this
   class carry a standing disclosure, and §7 (Provenance) governs how
@@ -592,6 +617,19 @@ Mechanics:
 
 This repo may be published on GitHub at any time. Everything committed is
 written as if it were already public:
+
+- **How this project is built is itself public (decided 2026-07-29).**
+  FAPD is developed with generative AI (Claude agents; every commit
+  carries a co-author trailer), and we say so plainly rather than
+  scrubbing the worklog: a project whose editorial code requires labeling
+  machine-generated prose does not hide its own machine authorship. The
+  full statement — including the working thesis that AI assistance let
+  design attention go to content and intent (editorial rules, provenance,
+  access ethics) rather than syntax, and how building *for* agentic
+  readers informed building *with* agents — lives in
+  `docs/site/ai-development.md`, published on the site. The worklog's
+  development narrative is part of that transparency and is never
+  retroactively curated.
 
 - **No personal details in tracked files.** Real email addresses, names,
   account identifiers, and machine hostnames live only in `.env` (git-ignored)

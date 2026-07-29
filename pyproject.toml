@@ -2,8 +2,10 @@
 name = "fapd"
 version = "0.1.0"
 description = "Automated, cited, opinion-agnostic daily digest of official US government publications"
+readme = "README.md"
 authors = [{ name = "David D. Karnowski" }]
 requires-python = ">=3.12"
+keywords = ["government", "digest", "govinfo", "civic-tech", "ai-agents", "provenance"]
 dependencies = [
     "requests>=2.32",
     "python-dotenv>=1.0",
@@ -13,6 +15,11 @@ dependencies = [
     "pyyaml>=6.0.3",
     "protego>=0.6.2",
 ]
+
+[project.urls]
+Homepage = "https://github.com/davidkarnowski/free-agentic-publication-digester"
+Repository = "https://github.com/davidkarnowski/free-agentic-publication-digester"
+Issues = "https://github.com/davidkarnowski/free-agentic-publication-digester/issues"
 
 [dependency-groups]
 dev = [

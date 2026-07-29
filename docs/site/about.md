@@ -20,6 +20,17 @@ This project uncovers nothing: it makes what is already published easier
 to find, read, verify, and (for AI agents) ingest. Primary sources are
 the ground truth; news coverage and commentary are never ingested.
 
+Not every official channel is open to us yet. A substantial share of
+agency websites currently block or challenge honestly-identified
+automated readers, and we never evade that — each closed source is
+recorded publicly as `unavailable`, which makes the registry both an
+accountability record and our standing outreach list. Opening those
+doors is continuing work: we keep reading publishers' own access
+documentation for channels we missed, re-probe as sites change, and
+engage agency web and API teams directly to advocate for safe, sane
+automated access to what they already publish. Coverage grows as doors
+open — never by picking locks.
+
 The design generalizes. The source registry, adapters, and editorial
 gates are jurisdiction-neutral by design and can be pointed at any
 government's official publication interfaces by anyone who forks the
