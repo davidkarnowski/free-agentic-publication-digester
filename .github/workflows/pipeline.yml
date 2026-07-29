@@ -1,0 +1,62 @@
+# Daily pipeline — GH-native runtime EVALUATION SKELETON (gh-native branch).
+# Status: pre-API-backend. Build backlog (docs/gh-native-plan.md):
+#   1. AnthropicBackend in llm.py   2. run-summary emitter
+#   3. state upload step            4. evidence-commit step (bot identity)
+# Until those land, this workflow only proves: checkout, deps, state
+# restore, and a budget-enforced list-only sync on a hosted runner (T3).
+
+name: Daily pipeline (evaluation)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "list-only (dry) or full (requires API backend — not yet built)"
+        type: choice
+        options: [list-only]
+        default: list-only
+
+concurrency:
+  group: fapd-pipeline
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Restore pipeline state from rolling release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p data
+          if gh release download pipeline-state --pattern '*.zst' --dir data 2>/dev/null; then
+            for f in data/*.zst; do zstd -d --rm "$f"; done
+            echo "state restored:" && ls -la data/
+          else
+            echo "no pipeline-state release yet (T2 seeding pending) — starting stateless"
+          fi
+
+      - name: List-only sync (budget-enforced, no downloads)
+        env:
+          GOVINFO_API_KEY: ${{ secrets.GOVINFO_API_KEY }}
+          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+        run: |
+          if [ -z "$GOVINFO_API_KEY" ]; then
+            echo "GOVINFO_API_KEY secret not configured — skipping live sync (CI-only smoke)"
+            exit 0
+          fi
+          uv run python scripts/sync.py --list-only --verbose
+
+      - name: Footprint report
+        run: |
+          if [ -f data/fetch_log.db ]; then uv run python scripts/audit.py; fi
+
+      # TODO (backlog 3): zstd + `gh release upload --clobber` the state back
+      # TODO (backlog 4): commit evidence (digests/manifests/run-summary) as
+      #   fapd-pipeline <noreply@github.com> — only after full runs exist
