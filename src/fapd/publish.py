@@ -249,30 +249,59 @@ def _nav_for(dates, i, doc_pages=()):
     return "".join(links)
 
 
+# README → site link rewriting: repo-relative links that have a site
+# equivalent are pointed at it; the rest degrade to plain code text (the
+# canonical footer names the repo file, and the repo is not yet public).
+_README_LINK_REWRITES = (
+    (re.compile(r"\]\(digests/(\d{4}-\d{2}-\d{2})\.md\)"), r"](\1.html)"),
+    (re.compile(r"\]\(site/\)"), r"](index.html)"),
+    (re.compile(r"\]\(site/([A-Za-z0-9_.-]+)\)"), r"](\1)"),
+    (re.compile(r"\]\(SOURCES\.md\)"), r"](sources.html)"),
+)
+_README_PLAIN_LINK = re.compile(
+    r"\[([^\]]+)\]\((?!https?://|#|[a-z0-9-]+\.html\b|llms\.txt|digests\.json"
+    r"|feed\.xml)[^)]+\)"
+)
+
+
+def _rewrite_readme_links(md_text):
+    for pattern, repl in _README_LINK_REWRITES:
+        md_text = pattern.sub(repl, md_text)
+    return _README_PLAIN_LINK.sub(r"`\1`", md_text)
+
+
 def _build_doc_pages(out_dir):
-    """Render every docs/site/*.md explanatory page (About, Methods, …) to
-    site/<stem>.html. Returns a sorted list of (stem, title) for pages built;
-    an absent docs/site directory simply yields no pages."""
-    doc_dir = config.PROJECT_ROOT / "docs" / "site"
-    if not doc_dir.is_dir():
-        return []
+    """Render every docs/site/*.md explanatory page (About, Methods, …) plus
+    the repo-root README (as readme.html, repo links rewritten to their site
+    equivalents) to site/<stem>.html. Returns a sorted list of (stem, title)
+    for pages built; absent sources simply yield no pages."""
     docs = []
-    for path in sorted(doc_dir.glob("*.md"), key=lambda p: p.stem):
-        md_text = path.read_text(encoding="utf-8")
+    doc_dir = config.PROJECT_ROOT / "docs" / "site"
+    if doc_dir.is_dir():
+        for path in sorted(doc_dir.glob("*.md"), key=lambda p: p.stem):
+            md_text = path.read_text(encoding="utf-8")
+            match = _H1_RE.search(md_text)
+            title = match.group(1) if match else path.stem.capitalize()
+            docs.append((md_text, path.stem, title, f"docs/site/{path.name}"))
+    readme = config.PROJECT_ROOT / "README.md"
+    if readme.exists():
+        md_text = _rewrite_readme_links(readme.read_text(encoding="utf-8"))
         match = _H1_RE.search(md_text)
-        title = match.group(1) if match else path.stem.capitalize()
-        docs.append((path, md_text, path.stem, title))
-    doc_pages = [(stem, title) for _p, _t, stem, title in docs]
-    for path, md_text, stem, title in docs:
+        title = match.group(1) if match else "README"
+        docs.append((md_text, "readme", title, "README.md"))
+    doc_pages = [(stem, title) for _t, stem, title, _c in docs]
+    brand = SITE_TITLE.split(" — ")[0]
+    for md_text, stem, title, canonical in docs:
         _MD.reset()
         body = _MD.convert(md_text)
         page = _render_page(
-            f"{title} — {SITE_TITLE}",
+            # No brand suffix when the page title already carries it (README)
+            title if brand in title else f"{title} — {SITE_TITLE}",
             body,
             '<a href="index.html">All digests</a><a href="sources.html">Sources</a>'
             + _doc_nav_links(p for p in doc_pages if p[0] != stem)
             + '<a href="agents.html">For agents</a>',
-            f"docs/site/{path.name}",
+            canonical,
         )
         (out_dir / f"{stem}.html").write_text(page, encoding="utf-8")
     return doc_pages

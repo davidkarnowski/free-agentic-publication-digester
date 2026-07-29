@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Agentic Publication Digester (FAPD)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <nav>
+    <a class="brand" href="index.html">FAPD</a>
+    <span class="nav-links"><a href="index.html">All digests</a><a href="sources.html">Sources</a><a href="about.html">About</a><a href="methods.html">Methods</a><a href="agents.html">For agents</a></span>
+  </nav>
+</header>
+<main>
+<h1 id="free-agentic-publication-digester-fapd">Free Agentic Publication Digester (FAPD)</h1>
+<p>FAPD is an automated pipeline that reads the official publications of the
+United States federal government — congressional floor proceedings, bills,
+the Federal Register, enacted laws, federal court opinions, and agency
+press releases — and produces a <strong>daily, cited, opinion-agnostic digest</strong>
+for two readerships at once: <strong>people, and AI agents</strong> researching what
+the federal government actually did on a given day.</p>
+<p>Every digest covers one publication day across all three branches. Every
+item carries a citation to the official record and names the mechanical
+rule that selected it. Everything not summarized is counted. Nothing is
+silently omitted.</p>
+<hr />
+<h2 id="philosophy">Philosophy</h2>
+<h3 id="built-exclusively-on-the-official-record">Built exclusively on the official record</h3>
+<p>Everything here derives from official government publications — the
+record a government produces <em>precisely in order to make it public</em>.
+Congress prints its proceedings; agencies publish their rules and
+announcements; courts post their opinions. FAPD uncovers nothing: it
+takes what is already published and makes it easier to find, read,
+verify, and — for AI agents — ingest. Primary sources are the ground
+truth. News coverage and commentary are never ingested, never consulted,
+never cited.</p>
+<p>This is why the project is legitimate infrastructure rather than
+scraping-as-adversarial-sport: the pipeline consumes only the channels
+governments built for the purpose of being read, identifies itself
+honestly on every request, and treats a refusal as an answer. A
+government that publishes its actions has already voted for this kind of
+reader to exist.</p>
+<h3 id="two-commitments-held-in-tension">Two commitments, held in tension</h3>
+<ol>
+<li><strong>Digestible</strong> — one person should be able to absorb the day's
+   significant official activity in one sitting.</li>
+<li><strong>Faithful</strong> — no summary without a citation; nothing significant
+   silently dropped; no editorial spin, ever.</li>
+</ol>
+<p>Summarization is where bias creeps in, so the tension is resolved by
+machinery, not judgment calls:</p>
+<ul>
+<li><strong>Mechanical, party-blind selection.</strong> What appears in a digest is
+  decided by coded, versioned rules — floor time consumed, recorded
+  votes taken, regulatory economic-significance designations, stage of
+  process — never by subject-matter preference. Every listed item states
+  its rule inline ("Included because: …").</li>
+<li><strong>A citation on every item</strong>, linking to the official govinfo package
+  or the originating agency document.</li>
+<li><strong>A mandatory Coverage Statement</strong> closing every digest: what was
+  published that day, what was summarized, what was deliberately not,
+  with counts that must reconcile arithmetically against the database.</li>
+<li><strong>Labeled model layers.</strong> All model-generated text is labeled in place
+  and linted against a banned lexicon of loaded adjectives and motive
+  attribution. Official text quoted verbatim is identified as such.</li>
+</ul>
+<p>A digest that fails any validation check — a citation that doesn't
+resolve, coverage arithmetic that doesn't reconcile, a banned term in our
+prose, a missing inclusion rule — <strong>is not published</strong>. There is no
+override.</p>
+<h3 id="a-publishing-house-for-humans-and-agents">A publishing house for humans <em>and</em> agents</h3>
+<p>AI agents answering "what did the federal government do on date D?" today
+either crawl official sites themselves (multiplying load on public
+infrastructure) or lean on secondhand coverage. FAPD offers a third path:
+one disciplined, identified, budgeted crawler reads the record once, and
+agents ingest the summarized, cited, coverage-accounted result — stable
+URLs, <a href="llms.txt"><code>llms.txt</code></a>, a machine-readable digest index, an
+Atom feed, and provenance manifests with SHA-256 records for verifying
+captured content.</p>
+<p>One ask travels with the data: <strong>for claims, cite the underlying official
+source</strong> (each item carries its govinfo ID or agency URL); cite this
+project for the aggregation. The digest is a route to the record, never a
+replacement for it.</p>
+<h3 id="forkable-by-design">Forkable by design</h3>
+<p>The editorial gates, provenance model, access discipline, and adapter
+seam are jurisdiction-neutral. Pointing the codebase at another
+government's official publication interfaces means replacing the source
+registry and the parsers — not the rules. See
+<code>docs/adding-sources.md</code>.</p>
+<hr />
+<h2 id="how-the-digester-obtains-content">How the digester obtains content</h2>
+<p>The acquisition layer is a set of automated agents with one governing
+principle: <strong>we are guests on public infrastructure</strong>, and every rule
+below is enforced in code, not by operator discipline.</p>
+<h3 id="the-source-registry-is-the-scope-authority">The source registry is the scope authority</h3>
+<p><code>sources/registry.yaml</code> (rendered as
+<a href="sources.html">SOURCES.md</a>) records every federal source ingested, planned,
+evaluated-and-excluded, or found unavailable — currently 97 sources
+across a tiered universe, so "how comprehensive is coverage?" is a
+measurement, not a claim. Honest statuses matter: a source that blocks
+our honestly-identified client is recorded <code>unavailable</code> with the
+observed behavior. That fact is itself published accountability data.</p>
+<h3 id="five-onboarding-gates">Five onboarding gates</h3>
+<p>No source is ingested on a hunch. Each one is (1) <strong>registered</strong> with
+identity, tier, and URLs; (2) <strong>probed</strong> end-to-end through the
+identified client — robots verdict, fetch with provenance capture, feed
+detection, item inventory, sample extraction; (3) <strong>content-evaluated</strong> —
+what does this source publish in total, and what fraction will ingestion
+see? Under-coverage is disclosed at onboarding, not discovered later;
+(4) <strong>activated</strong> into ingestion and coverage accounting; (5)
+<strong>re-evaluated</strong> on failures or redesigns. Documentation research
+precedes probing: the publisher's own developer pages, API docs, and
+feed directories say which door they built — and reading the sign on the
+front door has repeatedly beaten guessing (documented feeds that HTML
+autodiscovery misses; APIs on hosts a newsroom WAF never touches).</p>
+<h3 id="source-adapters-and-the-access-hierarchy">Source adapters and the access hierarchy</h3>
+<p>Real publication interfaces are irregular — feeds without stable IDs,
+article pages that challenge sustained automated access, content behind
+script-only redirects. That irregularity is absorbed at one seam: a
+<strong>source adapter</strong> owns exactly four decisions (what makes two sightings
+the same document; whether to fetch full articles or feed metadata only;
+how served bytes become text; what to store when no article is
+available), while the shared loop owns everything that must never vary —
+conditional requests, robots enforcement, budgets, capture, storage.</p>
+<p>Adapters reach for access in a fixed order:</p>
+<ol>
+<li><strong>Directed programmatic access</strong> — the API, bulk-data service, or
+   feed the agency itself publishes for machines. Always preferred: it
+   is the channel the publisher built for exactly this.</li>
+<li><strong>Basic web access</strong> — the same HTML a citizen reads, through the
+   robots-enforcing client, only where no directed channel exists.</li>
+<li><strong>Never impersonation.</strong> No browser user-agent spoofing, no script
+   execution, no WAF or bot-check circumvention — ever. Parsing
+   structured data a server chose to send us is legitimate; pretending
+   to be something we are not is not. When justice.gov answered
+   sustained article fetching with bot-challenge interstitials, the
+   response was to stop fetching articles and disclose the degraded
+   mode per item — not to solve the challenge.</li>
+</ol>
+<h3 id="politeness-is-a-promise-made-to-each-server-individually">Politeness is a promise made to each server individually</h3>
+<ul>
+<li><strong>Paced:</strong> at most 1 request/second sustained <em>per host</em> — and a
+  host's robots.txt crawl-delay overrides that downward. When gao.gov
+  asked for one request per 420 seconds, it got exactly that; the answer
+  to the resulting slowness was <em>fewer requests</em> (its feed's rich
+  official summaries), never faster ones.</li>
+<li><strong>Concurrent across hosts only:</strong> ingestion polls distinct hosts in
+  parallel, each worker with its own pacing clock, so no server waits
+  behind another's promises — and no server ever sees more than it would
+  if it were our only source.</li>
+<li><strong>Budgeted:</strong> hard daily request caps per source class, enforced by
+  the client itself, which refuses to exceed them mid-run.</li>
+<li><strong>Logged, twice:</strong> every outbound request lands in a queryable fetch
+  log written by the HTTP client (nothing can bypass it) and in a
+  human-readable daily access narrative. <code>scripts/audit.py</code> reports the
+  footprint at any time.</li>
+<li><strong>Identified:</strong> a descriptive User-Agent with a contact address, on
+  every request, to every server.</li>
+</ul>
+<h3 id="provenance-for-a-record-that-can-change">Provenance for a record that can change</h3>
+<p>GPO's record is stable; agency web content can be edited or removed
+without notice. So every capture is preserved under a two-hash strategy —
+<code>content_sha256</code> over the exact served bytes (the evidentiary hash,
+stored content-addressed) and <code>text_sha256</code> over normalized text (the
+change signal) — and every fetch <em>attempt</em>, including errors and robots
+refusals, is exported to a daily manifest committed to this repository.
+Each manifest chains to the previous day's by hash, so deletion or
+reordering of days is detectable from the files alone. New captures are
+additionally submitted to the Internet Archive's Wayback Machine as an
+independent second witness, within a budget, best-effort. A source's
+claimed publication date and the time we first observed it are always
+stored separately: the claimed date is the agency's assertion, our
+observation is the audit trail. What the hashes prove — and what they
+don't — is stated in full in <code>PROVENANCE.md</code>.</p>
+<hr />
+<h2 id="inference-exactly-where-models-are-used-and-where-they-are-not">Inference: exactly where models are used, and where they are not</h2>
+<p><strong>Mechanical work is code.</strong> Selection, counts, stage groupings, the
+entire Coverage Statement — zero model involvement, reproducible from
+versioned rules. An LLM call that could have been a SQL query is treated
+as a bug.</p>
+<p><strong>Official summaries come first.</strong> Federal Register agency abstracts,
+the Congressional Record's own Daily Digest, official bill titles and
+stages, court syllabi — used verbatim, identified as official text, at
+zero inference cost. Models write only what the record does not already
+summarize.</p>
+<p><strong>Three model layers, independently versioned</strong> (iterating on one never
+regenerates another):</p>
+<ol>
+<li><strong>Item summaries</strong> — for selected documents lacking an official
+   summary; generated from extracted source text, stored durably, always
+   cited.</li>
+<li><strong>Plain-speak restatements</strong> — one "In plain terms" sentence per
+   item, derived <em>only</em> from the stored summary sitting directly above
+   it, so a reader can check the interpretation against the official
+   text in place. It adds no facts and no significance judgments. It is
+   labeled interpretation, and an item whose restatement fails
+   validation simply renders without one.</li>
+<li><strong>Day and section syntheses</strong> — the "Day in Review" and per-section
+   quick-reads, composed from stored summaries and mechanical counts,
+   under the strictest scrutiny.</li>
+</ol>
+<p><strong>The banned-lexicon gate</strong> scans all generated prose against a coded
+list of loaded adjectives ("landmark", "controversial", "sweeping"…) and
+motive attribution ("in an attempt to…"). Verbatim official text and
+citation URLs are masked first — the gate polices <em>our</em> language, not
+the government's. A match blocks publication.</p>
+<p><strong>In transformation, models are the secondary tool.</strong> Turning source
+data into pipeline records is deterministic first — feed fields,
+embedded structured data, official metadata. Model inference is reserved
+for what programmatic shaping genuinely cannot recover, and is then
+budgeted, ledgered per token, prompt-versioned, and marked model-derived
+in metadata — never laundered into fields that read as source-provided.</p>
+<hr />
+<h2 id="the-digest">The digest</h2>
+<p>One Markdown document per publication day (the canonical artifact;
+the <a href="index.html">static site</a> is a derived presentation): a clickable table
+of contents, the Day in Review, numbered sections for floor activity,
+legislation, the Federal Register, enacted laws, judicial activity, and
+agency announcements (listed only when the <em>agency itself</em> dates the
+release on the digest day — backfill is disclosed and counted, never
+passed off as news), per-item citations and inclusion rules, plain-speak
+lines under their official counterparts, a glossary, the Coverage
+Statement, and a methodology footer. Sample:
+<a href="2026-07-28.html">digests/2026-07-28.md</a>.</p>
+<hr />
+<h2 id="setup">Setup</h2>
+<p><code>sh
+uv sync                                # install dependencies into .venv
+cp .env.example .env                   # then paste your api.data.gov key
+uv run python scripts/verify_key.py    # one-request sanity check</code></p>
+<p>Get a free API key at https://api.data.gov/signup/ (emailed instantly).</p>
+<h2 id="daily-operation">Daily operation</h2>
+<p><code>sh
+uv run python scripts/run_pipeline.py  # sync → ingest → extract → analyze → digest
+uv run python scripts/sync.py          # govinfo delta sync only
+uv run python scripts/ingest_agencies.py --verbose   # agency newsrooms only
+uv run python scripts/digest.py --date YYYY-MM-DD    # (re)render one digest
+uv run python scripts/build_site.py    # digests/*.md -&gt; site/ (static HTML)
+uv run python scripts/audit.py         # our server footprint, from the fetch log</code></p>
+<p>Sync is watermark-based (only changes since the last run are listed) and
+rate-limited per <code>GUIDE.md</code> §4. A first run with no watermark
+is date-bounded; deeper history comes from govinfo's bulk-data service,
+never the API.</p>
+<h2 id="layout">Layout</h2>
+<p><code>src/fapd/         pipeline code (fetch → extract → analyze → report → publish)
+sources/          registry.yaml — the source universe and its statuses
+scripts/          operational entry points
+provenance/       committed daily manifests (hash-chained)
+digests/          generated daily digests (committed, canonical)
+site/             derived static site (human pages + agent surfaces)
+docs/             schema, research reports, dev notes, how to add sources
+data/             raw archive + SQLite (local, git-ignored)
+tests/</code></p>
+<h2 id="the-documents-that-govern-this-project">The documents that govern this project</h2>
+<ul>
+<li><strong><code>GUIDE.md</code></strong> — the governing document: mission, editorial
+  principles, source classes, respectful-access policy, token economics,
+  provenance threat model, roadmap. Changes to it precede implementation.</li>
+<li><strong><a href="sources.html">SOURCES.md</a></strong> — the living source guide (generated).</li>
+<li><strong><code>PROVENANCE.md</code></strong> — what our capture hashes prove,
+  and honestly, what they do not.</li>
+<li><strong><code>docs/adding-sources.md</code></strong> — onboarding a new
+  source, writing an adapter, or pointing FAPD at another government.</li>
+<li><strong><code>docs/devnotes/</code></strong> — narrative engineering notes:
+  how the digester came to work the way it does.</li>
+<li><strong><code>WORKLOG.md</code></strong> — the timestamped record of every work
+  session. (Entries before 2026-07-28 use the project's working title,
+  "Information Intelligence" — preserved, not rewritten.)</li>
+</ul>
+</main>
+<footer class="site-footer">
+  <p>Generated 2026-07-29T02:23:49Z (UTC). Canonical source:
+  <code>README.md</code> in the repository. Selection is mechanical and
+  every item cites its official source; methodology in
+  <code>GUIDE.md</code> §2.</p>
+</footer>
+</body>
+</html>

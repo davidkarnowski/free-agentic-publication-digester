@@ -189,6 +189,37 @@ def test_llms_and_sitemap_include_doc_pages(digests, tmp_path):
     assert "/about.html" in sitemap and "/methods.html" in sitemap
 
 
+def test_readme_rendered_with_repo_links_rewritten(digests, tmp_path, monkeypatch):
+    """The repo-root README renders as readme.html: links with site
+    equivalents are rewritten; repo-only file links degrade to code text."""
+    from fapd import config
+
+    root = tmp_path / "root"
+    root.mkdir()
+    (root / "README.md").write_text(
+        "# Free Agentic Publication Digester (FAPD)\n\n"
+        "See [GUIDE.md](GUIDE.md), the [source guide](SOURCES.md),\n"
+        "[`llms.txt`](site/llms.txt), the [static site](site/), and\n"
+        "[digests/2026-07-01.md](digests/2026-07-01.md).\n"
+        "External: [api.data.gov](https://api.data.gov/signup/).\n"
+    )
+    monkeypatch.setattr(config, "PROJECT_ROOT", root)
+    out = tmp_path / "site"
+    stats = publish.build_site(digests, out)
+    assert stats["doc_pages"] == 1
+    page = (out / "readme.html").read_text()
+    assert "<title>Free Agentic Publication Digester (FAPD)" in page
+    assert 'href="sources.html"' in page          # SOURCES.md -> site page
+    assert 'href="llms.txt"' in page              # site/llms.txt -> local
+    assert 'href="index.html"' in page            # site/ -> index
+    assert 'href="2026-07-01.html"' in page       # digest md -> digest page
+    assert 'href="https://api.data.gov/signup/"' in page  # external kept
+    assert 'href="GUIDE.md"' not in page          # repo-only: not a dead link
+    assert "<code>GUIDE.md</code>" in page        # ...but still named
+    assert "README.md" in page                    # canonical-source footer
+    assert 'href="readme.html">Readme</a>' in (out / "2026-07-01.html").read_text()
+
+
 def test_no_docs_site_degrades_gracefully(digests, tmp_path, monkeypatch):
     from fapd import config
 

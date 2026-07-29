@@ -11,6 +11,7 @@
 - [Source guide — what we ingest and why](/sources.html)
 - [About this project](/about.html)
 - [Methods](/methods.html)
+- [Free Agentic Publication Digester (FAPD)](/readme.html)
 - [Access guide for agents](/agents.html)
 
 ## Notes
