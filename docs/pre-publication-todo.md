@@ -96,9 +96,14 @@ close (check them off with dates).
   are .gov pages): adopt the four GUIDE amendments (commercial-platform
   mirrors rule, Digital Registry verification, signal-class sources,
   ASR ≠ official text), then probe/register the GovTranscript pages
-  (state.gov briefings feed, whitehouse.gov, war.gov transcripts) and
-  build the Touchpoints Digital-Registry verifier (api.data.gov key we
-  already hold).
+  (state.gov briefings feed, whitehouse.gov, war.gov transcripts).
+  Digital-Registry verifier CORRECTED 2026-07-29 after hands-on check:
+  the Touchpoints API requires a federal-affiliated account
+  (source-verified) — no public read path exists. Replaced by (a) an
+  engagement letter to feedback-analytics@gsa.gov requesting public
+  read/export of the registry, and (b) the interim standard: official
+  social accounts verified against the agency's own .gov social
+  directory page, evidenced per registration.
 - [ ] **Blocked-source access program** (ranked plan in
   docs/access-alternatives-research-2026-07-29.md):
   1. Email-ingestion adapter over GovDelivery — ~~GUIDE amendment~~

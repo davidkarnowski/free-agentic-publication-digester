@@ -81,16 +81,49 @@ transcripts) are verbatim-eligible.
 | Courts | supremecourt.gov argument transcripts (same-day, documented) | registered |
 | Agency webcasts | newsroom/transcript pages; YouTube copies mirror events whose text already flows to us | existing classes |
 
-## Bonus find: programmatic official-account verification
+## Official-account verification via the U.S. Digital Registry — corrected 2026-07-29 (hands-on)
 
-The U.S. Digital Registry lives on as **Touchpoints**
-(touchpoints.app.cloud.gov/registry; public search UI deprecated, API
-alive): `GET /api/v1/digital_service_accounts` at api.gsa.gov —
-authenticated with the **same api.data.gov key family FAPD already
-holds**. Government-operated, purpose-built, open source: rung-1
-verification that a social account is officially federal, prerequisite
-for any future social-platform source class (also useful for the open
-Flickr question).
+The registry lives on inside **Touchpoints** and its *data model* is
+exactly the vetting infrastructure we'd want (verified from the open
+GSA/touchpoints source code):
+
+- `GET /api/v1/digital_service_accounts` exists (routes.rb), paginated
+  (size ≤ 500), and **serves only `published` accounts** — entries pass
+  a created → submitted → published → archived review lifecycle with
+  agency sponsorship before the API exposes them.
+- Per-account fields (serializer): name, sponsoring **agencies**,
+  contacts, `service` (a **validated 32-platform enum**: youtube,
+  facebook, instagram, twitter, flickr, mastodon, github, vimeo,
+  medium, threads, linkedin, …), unique `service_url`, language,
+  status, descriptions, tags.
+
+**But access is closed to the public** — corrected after a hands-on
+check: our api.data.gov key was rejected, and the source settles why
+(`ApiController#set_current_user`: the key must resolve via
+`User.find_by_api_key` to a registered **Touchpoints user**, and
+Touchpoints accounts are federal employees/contractors only; the
+current api-overview page states "The Touchpoints API has no
+public-facing endpoints" — the GitHub wiki's public-endpoints note is
+stale). The public search UI was separately deprecated 2024-09-19,
+which currently leaves **no public read path** to the registry at all.
+
+**Consequences:**
+1. The registry becomes an **engagement target**, not a dependency:
+   write to feedback-analytics@gsa.gov (the deprecation page's own
+   direction) requesting public read access or a periodic export —
+   public-domain government data describing *official public accounts*
+   with no visible reason to be closed; a natural first
+   M-23-22-adjacent letter, and its outcome is accountability data
+   either way.
+2. **Interim verification standard:** a social account qualifies as
+   official only if listed on the agency's own .gov site (a
+   social-media/connect directory page) — rung-2, consent-clean,
+   evidenced per registration in the registry notes.
+3. Platform note from the enum: **mastodon** is a registered platform
+   class — official Mastodon-instance accounts expose open APIs and
+   per-account RSS with no ToS fence, making them the one social
+   platform that is plausibly rung-1 ingestible under existing rules.
+   Worth a future look, separately from the YouTube question.
 
 ## What to build (and not)
 
