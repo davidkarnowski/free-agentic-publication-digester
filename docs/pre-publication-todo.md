@@ -36,16 +36,24 @@ close (check them off with dates).
   backend behind the existing interface (the `claude` CLI binds runs to
   the local machine/subscription and cannot run hosted). Blocks any
   hosted scheduling; local scheduling does not need it.
-- [ ] **Daily scheduling** with overlap guard. Recommended shape
-  (2026-07-29): a **self-hosted GitHub Actions runner** on the operator
-  machine — GH provides cron/logs/run-history, execution stays local
-  (local DBs = state, local .env, local claude CLI, and our stable IP
-  identity, which shared hosted-runner IPs would undermine with gov
-  WAFs). Hosted runners suit only stateless stages: the email-adapter
-  poll (IMAP creds in Actions secrets; mailbox \Seen/UID state lives
-  server-side) and site deploy could go hosted early; gov-crawling and
-  LLM stages stay local until the API-backend swap and a state-store
-  decision. Open since Phase 1.
+- [ ] **Daily scheduling** with overlap guard. Chosen shape
+  (operator, 2026-07-29): **self-hosted GitHub Actions runner in a
+  Docker container on a VPS** — overnight runs, persistent data/ volume
+  as state, and a consistent public IPv4 that doubles as identity
+  infrastructure: set **reverse DNS** on the address (rDNS + stable UA +
+  published IP is exactly what verified-bot programs and M-23-22
+  letters want; publish the crawler IP/UA on the agents page like
+  search engines do). LLM stage on the VPS: claude CLI headless with a
+  long-lived token works, but the API backend is cleaner unattended.
+  **Security requirement — runner never attaches to the public repo**
+  (GitHub warns fork PRs can execute on self-hosted runners): create a
+  separate private ops repo (fapd-ops) holding the scheduled workflows;
+  the runner registers only there; jobs check out the public repo and
+  push digests/manifests back. Public repo gets hosted-runner CI + site
+  deploy only. Caveats: datacenter-ASN IP reputation (check blacklists
+  before settling; Web Bot Auth signing is the long-term mitigation);
+  VPS hardening becomes part of the accountability story (.env and
+  mailbox credentials live there). Open since Phase 1.
 
 ### Community files
 - [ ] `SECURITY.md` — contact route (hustleyourcity address), what's in
