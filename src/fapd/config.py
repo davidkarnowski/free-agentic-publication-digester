@@ -73,6 +73,12 @@ COMPOSE_PROMPT_VERSION = 2
 SECTION_PROMPT_VERSION = 1
 PLAIN_MODEL = MAP_MODEL  # restatement is compression work — cheap tier
 MAX_PLAIN_BATCH_ITEMS = 25  # inputs are stored summaries (~170 tokens each)
+# Retries escalate isolation in groups before falling back to one call per
+# item. Every call re-pays the backend's fixed prompt overhead (~25K tokens),
+# so retrying singly is the expensive path: measured 2026-07-29, 25
+# single-item plain retries cost 645,778 input tokens — 42% of that day's
+# spend — to recover items the first pass had merely truncated away.
+MAX_RETRY_BATCH_ITEMS = 5
 LLM_TIMEOUT = 300  # seconds per call
 
 # GUIDE.md §3: scope. Order is sync order. USCOURTS added 2026-07-25 (J1).

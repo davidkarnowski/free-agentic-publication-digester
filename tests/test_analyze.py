@@ -290,27 +290,34 @@ def test_idempotent_rerun_makes_zero_llm_calls(conn):
     assert conn.execute("SELECT COUNT(*) FROM summaries").fetchone()[0] == 13
 
 
-def test_missing_key_retried_once_in_single_item_call(conn):
+def test_missing_item_recovered_by_a_group_retry(conn):
+    """Missing items are retried in a group first — one call, not one per
+    item. Every call re-pays the backend's fixed prompt overhead, so
+    single-item retries are the expensive last resort, not the first move."""
     k1, k2 = seed_two_llm_items(conn)
     fake = FakeLLM(scripted=[json.dumps({k1: "Summary one."})])  # k2 missing
     stats = analyze.run(conn, fake, DATE)
-    assert fake.purposes == ["map:batch1", "map:retry"]
+    assert fake.purposes == ["map:batch1", "map:retry-group"]
     assert k2.split("|")[1] in fake.prompts[1]  # retry carries the missing item
     assert stats["llm_summarized"] == 2
     assert stats["llm_calls"] == 2
     assert stats["failed_items"] == []
-    row = conn.execute(
-        "SELECT summary, input_tokens FROM summaries WHERE granule_id='G2'"
-    ).fetchone()
-    assert row["summary"] == f"Factual summary of {k2}."
-    assert row["input_tokens"] == 600  # single-item retry keeps the whole call
+
+
+def test_group_retry_recovers_many_items_in_one_call(conn):
+    """The whole point: N missing items cost one retry call, not N."""
+    keys = seed_two_llm_items(conn)
+    fake = FakeLLM(scripted=["not JSON {"])  # both items missing from batch 1
+    analyze.run(conn, fake, DATE)
+    assert fake.purposes == ["map:batch1", "map:retry-group"]  # not two singles
+    assert all(k.split("|")[1] in fake.prompts[1] for k in keys)
 
 
 def test_garbage_reply_retries_every_item_of_the_call(conn):
     seed_two_llm_items(conn)
     fake = FakeLLM(scripted=["this is not JSON {"])
     stats = analyze.run(conn, fake, DATE)
-    assert fake.purposes == ["map:batch1", "map:retry", "map:retry"]
+    assert fake.purposes == ["map:batch1", "map:retry-group"]
     assert stats["llm_summarized"] == 2
     assert stats["failed_items"] == []
 
@@ -326,9 +333,11 @@ def test_markdown_fenced_json_is_accepted(conn):
 
 def test_failed_items_recorded_and_never_written(conn):
     seed_two_llm_items(conn)
-    fake = FakeLLM(scripted=["garbage"] * 10)  # batch and both retries fail
+    fake = FakeLLM(scripted=["garbage"] * 10)  # batch, group and singles fail
     stats = analyze.run(conn, fake, DATE)
-    assert fake.purposes == ["map:batch1", "map:retry", "map:retry"]
+    # escalation: batch -> one group retry -> per-item isolation
+    assert fake.purposes == ["map:batch1", "map:retry-group",
+                             "map:retry-single", "map:retry-single"]
     assert stats["llm_summarized"] == 0
     assert stats["failed_items"] == [
         {"package_id": "CREC-2026-07-23", "granule_id": "G1", "rule_id": "CREC-SEL-01"},
@@ -441,3 +450,24 @@ def test_run_plain_uses_cheap_tier_and_purpose(conn):
     assert call["model"] == config.PLAIN_MODEL
     assert call["purpose"] == "plain:batch1"
     assert "An official summary." in call["prompt"]  # input is the STORED summary
+
+
+def seed_keys(conn):
+    return [f"{r['package_id']}|{r['granule_id']}" for r in conn.execute(
+        "SELECT package_id, granule_id FROM extracted_texts ORDER BY granule_id")]
+
+
+def test_plain_retries_batch_before_isolating(conn):
+    """Plain-speak retries escalate the same way. Measured 2026-07-29:
+    single-item retries burned 645,778 input tokens (42% of the day) to
+    recover items the first pass had merely truncated away."""
+    seed_two_llm_items(conn)
+    analyze.run(conn, FakeLLM(scripted=[json.dumps(
+        {k: f"Summary of {k}." for k in seed_keys(conn)})]), DATE)
+    fake = FakeLLM(scripted=["not JSON {"])  # nothing parses in batch 1
+    analyze.run_plain(conn, fake, DATE)
+    assert fake.purposes[0] == "plain:batch1"
+    assert fake.purposes[1] == "plain:retry-group"
+    assert "plain:retry-group" in fake.purposes
+    # the group call carries every missing item, rather than one call each
+    assert fake.purposes.count("plain:retry-group") == 1

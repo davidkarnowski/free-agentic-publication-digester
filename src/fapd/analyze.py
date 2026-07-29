@@ -18,8 +18,11 @@ Discipline, in order:
 
 import datetime as dt
 import json
+import logging
 
 from . import config, rules
+
+logger = logging.getLogger("fapd.analyze")
 
 # Amortizes the CLI backend's ~25K-token fixed per-call overhead.
 MAX_BATCH_ITEMS = 6
@@ -239,10 +242,29 @@ def _plain_call(llm, stats, entries, purpose):
     return _parse_reply(result["text"]), result
 
 
+def _retry_in_groups(llm, stats, rows, call, harvest, purpose):
+    """Retry missing items in small groups, returning those still missing.
+
+    A missing item usually means the batch response was truncated, not that
+    the item is unparseable — so a group retry recovers most of them at a
+    fraction of the cost. Anything still missing afterwards gets the
+    single-item isolation the caller falls back to."""
+    still_missing = []
+    for start in range(0, len(rows), config.MAX_RETRY_BATCH_ITEMS):
+        group = rows[start:start + config.MAX_RETRY_BATCH_ITEMS]
+        mapping, result = call(llm, stats, group, purpose)
+        still_missing.extend(harvest(group, mapping, result))
+    return still_missing
+
+
 def _harvest_plain(conn, stats, entries, mapping, result):
     share_in = result["input_tokens"] // len(entries)
     share_out = result["output_tokens"] // len(entries)
     missing = []
+    if len(mapping) < len(entries):
+        logger.info("plain: response covered %d of %d requested items"
+                    " (short response — likely truncation)",
+                    len(mapping), len(entries))
     for row in entries:
         plain = mapping.get(_key(row))
         if isinstance(plain, str) and plain.strip():
@@ -298,8 +320,15 @@ def run_plain(conn, llm, date):
         mapping, result = _plain_call(llm, stats, batch, f"plain:batch{batch_no}")
         retry_queue.extend(_harvest_plain(conn, stats, batch, mapping, result))
 
+    # Group retry first (cheap), then single-item isolation for the stubborn
+    # remainder — the reliability the old one-call-per-item path provided,
+    # without paying for it on every recovered item.
+    retry_queue = _retry_in_groups(
+        llm, stats, retry_queue, _plain_call,
+        lambda group, mapping, result: _harvest_plain(conn, stats, group, mapping, result),
+        "plain:retry-group")
     for row in retry_queue:
-        mapping, result = _plain_call(llm, stats, [row], "plain:retry")
+        mapping, result = _plain_call(llm, stats, [row], "plain:retry-single")
         if _harvest_plain(conn, stats, [row], mapping, result):
             stats["failed_items"].append(
                 {"package_id": row["package_id"], "granule_id": row["granule_id"]}
@@ -353,11 +382,16 @@ def run(conn, llm, date):
         mapping, result = _call(llm, stats, batch, f"map:batch{batch_no}")
         retry_queue.extend(_harvest(conn, stats, batch, mapping, result))
 
-    # One single-item retry per missing/unparsable item; still-failing items
-    # are recorded and skipped — never fabricated. They surface as known
-    # gaps in the Coverage Statement, not as silent omissions (GUIDE §2).
+    # Group retry, then single-item isolation for whatever is still missing;
+    # still-failing items are recorded and skipped — never fabricated. They
+    # surface as known gaps in the Coverage Statement, not as silent
+    # omissions (GUIDE §2).
+    retry_queue = _retry_in_groups(
+        llm, stats, retry_queue, _call,
+        lambda group, mapping, result: _harvest(conn, stats, group, mapping, result),
+        "map:retry-group")
     for entry in retry_queue:
-        mapping, result = _call(llm, stats, [entry], "map:retry")
+        mapping, result = _call(llm, stats, [entry], "map:retry-single")
         if _harvest(conn, stats, [entry], mapping, result):
             item = entry[0]
             stats["failed_items"].append(

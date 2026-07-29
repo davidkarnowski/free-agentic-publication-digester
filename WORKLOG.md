@@ -17,6 +17,36 @@ Entry format:
 
 ---
 
+## 2026-07-29 23:45 PDT — Retry escalation: group-first, isolate-last (the 42% token burn)
+
+**Context:** The 2026-07-29 ledger showed `plain:retry` consuming
+645,778 input tokens across 25 single-item calls — 42% of a 1.53M-token
+day — to recover items that had merely been truncated out of a batch
+response.
+
+**Work performed:** Both LLM layers now escalate isolation instead of
+jumping to it. A batch miss goes first to a **group retry**
+(`MAX_RETRY_BATCH_ITEMS = 5`), and only what is still missing gets a
+single-item call. The reliability the old path provided is intact —
+per-item isolation still happens, just last instead of first — while
+the common case (a truncated tail) costs one call rather than N. On the
+measured day that is roughly 25 calls collapsing to 5: about 500K input
+tokens recovered. Applied to the map layer too, which shared the
+pattern. Purposes renamed to `retry-group` / `retry-single` so the
+ledger shows which path a token went to.
+
+**Root-cause instrumentation:** the plain harvester now logs when a
+response covers fewer items than requested, so the next run produces
+evidence for whether truncation (and not unparseable content) is the
+real driver — measure before tuning batch size, per §6 rule 8.
+
+**Digest re-rendered and site rebuilt** (analyze is idempotent, so zero
+LLM calls). 257 tests passing.
+
+**Open questions / next steps:** with a run's worth of shortfall logs,
+decide whether `MAX_PLAIN_BATCH_ITEMS` (25) should come down; then set
+the §6 rule-8 daily cap.
+
 ## 2026-07-29 23:20 PDT — Full pipeline run with email sources wired in; token ledger yields its first real cap baseline
 
 **Context:** First end-to-end run including the new email channel.
