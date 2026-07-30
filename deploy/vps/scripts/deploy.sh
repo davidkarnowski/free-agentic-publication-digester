@@ -3,7 +3,7 @@
 # export -> image build -> compose up. Authorization gate applies
 # (deploy/vps/README.md): run only on the operator's explicit ask.
 set -euo pipefail
-cd "$(dirname "$0")/../.."     # repo root
+cd "$(dirname "$0")/../../.."  # repo root (scripts -> vps -> deploy -> root)
 
 SSH_KEY="${SSH_KEY:-$HOME/Projects/KnomeNet/hostinger_key}"
 VPS="${VPS:-dkarnowski@31.220.60.2}"
