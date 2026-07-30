@@ -2395,3 +2395,16 @@ all landed. The repo URL is now real on every surface: page footers,
 llms.txt, the agents page, the launch article. Knowingly deferred: the
 editorial spot-audit, queued against tomorrow's first fully-VPS
 digest. Flip executed immediately after this entry's commit.
+
+## 2026-07-30 — The live page becomes one stream
+
+Operator direction: no section groupings on /today — one chronological
+listing, newest at the top, that a reader scrolls down through the
+day's publications. The section headings are gone; in their place each
+entry leads its metadata line with its publication class
+("Congressional Record", "Federal Register", "Agency announcement"),
+followed by channel, agency, cite, and publisher date, with the branch/
+type/agency tag chips doing the classifying work the headings used to
+do. The date's stored section tags survive as a single "Day so far"
+chip row above the stream, model keys still marked. Same data contract,
+same zero-token rebuild; 351 tests.

@@ -612,9 +612,11 @@ def test_build_today_renders_disclosure_sections_and_labels(conn, tmp_path):
     assert "the dated digest is the" in page  # GUIDE §5 disclosure wording
     assert "composed at end of day" in page
     assert f"Today — {DATE} (in progress)" in page
-    assert "Congressional Record" in page and "Agency announcements" in page
+    # one chronological stream: no section headings, items self-describe
+    assert "<h2>" not in page.split("</h1>")[1]
+    assert "Congressional Record" in page and "Agency announcement" in page
     assert "model summary:" in page            # §2 labeling for llm method
-    assert "newest 11:30Z" in page or "newest 10:00Z" in page
+    assert page.index("AGENCYPR-x") < page.index("PgS1")  # newest first
 
     import json
     data = json.loads((tmp_path / "today.json").read_text())

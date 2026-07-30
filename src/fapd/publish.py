@@ -963,15 +963,16 @@ _TODAY_DISCLOSURE = (
     "of day and do not appear here."
 )
 
-# Journal collection -> display section, in render order.
-_TODAY_SECTIONS = (
-    ("CREC", "Congressional Record — floor proceedings"),
-    ("BILLS", "Legislation"),
-    ("PLAW", "Enacted laws"),
-    ("FR", "Federal Register"),
-    ("USCOURTS", "Judicial opinions"),
-    ("AGENCYPR", "Agency announcements"),
-)
+# Journal collection -> the label each stream entry leads with (the
+# stream is one chronological listing, so items self-describe).
+_TODAY_COLLECTION_LABELS = {
+    "CREC": "Congressional Record",
+    "BILLS": "Legislation",
+    "PLAW": "Enacted law",
+    "FR": "Federal Register",
+    "USCOURTS": "Judicial opinion",
+    "AGENCYPR": "Agency announcement",
+}
 
 
 # Mechanical per-item metadata (zero LLM). Branch by collection; document
@@ -1044,7 +1045,9 @@ def _today_item_row(item):
                   if url else html.escape(title))
     chips = "".join(_tag_chip(t) for t in _today_item_tags(item))
 
-    meta_bits = [_today_channel_label(item)]
+    coll_label = _TODAY_COLLECTION_LABELS.get(
+        item["collection"], item["collection"] or "publication")
+    meta_bits = [coll_label, _today_channel_label(item)]
     if item["agency"]:
         meta_bits.append(item["agency"].strip())
     elif item["source_id"]:
@@ -1093,30 +1096,20 @@ def build_today(conn, out_dir=None, date=None):
     status = today_status(conn, date)
     now = utc_now_iso()
 
-    grouped = {}
-    for item in status["items"]:
-        grouped.setdefault(item["collection"] or "OTHER", []).append(item)
-
-    # Section-tag chips (GUIDE §6 r12a): the date's stored section tags,
-    # folded onto /today's collection sections. Present once the tag layer
-    # has run for the date; absent (not faked) before that.
+    # Day-so-far chips (GUIDE §6 r12a): the date's stored section tags,
+    # rolled into one row above the stream — the stream itself is one
+    # chronological listing, so each item self-describes instead of
+    # sitting under a section heading. Present once the tag layer has
+    # run for the date; absent (not faked) before that.
     from .tags import get_section_tags
-    _SECTION_KEYS = {"CREC": ("senate", "house"), "BILLS": ("legislation",),
-                     "PLAW": ("laws",), "FR": ("rules", "proposed",
-                                               "presidential"),
-                     "USCOURTS": ("judicial",), "AGENCYPR": ("agency",)}
     stored = get_section_tags(conn, date)
-    section_chips = {}
-    for coll, keys in _SECTION_KEYS.items():
-        mech, model = [], []
-        for k in keys:
-            mech += stored.get(k, {}).get("mechanical", [])
-            model += stored.get(k, {}).get("llm", [])
-        chips = [_tag_chip(t) for t in dict.fromkeys(mech)]
-        chips += [_tag_chip(t, "tag-model", "model-generated discovery key")
+    mech, model = [], []
+    for bucket in stored.values():
+        mech += bucket.get("mechanical", [])
+        model += bucket.get("llm", [])
+    day_chips = [_tag_chip(t) for t in dict.fromkeys(mech)]
+    day_chips += [_tag_chip(t, "tag-model", "model-generated discovery key")
                   for t in dict.fromkeys(model)]
-        if chips:
-            section_chips[coll] = "".join(chips)
 
     recent = sorted(
         (p.stem for p in Path(config.DIGEST_DIR).glob("*.md")
@@ -1152,25 +1145,18 @@ def build_today(conn, out_dir=None, date=None):
          f"{len(status['items'])} item(s) observed so far · "
          f"{status['pending_llm']} item(s) awaiting model summary.</p>"),
     ]
+    if day_chips:
+        parts.append('<p class="today-chips">Day so far: '
+                     + "".join(day_chips) + "</p>")
     if not status["items"]:
         parts.append("<p>No items observed yet for this publication day. "
                      "Collectors poll continuously; check back.</p>")
-    known = {c for c, _ in _TODAY_SECTIONS}
-    sections = list(_TODAY_SECTIONS) + [
-        (c, c) for c in sorted(grouped) if c not in known]
-    for coll, heading in sections:
-        items = grouped.get(coll)
-        if not items:
-            continue
-        newest = max(i["observed_at"] or "" for i in items)[11:16]
-        parts.append(
-            f"<h2>{html.escape(heading)} "
-            f'<span class="rule-note">{len(items)} item(s) · newest '
-            f"{html.escape(newest)}Z</span></h2>")
-        if coll in section_chips:
-            parts.append(f'<p class="today-chips">{section_chips[coll]}</p>')
+    else:
+        # One chronological stream, newest first — no section headings;
+        # every entry names its own branch, agency, and document type.
         parts.append('<ul class="today-list">'
-                     + "".join(_today_item_row(i) for i in items) + "</ul>")
+                     + "".join(_today_item_row(i) for i in status["items"])
+                     + "</ul>")
 
     nav = ('<a href="index.html">All digests</a>'
            '<a href="sources.html">Sources</a>'
