@@ -33,10 +33,10 @@ close (check them off with dates).
 - [x] 2026-07-30 **CI workflow** (`.github/workflows/ci.yml`): `uv sync`
   + `ruff check` + `pytest` on push/PR — promoted from the `gh-native`
   branch.
-- [ ] **LLM backend swap** (`src/fapd/llm.py`): Anthropic-API backend
-  behind `LLM_BACKEND=api|cli` with a per-tier model mapping (CLI stays
-  the local default). Unblocks hosted scheduling and decouples the VPS
-  from `claude` CLI tooling.
+- [x] 2026-07-30 **LLM backend swap** (`src/fapd/llm.py`): Anthropic-API
+  backend behind `LLM_BACKEND=api|cli` with a per-tier model mapping
+  (CLI stays the local default). Unblocks hosted scheduling and
+  decouples the VPS from `claude` CLI tooling.
 - [ ] **Daily scheduling — active track: VPS runtime**
   (docs/vps-runtime-plan.md, adopted 2026-07-30, superseding the
   GH-native track before its T2–T5 evaluation ran): the pipeline runs

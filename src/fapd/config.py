@@ -62,9 +62,28 @@ MAX_WAYBACK_REQUESTS_PER_DAY = 100
 LLM_LEDGER_DB = DATA_DIR / "llm_ledger.db"
 
 # GUIDE §6 rule 6: tiered models — cheap map tier, strong compose tier.
-# Backend is the `claude` CLI (headless), billed to the operator's plan.
+# The LLM layer is backend-pluggable (§6 rule 7, amended 2026-07-30):
+#   "cli" — the `claude` CLI (headless), billed to the operator's plan;
+#   "api" — the Anthropic API (ANTHROPIC_API_KEY), for hosted/VPS runs.
+LLM_BACKEND = os.environ.get("LLM_BACKEND", "cli").strip().lower()
 MAP_MODEL = "haiku"
 COMPOSE_MODEL = "opus"
+# Tier alias -> concrete model, per backend. Env-overridable so models can
+# be tried without code edits; a name not in the table passes through
+# unresolved, so a caller may pin a concrete model id directly.
+LLM_MODELS = {
+    "cli": {
+        "haiku": os.environ.get("FAPD_MAP_MODEL_CLI", "haiku"),
+        "opus": os.environ.get("FAPD_COMPOSE_MODEL_CLI", "opus"),
+    },
+    "api": {
+        "haiku": os.environ.get("FAPD_MAP_MODEL_API", "claude-haiku-4-5-20251001"),
+        "opus": os.environ.get("FAPD_COMPOSE_MODEL_API", "claude-opus-5"),
+    },
+}
+# API-backend response cap. On models with extended thinking on by default
+# the cap covers thinking + text together, so it is deliberately generous.
+LLM_MAX_OUTPUT_TOKENS = 16000
 # Bump when summarization prompts change; stored per summary row (§6 rule 5).
 PROMPT_VERSION = 1
 # Plain-speak layer versions independently (§6 rule 9): phrasing iterations

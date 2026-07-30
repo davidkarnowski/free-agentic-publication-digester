@@ -17,6 +17,7 @@ dependencies = [
     "pyyaml>=6.0.3",
     "protego>=0.6.2",
     "dkimpy>=1.1.8",
+    "anthropic>=0.66",
 ]
 
 [project.urls]
