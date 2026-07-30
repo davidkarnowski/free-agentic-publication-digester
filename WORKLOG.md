@@ -17,6 +17,42 @@ Entry format:
 
 ---
 
+## 2026-07-30 12:20 PDT — The VPS pipeline is fully alive: subscription-billed LLM verified, readability layer live
+
+**Context:** Closing entries for the day's final stretch — the
+CLI-backend deploy with the operator's setup-token, and the digest
+readability layer.
+
+**Verified on the box:** claude CLI 2.1.220 in the backend image; the
+one-call smoke returned OK with the ledger recording
+('cli', 'haiku', 'smoke:cli-backend') — subscription billing
+confirmed. Within minutes the analyze worker's trigger fired and real
+map batches were running (43K-token batches, cli/haiku) — the
+contained-failure loop healed itself the moment the backend could
+bill, exactly as designed. The EOD retry will complete the first full
+VPS pipeline run on its backoff schedule; its evidence push stays
+deliberately inert (F-008/OB-11).
+
+**Readability layer live on fapd.info:** plain-speak lines render in
+their own labeled register; inclusion rules fold to tooltipped
+monospace ids; citations drop to small muted metadata. One deploy
+lesson became F-009: named-volume seeding is first-mount-only, so an
+image rebuild does not refresh the fapd-site volume — the styled pages
+went live only after an in-container build_site, and deploy.sh now
+runs that step post-up so presentation deploys take effect
+immediately rather than at EOD.
+
+**The day, in sum:** two governance layers adopted; the collector
+architecture built, tested, and live; fapd.info from unregistered
+domain to a fully-deployed, segmented, subscription-billed production
+stack serving the real digest — with 9 PRs, 323 tests, 9 findings
+recorded, and every politeness invariant intact.
+
+**Open questions / next steps:** OB-11 (state seeding + SSH remote +
+parity-checked first push) when the operator wants VPS output
+canonical; F-005/6/7 hardening; /today renderer (OB-8); tagging
+(OB-9); PDF backlog; the per-item official-text marker.
+
 ## 2026-07-30 11:59 PDT — LLM billing resolved: the VPS runs the CLI backend on the operator's subscription
 
 **Context:** The empty-balance 400s traced to a billing-system split

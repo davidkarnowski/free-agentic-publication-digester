@@ -40,6 +40,12 @@ ssh "${SSH_OPTS[@]}" "$VPS" \
    && sudo docker compose --profile backend up -d \
    && sudo docker compose ps --format '{{.Name}} {{.Status}}'"
 
+# The fapd-site volume is seeded from the image only when EMPTY — an image
+# rebuild does not refresh it (F-009). Rebuild the site in-container so
+# presentation changes go live with the deploy instead of waiting for EOD.
+ssh "${SSH_OPTS[@]}" "$VPS" \
+  "sudo docker exec fapd-backend uv run python scripts/build_site.py || true"
+
 echo "==> [4/4] verify"
 sleep 10
 curl -fsSI https://fapd.info | head -1
