@@ -107,6 +107,20 @@ LLM_TIMEOUT = 300  # seconds per call
 # GUIDE.md §3: scope. Order is sync order. USCOURTS added 2026-07-25 (J1).
 COLLECTIONS = ("CREC", "BILLS", "FR", "USCOURTS", "PLAW")
 
+# Continuous ingestion (GUIDE §4/§6 r12 amendments 2026-07-30;
+# docs/continuous-ingestion.md §4-§5). Intervals are minutes, jittered.
+GOVINFO_POLL_INTERVAL_MIN = 30
+AGENCY_POLL_INTERVAL_MIN = 60
+EMAIL_POLL_INTERVAL_MIN = 15
+# Model layers fire on batch-threshold-or-age, never per item (§6 r12):
+# a full map batch, or the oldest pending item older than the latency
+# bound; successive analyze cycles at least MIN_INTERVAL apart.
+ANALYZE_MAX_LATENCY_MIN = 60
+ANALYZE_MIN_INTERVAL_MIN = 15
+# Past this fraction of a class's daily request budget, its collector
+# doubles its interval for the rest of the UTC day (EOD headroom).
+BUDGET_BACKPRESSURE_FRACTION = 0.7
+
 # Rule USCOURTS-FETCH-01 (GUIDE §3 judicial): USCOURTS delta listings carry
 # heavy lastModified churn on years-old cases (measured 7,178 of 9,401 in a
 # 3-day window). Only packages whose date_issued falls within this window
