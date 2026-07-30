@@ -2189,3 +2189,15 @@ government servers — no abusive API usage.
 - [ ] Draft the daily digest template (sections, coverage statement format)
       before building the analysis layer, so reporting drives extraction
       requirements rather than the reverse.
+
+## 2026-07-30 — Email second wave: 4 sources flip on first live delivery
+
+The 2026-07-29 evening window closed without bulletins from va-email,
+irs-email, fdic-email, and dea-email; today all four delivered their
+first DKIM-verified bulletins and each parsed to an ingested item
+(1 item apiece, 2026-07-30). That is the gate-3 evidence the registry
+notes were holding for, so all four flip planned → active with dated
+coverage evaluations. Active set: 26 → 30 (email channel 7 → 11).
+SOURCES.md regenerated; the active-set and tier tests updated (Tier 1
+active 16 → 17 — VA rides Tier 1). dea-email's note keeps the caveat
+that the Diversion Control list remains separately unconfirmed.

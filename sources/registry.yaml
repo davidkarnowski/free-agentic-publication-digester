@@ -1522,9 +1522,9 @@
     home: https://www.irs.gov/newsroom
     signup: https://www.irs.gov/newsroom/e-news-subscriptions
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
-  status: planned
+  status: active
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender irs@service.govdelivery.com). Sibling of the planned irs-newsroom web entry. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
+  notes: "Subscribed and confirmed 2026-07-29 (sender irs@service.govdelivery.com). Sibling of the planned irs-newsroom web entry. Gate-3 coverage evaluation (2026-07-30, from live delivery): 1 bulletin -> 1 item on 2026-07-30 (the agency's own release list; first working input for IRS releases). DKIM-verified with the key archived; the bulletin stream is the subscription's own measure of coverage, observed continuously by the collector."
 
 - id: ssa-email
   adapter: govdelivery
@@ -1590,9 +1590,9 @@
     home: https://www.dea.gov/press-releases
     signup: https://public.govdelivery.com/accounts/USDOJDEA/subscriber/new
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
-  status: planned
+  status: active
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender dea@public.govdelivery.com). Sibling of dea-press, which returns HTTP 403 to our identified client — the first working input for this agency. The Diversion Control Division list is subscribed but awaiting email confirmation. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
+  notes: "Subscribed and confirmed 2026-07-29 (sender dea@public.govdelivery.com). Sibling of dea-press, which returns HTTP 403 to our identified client — the first working input for this agency. The Diversion Control Division list is subscribed but awaiting email confirmation. Gate-3 coverage evaluation (2026-07-30, from live delivery): 1 bulletin -> 1 item on 2026-07-30 (main DEA account; the Diversion Control list remains unconfirmed separately). DKIM-verified with the key archived; the bulletin stream is the subscription's own measure of coverage, observed continuously by the collector."
 
 - id: atf-email
   adapter: govdelivery
@@ -1793,9 +1793,9 @@
     home: https://news.va.gov/
     signup: https://public.govdelivery.com/accounts/USVA/subscriber/new
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
-  status: planned
+  status: active
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (senders veteransaffairs@messages.va.gov and veteransbenefits@messages.va.gov). Corroborating sibling of the active va-newsroom feed. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
+  notes: "Subscribed and confirmed 2026-07-29 (senders veteransaffairs@messages.va.gov and veteransbenefits@messages.va.gov). Corroborating sibling of the active va-newsroom feed. Gate-3 coverage evaluation (2026-07-30, from live delivery): 1 bulletin -> 1 item on 2026-07-30 (department press list; corroborates the active va-newsroom feed). DKIM-verified with the key archived; the bulletin stream is the subscription's own measure of coverage, observed continuously by the collector."
 
 - id: commercial-service-email
   adapter: govdelivery
@@ -1857,9 +1857,9 @@
     home: https://www.fdic.gov/news/press-releases
     signup: https://www.fdic.gov/about/subscriptions/
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
-  status: planned
+  status: active
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender subscriptions@subscriptions.fdic.gov). Sibling of the planned fdic-news web entry, and it settles the open GovDelivery-topic-RSS question in favor of the email channel for this agency. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
+  notes: "Subscribed and confirmed 2026-07-29 (sender subscriptions@subscriptions.fdic.gov). Sibling of the planned fdic-news web entry, and it settles the open GovDelivery-topic-RSS question in favor of the email channel for this agency. Gate-3 coverage evaluation (2026-07-30, from live delivery): 1 bulletin -> 1 item on 2026-07-30 (agency release list). DKIM-verified with the key archived; the bulletin stream is the subscription's own measure of coverage, observed continuously by the collector."
 
 - id: cpsc-email
   name: CPSC Recalls and News (email)
