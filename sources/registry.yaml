@@ -21,7 +21,7 @@
   method: govinfo collections API delta sync
   status: active
   added: "2026-07-26"
-  notes: ""
+  notes: "Coverage (gate 3, backfilled 2026-07-30): the collection is itself the complete official record of the daily edition; delta sync lists every package and extraction reads every granule, so ingestion sees 100% of what GPO publishes here."
 
 - id: govinfo-bills
   name: Congressional Bills (BILLS)
@@ -35,7 +35,7 @@
   method: govinfo collections API delta sync
   status: active
   added: "2026-07-26"
-  notes: ""
+  notes: "Coverage (gate 3, backfilled 2026-07-30): the complete official bill-text record — every printed stage of every bill GPO publishes is listed by delta sync and extracted; nothing is sampled or filtered."
 
 - id: govinfo-fr
   name: Federal Register (FR)
@@ -49,7 +49,7 @@
   method: govinfo collections API delta sync
   status: active
   added: "2026-07-26"
-  notes: ""
+  notes: "Coverage (gate 3, backfilled 2026-07-30): the complete daily issue — every document in each day's Federal Register is listed, extracted, and carries its official agency abstract; companion graphics PDFs are fetched for flagged documents under rule FR-GPH-01."
 
 - id: govinfo-uscourts
   name: U.S. Courts Opinions (USCOURTS)
@@ -76,10 +76,10 @@
   tier: 1
   urls:
     collection: https://www.govinfo.gov/app/collection/PLAW
-  method: Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4).
+  method: Syncs via the govinfo collections API delta mechanism (activated 2026-07-28, delta-only).
   status: active
   added: "2026-07-26"
-  notes: ""
+  notes: "Coverage (gate 3, backfilled 2026-07-30): the complete enacted-laws record, delta-only from 2026-07-25 (deeper history via bulkdata if ever needed). No packages listed in the window yet — govinfo has published no slip law since activation, so the digest's Enacted Laws section correctly renders its empty state."
 
 - id: govinfo-chrg
   name: Congressional Hearings (CHRG)

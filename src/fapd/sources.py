@@ -41,6 +41,14 @@ TYPES = ("govinfo-collection", "rss", "html-index", "aggregator",
          "api", "xml-index", "bulkdata", "email")
 TIERS = (1, 2, 3)
 URL_KEYS = ("collection", "feed", "index", "home", "signup")
+# Valid `adapter` values, scoped by dispatch mechanism. Web types dispatch
+# through agencies.ADAPTERS (a drift test asserts these stay equal — this
+# module must not import agencies, which pulls the HTTP stack). Email
+# entries dispatch by `sender`, never by adapter: their adapter value is
+# platform documentation (GUIDE §3), and absence is meaningful — it says
+# the platform is not yet known, so nothing may assume one.
+WEB_ADAPTERS = ("rss", "rss-feed-only", "usps")
+EMAIL_PLATFORMS = ("govdelivery",)
 
 _KEBAB_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -72,7 +80,7 @@ def _fail(entry: dict, problem: str) -> None:
     raise ValueError(f"registry entry {label!r}: {problem}")
 
 
-def _validate(entry: dict, seen_ids: set[str]) -> None:
+def _validate(entry: dict, seen_ids: set[str], seen_senders: dict[str, str]) -> None:
     if not isinstance(entry, dict):
         # ValueError, not TypeError: the contract is ValueError for any invalid entry
         raise ValueError(f"registry entry {entry!r}: not a mapping")  # noqa: TRY004
@@ -117,6 +125,46 @@ def _validate(entry: dict, seen_ids: set[str]) -> None:
         if not isinstance(url, str) or not url.startswith("http"):
             _fail(entry, f"urls[{key!r}] must be an http(s) URL string")
 
+    # Gate 3 lives in `notes` (GUIDE §3): an active source without a written
+    # coverage evaluation is a claim without evidence.
+    if entry["status"] == "active" and not entry["notes"].strip():
+        _fail(entry, "status 'active' requires a non-empty notes field "
+                     "(the gate-3 coverage evaluation lives there, GUIDE §3)")
+
+    adapter = entry.get("adapter")
+    if adapter is not None:
+        if not isinstance(adapter, str):
+            _fail(entry, "field 'adapter' must be a string")
+        allowed = EMAIL_PLATFORMS if entry["type"] == "email" else WEB_ADAPTERS
+        if adapter not in allowed:
+            _fail(entry, f"adapter {adapter!r} not in {allowed} "
+                         f"for type {entry['type']!r}")
+
+    _validate_sender(entry, seen_senders)
+
+
+def _validate_sender(entry: dict, seen_senders: dict[str, str]) -> None:
+    sender = entry.get("sender")
+    if entry["type"] != "email":
+        if sender is not None:
+            _fail(entry, "field 'sender' is only valid on type 'email' entries")
+        return
+    if sender is None:
+        _fail(entry, "type 'email' requires a 'sender' (the mailbox allowlist)")
+    addresses = sender if isinstance(sender, list) else [sender]
+    if not addresses:
+        _fail(entry, "field 'sender' must not be an empty list")
+    for address in addresses:
+        if not isinstance(address, str) or "@" not in address:
+            _fail(entry, f"sender {address!r} is not an email address")
+        key = address.strip().lower()
+        if key in seen_senders:
+            # The mailbox allowlist maps address -> source; a duplicate would
+            # silently attribute one source's bulletins to another.
+            _fail(entry, f"sender {address!r} already registered on "
+                         f"{seen_senders[key]!r}")
+        seen_senders[key] = entry["id"]
+
 
 def load_registry(path: str | Path | None = None) -> list[dict]:
     """Parse and validate the registry; raise ValueError naming any bad entry."""
@@ -127,8 +175,9 @@ def load_registry(path: str | Path | None = None) -> list[dict]:
         # ValueError, not TypeError: the contract is ValueError for any invalid registry
         raise ValueError(f"{registry_path}: top level must be a list of entries")  # noqa: TRY004
     seen_ids: set[str] = set()
+    seen_senders: dict[str, str] = {}
     for entry in entries:
-        _validate(entry, seen_ids)
+        _validate(entry, seen_ids, seen_senders)
         seen_ids.add(entry["id"])
     return entries
 

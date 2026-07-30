@@ -156,7 +156,15 @@ ADAPTERS = {
 
 
 def adapter_for(entry):
-    return ADAPTERS[entry.get("adapter") or "rss"]()
+    name = entry.get("adapter") or "rss"
+    try:
+        return ADAPTERS[name]()
+    except KeyError:
+        raise ValueError(
+            f"source {entry.get('id', '<no id>')!r}: unknown adapter {name!r} "
+            f"(known: {', '.join(ADAPTERS)}) — registry validation should have "
+            f"caught this"
+        ) from None
 
 
 class WaybackClient(HttpClient):

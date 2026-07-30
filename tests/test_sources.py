@@ -25,7 +25,8 @@ def make_entry(**overrides) -> dict:
         "method": "govinfo collections API delta sync",
         "status": "active",
         "added": "2026-07-26",
-        "notes": "",
+        # Non-empty because active entries require a gate-3 note (2026-07-30).
+        "notes": "Coverage: complete test fixture.",
     }
     entry.update(overrides)
     return entry
@@ -160,3 +161,86 @@ def test_aggregator_type_validates(tmp_path):
     path = tmp_path / "registry.yaml"
     path.write_text(yaml.safe_dump([entry]), encoding="utf-8")
     assert sources.load_registry(path)[0]["type"] == "aggregator"
+
+
+# ------------------------------------- validation hardening (2026-07-30) ----
+
+
+def load_one(tmp_path, *entries):
+    path = tmp_path / "registry.yaml"
+    path.write_text(yaml.safe_dump(list(entries)), encoding="utf-8")
+    return sources.load_registry(path)
+
+
+def email_entry(**overrides) -> dict:
+    entry = make_entry(
+        id="test-email",
+        type="email",
+        status="planned",
+        urls={"home": "https://www.example.gov/"},
+        sender="press@example.gov",
+    )
+    entry.update(overrides)
+    return entry
+
+
+def test_active_requires_nonempty_notes(tmp_path):
+    with pytest.raises(ValueError, match="test-source.*notes"):
+        load_one(tmp_path, make_entry(notes=""))
+    # planned may still carry empty notes (gap is visible, gate 3 not claimed)
+    assert load_one(tmp_path, make_entry(status="planned", notes=""))
+
+
+def test_unknown_web_adapter_rejected(tmp_path):
+    with pytest.raises(ValueError, match="rss-feed-onlt"):
+        load_one(tmp_path, make_entry(type="rss", adapter="rss-feed-onlt"))
+    assert load_one(tmp_path, make_entry(type="rss", adapter="rss-feed-only"))
+
+
+def test_email_adapter_scoped_to_platforms(tmp_path):
+    assert load_one(tmp_path, email_entry(adapter="govdelivery"))
+    assert load_one(tmp_path, email_entry())  # platform unknown: adapter absent
+    with pytest.raises(ValueError, match="adapter 'rss'"):
+        load_one(tmp_path, email_entry(adapter="rss"))
+    # web entries may not claim an email platform
+    with pytest.raises(ValueError, match="adapter 'govdelivery'"):
+        load_one(tmp_path, make_entry(type="rss", adapter="govdelivery"))
+
+
+def test_email_requires_sender(tmp_path):
+    entry = email_entry()
+    del entry["sender"]
+    with pytest.raises(ValueError, match="test-email.*sender"):
+        load_one(tmp_path, entry)
+
+
+def test_sender_must_look_like_an_address(tmp_path):
+    with pytest.raises(ValueError, match="not an email address"):
+        load_one(tmp_path, email_entry(sender="not-an-address"))
+
+
+def test_sender_list_accepted(tmp_path):
+    entry = email_entry(sender=["a@example.gov", "b@example.gov"])
+    assert load_one(tmp_path, entry)[0]["sender"] == ["a@example.gov", "b@example.gov"]
+
+
+def test_duplicate_sender_across_entries_rejected(tmp_path):
+    # The allowlist maps address -> source; a duplicate would silently
+    # attribute one source's bulletins to another (last-wins in _sender_map).
+    a = email_entry(id="email-a")
+    b = email_entry(id="email-b", sender="Press@Example.gov")  # case-insensitive
+    with pytest.raises(ValueError, match="email-b.*already registered.*email-a"):
+        load_one(tmp_path, a, b)
+
+
+def test_sender_forbidden_on_non_email_types(tmp_path):
+    with pytest.raises(ValueError, match="only valid on type 'email'"):
+        load_one(tmp_path, make_entry(sender="press@example.gov"))
+
+
+def test_web_adapters_match_agencies_registry():
+    # sources.py must not import agencies (HTTP deps), so the two constants
+    # are pinned equal here instead.
+    from fapd import agencies
+
+    assert set(sources.WEB_ADAPTERS) == set(agencies.ADAPTERS)
