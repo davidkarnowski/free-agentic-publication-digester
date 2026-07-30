@@ -30,8 +30,9 @@ close (check them off with dates).
   actions/deploy-pages from the `site/` directory (branch-based Pages
   cannot serve `site/`; a workflow is required). Include `SITE_BASE_URL`
   env so machine surfaces emit absolute URLs.
-- [ ] **CI workflow** (`.github/workflows/ci.yml`): `uv sync` + `ruff
-  check` + `pytest` on push/PR — promoted from the `gh-native` branch.
+- [x] 2026-07-30 **CI workflow** (`.github/workflows/ci.yml`): `uv sync`
+  + `ruff check` + `pytest` on push/PR — promoted from the `gh-native`
+  branch.
 - [ ] **LLM backend swap** (`src/fapd/llm.py`): Anthropic-API backend
   behind `LLM_BACKEND=api|cli` with a per-tier model mapping (CLI stays
   the local default). Unblocks hosted scheduling and decouples the VPS
