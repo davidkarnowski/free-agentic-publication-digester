@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software or cite the digest as an aggregation, please
+  cite it as below. For factual claims about government actions, cite
+  the underlying official source that each digest item links to; cite
+  FAPD for the aggregation itself.
+title: "Free Agentic Publication Digester (FAPD)"
+type: software
+authors:
+  - family-names: Karnowski
+    given-names: David D.
+repository-code: "https://github.com/davidkarnowski/free-agentic-publication-digester"
+url: "https://fapd.info"
+license: Apache-2.0
+keywords:
+  - government-transparency
+  - federal-register
+  - congressional-record
+  - civic-tech
+  - ai-agents
+abstract: >-
+  A daily, cited, opinion-agnostic digest of official United States
+  federal publications — congressional proceedings, bills, the Federal
+  Register, enacted laws, court opinions, and agency releases — built
+  only from primary sources, for human readers and AI agents. Digest
+  content is licensed CC BY 4.0; quoted official government text is
+  public domain (17 U.S.C. § 105).

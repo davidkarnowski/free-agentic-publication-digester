@@ -2374,3 +2374,24 @@ growing evidence commits — scoped as its own confirm-gated item. Three
 operator questions are queued at the memo's end, the largest being
 whether frozen day files join the evidence exemption. Design only;
 nothing built yet.
+
+## 2026-07-30 — Going public: the flip and its hygiene
+
+Operator decision: "since we are live anyway I think it's time to set
+the GH repo to public." The pre-flip pass ran first. A full-history
+credential sweep came back clean — the IMAP app password, the govinfo
+key, the OAuth token, and every private key have never touched a
+commit. The one finding was our own: deploy.sh hardcoded the box
+coordinates in violation of the repo's own posture rule; it now
+requires them from the environment (~/.fapd-deploy.env, example file
+committed), and the single historical commit that carries them stands
+as an operator-accepted disclosure — main is never rewritten, and SSH
+is key-only. SECURITY.md (what's actually attackable here: parsers,
+DKIM, content-injection into rendered pages), CONTRIBUTING.md (the
+GUIDE-first rule, what is not open to loosening by PR), CITATION.cff
+(cite the official source for claims, FAPD for the aggregation), and a
+Contributor Covenant CODE_OF_CONDUCT with the non-partisan-space rule
+all landed. The repo URL is now real on every surface: page footers,
+llms.txt, the agents page, the launch article. Knowingly deferred: the
+editorial spot-audit, queued against tomorrow's first fully-VPS
+digest. Flip executed immediately after this entry's commit.

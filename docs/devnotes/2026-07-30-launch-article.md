@@ -188,7 +188,8 @@ should start at [/llms.txt](https://fapd.info/llms.txt) and
 [/agents.html](https://fapd.info/agents.html); change discovery is the
 Atom feed, and the index is `digests.json`. The repository — code,
 governing documents, source registry, and the hash-chained provenance
-manifests — will be public at launch.
+manifests — is public:
+[github.com/davidkarnowski/free-agentic-publication-digester](https://github.com/davidkarnowski/free-agentic-publication-digester).
 
 For claims, cite the official source. For the aggregation, cite FAPD.
 The record was always yours; we just made it readable.

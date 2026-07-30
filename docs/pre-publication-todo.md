@@ -22,13 +22,23 @@ close (check them off with dates).
   placeholder live over HTTPS with auto-renewing TLS since 2026-07-30).
   Real site content replaces the placeholder when the backend container
   deploys (ops-backlog OB-1).
-- [ ] **[decision] Repo visibility flip date** — after the items below
+- [x] 2026-07-30 **[decision] Repo visibility flip** (operator, this
+  evening: "since we are live anyway I think it's time"). Pre-flip
+  hygiene done same evening: full-history credential sweep clean; VPS
+  coordinates scrubbed from deploy.sh (env-file pattern; one historical
+  commit retains them — operator-accepted, SSH is key-only);
+  SECURITY/CONTRIBUTING/CITATION/CODE_OF_CONDUCT added; repo URL wired
+  into site footer, llms.txt, agents page. Deferred knowingly: the
+  editorial spot-audit (queued for the first fully-VPS digest,
+  2026-07-30's EOD).
   it gates are done.
 
 ## Build work
 
 ### Publishing infrastructure
-- [ ] **GH Pages deploy workflow** (`.github/workflows/pages.yml`):
+- [ ] ~~GH Pages deploy workflow~~ **Dead track (2026-07-30):** the VPS
+  runtime won (docs/vps-runtime-plan.md); the site is served by the
+  fapd stack's nginx and GH Pages is not planned. Kept for the record:
   actions/deploy-pages from the `site/` directory (branch-based Pages
   cannot serve `site/`; a workflow is required). Include `SITE_BASE_URL`
   env so machine surfaces emit absolute URLs.
@@ -58,22 +68,23 @@ close (check them off with dates).
   identity, scheduler, rDNS, run-summary emitter). Open since Phase 1.
 
 ### Community files
-- [ ] `SECURITY.md` — contact route (hustleyourcity address), what's in
+- [x] 2026-07-30 `SECURITY.md` — contact route (hustleyourcity address), what's in
   scope (the pipeline; not .gov sites — include a pointer explaining we
   are not an authority for government-site issues).
-- [ ] `CONTRIBUTING.md` — GUIDE-first rule (changes to GUIDE.md precede
+- [x] 2026-07-30 `CONTRIBUTING.md` — GUIDE-first rule (changes to GUIDE.md precede
   implementation), test expectations, register/lexicon rules for prose,
   how to propose a new source (five gates, adding-sources.md).
-- [ ] `CITATION.cff` — cite the aggregation; reinforce citing official
+- [x] 2026-07-30 `CITATION.cff` — cite the aggregation; reinforce citing official
   sources for claims.
-- [ ] Decide on `CODE_OF_CONDUCT.md` (Contributor Covenant default).
+- [x] 2026-07-30 `CODE_OF_CONDUCT.md` — Contributor Covenant 2.1 by
+  reference, plus the non-partisan-space rule.
 
 ### Flip-time edits (do these the same day the repo goes public)
-- [ ] agents page + about page say "public repository" — currently false
+- [x] 2026-07-30 agents page + about page say "public repository" — true at flip
   while private; verify true, or reword, at flip time.
 - [ ] README "How this project is built" link check; site readme.html
   regeneration.
-- [ ] Add repo URL to site footers / about page once public.
+- [x] 2026-07-30 Repo URL in every page footer, llms.txt, and the agents page.
 - [ ] Announce-facing check of SOURCES.md rendering (it is the public
   accountability artifact).
 

@@ -5,9 +5,13 @@
 set -euo pipefail
 cd "$(dirname "$0")/../../.."  # repo root (scripts -> vps -> deploy -> root)
 
-SSH_KEY="${SSH_KEY:-$HOME/Projects/KnomeNet/hostinger_key}"
-VPS="${VPS:-dkarnowski@31.220.60.2}"
-PORT="${PORT:-2222}"
+# Box coordinates come from the environment or ~/.fapd-deploy.env — the
+# public repo carries no server dossier facts (CLAUDE.md §12). Copy
+# deploy/vps/deploy.env.example and fill it in.
+[ -f "$HOME/.fapd-deploy.env" ] && . "$HOME/.fapd-deploy.env"
+: "${SSH_KEY:?set SSH_KEY - path to the box SSH key}"
+: "${VPS:?set VPS - user@host}"
+PORT="${PORT:-22}"
 REMOTE_DIR="${REMOTE_DIR:-/opt/fapd}"
 SSH_OPTS=(-i "$SSH_KEY" -p "$PORT" -o BatchMode=yes -o StrictHostKeyChecking=accept-new)
 

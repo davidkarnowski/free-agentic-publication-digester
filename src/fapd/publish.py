@@ -23,6 +23,9 @@ SITE_TAGLINE = (
     "judicial — built only from primary sources."
 )
 
+REPO_URL = ("https://github.com/davidkarnowski/"
+            "free-agentic-publication-digester")
+
 _MD = markdown.Markdown(extensions=["tables", "toc"])
 
 _PAGE = """<!DOCTYPE html>
@@ -50,7 +53,8 @@ _PAGE = """<!DOCTYPE html>
 </main>
 <footer class="site-footer">
   <p>Generated {generated} (UTC). Canonical source:
-  <code>{canonical}</code> in the repository. Selection is mechanical and
+  <code>{canonical}</code> in the
+  <a href="{repo_url}">public repository</a>. Selection is mechanical and
   every item cites its official source; methodology in
   <code>GUIDE.md</code> §2.</p>
   <p>Content licensed
@@ -553,6 +557,7 @@ def _render_page(title, body_html, nav_links, canonical, description=None):
         body=body_html,
         generated=utc_now_iso(),
         canonical=html.escape(canonical),
+        repo_url=REPO_URL,
     )
 
 
@@ -585,7 +590,7 @@ def _nav_for(dates, i, doc_pages=()):
 
 # README → site link rewriting: repo-relative links that have a site
 # equivalent are pointed at it; the rest degrade to plain code text (the
-# canonical footer names the repo file, and the repo is not yet public).
+# canonical footer links the public repository).
 _README_LINK_REWRITES = (
     (re.compile(r"\]\(digests/(\d{4}-\d{2}-\d{2})\.md\)"), r"](\1.html)"),
     (re.compile(r"\]\(site/\)"), r"](index.html)"),
@@ -1233,6 +1238,8 @@ work. Check the source guide for what is ingested today.
 - **Source guide:** `/sources.html` — every federal source this pipeline
   ingests, plans to ingest, or found unavailable, with method and status.
 - **Canonical Markdown** for every digest lives in the public repository
+  at
+  [github.com/davidkarnowski/free-agentic-publication-digester](https://github.com/davidkarnowski/free-agentic-publication-digester)
   (`digests/<date>.md`), alongside provenance manifests
   (`provenance/manifests/`) whose SHA-256 records let you verify captured
   content.
@@ -1318,7 +1325,8 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
         "- Digest URLs are stable: /<YYYY-MM-DD>.html",
         "- Official text vs model-generated text is labeled in place;",
         "  every item cites the official govinfo record.",
-        "- Canonical Markdown + provenance manifests live in the repository.",
+        ("- Canonical Markdown + provenance manifests live in the public"
+         f" repository: {REPO_URL}"),
         "- Reuse: content is CC BY 4.0 (credit 'FAPD — Free Agentic",
         "  Publication Digester'); quoted official government text is public",
         "  domain. For factual claims, cite the underlying official source",
