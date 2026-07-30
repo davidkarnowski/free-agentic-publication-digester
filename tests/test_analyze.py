@@ -167,6 +167,20 @@ def test_garbage_reply_retries_every_item_of_the_call(conn):
     assert stats["failed_items"] == []
 
 
+def test_map_shortfall_and_unmatched_keys_are_logged(conn, caplog):
+    """F-010: the VPS backlog grind burned ~4M tokens invisibly because the
+    map layer had no shortfall logging. Short responses log the covered/
+    requested counts; response keys that match no requested item warn with
+    a sample (right-count-wrong-keys is otherwise indistinguishable)."""
+    k1, _k2 = seed_two_llm_items(conn)
+    fake = FakeLLM(scripted=[json.dumps({k1: "Summary one.", "BOGUS|key": "x"})])
+    with caplog.at_level("INFO", logger="fapd.analyze"):
+        analyze.run(conn, fake, DATE)
+    assert "map: response covered 1 of 2 requested items" in caplog.text
+    assert "match no requested item" in caplog.text
+    assert "BOGUS|key" in caplog.text
+
+
 def test_markdown_fenced_json_is_accepted(conn):
     keys = seed_two_llm_items(conn)
     fenced = "```json\n" + json.dumps({k: f"Summary of {k}." for k in keys}) + "\n```"

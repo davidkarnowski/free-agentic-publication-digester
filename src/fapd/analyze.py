@@ -143,6 +143,10 @@ def _harvest(conn, stats, entries, mapping, result):
     share_in = result["input_tokens"] // len(entries)
     share_out = result["output_tokens"] // len(entries)
     missing = []
+    unmatched = set(mapping) - {_key(item) for item, _ in entries}
+    if unmatched:
+        logger.warning("map: %d response key(s) match no requested item,"
+                       " e.g. %r", len(unmatched), sorted(unmatched)[:3])
     for item, text in entries:
         summary = mapping.get(_key(item))
         if isinstance(summary, str) and summary.strip():
@@ -153,6 +157,10 @@ def _harvest(conn, stats, entries, mapping, result):
             stats["llm_summarized"] += 1
         else:
             missing.append((item, text))
+    if missing:
+        logger.info("map: response covered %d of %d requested items"
+                    " (short response — likely truncation)",
+                    len(entries) - len(missing), len(entries))
     return missing
 
 
@@ -261,10 +269,10 @@ def _harvest_plain(conn, stats, entries, mapping, result):
     share_in = result["input_tokens"] // len(entries)
     share_out = result["output_tokens"] // len(entries)
     missing = []
-    if len(mapping) < len(entries):
-        logger.info("plain: response covered %d of %d requested items"
-                    " (short response — likely truncation)",
-                    len(mapping), len(entries))
+    unmatched = set(mapping) - {_key(row) for row in entries}
+    if unmatched:
+        logger.warning("plain: %d response key(s) match no requested item,"
+                       " e.g. %r", len(unmatched), sorted(unmatched)[:3])
     for row in entries:
         plain = mapping.get(_key(row))
         if isinstance(plain, str) and plain.strip():
@@ -275,6 +283,10 @@ def _harvest_plain(conn, stats, entries, mapping, result):
             stats["plain_written"] += 1
         else:
             missing.append(row)
+    if missing:
+        logger.info("plain: response covered %d of %d requested items"
+                    " (short response — likely truncation)",
+                    len(entries) - len(missing), len(entries))
     return missing
 
 

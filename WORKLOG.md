@@ -2201,3 +2201,18 @@ coverage evaluations. Active set: 26 → 30 (email channel 7 → 11).
 SOURCES.md regenerated; the active-set and tier tests updated (Tier 1
 active 16 → 17 — VA rides Tier 1). dea-email's note keeps the caveat
 that the Diversion Control list remains separately unconfirmed.
+
+## 2026-07-30 — F-010: the retry grind gets eyes (map-layer shortfall logging)
+
+The VPS's first day answered the retry-churn question: ~4M input tokens
+went to map-layer group/single retries while the fresh database ground
+through its judicial backlog — and it converged (zero pending for 07-29
+and 07-30 by evening), so this was expensive, not broken. What WAS
+broken is that we couldn't watch it: the plain layer logs when a
+response covers fewer items than requested, the map layer never did.
+Both harvests now log the covered/requested count on any shortfall and
+warn on response keys that match no requested item (the
+right-count-wrong-keys case the old length check couldn't see).
+Recorded as F-010, open: if the next EOD's logs confirm truncation, the
+lever is a smaller map batch or an explicit output-token bump on the
+CLI backend.
