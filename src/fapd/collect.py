@@ -12,6 +12,9 @@ module** (§6 rule 12: day/section composition is end-of-day only).
 import datetime as dt
 import json
 import logging
+import random
+import threading
+import uuid
 
 from . import config
 from .sync import utc_now_iso
@@ -228,3 +231,232 @@ def record_state(conn, worker, *, ok, stats=None, error=None):
          0 if ok else 1),
     )
     conn.commit()
+
+
+# ---------------------------------------------------------------------------
+# Workers and the supervisor (docs §2, §5)
+# ---------------------------------------------------------------------------
+
+
+class Worker:
+    """One collector loop: cycle() + interval + error backoff. Each cycle
+    opens its own connection (thread- and process-safe under WAL)."""
+
+    name = "worker"
+
+    def __init__(self, supervisor, interval_min):
+        self.sup = supervisor
+        self.base_interval_min = interval_min
+
+    def cycle(self, conn, cycle_id):  # pragma: no cover — abstract
+        raise NotImplementedError
+
+    def interval_min(self, conn):
+        """Current interval; subclasses apply budget backpressure here."""
+        return self.base_interval_min
+
+    def run_cycle(self):
+        cycle_id = uuid.uuid4().hex[:12]
+        conn = self.sup.conn_factory()
+        try:
+            stats = self.cycle(conn, cycle_id)
+            record_state(conn, self.name, ok=True, stats=stats)
+            return stats
+        except Exception as exc:  # noqa: BLE001 — a worker failure must not
+            # kill the supervisor; the error streak is the health signal.
+            logger.warning("%s cycle failed: %r — continuing", self.name, exc)
+            record_state(conn, self.name, ok=False, error=repr(exc))
+            return None
+        finally:
+            conn.close()
+
+    def loop(self, stop_event):
+        while not stop_event.is_set():
+            self.run_cycle()
+            conn = self.sup.conn_factory()
+            try:
+                errors = conn.execute(
+                    "SELECT consecutive_errors FROM collector_state WHERE worker = ?",
+                    (self.name,)).fetchone()
+                minutes = self.interval_min(conn) * (
+                    2 ** min(errors["consecutive_errors"] if errors else 0, 3))
+            finally:
+                conn.close()
+            # jitter ±10% so worker clocks don't align into bursts
+            stop_event.wait(minutes * 60 * random.uniform(0.9, 1.1))
+
+
+class GovinfoWorker(Worker):
+    name = "govinfo"
+
+    def cycle(self, conn, cycle_id):
+        from . import extract, sync
+
+        stats = {}
+        with self.sup.govinfo_factory() as client:
+            for collection in config.COLLECTIONS:
+                s = sync.sync_collection(client, conn, collection, max_downloads=50)
+                stats[collection] = {"listed": s["listed"], "downloaded": s["downloaded"]}
+        ex = extract.run(conn)
+        stats["extracted"] = ex["records"]
+        stats["journaled"] = journal_new(conn, "govinfo", cycle_id)
+        return stats
+
+
+class AgencyHostWorker(Worker):
+    """One worker per host group — a slow crawl-delay host lives on its
+    own clock without delaying anyone (GUIDE §4)."""
+
+    def __init__(self, supervisor, host, entries, interval_min):
+        super().__init__(supervisor, interval_min)
+        self.name = f"host:{host}"
+        self.entries = entries
+
+    def interval_min(self, conn):
+        # Budget backpressure (GUIDE §4 amendment): past the threshold
+        # fraction of the agency class budget, double the interval — the
+        # EOD finalizer's headroom is reserved. The budget lives in
+        # fetch_log.db (written by the client itself), not the pipeline DB.
+        used = self.sup.agency_requests_today()
+        if used >= config.MAX_AGENCY_REQUESTS_PER_DAY * config.BUDGET_BACKPRESSURE_FRACTION:
+            return self.base_interval_min * 2
+        return self.base_interval_min
+
+    def cycle(self, conn, cycle_id):
+        from . import agencies, provenance
+
+        with self.sup.agency_factory() as client, self.sup.wayback_factory() as wayback:
+            results = [agencies._poll_isolated(client, wayback, conn, e)
+                       for e in self.entries]
+        stats = {"new_items": sum(r["new_items"] for r in results),
+                 "journaled": journal_new(conn, "agency", cycle_id)}
+        if stats["new_items"]:
+            provenance.export_manifest(conn)
+        return stats
+
+
+class EmailWorker(Worker):
+    name = "email"
+
+    def cycle(self, conn, cycle_id):
+        if not (config.IMAP_HOST and config.IMAP_USER and config.IMAP_PASSWORD):
+            return {"configured": False}
+        entries = [e for e in self.sup.registry()
+                   if e["type"] == "email"
+                   and e["status"] in ("active", "planned")
+                   and e.get("sender")]
+        with self.sup.mailbox_factory() as mbox:
+            results = self.sup.poll(mbox, conn, entries)
+        return {"configured": True,
+                "bulletins": sum(r["messages"] for r in results),
+                "items": sum(r["items"] for r in results),
+                "journaled": journal_new(conn, "email", cycle_id)}
+
+
+class AnalyzeWorker(Worker):
+    """Model layers on trigger. NO compose call exists here (§6 r12)."""
+
+    name = "analyze"
+
+    def cycle(self, conn, cycle_id):
+        from . import analyze
+
+        stats = {"dates": 0, "summarized": 0, "plain": 0}
+        if not self.sup.llm_enabled:
+            return stats
+        for date in dates_with_pending(conn):
+            if not trigger_fires(conn, date):
+                continue
+            with self.sup.llm_factory() as lclient:
+                a = analyze.run(conn, lclient, date)
+                p = analyze.run_plain(conn, lclient, date)
+            stats["dates"] += 1
+            stats["summarized"] += a["llm_summarized"] + a["official"]
+            stats["plain"] += p["plain_written"]
+        stats["journaled"] = journal_model_events(conn, cycle_id)
+        return stats
+
+
+class Supervisor:
+    """One process, per-source-class workers (docs §2). Every dependency
+    is an optional constructor parameter with a config/module default —
+    the project seam pattern (code-standards §1)."""
+
+    def __init__(self, *, registry=None, conn_factory=None,
+                 govinfo_factory=None, agency_factory=None,
+                 wayback_factory=None, mailbox_factory=None, poll=None,
+                 llm_factory=None, llm_enabled=True, intervals=None):
+        from . import db, email_sources
+        from .client import AgencyClient, GovinfoClient
+        from .sources import load_registry
+
+        self.registry = registry or load_registry
+        self.conn_factory = conn_factory or db.connect
+        self.govinfo_factory = govinfo_factory or GovinfoClient
+        self.agency_factory = agency_factory or AgencyClient
+        self.wayback_factory = wayback_factory or self._default_wayback
+        self.mailbox_factory = mailbox_factory or email_sources.MailboxClient
+        self.poll = poll or email_sources.poll_mailbox
+        self.llm_factory = llm_factory or self._default_llm
+        self.llm_enabled = llm_enabled
+        iv = intervals or {}
+        self.workers = self._build_workers(iv)
+
+    @staticmethod
+    def _default_wayback():
+        from .agencies import WaybackClient
+
+        return WaybackClient()
+
+    @staticmethod
+    def agency_requests_today():
+        """Agency-class requests today, read from the fetch log (the
+        budget authority). 0 when the log doesn't exist yet."""
+        import sqlite3
+
+        try:
+            fdb = sqlite3.connect(f"file:{config.FETCH_LOG_DB}?mode=ro", uri=True)
+            n = fdb.execute(
+                "SELECT COUNT(*) FROM fetch_log WHERE client = 'agency'"
+                " AND ts_utc >= date('now')").fetchone()[0]
+            fdb.close()
+            return n
+        except sqlite3.Error:
+            return 0
+
+    @staticmethod
+    def _default_llm():
+        from . import llm
+
+        return llm.LLMClient()
+
+    def _build_workers(self, iv):
+        from .agencies import host_groups
+
+        workers = [
+            GovinfoWorker(self, iv.get("govinfo", config.GOVINFO_POLL_INTERVAL_MIN)),
+            EmailWorker(self, iv.get("email", config.EMAIL_POLL_INTERVAL_MIN)),
+        ]
+        rss = [e for e in self.registry()
+               if e["status"] == "active" and e["type"] == "rss"]
+        for host, entries in sorted(host_groups(rss).items()):
+            workers.append(AgencyHostWorker(
+                self, host, entries,
+                iv.get("agency", config.AGENCY_POLL_INTERVAL_MIN)))
+        workers.append(AnalyzeWorker(
+            self, iv.get("analyze", config.ANALYZE_MIN_INTERVAL_MIN)))
+        return workers
+
+    def run_once(self):
+        """Every worker exactly one serial cycle — the testable path and
+        the cron-compatible fallback shape."""
+        return {w.name: w.run_cycle() for w in self.workers}
+
+    def run_forever(self):
+        stop = threading.Event()
+        threads = [threading.Thread(target=w.loop, args=(stop,),
+                                    name=w.name, daemon=True)
+                   for w in self.workers]
+        for t in threads:
+            t.start()
+        return stop, threads

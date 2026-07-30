@@ -147,3 +147,45 @@ def test_main_exit_1_when_validation_fails(monkeypatch):
     monkeypatch.setattr(run_pipeline, "detail_report", lambda **kw: None)
 
     assert run_pipeline.main(["--date", "2026-07-28"]) == 1
+
+# ---------------------------------------------------------- collect.py CLI --
+
+
+def test_collect_once_exit_codes(monkeypatch):
+    import collect as collect_cli
+
+    class FakeSup:
+        def __init__(self, results):
+            self._results = results
+
+        def run_once(self):
+            return self._results
+
+    monkeypatch.setattr(collect_cli, "Supervisor",
+                        lambda **kw: FakeSup({"govinfo": {"ok": 1}, "email": {}}))
+    monkeypatch.setattr(collect_cli.logging_setup, "setup", lambda **kw: None)
+    assert collect_cli.main(["--once", "--no-llm"]) == 0
+
+    monkeypatch.setattr(collect_cli, "Supervisor",
+                        lambda **kw: FakeSup({"govinfo": None}))  # a failed worker
+    assert collect_cli.main(["--once"]) == 1
+
+
+def test_collect_cli_passes_flags_to_supervisor(monkeypatch):
+    import collect as collect_cli
+
+    captured = {}
+
+    def fake_supervisor(**kw):
+        captured.update(kw)
+
+        class S:
+            def run_once(self):
+                return {}
+        return S()
+
+    monkeypatch.setattr(collect_cli, "Supervisor", fake_supervisor)
+    monkeypatch.setattr(collect_cli.logging_setup, "setup", lambda **kw: None)
+    collect_cli.main(["--once", "--no-llm", "--interval-email", "5"])
+    assert captured["llm_enabled"] is False
+    assert captured["intervals"] == {"email": 5}

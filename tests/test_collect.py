@@ -140,6 +140,119 @@ def test_today_status_empty_day(conn):
 # ------------------------------------------------------------ record_state --
 
 
+def _noop_ctx():
+    class _Ctx:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+    return _Ctx()
+
+
+def make_supervisor(tmp_path, monkeypatch, *, llm_enabled=False, poll=None,
+                    registry=None):
+    from fapd import db
+
+    db_path = tmp_path / "meta.db"
+
+    def conn_factory():
+        return db.connect(db_path)
+
+    monkeypatch.setattr(config, "IMAP_HOST", "x")
+    monkeypatch.setattr(config, "IMAP_USER", "x")
+    monkeypatch.setattr(config, "IMAP_PASSWORD", "x")
+    sup = collect.Supervisor(
+        registry=registry or list,
+        conn_factory=conn_factory,
+        govinfo_factory=_noop_ctx, agency_factory=_noop_ctx,
+        wayback_factory=_noop_ctx, mailbox_factory=_noop_ctx,
+        poll=poll or (lambda mbox, c, e: []),
+        llm_factory=_noop_ctx, llm_enabled=llm_enabled,
+    )
+    return sup, conn_factory
+
+
+def test_supervisor_run_once_cycles_every_worker(tmp_path, monkeypatch):
+    # Stub the govinfo cycle's internals (sync/extract are heavy); email
+    # and analyze run their real cycle logic against fakes.
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    monkeypatch.setattr(collect.GovinfoWorker, "cycle",
+                        lambda self, conn, cid: {"stubbed": True})
+    results = sup.run_once()
+    assert results["govinfo"] == {"stubbed": True}
+    assert results["email"]["configured"] is True
+    assert results["analyze"] == {"dates": 0, "summarized": 0, "plain": 0}
+    conn = conn_factory()
+    workers = {r["worker"]: r for r in conn.execute("SELECT * FROM collector_state")}
+    assert {"govinfo", "email", "analyze"} <= set(workers)
+    assert all(w["consecutive_errors"] == 0 for w in workers.values())
+    conn.close()
+
+
+def test_supervisor_worker_failure_is_contained(tmp_path, monkeypatch):
+    def broken_poll(mbox, c, e):
+        raise ConnectionError("imap down")
+
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch, poll=broken_poll)
+    monkeypatch.setattr(collect.GovinfoWorker, "cycle",
+                        lambda self, conn, cid: {})
+    results = sup.run_once()   # must not raise
+    assert results["email"] is None
+    assert results["analyze"] is not None  # later workers still ran
+    conn = conn_factory()
+    row = conn.execute(
+        "SELECT consecutive_errors, last_result FROM collector_state"
+        " WHERE worker = 'email'").fetchone()
+    assert row["consecutive_errors"] == 1
+    assert "imap down" in row["last_result"]
+    conn.close()
+
+
+def test_supervisor_builds_one_worker_per_agency_host(tmp_path, monkeypatch):
+    def registry():
+        return [
+            {"id": "a", "status": "active", "type": "rss",
+             "urls": {"feed": "https://www.gao.gov/rss.xml"}},
+            {"id": "b", "status": "active", "type": "rss",
+             "urls": {"feed": "https://www.nasa.gov/rss.xml"}},
+            {"id": "c", "status": "planned", "type": "rss",
+             "urls": {"feed": "https://x.gov/rss.xml"}},      # not active: no worker
+            {"id": "d", "status": "active", "type": "email",
+             "sender": "x@x.gov", "urls": {"home": "https://x.gov"}},  # email: no host worker
+        ]
+    sup, _ = make_supervisor(tmp_path, monkeypatch, registry=registry)
+    host_workers = [w.name for w in sup.workers if w.name.startswith("host:")]
+    assert len(host_workers) == 2
+    assert any("gao.gov" in n for n in host_workers)
+
+
+def test_agency_backpressure_doubles_interval(tmp_path, monkeypatch):
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    worker = collect.AgencyHostWorker(sup, "www.gao.gov", [], 60)
+    conn = conn_factory()
+    monkeypatch.setattr(sup, "agency_requests_today", lambda: 0)
+    assert worker.interval_min(conn) == 60
+    monkeypatch.setattr(
+        sup, "agency_requests_today",
+        lambda: int(config.MAX_AGENCY_REQUESTS_PER_DAY
+                    * config.BUDGET_BACKPRESSURE_FRACTION))
+    assert worker.interval_min(conn) == 120
+    conn.close()
+
+
+def test_analyze_worker_no_llm_mode_does_nothing(tmp_path, monkeypatch):
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch, llm_enabled=False)
+    conn = conn_factory()
+    seed_corpus(conn)
+    collect.journal_new(conn, "govinfo", "c1")
+    conn.close()
+    worker = next(w for w in sup.workers if w.name == "analyze")
+    stats = worker.run_cycle()
+    assert stats == {"dates": 0, "summarized": 0, "plain": 0}
+
+
 def test_record_state_tracks_errors_and_recovery(conn):
     collect.record_state(conn, "email", ok=False, error="imap down")
     collect.record_state(conn, "email", ok=False, error="imap down")
