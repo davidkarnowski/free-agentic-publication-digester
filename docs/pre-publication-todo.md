@@ -39,7 +39,12 @@ close (check them off with dates).
   backend behind `LLM_BACKEND=api|cli` with a per-tier model mapping
   (CLI stays the local default). Unblocks hosted scheduling and
   decouples the VPS from `claude` CLI tooling.
-- [ ] **Daily scheduling — active track: VPS runtime**
+- [ ] **Daily scheduling — active track: VPS runtime.** *2026-07-30:
+  the collector core landed (src/fapd/collect.py — supervisor,
+  per-source-class workers, journal, triggers; GUIDE §4/§5/§6 r12
+  amendments); remaining scope is the backend container deploy
+  (ops-backlog OB-1) and /today renderer (OB-8), both fully designed in
+  docs/continuous-ingestion.md.* Original item:
   (docs/vps-runtime-plan.md, adopted 2026-07-30, superseding the
   GH-native track before its T2–T5 evaluation ran): the pipeline runs
   on a VPS under cron/systemd, pushes evidence commits (digests,
@@ -149,6 +154,23 @@ close (check them off with dates).
   section headers, tags in digests.json entries, and a tags block on
   each digest's agent surface. GUIDE amendment precedes implementation
   (new §2/§6 language for the tag layer).
+
+- [ ] **PDF render and serve** (requested 2026-07-30): render each
+  canonical digest as a PDF and serve it beside the HTML — a
+  fixed-layout, citable, printable artifact of the day's record.
+  Design notes: deterministic zero-LLM render from the same canonical
+  Markdown (code-standards §2 r5 applies — a PDF is another derived
+  presentation, like site/); embedded graphics carry the same citation
+  discipline; the license/name footer renders in-document; likely
+  toolchain is the already-present reportlab-class or
+  markdown→HTML→print-CSS path — evaluate without adding heavy deps
+  (stdlib-first rule; pypdf is already a dependency for parsing, not
+  authoring). Serve as `site/YYYY-MM-DD.pdf` with links from the digest
+  page, digests.json gaining a `pdf` field, and the agent surfaces
+  noting the format. Dual-audience note: PDFs are the *human*
+  archival/citation format; agents keep the Markdown/JSON surfaces —
+  the PDF never becomes the canonical artifact (the committed Markdown
+  stays canonical).
 
 ## Done (for the record)
 - [x] 2026-07-29 — Sensitive-content audit of full history: PASS.

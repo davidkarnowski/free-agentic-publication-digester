@@ -17,6 +17,38 @@ Entry format:
 
 ---
 
+## 2026-07-30 09:22 PDT — Collector core verified live: 17 workers green, 5,353 items journaled
+
+**Context:** Workstream B's closing live smoke — `collect.py --once
+--no-llm` against the real database, after the background pipeline run
+exited.
+
+**Result (exit 0, all workers ok):** govinfo worker listed deltas for
+all five collections and downloaded 43 USCOURTS opinions **through a
+sustained govinfo 503 storm** — every retry honored the server's
+30-second Retry-After, four packages correctly failed back to the
+pending queue after five paced attempts, and the daily budget closed at
+~570/2,000. All 14 agency host workers cycled (gao.gov's 420-second
+crawl-delay honored on its own clock — the exact serial cost the
+threaded mode eliminates; justice 7 new items, defense 1). Email worker
+ingested 1 new bulletin. Analyze worker correctly did nothing under
+--no-llm. First-run journal reconciliation backfilled the entire
+corpus: 4,935 govinfo + 364 agency + 54 email 'ingested' rows, with 177
+items already carrying today's digest date — the /today data contract
+returns real data. collector_state shows 17 workers, zero error
+streaks. The 503 storm doubled as an unplanned demonstration of the
+architecture's point: a slow, failing upstream cost one worker's cycle
+time and nobody else's.
+
+**Also this session:** operator feature requests recorded to the
+backlog — section auto-tagging (schema already landed) and PDF
+render-and-serve for canonical digests.
+
+**Open questions / next steps:** merge B; public transparency pages
+(privacy/licensing + crawler page + UA URL); then the authorized full
+VPS deployment (backend container, OB-1) with the operator-provided
+Anthropic key.
+
 ## 2026-07-30 09:05 PDT — Continuous ingestion adopted: supervisor collectors, two-artifact model (branch arch/continuous-ingestion)
 
 **Context:** Sources publish at varied times; the operator directed a
