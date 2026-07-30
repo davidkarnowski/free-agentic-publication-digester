@@ -207,6 +207,52 @@ CREATE TABLE IF NOT EXISTS sync_state (
     last_sync_completed_at  TEXT,
     last_sync_package_count INTEGER
 );
+
+-- Continuous ingestion (GUIDE §5 two-artifact model; docs/continuous-ingestion.md).
+-- Arrival journal: written by post-cycle reconciliation, never by the
+-- collection functions themselves. observed_at is cycle-granularity by
+-- design; dating rules key on claimed dates, not observation minutes.
+CREATE TABLE IF NOT EXISTS item_journal (
+    id            INTEGER PRIMARY KEY,
+    observed_at   TEXT NOT NULL,
+    source_class  TEXT NOT NULL CHECK (source_class IN ('govinfo', 'agency', 'email')),
+    package_id    TEXT NOT NULL,
+    granule_id    TEXT NOT NULL DEFAULT '',
+    collection    TEXT,
+    source_id     TEXT,                        -- registry id (agency/email classes)
+    digest_date   TEXT,                        -- the day the item belongs to
+    event         TEXT NOT NULL CHECK (event IN ('ingested', 'summarized', 'plain')),
+    cycle_id      TEXT,
+
+    UNIQUE (package_id, granule_id, event)
+);
+CREATE INDEX IF NOT EXISTS idx_item_journal_day
+    ON item_journal (digest_date, observed_at);
+
+-- Collector liveness, read by OPS-GUIDE / the fapd-health skill.
+CREATE TABLE IF NOT EXISTS collector_state (
+    worker             TEXT PRIMARY KEY,       -- 'govinfo' | 'email' | 'analyze' | 'host:<netloc>'
+    last_cycle_at      TEXT,
+    last_ok_at         TEXT,
+    last_result        TEXT,                   -- JSON stats of the last cycle
+    consecutive_errors INTEGER NOT NULL DEFAULT 0
+);
+
+-- Section auto-tagging (schema-first; build is ops-backlog OB-9).
+-- Tags attach to items — renderers aggregate to section level; LLM
+-- discovery keys are a §3a-versioned model surface, labeled by method.
+CREATE TABLE IF NOT EXISTS item_tags (
+    package_id     TEXT NOT NULL,
+    granule_id     TEXT NOT NULL DEFAULT '',
+    tag_kind       TEXT NOT NULL CHECK (tag_kind IN ('branch', 'agency', 'discovery')),
+    tag            TEXT NOT NULL,
+    method         TEXT NOT NULL CHECK (method IN ('mechanical', 'llm')),
+    prompt_version INTEGER,                    -- NULL for mechanical
+    model          TEXT,
+    created_at     TEXT NOT NULL,
+
+    PRIMARY KEY (package_id, granule_id, tag_kind, tag)
+) WITHOUT ROWID;
 """
 
 

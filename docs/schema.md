@@ -369,3 +369,32 @@ for the agency poller.
 `fetch_log` (fetch_log.db) gained a `client` column via additive
 migration: NULL rows are historical govinfo traffic; budgets are counted
 per client bucket (govinfo vs agency vs wayback).
+
+## Continuous-ingestion layer (2026-07-30; docs/continuous-ingestion.md)
+
+`item_journal` — the intraday arrival journal, written by **post-cycle
+reconciliation** (`WHERE NOT EXISTS` against the source tables), never
+by the collection functions themselves. One row per (item, event) with
+`event ∈ ingested/summarized/plain`; `observed_at` is the best
+available arrival time per source class (`extracted_at`,
+`documents.first_seen_at`, else journaling time) at cycle granularity —
+deliberately: dating rules key on claimed publication dates, and the
+journal exists to timestamp the live `/today` view, not to assert
+observation minutes. `digest_date` is the day the item belongs to under
+GUIDE §3 dating rules. Indexed by `(digest_date, observed_at)`.
+
+`collector_state` — one row per collector worker (`govinfo`, `email`,
+`analyze`, `host:<netloc>`): last cycle/ok timestamps, JSON stats of
+the last cycle, `consecutive_errors`. The read surface for
+OPS-GUIDE.md and the `/fapd-health` skill; a worker whose
+`consecutive_errors` grows or whose `last_ok_at` goes stale is a
+finding.
+
+`item_tags` — section auto-tagging, **schema-first** (the build is
+ops-backlog OB-9): tags attach to items on the universal
+`(package_id, granule_id)` key with `tag_kind ∈
+branch/agency/discovery` and `method ∈ mechanical/llm`; the LLM
+discovery keys carry `prompt_version` (a §3a-versioned surface) and
+`model`, so model-derived tags are never mistakable for
+source-provided data. Renderers join per item and aggregate to
+section level.
