@@ -4,16 +4,16 @@
 > ingestion as well as human reading: see /agents.html.
 
 ## Core
-- [Latest digest](/2026-07-28.html)
-- [All digests (index)](/index.html)
-- [Machine-readable digest index](/digests.json)
-- [Atom feed of digests](/feed.xml)
-- [Source guide — what we ingest and why](/sources.html)
-- [About this project](/about.html)
-- [How AI Built This](/ai-development.html)
-- [Methods](/methods.html)
-- [Free Agentic Publication Digester (FAPD)](/readme.html)
-- [Access guide for agents](/agents.html)
+- [Latest digest](https://fapd.info/2026-07-29.html)
+- [All digests (index)](https://fapd.info/index.html)
+- [Machine-readable digest index](https://fapd.info/digests.json)
+- [Atom feed of digests](https://fapd.info/feed.xml)
+- [Source guide — what we ingest and why](https://fapd.info/sources.html)
+- [About this project](https://fapd.info/about.html)
+- [How AI Built This](https://fapd.info/ai-development.html)
+- [Methods](https://fapd.info/methods.html)
+- [Free Agentic Publication Digester (FAPD)](https://fapd.info/readme.html)
+- [Access guide for agents](https://fapd.info/agents.html)
 
 ## Notes
 - Digest URLs are stable: /<YYYY-MM-DD>.html
