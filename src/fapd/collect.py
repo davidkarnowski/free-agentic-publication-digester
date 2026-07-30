@@ -183,8 +183,15 @@ def today_status(conn, date):
     items = [dict(r) for r in conn.execute(
         """
         SELECT j.observed_at, j.source_class, j.package_id, j.granule_id,
-               j.collection, j.source_id, e.doc_type, e.title,
-               s.summary, s.method AS summary_method
+               j.collection, j.source_id, e.doc_type, e.title, e.agency,
+               substr(e.text, 1, 240) AS opening,
+               json_extract(e.metadata, '$.url') AS url,
+               json_extract(e.metadata, '$.channel') AS channel,
+               json_extract(e.metadata, '$.dkim.result') AS dkim_result,
+               json_extract(e.metadata, '$.claimed_published_at')
+                   AS claimed_published_at,
+               s.summary, s.method AS summary_method,
+               s.inclusion_rule
         FROM item_journal j
         LEFT JOIN extracted_texts e USING (package_id, granule_id)
         LEFT JOIN summaries s ON s.package_id = j.package_id

@@ -326,6 +326,13 @@ li.source-note a { color: var(--muted); }
   color: var(--muted); margin-right: 0.35rem;
 }
 .today-summary { margin: 0.2rem 0 0 2.4rem; font-size: 0.92rem; }
+.today-opening { color: var(--muted); }
+.today-chips { margin: 0.15rem 0 0.1rem; }
+.today-chips .tag { margin-right: 0.25rem; }
+.today-item-meta {
+  margin-left: 2.4rem; font-size: 0.78rem; color: var(--muted);
+  overflow-wrap: anywhere;
+}
 """
 
 _DATE_MD_RE = re.compile(r"^\d{4}-\d{2}-\d{2}\.md$")
@@ -889,21 +896,108 @@ _TODAY_SECTIONS = (
 )
 
 
+# Mechanical per-item metadata (zero LLM). Branch by collection; document
+# type expanded into plain words; channel from the journal source class.
+_TODAY_BRANCH = {"CREC": "legislative", "BILLS": "legislative",
+                 "PLAW": "legislative", "FR": "executive",
+                 "USCOURTS": "judicial", "AGENCYPR": "executive"}
+_TODAY_DOC_TYPES = {
+    "RULE": "final rule", "PRORULE": "proposed rule", "NOTICE": "notice",
+    "PRESDOCU": "presidential document", "SENATE": "senate floor",
+    "HOUSE": "house floor", "EXTENSIONS": "extensions of remarks",
+    "DAILYDIGEST": "daily digest", "PRESS": "press release",
+}
+
+
+def _today_doc_label(item):
+    if item["collection"] == "USCOURTS":
+        return "court opinion"
+    if item["collection"] == "PLAW":
+        return "public law"
+    if item["collection"] == "BILLS":
+        v = (item["doc_type"] or "").lower()
+        return f"bill text ({v})" if v else "bill text"
+    dt_ = item["doc_type"] or ""
+    return _TODAY_DOC_TYPES.get(dt_, dt_.lower() or "document")
+
+
+def _today_item_tags(item):
+    """Mechanical tags: branch, plain-words document type, and the agency
+    (FR metadata) or the source's registry stem (agency/email classes).
+    The model discovery-key layer for items stays backlogged; nothing
+    here costs a token."""
+    tags = [_TODAY_BRANCH.get(item["collection"], "cross-branch"),
+            _today_doc_label(item)]
+    if item["agency"]:
+        tags.append(item["agency"].strip().lower())
+    elif item["source_id"]:
+        tags.append(item["source_id"].split("-")[0])
+    return list(dict.fromkeys(t for t in tags if t))
+
+
+def _today_official_url(item):
+    """Best official link we can construct without a request: the item's
+    own captured URL for agency items, the govinfo details page for
+    govinfo collections, none for URL-less email bulletins."""
+    if item["url"]:
+        return item["url"]
+    if item["source_class"] == "govinfo":
+        base = f"https://www.govinfo.gov/app/details/{item['package_id']}"
+        return base + (f"/{item['granule_id']}" if item["granule_id"] else "")
+    return None
+
+
+def _today_channel_label(item):
+    if item["source_class"] == "govinfo":
+        return "govinfo API"
+    if item["channel"] == "email":
+        verified = " (DKIM-verified)" if item["dkim_result"] == "pass" else ""
+        return f"email bulletin{verified}"
+    return "web feed"
+
+
 def _today_item_row(item):
     title = (item["title"] or "").strip() or item["package_id"]
     gran = item["granule_id"]
     cite = item["package_id"] + (f" / {gran}" if gran else "")
     observed = html.escape((item["observed_at"] or "")[11:16])
-    summary = ""
+    url = _today_official_url(item)
+    title_html = (f'<a href="{html.escape(url)}">{html.escape(title)}</a>'
+                  if url else html.escape(title))
+    chips = "".join(f'<span class="tag">{html.escape(t)}</span>'
+                    for t in _today_item_tags(item))
+
+    meta_bits = [_today_channel_label(item)]
+    if item["agency"]:
+        meta_bits.append(item["agency"].strip())
+    elif item["source_id"]:
+        meta_bits.append(item["source_id"])
+    meta_bits.append(cite)
+    if item["claimed_published_at"]:
+        meta_bits.append(f"publisher-dated {item['claimed_published_at']}")
+    meta = html.escape(" · ".join(meta_bits))
+
     if item["summary"]:
         label = ("official summary" if item["summary_method"] == "official"
                  else "model summary")
-        summary = (f'<p class="today-summary"><span class="plain-label">'
-                   f"{label}:</span> {html.escape(item['summary'])}</p>")
+        rule = (f' <span class="rule-note">{html.escape(item["inclusion_rule"])}'
+                "</span>" if item["inclusion_rule"] else "")
+        body = (f'<p class="today-summary"><span class="plain-label">'
+                f"{label}:</span> {html.escape(item['summary'])}{rule}</p>")
+    elif item["opening"]:
+        snippet = " ".join(item["opening"].split())
+        if len(snippet) > 200:
+            snippet = snippet[:200].rsplit(" ", 1)[0] + "…"
+        body = (f'<p class="today-summary today-opening">'
+                f'<span class="plain-label">opening text (verbatim):</span> '
+                f"{html.escape(snippet)}</p>")
+    else:
+        body = ""
     return (
         f'<li class="today-item"><span class="today-time">{observed}Z</span> '
-        f"<strong>{html.escape(title)}</strong> "
-        f'<span class="source-note">{html.escape(cite)}</span>{summary}</li>'
+        f"<strong>{title_html}</strong> "
+        f'<span class="today-chips">{chips}</span>'
+        f'<div class="today-item-meta">{meta}</div>{body}</li>'
     )
 
 
@@ -925,6 +1019,29 @@ def build_today(conn, out_dir=None, date=None):
     grouped = {}
     for item in status["items"]:
         grouped.setdefault(item["collection"] or "OTHER", []).append(item)
+
+    # Section-tag chips (GUIDE §6 r12a): the date's stored section tags,
+    # folded onto /today's collection sections. Present once the tag layer
+    # has run for the date; absent (not faked) before that.
+    from .tags import get_section_tags
+    _SECTION_KEYS = {"CREC": ("senate", "house"), "BILLS": ("legislation",),
+                     "PLAW": ("laws",), "FR": ("rules", "proposed",
+                                               "presidential"),
+                     "USCOURTS": ("judicial",), "AGENCYPR": ("agency",)}
+    stored = get_section_tags(conn, date)
+    section_chips = {}
+    for coll, keys in _SECTION_KEYS.items():
+        mech, model = [], []
+        for k in keys:
+            mech += stored.get(k, {}).get("mechanical", [])
+            model += stored.get(k, {}).get("llm", [])
+        chips = [f'<span class="tag">{html.escape(t)}</span>'
+                 for t in dict.fromkeys(mech)]
+        chips += [f'<span class="tag tag-model" title="model-generated '
+                  f'discovery key">{html.escape(t)}</span>'
+                  for t in dict.fromkeys(model)]
+        if chips:
+            section_chips[coll] = "".join(chips)
 
     parts = [
         f"<h1>Today — {date} (in progress)</h1>",
@@ -948,6 +1065,8 @@ def build_today(conn, out_dir=None, date=None):
             f"<h2>{html.escape(heading)} "
             f'<span class="rule-note">{len(items)} item(s) · newest '
             f"{html.escape(newest)}Z</span></h2>")
+        if coll in section_chips:
+            parts.append(f'<p class="today-chips">{section_chips[coll]}</p>')
         parts.append('<ul class="today-list">'
                      + "".join(_today_item_row(i) for i in items) + "</ul>")
 
@@ -958,15 +1077,29 @@ def build_today(conn, out_dir=None, date=None):
                         "derived-only: not part of the committed record")
     (out_dir / "today.html").write_text(page, encoding="utf-8")
 
+    json_items = []
+    for i in status["items"]:
+        row = {k: v for k, v in i.items() if k != "opening"}
+        row["opening_verbatim"] = i["opening"]  # official text, unedited
+        row["official_url"] = _today_official_url(i)
+        row["channel_label"] = _today_channel_label(i)
+        row["tags"] = _today_item_tags(i)       # mechanical, zero-LLM
+        json_items.append(row)
     (out_dir / "today.json").write_text(_json.dumps({
         "date": date,
         "generated": now,
         "disclosure": _TODAY_DISCLOSURE,
         "canonical_record": "the dated digest, frozen at end of day",
+        "labels": {"summary_method": "official = agency/GPO text;"
+                                     " llm = model-generated, labeled",
+                   "opening_verbatim": "first ~240 chars of the official"
+                                       " text, unedited",
+                   "tags": "mechanical (branch, document type, agency);"
+                           " no model-generated item tags yet"},
         "counts": status["counts"],
         "pending_llm": status["pending_llm"],
         "last_observed_at": status["last_observed_at"],
-        "items": status["items"],
+        "items": json_items,
     }, indent=1, sort_keys=True) + "\n", encoding="utf-8")
     return {"date": date, "items": len(status["items"]),
             "pending_llm": status["pending_llm"], "out_dir": out_dir}

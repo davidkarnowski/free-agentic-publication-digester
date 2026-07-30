@@ -2314,3 +2314,24 @@ dead), so freshness costs zero tokens and zero requests. Both artifacts
 are gitignored: derived-only, never committed, exactly the two-artifact
 split §5 was amended for. llms.txt, robots.txt, and the site nav now
 point to it, each labeled preliminary. 346 tests.
+
+## 2026-07-30 — /today grows up: citations, channels, descriptors, tags
+
+Same-evening follow-up to the /today ship, on operator direction. Each
+live item now carries real citation metadata: a constructed official
+link (the govinfo details page for GPO collections, the captured URL
+for web items — never a fabricated link for URL-less email bulletins),
+a channel label ("govinfo API", "web feed", "email bulletin", the last
+marked DKIM-verified only when the stored verification actually
+passed), the agency or registry source, the package/granule cite, and
+the publisher's own claimed date where one exists. Unsummarized items
+get a descriptor instead of silence: the first ~200 characters of the
+official text, labeled "opening text (verbatim)" — official words, not
+ours. Summarized items keep their labeled official/model summary and
+now show their inclusion rule as the same subtle note the digest uses.
+Every item wears mechanical tag chips — branch, plain-words document
+type, agency stem — at zero tokens; the date's stored section tags fold
+onto the section headers once the tag layer has run, model keys marked.
+today.json exposes all of it, with a labels block explaining each
+field's provenance. The model discovery-key layer for individual items
+stays backlogged. 348 tests.

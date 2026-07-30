@@ -576,11 +576,27 @@ def _seed_today(conn):
         " ('CREC-2026-07-23', 'PgS1', ?, 'llm', 'CREC-SEL-01',"
         " 'The Senate debated a measure.', 'x')",
         (_config.PROMPT_VERSION,))
+    # an unsummarized email-channel agency item with a full extract row
+    conn.execute("INSERT INTO packages (package_id, collection, date_issued,"
+                 " last_modified, title, first_seen_at) VALUES"
+                 " ('AGENCYPR-x', 'AGENCYPR', ?, 'x', 'VA announcement', 'x')",
+                 (DATE,))
+    conn.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection,"
+        " doc_type, title, text, char_count, metadata, extracted_at,"
+        " extractor_version) VALUES ('AGENCYPR-x', '', 'AGENCYPR', 'PRESS',"
+        " 'VA announces a claims program',"
+        " 'The Department of Veterans Affairs announced a program today.',"
+        " 61, ?, 'x', 1)",
+        (('{"channel": "email", "dkim": {"result": "pass"},'
+          ' "source_id": "va-email", "url": null}'),))
     conn.execute(
         "INSERT INTO item_journal (observed_at, source_class, package_id,"
-        " granule_id, collection, digest_date, event) VALUES"
-        " (?, 'govinfo', 'CREC-2026-07-23', 'PgS1', 'CREC', ?, 'ingested'),"
-        " (?, 'agency', 'AGENCYPR-x', '', 'AGENCYPR', ?, 'ingested')",
+        " granule_id, collection, source_id, digest_date, event) VALUES"
+        " (?, 'govinfo', 'CREC-2026-07-23', 'PgS1', 'CREC', NULL, ?,"
+        "  'ingested'),"
+        " (?, 'email', 'AGENCYPR-x', '', 'AGENCYPR', 'va-email', ?,"
+        "  'ingested')",
         (f"{DATE}T10:00:00Z", DATE, f"{DATE}T11:30:00Z", DATE))
     conn.commit()
 
@@ -613,3 +629,64 @@ def test_build_today_empty_day_renders_on_purpose(conn, tmp_path):
     page = (tmp_path / "today.html").read_text()
     assert "No items observed yet" in page
     assert "preliminary" in page.lower()
+
+
+def test_build_today_citation_metadata_and_item_tags(conn, tmp_path):
+    """The enrichment contract: official links, channel labels, mechanical
+    item-tag chips, verbatim opening descriptors for unsummarized items,
+    and the same fields machine-readable in today.json."""
+    import json
+
+    from conftest import DATE
+
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+
+    # govinfo citation link constructed without any request
+    assert ("https://www.govinfo.gov/app/details/CREC-2026-07-23/PgS1"
+            in page)
+    # channel + cite metadata line
+    assert "govinfo API" in page
+    assert "CREC-2026-07-23 / PgS1" in page
+    # mechanical item tags: branch + doc-type words
+    assert '<span class="tag">legislative</span>' in page
+    assert '<span class="tag">senate floor</span>' in page
+    # summarized item carries its inclusion rule as a subtle note
+    assert '<span class="rule-note">CREC-SEL-01</span>' in page
+    # the unsummarized agency item -> labeled verbatim opening + channel
+    assert "opening text (verbatim):" in page
+    assert "email bulletin (DKIM-verified)" in page
+
+    data = json.loads((tmp_path / "today.json").read_text())
+    by_pkg = {i["package_id"]: i for i in data["items"]}
+    crec = by_pkg["CREC-2026-07-23"]
+    assert crec["official_url"].endswith("/CREC-2026-07-23/PgS1")
+    assert crec["channel_label"] == "govinfo API"
+    assert "legislative" in crec["tags"] and "senate floor" in crec["tags"]
+    assert crec["inclusion_rule"] == "CREC-SEL-01"
+    assert data["labels"]["tags"].startswith("mechanical")
+    agency = by_pkg["AGENCYPR-x"]
+    assert agency["tags"] == ["executive", "press release", "va"]
+    assert agency["channel_label"] == "email bulletin (DKIM-verified)"
+    assert agency["official_url"] is None  # URL-less bulletin: no fake link
+    assert agency["opening_verbatim"].startswith("The Department")
+
+
+def test_build_today_renders_section_tag_chips_when_stored(conn, tmp_path):
+    from conftest import DATE
+
+    _seed_today(conn)
+    conn.execute(
+        "INSERT INTO section_tags (date, section_key, tag, method, created_at)"
+        " VALUES (?, 'senate', 'legislative', 'mechanical', 'x')", (DATE,))
+    conn.execute(
+        "INSERT INTO section_tags (date, section_key, tag, method,"
+        " prompt_version, created_at)"
+        " VALUES (?, 'senate', 'stock trading ban', 'llm', 1, 'x')", (DATE,))
+    conn.commit()
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+    assert '<p class="today-chips">' in page
+    assert ">stock trading ban</span>" in page
+    assert 'tag-model" title="model-generated discovery key"' in page
