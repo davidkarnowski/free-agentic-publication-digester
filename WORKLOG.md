@@ -17,6 +17,157 @@ Entry format:
 
 ---
 
+## 2026-07-30 07:20 PDT — Four operator decisions: fapd.info, VPS runtime, API backend, evidence-based email activation
+
+**Context:** Following the morning's state-of-the-project review, the
+operator resolved the open decisions blocking the launch path and
+scoped a work push.
+
+**Decisions (operator):**
+- **Domain: `fapd.info`.** With it, a standing branding rule: public
+  surfaces always carry the full name — "Free Agentic Publication
+  Digester (FAPD)" — not the bare acronym. Site *hosting* is
+  deliberately deferred; this push wires `SITE_BASE_URL` only.
+- **Runtime: VPS, not GH-native.** The GH-Actions-only track adopted
+  2026-07-29 is superseded before its T2–T5 evaluation ran — the
+  operator's judgment, not a failed measurement. The pipeline will run
+  on a VPS; GitHub remains the public repo, CI, and the committed
+  digest/manifest integrity record (the role GUIDE §7 always assigned
+  it). The stable-IP/rDNS identity argument that favored the VPS in the
+  original deliberation becomes the plan's centerpiece.
+  docs/vps-runtime-plan.md is the active plan; gh-native-plan.md
+  carries a superseded header; the gh-native branch stays unmerged as
+  evaluation evidence; ci.yml is the one artifact promoted to main.
+- **LLM backend: build the Anthropic-API backend now**, behind
+  `LLM_BACKEND=api|cli` (CLI stays the local default), with a per-tier
+  model mapping (env-overridable) so different models can be tried
+  without code edits. GUIDE §6 rule 7 amended accordingly (backends are
+  pluggable; ledger records backend + resolved model).
+- **Email sources: evidence-based activation.** Only the 7 sources with
+  observed, parsed, DKIM-verified bulletins flip to active; the 23
+  confirmed-but-silent stay planned with dated notes — the observation
+  window (~45 minutes on 07-29) cannot answer gate 3 for them.
+
+**Work performed (docs-first, per the working agreement):** GUIDE §6
+rule 7 amendment + §8 "Phase R — Hosted runtime"; gh-native-plan.md
+superseded header; vps-runtime-plan.md written (decision, rationale,
+what was kept/dropped from GH-native, deployment outline including the
+first-run API smoke, reversal criteria); pre-publication-todo.md
+domain item closed and scheduling item rewritten to the VPS track.
+
+**Push scope (implementation follows this entry):** CI workflow on
+main; domain + branding wiring (including a real bug found in planning:
+config.py reads SITE_BASE_URL *before* load_dotenv, so a .env value was
+silently ignored); the LLM backend abstraction; registry validation
+hardening (adapter membership by type, sender rules with global
+uniqueness, notes required for active status); the email flip with
+gate-3 notes (plus correcting swapped provenance notes between
+ofr-email and usattorneys-email, and 30 stale "pending build" method
+strings); test-debt paydown (dedicated test_rules.py, compose_sections
+coverage, a stage-split refactor of run_pipeline with its first tests);
+then, held to last, a full pipeline run — which renders the 2026-07-29
+digest, the newest complete day.
+
+**Open questions / next steps:** VPS provisioning is a later push (the
+deployment outline is written); site hosting decision still open; the
+GUIDE §6 rule-8 cap still waits on a decision from the measured
+baseline.
+
+## 2026-07-30 06:34 PDT — State-of-the-project review: full context pass before new work
+
+**Context:** New work session opened with a fresh review of the whole
+project — code, governing documents, research, registry, and data state
+— to re-establish context and record where things stand before the next
+build phase.
+
+**Work performed:** Read-through of README, GUIDE, the launch checklist
+(docs/pre-publication-todo.md), the GH-native plan, recent worklog
+entries, and a structured sweep of all 21 modules in src/fapd, the 13
+scripts, the 19 test files, and the registry. No code changed; this
+entry is the resulting assessment.
+
+**Where the project stands (summary of progress to date):**
+
+- **The pipeline is complete end to end and validated.** Six days from
+  inception (07-24) to a full run: sync (govinfo delta, watermarked) →
+  agency RSS (per-host concurrent) → email bulletins (IMAP, DKIM-
+  verified) → extract (five collection parsers + FR graphics) →
+  mechanical selection (versioned rules, party-blind) → three
+  independently-versioned LLM layers → deterministic render with four
+  hard validation gates → static site with agent surfaces. ~4,700 LOC,
+  257 tests passing, four digests committed, provenance manifests
+  hash-chained.
+- **The editorial machinery is real, not aspirational.** Selection is
+  code (rules.py registry, one rule per item, registry order as
+  precedence); the Coverage Statement reconciles arithmetically against
+  SQL; the banned-lexicon gate masks official text before scanning our
+  prose; a failed gate blocks publication with no override. The one
+  acknowledged gap in the source is disclosed in the digest itself (the
+  FR graphics vision pass, report.py:1110) and pinned by a test.
+- **The source universe is measured: 127 registered, 19 active, 19
+  unavailable, 87 planned, 2 evaluated-excluded.** The access story has
+  become the project's most distinctive pillar: refusals recorded as
+  data, the email channel re-opening 11 blocked agencies through the
+  publishers' own bulletins (37 items from 9 agencies on the first
+  live run, DKIM 37/37), and an advocacy agenda (M-23-22 letters, Web
+  Bot Auth) queued behind GUIDE amendments.
+- **Token economics found its baseline.** The 07-29 judicial-heavy run
+  measured 1.53M input tokens; the ledger traced 42% to single-item
+  plain-speak retries, and the group-first/isolate-last escalation
+  landed the same night (~500K/day recovered). The GUIDE §6 rule-8 cap
+  can now be set from data, as rule 8 always intended.
+- **Launch posture:** licenses decided and committed (Apache-2.0 /
+  CC BY 4.0), history audit passed, AI-transparency page published,
+  rebrand done. What gates the public flip is infrastructure, not
+  content: domain decision, CI + Pages workflows, the AnthropicBackend
+  for hosted runs, community files, and the STATUS snapshot.
+
+**Assessment — strengths worth preserving:** the GUIDE-first working
+agreement is visibly holding (module docstrings cite section numbers;
+amendments precede implementation); incomplete work lives in tracked
+TODO docs rather than code markers (a grep of src/scripts/tests finds
+essentially none); verification culture is catching real defects
+(live-output checks found the email adapter's fabricated-item and
+wrong-citation bugs that green tests missed).
+
+**Assessment — gaps and frictions found in this pass:**
+
+1. **The registry's `adapter: govdelivery` field is decorative.** 24
+   email entries declare it, but no such key exists in
+   `agencies.ADAPTERS` and email_sources.py never reads the field.
+   Harmless today (all 24 are planned and routed by sender allowlist),
+   but `sources._validate` doesn't check `adapter` values against known
+   adapters, and a mistyped entry would surface as a KeyError at poll
+   time instead of a validation failure at load time.
+2. **scripts/ is untested** — including run_pipeline.py's stage wiring,
+   the `from digest import default_date` cross-script import, and the
+   mailbox-outage fallback. The pipeline's connective tissue relies on
+   live runs for verification.
+3. **Rule coverage is discoverability-hostile:** the selection registry
+   — the most safety-critical module — is tested inside
+   test_analyze.py rather than a test_rules.py of its own.
+4. **compose.py is the thinnest-tested module** (290 LOC, 4 tests).
+5. **PLAW is in COLLECTIONS with a parser but data/raw has no PLAW/
+   directory** — the collection has produced no archived packages yet;
+   worth confirming this is delta-sync timing rather than a silent
+   filter.
+6. Email sources remain `planned` pending gate-3 coverage evaluation —
+   correct per the five-gate discipline, but the few-days bulletin
+   accumulation clock is running and should be checked deliberately,
+   not remembered accidentally.
+
+**Decisions:** none — assessment session only.
+
+**Open questions / next steps:** the launch checklist is the map. The
+critical path to the flip: (a) domain decision (operator), then
+SITE_BASE_URL; (b) gh-native branch backlog — AnthropicBackend,
+run-summary emitter, state steps, T2–T5 evaluation with the per-source
+403 measurement; (c) community files; (d) STATUS snapshot; (e) set the
+§6 rule-8 cap from the measured baseline. Alongside: gate-3 evaluation
+of the email sources once a few days of bulletins accumulate, and the
+small hardening items above (adapter-field validation, a smoke test
+for run_pipeline's wiring).
+
 ## 2026-07-29 23:45 PDT — Retry escalation: group-first, isolate-last (the 42% token burn)
 
 **Context:** The 2026-07-29 ledger showed `plain:retry` consuming

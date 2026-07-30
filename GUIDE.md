@@ -590,7 +590,13 @@ of the code, not of operator discipline.
 7. **Token ledger, like the fetch log.** Every LLM call is logged (UTC
    timestamp, model, purpose, input/output tokens, package IDs touched) to a
    local ledger. A self-audit report (like `scripts/audit.py`) answers "what
-   did analysis cost this week?" at any time.
+   did analysis cost this week?" at any time. The LLM layer is
+   backend-pluggable (amended 2026-07-30): the `claude` CLI remains the
+   default for operator-machine runs, and an Anthropic-API backend serves
+   hosted runs; callers name model *tiers*, a config table resolves the
+   concrete model per backend, and the ledger records both the backend and
+   the resolved model for every call — budget rules apply identically to
+   both.
 8. **Measure first, then cap.** The token ledger (rule 7) runs from the
    analysis layer's very first call, but **no hard cap is enforced until
    real test runs establish a measured baseline** — capping against
@@ -684,6 +690,12 @@ Mechanics:
 - **Phase 4 — Broaden & harden:** add PLAW/CHRG/CRPT/DCPD, Congress.gov
   metadata, backfill via bulk data, bias/faithfulness spot-audits
   (periodically diff a digest item against its full source).
+- **Phase R — Hosted runtime (adopted 2026-07-30):** a VPS runs the daily
+  pipeline on a schedule (cron/systemd timer) and pushes evidence commits
+  with a bot identity; GitHub remains the public repository, CI, and the
+  integrity witness for committed digests and manifests (§7). The VPS's
+  stable IPv4 and reverse-DNS serve as crawler identity infrastructure.
+  Plan: `docs/vps-runtime-plan.md`.
 
 ## 9. Open-Source Readiness
 

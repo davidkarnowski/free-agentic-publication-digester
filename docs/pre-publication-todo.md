@@ -15,10 +15,11 @@ close (check them off with dates).
   `LICENSE-CONTENT.md` committed; stated in site footer, llms.txt Reuse
   note, agents-page Reuse section, README Licensing section, and each
   digest's methodology footer (all digests re-rendered).
-- [ ] **[decision] Domain.** Choose and register the public domain (or
-  decide user-site `davidkarnowski.github.io`). Then: `CNAME` in site/,
-  set `SITE_BASE_URL` in the build environment (machinery landed
-  2026-07-29), regenerate.
+- [x] 2026-07-30 **[decision] Domain: `fapd.info`** (operator).
+  `SITE_BASE_URL=https://fapd.info` set in `.env`/`.env.example` and all
+  machine surfaces regenerated with absolute URLs. Site *hosting*
+  (GitHub Pages + CNAME vs served from the VPS) deliberately deferred —
+  no CNAME yet.
 - [ ] **[decision] Repo visibility flip date** — after the items below
   it gates are done.
 
@@ -30,26 +31,21 @@ close (check them off with dates).
   cannot serve `site/`; a workflow is required). Include `SITE_BASE_URL`
   env so machine surfaces emit absolute URLs.
 - [ ] **CI workflow** (`.github/workflows/ci.yml`): `uv sync` + `ruff
-  check` + `pytest` on push/PR. 227 tests currently run only on the
-  operator's machine.
-- [ ] **LLM backend swap** (`src/fapd/llm.py`): add an Anthropic-API
-  backend behind the existing interface (the `claude` CLI binds runs to
-  the local machine/subscription and cannot run hosted). Blocks any
-  hosted scheduling; local scheduling does not need it.
-- [ ] **Daily scheduling — active track: GH-native runtime**
-  (docs/gh-native-plan.md, adopted 2026-07-29): the pipeline runs
-  entirely on hosted GitHub Actions — rolling `pipeline-state` Release
-  as the state store, evidence + a new committed daily run-summary in
-  git (bot commit identity), AnthropicBackend for the LLM stage,
-  ci/pipeline/pages workflows. Built and evaluated on the **gh-native
-  branch** (T1–T5 in the plan doc, incl. the per-source 403-delta
-  measurement that decides the IP-reputation question); main's runtime
-  changes only by reviewed PR after the evaluation passes. The
-  VPS/self-hosted-runner shape (consistent IPv4 + rDNS as crawler
-  identity; private ops repo requirement) is documented in the plan doc
-  as the considered, not-settled alternative — revisited only if the
-  measured 403 delta materially shrinks agency coverage and Web Bot
-  Auth signing doesn't recover it. Open since Phase 1.
+  check` + `pytest` on push/PR — promoted from the `gh-native` branch.
+- [ ] **LLM backend swap** (`src/fapd/llm.py`): Anthropic-API backend
+  behind `LLM_BACKEND=api|cli` with a per-tier model mapping (CLI stays
+  the local default). Unblocks hosted scheduling and decouples the VPS
+  from `claude` CLI tooling.
+- [ ] **Daily scheduling — active track: VPS runtime**
+  (docs/vps-runtime-plan.md, adopted 2026-07-30, superseding the
+  GH-native track before its T2–T5 evaluation ran): the pipeline runs
+  on a VPS under cron/systemd, pushes evidence commits (digests,
+  manifests, SOURCES.md, site) with a bot identity, and GitHub remains
+  the public repo, CI, and integrity witness (GUIDE §7). Stable IPv4 +
+  rDNS become the crawler-identity anchor; Web Bot Auth signing is a
+  strengthening layer, not a prerequisite. Remaining work is the
+  deployment outline in the plan doc (provision, first-run smoke, bot
+  identity, scheduler, rDNS, run-summary emitter). Open since Phase 1.
 
 ### Community files
 - [ ] `SECURITY.md` — contact route (hustleyourcity address), what's in

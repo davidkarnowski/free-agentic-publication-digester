@@ -1,5 +1,15 @@
 # GH-Native Runtime Plan — running FAPD entirely on GitHub
 
+> **STATUS: SUPERSEDED (2026-07-30).** The operator chose a VPS-hosted
+> runtime before the T2–T5 evaluation ran: the pipeline will execute on
+> a VPS while GitHub remains the public repository, CI, and the
+> committed digest/manifest integrity record. The active plan is
+> [`vps-runtime-plan.md`](vps-runtime-plan.md). The `gh-native` branch
+> is preserved unmerged as the evaluation record, per this plan's own
+> rule ("if evaluation fails, the branch is evidence, not debt");
+> `ci.yml` was the one artifact promoted to `main`. The text below is
+> unchanged from adoption on 2026-07-29.
+
 *Adopted as the active scheduling track 2026-07-29. Built and evaluated
 on the `gh-native` branch; promoted to `main` only by reviewed PR after
 the test plan below passes. The VPS/self-hosted-runner alternative is
