@@ -319,7 +319,8 @@ channels refuse identified clients (see
   posture is re-evaluated (gate 5).
 - **Our mailbox, our budget.** Polling our own mailbox costs government
   servers nothing; §4's request budgets don't apply to it. It is still
-  paced (a few polls per day), logged in the access narrative, and
+  paced (bounded intraday polls — ~15-minute cadence under continuous
+  ingestion, amended 2026-07-30), logged in the access narrative, and
   per-message ingest events are recorded like any fetch attempt in the
   daily manifest — absence must remain an assertion.
 - **Consent is revocable.** An unsubscribe request, list removal, or
@@ -469,9 +470,18 @@ discipline:
   global across workers (counted from the shared fetch log); the check is
   read-before-request, so concurrency can overshoot a cap by at most the
   worker count — budgets are set with headroom for exactly this reason.
-- **Poll, don't hammer:** one scheduled sync per day (a second late-day pass
-  is acceptable later). Use the `collections` service's last-modified
-  filtering so each sync asks only "what changed since my last watermark."
+- **Poll, don't hammer (amended 2026-07-30 for continuous ingestion):**
+  polling is watermark-delta at bounded intervals — each ask remains "what
+  changed since my last watermark," now repeated through the day on
+  per-source-class clocks (govinfo ~30 min, agency feeds ~60 min via
+  conditional requests, our own mailbox ~15 min) instead of once. **The
+  binding invariants do not loosen:** at most 1 request/second per host with
+  crawl-delay overriding downward, per-class daily budgets enforced by the
+  client, every request logged, identified UA. Frequency is additionally
+  governed by **backpressure**: past 70% of a class's daily budget its
+  collector doubles its interval for the rest of the UTC day, reserving
+  headroom for the end-of-day finalizer — continuous polling must never
+  starve the canonical run.
 - **Date-bound every sync.** A sync with no stored watermark (first run, or a
   reset) must not walk open-ended history: it starts at now minus a small
   fixed lookback window (`INITIAL_SYNC_LOOKBACK_DAYS`, currently 3 days) and
@@ -528,6 +538,21 @@ without touching upstream:
            and GitHub Pages.
 ```
 
+- **Continuous operation and the two-artifact model (amended
+  2026-07-30):** ingestion runs continuously — a single supervisor
+  process (`src/fapd/collect.py`) with per-source-class workers on their
+  own clocks (a 420-second crawl-delay host simply lives on its own
+  clock without delaying anyone), journaling arrivals into
+  `item_journal` with observation timestamps. Presentation splits into
+  two artifacts: a **live `/today` page** — derived-only, never
+  committed, updating through the day, carrying a mandatory disclosure
+  block ("preliminary; items may be re-dated, re-summarized, or
+  excluded by end-of-day editorial gates; the dated digest is the
+  record") — and the **canonical dated digest**, produced by the
+  end-of-day finalizer run (`run_pipeline.py`), frozen by its
+  validation gates, and committed as the §7 integrity record. Intraday
+  state never bypasses a gate: whatever `/today` showed, the canonical
+  digest is what the validation gates passed.
 - **Storage:** filesystem for raw documents (`data/raw/<collection>/<date>/`),
   SQLite for metadata and extracted records. No cloud dependency to start.
 - **Language:** Python (mature XML tooling, easy scheduling). Decide at first
@@ -622,6 +647,17 @@ of the code, not of operator discipline.
    structure analysis as batchable per-item calls so it can run on
    discounted/off-peak capacity, and so a partial day's work is resumable —
    mirroring the fetch layer's pending-queue semantics.
+12. **Continuous operation preserves batching (added 2026-07-30).**
+   Under continuous ingestion, "fully continuous" is honored **by
+   layer**: mechanical layers (item listing, official summaries, counts,
+   rendering) update on every arrival at zero tokens; model map/plain
+   layers fire only on batch-threshold-or-age triggers (a full batch, or
+   the oldest pending item exceeding a latency bound), never per item —
+   per-item calls would re-pay the fixed prompt overhead rule 9's
+   batching exists to amortize. Day/section composition runs **only** in
+   the end-of-day finalizer: its staleness rule would otherwise
+   recompose on nearly every intraday batch, and the Day in Review
+   describes a completed day by definition.
 
 ## 7. Provenance & Tamper-Evidence
 

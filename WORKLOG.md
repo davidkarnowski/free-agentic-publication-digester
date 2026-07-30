@@ -17,6 +17,46 @@ Entry format:
 
 ---
 
+## 2026-07-30 09:05 PDT — Continuous ingestion adopted: supervisor collectors, two-artifact model (branch arch/continuous-ingestion)
+
+**Context:** Sources publish at varied times; the operator directed a
+move to continuous ingestion — background per-source collectors (the
+420-second-crawl-delay host being the canonical case), email ingested
+as it arrives, an intraday view of the day with timestamped updates,
+and a full end-of-day digest. Operator decisions via Q&A: live /today
+page + frozen canonical digest (two artifacts); fully-continuous
+updates; this push builds the collector core, /today rendering and VPS
+backend next push.
+
+**GUIDE amendments (first, per the working agreement):** §4
+poll-don't-hammer rewritten for bounded-interval watermark-delta
+polling with every politeness invariant explicitly reaffirmed and a
+70%-budget backpressure rule reserving EOD headroom; §3 mailbox pacing
+wording; §5 the two-artifact model (/today derived-only and never
+committed, with a mandatory preliminary-disclosure block; the dated
+digest frozen by the finalizer's validation gates remains the §7
+record); §6 rule 12 — "fully continuous" honored by layer: mechanical
+layers on every arrival at zero tokens, model layers on
+batch-threshold-or-age triggers, compose EOD-only (enforced
+structurally: the collector module contains no compose call).
+
+**Design (docs/continuous-ingestion.md is the authority):** one
+supervisor process with per-source-class worker threads — the
+run_concurrent shape extended in time; collectors call only existing
+functions (sync_collection, poll_source, poll_mailbox, extract.run,
+analyze.run/run_plain — all already watermarked/idempotent); arrivals
+journaled by post-cycle reconciliation (WHERE NOT EXISTS), zero changes
+to collection code; item_journal/collector_state/item_tags schema
+(tagging schema-first so its build needs no second migration); EOD
+handoff keeps run_pipeline as the finalizer with collectors paused
+around it. Next-push designs written in full: /today renderer, the
+egress-only backend container with the in-supervisor EODWorker and
+guard-shell evidence commits, and the tagging build.
+
+**Open questions / next steps:** B2–B5 commits (schema, core logic,
+supervisor + CLI, bookkeeping); live smoke held until no other process
+holds the live DB.
+
 ## 2026-07-30 08:40 PDT — Agent-ops standards adopted from the sibling projects (branch arch/agent-ops-standards)
 
 **Context:** The operator directed FAPD to adopt the operational
