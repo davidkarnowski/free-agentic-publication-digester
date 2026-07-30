@@ -13,7 +13,7 @@ from pathlib import Path
 
 import markdown
 
-from . import config
+from . import config, sources
 from .sync import utc_now_iso
 
 SITE_TITLE = "Free Agentic Publication Digester — Daily Federal Digest"
@@ -277,6 +277,42 @@ li.source-note a { color: var(--muted); }
   font-size: 0.95rem;
 }
 .tagline { color: var(--muted); }
+/* Source directory (sources.html): the registry rendered as grouped cards.
+   Chips reuse .tag; the record folds into a native details (still JS-free). */
+.src-counts { font-size: 1.02rem; }
+.status-key {
+  display: grid; grid-template-columns: max-content 1fr;
+  gap: 0.35rem 0.7rem; margin: 0.8rem 0 1.2rem;
+}
+.status-key dt { margin: 0; }
+.status-key dd { margin: 0; font-size: 0.9rem; color: var(--muted); }
+.src-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  margin: 0.8rem 0;
+}
+.src-card .src-name {
+  margin: 0; font-size: 1.02rem;
+  text-transform: none; letter-spacing: normal; color: var(--fg);
+}
+.src-name a { text-decoration: none; }
+.src-name a:hover { text-decoration: underline; }
+.src-sub { margin: 0.25rem 0 0; font-size: 0.8rem; color: var(--muted); }
+.src-desc { margin: 0.45rem 0 0; font-size: 0.92rem; }
+.src-links { margin: 0.35rem 0 0; font-size: 0.85rem; }
+.src-more { margin-top: 0.45rem; font-size: 0.8rem; color: var(--muted); }
+.src-more summary { cursor: pointer; color: var(--accent); }
+.src-more dl { margin: 0.4rem 0 0; }
+.src-more dt { font-weight: 600; margin-top: 0.3rem; }
+.src-more dd { margin: 0; overflow-wrap: anywhere; }
+.tag-status-active {
+  background: var(--accent-soft); color: var(--accent);
+  border-color: var(--accent);
+}
+.tag-status-unavailable { border-style: dashed; }
+.tag-status-excluded { border-style: dotted; }
 """
 
 _DATE_MD_RE = re.compile(r"^\d{4}-\d{2}-\d{2}\.md$")
@@ -521,19 +557,217 @@ def _build_doc_pages(out_dir):
     return doc_pages
 
 
+# ---------------------------------------------------------------------------
+# Source guide page (sources.html)
+# ---------------------------------------------------------------------------
+# Rendered directly from sources/registry.yaml — the same registry that
+# generates the committed SOURCES.md evidence artifact (which is unchanged
+# by this page). Deterministic, zero-LLM: a directory of grouped cards
+# instead of one large table.
+
+_TYPE_LABELS = {
+    "govinfo-collection": "govinfo collection",
+    "rss": "RSS feed",
+    "html-index": "HTML index",
+    "xml-index": "XML index",
+    "api": "API",
+    "aggregator": "aggregator",
+    "bulkdata": "bulk data",
+    "email": "email bulletin",
+}
+_WEB_TYPES = ("rss", "html-index", "xml-index", "api", "aggregator", "bulkdata")
+_STATUS_CHIPS = {
+    "active": ("active", "tag-status-active"),
+    "planned": ("planned", "tag-status-planned"),
+    "unavailable": ("unavailable", "tag-status-unavailable"),
+    "evaluated-excluded": ("excluded", "tag-status-excluded"),
+}
+_STATUS_PHRASES = {
+    "active": "active",
+    "planned": "planned",
+    "unavailable": "unavailable",
+    "evaluated-excluded": "evaluated and excluded",
+}
+_STATUS_DEFS = (
+    ("active", ("ingested by the pipeline today; each active entry carries a "
+                "dated coverage evaluation in its registry notes")),
+    ("planned", ("registered so the coverage gap is visible; activation waits "
+                 "on the source's probe and content evaluation")),
+    ("unavailable", ("the publisher's site refuses the project's "
+                     "honestly-identified automated client; the refusal is "
+                     "recorded as observed, never evaded, and re-checked as "
+                     "sites change")),
+    ("evaluated-excluded", ("examined and found outside the project's scope "
+                            "of newly published federal government actions; "
+                            "kept on the record")),
+)
+# Email addresses never render on the site: the project mailbox and the
+# per-source sender allowlist stay in the registry (GUIDE §9 posture).
+# Registry notes that quote a sender keep their evidence value with the
+# address withheld in place.
+_EMAIL_ADDR_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+
+
+def _redact_addresses(text):
+    return _EMAIL_ADDR_RE.sub("[address withheld]", text)
+
+
+def _status_chip(status):
+    label, css_class = _STATUS_CHIPS[status]
+    return f'<span class="tag {css_class}">{label}</span>'
+
+
+def _source_card(entry):
+    """One registry entry as a card: linked name, status chip + subtitle,
+    the registry's descriptive text, and the full registry record (id,
+    added date, method, notes) folded into a native <details>."""
+    urls = entry["urls"]
+    link = urls.get("home") or next(iter(urls.values()))
+    subtitle = html.escape(
+        f"{entry['branch'].capitalize()} · Tier {entry['tier']} · "
+        f"{_TYPE_LABELS.get(entry['type'], entry['type'])} · {entry['parent_org']}"
+    )
+    signup = ""
+    if entry["type"] == "email" and "signup" in urls:
+        signup = (
+            f'<p class="src-links"><a href="{html.escape(urls["signup"], quote=True)}">'
+            "Agency signup page</a> (the same public form the project "
+            "subscribed through)</p>"
+        )
+    record = [
+        f"<dt>Registry id</dt><dd><code>{html.escape(entry['id'])}</code></dd>",
+        f"<dt>Added</dt><dd>{html.escape(entry['added'])}</dd>",
+        f"<dt>Method</dt><dd>{html.escape(_redact_addresses(entry['method']))}</dd>",
+    ]
+    notes = entry["notes"].strip()
+    if notes:
+        record.append(
+            f"<dt>Notes</dt><dd>{html.escape(_redact_addresses(notes))}</dd>")
+    return (
+        f'<article class="src-card" id="src-{html.escape(entry["id"])}">'
+        f'<h4 class="src-name"><a href="{html.escape(link, quote=True)}">'
+        f"{html.escape(entry['name'])}</a></h4>"
+        f'<p class="src-sub">{_status_chip(entry["status"])} {subtitle}</p>'
+        f'<p class="src-desc">{html.escape(entry["description"])}</p>'
+        f"{signup}"
+        f'<details class="src-more"><summary>Registry record</summary>'
+        f'<dl>{"".join(record)}</dl></details>'
+        "</article>"
+    )
+
+
+def _source_section(anchor, title, intro_html, group_entries):
+    """A source group as h2 + intro + Active/Planned h3 subgroups of cards
+    (registry order within each subgroup — registry order is precedence)."""
+    parts = [f'<h2 id="{anchor}">{title}</h2>', intro_html]
+    for status in ("active", "planned"):
+        subset = [e for e in group_entries if e["status"] == status]
+        if not subset:
+            continue
+        parts.append(f"<h3>{status.capitalize()} ({len(subset)})</h3>")
+        parts.extend(_source_card(e) for e in subset)
+    return "".join(parts)
+
+
+def _sources_body(entries):
+    counts = {s: sum(1 for e in entries if e["status"] == s)
+              for s in sources.STATUSES}
+    # Counts read in page order (the order sections appear), not enum order.
+    counts_text = ", ".join(
+        f"{counts[s]} {_STATUS_PHRASES[s]}" for s, _d in _STATUS_DEFS if counts[s])
+    status_key = "".join(
+        f"<dt>{_status_chip(s)}</dt><dd>{d}.</dd>" for s, d in _STATUS_DEFS)
+    # Tier semantics come from the registry module so this page and
+    # SOURCES.md state the same universe.
+    tiers_text = "; ".join(
+        f"Tier {t} — {sources._TIER_SEMANTICS[t]}" for t in sources.TIERS)
+
+    parts = [
+        "<h1>Sources</h1>",
+        ("<p>The Free Agentic Publication Digester builds its daily digest "
+         "only from official federal publication channels. This page is the "
+         "source directory: every source the project ingests, plans to "
+         "ingest, or has evaluated, rendered from the registry "
+         "(<code>sources/registry.yaml</code>) that governs the pipeline's "
+         "scope. Entries are never deleted — a source that refuses automated "
+         "access stays listed, because the refusal is part of the coverage "
+         "record.</p>"),
+        (f'<p class="src-counts"><strong>{len(entries)}</strong> sources '
+         f"registered — {counts_text}.</p>"),
+        f'<dl class="status-key">{status_key}</dl>',
+        (f'<p class="tagline">Tiers state coverage against a defined '
+         f"universe: {tiers_text}.</p>"),
+    ]
+
+    listed = [e for e in entries if e["status"] in ("active", "planned")]
+    parts.append(_source_section(
+        "govinfo-collections", "Official govinfo collections",
+        "<p>Structured document collections published by the Government "
+        "Publishing Office through govinfo.gov — the core official record "
+        "the digest is built from. Each collection syncs through the "
+        "govinfo collections API with per-collection watermarks.</p>",
+        [e for e in listed if e["type"] == "govinfo-collection"]))
+    parts.append(_source_section(
+        "agency-web-channels", "Agency newsrooms and web channels",
+        "<p>Press-release feeds and indexes, APIs, and bulk data that "
+        "agencies publish on the web, read through the project's "
+        "robots-respecting identified client. The subtitle on each card "
+        "names the channel type.</p>",
+        [e for e in listed if e["type"] in _WEB_TYPES]))
+    parts.append(_source_section(
+        "agency-email-bulletins", "Agency email bulletins",
+        "<p>Bulletins the agencies themselves distribute by subscription "
+        "email (GovDelivery and similar services), delivered to a single "
+        "identified project mailbox, DKIM-verified on arrival, and ingested "
+        "from the message body. Sender and mailbox addresses are recorded "
+        "in the registry, not republished here; where a registry note "
+        "quotes one, it appears as [address withheld].</p>",
+        [e for e in listed if e["type"] == "email"]))
+
+    unavailable = [e for e in entries if e["status"] == "unavailable"]
+    if unavailable:
+        parts.append(
+            f'<h2 id="unavailable-sources">Unavailable sources '
+            f"({len(unavailable)})</h2>"
+            "<p>These publishers currently refuse the project's "
+            "honestly-identified automated client — a robots.txt disallow "
+            "or an HTTP block on the listed path. Project policy "
+            '(<a href="methods.html">Methods</a>) is to record the refusal '
+            "exactly as observed and never work around it: no browser "
+            "impersonation, no unidentified fetching. Each entry stays "
+            "listed because a closed door is coverage information; where an "
+            "agency offers a subscription email channel instead, a sibling "
+            "entry appears above and the refusal here stands on the "
+            "record.</p>")
+        parts.extend(_source_card(e) for e in unavailable)
+
+    excluded = [e for e in entries if e["status"] == "evaluated-excluded"]
+    if excluded:
+        parts.append(
+            f'<h2 id="evaluated-and-excluded">Evaluated and excluded '
+            f"({len(excluded)})</h2>"
+            "<p>Sources examined and found outside the project's scope — "
+            "they do not publish new federal government actions. The "
+            "evaluation is kept so the decision stays visible and "
+            "revisitable.</p>")
+        parts.extend(_source_card(e) for e in excluded)
+
+    return "".join(parts)
+
+
 def _build_sources_page(out_dir, doc_pages=()):
-    """Render the source guide (SOURCES.md, generated from the registry)
-    into the site. Returns True if the page was built."""
-    sources_md = config.PROJECT_ROOT / "SOURCES.md"
-    if not sources_md.exists():
+    """Render the source guide as a human-readable directory derived from
+    sources/registry.yaml at build time. Returns True if the page was built."""
+    registry_path = config.PROJECT_ROOT / "sources" / "registry.yaml"
+    if not registry_path.exists():
         return False
-    _MD.reset()
-    body = _MD.convert(sources_md.read_text(encoding="utf-8"))
+    entries = sources.load_registry(registry_path)
     page = _render_page(
         f"Sources — {SITE_TITLE}",
-        body,
-        '<a href="index.html">All digests</a>' + _doc_nav_links(doc_pages),
-        "SOURCES.md (generated from sources/registry.yaml)",
+        _sources_body(entries),
+        '<a href="index.html">All digests</a>' + _doc_nav_links(doc_pages)
+        + '<a href="agents.html">For agents</a>',
+        "sources/registry.yaml",
     )
     (out_dir / "sources.html").write_text(page, encoding="utf-8")
     return True

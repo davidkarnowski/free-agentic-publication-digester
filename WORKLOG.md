@@ -2268,3 +2268,31 @@ have forever exited "nothing staged" from the wrong directory, and the
 collector_state seed that keeps the EOD from refiring on a day the
 operator machine already finalized. First automated evidence commit
 expected at tomorrow's 09:00Z EOD.
+## 2026-07-30 — Sources page: from one giant table to a readable directory
+
+site/sources.html had been the whole of SOURCES.md run through the
+Markdown converter — 127 registry rows in one table, honest but
+unreadable, and the notes column (where the probe history and gate-3
+evaluations live) made it worse the more honest it got. The page now
+renders straight from `sources/registry.yaml` at build time instead:
+`publish._build_sources_page` loads the registry via
+`sources.load_registry`, computes the status counts (never hardcoded),
+and lays the entries out as grouped cards — three channel sections
+(Official govinfo collections; Agency newsrooms and web channels;
+Agency email bulletins) with Active/Planned h3 subgroups, then
+Unavailable and Evaluated-and-excluded as their own sections with
+explanatory paragraphs, because a closed door is coverage information
+and gets said out loud, not buried in a row. Each card: linked name,
+status chip + branch/tier/type/parent subtitle, the registry's own
+description, and the full registry record (id, added, method, notes)
+folded into a native details element — still zero JavaScript.
+
+Two deliberate boundaries. SOURCES.md and scripts/sources_doc.py are
+untouched — the committed evidence artifact keeps its shape; this is
+presentation only. And email addresses never render: sender and mailbox
+stay in the registry, and registry notes that quote a sender show
+[address withheld] in place, with the redaction itself disclosed in the
+email section's intro. A real-registry test pins both (127 cards, zero
+address matches, zero tables), alongside fixture-registry tests for the
+grouping, chips, counts, and the unavailable section's policy text.
+325 passed + 7 data-dependent skips in the worktree (no data/ here).

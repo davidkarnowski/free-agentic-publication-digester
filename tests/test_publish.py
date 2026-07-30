@@ -215,26 +215,180 @@ def test_real_digests_build(tmp_path):
     assert "Daily Digest — 2026-07-23" in index
 
 
-def test_sources_page_built_and_linked(digests, tmp_path, monkeypatch):
+_REGISTRY_YAML = """\
+- id: govinfo-test
+  name: Test Collection (TEST)
+  branch: legislative
+  parent_org: U.S. Congress
+  description: "A structured collection of test documents."
+  type: govinfo-collection
+  tier: 1
+  urls:
+    collection: https://www.govinfo.gov/app/collection/TEST
+  method: govinfo collections API delta sync
+  status: active
+  added: "2026-07-26"
+  notes: "Coverage (gate 3): the complete official test record."
+- id: gao-reports
+  name: GAO Reports
+  branch: legislative
+  parent_org: Government Accountability Office
+  description: "Audit and evaluation reports published on a daily feed."
+  type: rss
+  tier: 1
+  urls:
+    home: https://www.gao.gov/reports
+  method: Would parse the reports feed daily.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+- id: treasury-email-test
+  name: Treasury Press Releases (email)
+  branch: executive
+  parent_org: Department of the Treasury
+  description: "Subscription bulletins carrying press releases."
+  type: email
+  tier: 1
+  sender: subscriptions@subscriptions.treas.gov
+  urls:
+    home: https://home.treasury.gov/news/press-releases
+    signup: https://service.govdelivery.com/service/multi_subscribe.html?code=USTREAS
+  method: Subscription bulletins to the project mailbox.
+  status: active
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29 (sender subscriptions@subscriptions.treas.gov)."
+- id: blocked-newsroom
+  name: Blocked Newsroom
+  branch: executive
+  parent_org: Department of Example
+  description: "A press-release index whose path refuses identified clients."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://example.gov/newsroom
+  method: Would parse the press-release HTML index daily.
+  status: unavailable
+  added: "2026-07-26"
+  notes: "Probed 2026-07-26: robots.txt disallows our identified client."
+- id: archive-api
+  name: Archive Catalog API
+  branch: executive
+  parent_org: Example Archives
+  description: "An archival catalog that publishes no new government actions."
+  type: api
+  tier: 3
+  urls:
+    home: https://catalog.example.gov/api
+  method: Not applicable; evaluated only.
+  status: evaluated-excluded
+  added: "2026-07-28"
+  notes: "Evaluated 2026-07-28: archival by nature, out of scope."
+"""
+
+
+@pytest.fixture
+def registry_root(tmp_path, monkeypatch):
     from fapd import config
 
     root = tmp_path / "root"
-    root.mkdir()
-    (root / "SOURCES.md").write_text(
-        "# Sources\n\n| Name | Status |\n|---|---|\n| GAO | planned |\n"
-    )
+    (root / "sources").mkdir(parents=True)
+    (root / "sources" / "registry.yaml").write_text(_REGISTRY_YAML)
     monkeypatch.setattr(config, "PROJECT_ROOT", root)
+    return root
+
+
+def test_sources_page_built_and_linked(digests, registry_root, tmp_path):
     out = tmp_path / "site"
     publish.build_site(digests, out)
     page = (out / "sources.html").read_text()
-    assert "<table>" in page and "GAO" in page
+    assert "sources/registry.yaml" in page  # canonical-source footer
     index = (out / "index.html").read_text()
     assert 'href="sources.html"' in index
     digest_page = (out / "2026-07-01.html").read_text()
     assert 'href="sources.html">Sources</a>' in digest_page
 
 
-def test_no_sources_md_degrades_gracefully(digests, tmp_path, monkeypatch):
+def test_sources_page_intro_counts_and_status_key(digests, registry_root, tmp_path):
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "sources.html").read_text()
+    # counts computed from the registry, never hardcoded
+    assert "<strong>5</strong> sources registered" in page
+    assert "2 active, 1 planned, 1 unavailable, 1 evaluated and excluded." in page
+    # every status defined in the key, chips reused from the site's tag style
+    for chip in ("tag-status-active", "tag-status-planned",
+                 "tag-status-unavailable", "tag-status-excluded"):
+        assert chip in page
+    assert '<dl class="status-key">' in page
+
+
+def test_sources_page_grouped_sections_and_cards(digests, registry_root, tmp_path):
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "sources.html").read_text()
+    # the three channel groups, plus the accountability sections
+    assert '<h2 id="govinfo-collections">Official govinfo collections</h2>' in page
+    assert '<h2 id="agency-web-channels">Agency newsrooms and web channels</h2>' in page
+    assert '<h2 id="agency-email-bulletins">Agency email bulletins</h2>' in page
+    assert '<h2 id="unavailable-sources">Unavailable sources (1)</h2>' in page
+    assert '<h2 id="evaluated-and-excluded">Evaluated and excluded (1)</h2>' in page
+    # status subgroups inside a channel group
+    assert "<h3>Active (1)</h3>" in page and "<h3>Planned (1)</h3>" in page
+    # a card: linked name, chip + subtitle, description, folded registry record
+    assert '<article class="src-card" id="src-gao-reports">' in page
+    assert 'href="https://www.gao.gov/reports">GAO Reports</a>' in page
+    assert '<span class="tag tag-status-active">active</span>' in page
+    assert "Legislative · Tier 1 · RSS feed · Government Accountability Office" in page
+    assert "Audit and evaluation reports published on a daily feed." in page
+    assert '<details class="src-more"><summary>Registry record</summary>' in page
+    assert "<dt>Registry id</dt><dd><code>govinfo-test</code></dd>" in page
+    # the old SOURCES.md giant table is gone: no table markup at all
+    assert "<table>" not in page
+
+
+def test_sources_page_unavailable_is_explained_not_hidden(
+        digests, registry_root, tmp_path):
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "sources.html").read_text()
+    assert "record the refusal exactly as observed" in page
+    assert "no browser impersonation" in page
+    # the refused entry still renders as a full card, probe note included
+    assert '<article class="src-card" id="src-blocked-newsroom">' in page
+    assert "robots.txt disallows our identified client." in page
+
+
+def test_sources_page_publishes_no_email_addresses(digests, registry_root, tmp_path):
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "sources.html").read_text()
+    # sender/mailbox addresses never render; quoted notes are redacted in place
+    assert publish._EMAIL_ADDR_RE.search(page) is None
+    assert "subscriptions.treas.gov" not in page
+    assert "(sender [address withheld])" in page
+    # the public signup form is linked; the name links to the agency page
+    assert 'href="https://service.govdelivery.com/service/multi_subscribe.html' in page
+    assert 'href="https://home.treasury.gov/news/press-releases">' in page
+
+
+def test_sources_page_from_real_registry(digests, tmp_path):
+    """The committed registry renders: counts match, no address leaks."""
+    from fapd import config, sources
+
+    registry_path = config.PROJECT_ROOT / "sources" / "registry.yaml"
+    if not registry_path.exists():
+        pytest.skip("no registry on disk")
+    entries = sources.load_registry(registry_path)
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "sources.html").read_text()
+    assert f"<strong>{len(entries)}</strong> sources registered" in page
+    assert page.count('<article class="src-card"') == len(entries)
+    assert publish._EMAIL_ADDR_RE.search(page) is None
+    assert "<table>" not in page
+
+
+def test_no_registry_degrades_gracefully(digests, tmp_path, monkeypatch):
     from fapd import config
 
     empty_root = tmp_path / "empty"
