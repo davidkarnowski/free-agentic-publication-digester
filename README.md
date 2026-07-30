@@ -19,8 +19,8 @@ repository disagrees, this dated snapshot is the current one.
 
 - **Live site:** https://fapd.info — served from a Docker stack on a
   VPS; GitHub holds the repository, CI, and the integrity record.
-- **Source registry:** 127 sources — 26 active (14 web feeds and
-  newsrooms, 7 email bulletins, 5 govinfo collections), 80 planned,
+- **Source registry:** 127 sources — 30 active (14 web feeds and
+  newsrooms, 11 email bulletins, 5 govinfo collections), 76 planned,
   19 recorded unavailable, 2 evaluated and excluded.
 - **Latest digest:** [2026-07-29](digests/2026-07-29.md).
 - **Test suite:** 319 tests.
