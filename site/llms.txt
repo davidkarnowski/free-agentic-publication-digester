@@ -11,7 +11,9 @@
 - [Source guide — what we ingest and why](https://fapd.info/sources.html)
 - [About this project](https://fapd.info/about.html)
 - [How AI Built This](https://fapd.info/ai-development.html)
+- [Our crawler](https://fapd.info/bot.html)
 - [Methods](https://fapd.info/methods.html)
+- [Privacy & licensing](https://fapd.info/privacy.html)
 - [Free Agentic Publication Digester (FAPD)](https://fapd.info/readme.html)
 - [Access guide for agents](https://fapd.info/agents.html)
 

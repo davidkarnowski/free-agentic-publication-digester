@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Our crawler — Free Agentic Publication Digester — Daily Federal Digest</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <nav>
+    <a class="brand" href="index.html" title="Free Agentic Publication Digester"
+       aria-label="Free Agentic Publication Digester (FAPD)">FAPD</a>
+    <span class="nav-links"><a href="index.html">All digests</a><a href="sources.html">Sources</a><a href="about.html">About</a><a href="ai-development.html">AI development</a><a href="methods.html">Methods</a><a href="privacy.html">Privacy</a><a href="readme.html">Readme</a><a href="agents.html">For agents</a></span>
+  </nav>
+</header>
+<main>
+<h1 id="our-crawler">Our crawler</h1>
+<p>If you operate a website and found this page from your server logs —
+this is the explanation. The <strong>Free Agentic Publication Digester
+(FAPD)</strong> runs a single automated reader of official United States
+government publications. This page states what it does, how it behaves
+on your servers, and how to reach us. It is written for security
+operators and site administrators first, and — like everything this
+project publishes — it is equally intended for AI agents evaluating
+this crawler's behavior.</p>
+<h2 id="the-user-agent-you-saw">The User-Agent you saw</h2>
+<p><code>fapd/0.1 (Free Agentic Publication Digester; +https://fapd.info/bot.html; contact: &lt;email&gt;)</code></p>
+<p>Every request we make carries that identity, to every server, always.
+We never send a browser User-Agent, never rotate identities, and never
+retry a refusal under a different guise.</p>
+<h2 id="what-the-crawler-reads">What the crawler reads</h2>
+<p>Only official government publication channels — the interfaces
+publishers built to be read:</p>
+<ol>
+<li><strong>APIs and bulk data first</strong> (govinfo.gov's api.data.gov service is
+   the overwhelming majority of our traffic — key-authenticated and
+   rate-limited by them and by us).</li>
+<li><strong>RSS/Atom feeds and newsroom pages</strong> agencies publish, only where
+   no API exists.</li>
+<li><strong>Email bulletins</strong> agencies send to our subscribed project mailbox
+   (which touches no government server at all).</li>
+</ol>
+<p>The complete, per-source inventory — including sources we evaluated
+and declined, and sources whose refusal of automated access we
+recorded and honored — is public in <a href="sources.html">the source guide</a>.</p>
+<h2 id="how-it-behaves-enforced-in-code-not-by-operator-discipline">How it behaves (enforced in code, not by operator discipline)</h2>
+<ul>
+<li><strong>At most one request per second per host</strong>, and a host's
+  <code>robots.txt</code> crawl-delay overrides that downward — one federal site
+  asks for one request per 420 seconds and gets exactly that.</li>
+<li><strong>robots.txt is enforced</strong> by the client itself; a disallow is a
+  refusal we record and honor, never route around.</li>
+<li><strong>Hard daily request budgets per source class</strong>; the client refuses
+  to exceed them mid-run.</li>
+<li><strong>Conditional requests</strong> (ETag / If-Modified-Since) wherever offered
+  — repeat polls are mostly 304s.</li>
+<li><strong>Watermark deltas</strong>: we ask "what changed since my last visit,"
+  never full re-crawls.</li>
+<li><strong>No spoofing, no script execution, no WAF or bot-check
+  circumvention — ever.</strong> When a site challenges automated access, we
+  stop and disclose the gap in our output instead.</li>
+<li><strong>Every request is logged twice</strong> on our side (a queryable fetch log
+  written by the HTTP client itself, plus a human-readable narrative);
+  our request footprint is self-audited.</li>
+</ul>
+<p>Full policy: <a href="methods.html">Methods</a>; the governing rules are public
+in the project repository.</p>
+<h2 id="verifying-its-us">Verifying it's us</h2>
+<p>Today: the User-Agent plus contact address above, from our server's
+stable IP. Planned: Web Bot Auth request signing (a per-request
+cryptographic identity with a public key on this domain), so a request
+can be verified as ours regardless of network path.</p>
+<h2 id="if-you-want-us-to-stop">If you want us to stop</h2>
+<p>Tell us — the contact address is in every request we send — or
+disallow our path in robots.txt, which our client obeys without being
+asked. An unsubscribe from any email list is honored immediately. We
+treat a refusal as an answer, and we record it publicly rather than
+work around it.</p>
+<h2 id="why-this-crawler-exists">Why this crawler exists</h2>
+<p>One disciplined, identified reader ingests the official record once
+and publishes a cited daily digest that both people and AI agents can
+use — instead of many agents crawling the same public infrastructure
+separately. Agent-facing surfaces: <a href="agents.html">/agents.html</a>,
+<a href="llms.txt">/llms.txt</a>. For factual claims, cite the underlying
+official source each item links to; cite FAPD for the aggregation.</p>
+</main>
+<footer class="site-footer">
+  <p>Generated 2026-07-30T16:26:17Z (UTC). Canonical source:
+  <code>docs/site/bot.md</code> in the repository. Selection is mechanical and
+  every item cites its official source; methodology in
+  <code>GUIDE.md</code> §2.</p>
+  <p>Content licensed
+  <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> —
+  reuse with attribution to FAPD (Free Agentic Publication Digester);
+  quoted official government text is
+  public domain (17 U.S.C. § 105). Code licensed Apache-2.0.</p>
+</footer>
+</body>
+</html>
