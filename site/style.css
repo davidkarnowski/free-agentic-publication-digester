@@ -112,6 +112,40 @@ img {
   border-radius: 6px;
   background: #fff;
 }
+/* Digest readability layer (derived presentation; canonical md unstyled).
+   Plain-speak = interpretation register; rule/source = subtle metadata. */
+.plain {
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  padding: 0.35rem 0.6rem;
+  margin: 0.3rem 0;
+  list-style: none;
+  font-size: 0.95rem;
+}
+.plain-label {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  margin-right: 0.45rem;
+}
+.plain-label::after { content: ":"; }
+li.rule-note, li.source-note {
+  font-size: 0.78rem;
+  color: var(--muted);
+  list-style: none;
+  margin: 0.1rem 0;
+}
+li.source-note a { color: var(--muted); }
+.rule-id {
+  border-bottom: 1px dotted var(--muted);
+  cursor: help;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.74rem;
+}
 .site-footer {
   border-top: 1px solid var(--border);
   color: var(--muted);
