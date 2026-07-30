@@ -750,3 +750,22 @@ written as if it were already public:
 - Decisions that change scope, sources, or editorial rules are made in this
   file first, then implemented.
 - Secrets (API keys) live in `.env`, git-ignored, never in code or logs.
+- **main is sacred — for code (adopted 2026-07-30).** All engineering work
+  (code, tests, governing documents, config) happens on `feature/`, `bug/`,
+  or `arch/` branches; CI must be green before promotion; merges are
+  fast-forward. An agent about to edit code on `main` STOPS and confirms a
+  branch name with the operator first.
+- **Evidence exemption (scoped by path, not by author):** pipeline evidence
+  commits — `digests/`, `provenance/`, `site/`, and `SOURCES.md` as produced
+  by pipeline runs — commit directly to `main` as data. GitHub history is
+  the §7 integrity witness; parking evidence on a branch would delay the
+  ordering timestamp it exists to provide. A commit that mixes evidence
+  paths with code paths is a rule violation, not an exemption.
+- **Engineering practice is governed by `CLAUDE.md`** (the agent working
+  guide) **and `docs/code-standards.md`** (code rules), adopted 2026-07-30
+  from the operator's sibling projects. This GUIDE remains the editorial
+  constitution and always prevails on conflict.
+- **Operational runbooks live under `docs/ops/`**; production-affecting
+  actions follow the authorization gates stated there — a VPS write happens
+  only on the operator's explicit ask in the current session, never inferred
+  from prior approval or a generic "looks good."

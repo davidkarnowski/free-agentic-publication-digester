@@ -17,6 +17,37 @@ Entry format:
 
 ---
 
+## 2026-07-30 08:40 PDT — Agent-ops standards adopted from the sibling projects (branch arch/agent-ops-standards)
+
+**Context:** The operator directed FAPD to adopt the operational
+standards of their two other projects, both surveyed in depth this
+session: agent-ops runbooks, a CLAUDE.md working guide, a code-standards
+document, thin-dispatcher skills, a CVE sweep process, branch
+discipline, and trigger-driven operational bookkeeping. FAPD had strong
+editorial governance and none of this engineering governance.
+
+**Decisions (operator, via Q&A):** main-is-sacred branching with the
+evidence-commit exemption (data with an integrity role, scoped by
+path); this workstream is itself the rule's first exercise — built on
+`arch/agent-ops-standards`, merged only with CI green.
+
+**Work performed (this workstream, committed in sequence):** GUIDE §10
+amendments (branch rule, engineering-governance pointers, ops
+authorization gates); CLAUDE.md (13 sections — including the
+intentional-vs-bug split and the task→file table); docs/code-standards.md
+(descriptive-first: the seams and rules the codebase already follows,
+made explicit); docs/ops/ suite (portable VPS servicing guide with the
+six principles, per-box dossier pointer, read-only health runbook,
+plan-task template, staged-scripts convention); ops-backlog
+(Gap/Trigger/Sketch) + stable-ID findings register; CVE sweep guide
+adapted to FAPD's surface (parsers over fetched government content)
+with three skills as thin dispatchers and the .gitignore change that
+lets skills be tracked while settings stay local.
+
+**Open questions / next steps:** continuous-ingestion workstream
+follows on its own branch; /fapd-deploy skill waits for the backend
+deploy runbook (ops-backlog OB-1).
+
 ## 2026-07-30 08:25 PDT — fapd.info live: placeholder over HTTPS on the shared VPS, strict Docker segmentation
 
 **Context:** The operator pointed fapd.info's DNS at the VPS already
