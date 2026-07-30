@@ -2233,3 +2233,13 @@ itself, never document content. Wired as a post-site stage of
 run_pipeline whose failure never fails the run; the report rides the
 evidence commit since provenance/ was already an evidence path. OB-2
 gets its done-note. 337 tests.
+
+## 2026-07-30 — Pre-push catch: the evidence commit that would never fire
+
+Reread before enabling real pushes (OB-11): evidence-commit.sh cd'd one
+level up from its own directory — deploy/vps, inside the repo but not
+its root — so `git add digests/ provenance/ site/ SOURCES.md` matched
+nothing and every EOD evidence commit would have exited "nothing
+staged", success code, publishing nothing, forever. Fixed to the same
+three-level walk deploy.sh uses, with a repo-root guard (GUIDE.md must
+exist at $PWD) so a future move fails loudly instead of quietly.

@@ -4,7 +4,12 @@
 # evidence paths, asserts the staged set matches, commits as the bot
 # identity, pushes over the deploy key. Any mismatch aborts untouched.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+# Repo root is three levels up (scripts -> vps -> deploy -> root), the
+# same walk deploy.sh does. One level up is deploy/vps — still inside
+# the repo, where `git add digests/ ...` matches nothing and every
+# evidence commit exits "nothing staged" (found 2026-07-30, pre-push).
+cd "$(dirname "$0")/../../.."
+test -f GUIDE.md || { echo "GUARD ABORT — not at repo root: $PWD"; exit 3; }
 
 DATE_TAG="$(date -u +%F)"
 git add digests/ provenance/ site/ SOURCES.md 2>/dev/null || true
