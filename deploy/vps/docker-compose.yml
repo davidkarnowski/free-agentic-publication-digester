@@ -1,0 +1,45 @@
+name: fapd
+
+# FAPD stack on the shared VPS (/opt/fapd). Strict segmentation by design:
+# - fapd_edge is an EXTERNAL, --internal Docker network (created once on the
+#   box: `sudo docker network create --internal fapd_edge`). The only other
+#   member is the shared edge proxy (spiralyst-proxy), which terminates TLS
+#   for fapd.info and proxies here. --internal means no default route: this
+#   container has ZERO egress, and nothing on the Spiralyst networks can
+#   reach it except the proxy.
+# - The backend (collector supervisor + EOD finalizer) arrives as a separate
+#   service under `profiles: ["backend"]` on its own private egress-only
+#   network, coupled to web ONLY through the fapd-site volume (never a
+#   socket). See docs/continuous-ingestion.md and docs/vps-runtime-plan.md.
+
+services:
+  web:
+    # Pinned to 1.30-alpine — parity with the edge proxy (the current nginx
+    # STABLE branch). Bump both together during CVE sweeps, never just one.
+    image: nginx:1.30-alpine
+    container_name: fapd-web
+    restart: unless-stopped
+    expose: ["80"]                # private network only — never published
+    networks: [fapd_edge]
+    volumes:
+      # Placeholder content until the backend produces the real site into
+      # the fapd-site volume; at that point this bind mount is replaced by
+      #   - fapd-site:/usr/share/nginx/html:ro
+      - ./placeholder:/usr/share/nginx/html:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+networks:
+  fapd_edge:
+    external: true
+
+volumes:
+  # Declared ahead of the backend service (next push) so the wiring is
+  # visible now: fapd-site is the web content hand-off (backend writes,
+  # web reads-only); fapd-data holds the pipeline databases and archive.
+  fapd-site:
+  fapd-data:

@@ -21,6 +21,33 @@ project:
   lives in our own committed artifacts, never in platform logs — that
   conclusion from the GH-native deliberation stands unchanged.
 
+## Update 2026-07-30 (evening): hosting resolved — shared VPS, Docker stack
+
+Same-day development: `fapd.info` now points at the VPS the operator
+already runs for another project, and the **placeholder site is live
+over HTTPS** (Let's Encrypt, webroot method, auto-renewing). Decisions
+this resolves and reshapes:
+
+- **The stack is fully containerized** (operator direction). The
+  bare-host "Python + uv + cron" shape below is superseded by a Docker
+  compose stack at `/opt/fapd`, source of truth in this repo's
+  [`deploy/vps/`](../deploy/vps/): `fapd-web` (nginx, inbound-only — it
+  sits solely on an external `--internal` Docker network with zero
+  egress) and, next push, `fapd-backend` (collector supervisor + EOD
+  finalizer; egress-only on its own private network, no published
+  ports, unreachable from anything public). Backend hands the built
+  site to web through a read-only named volume — never a socket.
+- **Traffic sorting** happens in the cohabiting project's edge proxy,
+  which terminates TLS for both hostnames and is the only container
+  bridging the two projects' networks. The proxy bundle and the box
+  dossier live in the operator's private tree, not this repo.
+- **EOD scheduling moves inside the backend supervisor** (no host
+  cron/systemd dependency; the host needs only Docker) — see
+  `docs/continuous-ingestion.md`.
+- The stable-IPv4/rDNS identity argument below is unchanged and now
+  concrete: the box exists and its identity can anchor M-23-22 letters
+  and verified-bot registrations.
+
 ## Why a VPS over hosted runners
 
 The identified-client posture is the project's access ethic, and a VPS

@@ -17,6 +17,62 @@ Entry format:
 
 ---
 
+## 2026-07-30 08:25 PDT — fapd.info live: placeholder over HTTPS on the shared VPS, strict Docker segmentation
+
+**Context:** The operator pointed fapd.info's DNS at the VPS already
+running another of their projects and directed: reuse the same SSH
+management method, sort traffic in the edge proxy, stand up a
+dark-theme placeholder container, issue the Let's Encrypt cert by the
+same webroot method, and architect everything as a Docker stack with
+strict network segmentation between the two projects and between
+FAPD's own public-facing and backend containers.
+
+**Work performed:**
+- **New `deploy/vps/` in this repo** — the FAPD stack's source of
+  truth: compose file (project `fapd`), dark placeholder page carrying
+  the full project name, and a deploy runbook with the
+  authorization-gate wording. `fapd-web` (nginx, pinned to the same
+  stable tag as the edge proxy) sits ONLY on a new external
+  `--internal` Docker network `fapd_edge` — no default route, zero
+  egress, inbound only via the proxy. Named volumes `fapd-site` /
+  `fapd-data` declared ahead of the backend container (next push),
+  which will be egress-only on its own network and hand the site to
+  the web container through a read-only volume, never a socket.
+- **Edge routing** (authored in the cohabiting project's private
+  bundle, deployed with its tooling): the proxy joins both edge
+  networks — the only bridge between the projects — with fapd.info
+  server blocks staged in two deploys: (A) HTTP + ACME webroot first;
+  cert issuance (`certbot certonly --webroot`, same account, ECDSA,
+  fapd.info + www, expires 2026-10-28, covered by the existing renewal
+  reload hook); then (B) the `:443` block. The stage-B config was
+  rehearsed in a throwaway `nginx -t` container attached to both
+  networks before the live proxy saw it — a missing cert path would
+  have crash-looped the proxy and taken the other site down.
+- **One real deploy lesson:** the stage-B config change silently did
+  not apply — `docker compose up -d` does not recreate a container
+  whose only change is a single-file bind mount's content (new inode
+  after rsync). Fixed with `--force-recreate proxy`; recorded in the
+  cohabiting bundle's README as a standing gotcha.
+- **Verified end-to-end:** `https://fapd.info` and `https://www.fapd.info`
+  serve the placeholder over HTTP/2 with correct SANs; `http://` 301s;
+  the other site unaffected throughout; all three containers healthy;
+  `fapd-web`'s network list is exactly `fapd_edge`. Renewal dry-run
+  in flight at entry time (certbot's random jitter delay); verdict
+  recorded in the next entry if not green.
+- **No firewall changes were needed** — 80/443 were already open and
+  the webroot flow rides the existing proxy.
+
+**Decisions:** Everything containerized (operator); segmentation as
+architecture, not convention — the public-facing container *cannot*
+reach the backend or the internet, enforced by Docker network
+topology rather than discipline. Hosting question from the launch
+checklist: resolved.
+
+**Open questions / next steps:** backend container (collector
+supervisor + EOD finalizer) per docs/continuous-ingestion.md — next
+push; real site content replaces the placeholder via the fapd-site
+volume when it lands.
+
 ## 2026-07-30 08:05 PDT — Email sources: gate-3 evaluation and the first seven activations
 
 **Context:** GUIDE §3 gate 5 makes status changes worklog events. This

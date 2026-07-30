@@ -17,9 +17,11 @@ close (check them off with dates).
   digest's methodology footer (all digests re-rendered).
 - [x] 2026-07-30 **[decision] Domain: `fapd.info`** (operator).
   `SITE_BASE_URL=https://fapd.info` set in `.env`/`.env.example` and all
-  machine surfaces regenerated with absolute URLs. Site *hosting*
-  (GitHub Pages + CNAME vs served from the VPS) deliberately deferred —
-  no CNAME yet.
+  machine surfaces regenerated with absolute URLs. Hosting resolved the
+  same day: **served from the shared VPS** (Docker stack, `deploy/vps/`;
+  placeholder live over HTTPS with auto-renewing TLS since 2026-07-30).
+  Real site content replaces the placeholder when the backend container
+  deploys (ops-backlog OB-1).
 - [ ] **[decision] Repo visibility flip date** — after the items below
   it gates are done.
 
