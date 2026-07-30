@@ -72,8 +72,24 @@ def test_page_shell_and_markdown_conversion(digests, tmp_path):
     assert '<link rel="stylesheet" href="style.css">' in page
     assert "<table>" in page  # tables extension active
     assert '<img alt="Graphic from 2026-1 (printed page 1)" src="assets/2026-07-01/g.png"' in page
-    assert "<em>In plain terms:</em>" in page
+    # plain-speak renders in its styled register (readability layer)
+    assert '<span class="plain-label">In plain terms</span>' in page
     assert "digests/2026-07-01.md" in page  # canonical-source footer
+
+
+def test_digest_readability_classes(digests, tmp_path):
+    # The derived layer styles registers the canonical Markdown only
+    # implies: plain-speak, rule notes (id + tooltip description), sources.
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "2026-07-01.html").read_text()
+    assert '<li class="plain"><span class="plain-label">In plain terms</span>' in page
+    assert '<li class="rule-note">Included because: ' in page
+    assert '<span class="rule-id" title="floor item">CREC-SEL-01</span>' in page
+    assert '<li class="source-note">Source: <a href=' in page
+    assert "Included because: CREC-SEL-01 — floor item" not in page  # folded
+    css = (out / "style.css").read_text()
+    assert ".rule-id" in css and ".plain-label" in css
 
 
 def test_every_page_carries_the_full_project_name(digests, tmp_path):

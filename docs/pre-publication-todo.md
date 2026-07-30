@@ -155,6 +155,14 @@ close (check them off with dates).
   each digest's agent surface. GUIDE amendment precedes implementation
   (new §2/§6 language for the tag layer).
 
+- [ ] **Per-item official-text marker in the canonical digest**
+  (follow-up to the 2026-07-30 readability layer): the site now styles
+  plain-speak and mechanical notations, but cannot distinguish
+  verbatim-official item summaries from model-written ones — that fact
+  lives only in the DB (`summaries.method`). Amend the digest format
+  (report.py + TEMPLATE) to mark it per item (e.g. a trailing
+  "— official summary" token), then style the two registers apart in
+  publish. Canonical-format change: GUIDE §2 note precedes.
 - [ ] **PDF render and serve** (requested 2026-07-30): render each
   canonical digest as a PDF and serve it beside the HTML — a
   fixed-layout, citable, printable artifact of the day's record.

@@ -174,6 +174,40 @@ img {
   border-radius: 6px;
   background: #fff;
 }
+/* Digest readability layer (derived presentation; canonical md unstyled).
+   Plain-speak = interpretation register; rule/source = subtle metadata. */
+.plain {
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  padding: 0.35rem 0.6rem;
+  margin: 0.3rem 0;
+  list-style: none;
+  font-size: 0.95rem;
+}
+.plain-label {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  margin-right: 0.45rem;
+}
+.plain-label::after { content: ":"; }
+li.rule-note, li.source-note {
+  font-size: 0.78rem;
+  color: var(--muted);
+  list-style: none;
+  margin: 0.1rem 0;
+}
+li.source-note a { color: var(--muted); }
+.rule-id {
+  border-bottom: 1px dotted var(--muted);
+  cursor: help;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.74rem;
+}
 .site-footer {
   border-top: 1px solid var(--border);
   color: var(--muted);
@@ -222,6 +256,39 @@ def _teaser(md_text):
     para = rest.split("\n\n", 1)[0].replace("\n", " ").strip()
     sentence = re.split(r"(?<=[.;])\s", para, maxsplit=1)[0]
     return sentence or None
+
+
+_PLAIN_LI_RE = re.compile(r"<li><em>In plain terms:</em>\s*(.*?)</li>", re.DOTALL)
+_PLAIN_P_RE = re.compile(r"<p><em>In plain terms:\s*(.*?)</em></p>", re.DOTALL)
+_RULE_LI_RE = re.compile(
+    r"<li>Included because:\s*([A-Z]+-[A-Z]+-\d+)\s*—\s*(.*?)</li>", re.DOTALL)
+_SOURCE_LI_RE = re.compile(r"<li>Source:\s*(.*?)</li>", re.DOTALL)
+
+
+def _style_digest_body(html_body):
+    """Readability layer for digest pages (derived presentation only — the
+    canonical Markdown is untouched, per GUIDE §5): plain-speak lines get
+    their own visual register, and the mechanical notations (inclusion
+    rule, citation) shrink to subtle metadata. The rule description folds
+    into a tooltip on the rule id — the compact "rule mapping" — while
+    staying verbatim in the canonical file."""
+    html_body = _PLAIN_LI_RE.sub(
+        r'<li class="plain"><span class="plain-label">In plain terms</span> \1</li>',
+        html_body)
+    html_body = _PLAIN_P_RE.sub(
+        r'<p class="plain plain-para"><span class="plain-label">In plain terms</span> \1</p>',
+        html_body)
+
+    def _rule(match):
+        rule_id, desc = match.group(1), match.group(2)
+        title = html.escape(re.sub(r"<[^>]+>", "", desc), quote=True)
+        return (f'<li class="rule-note">Included because: '
+                f'<span class="rule-id" title="{title}">{rule_id}</span></li>')
+
+    html_body = _RULE_LI_RE.sub(_rule, html_body)
+    html_body = _SOURCE_LI_RE.sub(
+        r'<li class="source-note">Source: \1</li>', html_body)
+    return html_body
 
 
 def _render_page(title, body_html, nav_links, canonical):
@@ -352,7 +419,7 @@ def build_site(digest_dir=None, out_dir=None):
         md_text = path.read_text(encoding="utf-8")
         teasers[path.stem] = _teaser(md_text)
         _MD.reset()
-        body = _MD.convert(md_text)
+        body = _style_digest_body(_MD.convert(md_text))
         page = _render_page(
             f"Daily Digest {path.stem} — {SITE_TITLE}",
             body,
