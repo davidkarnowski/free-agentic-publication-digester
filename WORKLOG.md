@@ -2243,3 +2243,28 @@ nothing and every EOD evidence commit would have exited "nothing
 staged", success code, publishing nothing, forever. Fixed to the same
 three-level walk deploy.sh uses, with a repo-root guard (GUIDE.md must
 exist at $PWD) so a future move fails loudly instead of quietly.
+
+## 2026-07-30 — Cutover: the VPS is now the pipeline's home (OB-11)
+
+All operations moved to the box tonight; the laptop stands down to
+fallback. The full data/ tree (1.3G — raw govinfo archives, hashed
+captures, graphics, and the three databases) seeded the fapd-data
+volume, with one lesson en route: rsyncing a live-WAL SQLite file
+produced a torn copy ("malformed database schema"), so the databases
+went up again as checkpointed VACUUM INTO snapshots — cold copies only,
+recorded in the OB-11 done-note. The backend restarted onto the
+canonical history: 20,095 packages, 275 summaries, the laptop's
+watermarks and today's combined request budgets carried forward
+mid-count (612/2000 govinfo), 18 workers green, GAO's 420s clock
+honored from the first cycle.
+
+Parity held: an in-container re-render of 2026-07-29 matched the
+committed digest byte-for-byte except the generated-at timestamp and
+pipeline hash. Evidence pushes are armed for real now — origin flipped
+to SSH by deploy.sh on every deploy (F-008 resolved), deploy-key auth
+verified against main, FAPD_EVIDENCE_PUSH=1 standing. Two pre-push
+catches made tonight's arming honest: the evidence script that would
+have forever exited "nothing staged" from the wrong directory, and the
+collector_state seed that keeps the EOD from refiring on a day the
+operator machine already finalized. First automated evidence commit
+expected at tomorrow's 09:00Z EOD.

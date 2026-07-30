@@ -39,6 +39,19 @@ one.*
   git@github.com:...` in the deploy flow → controlled first push
   verified against a local render of the same day (the old T4 parity
   check) → only then leave FAPD_EVIDENCE_PUSH=1.
+- **Done 2026-07-30 (evening):** executed as designed. Backend stopped;
+  first-day volume backed up on the box; the operator machine's full
+  data/ (raw archives, captures, assets) rsynced in, with the three
+  SQLite databases re-copied as checkpointed `VACUUM INTO` snapshots
+  after the first rsync produced a WAL-torn `fapd.db` (malformed schema
+  on open — copy databases cold, never live-file rsync). collector_state
+  seeded with the 07-29 finalization so the EOD didn't refire on start.
+  Parity: in-container re-render of 2026-07-29 differed from the
+  committed digest ONLY in the generated-at timestamp and pipeline
+  version hash — content byte-identical. deploy.sh now re-flips the
+  baked origin to SSH every deploy (F-008); deploy-key `ls-remote`
+  verified against main. FAPD_EVIDENCE_PUSH=1 stands; first automated
+  push expected at the next EOD. The laptop is fallback only.
 
 **OB-2 — Committed daily run summary (`provenance/runs/YYYY-MM-DD.md`)**
 - **Gap:** run facts (budgets, counts, verdicts, timings) live only in
