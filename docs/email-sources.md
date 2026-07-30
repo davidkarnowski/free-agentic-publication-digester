@@ -108,7 +108,9 @@ Per source:
 
 ## 5. How ingestion works
 
-- **Polling.** The adapter polls the project mailbox a few times a day.
+- **Polling.** The adapter polls the project mailbox on a short cadence
+  through the day (about every 15 minutes under the collector
+  supervisor; standalone runs poll once).
   This costs government servers nothing; §4's request budgets don't
   apply — but polling is still paced, logged in the daily access
   narrative, and every processed message lands as an attempt record in

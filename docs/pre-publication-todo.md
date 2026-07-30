@@ -42,8 +42,10 @@ close (check them off with dates).
 - [ ] **Daily scheduling — active track: VPS runtime.** *2026-07-30:
   the collector core landed (src/fapd/collect.py — supervisor,
   per-source-class workers, journal, triggers; GUIDE §4/§5/§6 r12
-  amendments); remaining scope is the backend container deploy
-  (ops-backlog OB-1) and /today renderer (OB-8), both fully designed in
+  amendments) and the backend container deployed the same day (real
+  site live on fapd.info, collector running on the box); remaining
+  scope is the /today renderer (ops-backlog OB-8) and making VPS
+  evidence pushes canonical (OB-11), designed in
   docs/continuous-ingestion.md.* Original item:
   (docs/vps-runtime-plan.md, adopted 2026-07-30, superseding the
   GH-native track before its T2–T5 evaluation ran): the pipeline runs
@@ -86,11 +88,12 @@ close (check them off with dates).
   ran ~90K in). Rule 8 deferred the cap until exactly this data existed.
 
 ### Accuracy & freshness
-- [ ] **Dated STATUS snapshot** (README section or STATUS.md,
-  regenerated with the site): registry counts, active sources, test
-  count, latest digest date — the single authoritative numbers block, so
-  external AI readers stop averaging stale worklog figures (lesson from
-  the NotebookLM briefing fact-check).
+- [x] 2026-07-30 **Dated STATUS snapshot** (README "Status (2026-07-30)"
+  section): registry counts, active sources by channel, test count,
+  latest digest date, live-site URL — the single authoritative numbers
+  block, so external AI readers stop averaging stale worklog figures
+  (lesson from the NotebookLM briefing fact-check). Refresh the date
+  with each update; anything elsewhere that disagrees defers to it.
 - [ ] Editorial spot-audit of a full digest against sources (GUIDE §2
   compliance read-through by the operator).
 - [ ] Wayback top-up pass for the ~180 uncorroborated 07-28 captures
@@ -140,7 +143,11 @@ close (check them off with dates).
 
 ## Feature backlog (post-launch, operator-requested)
 
-- [ ] **Section auto-tagging** (requested 2026-07-30): digest sections
+- [ ] **Section auto-tagging** (requested 2026-07-30). *2026-07-30: the
+  section layer shipped — GUIDE §6 r12a, `src/fapd/tags.py`, `Tags:`
+  lines in the digest and tag chips on the site; item-level tags and
+  digests.json/meta emission remain (ops-backlog OB-9).* Original item:
+  digest sections
   and items carry machine-readable tags on the site and agent surfaces —
   (a) branch (`legislative`/`executive`/`judicial`), mechanical from the
   collection and registry, zero tokens; (b) department/agency names,

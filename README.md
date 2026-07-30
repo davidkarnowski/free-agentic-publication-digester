@@ -12,6 +12,19 @@ item carries a citation to the official record and names the mechanical
 rule that selected it. Everything not summarized is counted. Nothing is
 silently omitted.
 
+## Status (2026-07-30)
+
+The authoritative numbers block — where any other figure in the
+repository disagrees, this dated snapshot is the current one.
+
+- **Live site:** https://fapd.info — served from a Docker stack on a
+  VPS; GitHub holds the repository, CI, and the integrity record.
+- **Source registry:** 127 sources — 26 active (14 web feeds and
+  newsrooms, 7 email bulletins, 5 govinfo collections), 80 planned,
+  19 recorded unavailable, 2 evaluated and excluded.
+- **Latest digest:** [2026-07-29](digests/2026-07-29.md).
+- **Test suite:** 319 tests.
+
 ---
 
 ## Philosophy
@@ -185,6 +198,13 @@ Adapters reach for access in a fixed order:
   parallel, each worker with its own pacing clock, so no server waits
   behind another's promises — and no server ever sees more than it would
   if it were our only source.
+- **Continuous, with backpressure:** in production a collector
+  supervisor ([src/fapd/collect.py](src/fapd/collect.py)) polls each
+  source class on its own clock through the day — govinfo about every
+  30 minutes, agency feeds about every 60, the project mailbox about
+  every 15 — always as watermark deltas with conditional requests. Past
+  70% of a class's daily budget its interval doubles for the rest of
+  the day, reserving headroom for the end-of-day finalizer.
 - **Budgeted:** hard daily request caps per source class, enforced by
   the client itself, which refuses to exceed them mid-run.
 - **Logged, twice:** every outbound request lands in a queryable fetch
@@ -226,7 +246,7 @@ stages, court syllabi — used verbatim, identified as official text, at
 zero inference cost. Models write only what the record does not already
 summarize.
 
-**Three model layers, independently versioned** (iterating on one never
+**Four model layers, independently versioned** (iterating on one never
 regenerates another):
 
 1. **Item summaries** — for selected documents lacking an official
@@ -241,6 +261,12 @@ regenerates another):
 3. **Day and section syntheses** — the "Day in Review" and per-section
    quick-reads, composed from stored summaries and mechanical counts,
    under the strictest scrutiny.
+4. **Section tags** — each digest section's `Tags:` line: mechanical
+   branch and agency tags first (zero tokens), then up to three
+   model-generated one-to-three-word discovery keys per section,
+   generated in one batched cheap-tier call per day from the stored
+   synopses, labeled model-derived, and linted by the same
+   banned-lexicon gate because they render in the digest.
 
 **The banned-lexicon gate** scans all generated prose against a coded
 list of loaded adjectives ("landmark", "controversial", "sweeping"…) and
@@ -266,9 +292,14 @@ legislation, the Federal Register, enacted laws, judicial activity, and
 agency announcements (listed only when the *agency itself* dates the
 release on the digest day — backfill is disclosed and counted, never
 passed off as news), per-item citations and inclusion rules, plain-speak
-lines under their official counterparts, a glossary, the Coverage
-Statement, and a methodology footer. Sample:
+lines under their official counterparts, per-section tag lines, a
+glossary, the Coverage Statement, and a methodology footer. Sample:
 [digests/2026-07-28.md](digests/2026-07-28.md).
+
+On the site, each digest renders as a collapsed, plain-speak-first
+view: section cards whose headers carry the title, tag chips, and the
+plain-language synopsis, expanding to the full record on demand —
+still static HTML, no JavaScript.
 
 ---
 
@@ -284,8 +315,14 @@ Get a free API key at https://api.data.gov/signup/ (emailed instantly).
 
 ## Daily operation
 
+In production (the VPS Docker stack in [deploy/vps/](deploy/vps/)), a
+collector supervisor polls sources continuously through the day and
+`run_pipeline.py` runs as the end-of-day finalizer that freezes and
+commits the canonical digest. Each stage also runs standalone:
+
 ```sh
-uv run python scripts/run_pipeline.py  # sync → ingest → extract → analyze → digest
+uv run python scripts/collect.py       # collector supervisor (continuous ingestion; --once for one cycle)
+uv run python scripts/run_pipeline.py  # EOD finalizer: sync → ingest → extract → analyze → digest
 uv run python scripts/sync.py          # govinfo delta sync only
 uv run python scripts/ingest_agencies.py --verbose   # agency newsrooms only
 uv run python scripts/digest.py --date YYYY-MM-DD    # (re)render one digest
@@ -307,6 +344,7 @@ scripts/          operational entry points
 provenance/       committed daily manifests (hash-chained)
 digests/          generated daily digests (committed, canonical)
 site/             derived static site (human pages + agent surfaces)
+deploy/vps/       the Docker stack serving fapd.info (source of truth)
 docs/             schema, research reports, dev notes, how to add sources
 data/             raw archive + SQLite (local, git-ignored)
 tests/

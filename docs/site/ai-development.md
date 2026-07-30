@@ -66,13 +66,13 @@ build it. That symmetry was used deliberately during development:
 
 It does not mean the digests are "written by AI" in any loose sense:
 selection is mechanical code, most summary text is verbatim official
-language, and the three model-written layers are labeled in place,
+language, and the four model-written layers are labeled in place,
 validated against a banned lexicon, and blocked from publication on any
 failure. It does not mean the development was unsupervised: the record
 shows the operator redirecting, refusing, and deciding throughout.
 
 It does mean that a small project could afford discipline usually
-reserved for large ones — a 200+ case test suite, per-request
+reserved for large ones — a 300+ case test suite, per-request
 accountability logging, tamper-evident provenance, a governing document
 that is actually kept current — because the marginal cost of doing
 things properly fell far enough to stop cutting corners. We think that
