@@ -2216,3 +2216,20 @@ right-count-wrong-keys case the old length check couldn't see).
 Recorded as F-010, open: if the next EOD's logs confirm truncation, the
 lever is a smaller map batch or an explicit output-token bump on the
 CLI backend.
+
+## 2026-07-30 — The feedback loop: a daily operations report with eyes on itself
+
+New §3a surface (GUIDE amended first, inventory now honestly five):
+`fapd.insight` closes each EOD by writing
+`provenance/runs/insight-<date>.md` — requests by client, token spend
+with the retry share called out (today's 4M-token grind is exactly the
+number this exists to surface), the day's LLM errors, journal coverage
+per digest date, and collector liveness sorted sickest-first. All
+mechanical, straight from the three databases the run already keeps.
+One optional cheap-tier call (INSIGHT_PROMPT_VERSION 1) turns the
+metrics into at most five labeled suggested-next-steps — dev-facing,
+never editorial, never in a digest, and its input is the metrics JSON
+itself, never document content. Wired as a post-site stage of
+run_pipeline whose failure never fails the run; the report rides the
+evidence commit since provenance/ was already an evidence path. OB-2
+gets its done-note. 337 tests.

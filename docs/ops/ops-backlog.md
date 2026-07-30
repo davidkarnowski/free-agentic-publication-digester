@@ -46,6 +46,13 @@ one.*
 - **Trigger:** OB-1 (evidence commits become automated).
 - **Sketch:** emitter reading fetch-log/ledger/validation state, called
   by the EOD finalizer; committed with the evidence.
+- **Done 2026-07-30:** built as `fapd.insight` — `provenance/runs/
+  insight-<date>.md` from the run_pipeline post-stage: requests by
+  client, token spend with retry share, LLM errors, journal coverage,
+  collector liveness, plus a labeled cheap-tier suggested-next-steps
+  list (INSIGHT_PROMPT_VERSION, GUIDE §3a dev-facing surface). Rides
+  the evidence commit (provenance/ is already staged). Failure never
+  fails the run.
 
 **OB-3 — Web Bot Auth request signing**
 - **Gap:** crawler identity is UA + contact + (now) stable IP; no

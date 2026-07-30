@@ -8,8 +8,11 @@ so the wiring is testable (tests/test_scripts.py) and a scheduler (the
 VPS cron, docs/vps-runtime-plan.md) exercises exactly the code an
 operator run does. Verbose logging is forced on so every HTTP request
 and LLM call prints as it happens (the same narrative lands in
-data/logs/access-*.log). Ends with a detail report: requests by client,
-tokens by purpose, digest stats, and validation outcome.
+data/logs/access-*.log). After the site stage the developer-insight
+report (fapd.insight) writes provenance/runs/insight-<date>.md — the
+daily feedback loop; its failure never fails the run. Ends with a
+detail report: requests by client, tokens by purpose, digest stats,
+and validation outcome.
 """
 
 import argparse
@@ -27,6 +30,7 @@ from fapd import (
     db,
     email_sources,
     extract,
+    insight,
     llm,
     logging_setup,
     report,
@@ -165,6 +169,21 @@ def stage_site():
     return site
 
 
+def stage_insight(conn, date, *, llm_client=None):
+    """Post-EOD developer-insight report (GUIDE §3a dev-facing surface).
+    An insight failure never fails the run: the digest is already
+    rendered and validated by this point, and the feedback loop is for
+    the developer, not the reader."""
+    try:
+        path = insight.run(conn, llm_client, date)
+        print(f"   insight report: {path}", flush=True)
+        return path
+    except Exception as exc:  # noqa: BLE001 — ops reporting must not
+        # cost a finished run; the gap itself shows up in tomorrow's report.
+        print(f"   insight report failed: {exc!r} — continuing", flush=True)
+        return None
+
+
 def detail_report(*, gov_requests, before, after, timings, validation,
                   out_path, site):
     banner("DETAIL REPORT")
@@ -245,6 +264,12 @@ def main(argv=None) -> int:
     t0 = stage("STAGE 5/5 — SITE (canonical markdown -> styled HTML)")
     site = stage_site()
     timings["site"] = time.monotonic() - t0
+    done(t0)
+
+    t0 = stage(f"POST — OPERATIONS REPORT (developer feedback loop) for {date}")
+    with llm.LLMClient() as lclient:
+        stage_insight(conn, date, llm_client=lclient)
+    timings["insight"] = time.monotonic() - t0
     done(t0)
 
     detail_report(gov_requests=gov_requests, before=analysis["before"],

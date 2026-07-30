@@ -147,7 +147,8 @@ confirm-gate.
 | Politeness, pacing, budgets | `src/fapd/client.py`, `config.py` (constants are policy — GUIDE §4) |
 | Add/probe a source | `docs/adding-sources.md`, `sources/registry.yaml`, `scripts/check_sources.py` |
 | Selection/exclusion rules | `src/fapd/rules.py` (registry order = precedence) |
-| Prompts / model layers | `analyze.py`, `compose.py` — GUIDE §3a governs changes |
+| Prompts / model layers | `analyze.py`, `compose.py`, `tags.py`, `insight.py` — GUIDE §3a governs changes |
+| Daily ops feedback loop | `src/fapd/insight.py` → `provenance/runs/insight-<date>.md` (OB-2) |
 | Digest layout & validation gates | `src/fapd/report.py` |
 | Site & agent surfaces | `src/fapd/publish.py` |
 | Provenance / hashes | `src/fapd/provenance.py`, `PROVENANCE.md` |

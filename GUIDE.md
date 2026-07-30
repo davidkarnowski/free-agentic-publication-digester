@@ -420,13 +420,24 @@ through these gates, each recorded in the registry entry:
 
 All LLM prompts are code, versioned, and change through procedure:
 
-- **Inventory.** Three prompt surfaces exist: the map/summarization
-  preamble (`analyze._PREAMBLE`, versioned by `PROMPT_VERSION`), the
-  plain-speak restatement preamble (`analyze._PLAIN_PREAMBLE`,
-  `PLAIN_PROMPT_VERSION`), and the Day-in-Review compose prompt
-  (`compose._PROMPT`, `COMPOSE_PROMPT_VERSION`). Each layer versions
-  independently — a deliberate design so iterating on one never
-  regenerates the artifacts of another.
+- **Inventory** (amended 2026-07-30). Five prompt surfaces exist: the
+  map/summarization preamble (`analyze._PREAMBLE`, versioned by
+  `PROMPT_VERSION`), the plain-speak restatement preamble
+  (`analyze._PLAIN_PREAMBLE`, `PLAIN_PROMPT_VERSION`), the
+  Day-in-Review compose prompt (`compose._PROMPT`,
+  `COMPOSE_PROMPT_VERSION`), the section discovery-key prompt
+  (`tags._TAG_PROMPT`, `TAG_PROMPT_VERSION`, added with §6 rule 12a),
+  and the developer-insight suggestions prompt (`insight._PROMPT`,
+  `INSIGHT_PROMPT_VERSION`). Each layer versions independently — a
+  deliberate design so iterating on one never regenerates the artifacts
+  of another.
+- **The insight surface is developer-facing, never editorial.** Its
+  output appears only in the daily operations report under
+  `provenance/runs/` — never in a digest, the site's reader pages, or
+  any coverage claim. It is labeled model output (§2) and its input is
+  the run's own mechanical metrics, never document content. Because it
+  is outside the published digest, the render-time lexicon gate does not
+  apply to it; the labeling rule still does.
 - **The plain-speak contract specifically** (the most iterated surface):
   input is ONLY the stored summary (never raw text, never outside
   knowledge); output is one sentence ≤ ~35 words; jargon is expanded into

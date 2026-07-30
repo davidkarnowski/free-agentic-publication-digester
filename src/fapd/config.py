@@ -97,6 +97,9 @@ SECTION_PROMPT_VERSION = 1
 # Section discovery-key tags (§6 rule 12a): independently versioned,
 # cheap tier, one batched call per digest day.
 TAG_PROMPT_VERSION = 1
+# Developer-insight suggestions (§3a): dev-facing surface, one cheap-tier
+# call per EOD over the run's own metrics — never document content.
+INSIGHT_PROMPT_VERSION = 1
 PLAIN_MODEL = MAP_MODEL  # restatement is compression work — cheap tier
 MAX_PLAIN_BATCH_ITEMS = 25  # inputs are stored summaries (~170 tokens each)
 # Retries escalate isolation in groups before falling back to one call per
