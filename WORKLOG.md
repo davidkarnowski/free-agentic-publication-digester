@@ -2335,3 +2335,23 @@ onto the section headers once the tag layer has run, model keys marked.
 today.json exposes all of it, with a labels block explaining each
 field's provenance. The model discovery-key layer for individual items
 stays backlogged. 348 tests.
+
+## 2026-07-30 — Polish pass on the live surface, and the site learns SEO
+
+Operator direction, four parts. The live page now reads as arrivals —
+newest on top (the journal query flipped to descending; the contract
+docstring says so). Branch tags carry stable colors everywhere chips
+render — indigo legislative, teal executive, amber judicial, grey
+cross-branch — hues chosen deliberately off the red/blue party palette,
+because a party-blind selection must not dress its branches in party
+colors. /today opens with a real introduction: what the live view is,
+the polling cadences, what each entry shows, and a pointer to whole-day
+context — the three most recent dated digests linked by name plus the
+full archive. Today (live) joined the nav on every page class (doc
+pages, sources, agents — the digest pages already had it), and the
+index body itself grew a live callout above the digest listing. For
+the crawlers: every page head now carries a description meta, explicit
+index,follow robots meta, and a rel=alternate link to /llms.txt naming
+us an AI-first digest; robots.txt spells out the agent guide, LLM
+guide, machine index, and feed up top; today.html joined the sitemap.
+351 tests.

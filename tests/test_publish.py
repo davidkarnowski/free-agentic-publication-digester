@@ -134,7 +134,7 @@ def test_digest_structure_transforms(digests, tmp_path):
     assert ">Contents</h2>" not in page
 
     # tags -> chips, model keys labeled and visually distinct
-    assert '<span class="tag">legislative</span>' in page
+    assert '<span class="tag tag-branch-legislative">legislative</span>' in page
     assert 'class="tag tag-model" title="model-generated key">budget debate</span>' in page
 
     # numbered section + glossary collapse; anchor id moves to details
@@ -650,8 +650,8 @@ def test_build_today_citation_metadata_and_item_tags(conn, tmp_path):
     assert "govinfo API" in page
     assert "CREC-2026-07-23 / PgS1" in page
     # mechanical item tags: branch + doc-type words
-    assert '<span class="tag">legislative</span>' in page
-    assert '<span class="tag">senate floor</span>' in page
+    assert '<span class="tag tag-branch-legislative">legislative</span>' in page
+    assert '<span class="tag">senate floor</span>' in page  # non-branch: plain chip
     # summarized item carries its inclusion rule as a subtle note
     assert '<span class="rule-note">CREC-SEL-01</span>' in page
     # the unsummarized agency item -> labeled verbatim opening + channel
@@ -690,3 +690,55 @@ def test_build_today_renders_section_tag_chips_when_stored(conn, tmp_path):
     assert '<p class="today-chips">' in page
     assert ">stock trading ban</span>" in page
     assert 'tag-model" title="model-generated discovery key"' in page
+
+
+def test_build_today_newest_first_with_branch_colors_and_intro(conn, tmp_path):
+    """Operator direction 2026-07-30: arrivals read latest-on-top, branch
+    tags carry stable colors, and the intro explains the page and points
+    at the dated whole-day digests."""
+    import json
+
+    from conftest import DATE
+
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    data = json.loads((tmp_path / "today.json").read_text())
+    # 11:30 agency item observed after the 10:00 CREC item -> listed first
+    assert [i["package_id"] for i in data["items"]] == \
+        ["AGENCYPR-x", "CREC-2026-07-23"]
+
+    page = (tmp_path / "today.html").read_text()
+    assert 'class="tag tag-branch-legislative">legislative</span>' in page
+    assert 'class="tag tag-branch-executive">executive</span>' in page
+    assert "live view" in page
+    assert "whole-day context" in page and 'href="index.html">all digests' in page
+    # head is bot-friendly: description meta + llms.txt alternate link
+    assert '<meta name="description"' in page
+    assert 'href="llms.txt"' in page and "AI-first" in page
+
+
+def test_agent_surfaces_are_bot_friendly(tmp_path, monkeypatch):
+    from fapd import config as _config
+
+    monkeypatch.setattr(_config, "SITE_BASE_URL", "")
+    publish._build_agent_surfaces(tmp_path, ["2026-07-29"], {}, [], base="")
+    robots = (tmp_path / "robots.txt").read_text()
+    assert "LLM guide:    /llms.txt" in robots
+    assert "AI-first" in robots and "Allow: /" in robots
+    assert "today.html" in (tmp_path / "sitemap.xml").read_text()
+    assert "PRELIMINARY" in (tmp_path / "llms.txt").read_text()
+
+
+def test_index_page_has_live_callout_above_digest_list(tmp_path):
+    """Operator direction 2026-07-30: the live /today offering is visible
+    on the index body itself, above the digest listing."""
+    (tmp_path / "digests").mkdir()
+    (tmp_path / "digests" / "2026-07-29.md").write_text(
+        "# Daily Digest\n\nBody.\n")
+    publish.build_site(digest_dir=tmp_path / "digests",
+                       out_dir=tmp_path / "site")
+    index = (tmp_path / "site" / "index.html").read_text()
+    callout = index.index('class="live-callout"')
+    listing = index.index('class="digest-list"')
+    assert callout < listing
+    assert 'href="today.html"' in index[callout:listing]

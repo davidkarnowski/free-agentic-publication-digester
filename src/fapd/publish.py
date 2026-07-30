@@ -31,6 +31,10 @@ _PAGE = """<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
+<meta name="description" content="{description}">
+<meta name="robots" content="index, follow">
+<link rel="alternate" type="text/plain" href="llms.txt"
+      title="LLM guide — this is an AI-first digest of official US federal publications">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -200,6 +204,28 @@ img {
   font-size: 0.72rem; letter-spacing: 0.02em; white-space: nowrap;
 }
 .tag-model { border-style: dashed; font-style: italic; }
+/* Branch colors — deliberately not the red/blue party palette. */
+.tag-branch-legislative {
+  background: rgba(99, 102, 241, 0.14); color: #5a5fd0;
+  border-color: rgba(99, 102, 241, 0.55);
+}
+.tag-branch-executive {
+  background: rgba(13, 148, 136, 0.14); color: #0f9488;
+  border-color: rgba(13, 148, 136, 0.55);
+}
+.tag-branch-judicial {
+  background: rgba(217, 119, 6, 0.14); color: #c07207;
+  border-color: rgba(217, 119, 6, 0.55);
+}
+.tag-branch-cross {
+  background: rgba(107, 114, 128, 0.14);
+  border-color: rgba(107, 114, 128, 0.55);
+}
+@media (prefers-color-scheme: dark) {
+  .tag-branch-legislative { color: #9fa0f2; }
+  .tag-branch-executive { color: #2dd4bf; }
+  .tag-branch-judicial { color: #fbbf24; }
+}
 details.digest-section {
   border: 1px solid var(--border); border-radius: 8px;
   background: var(--card); margin: 0.7rem 0; padding: 0;
@@ -333,6 +359,17 @@ li.source-note a { color: var(--muted); }
   margin-left: 2.4rem; font-size: 0.78rem; color: var(--muted);
   overflow-wrap: anywhere;
 }
+.live-callout {
+  border: 1px solid var(--border); border-left: 3px solid #0f9488;
+  border-radius: 4px; background: var(--card);
+  padding: 0.6rem 0.85rem; font-size: 0.92rem;
+}
+.live-callout a { font-weight: 650; text-decoration: none; }
+.live-callout a:hover { text-decoration: underline; }
+.live-dot {
+  display: inline-block; width: 0.55em; height: 0.55em;
+  border-radius: 50%; background: #0f9488; margin-right: 0.4em;
+}
 """
 
 _DATE_MD_RE = re.compile(r"^\d{4}-\d{2}-\d{2}\.md$")
@@ -402,18 +439,40 @@ def _compact_meta(html_body):
     return html_body[:match.start()] + strip + html_body[match.end():]
 
 
+# The three branches get stable colors everywhere tags render. The hues
+# deliberately avoid the red/blue party palette — selection is party-blind
+# and the presentation must not imply otherwise.
+_BRANCH_CHIP_CLASSES = {
+    "legislative": "tag-branch-legislative",
+    "executive": "tag-branch-executive",
+    "judicial": "tag-branch-judicial",
+    "cross-branch": "tag-branch-cross",
+}
+
+
+def _tag_chip(text, extra_class="", title=""):
+    classes = "tag"
+    branch = _BRANCH_CHIP_CLASSES.get(text.strip().lower())
+    if branch:
+        classes += f" {branch}"
+    if extra_class:
+        classes += f" {extra_class}"
+    title_attr = f' title="{html.escape(title)}"' if title else ""
+    return f'<span class="{classes}"{title_attr}>{html.escape(text)}</span>'
+
+
 def _chip_tags(html_body):
     """`Tags: a · b · model keys: x · y` paragraphs become chip rows; the
     model-derived keys keep their in-place label as a visually distinct
-    chip class (GUIDE §2 labeling carried into the presentation)."""
+    chip class (GUIDE §2 labeling carried into the presentation), and
+    branch tags carry their site-wide colors."""
 
     def _sub(match):
         text = match.group(1)
         mech_part, _, model_part = text.partition("model keys:")
-        chips = [f'<span class="tag">{t.strip()}</span>'
+        chips = [_tag_chip(t.strip())
                  for t in mech_part.split("·") if t.strip()]
-        chips += [f'<span class="tag tag-model" title="model-generated key">'
-                  f"{t.strip()}</span>"
+        chips += [_tag_chip(t.strip(), "tag-model", "model-generated key")
                   for t in model_part.split("·") if t.strip()]
         return f'<p class="tags">{"".join(chips)}</p>'
 
@@ -483,9 +542,13 @@ def _style_digest_body(html_body):
     return html_body
 
 
-def _render_page(title, body_html, nav_links, canonical):
+def _render_page(title, body_html, nav_links, canonical, description=None):
     return _PAGE.format(
         title=html.escape(title),
+        description=html.escape(
+            description
+            or f"{SITE_TAGLINE} Built for human readers and AI agents;"
+               " agents start at /llms.txt."),
         nav_links=nav_links,
         body=body_html,
         generated=utc_now_iso(),
@@ -569,7 +632,9 @@ def _build_doc_pages(out_dir):
             # No brand suffix when the page title already carries it (README)
             title if brand in title else f"{title} — {SITE_TITLE}",
             body,
-            '<a href="index.html">All digests</a><a href="sources.html">Sources</a>'
+            '<a href="index.html">All digests</a>'
+            '<a href="today.html">Today (live)</a>'
+            '<a href="sources.html">Sources</a>'
             + _doc_nav_links(p for p in doc_pages if p[0] != stem)
             + '<a href="agents.html">For agents</a>',
             canonical,
@@ -786,7 +851,8 @@ def _build_sources_page(out_dir, doc_pages=()):
     page = _render_page(
         f"Sources — {SITE_TITLE}",
         _sources_body(entries),
-        '<a href="index.html">All digests</a>' + _doc_nav_links(doc_pages)
+        '<a href="index.html">All digests</a>'
+        '<a href="today.html">Today (live)</a>' + _doc_nav_links(doc_pages)
         + '<a href="agents.html">For agents</a>',
         "sources/registry.yaml",
     )
@@ -846,9 +912,16 @@ def build_site(digest_dir=None, out_dir=None):
         "federal source we ingest, plan to ingest, or have evaluated, with "
         "method and status.</p>" if sources_built else ""
     )
+    live_callout = (
+        '<p class="live-callout"><a href="today.html">'
+        '<span class="live-dot"></span>Today — live</a> '
+        "watch official publications arrive through the day, newest first "
+        "(preliminary until the end-of-day digest freezes the record).</p>"
+    )
     index_body = (
         f"<h1>{html.escape(SITE_TITLE)}</h1>"
         f'<p class="tagline">{html.escape(SITE_TAGLINE)}</p>'
+        f"{live_callout}"
         f"{sources_link}"
         f'<ul class="digest-list">{"".join(cards)}</ul>'
     )
@@ -964,8 +1037,7 @@ def _today_item_row(item):
     url = _today_official_url(item)
     title_html = (f'<a href="{html.escape(url)}">{html.escape(title)}</a>'
                   if url else html.escape(title))
-    chips = "".join(f'<span class="tag">{html.escape(t)}</span>'
-                    for t in _today_item_tags(item))
+    chips = "".join(_tag_chip(t) for t in _today_item_tags(item))
 
     meta_bits = [_today_channel_label(item)]
     if item["agency"]:
@@ -1035,17 +1107,42 @@ def build_today(conn, out_dir=None, date=None):
         for k in keys:
             mech += stored.get(k, {}).get("mechanical", [])
             model += stored.get(k, {}).get("llm", [])
-        chips = [f'<span class="tag">{html.escape(t)}</span>'
-                 for t in dict.fromkeys(mech)]
-        chips += [f'<span class="tag tag-model" title="model-generated '
-                  f'discovery key">{html.escape(t)}</span>'
+        chips = [_tag_chip(t) for t in dict.fromkeys(mech)]
+        chips += [_tag_chip(t, "tag-model", "model-generated discovery key")
                   for t in dict.fromkeys(model)]
         if chips:
             section_chips[coll] = "".join(chips)
 
+    recent = sorted(
+        (p.stem for p in Path(config.DIGEST_DIR).glob("*.md")
+         if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.stem)), reverse=True)[:3]
+    recent_links = " · ".join(f'<a href="{d}.html">{d}</a>' for d in recent)
+    intro = (
+        "<p>This is the <strong>live view</strong> of the Free Agentic "
+        "Publication Digester: official United States federal publications "
+        "as our collectors observe them, newest first. Sources are polled "
+        "continuously — the govinfo API about every half hour, agency "
+        "newsrooms about hourly, and agency email bulletins about every "
+        "fifteen minutes — and this page refreshes within minutes of a new "
+        "arrival. Each entry shows the time we observed it, a link to the "
+        "official record, the channel it arrived through, mechanical tags "
+        "(branch of government, document type, agency), and either a "
+        "labeled summary or the unedited opening words of the official "
+        "text.</p>"
+        "<p>For whole-day context, read the <strong>dated digests</strong> — "
+        "each one a validated, frozen record of a complete publication day "
+        "with plain-language summaries, coverage accounting, and a Day in "
+        f"Review. Most recent: {recent_links} · "
+        '<a href="index.html">all digests</a>. AI agents: start at '
+        '<a href="llms.txt">/llms.txt</a>.</p>'
+    ) if recent_links else (
+        "<p>This is the live view: official federal publications as our "
+        "collectors observe them, newest first. Dated, validated digests "
+        'are on the <a href="index.html">main page</a>.</p>')
     parts = [
         f"<h1>Today — {date} (in progress)</h1>",
         f'<p class="today-disclosure">{html.escape(_TODAY_DISCLOSURE)}</p>',
+        intro,
         (f'<p class="today-meta">Last updated {html.escape(now)} · '
          f"{len(status['items'])} item(s) observed so far · "
          f"{status['pending_llm']} item(s) awaiting model summary.</p>"),
@@ -1188,7 +1285,9 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
     page = _render_page(
         f"Access for AI Agents — {SITE_TITLE}",
         _MD.convert(_AGENTS_MD),
-        '<a href="index.html">All digests</a><a href="sources.html">Sources</a>',
+        '<a href="index.html">All digests</a>'
+        '<a href="today.html">Today (live)</a>'
+        '<a href="sources.html">Sources</a>',
         "GUIDE.md §1 (dual audience)",
     )
     (out_dir / "agents.html").write_text(page, encoding="utf-8")
@@ -1265,14 +1364,20 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
     # (The Sitemap directive formally requires an absolute URL; the
     # root-relative fallback is for local viewing before a domain exists.)
     (out_dir / "robots.txt").write_text(
-        "# AI agents and crawlers are welcome here — see /agents.html\n"
+        "# AI agents and crawlers are welcome here — indexing is\n"
+        "# encouraged. This is an AI-first digest of official US federal\n"
+        "# publications, built for machine ingestion as much as human\n"
+        "# reading.\n"
+        "#   Agent guide:  /agents.html\n"
+        "#   LLM guide:    /llms.txt\n"
+        "#   Machine index: /digests.json   Atom: /feed.xml\n"
         "# /today.html is a PRELIMINARY live view; the dated digests are\n"
         "# the record.\n"
         f"User-agent: *\nAllow: /\n\nSitemap: {base}/sitemap.xml\n",
         encoding="utf-8",
     )
     urls = (
-        ["index.html", "sources.html", "agents.html"]
+        ["index.html", "today.html", "sources.html", "agents.html"]
         + [f"{stem}.html" for stem, _title in doc_pages]
         + [f"{d}.html" for d in dates]
     )

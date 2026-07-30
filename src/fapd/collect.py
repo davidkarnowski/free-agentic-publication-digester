@@ -179,7 +179,9 @@ def dates_with_pending(conn):
 
 
 def today_status(conn, date):
-    """Everything the /today renderer needs, mechanically (zero LLM)."""
+    """Everything the /today renderer needs, mechanically (zero LLM).
+    Items are newest-first — the live page reads as arrivals, latest on
+    top."""
     items = [dict(r) for r in conn.execute(
         """
         SELECT j.observed_at, j.source_class, j.package_id, j.granule_id,
@@ -197,7 +199,7 @@ def today_status(conn, date):
         LEFT JOIN summaries s ON s.package_id = j.package_id
              AND s.granule_id = j.granule_id AND s.prompt_version = ?
         WHERE j.digest_date = ? AND j.event = 'ingested'
-        ORDER BY j.observed_at, j.package_id, j.granule_id
+        ORDER BY j.observed_at DESC, j.package_id, j.granule_id
         """,
         (config.PROMPT_VERSION, date),
     )]
