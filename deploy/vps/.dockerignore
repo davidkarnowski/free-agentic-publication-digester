@@ -1,0 +1,6 @@
+# Build-context hygiene: secrets and runtime state never enter an image.
+.env
+secrets/
+placeholder/
+repo/data/
+repo/.venv/

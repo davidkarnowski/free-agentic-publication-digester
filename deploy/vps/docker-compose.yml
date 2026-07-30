@@ -22,10 +22,11 @@ services:
     expose: ["80"]                # private network only — never published
     networks: [fapd_edge]
     volumes:
-      # Placeholder content until the backend produces the real site into
-      # the fapd-site volume; at that point this bind mount is replaced by
-      #   - fapd-site:/usr/share/nginx/html:ro
-      - ./placeholder:/usr/share/nginx/html:ro
+      # The site hand-off: the backend writes /app/site into this volume;
+      # web serves it read-only. A volume, never a socket — the two
+      # containers share no network. Docker seeds an empty volume from the
+      # backend image's baked site/ on first mount.
+      - fapd-site:/usr/share/nginx/html:ro
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
       interval: 10s
@@ -33,13 +34,33 @@ services:
       retries: 5
       start_period: 5s
 
+  backend:
+    # Collector supervisor + in-supervisor EOD finalizer
+    # (docs/continuous-ingestion.md §9). Egress-only: its own private
+    # bridge, no published ports, NOT on fapd_edge — unreachable from the
+    # proxy, the web container, or the public internet.
+    build:
+      context: .                  # the bundle dir; .dockerignore excludes
+      dockerfile: Dockerfile.backend  # .env and secrets from the context
+    image: fapd-backend:latest
+    container_name: fapd-backend
+    restart: unless-stopped
+    profiles: ["backend"]
+    command: ["--eod"]
+    env_file: .env                # server-side only; never synced (deploy.sh excludes it)
+    networks: [fapd_backend]
+    volumes:
+      - fapd-data:/app/data
+      - fapd-site:/app/site
+      - ./secrets:/app/secrets:ro # deploy key for evidence pushes (0600, root-owned dir)
+
 networks:
   fapd_edge:
     external: true
+  fapd_backend:
+    driver: bridge                # egress-only by construction: no member
+                                  # publishes ports; nothing else joins it
 
 volumes:
-  # Declared ahead of the backend service (next push) so the wiring is
-  # visible now: fapd-site is the web content hand-off (backend writes,
-  # web reads-only); fapd-data holds the pipeline databases and archive.
   fapd-site:
   fapd-data:

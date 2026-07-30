@@ -24,6 +24,9 @@ def main(argv=None) -> int:
                     help="one serial cycle of every worker, then exit")
     ap.add_argument("--no-llm", action="store_true",
                     help="mechanical-only: skip the analyze worker's model calls")
+    ap.add_argument("--eod", action="store_true",
+                    help="enable the in-supervisor end-of-day finalizer "
+                         "(the container path; never implicit)")
     ap.add_argument("--interval-govinfo", type=int, metavar="MIN")
     ap.add_argument("--interval-agency", type=int, metavar="MIN")
     ap.add_argument("--interval-email", type=int, metavar="MIN")
@@ -36,7 +39,8 @@ def main(argv=None) -> int:
         ("agency", args.interval_agency),
         ("email", args.interval_email),
     ) if v}
-    sup = Supervisor(llm_enabled=not args.no_llm, intervals=intervals)
+    sup = Supervisor(llm_enabled=not args.no_llm, intervals=intervals,
+                     eod_enabled=args.eod)
 
     if args.once:
         results = sup.run_once()

@@ -272,6 +272,11 @@ class Worker:
 
     def loop(self, stop_event):
         while not stop_event.is_set():
+            if self.sup.pause_event.is_set() and self.name != "eod":
+                # The EOD finalizer holds the floor (docs §7 serialization);
+                # collectors sit out and re-check shortly.
+                stop_event.wait(30)
+                continue
             self.run_cycle()
             conn = self.sup.conn_factory()
             try:
@@ -377,6 +382,69 @@ class AnalyzeWorker(Worker):
         return stats
 
 
+class EODWorker(Worker):
+    """The end-of-day finalizer, in-supervisor (docs §9): once per UTC
+    day at/after config.EOD_UTC_HOUR it pauses the collectors, runs the
+    finalizer (run_pipeline as a subprocess — its own process, its own
+    connections), pushes the evidence commit when enabled, and resumes.
+    Only added when the supervisor is constructed with eod_enabled=True
+    (the container path) — never implicitly in --once runs."""
+
+    name = "eod"
+
+    def eod_due(self, conn, now=None):
+        """The digest date to finalize, or None. Due when past the EOD
+        hour and the newest complete day hasn't been finalized yet."""
+        now = now or dt.datetime.now(dt.UTC)
+        if now.hour < config.EOD_UTC_HOUR:
+            return None
+        target = (now - dt.timedelta(days=1)).strftime("%Y-%m-%d")
+        row = conn.execute(
+            "SELECT last_result FROM collector_state WHERE worker = 'eod'"
+        ).fetchone()
+        if row and row["last_result"]:
+            done_date = json.loads(row["last_result"]).get("date")
+            if done_date and done_date >= target:
+                return None
+        return target
+
+    def cycle(self, conn, cycle_id):
+        target = self.eod_due(conn)
+        if not target:
+            return {"ran": False}
+        logger.info("EOD finalizer firing for %s — pausing collectors", target)
+        self.sup.pause_event.set()
+        try:
+            exit_code = self.sup.finalizer_runner()
+            pushed = None
+            if exit_code == 0 and config.EVIDENCE_PUSH:
+                pushed = self.sup.evidence_runner() == 0
+            if exit_code != 0:
+                raise RuntimeError(f"finalizer exited {exit_code} for {target}")
+            journal_new(conn, "govinfo", cycle_id)  # late finalizer items
+            journal_model_events(conn, cycle_id)
+            return {"ran": True, "date": target, "pushed": pushed}
+        finally:
+            self.sup.pause_event.clear()
+
+
+def _run_finalizer():
+    import subprocess
+    import sys
+
+    return subprocess.run(
+        [sys.executable, "scripts/run_pipeline.py"],
+        cwd=config.PROJECT_ROOT, check=False).returncode
+
+
+def _run_evidence_commit():
+    import subprocess
+
+    return subprocess.run(
+        ["bash", "deploy/vps/scripts/evidence-commit.sh"],
+        cwd=config.PROJECT_ROOT, check=False).returncode
+
+
 class Supervisor:
     """One process, per-source-class workers (docs §2). Every dependency
     is an optional constructor parameter with a config/module default —
@@ -385,7 +453,9 @@ class Supervisor:
     def __init__(self, *, registry=None, conn_factory=None,
                  govinfo_factory=None, agency_factory=None,
                  wayback_factory=None, mailbox_factory=None, poll=None,
-                 llm_factory=None, llm_enabled=True, intervals=None):
+                 llm_factory=None, llm_enabled=True, intervals=None,
+                 eod_enabled=False, finalizer_runner=None,
+                 evidence_runner=None):
         from . import db, email_sources
         from .client import AgencyClient, GovinfoClient
         from .sources import load_registry
@@ -399,6 +469,10 @@ class Supervisor:
         self.poll = poll or email_sources.poll_mailbox
         self.llm_factory = llm_factory or self._default_llm
         self.llm_enabled = llm_enabled
+        self.pause_event = threading.Event()
+        self.finalizer_runner = finalizer_runner or _run_finalizer
+        self.evidence_runner = evidence_runner or _run_evidence_commit
+        self.eod_enabled = eod_enabled
         iv = intervals or {}
         self.workers = self._build_workers(iv)
 
@@ -445,6 +519,8 @@ class Supervisor:
                 iv.get("agency", config.AGENCY_POLL_INTERVAL_MIN)))
         workers.append(AnalyzeWorker(
             self, iv.get("analyze", config.ANALYZE_MIN_INTERVAL_MIN)))
+        if self.eod_enabled:
+            workers.append(EODWorker(self, iv.get("eod", 10)))
         return workers
 
     def run_once(self):

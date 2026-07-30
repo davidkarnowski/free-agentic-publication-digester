@@ -1,0 +1,22 @@
+# FAPD backend: collector supervisor + end-of-day finalizer.
+# Egress-only by network design (compose: fapd_backend private bridge, no
+# published ports, NOT on fapd_edge). See docs/continuous-ingestion.md §9.
+FROM python:3.12-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends git openssh-client \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir uv
+
+WORKDIR /app
+# deploy.sh rsyncs the tested working tree (incl. .git — evidence
+# commits push from here) to ./repo in the bundle; data/ and site/ are
+# volumes, .env arrives via env_file at run time, never at build time.
+COPY repo/ /app
+RUN uv sync --frozen --no-dev
+
+# Evidence commits are authored by the pipeline's bot identity.
+RUN git config --global user.name "fapd-pipeline" \
+    && git config --global user.email "fapd-pipeline@users.noreply.github.com" \
+    && git config --global --add safe.directory /app
+
+ENTRYPOINT ["uv", "run", "python", "scripts/collect.py"]

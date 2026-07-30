@@ -253,6 +253,72 @@ def test_analyze_worker_no_llm_mode_does_nothing(tmp_path, monkeypatch):
     assert stats == {"dates": 0, "summarized": 0, "plain": 0}
 
 
+# ------------------------------------------------------------- EODWorker --
+
+
+def test_eod_worker_absent_unless_enabled(tmp_path, monkeypatch):
+    sup, _ = make_supervisor(tmp_path, monkeypatch)
+    assert not any(w.name == "eod" for w in sup.workers)
+
+
+def test_eod_due_only_after_hour_and_once_per_day(tmp_path, monkeypatch):
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    worker = collect.EODWorker(sup, 10)
+    conn = conn_factory()
+    before = dt.datetime(2026, 7, 30, config.EOD_UTC_HOUR - 1, 0, tzinfo=dt.UTC)
+    after = dt.datetime(2026, 7, 30, config.EOD_UTC_HOUR, 5, tzinfo=dt.UTC)
+    assert worker.eod_due(conn, now=before) is None
+    assert worker.eod_due(conn, now=after) == "2026-07-29"
+    # once recorded, not due again for the same target
+    collect.record_state(conn, "eod", ok=True,
+                         stats={"ran": True, "date": "2026-07-29"})
+    assert worker.eod_due(conn, now=after) is None
+    # ...but due again the next day
+    next_day = after + dt.timedelta(days=1)
+    assert worker.eod_due(conn, now=next_day) == "2026-07-30"
+    conn.close()
+
+
+def test_eod_cycle_pauses_runs_finalizer_and_resumes(tmp_path, monkeypatch):
+    calls = []
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    sup.finalizer_runner = lambda: calls.append("finalize") or 0
+    sup.evidence_runner = lambda: calls.append("evidence") or 0
+    monkeypatch.setattr(config, "EVIDENCE_PUSH", True)
+    worker = collect.EODWorker(sup, 10)
+    paused_during = []
+    sup.finalizer_runner = lambda: (
+        paused_during.append(sup.pause_event.is_set()), calls.append("finalize"))[0] or 0
+
+    conn = conn_factory()
+    monkeypatch.setattr(worker, "eod_due", lambda c, now=None: "2026-07-29")
+    stats = worker.cycle(conn, "c1")
+    assert stats == {"ran": True, "date": "2026-07-29", "pushed": True}
+    assert paused_during == [True]          # collectors were paused during finalize
+    assert not sup.pause_event.is_set()     # and resumed after
+    assert "evidence" in calls
+    conn.close()
+
+
+def test_eod_cycle_failure_resumes_and_records_error(tmp_path, monkeypatch):
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    sup.finalizer_runner = lambda: 1        # validation failed -> exit 1
+    sup.evidence_runner = lambda: (_ for _ in ()).throw(AssertionError("must not push"))
+    monkeypatch.setattr(config, "EVIDENCE_PUSH", True)
+    worker = collect.EODWorker(sup, 10)
+    conn = conn_factory()
+    monkeypatch.setattr(worker, "eod_due", lambda c, now=None: "2026-07-29")
+    stats = worker.run_cycle()              # contained like any worker failure
+    assert stats is None
+    assert not sup.pause_event.is_set()     # resumed even on failure
+    conn2 = conn_factory()
+    row = conn2.execute(
+        "SELECT consecutive_errors FROM collector_state WHERE worker='eod'").fetchone()
+    assert row["consecutive_errors"] == 1
+    conn2.close()
+    conn.close()
+
+
 def test_record_state_tracks_errors_and_recovery(conn):
     collect.record_state(conn, "email", ok=False, error="imap down")
     collect.record_state(conn, "email", ok=False, error="imap down")

@@ -120,6 +120,11 @@ ANALYZE_MIN_INTERVAL_MIN = 15
 # Past this fraction of a class's daily request budget, its collector
 # doubles its interval for the rest of the UTC day (EOD headroom).
 BUDGET_BACKPRESSURE_FRACTION = 0.7
+# EOD finalizer (in-supervisor, docs/continuous-ingestion.md §9): fires
+# once per UTC day at/after this hour — 09:00 UTC ≈ 4-5am US Eastern,
+# the §4 off-peak window. Evidence pushes gate on FAPD_EVIDENCE_PUSH=1.
+EOD_UTC_HOUR = 9
+EVIDENCE_PUSH = os.environ.get("FAPD_EVIDENCE_PUSH", "") == "1"
 
 # Rule USCOURTS-FETCH-01 (GUIDE §3 judicial): USCOURTS delta listings carry
 # heavy lastModified churn on years-old cases (measured 7,178 of 9,401 in a
