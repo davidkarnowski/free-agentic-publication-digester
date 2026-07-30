@@ -382,6 +382,32 @@ class AnalyzeWorker(Worker):
         return stats
 
 
+class RenderWorker(Worker):
+    """The /today re-renderer (docs §8, OB-8): zero tokens, zero requests.
+    Rebuilds site/today.html + today.json only when the journal has
+    something newer than the last render (or the UTC day rolled over) —
+    "after any cycle that journaled ≥ 1 item", observed via the journal
+    watermark instead of cross-thread hooks."""
+
+    name = "render"
+
+    def cycle(self, conn, cycle_id):
+        date = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d")
+        newest = conn.execute(
+            "SELECT MAX(observed_at) FROM item_journal WHERE digest_date = ?",
+            (date,)).fetchone()[0] or ""
+        row = conn.execute(
+            "SELECT last_result FROM collector_state WHERE worker = 'render'"
+        ).fetchone()
+        prev = json.loads(row["last_result"]) if row and row["last_result"] else {}
+        if (prev.get("date") == date and prev.get("through") == newest
+                and (config.SITE_DIR / "today.html").exists()):
+            return {"date": date, "rebuilt": False, "through": newest}
+        stats = self.sup.today_builder(conn, date=date)
+        return {"date": date, "rebuilt": True, "through": newest,
+                "items": stats["items"], "pending_llm": stats["pending_llm"]}
+
+
 class EODWorker(Worker):
     """The end-of-day finalizer, in-supervisor (docs §9): once per UTC
     day at/after config.EOD_UTC_HOUR it pauses the collectors, runs the
@@ -455,7 +481,7 @@ class Supervisor:
                  wayback_factory=None, mailbox_factory=None, poll=None,
                  llm_factory=None, llm_enabled=True, intervals=None,
                  eod_enabled=False, finalizer_runner=None,
-                 evidence_runner=None):
+                 evidence_runner=None, today_builder=None):
         from . import db, email_sources
         from .client import AgencyClient, GovinfoClient
         from .sources import load_registry
@@ -472,6 +498,7 @@ class Supervisor:
         self.pause_event = threading.Event()
         self.finalizer_runner = finalizer_runner or _run_finalizer
         self.evidence_runner = evidence_runner or _run_evidence_commit
+        self.today_builder = today_builder or self._default_today_builder
         self.eod_enabled = eod_enabled
         iv = intervals or {}
         self.workers = self._build_workers(iv)
@@ -504,6 +531,12 @@ class Supervisor:
 
         return llm.LLMClient()
 
+    @staticmethod
+    def _default_today_builder(conn, *, date=None):
+        from .publish import build_today
+
+        return build_today(conn, date=date)
+
     def _build_workers(self, iv):
         from .agencies import host_groups
 
@@ -519,6 +552,8 @@ class Supervisor:
                 iv.get("agency", config.AGENCY_POLL_INTERVAL_MIN)))
         workers.append(AnalyzeWorker(
             self, iv.get("analyze", config.ANALYZE_MIN_INTERVAL_MIN)))
+        workers.append(RenderWorker(
+            self, iv.get("render", config.TODAY_RENDER_INTERVAL_MIN)))
         if self.eod_enabled:
             workers.append(EODWorker(self, iv.get("eod", 10)))
         return workers

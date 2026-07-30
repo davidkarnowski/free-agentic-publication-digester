@@ -116,6 +116,15 @@ one.*
   today.json, preliminary-disclosure header, RenderWorker rebuild after
   any journaling cycle, never committed.
 
+- **Done 2026-07-30 (operator go):** `publish.build_today` renders
+  site/today.html + today.json from `collect.today_status` — disclosure
+  block (GUIDE §5 wording), last-updated stamp, per-section newest-item
+  times, pending-model-summary count, official/model summary labels in
+  place. A RenderWorker (5-min check, rebuild only when the journal
+  watermark moved or the artifact is missing) keeps it fresh at zero
+  tokens. Both files gitignored — derived-only, never committed;
+  llms.txt/robots.txt/nav gained pointers labeled preliminary.
+
 **OB-9 — Section auto-tagging build**
 - **Gap:** `item_tags` schema exists (B2); no taggers, no rendering.
 - **Trigger:** operator go (was requested 2026-07-30; schema-first by

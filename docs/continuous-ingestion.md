@@ -113,7 +113,7 @@ anyway: the supervisor pauses collector workers during finalization
 
 ---
 
-## §8 Next push: `/today` renderer (OB-8)
+## §8 `/today` renderer (OB-8 — built 2026-07-30)
 
 `publish.build_today(conn)` consuming exactly
 `collect.today_status(conn, date)` → `site/today.html` + `today.json`:

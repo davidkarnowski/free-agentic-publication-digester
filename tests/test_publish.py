@@ -557,3 +557,59 @@ def test_agent_surfaces_built(digests, tmp_path):
     assert "Coverage Statement" in agents
     # navigation reaches the agents page from digest pages
     assert 'href="agents.html">For agents</a>' in (out / "2026-07-01.html").read_text()
+
+
+# ------------------------------------------------------------------ /today --
+
+
+def _seed_today(conn):
+    """One extracted+summarized CREC item and one bare agency item,
+    journaled for DATE."""
+    from conftest import DATE, seed_item
+
+    from fapd import config as _config
+
+    seed_item(conn, "CREC-2026-07-23", "PgS1", "CREC", "SENATE")
+    conn.execute(
+        "INSERT INTO summaries (package_id, granule_id, prompt_version,"
+        " method, inclusion_rule, summary, created_at) VALUES"
+        " ('CREC-2026-07-23', 'PgS1', ?, 'llm', 'CREC-SEL-01',"
+        " 'The Senate debated a measure.', 'x')",
+        (_config.PROMPT_VERSION,))
+    conn.execute(
+        "INSERT INTO item_journal (observed_at, source_class, package_id,"
+        " granule_id, collection, digest_date, event) VALUES"
+        " (?, 'govinfo', 'CREC-2026-07-23', 'PgS1', 'CREC', ?, 'ingested'),"
+        " (?, 'agency', 'AGENCYPR-x', '', 'AGENCYPR', ?, 'ingested')",
+        (f"{DATE}T10:00:00Z", DATE, f"{DATE}T11:30:00Z", DATE))
+    conn.commit()
+
+
+def test_build_today_renders_disclosure_sections_and_labels(conn, tmp_path):
+    from conftest import DATE
+
+    _seed_today(conn)
+    stats = publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    assert stats["items"] == 2
+    page = (tmp_path / "today.html").read_text()
+    assert "preliminary" in page.lower()
+    assert "the dated digest is the" in page  # GUIDE §5 disclosure wording
+    assert "composed at end of day" in page
+    assert f"Today — {DATE} (in progress)" in page
+    assert "Congressional Record" in page and "Agency announcements" in page
+    assert "model summary:" in page            # §2 labeling for llm method
+    assert "newest 11:30Z" in page or "newest 10:00Z" in page
+
+    import json
+    data = json.loads((tmp_path / "today.json").read_text())
+    assert data["date"] == DATE and len(data["items"]) == 2
+    assert "preliminary" in data["disclosure"].lower()
+    assert data["counts"]  # mechanical counts present
+
+
+def test_build_today_empty_day_renders_on_purpose(conn, tmp_path):
+    stats = publish.build_today(conn, out_dir=tmp_path, date="2020-01-01")
+    assert stats["items"] == 0
+    page = (tmp_path / "today.html").read_text()
+    assert "No items observed yet" in page
+    assert "preliminary" in page.lower()

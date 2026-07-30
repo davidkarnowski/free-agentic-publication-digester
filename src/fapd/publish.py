@@ -313,6 +313,19 @@ li.source-note a { color: var(--muted); }
 }
 .tag-status-unavailable { border-style: dashed; }
 .tag-status-excluded { border-style: dotted; }
+.today-disclosure {
+  border: 1px solid var(--rule); border-left: 3px solid var(--accent);
+  padding: 0.6rem 0.85rem; font-size: 0.88rem; color: var(--muted);
+  border-radius: 4px;
+}
+.today-meta { font-size: 0.85rem; color: var(--muted); }
+.today-list { list-style: none; padding-left: 0; }
+.today-item { margin: 0.55rem 0; }
+.today-time {
+  font-family: ui-monospace, monospace; font-size: 0.78rem;
+  color: var(--muted); margin-right: 0.35rem;
+}
+.today-summary { margin: 0.2rem 0 0 2.4rem; font-size: 0.92rem; }
 """
 
 _DATE_MD_RE = re.compile(r"^\d{4}-\d{2}-\d{2}\.md$")
@@ -493,6 +506,7 @@ def _nav_for(dates, i, doc_pages=()):
     if i < len(dates) - 1:
         links.append(f'<a href="{dates[i + 1]}.html">{dates[i + 1]} &rarr;</a>')
     links.append('<a href="index.html">All digests</a>')
+    links.append('<a href="today.html">Today (live)</a>')
     links.append('<a href="sources.html">Sources</a>')
     links.append(_doc_nav_links(doc_pages))
     links.append('<a href="agents.html">For agents</a>')
@@ -833,7 +847,8 @@ def build_site(digest_dir=None, out_dir=None):
     )
     index = _render_page(
         SITE_TITLE, index_body,
-        ('<a href="sources.html">Sources</a>' if sources_built else "")
+        '<a href="today.html">Today (live)</a>'
+        + ('<a href="sources.html">Sources</a>' if sources_built else "")
         + _doc_nav_links(doc_pages),
         "digests/",
     )
@@ -848,6 +863,113 @@ def build_site(digest_dir=None, out_dir=None):
         "doc_pages": len(doc_pages),
         "out_dir": out_dir,
     }
+
+
+# ---------------------------------------------------------------------------
+# /today — the live in-progress day (GUIDE §5 two-artifact model)
+# ---------------------------------------------------------------------------
+
+# Mandatory disclosure wording (GUIDE §5, amended 2026-07-30). The page is
+# derived-only and never committed; the dated digest is the record.
+_TODAY_DISCLOSURE = (
+    "This page is preliminary. Items may be re-dated, re-summarized, or "
+    "excluded by the end-of-day editorial gates; the dated digest is the "
+    "record. The Day in Review and section synopses are composed at end "
+    "of day and do not appear here."
+)
+
+# Journal collection -> display section, in render order.
+_TODAY_SECTIONS = (
+    ("CREC", "Congressional Record — floor proceedings"),
+    ("BILLS", "Legislation"),
+    ("PLAW", "Enacted laws"),
+    ("FR", "Federal Register"),
+    ("USCOURTS", "Judicial opinions"),
+    ("AGENCYPR", "Agency announcements"),
+)
+
+
+def _today_item_row(item):
+    title = (item["title"] or "").strip() or item["package_id"]
+    gran = item["granule_id"]
+    cite = item["package_id"] + (f" / {gran}" if gran else "")
+    observed = html.escape((item["observed_at"] or "")[11:16])
+    summary = ""
+    if item["summary"]:
+        label = ("official summary" if item["summary_method"] == "official"
+                 else "model summary")
+        summary = (f'<p class="today-summary"><span class="plain-label">'
+                   f"{label}:</span> {html.escape(item['summary'])}</p>")
+    return (
+        f'<li class="today-item"><span class="today-time">{observed}Z</span> '
+        f"<strong>{html.escape(title)}</strong> "
+        f'<span class="source-note">{html.escape(cite)}</span>{summary}</li>'
+    )
+
+
+def build_today(conn, out_dir=None, date=None):
+    """Render site/today.html + today.json from collect.today_status —
+    mechanical, zero LLM, derived-only (never committed; gitignored).
+    Empty days render on purpose: disclosure, then 'no items yet'."""
+    import datetime as _dt
+    import json as _json
+
+    from .collect import today_status
+
+    out_dir = Path(out_dir or config.SITE_DIR)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    date = date or _dt.datetime.now(_dt.UTC).strftime("%Y-%m-%d")
+    status = today_status(conn, date)
+    now = utc_now_iso()
+
+    grouped = {}
+    for item in status["items"]:
+        grouped.setdefault(item["collection"] or "OTHER", []).append(item)
+
+    parts = [
+        f"<h1>Today — {date} (in progress)</h1>",
+        f'<p class="today-disclosure">{html.escape(_TODAY_DISCLOSURE)}</p>',
+        (f'<p class="today-meta">Last updated {html.escape(now)} · '
+         f"{len(status['items'])} item(s) observed so far · "
+         f"{status['pending_llm']} item(s) awaiting model summary.</p>"),
+    ]
+    if not status["items"]:
+        parts.append("<p>No items observed yet for this publication day. "
+                     "Collectors poll continuously; check back.</p>")
+    known = {c for c, _ in _TODAY_SECTIONS}
+    sections = list(_TODAY_SECTIONS) + [
+        (c, c) for c in sorted(grouped) if c not in known]
+    for coll, heading in sections:
+        items = grouped.get(coll)
+        if not items:
+            continue
+        newest = max(i["observed_at"] or "" for i in items)[11:16]
+        parts.append(
+            f"<h2>{html.escape(heading)} "
+            f'<span class="rule-note">{len(items)} item(s) · newest '
+            f"{html.escape(newest)}Z</span></h2>")
+        parts.append('<ul class="today-list">'
+                     + "".join(_today_item_row(i) for i in items) + "</ul>")
+
+    nav = ('<a href="index.html">All digests</a>'
+           '<a href="sources.html">Sources</a>'
+           '<a href="agents.html">For agents</a>')
+    page = _render_page(f"Today (live) — {SITE_TITLE}", "".join(parts), nav,
+                        "derived-only: not part of the committed record")
+    (out_dir / "today.html").write_text(page, encoding="utf-8")
+
+    (out_dir / "today.json").write_text(_json.dumps({
+        "date": date,
+        "generated": now,
+        "disclosure": _TODAY_DISCLOSURE,
+        "canonical_record": "the dated digest, frozen at end of day",
+        "counts": status["counts"],
+        "pending_llm": status["pending_llm"],
+        "last_observed_at": status["last_observed_at"],
+        "items": status["items"],
+    }, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    return {"date": date, "items": len(status["items"]),
+            "pending_llm": status["pending_llm"], "out_dir": out_dir}
 
 
 # ---------------------------------------------------------------------------
@@ -951,6 +1073,9 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
         f"- [All digests (index)]({base}/index.html)",
         f"- [Machine-readable digest index]({base}/digests.json)",
         f"- [Atom feed of digests]({base}/feed.xml)",
+        (f"- [Today — live in-progress day, PRELIMINARY]({base}/today.html)"
+         " (also /today.json; items may change until the end-of-day gates"
+         " freeze the dated digest)"),
         f"- [Source guide — what we ingest and why]({base}/sources.html)",
     ] + [
         f"- [{title}]({base}/{stem}.html)" for stem, title in doc_pages
@@ -1008,6 +1133,8 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
     # root-relative fallback is for local viewing before a domain exists.)
     (out_dir / "robots.txt").write_text(
         "# AI agents and crawlers are welcome here — see /agents.html\n"
+        "# /today.html is a PRELIMINARY live view; the dated digests are\n"
+        "# the record.\n"
         f"User-agent: *\nAllow: /\n\nSitemap: {base}/sitemap.xml\n",
         encoding="utf-8",
     )

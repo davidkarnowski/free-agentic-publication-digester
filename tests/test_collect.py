@@ -152,13 +152,20 @@ def _noop_ctx():
 
 
 def make_supervisor(tmp_path, monkeypatch, *, llm_enabled=False, poll=None,
-                    registry=None):
+                    registry=None, today_builder=None):
     from fapd import db
 
     db_path = tmp_path / "meta.db"
 
     def conn_factory():
         return db.connect(db_path)
+
+    # /today writes must never leave the test sandbox.
+    monkeypatch.setattr(config, "SITE_DIR", tmp_path / "site")
+    if today_builder is None:
+        def today_builder(conn, *, date=None):
+            return {"date": date, "items": 0, "pending_llm": 0,
+                    "out_dir": None}
 
     monkeypatch.setattr(config, "IMAP_HOST", "x")
     monkeypatch.setattr(config, "IMAP_USER", "x")
@@ -170,6 +177,7 @@ def make_supervisor(tmp_path, monkeypatch, *, llm_enabled=False, poll=None,
         wayback_factory=_noop_ctx, mailbox_factory=_noop_ctx,
         poll=poll or (lambda mbox, c, e: []),
         llm_factory=_noop_ctx, llm_enabled=llm_enabled,
+        today_builder=today_builder,
     )
     return sup, conn_factory
 
@@ -186,7 +194,7 @@ def test_supervisor_run_once_cycles_every_worker(tmp_path, monkeypatch):
     assert results["analyze"] == {"dates": 0, "summarized": 0, "plain": 0}
     conn = conn_factory()
     workers = {r["worker"]: r for r in conn.execute("SELECT * FROM collector_state")}
-    assert {"govinfo", "email", "analyze"} <= set(workers)
+    assert {"govinfo", "email", "analyze", "render"} <= set(workers)
     assert all(w["consecutive_errors"] == 0 for w in workers.values())
     conn.close()
 
@@ -330,3 +338,66 @@ def test_record_state_tracks_errors_and_recovery(conn):
     row = conn.execute("SELECT * FROM collector_state WHERE worker='email'").fetchone()
     assert row["consecutive_errors"] == 0 and row["last_ok_at"] is not None
     assert json.loads(row["last_result"]) == {"items": 3}
+
+
+def _seed_today_journal(conn_factory, date):
+    conn = conn_factory()
+    conn.execute(
+        "INSERT INTO item_journal (observed_at, source_class, package_id,"
+        " granule_id, collection, digest_date, event) VALUES"
+        " (?, 'govinfo', 'CREC-X', 'PgS1', 'CREC', ?, 'ingested')",
+        (f"{date}T10:00:00Z", date))
+    conn.commit()
+    conn.close()
+
+
+def test_render_worker_rebuilds_once_then_skips(tmp_path, monkeypatch):
+    """The /today watermark contract: rebuild when the journal moved,
+    skip when nothing new arrived (zero tokens either way)."""
+    calls = []
+
+    def builder(conn, *, date=None):
+        (config.SITE_DIR).mkdir(parents=True, exist_ok=True)
+        (config.SITE_DIR / "today.html").write_text("stub")
+        calls.append(date)
+        return {"date": date, "items": 1, "pending_llm": 0, "out_dir": None}
+
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch,
+                                        today_builder=builder)
+    today = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d")
+    _seed_today_journal(conn_factory, today)
+
+    worker = next(w for w in sup.workers if w.name == "render")
+    first = worker.run_cycle()
+    assert first["rebuilt"] is True and calls == [today]
+    second = worker.run_cycle()
+    assert second["rebuilt"] is False and calls == [today]  # no new journal
+
+    # a new journal row moves the watermark -> rebuild fires again
+    conn = conn_factory()
+    conn.execute(
+        "INSERT INTO item_journal (observed_at, source_class, package_id,"
+        " granule_id, collection, digest_date, event) VALUES"
+        " (?, 'agency', 'AGENCYPR-Y', '', 'AGENCYPR', ?, 'ingested')",
+        (f"{today}T11:00:00Z", today))
+    conn.commit()
+    conn.close()
+    third = worker.run_cycle()
+    assert third["rebuilt"] is True and len(calls) == 2
+
+
+def test_render_worker_rebuilds_when_artifact_missing(tmp_path, monkeypatch):
+    """A wiped site volume (F-009 territory) must not leave /today dead:
+    matching watermark with no today.html on disk still rebuilds."""
+    calls = []
+
+    def builder(conn, *, date=None):
+        calls.append(date)  # deliberately does NOT create today.html
+        return {"date": date, "items": 0, "pending_llm": 0, "out_dir": None}
+
+    sup, _conn_factory = make_supervisor(tmp_path, monkeypatch,
+                                         today_builder=builder)
+    worker = next(w for w in sup.workers if w.name == "render")
+    worker.run_cycle()
+    worker.run_cycle()
+    assert len(calls) == 2  # every cycle rebuilds while the file is absent

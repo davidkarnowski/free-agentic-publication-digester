@@ -22,3 +22,8 @@ research/
 # re-include to work.
 .claude/*
 !.claude/skills/
+
+# /today live view — derived-only, never committed (GUIDE §5 two-artifact
+# model); the canonical record is the dated digest the EOD gates freeze.
+site/today.html
+site/today.json

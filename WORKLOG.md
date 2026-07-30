@@ -2296,3 +2296,21 @@ email section's intro. A real-registry test pins both (127 cards, zero
 address matches, zero tables), alongside fixture-registry tests for the
 grouping, chips, counts, and the unavailable section's policy text.
 325 passed + 7 data-dependent skips in the worktree (no data/ here).
+
+## 2026-07-30 — /today ships: the in-progress day gets its window (OB-8)
+
+The gap between "collectors ingest all day" and "the site changes once a
+day" closes tonight. `publish.build_today` renders site/today.html and
+today.json straight from the item journal — every item with its
+observation time, citation, and (when the model layers have caught up)
+its labeled official/model summary, grouped by digest section with
+per-section newest-item stamps and a pending-model-summary count. The
+mandatory GUIDE §5 disclosure leads the page: preliminary, mutable, the
+dated digest is the record; Day-in-Review and synopses stay EOD-only by
+their absence, labeled as such. A RenderWorker joins the supervisor on
+a five-minute check that rebuilds only when the journal watermark moved
+(or the artifact vanished — a wiped site volume must not leave /today
+dead), so freshness costs zero tokens and zero requests. Both artifacts
+are gitignored: derived-only, never committed, exactly the two-artifact
+split §5 was amended for. llms.txt, robots.txt, and the site nav now
+point to it, each labeled preliminary. 346 tests.

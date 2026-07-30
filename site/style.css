@@ -215,3 +215,39 @@ li.source-note a { color: var(--muted); }
   font-size: 0.95rem;
 }
 .tagline { color: var(--muted); }
+/* Source directory (sources.html): the registry rendered as grouped cards.
+   Chips reuse .tag; the record folds into a native details (still JS-free). */
+.src-counts { font-size: 1.02rem; }
+.status-key {
+  display: grid; grid-template-columns: max-content 1fr;
+  gap: 0.35rem 0.7rem; margin: 0.8rem 0 1.2rem;
+}
+.status-key dt { margin: 0; }
+.status-key dd { margin: 0; font-size: 0.9rem; color: var(--muted); }
+.src-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  margin: 0.8rem 0;
+}
+.src-card .src-name {
+  margin: 0; font-size: 1.02rem;
+  text-transform: none; letter-spacing: normal; color: var(--fg);
+}
+.src-name a { text-decoration: none; }
+.src-name a:hover { text-decoration: underline; }
+.src-sub { margin: 0.25rem 0 0; font-size: 0.8rem; color: var(--muted); }
+.src-desc { margin: 0.45rem 0 0; font-size: 0.92rem; }
+.src-links { margin: 0.35rem 0 0; font-size: 0.85rem; }
+.src-more { margin-top: 0.45rem; font-size: 0.8rem; color: var(--muted); }
+.src-more summary { cursor: pointer; color: var(--accent); }
+.src-more dl { margin: 0.4rem 0 0; }
+.src-more dt { font-weight: 600; margin-top: 0.3rem; }
+.src-more dd { margin: 0; overflow-wrap: anywhere; }
+.tag-status-active {
+  background: var(--accent-soft); color: var(--accent);
+  border-color: var(--accent);
+}
+.tag-status-unavailable { border-style: dashed; }
+.tag-status-excluded { border-style: dotted; }

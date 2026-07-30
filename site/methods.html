@@ -25,14 +25,14 @@ section stands alone; agents may ingest them independently.</p>
 <h2 id="sourcing">Sourcing</h2>
 <p><strong>The registry is the scope authority.</strong> Every source ingested, planned,
 evaluated, or found unavailable is recorded in a versioned registry —
-currently 81 sources — and coverage of the federal source universe is
+currently 127 sources — and coverage of the federal source universe is
 measured there, never assumed. Sources are tiered so comprehensiveness
 can be stated against a defined universe: Tier 1 (cabinet departments,
 top independent agencies, legislative support agencies, the White House
 briefing room, core govinfo collections), Tier 2 (major sub-agency
 newsrooms and regulator clusters whose output does not flow through a
 parent department), Tier 3 (the long tail, added opportunistically). The
-registry currently spans Tiers 1 and 2. Statuses are honest: alongside
+registry currently spans all three tiers. Statuses are honest: alongside
 <code>active</code> and <code>planned</code>, a source that blocks our honestly-identified
 client is recorded <code>unavailable</code> with the observed behavior — that fact
 is itself accountability data, and such a source is never evaded or
@@ -88,8 +88,10 @@ fixed order and record which rung they stand on:</p>
 </ol>
 <h2 id="ingestion">Ingestion</h2>
 <p><strong>govinfo delta sync with watermarks.</strong> The primary source is the U.S.
-Government Publishing Office's govinfo system, polled once daily per
-collection with a "what changed since timestamp X" query. The watermark
+Government Publishing Office's govinfo system, polled per collection
+with a "what changed since timestamp X" query — under continuous
+operation, repeated through the day at roughly 30-minute intervals
+rather than once. The watermark
 is always a server-side last-modified value, never our clock, and it
 advances only after a listing completes — a failed sync re-lists the
 same window. A first sync with no watermark is date-bounded to a 3-day
@@ -101,7 +103,20 @@ headers, 5xx backoff) are honored exactly.</p>
 <p><strong>Agency polling.</strong> Agency newsrooms and report publishers are polled
 through their feeds with conditional requests (ETag / If-Modified-Since)
 under their own daily budget, so agency crawling can never consume the
-govinfo budget or vice versa.</p>
+govinfo budget or vice versa. Under continuous operation the feed poll
+runs about hourly, and the project mailbox for email-distributed sources
+is checked about every 15 minutes — a poll that touches no government
+server at all.</p>
+<p><strong>Continuous collection, end-of-day finalization.</strong> A single collector
+supervisor runs the polls above on per-source-class clocks through the
+day, journaling arrivals with observation timestamps. The binding
+politeness invariants do not loosen with frequency: at most one request
+per second per host (a robots.txt crawl-delay overrides that downward),
+per-class daily budgets enforced by the client, every request logged,
+identified User-Agent. Past 70% of a class's daily budget the collector
+doubles its polling interval for the rest of the day, reserving
+headroom for the end-of-day finalizer — the run that assembles,
+validates, and freezes the canonical dated digest.</p>
 <p><strong>Capture-everything provenance.</strong> Unlike the GPO record, agency web
 content can be edited or removed without notice, so every capture is
 preserved under a two-hash strategy:</p>
@@ -143,7 +158,7 @@ the Congressional Record's own Daily Digest, and official bill titles
 and stage designations are the first drafting inputs, used verbatim and
 identified as official text. Model-written summaries exist only for
 selected items that lack an official summary.</p>
-<p><strong>Three model layers, independently versioned.</strong> Where models are used,
+<p><strong>Four model layers, independently versioned.</strong> Where models are used,
 each layer carries its own prompt version so iterating on one never
 regenerates the artifacts of another:</p>
 <ol>
@@ -159,6 +174,15 @@ regenerates the artifacts of another:</p>
 <li><strong>Day and section syntheses</strong> — the Day in Review and per-section
    quick-reads, composed from stored summaries and mechanical counts,
    and subjected to the strictest lexicon scrutiny.</li>
+<li><strong>Section tags</strong> — each section's <code>Tags:</code> line leads with mechanical
+   tags (branch, agency — derived from the collection and registry
+   metadata at zero model involvement), followed by up to three
+   model-generated one-to-three-word discovery keys describing the
+   section's content for search and agent retrieval, produced in one
+   batched call per digest day from the stored synopses. Tags are
+   navigational metadata, never judgments; model keys are labeled as
+   such, and a section whose keys fail validation renders with
+   mechanical tags only.</li>
 </ol>
 <p><strong>The banned-lexicon gate.</strong> Generated prose is scanned against a coded
 banned lexicon (currently 16 terms and phrases: loaded adjectives such
@@ -181,14 +205,18 @@ version, per-collection sync watermarks); a table of contents; the Day
 in Review; numbered sections 1–6 (Congressional Floor Activity;
 Legislation; Federal Register; Enacted Laws; Judicial Activity; Agency
 Announcements, which appears as active agency sources contribute); an
-italicized quick-read at the top of major sections; a Terms Used Today
-glossary; the Coverage Statement; and a Methodology footer restating the
-selection and labeling rules. Every item carries its citation and an
-"Included because" line naming the mechanical rule that selected it.</p>
+italicized quick-read and a <code>Tags:</code> line at the top of major sections;
+a Terms Used Today glossary; the Coverage Statement; and a Methodology
+footer restating the selection and labeling rules. Every item carries
+its citation and an "Included because" line naming the mechanical rule
+that selected it.</p>
 <p><strong>Canonical Markdown, derived HTML.</strong> The Markdown digest in the
 repository is the canonical artifact. The HTML site — including this
 page — is a derived, zero-model presentation layer, regenerable at any
-time without touching data or models.</p>
+time without touching data or models. On the site, each digest renders
+as a collapsed, plain-speak-first view: section cards whose headers
+carry the title, tag chips, and the plain-language synopsis, expanding
+to the full record on demand — static HTML with no JavaScript.</p>
 <p><strong>The validation gate.</strong> Before publication, each digest must pass four
 coded checks: every govinfo citation resolves to a stored record; the
 Coverage Statement's arithmetic reconciles internally and against the
@@ -198,7 +226,7 @@ rule. A digest that fails any check is not published — there is no
 override.</p>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-07-30T19:38:03Z (UTC). Canonical source:
+  <p>Generated 2026-07-30T21:21:15Z (UTC). Canonical source:
   <code>docs/site/methods.md</code> in the repository. Selection is mechanical and
   every item cites its official source; methodology in
   <code>GUIDE.md</code> §2.</p>

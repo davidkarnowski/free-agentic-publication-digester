@@ -26,6 +26,18 @@ the federal government actually did on a given day.</p>
 item carries a citation to the official record and names the mechanical
 rule that selected it. Everything not summarized is counted. Nothing is
 silently omitted.</p>
+<h2 id="status-2026-07-30">Status (2026-07-30)</h2>
+<p>The authoritative numbers block — where any other figure in the
+repository disagrees, this dated snapshot is the current one.</p>
+<ul>
+<li><strong>Live site:</strong> https://fapd.info — served from a Docker stack on a
+  VPS; GitHub holds the repository, CI, and the integrity record.</li>
+<li><strong>Source registry:</strong> 127 sources — 30 active (14 web feeds and
+  newsrooms, 11 email bulletins, 5 govinfo collections), 76 planned,
+  19 recorded unavailable, 2 evaluated and excluded.</li>
+<li><strong>Latest digest:</strong> <a href="2026-07-29.html">2026-07-29</a>.</li>
+<li><strong>Test suite:</strong> 319 tests.</li>
+</ul>
 <hr />
 <h2 id="philosophy">Philosophy</h2>
 <h3 id="built-exclusively-on-the-official-record">Built exclusively on the official record</h3>
@@ -177,6 +189,13 @@ conditional requests, robots enforcement, budgets, capture, storage.</p>
   parallel, each worker with its own pacing clock, so no server waits
   behind another's promises — and no server ever sees more than it would
   if it were our only source.</li>
+<li><strong>Continuous, with backpressure:</strong> in production a collector
+  supervisor (<code>src/fapd/collect.py</code>) polls each
+  source class on its own clock through the day — govinfo about every
+  30 minutes, agency feeds about every 60, the project mailbox about
+  every 15 — always as watermark deltas with conditional requests. Past
+  70% of a class's daily budget its interval doubles for the rest of
+  the day, reserving headroom for the end-of-day finalizer.</li>
 <li><strong>Budgeted:</strong> hard daily request caps per source class, enforced by
   the client itself, which refuses to exceed them mid-run.</li>
 <li><strong>Logged, twice:</strong> every outbound request lands in a queryable fetch
@@ -212,7 +231,7 @@ the Congressional Record's own Daily Digest, official bill titles and
 stages, court syllabi — used verbatim, identified as official text, at
 zero inference cost. Models write only what the record does not already
 summarize.</p>
-<p><strong>Three model layers, independently versioned</strong> (iterating on one never
+<p><strong>Four model layers, independently versioned</strong> (iterating on one never
 regenerates another):</p>
 <ol>
 <li><strong>Item summaries</strong> — for selected documents lacking an official
@@ -227,6 +246,12 @@ regenerates another):</p>
 <li><strong>Day and section syntheses</strong> — the "Day in Review" and per-section
    quick-reads, composed from stored summaries and mechanical counts,
    under the strictest scrutiny.</li>
+<li><strong>Section tags</strong> — each digest section's <code>Tags:</code> line: mechanical
+   branch and agency tags first (zero tokens), then up to three
+   model-generated one-to-three-word discovery keys per section,
+   generated in one batched cheap-tier call per day from the stored
+   synopses, labeled model-derived, and linted by the same
+   banned-lexicon gate because they render in the digest.</li>
 </ol>
 <p><strong>The banned-lexicon gate</strong> scans all generated prose against a coded
 list of loaded adjectives ("landmark", "controversial", "sweeping"…) and
@@ -248,9 +273,13 @@ legislation, the Federal Register, enacted laws, judicial activity, and
 agency announcements (listed only when the <em>agency itself</em> dates the
 release on the digest day — backfill is disclosed and counted, never
 passed off as news), per-item citations and inclusion rules, plain-speak
-lines under their official counterparts, a glossary, the Coverage
-Statement, and a methodology footer. Sample:
+lines under their official counterparts, per-section tag lines, a
+glossary, the Coverage Statement, and a methodology footer. Sample:
 <a href="2026-07-28.html">digests/2026-07-28.md</a>.</p>
+<p>On the site, each digest renders as a collapsed, plain-speak-first
+view: section cards whose headers carry the title, tag chips, and the
+plain-language synopsis, expanding to the full record on demand —
+still static HTML, no JavaScript.</p>
 <hr />
 <h2 id="setup">Setup</h2>
 <p><code>sh
@@ -259,8 +288,13 @@ cp .env.example .env                   # then paste your api.data.gov key
 uv run python scripts/verify_key.py    # one-request sanity check</code></p>
 <p>Get a free API key at https://api.data.gov/signup/ (emailed instantly).</p>
 <h2 id="daily-operation">Daily operation</h2>
+<p>In production (the VPS Docker stack in <code>deploy/vps/</code>), a
+collector supervisor polls sources continuously through the day and
+<code>run_pipeline.py</code> runs as the end-of-day finalizer that freezes and
+commits the canonical digest. Each stage also runs standalone:</p>
 <p><code>sh
-uv run python scripts/run_pipeline.py  # sync → ingest → extract → analyze → digest
+uv run python scripts/collect.py       # collector supervisor (continuous ingestion; --once for one cycle)
+uv run python scripts/run_pipeline.py  # EOD finalizer: sync → ingest → extract → analyze → digest
 uv run python scripts/sync.py          # govinfo delta sync only
 uv run python scripts/ingest_agencies.py --verbose   # agency newsrooms only
 uv run python scripts/digest.py --date YYYY-MM-DD    # (re)render one digest
@@ -277,6 +311,7 @@ scripts/          operational entry points
 provenance/       committed daily manifests (hash-chained)
 digests/          generated daily digests (committed, canonical)
 site/             derived static site (human pages + agent surfaces)
+deploy/vps/       the Docker stack serving fapd.info (source of truth)
 docs/             schema, research reports, dev notes, how to add sources
 data/             raw archive + SQLite (local, git-ignored)
 tests/</code></p>
@@ -318,7 +353,7 @@ is at <code>docs/site/ai-development.md</code>
 </ul>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-07-30T19:38:03Z (UTC). Canonical source:
+  <p>Generated 2026-07-30T21:21:15Z (UTC). Canonical source:
   <code>README.md</code> in the repository. Selection is mechanical and
   every item cites its official source; methodology in
   <code>GUIDE.md</code> §2.</p>

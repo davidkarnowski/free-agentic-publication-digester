@@ -118,6 +118,9 @@ COLLECTIONS = ("CREC", "BILLS", "FR", "USCOURTS", "PLAW")
 GOVINFO_POLL_INTERVAL_MIN = 30
 AGENCY_POLL_INTERVAL_MIN = 60
 EMAIL_POLL_INTERVAL_MIN = 15
+# /today re-render check (zero tokens, zero requests — journal watermark
+# comparison; rebuilds only when a cycle journaled something new).
+TODAY_RENDER_INTERVAL_MIN = 5
 # Model layers fire on batch-threshold-or-age, never per item (§6 r12):
 # a full map batch, or the oldest pending item older than the latency
 # bound; successive analyze cycles at least MIN_INTERVAL apart.
