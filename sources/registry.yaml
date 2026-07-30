@@ -1471,10 +1471,10 @@
   urls:
     home: https://home.treasury.gov/news/press-releases
     signup: https://service.govdelivery.com/service/multi_subscribe.html?code=USTREAS
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
-  status: planned
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender subscriptions@subscriptions.treas.gov). Sibling of treasury-newsroom, whose web path robots.txt disallows — that refusal stands unchanged. Treasury component subscriptions also confirmed and registered separately or noted here: FinCEN (fincen-email), TTB, BEP, CDFI Fund, TIGTA, Office of Financial Research (ofr-email), and the Federal Reserve Bank of New York alerts."
+  notes: "Subscribed and confirmed 2026-07-29 (sender subscriptions@subscriptions.treas.gov). Sibling of treasury-newsroom, whose web path robots.txt disallows — that refusal stands unchanged. Treasury component subscriptions also confirmed and registered separately or noted here: FinCEN (fincen-email), TTB, BEP, CDFI Fund, TIGTA, Office of Financial Research (ofr-email), and the Federal Reserve Bank of New York alerts. Gate-3 coverage evaluation (2026-07-30, from the 2026-07-29 bulletins): 5 bulletins carried 5 press releases, full text, DKIM-verified, each with its canonical home.treasury.gov URL. The subscription is the department's own press-release distribution list; because the web channel refuses our client, this is the department's first working input and the bulletin stream is the measure of its own coverage — item counts are consistent with the newsroom's public daily volume, and any gap the web page would reveal cannot be checked without crawling a site that refused us (we do not)."
 
 - id: fincen-email
   adapter: govdelivery
@@ -1488,10 +1488,10 @@
   urls:
     home: https://www.fincen.gov/news-room
     signup: https://public.govdelivery.com/accounts/USFINCEN/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender fincenupdates@public.govdelivery.com)."
+  notes: "Subscribed and confirmed 2026-07-29 (sender fincenupdates@public.govdelivery.com). No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: ofr-email
   adapter: govdelivery
@@ -1504,10 +1504,10 @@
   tier: 3
   urls:
     home: https://www.financialresearch.gov/
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender updates@subscribe.financialresearch.gov). Signup URL recovered from the bulletin List-Unsubscribe header and verified (account USDOJUSAO); the earlier inferred address had not resolved."
+  notes: "Subscribed and confirmed 2026-07-29 (sender updates@subscribe.financialresearch.gov). Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here. [Note corrected 2026-07-30: this entry and usattorneys-email carried each other's signup-URL provenance sentences; see WORKLOG.] No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: irs-email
   adapter: govdelivery
@@ -1521,10 +1521,10 @@
   urls:
     home: https://www.irs.gov/newsroom
     signup: https://www.irs.gov/newsroom/e-news-subscriptions
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender irs@service.govdelivery.com). Sibling of the planned irs-newsroom web entry."
+  notes: "Subscribed and confirmed 2026-07-29 (sender irs@service.govdelivery.com). Sibling of the planned irs-newsroom web entry. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: ssa-email
   adapter: govdelivery
@@ -1538,10 +1538,10 @@
   urls:
     home: https://www.ssa.gov/news/en/press/releases/index.html
     signup: https://public.govdelivery.com/accounts/USSSA/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender subscription.service@subscriptions.ssa.gov). Sibling of ssa-newsroom, which returns HTTP 403 to our identified client — the first working input for this agency."
+  notes: "Subscribed and confirmed 2026-07-29 (sender subscription.service@subscriptions.ssa.gov). Sibling of ssa-newsroom, which returns HTTP 403 to our identified client — the first working input for this agency. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: justice-email
   adapter: govdelivery
@@ -1555,10 +1555,10 @@
   urls:
     home: https://www.justice.gov/news
     signup: https://public.govdelivery.com/accounts/USDOJ/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
-  status: planned
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender usdoj@public.govdelivery.com). Corroborating sibling of the active justice-newsroom feed, whose 25-item depth can under-cover heavy days; the bulletin stream is expected to close part of that gap."
+  notes: "Subscribed and confirmed 2026-07-29 (sender usdoj@public.govdelivery.com). Corroborating sibling of the active justice-newsroom feed, whose 25-item depth can under-cover heavy days; the bulletin stream is expected to close part of that gap. Gate-3 coverage evaluation (2026-07-30, from the 2026-07-29 bulletins): 7 bulletins yielded 3 ingested items after cross-channel dedup — most releases had already arrived via the justice-newsroom RSS feed and dedup is first-recorded-wins, which is the intended behavior for a corroborating channel. Coverage adds depth beyond the feed's 25-item window rather than new document classes; both channels are counted in coverage accounting."
 
 - id: usattorneys-email
   adapter: govdelivery
@@ -1572,10 +1572,10 @@
   urls:
     home: https://www.justice.gov/usao/pressreleases
     signup: https://public.govdelivery.com/accounts/USDOJUSAO/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
-  status: planned
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender usattorneys@public.govdelivery.com); a real news bulletin arrived the same day. High expected volume — content evaluation must establish whether the digest lists these individually or aggregates them by district, and the answer will be disclosed in the coverage statement. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+  notes: "Subscribed and confirmed 2026-07-29 (sender usattorneys@public.govdelivery.com); a real news bulletin arrived the same day. Signup URL recovered from the bulletin List-Unsubscribe header and verified (account USDOJUSAO); an earlier address inferred from the sender had not resolved. [Note corrected 2026-07-30: this entry and ofr-email carried each other's signup-URL provenance sentences; see WORKLOG.] Gate-3 coverage evaluation (2026-07-30, from the 2026-07-29 bulletins): the subscription is EOUSA's consolidated all-districts distribution — 3 bulletins carried 25 district releases (20 with full text, 5 teaser-mode), DKIM-verified, one bulletin alone carrying sixteen. The open question is resolved: the digest lists district releases individually, as the adapter already parses them; per-district volume is whatever EOUSA distributes, and the coverage statement counts every item. Fraction of the visible newsroom stream: the same releases appear on justice.gov/usao/pressreleases, which sustained article fetching cannot use (recorded DOJ challenge behavior) — the bulletin channel is the fuller input, and under-coverage relative to it has not been observed in the window."
 
 - id: dea-email
   adapter: govdelivery
@@ -1589,10 +1589,10 @@
   urls:
     home: https://www.dea.gov/press-releases
     signup: https://public.govdelivery.com/accounts/USDOJDEA/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender dea@public.govdelivery.com). Sibling of dea-press, which returns HTTP 403 to our identified client — the first working input for this agency. The Diversion Control Division list is subscribed but awaiting email confirmation."
+  notes: "Subscribed and confirmed 2026-07-29 (sender dea@public.govdelivery.com). Sibling of dea-press, which returns HTTP 403 to our identified client — the first working input for this agency. The Diversion Control Division list is subscribed but awaiting email confirmation. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: atf-email
   adapter: govdelivery
@@ -1606,10 +1606,10 @@
   urls:
     home: https://www.atf.gov/news
     signup: https://public.govdelivery.com/accounts/USATF/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender atf@service.govdelivery.com). Sibling of atf-news, which returns HTTP 403 to our identified client — the first working input for this agency. Corrects the 2026-07-29 access research, which concluded no ATF-specific bulletin account existed; the account exists under a different code than the one guessed."
+  notes: "Subscribed and confirmed 2026-07-29 (sender atf@service.govdelivery.com). Sibling of atf-news, which returns HTTP 403 to our identified client — the first working input for this agency. Corrects the 2026-07-29 access research, which concluded no ATF-specific bulletin account existed; the account exists under a different code than the one guessed. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: transportation-email
   adapter: govdelivery
@@ -1623,10 +1623,10 @@
   urls:
     home: https://www.transportation.gov/briefing-room
     signup: https://public.govdelivery.com/accounts/USDOT/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender usdot@info.dot.gov). Sibling of transportation-newsroom, which returns HTTP 403 to our identified client. Modal-administration lists also subscribed and confirmed under the same platform, to be split into their own entries if content evaluation shows distinct action streams: FRA, FHWA, FTA, FMCSA, PHMSA, MARAD, and the DOT Inspector General."
+  notes: "Subscribed and confirmed 2026-07-29 (sender usdot@info.dot.gov). Sibling of transportation-newsroom, which returns HTTP 403 to our identified client. Modal-administration lists also subscribed and confirmed under the same platform, to be split into their own entries if content evaluation shows distinct action streams: FRA, FHWA, FTA, FMCSA, PHMSA, MARAD, and the DOT Inspector General. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: faa-email
   adapter: govdelivery
@@ -1640,10 +1640,10 @@
   urls:
     home: https://www.faa.gov/newsroom
     signup: https://public.govdelivery.com/accounts/USAFAA/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender usafaa@info.dot.gov). Sibling of faa-newsroom, which returns HTTP 403 to our identified client — the first working input for this agency."
+  notes: "Subscribed and confirmed 2026-07-29 (sender usafaa@info.dot.gov). Sibling of faa-newsroom, which returns HTTP 403 to our identified client — the first working input for this agency. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: nhtsa-email
   adapter: govdelivery
@@ -1657,10 +1657,10 @@
   urls:
     home: https://www.nhtsa.gov/press-releases
     signup: https://public.govdelivery.com/accounts/USDOTNHTSA/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender nhtsa@service.govdelivery.com). Sibling of nhtsa-press, which returns HTTP 403 to our identified client. NHTSA operates its own bulletin account rather than sharing the departmental one, giving finer topic control than expected."
+  notes: "Subscribed and confirmed 2026-07-29 (sender nhtsa@service.govdelivery.com). Sibling of nhtsa-press, which returns HTTP 403 to our identified client. NHTSA operates its own bulletin account rather than sharing the departmental one, giving finer topic control than expected. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: epa-email
   adapter: govdelivery
@@ -1674,10 +1674,10 @@
   urls:
     home: https://www.epa.gov/newsreleases
     signup: https://www.epa.gov/newsroom/email-subscriptions-epa-headquarters-new-releases
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender epa.admin@govdelivery.epa.gov). Sibling of epa-newsroom, whose web path robots.txt disallows — the first working input for this agency."
+  notes: "Subscribed and confirmed 2026-07-29 (sender epa.admin@govdelivery.epa.gov). Sibling of epa-newsroom, whose web path robots.txt disallows — the first working input for this agency. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: agriculture-email
   adapter: govdelivery
@@ -1691,10 +1691,10 @@
   urls:
     home: https://www.usda.gov/about-usda/news/press-releases
     signup: https://public.govdelivery.com/accounts/USDAOC/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
-  status: planned
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender usda@public.govdelivery.com). Sibling of agriculture-newsroom, whose web path robots.txt disallows — the first working input for this department. Component lists also subscribed and confirmed, to be split into their own entries if content evaluation shows distinct action streams: Foreign Agricultural Service, Food and Nutrition Service, Agricultural Marketing Service, APHIS, NIFA, Agricultural Research Service, Rural Development, and Farmers.gov."
+  notes: "Subscribed and confirmed 2026-07-29 (sender usda@public.govdelivery.com). Sibling of agriculture-newsroom, whose web path robots.txt disallows — the first working input for this department. Component lists also subscribed and confirmed, to be split into their own entries if content evaluation shows distinct action streams: Foreign Agricultural Service, Food and Nutrition Service, Agricultural Marketing Service, APHIS, NIFA, Agricultural Research Service, Rural Development, and Farmers.gov. Gate-3 coverage evaluation (2026-07-30, from the 2026-07-29 bulletins): 2 bulletins carried 2 departmental releases, full text, DKIM-verified, with canonical usda.gov URLs. The subscription is the departmental press list; with the web channel refusing our client it is this department's only input, so the bulletin stream is the measure of its own coverage; component-list volume is observed under this entry until the split decision."
 
 - id: fsis-email
   adapter: govdelivery
@@ -1708,10 +1708,10 @@
   urls:
     home: https://www.fsis.usda.gov/recalls
     signup: https://public.govdelivery.com/accounts/USFSIS/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
-  status: planned
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender usfsis@public.govdelivery.com). Registered separately from agriculture-email because recalls are a distinct, time-critical document class rather than press material."
+  notes: "Subscribed and confirmed 2026-07-29 (sender usfsis@public.govdelivery.com). Registered separately from agriculture-email because recalls are a distinct, time-critical document class rather than press material. Gate-3 coverage evaluation (2026-07-30, from the 2026-07-29 bulletins): 1 bulletin carried 1 recall/alert, full text, DKIM-verified, with its canonical fsis.usda.gov URL. The subscription is FSIS's own recall-and-alert distribution list — the channel the agency operates for exactly this document class; the public recalls page remains the visible cross-check."
 
 - id: uscg-email
   adapter: govdelivery
@@ -1724,10 +1724,10 @@
   tier: 2
   urls:
     home: https://www.news.uscg.mil/
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender uscoastguard@service.govdelivery.com). Sibling of uscg-news, whose robots.txt disallows our client. A second consent-based path alongside the planned DVIDS API integration; content evaluation will determine which carries the fuller record. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+  notes: "Subscribed and confirmed 2026-07-29 (sender uscoastguard@service.govdelivery.com). Sibling of uscg-news, whose robots.txt disallows our client. A second consent-based path alongside the planned DVIDS API integration; content evaluation will determine which carries the fuller record. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: uscis-email
   adapter: govdelivery
@@ -1741,10 +1741,10 @@
   urls:
     home: https://www.uscis.gov/newsroom
     signup: https://public.govdelivery.com/accounts/USDHSCIS/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
-  status: planned
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender uscis@messages.dhs.gov). Sibling of the planned uscis-newsroom web entry. Department-level DHS and ICE subscriptions are awaiting email confirmation."
+  notes: "Subscribed and confirmed 2026-07-29 (sender uscis@messages.dhs.gov). Sibling of the planned uscis-newsroom web entry. Department-level DHS and ICE subscriptions are awaiting email confirmation. Gate-3 coverage evaluation (2026-07-30, from the 2026-07-29 bulletins): 1 bulletin carried 1 update, full text, DKIM-verified, with its canonical uscis.gov URL. The subscription is the agency's own update list covering policy-manual, form, and processing changes — document classes the newsroom page also lists; per-topic subscription scope means the newsroom comparison stays part of coverage accounting as volume accrues."
 
 - id: fda-email
   adapter: govdelivery
@@ -1758,10 +1758,10 @@
   urls:
     home: https://www.fda.gov/news-events/fda-newsroom
     signup: https://public.govdelivery.com/accounts/USFDA/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender usfda@public.govdelivery.com). Corroborating sibling of the active fda-press feed; content evaluation will establish whether the bulletins carry material the feed omits."
+  notes: "Subscribed and confirmed 2026-07-29 (sender usfda@public.govdelivery.com). Corroborating sibling of the active fda-press feed; content evaluation will establish whether the bulletins carry material the feed omits. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: cms-email
   adapter: govdelivery
@@ -1775,10 +1775,10 @@
   urls:
     home: https://www.cms.gov/newsroom
     signup: https://public.govdelivery.com/accounts/USCMS/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender cmslists@subscriptions.cms.hhs.gov). Sibling of the planned cms-newsroom web entry. The HHS departmental subscription is awaiting email confirmation; NIH Office of Research on Women's Health, the Office on Women's Health, and ODPHP lists are also confirmed and may be registered after evaluation."
+  notes: "Subscribed and confirmed 2026-07-29 (sender cmslists@subscriptions.cms.hhs.gov). Sibling of the planned cms-newsroom web entry. The HHS departmental subscription is awaiting email confirmation; NIH Office of Research on Women's Health, the Office on Women's Health, and ODPHP lists are also confirmed and may be registered after evaluation. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: va-email
   adapter: govdelivery
@@ -1792,10 +1792,10 @@
   urls:
     home: https://news.va.gov/
     signup: https://public.govdelivery.com/accounts/USVA/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (senders veteransaffairs@messages.va.gov and veteransbenefits@messages.va.gov). Corroborating sibling of the active va-newsroom feed."
+  notes: "Subscribed and confirmed 2026-07-29 (senders veteransaffairs@messages.va.gov and veteransbenefits@messages.va.gov). Corroborating sibling of the active va-newsroom feed. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: commercial-service-email
   adapter: govdelivery
@@ -1808,10 +1808,10 @@
   tier: 3
   urls:
     home: https://www.trade.gov/commercial-service
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender u.s.commercialservice@public.govdelivery.com). Partial coverage only for commerce-newsroom, which returns HTTP 403 to our identified client: this is a trade-promotion channel, not the department's press office. A departmental Commerce subscription remains to be found. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+  notes: "Subscribed and confirmed 2026-07-29 (sender u.s.commercialservice@public.govdelivery.com). Partial coverage only for commerce-newsroom, which returns HTTP 403 to our identified client: this is a trade-promotion channel, not the department's press office. A departmental Commerce subscription remains to be found. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: state-week-email
   adapter: govdelivery
@@ -1825,10 +1825,10 @@
   urls:
     home: https://www.state.gov/week-at-state/
     signup: https://public.govdelivery.com/accounts/USSTATEBPA/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender usstatebpa@public.govdelivery.com). Only partial coverage for state-newsroom: weekly and summarized, not the daily press statements or briefing transcripts. The documented state.gov press-release and briefing feeds remain the target for full coverage."
+  notes: "Subscribed and confirmed 2026-07-29 (sender usstatebpa@public.govdelivery.com). Only partial coverage for state-newsroom: weekly and summarized, not the daily press statements or briefing transcripts. The documented state.gov press-release and briefing feeds remain the target for full coverage. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: federal-reserve-email
   name: Federal Reserve Board Announcements (email)
@@ -1840,10 +1840,10 @@
   tier: 2
   urls:
     home: https://www.federalreserve.gov/newsevents.htm
-  method: Subscription notifications to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription notifications to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender frb-webannouncements@announcements.federalreserve.gov). The Board runs its own notification system rather than GovDelivery, so the adapter must not assume a single platform. Corroborating sibling of the active federal-reserve-news feed. Federal Reserve Bank of New York alerts are also confirmed. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+  notes: "Subscribed and confirmed 2026-07-29 (sender frb-webannouncements@announcements.federalreserve.gov). The Board runs its own notification system rather than GovDelivery, so the adapter must not assume a single platform. Corroborating sibling of the active federal-reserve-news feed. Federal Reserve Bank of New York alerts are also confirmed. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: fdic-email
   name: FDIC Press Releases (email)
@@ -1856,10 +1856,10 @@
   urls:
     home: https://www.fdic.gov/news/press-releases
     signup: https://www.fdic.gov/about/subscriptions/
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender subscriptions@subscriptions.fdic.gov). Sibling of the planned fdic-news web entry, and it settles the open GovDelivery-topic-RSS question in favor of the email channel for this agency."
+  notes: "Subscribed and confirmed 2026-07-29 (sender subscriptions@subscriptions.fdic.gov). Sibling of the planned fdic-news web entry, and it settles the open GovDelivery-topic-RSS question in favor of the email channel for this agency. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: cpsc-email
   name: CPSC Recalls and News (email)
@@ -1872,10 +1872,10 @@
   urls:
     home: https://www.cpsc.gov/Newsroom
     signup: https://www.cpsc.gov/Newsroom/Subscribe
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender uscpsc@info.cpsc.gov). New coverage: the commission had no registered source before this subscription."
+  notes: "Subscribed and confirmed 2026-07-29 (sender uscpsc@info.cpsc.gov). New coverage: the commission had no registered source before this subscription. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: pbgc-email
   name: PBGC Updates (email)
@@ -1887,10 +1887,10 @@
   tier: 3
   urls:
     home: https://www.pbgc.gov/news
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender pbgc@subscriptions.pbgc.gov). New coverage: no registered source before this subscription. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+  notes: "Subscribed and confirmed 2026-07-29 (sender pbgc@subscriptions.pbgc.gov). New coverage: no registered source before this subscription. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: eac-email
   name: Election Assistance Commission (email)
@@ -1902,10 +1902,10 @@
   tier: 3
   urls:
     home: https://www.eac.gov/newsroom
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender newsletter@updates.eac.gov). New coverage: no registered source before this subscription. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+  notes: "Subscribed and confirmed 2026-07-29 (sender newsletter@updates.eac.gov). New coverage: no registered source before this subscription. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: ussc-email
   adapter: govdelivery
@@ -1918,10 +1918,10 @@
   tier: 2
   urls:
     home: https://www.ussc.gov/topic/news
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender ussc@public.govdelivery.com). Sibling of ussc-news, whose documented RSS feed was reachable but empty at probe — the bulletin channel may prove the more reliable input for this judicial-branch agency. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here."
+  notes: "Subscribed and confirmed 2026-07-29 (sender ussc@public.govdelivery.com). Sibling of ussc-news, whose documented RSS feed was reachable but empty at probe — the bulletin channel may prove the more reliable input for this judicial-branch agency. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
 - id: usps-oig-email
   adapter: govdelivery
@@ -1935,10 +1935,10 @@
   urls:
     home: https://www.uspsoig.gov/
     signup: https://public.govdelivery.com/accounts/USPSOIG/subscriber/new
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
-  status: planned
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender uspsoig@public.govdelivery.com); a real audit-release bulletin arrived the same day. Overlaps the planned oversight.gov aggregator, which collects IG reports government-wide; the aggregator rule applies if both are activated."
+  notes: "Subscribed and confirmed 2026-07-29 (sender uspsoig@public.govdelivery.com); a real audit-release bulletin arrived the same day. Overlaps the planned oversight.gov aggregator, which collects IG reports government-wide; the aggregator rule applies if both are activated. Gate-3 coverage evaluation (2026-07-30, from the 2026-07-29 bulletins): 1 bulletin carried 1 audit release, full text, DKIM-verified, with its canonical uspsoig.gov URL. The subscription is the OIG's own release list; its published output (audits, white papers) is low-volume and the bulletin stream matches the classes the site publishes."
 
 - id: hud-oig-email
   name: HUD Inspector General (email)
@@ -1951,7 +1951,7 @@
   urls:
     home: https://www.hudoig.gov/newsroom
     signup: https://www.hudoig.gov/subscribe
-  method: Subscription bulletins to the project mailbox, ingested by the email adapter (pending build).
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender hudoig@info.hudoig.gov). The signup page returns HTTP 403 to our identified client; recorded as observed, not evaded. Partial coverage for the department: hud-newsroom returns HTTP 403 to our identified client and the HUD-NEWS-L press listserv signup did not complete — the IG stream is oversight material, not the department's own announcements."
+  notes: "Subscribed and confirmed 2026-07-29 (sender hudoig@info.hudoig.gov). The signup page returns HTTP 403 to our identified client; recorded as observed, not evaded. Partial coverage for the department: hud-newsroom returns HTTP 403 to our identified client and the HUD-NEWS-L press listserv signup did not complete — the IG stream is oversight material, not the department's own announcements. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."

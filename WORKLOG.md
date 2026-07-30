@@ -17,6 +17,61 @@ Entry format:
 
 ---
 
+## 2026-07-30 08:05 PDT — Email sources: gate-3 evaluation and the first seven activations
+
+**Context:** GUIDE §3 gate 5 makes status changes worklog events. This
+entry records the gate-3 content evaluation of the 30 registered email
+sources and the resulting activations, per the operator's
+evidence-based-subset decision.
+
+**The evidence (from the 2026-07-29 mailbox polls, ~45 minutes of
+observation):** 20 bulletins from 7 senders produced 38 ingested items,
+DKIM verified 38/38 with every verifying key archived. Per source:
+usattorneys-email 3 bulletins → 25 items (20 full, 5 teaser; one
+bulletin carried sixteen district releases); treasury-email 5 → 5;
+justice-email 7 → 3 (heavy cross-channel dedup against the active
+justice-newsroom RSS feed — intended first-recorded-wins behavior for a
+corroborating channel — plus administrivia filtering); agriculture-email
+2 → 2; fsis-email, uscis-email, usps-oig-email 1 → 1 each.
+
+**Activated (7):** usattorneys-email, treasury-email, justice-email,
+agriculture-email, fsis-email, uscis-email, usps-oig-email — each with
+its gate-3 coverage answer written into the entry notes, as the GUIDE
+requires. The usattorneys open question is resolved: district releases
+are listed individually (the adapter already parses them so), and the
+coverage statement counts every item. The activation also corrects a
+disclosure inaccuracy: report.py's AGENCYPR rule text says "all such
+releases from active sources are listed," and email items were flowing
+under it from planned sources.
+
+**Honest statement about the other 23:** they stay `planned`. Every one
+is a confirmed subscription, but ~45 minutes of evening observation
+cannot answer gate 3's question — silence in that window is not
+evidence of anything. Each entry now carries a dated note: subscription
+confirmed, no bulletin observed, window open, activate on first parsed
+bulletin.
+
+**Two data corrections in the same pass:** (1) ofr-email and
+usattorneys-email carried each other's signup-URL provenance sentences
+(the List-Unsubscribe-recovered USDOJUSAO account belongs to
+usattorneys; the did-not-resolve caveat belongs to OFR) — swapped back,
+with a correction marker in both notes. (2) All 30 email entries'
+method strings still said the adapter was "pending build" three
+sessions after it shipped; they now name src/fapd/email_sources.py and
+its capture/DKIM behavior. PLAW's "would sync once enabled" method
+string got the same staleness fix in the validation commit.
+
+**Decisions:** Activation threshold is parsed evidence, not confirmed
+subscription — the same standard that kept these entries `planned` on
+07-29 now admits exactly seven. The 23 flips happen one at a time as
+bulletins arrive, each a worklog event.
+
+**Open questions / next steps:** watch the mailbox over the coming days
+and flip silent sources as they deliver; the usattorneys volume
+question (does 25 items/day hold?) answers itself in coverage
+accounting; component-list splits (USDA, Treasury) wait on observed
+distinct streams.
+
 ## 2026-07-30 07:20 PDT — Four operator decisions: fapd.info, VPS runtime, API backend, evidence-based email activation
 
 **Context:** Following the morning's state-of-the-project review, the
