@@ -17,5 +17,8 @@ __pycache__/
 
 # Local research/analysis material (NotebookLM bundles etc.) — never published
 research/
-# Assistant-harness local settings
-.claude/
+# Assistant-harness: local settings stay out; skills are tracked project
+# assets. The pattern must be `.claude/*` (not `.claude/`) for the
+# re-include to work.
+.claude/*
+!.claude/skills/
