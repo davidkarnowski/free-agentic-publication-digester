@@ -134,8 +134,11 @@ CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")
 IMAP_HOST = os.environ.get("IMAP_HOST", "")
 IMAP_USER = os.environ.get("IMAP_USER", "")
 IMAP_PASSWORD = os.environ.get("IMAP_PASSWORD", "")
-USER_AGENT = (f"fapd/0.1 (Free Agentic Publication Digester; personal"
-              f" daily-digest research; contact: {CONTACT_EMAIL})")
+# The +URL is the crawler-transparency page (docs/site/bot.md) — the
+# standard convention so a sec-ops reader of a server log lands on the
+# explanation in one step.
+USER_AGENT = (f"fapd/0.1 (Free Agentic Publication Digester;"
+              f" +https://fapd.info/bot.html; contact: {CONTACT_EMAIL})")
 
 
 def api_key() -> str:
