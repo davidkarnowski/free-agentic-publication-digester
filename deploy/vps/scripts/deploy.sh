@@ -46,6 +46,14 @@ ssh "${SSH_OPTS[@]}" "$VPS" \
 ssh "${SSH_OPTS[@]}" "$VPS" \
   "sudo docker exec fapd-backend uv run python scripts/build_site.py || true"
 
+# OB-11: evidence pushes authenticate over the deploy key, so the baked
+# repo's origin must be the SSH URL — the laptop tree bakes in HTTPS
+# (findings F-008), and every rebuild would silently regress it. Re-flip
+# on every deploy.
+ssh "${SSH_OPTS[@]}" "$VPS" \
+  "sudo docker exec fapd-backend git -C /app remote set-url origin \
+   git@github.com:davidkarnowski/free-agentic-publication-digester.git"
+
 echo "==> [4/4] verify"
 sleep 10
 curl -fsSI https://fapd.info | head -1
