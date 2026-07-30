@@ -1,13 +1,13 @@
 [project]
 name = "fapd"
 version = "0.1.0"
-description = "Automated, cited, opinion-agnostic daily digest of official US government publications"
+description = "Free Agentic Publication Digester (FAPD): automated, cited, opinion-agnostic daily digest of official US government publications"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
 authors = [{ name = "David D. Karnowski" }]
 requires-python = ">=3.12"
-keywords = ["government", "digest", "govinfo", "civic-tech", "ai-agents", "provenance"]
+keywords = ["fapd", "government", "digest", "govinfo", "civic-tech", "ai-agents", "provenance"]
 dependencies = [
     "requests>=2.32",
     "python-dotenv>=1.0",
@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/davidkarnowski/free-agentic-publication-digester"
+Homepage = "https://fapd.info"
 Repository = "https://github.com/davidkarnowski/free-agentic-publication-digester"
 Issues = "https://github.com/davidkarnowski/free-agentic-publication-digester/issues"
 

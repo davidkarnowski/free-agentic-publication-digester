@@ -1,6 +1,7 @@
 # Methods
 
-How each digest is made, in pipeline order: where documents come from
+How the Free Agentic Publication Digester (FAPD) makes each digest, in
+pipeline order: where documents come from
 (Sourcing), how they are fetched and preserved (Ingestion), exactly where
 language models are and are not used (Inference), and how a digest is
 assembled and validated before it is published (Publication). Each

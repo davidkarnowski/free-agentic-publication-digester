@@ -76,6 +76,15 @@ def test_page_shell_and_markdown_conversion(digests, tmp_path):
     assert "digests/2026-07-01.md" in page  # canonical-source footer
 
 
+def test_every_page_carries_the_full_project_name(digests, tmp_path):
+    # Branding rule (2026-07-30): the bare acronym never stands alone —
+    # every published page expands "Free Agentic Publication Digester".
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    for page_path in out.glob("*.html"):
+        assert "Free Agentic Publication Digester" in page_path.read_text(), page_path.name
+
+
 def test_prev_next_navigation(digests, tmp_path):
     out = tmp_path / "site"
     publish.build_site(digests, out)
@@ -180,7 +189,10 @@ def test_doc_nav_links_on_digest_pages_and_index(digests, tmp_path):
         assert 'href="methods.html">Methods</a>' in page
 
 
-def test_llms_and_sitemap_include_doc_pages(digests, tmp_path):
+def test_llms_and_sitemap_include_doc_pages(digests, tmp_path, monkeypatch):
+    # Pin the no-domain mode: with SITE_BASE_URL now honored from .env
+    # (config fix 2026-07-30), this test must not inherit the local value.
+    monkeypatch.setattr(publish.config, "SITE_BASE_URL", "")
     out = tmp_path / "site"
     publish.build_site(digests, out)
     llms = (out / "llms.txt").read_text()

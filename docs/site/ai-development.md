@@ -7,9 +7,9 @@ hiding its own machine authorship. So here is the plain statement.
 
 ## The arrangement
 
-FAPD was designed and written in collaboration between its human
-operator and Claude, Anthropic's AI system, working as coding and
-research agents. The division of labor: the operator set intent,
+FAPD — the Free Agentic Publication Digester — was designed and written
+in collaboration between its human operator and Claude, Anthropic's AI
+system, working as coding and research agents. The division of labor: the operator set intent,
 constraints, and editorial judgment — what the project is for, what it
 must never do, which trade-offs are acceptable — and reviewed, directed,
 and sometimes stopped the work. The AI agents wrote code and tests,

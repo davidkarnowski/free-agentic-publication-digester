@@ -36,7 +36,8 @@ _PAGE = """<!DOCTYPE html>
 <body>
 <header class="site-header">
   <nav>
-    <a class="brand" href="index.html">FAPD</a>
+    <a class="brand" href="index.html" title="Free Agentic Publication Digester"
+       aria-label="Free Agentic Publication Digester (FAPD)">FAPD</a>
     <span class="nav-links">{nav_links}</span>
   </nav>
 </header>
@@ -50,7 +51,8 @@ _PAGE = """<!DOCTYPE html>
   <code>GUIDE.md</code> §2.</p>
   <p>Content licensed
   <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> —
-  reuse with attribution to FAPD; quoted official government text is
+  reuse with attribution to FAPD (Free Agentic Publication Digester);
+  quoted official government text is
   public domain (17 U.S.C. § 105). Code licensed Apache-2.0.</p>
 </footer>
 </body>

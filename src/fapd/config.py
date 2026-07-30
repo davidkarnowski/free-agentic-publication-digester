@@ -12,14 +12,18 @@ DATA_DIR = PROJECT_ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"
 DIGEST_DIR = PROJECT_ROOT / "digests"
 SITE_DIR = PROJECT_ROOT / "site"
-# Absolute base URL for published machine surfaces (sitemap <loc>, feed
-# links, robots Sitemap directive, llms.txt) — e.g. "https://example.org".
-# Empty (default) emits root-relative paths, correct for local viewing and
-# domain-root hosting. Set when the public domain is chosen; sitemaps and
-# robots Sitemap directives formally require absolute URLs.
-SITE_BASE_URL = os.environ.get("SITE_BASE_URL", "").rstrip("/")
 
+# .env must load before any os.environ read below — a value set only in
+# .env is otherwise silently ignored (bug found 2026-07-30: SITE_BASE_URL
+# was read above this line and never saw .env).
 load_dotenv(PROJECT_ROOT / ".env")
+
+# Absolute base URL for published machine surfaces (sitemap <loc>, feed
+# links, robots Sitemap directive, llms.txt) — e.g. "https://fapd.info".
+# Empty (default) emits root-relative paths, correct for local viewing and
+# domain-root hosting. Sitemaps and robots Sitemap directives formally
+# require absolute URLs.
+SITE_BASE_URL = os.environ.get("SITE_BASE_URL", "").rstrip("/")
 
 API_BASE = "https://api.govinfo.gov"
 BULKDATA_BASE = "https://www.govinfo.gov/bulkdata"

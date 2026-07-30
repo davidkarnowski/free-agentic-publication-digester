@@ -433,3 +433,8 @@ accounting — are defined in [GUIDE.md](../GUIDE.md) §2. Ruleset in effect:
 {ruleset_version}. To reproduce this digest: re-run the report stage against
 the extracted records for {data_start_date}–{data_end_date}; no upstream
 re-fetch is required (GUIDE.md §5).
+
+License: this digest's compilation and prose are
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (credit
+"FAPD — Free Agentic Publication Digester"); quoted official
+government text is public domain (17 U.S.C. § 105).

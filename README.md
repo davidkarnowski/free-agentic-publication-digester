@@ -99,7 +99,7 @@ below is enforced in code, not by operator discipline.
 
 [`sources/registry.yaml`](sources/registry.yaml) (rendered as
 [SOURCES.md](SOURCES.md)) records every federal source ingested, planned,
-evaluated-and-excluded, or found unavailable — currently 97 sources
+evaluated-and-excluded, or found unavailable — currently 127 sources
 across a tiered universe, so "how comprehensive is coverage?" is a
 measurement, not a claim. Honest statuses matter: a source that blocks
 our honestly-identified client is recorded `unavailable` with the
