@@ -46,6 +46,14 @@ ssh "${SSH_OPTS[@]}" "$VPS" \
 ssh "${SSH_OPTS[@]}" "$VPS" \
   "sudo docker exec fapd-backend uv run python scripts/build_site.py || true"
 
+# /today's RenderWorker skips on an unchanged journal watermark — it
+# watches data, not code — so a deploy that changes the renderer must
+# rebuild the live page itself or the new markup waits for the next
+# journaled item.
+ssh "${SSH_OPTS[@]}" "$VPS" \
+  "sudo docker exec fapd-backend uv run python -c \
+   'from fapd import db, publish; publish.build_today(db.connect())' || true"
+
 # OB-11: evidence pushes authenticate over the deploy key, so the baked
 # repo's origin must be the SSH URL — the laptop tree bakes in HTTPS
 # (findings F-008), and every rebuild would silently regress it. Re-flip
