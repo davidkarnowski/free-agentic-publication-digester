@@ -2355,3 +2355,22 @@ index,follow robots meta, and a rel=alternate link to /llms.txt naming
 us an AI-first digest; robots.txt spells out the agent guide, LLM
 guide, machine index, and feed up top; today.html joined the sitemap.
 351 tests.
+
+## 2026-07-30 — Design memo: the agent API at year one (subagent)
+
+The operator asked the right question about digests.json: what happens
+when the project is a year old? A design agent measured the answer
+(~283 bytes per entry — ~104 KB at day 365, ~212K ingestion tokens for
+an agent swallowing it at day 3000) and wrote docs/agent-api-design.md:
+a static /api/v1/ tree with a ~1 KB root index, immutable year shards,
+a bounded 30-day latest.json as the only polling target, and one frozen
+day file per finalized date carrying today.json's full per-item detail
+plus content hashes tying it to the canonical Markdown and the manifest
+chain. Volatility quarantined to one file so nginx's free ETags give
+pollers 304s; feed.xml gains RFC 5005 archives; digests.json never
+breaks. The measuring pass also surfaced a second year-scale problem:
+every page rewrites daily for a footer timestamp, churning ETags and
+growing evidence commits — scoped as its own confirm-gated item. Three
+operator questions are queued at the memo's end, the largest being
+whether frozen day files join the evidence exemption. Design only;
+nothing built yet.
