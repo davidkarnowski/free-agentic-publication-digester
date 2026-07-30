@@ -17,6 +17,56 @@ Entry format:
 
 ---
 
+## 2026-07-30 11:51 PDT — Full VPS deployment: the real site live, backend running, LLM stage awaiting API credits
+
+**Context:** Operator-authorized full deployment (OB-1) after the B
+merge, the transparency pages, and the site rebuild. Also merged this
+stretch: the public pages (privacy/licensing + the crawler page a
+sec-ops investigator finds from our User-Agent, which now carries
++https://fapd.info/bot.html) and two deploy-script bug fixes.
+
+**Deployed and verified:**
+- **fapd.info now serves the real digest site** — digests, sources,
+  bot and privacy pages — from the fapd-site volume (Docker seeded it
+  from the image's baked site on first mount, as designed). Placeholder
+  retired. TLS unchanged, spiralyst.com unaffected.
+- **fapd-backend live**: 18 workers (govinfo, 14 agency hosts on their
+  own clocks, email, analyze, EOD). Egress-only network verified —
+  container has no published ports, joins only its private bridge;
+  fapd-web still joins only fapd_edge. Deploy key registered
+  (read-write) and mounted; .env provisioned over SSH stdin.
+- **Two deploy defects found by the deploy itself**: the script's cd
+  depth (its own test gate caught it — after a pipe to tail had masked
+  the exit; deploy scripts are now invoked bare), and F-004: the bundle
+  rsync's --delete deleted the box .env because the box-only excludes
+  were missing — the sibling project's guide warns about exactly this;
+  excludes now load-bearing and commented, .env re-provisioned.
+- **The system's failure behavior passed a live exam it didn't sign up
+  for**: the operator's Anthropic key has no credit balance, so the
+  first in-container finalizer run failed at map:batch1 with the API's
+  400. The map layer raised, run_pipeline exited 1, the EODWorker
+  contained it, recorded the error streak, and is retrying on growing
+  backoff; analyze-worker triggers fail contained per-cycle; every
+  failed call is in the ledger; the Wayback budget cap enforced itself
+  mid-run; collectors kept ingesting mechanically throughout. When
+  credits land, the next retry completes with no intervention.
+- **Deliberate safety confirmed**: the baked repo's HTTPS origin means
+  container evidence pushes cannot authenticate (F-008) — the
+  experimental backend cannot clobber canonical history. Making pushes
+  real is OB-11: seed the data volume from the operator machine's
+  databases (so the VPS continues the record rather than re-deriving a
+  thinner one), flip the remote to SSH, verify the first push against
+  a local render of the same day.
+
+**New findings recorded:** F-005 first-boot migration race (contained);
+F-006 EOD pause doesn't drain in-flight cycles; F-007 robots.txt
+re-fetched per cycle (~half the agency request spend — cache it);
+F-008 as above.
+
+**Open questions / next steps:** operator adds API credits (the system
+self-heals); then OB-11 when the operator wants VPS output canonical;
+fix F-005/F-006/F-007 in a hardening pass.
+
 ## 2026-07-30 09:22 PDT — Collector core verified live: 17 workers green, 5,353 items journaled
 
 **Context:** Workstream B's closing live smoke — `collect.py --once

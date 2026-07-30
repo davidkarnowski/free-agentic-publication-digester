@@ -17,9 +17,9 @@
 |---|---|
 | Hosting model | Shared VPS with the operator's Spiralyst project; strict Docker-network segmentation (the cohabitant's edge proxy is the only bridge) |
 | FAPD stack path | `/opt/fapd` — source of truth [`deploy/vps/`](../../deploy/vps/) in this repo |
-| Containers | `fapd-web` (nginx, inbound-only, zero egress — external `--internal` net `fapd_edge`); `fapd-backend` planned (egress-only, own private net, volume-coupled to web) |
+| Containers | `fapd-web` (nginx, inbound-only, zero egress — external `--internal` net `fapd_edge`); `fapd-backend` **live 2026-07-30** (collector supervisor + EOD finalizer, egress-only on `fapd_fapd_backend`, no published ports, volume-coupled to web) |
 | TLS | Let's Encrypt for `fapd.info` + `www`, webroot method via the shared edge proxy, auto-renewing (deploy-hook reload covers it); issued 2026-07-30 |
-| Public surface | `https://fapd.info` (placeholder until the backend deploys — ops-backlog OB-1) |
+| Public surface | `https://fapd.info` — the full digest site (served from the fapd-site volume since 2026-07-30) |
 | Bot git identity (planned) | `fapd-pipeline` with a repo-scoped deploy key, for evidence commits |
 | Backend scheduling (planned) | inside the supervisor container (EODWorker) — host needs only Docker |
 
@@ -31,6 +31,8 @@
 
 | Item | Last verified |
 |---|---|
+| Backend deployed; segmentation re-verified; real site serving | 2026-07-30 |
+| Evidence push inert by HTTPS remote (deliberate, OB-11) | 2026-07-30 |
 | Placeholder serving over HTTPS, both hostnames | 2026-07-30 |
 | Renewal dry-run green (both cohabiting certs) | 2026-07-30 |
 | `fapd-web` networks == exactly `fapd_edge` | 2026-07-30 |

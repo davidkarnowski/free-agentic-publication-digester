@@ -27,6 +27,19 @@ one.*
   excludes; `/fapd-deploy` skill lands with the runbook. Full design:
   [docs/continuous-ingestion.md](../continuous-ingestion.md).
 
+**OB-11 — Make VPS evidence pushes real: state seeding + SSH remote**
+- **Gap:** the backend renders from its own fresh-start database (its
+  2026-07-29 digest is thinner than the canonical one) and its HTTPS
+  origin cannot push (F-008) — currently a deliberate safety.
+- **Trigger:** operator decision that VPS output should become the
+  canonical record (requires API credits first; see OB-1 Done-note).
+- **Sketch:** stop backend → seed the fapd-data volume with the
+  operator machine's fapd.db (+ fetch_log/ledger) so the VPS continues
+  the record instead of re-deriving it → `git remote set-url origin
+  git@github.com:...` in the deploy flow → controlled first push
+  verified against a local render of the same day (the old T4 parity
+  check) → only then leave FAPD_EVIDENCE_PUSH=1.
+
 **OB-2 — Committed daily run summary (`provenance/runs/YYYY-MM-DD.md`)**
 - **Gap:** run facts (budgets, counts, verdicts, timings) live only in
   local logs; the public record has no per-run execution transparency.
