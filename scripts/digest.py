@@ -50,7 +50,7 @@ def main() -> int:
     day_tokens = None
     try:
         # Built concurrently with this script; report-only runs must still work.
-        from fapd import analyze, compose, llm
+        from fapd import analyze, compose, llm, tags
     except ImportError as exc:
         print(
             f"analysis layer unavailable ({exc}); "
@@ -63,6 +63,7 @@ def main() -> int:
             plain_stats = analyze.run_plain(conn, client, date)
             compose.compose_day(conn, client, date)
             compose.compose_sections(conn, client, date)
+            tags.run(conn, client, date)
             after = client.tokens_today()
         print(
             f"plain: {plain_stats['plain_written']}/{plain_stats['plain_pending']} written"

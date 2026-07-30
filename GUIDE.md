@@ -647,6 +647,18 @@ of the code, not of operator discipline.
    structure analysis as batchable per-item calls so it can run on
    discounted/off-peak capacity, and so a partial day's work is resumable —
    mirroring the fetch layer's pending-queue semantics.
+12a. **Section tags are a fourth model surface (added 2026-07-30).**
+   Each digest section carries a `Tags:` line: mechanical tags first
+   (branch, agency — derived from collection and registry metadata at
+   zero tokens), then up to three model-generated one-to-three-word
+   discovery keys describing the section's content for search and
+   agent retrieval. The key layer is independently versioned
+   (`TAG_PROMPT_VERSION`), generated in one batched cheap-tier call
+   per digest day from the stored section synopses, ledgered, and —
+   because tags render inside the digest — linted by the same
+   banned-lexicon gate as all generated prose. Tags are navigational
+   metadata, never judgments; a section whose keys fail validation
+   renders with mechanical tags only.
 12. **Continuous operation preserves batching (added 2026-07-30).**
    Under continuous ingestion, "fully continuous" is honored **by
    layer**: mechanical layers (item listing, official summaries, counts,

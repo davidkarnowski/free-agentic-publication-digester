@@ -238,6 +238,20 @@ CREATE TABLE IF NOT EXISTS collector_state (
     consecutive_errors INTEGER NOT NULL DEFAULT 0
 );
 
+-- Section-level tags (GUIDE §6 r12a): mechanical branch/agency tags plus
+-- model discovery keys, one row per (date, section, tag).
+CREATE TABLE IF NOT EXISTS section_tags (
+    date           TEXT NOT NULL,
+    section_key    TEXT NOT NULL,
+    tag            TEXT NOT NULL,
+    method         TEXT NOT NULL CHECK (method IN ('mechanical', 'llm')),
+    prompt_version INTEGER,                    -- NULL for mechanical
+    model          TEXT,
+    created_at     TEXT NOT NULL,
+
+    PRIMARY KEY (date, section_key, tag)
+) WITHOUT ROWID;
+
 -- Section auto-tagging (schema-first; build is ops-backlog OB-9).
 -- Tags attach to items — renderers aggregate to section level; LLM
 -- discovery keys are a §3a-versioned model surface, labeled by method.

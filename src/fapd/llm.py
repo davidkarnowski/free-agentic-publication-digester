@@ -19,6 +19,7 @@ eventually set it.
 import datetime as dt
 import json
 import logging
+import os
 import sqlite3
 import subprocess
 import time
@@ -60,9 +61,15 @@ class CLIBackend:
 
     def complete(self, prompt, *, model, timeout):
         cmd = ["claude", "-p", "--model", model, "--output-format", "json"]
+        # The CLI backend means subscription billing by definition: an
+        # ANTHROPIC_API_KEY in the environment would silently take
+        # precedence over the CLI's login/token and switch billing (the
+        # shadowing hazard, .env.example) — strip it for the subprocess.
+        env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
         try:
             proc = self._runner(
-                cmd, input=prompt, capture_output=True, text=True, timeout=timeout,
+                cmd, input=prompt, capture_output=True, text=True,
+                timeout=timeout, env=env,
             )
         except subprocess.TimeoutExpired as exc:
             raise LLMError(repr(exc)) from exc

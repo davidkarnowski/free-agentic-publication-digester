@@ -30,6 +30,7 @@ from fapd import (
     llm,
     logging_setup,
     report,
+    tags,
 )
 from fapd.client import GovinfoClient
 from fapd.publish import build_site
@@ -135,8 +136,10 @@ def stage_analyze(conn, date):
               f"({len(p['failed_items'])} failed)", flush=True)
         c = compose.compose_day(conn, lclient, date)
         s = compose.compose_sections(conn, lclient, date)
+        t = tags.run(conn, lclient, date)
         print(f"   sections: {s['composed']} synopsis(es) "
-              f"(skipped={s['skipped_existing']})", flush=True)
+              f"(skipped={s['skipped_existing']}); tags: {t['mechanical']} "
+              f"mechanical + {t['llm']} discovery", flush=True)
         print(f"   compose: composed={c['composed']} "
               f"skipped_existing={c['skipped_existing']}", flush=True)
         after = lclient.tokens_today()

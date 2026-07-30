@@ -99,6 +99,12 @@ one.*
 **OB-9 — Section auto-tagging build**
 - **Gap:** `item_tags` schema exists (B2); no taggers, no rendering.
 - **Trigger:** operator go (was requested 2026-07-30; schema-first by
+- **Done 2026-07-30 (section layer):** GUIDE §6 r12a; tags.py
+  (mechanical branch/agency + batched discovery keys,
+  TAG_PROMPT_VERSION, lexicon-gated via the digest); canonical
+  Tags: lines with model keys labeled in place; site renders
+  chips. Remaining: digests.json/meta emission + item-level
+  tags (item_tags stays schema-ready).
   design).
 - **Sketch:** mechanical branch/agency taggers (zero tokens); LLM 1–3
   word discovery keys as a new §3a surface (`TAG_PROMPT_VERSION`, cheap

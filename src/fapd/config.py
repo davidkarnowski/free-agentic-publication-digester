@@ -94,6 +94,9 @@ PLAIN_PROMPT_VERSION = 1
 COMPOSE_PROMPT_VERSION = 2
 # Section quick-read synopses version independently (§3a).
 SECTION_PROMPT_VERSION = 1
+# Section discovery-key tags (§6 rule 12a): independently versioned,
+# cheap tier, one batched call per digest day.
+TAG_PROMPT_VERSION = 1
 PLAIN_MODEL = MAP_MODEL  # restatement is compression work — cheap tier
 MAX_PLAIN_BATCH_ITEMS = 25  # inputs are stored summaries (~170 tokens each)
 # Retries escalate isolation in groups before falling back to one call per

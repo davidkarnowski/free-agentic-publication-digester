@@ -17,6 +17,46 @@ Entry format:
 
 ---
 
+## 2026-07-30 12:38 PDT — Digest reimagined: plain-speak-first collapsed view, compact header, section tags live
+
+**Context:** Operator direction from the live screenshots: the header
+metadata table read poorly, the initial page was intimidating, and the
+section auto-tagging backlog item should ship as part of the visual
+update.
+
+**Canonical changes (GUIDE §6 rule 12a added first):** a fourth model
+surface — section Tags lines: mechanical branch/agency tags at zero
+tokens plus up to three batched cheap-tier discovery keys per section
+(TAG_PROMPT_VERSION), with model keys labeled in place per §2 and the
+whole line passing the digest's banned-lexicon gate. tags.py + a
+section_tags table (additive DDL); wired into digest.py and
+run_pipeline's analyze stage; 2026-07-29 tagged for real — the keys
+came out exactly as intended ("congressional stock ban", "russian
+sanctions", "airworthiness directive") — and the digest re-rendered
+through all gates.
+
+**Presentation (derived layer, still zero JS):** the metadata table
+folds to a compact strip (date in the h1, generation line small,
+provenance in a native details); the Contents block gives way to
+collapsible section cards whose summaries carry title + tag chips +
+the plain-speak synopsis — the collapsed page IS the day in plain
+speak, and each breakout expands on demand; model-key chips render
+dashed/italic to keep the §2 label visible; anchor ids move to the
+details elements so deep links still work; the nav no longer breaks
+mid-label.
+
+**A hazard predicted this morning bit this afternoon and got a
+structural fix:** the local .env's unfunded ANTHROPIC_API_KEY shadowed
+the CLI's claude.ai login, failing the tag call. CLIBackend now strips
+ANTHROPIC_API_KEY from its subprocess environment — CLI backend means
+subscription billing by definition; the shadowing class is closed on
+both operator machine and VPS.
+
+**Open questions / next steps:** digests.json/meta tag emission +
+item-level tags (item_tags stays schema-ready); more sections could
+carry summary blurbs once subsection synopses aggregate upward; the
+per-item official-text marker remains queued.
+
 ## 2026-07-30 12:20 PDT — The VPS pipeline is fully alive: subscription-billed LLM verified, readability layer live
 
 **Context:** Closing entries for the day's final stretch — the

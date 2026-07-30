@@ -1378,16 +1378,25 @@ _BLURB_HEADINGS = {
 }
 
 
-def _inject_section_blurbs(lines, synopses):
-    """Insert the stored quick-read synopsis directly under each section
-    heading (LLM prose: linted un-masked like all generated text). Sections
-    without a stored synopsis render unchanged — never fabricated."""
-    if not synopses:
+def _inject_section_blurbs(lines, synopses, tags=None):
+    """Insert the stored quick-read synopsis and the section's Tags line
+    directly under each section heading (LLM prose and discovery keys:
+    linted un-masked like all generated text — GUIDE §6 r12a). Sections
+    without stored data render unchanged — never fabricated."""
+    if not synopses and not tags:
         return lines
+    synopses = synopses or {}
+    tags = tags or {}
     out = []
     for line in lines:
         out.append(line)
         key = _BLURB_HEADINGS.get(line.strip())
+        if key and tags.get(key):
+            parts = " · ".join(tags[key]["mechanical"])
+            if tags[key]["llm"]:  # model-derived, labeled in place (GUIDE §2)
+                parts += " · model keys: " + " · ".join(tags[key]["llm"])
+            if parts:
+                out += ["", f"Tags: {parts}"]
         if key and synopses.get(key):
             out += ["", f"*In plain terms: {_one_line(synopses[key])}*"]
     return out
@@ -1439,8 +1448,10 @@ def render(conn, date, out_dir=None):
     lines += _methodology_lines(date, git_short)
 
     from .compose import get_section_synopses
+    from .tags import get_section_tags
 
-    lines = _inject_section_blurbs(lines, get_section_synopses(conn, date))
+    lines = _inject_section_blurbs(lines, get_section_synopses(conn, date),
+                                   get_section_tags(conn, date))
     lines = _inject_toc(lines)
 
     markdown = "\n".join(lines) + "\n"

@@ -113,10 +113,15 @@ body {
   color: var(--accent);
   letter-spacing: 0.01em;
 }
+.nav-links {
+  display: inline-flex; flex-wrap: wrap; gap: 0.15rem 0;
+  font-size: 0.85rem;
+}
 .nav-links a {
   color: var(--muted);
   text-decoration: none;
   margin-left: 0.9rem;
+  white-space: nowrap;   /* multi-word labels never break mid-name */
 }
 .nav-links a:hover, .brand:hover { text-decoration: underline; }
 main {
@@ -174,6 +179,45 @@ img {
   border-radius: 6px;
   background: #fff;
 }
+/* Digest structure layer: compact header, tag chips, collapsible sections
+   (native details/summary — the site remains JS-free). */
+.digest-meta {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem 1rem;
+  margin: 0.4rem 0 1.4rem; padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+.meta-generated { font-size: 0.8rem; color: var(--muted); }
+.meta-more { font-size: 0.8rem; color: var(--muted); }
+.meta-more summary { cursor: pointer; color: var(--accent); }
+.meta-more dl { margin: 0.4rem 0 0; }
+.meta-more dt { font-weight: 600; margin-top: 0.3rem; }
+.meta-more dd { margin: 0; overflow-wrap: anywhere; }
+.tags { margin: 0.35rem 0; line-height: 1.9; }
+.tag {
+  display: inline-block; padding: 0.05rem 0.55rem; margin-right: 0.3rem;
+  border: 1px solid var(--border); border-radius: 999px;
+  background: var(--stripe); color: var(--muted);
+  font-size: 0.72rem; letter-spacing: 0.02em; white-space: nowrap;
+}
+.tag-model { border-style: dashed; font-style: italic; }
+details.digest-section {
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--card); margin: 0.7rem 0; padding: 0;
+}
+details.digest-section > summary {
+  cursor: pointer; padding: 0.7rem 0.9rem; list-style: none;
+  display: flex; flex-direction: column; gap: 0.25rem;
+}
+details.digest-section > summary::-webkit-details-marker { display: none; }
+.sec-title { font-weight: 650; font-size: 1.05rem; }
+.sec-title::before { content: "▸ "; color: var(--accent); font-size: 0.85em; }
+details.digest-section[open] .sec-title::before { content: "▾ "; }
+summary .sec-blurb { font-size: 0.92rem; color: var(--fg); opacity: 0.85; }
+details.digest-section > *:not(summary) { margin-left: 0.9rem; margin-right: 0.9rem; }
+details.digest-section > .sec-heading { font-size: 1.15rem; margin-top: 0.6rem; }
+details.digest-section[open] > summary .sec-blurb,
+details.digest-section[open] > summary .tags { display: none; }
+
 /* Digest readability layer (derived presentation; canonical md unstyled).
    Plain-speak = interpretation register; rule/source = subtle metadata. */
 .plain {
@@ -265,6 +309,94 @@ _RULE_LI_RE = re.compile(
 _SOURCE_LI_RE = re.compile(r"<li>Source:\s*(.*?)</li>", re.DOTALL)
 
 
+_META_TABLE_RE = re.compile(r"<table>.*?Digest date.*?</table>", re.DOTALL)
+_META_ROW_RE = re.compile(
+    r"<td>(?:<strong>)?(Digest date|Data date range|Generated at|"
+    r"Pipeline version|Source watermarks)(?:</strong>)?</td>\s*<td>(.*?)</td>",
+    re.DOTALL)
+_TAGS_P_RE = re.compile(r"<p>Tags: (.*?)</p>", re.DOTALL)
+_CONTENTS_RE = re.compile(r"<h2[^>]*>Contents</h2>\s*<ul>.*?</ul>\s*(<hr\s*/?>)?",
+                          re.DOTALL)
+# Sections that collapse: numbered sections plus the appendix blocks.
+_COLLAPSIBLE_H2_RE = re.compile(
+    r'<h2 id="([^"]+)">(\d+\..*?|Glossary.*?|Coverage Statement.*?|Methodology.*?)</h2>',
+    re.DOTALL)
+
+
+def _compact_meta(html_body):
+    """The leading metadata table becomes a compact strip: the date reads
+    large, generation info small, and the provenance detail (pipeline
+    version, watermarks, range) folds into a native <details>."""
+    match = _META_TABLE_RE.search(html_body)
+    if not match:
+        return html_body
+    fields = dict(_META_ROW_RE.findall(match.group(0)))
+    if "Digest date" not in fields:
+        return html_body
+    strip = (
+        '<div class="digest-meta">'
+        f'<span class="meta-generated">Generated {fields.get("Generated at", "")}'
+        "</span>"
+        '<details class="meta-more"><summary>Provenance</summary><dl>'
+        f'<dt>Data date range</dt><dd>{fields.get("Data date range", "")}</dd>'
+        f'<dt>Pipeline version</dt><dd>{fields.get("Pipeline version", "")}</dd>'
+        f'<dt>Source watermarks</dt><dd>{fields.get("Source watermarks", "")}</dd>'
+        "</dl></details></div>"
+    )
+    return html_body[:match.start()] + strip + html_body[match.end():]
+
+
+def _chip_tags(html_body):
+    """`Tags: a · b · model keys: x · y` paragraphs become chip rows; the
+    model-derived keys keep their in-place label as a visually distinct
+    chip class (GUIDE §2 labeling carried into the presentation)."""
+
+    def _sub(match):
+        text = match.group(1)
+        mech_part, _, model_part = text.partition("model keys:")
+        chips = [f'<span class="tag">{t.strip()}</span>'
+                 for t in mech_part.split("·") if t.strip()]
+        chips += [f'<span class="tag tag-model" title="model-generated key">'
+                  f"{t.strip()}</span>"
+                  for t in model_part.split("·") if t.strip()]
+        return f'<p class="tags">{"".join(chips)}</p>'
+
+    return _TAGS_P_RE.sub(_sub, html_body)
+
+
+def _collapse_sections(html_body):
+    """Numbered sections and appendix blocks fold into native <details>
+    cards whose summary carries the title, the section's tag chips, and
+    its plain-speak synopsis — so the initial page is the day in plain
+    speak, and the full record expands on demand. The h2's anchor id
+    moves to the details element so ToC-style deep links keep working."""
+    parts = re.split(r"(?=<h2 )", html_body)
+    out = [parts[0]]
+    for chunk in parts[1:]:
+        match = _COLLAPSIBLE_H2_RE.match(chunk)
+        if not match:
+            out.append(chunk)
+            continue
+        anchor, title = match.group(1), re.sub(r"<[^>]+>", "", match.group(2))
+        body = chunk[match.end():]
+        tags_m = re.search(r'<p class="tags">.*?</p>', body, re.DOTALL)
+        blurb_m = re.search(
+            r'<p class="plain plain-para">'
+            r'<span class="plain-label">In plain terms</span>\s*(.*?)</p>',
+            body, re.DOTALL)
+        summary = f'<span class="sec-title">{title}</span>'
+        if tags_m:
+            summary += tags_m.group(0).replace('<p class="tags">', '<span class="tags">') \
+                                      .replace("</p>", "</span>")
+        if blurb_m:
+            summary += f'<span class="sec-blurb">{blurb_m.group(1)}</span>'
+        out.append(
+            f'<details class="digest-section" id="{anchor}">'
+            f"<summary>{summary}</summary>"
+            f'<h2 class="sec-heading">{title}</h2>{body}</details>')
+    return "".join(out)
+
+
 def _style_digest_body(html_body):
     """Readability layer for digest pages (derived presentation only — the
     canonical Markdown is untouched, per GUIDE §5): plain-speak lines get
@@ -288,6 +420,10 @@ def _style_digest_body(html_body):
     html_body = _RULE_LI_RE.sub(_rule, html_body)
     html_body = _SOURCE_LI_RE.sub(
         r'<li class="source-note">Source: \1</li>', html_body)
+    html_body = _compact_meta(html_body)
+    html_body = _chip_tags(html_body)
+    html_body = _CONTENTS_RE.sub("", html_body, count=1)
+    html_body = _collapse_sections(html_body)
     return html_body
 
 

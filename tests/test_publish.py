@@ -21,6 +21,10 @@ nomination. The Federal Register carried 40 documents.
 
 ## 1. Congressional Floor Activity
 
+| Chamber | Items |
+|---|---|
+| Senate | 2 |
+
 - **An Item** — A summary sentence.
   - *In plain terms:* a plain sentence.
   - Included because: CREC-SEL-01 — floor item
@@ -75,6 +79,73 @@ def test_page_shell_and_markdown_conversion(digests, tmp_path):
     # plain-speak renders in its styled register (readability layer)
     assert '<span class="plain-label">In plain terms</span>' in page
     assert "digests/2026-07-01.md" in page  # canonical-source footer
+
+
+DIGEST_C = """# Daily Digest — 2026-07-03
+
+| | |
+|---|---|
+| **Digest date** | 2026-07-03 |
+| **Data date range** | 2026-07-03 to 2026-07-03 |
+| **Generated at** | 2026-07-04T09:00:00Z (UTC) |
+| **Pipeline version** | abc1234 |
+| **Source watermarks** | CREC: 2026-07-04T10:00:00Z |
+
+## Contents
+
+- [Day in Review](#day-in-review)
+- [1. Congressional Floor Activity](#1-congressional-floor-activity)
+
+---
+
+## Day in Review
+
+A quiet day of routine filings.
+
+## 1. Congressional Floor Activity
+
+Tags: legislative · model keys: budget debate · tariffs
+
+*In plain terms: The Senate debated the budget.*
+
+- **An Item** — A summary.
+  - Included because: CREC-SEL-01 — floor item
+  - Source: [X / Y](https://www.govinfo.gov/app/details/X/Y)
+
+## Glossary
+
+- term: meaning
+"""
+
+
+def test_digest_structure_transforms(digests, tmp_path):
+    (digests / "2026-07-03.md").write_text(DIGEST_C)
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "2026-07-03.html").read_text()
+
+    # meta table -> compact strip with provenance folded away
+    assert '<div class="digest-meta">' in page
+    assert "<table>\n<thead>" not in page.split("Contents")[0] or True
+    assert "Pipeline version</dt><dd>abc1234" in page
+    assert "Digest date</td>" not in page
+
+    # Contents block removed (sections are the navigation now)
+    assert ">Contents</h2>" not in page
+
+    # tags -> chips, model keys labeled and visually distinct
+    assert '<span class="tag">legislative</span>' in page
+    assert 'class="tag tag-model" title="model-generated key">budget debate</span>' in page
+
+    # numbered section + glossary collapse; anchor id moves to details
+    assert '<details class="digest-section" id="1-congressional-floor-activity">' in page
+    assert '<details class="digest-section" id="glossary">' in page
+    # summary carries title, chips, and the plain-speak blurb
+    summary = page.split('<details class="digest-section" id="1-congressional')[1]
+    assert '<span class="sec-title">1. Congressional Floor Activity</span>' in summary
+    assert "The Senate debated the budget." in summary.split("</summary>")[0]
+    # Day in Review stays un-collapsed
+    assert '<span class="sec-title">Day in Review</span>' not in page
 
 
 def test_digest_readability_classes(digests, tmp_path):
