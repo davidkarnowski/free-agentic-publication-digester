@@ -131,6 +131,23 @@ close (check them off with dates).
   captures only (bright line: never Save-Page-Now-as-proxy), labeled
   archive-sourced. GUIDE amendments precede each implementation.
 
+## Feature backlog (post-launch, operator-requested)
+
+- [ ] **Section auto-tagging** (requested 2026-07-30): digest sections
+  and items carry machine-readable tags on the site and agent surfaces —
+  (a) branch (`legislative`/`executive`/`judicial`), mechanical from the
+  collection and registry, zero tokens; (b) department/agency names,
+  mechanical from registry `parent_org` and FR agency metadata; (c)
+  LLM-generated one-to-three-word key values representing each section's
+  natural-language content, for SEO and LLM-based discovery. Layer (c)
+  is a new model layer: independently prompt-versioned, ledgered,
+  banned-lexicon-gated, and labeled model-derived like every other
+  generated field — never laundered into fields that read as
+  source-provided. Rendering: HTML meta/keywords + visible tag chips on
+  section headers, tags in digests.json entries, and a tags block on
+  each digest's agent surface. GUIDE amendment precedes implementation
+  (new §2/§6 language for the tag layer).
+
 ## Done (for the record)
 - [x] 2026-07-29 — Sensitive-content audit of full history: PASS.
 - [x] 2026-07-29 — `research/` + `.claude/` structurally gitignored.
