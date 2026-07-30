@@ -16,7 +16,12 @@ uv run ruff check src/ scripts/ tests/
 uv run pytest -q
 
 echo "==> [2/4] rsync bundle (deploy/vps/) and repo export (backend build context)"
-rsync -az --delete --exclude '.DS_Store' -e "ssh ${SSH_OPTS[*]}" \
+# The excludes are load-bearing: .env, secrets/, and repo/ exist ONLY on
+# the box; --delete without them destroys the deployment's own state
+# (it did, once — findings F-004).
+rsync -az --delete --exclude '.DS_Store' \
+  --exclude '.env' --exclude 'secrets/' --exclude 'repo/' \
+  -e "ssh ${SSH_OPTS[*]}" \
   deploy/vps/ "${VPS}:${REMOTE_DIR}/"
 # The backend image bakes the tested working tree INCLUDING .git — the
 # EOD finalizer commits evidence from inside the container and pushes to
