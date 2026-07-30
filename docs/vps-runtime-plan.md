@@ -44,6 +44,15 @@ this resolves and reshapes:
 - **EOD scheduling moves inside the backend supervisor** (no host
   cron/systemd dependency; the host needs only Docker) — see
   `docs/continuous-ingestion.md`.
+- **LLM billing (operator decision, 2026-07-30 evening): the VPS runs
+  `LLM_BACKEND=cli`**, billing the operator's Claude subscription via a
+  `claude setup-token` credential — the claude.ai usage-credit balance
+  covers it, whereas API keys draw on a separate (unfunded) Console
+  balance. The API backend remains built, tested, and one `.env` edit
+  away (`LLM_BACKEND=api` + a funded `ANTHROPIC_API_KEY`) if the
+  subscription coupling ever becomes a constraint. Never set both the
+  OAuth token and an API key: the key shadows the token and silently
+  switches billing.
 - The stable-IPv4/rDNS identity argument below is unchanged and now
   concrete: the box exists and its identity can anchor M-23-22 letters
   and verified-bot registrations.

@@ -3,9 +3,19 @@
 # published ports, NOT on fapd_edge). See docs/continuous-ingestion.md §9.
 FROM python:3.12-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends git openssh-client \
+RUN apt-get update && apt-get install -y --no-install-recommends git openssh-client curl \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir uv
+
+# The claude CLI (LLM_BACKEND=cli, the operator's decision 2026-07-30):
+# pipeline LLM calls bill the operator's Claude subscription via a
+# setup-token (CLAUDE_CODE_OAUTH_TOKEN in the server-side .env) instead
+# of API credits. Node 22 is the CLI's runtime requirement.
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/* \
+    && npm install -g @anthropic-ai/claude-code \
+    && claude --version
 
 WORKDIR /app
 # deploy.sh rsyncs the tested working tree (incl. .git — evidence

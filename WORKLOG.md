@@ -17,6 +17,31 @@ Entry format:
 
 ---
 
+## 2026-07-30 11:59 PDT — LLM billing resolved: the VPS runs the CLI backend on the operator's subscription
+
+**Context:** The empty-balance 400s traced to a billing-system split
+the operator confirmed with a screenshot: claude.ai usage credits
+($100 balance) cover the *subscription* (Claude app, Claude Code), not
+API keys, which draw on a separate, unfunded Console balance. Options
+presented: fund the Console (~$1–2/day, self-heals instantly) or point
+the backend at the subscription via the CLI backend the LLM layer
+already supports. **Operator chose the CLI backend.**
+
+**Work performed:** Dockerfile.backend gains Node 22 + the Claude Code
+CLI (with a build-time version check); .env.example documents the
+`claude setup-token` flow and the shadowing hazard (an API key set
+alongside the OAuth token silently switches billing — the box .env
+must carry exactly one); vps-runtime-plan records the decision with
+the API backend kept one .env edit away as the escape hatch. No
+changes to src/ — `LLM_BACKEND=cli` and the CLIBackend were built and
+tested this morning; this is deployment plumbing only.
+
+**Open questions / next steps:** operator mints the setup-token;
+provision box .env (LLM_BACKEND=cli, token in, API key out); redeploy;
+verify one cheap in-container CLI call in the ledger
+(backend='cli', resolved model alias); then the EOD retry loop
+completes the first full VPS pipeline run on subscription billing.
+
 ## 2026-07-30 11:51 PDT — Full VPS deployment: the real site live, backend running, LLM stage awaiting API credits
 
 **Context:** Operator-authorized full deployment (OB-1) after the B
