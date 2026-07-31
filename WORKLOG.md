@@ -3256,3 +3256,26 @@ registration, and a general statement about participating APIs is not
 that publisher telling us our key applies.
 
 Active 34 -> 35, planned 76 -> 70, unavailable 19 -> 20.
+
+## 2026-07-31 — The non-web planned sources, probed
+
+Followed the web sweep by checking the structured candidates the probe
+script does not cover, through the real client so robots and pacing
+held. All four answer 200 and none needs a credential we lack:
+
+Senate roll-call votes return 123 KB of well-formed XML. The House
+Clerk's roll-call index answers 200 and publishes no robots.txt at all.
+The Federal Register API answers without a key, and its public-inspection
+endpoint returned 114 documents — material filed before it formally
+appears in the Register, a capability no current source gives us.
+Congress.gov authenticates with the api.data.gov key we already hold.
+
+So the honest state of the planned list is that almost nothing is
+waiting on permission. Four Tier 1 sources are waiting on adapters, and
+33 more are waiting on one HTML adapter. Recorded per entry with what
+was observed and what remains.
+
+Also recorded that regulations.gov was deliberately not probed: its docs
+describe their own registration and a different header, and a general
+statement about participating APIs is not that publisher telling us our
+key applies.
