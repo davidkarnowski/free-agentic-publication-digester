@@ -64,6 +64,16 @@ Deviations need an explicit comment explaining why.
    failures.** A missing API key raises; a mailbox outage is reported
    and the run continues (`stage_email` contract). Never silently skip.
 
+9. **Outbound links open in a new tab, sitewide** (operator rule,
+   2026-07-30). Any link whose href leaves fapd.info gets
+   `target="_blank" rel="noopener noreferrer"` — so a reader following a
+   citation to the official record never loses the digest they were
+   reading. This is enforced in ONE place, `publish._externalize_links`,
+   applied to whole rendered pages inside `_render_page`; do not add
+   `target` by hand at call sites, and do not add a second rendering
+   path that bypasses `_render_page`. Same-site links, fragments, and
+   non-HTTP schemes (`mailto:`) keep default behavior.
+
 ## §3 Worked example — `stage_email`
 
 The three contracts, each pinned by a test through injected seams

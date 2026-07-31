@@ -546,8 +546,48 @@ def _style_digest_body(html_body):
     return html_body
 
 
+_A_TAG_RE = re.compile(r"<a\b([^>]*)>", re.IGNORECASE)
+_HREF_ATTR_RE = re.compile(r'href="([^"]*)"', re.IGNORECASE)
+
+
+def _site_host(base=None):
+    from urllib.parse import urlsplit
+
+    host = urlsplit(base if base is not None else config.SITE_BASE_URL).netloc
+    return host.lower().removeprefix("www.")
+
+
+def _externalize_links(page_html, base=None):
+    """Every link that leaves this site opens in a new tab — a reader
+    following a citation to the official record never loses the digest
+    they were reading. Applied to whole rendered pages (one seam, so
+    Markdown-authored citation links, hand-built cards, and the footer
+    all obey the same rule). Same-site links, fragments, and non-HTTP
+    schemes such as mailto: keep default behavior; `rel` blocks the
+    opened page's access to ours and its referrer."""
+    from urllib.parse import urlsplit
+
+    site = _site_host(base)
+
+    def _sub(match):
+        attrs = match.group(1)
+        if "target=" in attrs.lower():
+            return match.group(0)
+        href = _HREF_ATTR_RE.search(attrs)
+        if not href:
+            return match.group(0)
+        parts = urlsplit(href.group(1))
+        if parts.scheme.lower() not in ("http", "https"):
+            return match.group(0)
+        if site and parts.netloc.lower().removeprefix("www.") == site:
+            return match.group(0)
+        return f'<a{attrs} target="_blank" rel="noopener noreferrer">'
+
+    return _A_TAG_RE.sub(_sub, page_html)
+
+
 def _render_page(title, body_html, nav_links, canonical, description=None):
-    return _PAGE.format(
+    return _externalize_links(_PAGE.format(
         title=html.escape(title),
         description=html.escape(
             description
@@ -558,7 +598,7 @@ def _render_page(title, body_html, nav_links, canonical, description=None):
         generated=utc_now_iso(),
         canonical=html.escape(canonical),
         repo_url=REPO_URL,
-    )
+    ))
 
 
 # Compact nav labels where a stem's .capitalize() reads badly.

@@ -2408,3 +2408,20 @@ type/agency tag chips doing the classifying work the headings used to
 do. The date's stored section tags survive as a single "Day so far"
 chip row above the stream, model keys still marked. Same data contract,
 same zero-token rebuild; 351 tests.
+
+## 2026-07-30 — Outbound links leave in a new tab (universal rule)
+
+Operator rule: following a source link must never cost the reader the
+FAPD page they were on. Implemented as one seam —
+`publish._externalize_links`, applied to whole rendered pages inside
+`_render_page`, so every page class obeys it at once: digest citation
+links written in Markdown, the live stream's official-record links,
+source-guide cards, the agents page, and the footer's own license and
+repository links. Anything leaving fapd.info gets `target="_blank"` and
+`rel="noopener noreferrer"` (the opened page gets no window handle and
+no referrer). Same-site links, in-page fragments, and `mailto:` keep
+default behavior — internal navigation spawning tabs would be its own
+kind of rude, and the rule's rationale ("not in the same tab as the
+FAPD site") only applies to links that actually leave. Recorded as
+code-standards §2 rule 9 with a do-not-bypass note, pinned by tests
+that cover both the seam and two real page classes. 353 tests.

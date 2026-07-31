@@ -336,7 +336,8 @@ def test_sources_page_grouped_sections_and_cards(digests, registry_root, tmp_pat
     assert "<h3>Active (1)</h3>" in page and "<h3>Planned (1)</h3>" in page
     # a card: linked name, chip + subtitle, description, folded registry record
     assert '<article class="src-card" id="src-gao-reports">' in page
-    assert 'href="https://www.gao.gov/reports">GAO Reports</a>' in page
+    assert ('href="https://www.gao.gov/reports" target="_blank"'
+            ' rel="noopener noreferrer">GAO Reports</a>') in page
     assert '<span class="tag tag-status-active">active</span>' in page
     assert "Legislative · Tier 1 · RSS feed · Government Accountability Office" in page
     assert "Audit and evaluation reports published on a daily feed." in page
@@ -368,7 +369,7 @@ def test_sources_page_publishes_no_email_addresses(digests, registry_root, tmp_p
     assert "(sender [address withheld])" in page
     # the public signup form is linked; the name links to the agency page
     assert 'href="https://service.govdelivery.com/service/multi_subscribe.html' in page
-    assert 'href="https://home.treasury.gov/news/press-releases">' in page
+    assert 'href="https://home.treasury.gov/news/press-releases"' in page
 
 
 def test_sources_page_from_real_registry(digests, tmp_path):
@@ -744,3 +745,59 @@ def test_index_page_has_live_callout_above_digest_list(tmp_path):
     listing = index.index('class="digest-list"')
     assert callout < listing
     assert 'href="today.html"' in index[callout:listing]
+
+
+# ------------------------------------------------- external-link behavior --
+
+
+def test_external_links_open_in_a_new_tab_sitewide(monkeypatch):
+    """Universal rule (operator, 2026-07-30): a link that leaves the site
+    opens in a new tab so a reader following a citation never loses the
+    digest. Same-site links, fragments, and mailto: are untouched."""
+    from fapd import config as _config
+
+    monkeypatch.setattr(_config, "SITE_BASE_URL", "https://fapd.info")
+    body = (
+        '<a href="https://www.govinfo.gov/app/details/X">official</a>'
+        '<a href="2026-07-29.html">yesterday</a>'
+        '<a href="#section-2">jump</a>'
+        '<a href="mailto:someone@example.gov">write</a>'
+        '<a href="https://fapd.info/today.html">our own live page</a>'
+        '<a href="https://www.fapd.info/index.html">www of ours</a>'
+        '<a href="https://example.gov/x" target="_self">already targeted</a>'
+    )
+    page = publish._render_page("T", body, "", "canonical")
+
+    assert ('<a href="https://www.govinfo.gov/app/details/X"'
+            ' target="_blank" rel="noopener noreferrer">') in page
+    for same_tab in ('<a href="2026-07-29.html">', '<a href="#section-2">',
+                     '<a href="mailto:someone@example.gov">',
+                     '<a href="https://fapd.info/today.html">',
+                     '<a href="https://www.fapd.info/index.html">',
+                     '<a href="https://example.gov/x" target="_self">'):
+        assert same_tab in page, same_tab
+    # the footer's own outbound links obey the same rule
+    assert page.count('rel="noopener noreferrer"') >= 3
+
+
+def test_external_link_rule_applies_to_digest_and_today_pages(conn, tmp_path,
+                                                              monkeypatch):
+    from conftest import DATE
+
+    from fapd import config as _config
+
+    monkeypatch.setattr(_config, "SITE_BASE_URL", "https://fapd.info")
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    today = (tmp_path / "today.html").read_text()
+    assert ('<a href="https://www.govinfo.gov/app/details/CREC-2026-07-23/PgS1"'
+            ' target="_blank" rel="noopener noreferrer">') in today
+    # internal nav stays in-tab
+    assert '<a href="index.html">All digests</a>' in today
+
+    (tmp_path / "d").mkdir()
+    (tmp_path / "d" / "2026-07-29.md").write_text(
+        "# Daily Digest\n\nSee [the record](https://www.govinfo.gov/x).\n")
+    publish.build_site(digest_dir=tmp_path / "d", out_dir=tmp_path / "s")
+    digest = (tmp_path / "s" / "2026-07-29.html").read_text()
+    assert 'href="https://www.govinfo.gov/x" target="_blank"' in digest
