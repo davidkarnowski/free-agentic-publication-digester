@@ -354,7 +354,10 @@ def test_sources_page_grouped_sections_and_cards(digests, registry_root, tmp_pat
     assert "Audit and evaluation reports published on a daily feed." in page
     assert '<details class="src-more"><summary>Registry record</summary>' in page
     assert "<dt>Registry id</dt><dd><code>govinfo-test</code></dd>" in page
-    # the old SOURCES.md giant table is gone: no table markup at all
+    # the old SOURCES.md giant table is gone: the directory is cards, and
+    # the only table the page may carry is the health key (below), which
+    # this fixture has no databases to populate
+    assert "<th>Method</th>" not in page
     assert "<table>" not in page
 
 
@@ -397,7 +400,8 @@ def test_sources_page_from_real_registry(digests, tmp_path):
     assert f"<strong>{len(entries)}</strong> sources registered" in page
     assert page.count('<article class="src-card"') == len(entries)
     assert publish._EMAIL_ADDR_RE.search(page) is None
-    assert "<table>" not in page
+    # the directory is still cards, never one wide table of every source
+    assert "<th>Method</th>" not in page
 
 
 def test_no_registry_degrades_gracefully(digests, tmp_path, monkeypatch):
@@ -410,6 +414,402 @@ def test_no_registry_degrades_gracefully(digests, tmp_path, monkeypatch):
     publish.build_site(digests, out)
     assert not (out / "sources.html").exists()
     assert 'href="sources.html"' not in (out / "index.html").read_text()
+    # the machine surface follows the page: nothing points at a file that
+    # was not built
+    assert not (out / "sources.json").exists()
+    assert "sources.json" not in (out / "llms.txt").read_text()
+
+
+# ---------------------------------------------------------------------------
+# Source health and statistics on the source guide (fapd.health rendered)
+# ---------------------------------------------------------------------------
+
+_HEALTH_REGISTRY_YAML = """\
+- id: govinfo-test
+  name: Test Collection (TEST)
+  branch: legislative
+  parent_org: U.S. Congress
+  description: "A structured collection of test documents."
+  type: govinfo-collection
+  tier: 1
+  urls:
+    collection: https://www.govinfo.gov/app/collection/TEST
+  method: govinfo collections API delta sync
+  status: active
+  added: "2026-07-26"
+  notes: "Coverage (gate 3): the complete official test record."
+- id: example-newsroom
+  name: Example Newsroom
+  branch: executive
+  parent_org: Department of Example
+  description: "Press releases published on a daily feed."
+  type: rss
+  tier: 1
+  urls:
+    feed: https://feeds.example.gov/press.xml
+    home: https://www.example.gov/news
+  method: Conditional GET against the feed.
+  status: active
+  added: "2026-07-26"
+  notes: "Coverage (gate 3): the department's full release stream."
+- id: example-email
+  name: Example Bulletins (email)
+  branch: executive
+  parent_org: Department of Example
+  description: "Subscription bulletins carrying press releases."
+  type: email
+  tier: 1
+  sender: bulletins@example.gov
+  urls:
+    home: https://www.example.gov/news
+    signup: https://public.govdelivery.com/accounts/EXAMPLE/subscriber/new
+  method: Subscription bulletins to the project mailbox.
+  status: active
+  added: "2026-07-29"
+  notes: "Subscribed and confirmed 2026-07-29."
+- id: planned-newsroom
+  name: Planned Newsroom
+  branch: executive
+  parent_org: Department of Later
+  description: "A newsroom registered so the coverage gap stays visible."
+  type: html-index
+  tier: 2
+  urls:
+    home: https://later.example.gov/newsroom
+  method: Would parse the press-release index daily.
+  status: planned
+  added: "2026-07-26"
+  notes: ""
+"""
+
+HEALTH_TODAY = "2026-07-31"
+
+
+@pytest.fixture
+def health_site(digests, tmp_path, monkeypatch):
+    """Registry + real pipeline/fetch databases, and a frozen publication
+    date so the window is deterministic. Returns a builder taking the rows
+    to seed, so each test states only the facts it is about."""
+    import sqlite3
+
+    from fapd import config, db, health, sync
+
+    root = tmp_path / "hroot"
+    (root / "sources").mkdir(parents=True)
+    (root / "sources" / "registry.yaml").write_text(_HEALTH_REGISTRY_YAML)
+    monkeypatch.setattr(config, "PROJECT_ROOT", root)
+    monkeypatch.setattr(sync, "publication_date",
+                        lambda *a, **kw: HEALTH_TODAY)
+    monkeypatch.setattr(health, "publication_date",
+                        lambda *a, **kw: HEALTH_TODAY)
+
+    def build(items=(), fetches=(), collectors=(), with_dbs=True):
+        out = tmp_path / "site"
+        if not with_dbs:
+            publish.build_site(digests, out,
+                               pipeline_db=tmp_path / "absent-pipeline.db",
+                               fetch_db=tmp_path / "absent-fetch.db")
+            return out
+        pipeline = tmp_path / "fapd.db"
+        fetch = tmp_path / "fetch_log.db"
+        for stale in (pipeline, fetch):   # a test may build more than once
+            stale.unlink(missing_ok=True)
+        conn = db.connect(pipeline)
+        for i, (collection, date, chars, metadata) in enumerate(items):
+            pid = f"P{i}"
+            conn.execute(
+                "INSERT INTO packages (package_id, collection, date_issued,"
+                " last_modified, first_seen_at) VALUES (?, ?, ?, 'x', 'x')",
+                (pid, collection, date))
+            conn.execute(
+                "INSERT INTO extracted_texts (package_id, granule_id,"
+                " collection, metadata, text, char_count, extracted_at,"
+                " extractor_version) VALUES (?, '', ?, ?, '', ?, 'x', 1)",
+                (pid, collection, metadata, chars))
+        for worker, errors in collectors:
+            conn.execute(
+                "INSERT INTO collector_state (worker, consecutive_errors)"
+                " VALUES (?, ?)", (worker, errors))
+        conn.commit()
+        conn.close()
+
+        fconn = sqlite3.connect(fetch)
+        fconn.execute(
+            "CREATE TABLE fetch_log (id INTEGER PRIMARY KEY, ts_utc TEXT,"
+            " url TEXT, status INTEGER, attempt INTEGER)")
+        fconn.executemany(
+            "INSERT INTO fetch_log (ts_utc, url, status, attempt)"
+            " VALUES (?, ?, ?, 1)", fetches)
+        fconn.commit()
+        fconn.close()
+        publish.build_site(digests, out, pipeline_db=pipeline, fetch_db=fetch)
+        return out
+
+    return build
+
+
+def _meta(source_id=None, mode=None):
+    import json
+
+    payload = {k: v for k, v in (("source_id", source_id), ("mode", mode))
+               if v}
+    return json.dumps(payload, sort_keys=True)
+
+
+DELIVERING_ITEMS = (
+    ("TEST", HEALTH_TODAY, 16000, _meta()),
+    ("TEST", "2026-07-30", 12000, _meta()),
+    ("AGENCYPR", HEALTH_TODAY, 340, _meta("example-newsroom", "feed-only")),
+    ("AGENCYPR", "2026-07-30", 300, _meta("example-newsroom", "feed-only")),
+    ("AGENCYPR", HEALTH_TODAY, 310, _meta("example-email", "email-teaser")),
+)
+CLEAN_FETCHES = tuple(
+    [(f"2026-07-31T0{i}:00:00Z", "https://feeds.example.gov/press.xml", 200)
+     for i in range(6)]
+    + [(f"2026-07-31T0{i}:00:00Z", "https://api.govinfo.gov/collections/TEST",
+        200) for i in range(6)])
+
+
+def test_health_summary_and_key_render_above_the_directory(health_site):
+    """The page leads with the whole-directory picture: how many active
+    sources delivered, how many recorded requests that returned nothing,
+    the aggregate rate, and what every label means."""
+    page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+            / "sources.html").read_text()
+    assert '<h2 id="source-health">Source health and statistics</h2>' in page
+    # 3 active sources, all delivering; 5 items over the 14-day window
+    assert "<strong>3</strong> of 3 active sources delivered items" in page
+    assert "5 item(s) in all" in page
+    assert "0 source(s) recorded requests that returned no content" in page
+    # the health section precedes the first channel group
+    assert page.index('id="source-health"') < page.index('id="govinfo-collections"')
+    # every label defined in words, with its live threshold substituted
+    for word in ("delivering", "quiet", "degraded", "no response", "no data"):
+        assert word in page
+    assert "no item for more than 7 days" in page
+    assert "10.0% or more of our requests returned no content" in page
+
+
+def test_health_key_table_is_accessible(health_site):
+    """The page's one table goes through `_accessible_tables`: a focusable
+    labelled scroll region and `scope` on the header cells (A11Y-03)."""
+    page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+            / "sources.html").read_text()
+    assert ('<div class="table-scroll" role="region" tabindex="0"'
+            ' aria-labelledby="source-health"><table>') in page
+    assert page.count("<table>") == 1
+    assert page.count('<th scope="col">') == 3
+    assert "<th>" not in page   # every header cell carries its scope
+
+
+def test_health_is_never_signalled_by_colour_alone(health_site):
+    """Every indicator carries a word and a glyph as well as its colour,
+    and names what it is about for a reader who meets it out of context
+    (1.4.1, 1.3.1)."""
+    page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+            / "sources.html").read_text()
+    chips = re.findall(
+        r'<span class="tag tag-health-([a-z-]+)">'
+        r'<span class="health-glyph" aria-hidden="true">(.)</span>'
+        r'<span class="vh">Ingestion health: </span>([a-z ]+)</span>', page)
+    # one per active source card, plus one per row of the five-row key
+    assert len(chips) == 3 + 5
+    for label, glyph, word in chips:
+        assert glyph and glyph not in "  "   # a real, visible mark
+        assert word.replace(" ", "-") == label    # the word IS the label
+    # the colour is paired in the stylesheet, never carried alone
+    css = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+           / "style.css").read_text()
+    assert ".tag-health-delivering" in css and ".health-glyph" in css
+
+
+def test_each_card_states_its_own_numbers(health_site):
+    """A label must be checkable from the card it sits on: volume, rate,
+    content length, delivery mode, and the request outcomes are all there
+    in words."""
+    page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+            / "sources.html").read_text()
+    card = page[page.index('id="src-example-newsroom"'):]
+    card = card[:card.index("</article>")]
+    assert "2 in 14 days (0.14 per day)" in card
+    assert "most recent 2026-07-31" in card
+    assert "320 characters average, 320 median" in card   # (340 + 300) / 2
+    assert "shortest 300, longest 340" in card
+    assert "<code>feed-only</code>" in card
+    assert "the source publishes no more than this through this channel" in card
+    assert "Our requests to feeds.example.gov:</span> 6 request(s) · 6 answered" in card
+    assert "0 declined (4xx) · 0 server declined (5xx) · 0 no response" in card
+    assert "0.0% returned no content" in card
+    assert "tag-health-delivering" in card
+
+
+def test_content_length_exposes_a_teaser_source(health_site):
+    """Content length is the signal the operator asked for: a source
+    emitting 310-character stubs is giving a reader far less than one
+    emitting full text, and both numbers sit on the page."""
+    page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+            / "sources.html").read_text()
+    email_card = page[page.index('id="src-example-email"'):]
+    email_card = email_card[:email_card.index("</article>")]
+    assert "310 characters average" in email_card
+    assert "<code>email-teaser</code>" in email_card
+    assert "the bulletin carried a short teaser, not the full item" in email_card
+    govinfo = page[page.index('id="src-govinfo-test"'):]
+    govinfo = govinfo[:govinfo.index("</article>")]
+    assert "14,000 characters average" in govinfo
+
+
+def test_email_cards_say_why_there_is_no_request_table(health_site):
+    page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+            / "sources.html").read_text()
+    card = page[page.index('id="src-example-email"'):]
+    card = card[:card.index("</article>")]
+    assert "Our requests to" not in card
+    assert "delivered to the project mailbox" in card
+    assert "read from delivery recency alone" in card
+
+
+def test_declined_requests_are_reported_with_their_mechanical_reason(health_site):
+    """A host that declines a fifth of our requests is reported as
+    degraded — with the counts, and with the standing note that a 5xx is
+    the server declining and that we cannot say why."""
+    fetches = tuple(
+        [(f"2026-07-3{d}T01:00:00Z", "https://feeds.example.gov/press.xml", 200)
+         for d in (0, 1)] * 4
+        + [("2026-07-31T02:00:00Z", "https://feeds.example.gov/press.xml", 503)]
+        * 2)
+    page = (health_site(DELIVERING_ITEMS, fetches) / "sources.html").read_text()
+    card = page[page.index('id="src-example-newsroom"'):]
+    card = card[:card.index("</article>")]
+    assert "tag-health-degraded" in card
+    assert "2 of 10 request(s) to feeds.example.gov returned no content" in card
+    assert "20.0%, at or above the 10% mark" in card
+    assert "1 source(s) recorded requests that returned no content" in page
+    # the mechanical reason, stated once for the page
+    assert ("A 4xx or 5xx is the server declining to return content" in page)
+    assert "we cannot tell which from outside" in page
+    # and no verdict about the department anywhere
+    for word in ("unreliable", "negligent", "irresponsible", "unhealthy"):
+        assert word not in page.lower()
+
+
+def test_shared_host_figures_are_labelled_as_host_wide(health_site):
+    page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+            / "sources.html").read_text()
+    card = page[page.index('id="src-govinfo-test"'):]
+    card = card[:card.index("</article>")]
+    assert "Our requests to api.govinfo.gov:" in card
+    # one govinfo source in this registry, so no host-wide caveat
+    assert "registered sources, so these figures are host-wide" not in card
+
+
+def test_collector_errors_show_on_the_card(health_site):
+    page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES,
+                        collectors=[("host:feeds.example.gov", 4)])
+            / "sources.html").read_text()
+    card = page[page.index('id="src-example-newsroom"'):]
+    card = card[:card.index("</article>")]
+    assert "4 consecutive cycle(s) ended in an error" in card
+    assert "tag-health-degraded" in card
+
+
+def test_planned_sources_say_why_they_are_unmeasured(health_site):
+    """Absence is stated, never silent: a planned source carries no health
+    label, and the card says that is what its registry status means."""
+    page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+            / "sources.html").read_text()
+    card = page[page.index('id="src-planned-newsroom"'):]
+    card = card[:card.index("</article>")]
+    assert "Not ingested: the registry status of this source is planned." in card
+    assert "shown for active sources only" in card
+    assert "tag-health-" not in card
+
+
+def test_health_degrades_gracefully_without_databases(health_site):
+    """The whole point of the fallback: a fresh clone or a CI run has no
+    `data/`, and the source guide must still build — saying so, not
+    showing a page of zeroes that would read as an outage."""
+    out = health_site(with_dbs=False)
+    page = (out / "sources.html").read_text()
+    assert '<h2 id="source-health">' in page
+    assert "Per-source statistics are not available in this build" in page
+    assert "pipeline database not present" in page
+    assert "The directory below is rendered from the registry alone." in page
+    # no invented numbers, no labels, no table
+    assert "tag-health-" not in page
+    assert "<table>" not in page
+    # the directory itself is unaffected
+    assert page.count('<article class="src-card"') == 4
+    # and the machine surface says the same thing rather than omitting it
+    import json
+    data = json.loads((out / "sources.json").read_text())
+    assert data["available"] is False
+    assert "not present" in data["unavailable_reason"]
+    assert len(data["sources"]) == 4
+    assert all(s.get("health") is None for s in data["sources"])
+
+
+def test_sources_json_carries_the_same_facts_as_the_page(health_site):
+    import json
+
+    out = health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+    data = json.loads((out / "sources.json").read_text())
+    assert data["available"] is True
+    assert data["window"] == {"days": 14, "start": "2026-07-18",
+                              "end": HEALTH_TODAY}
+    # thresholds travel with the labels, so an agent can recompute any one
+    assert data["thresholds"]["quiet_after_days"] == 7
+    assert data["thresholds"]["degraded_error_rate_pct"] == 10.0
+    assert set(data["health_labels"]) == {"delivering", "quiet", "degraded",
+                                          "no-response", "no-data"}
+    assert data["summary"]["delivering"] == 3
+    assert data["summary"]["items_window"] == 5
+    by_id = {s["id"]: s for s in data["sources"]}
+    assert set(by_id) == {"govinfo-test", "example-newsroom", "example-email",
+                          "planned-newsroom"}
+    news = by_id["example-newsroom"]
+    assert news["items"] == 2
+    assert news["avg_chars"] == 320 and news["median_chars"] == 320
+    assert news["delivery_mode"] == "feed-only"
+    assert news["fetch"]["host"] == "feeds.example.gov"
+    assert news["fetch"]["answered"] == 6
+    assert news["health"] == "delivering"
+    assert news["card"] == "sources.html#src-example-newsroom"
+    assert by_id["example-email"]["fetch"] is None
+    assert by_id["planned-newsroom"]["measured"] is False
+    # the scope statement is part of the payload, not a page-only caveat
+    assert "not a measurement of any agency" in data["scope"]
+    assert "'active'" in data["measurement"]
+
+
+def test_sources_json_stays_out_of_the_record_surfaces(health_site):
+    """digests.json and the Atom feed enumerate the official record. Our
+    ingestion statistics are not that and must never arrive as though
+    they were."""
+    out = health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+    for name in ("digests.json", "feed.xml"):
+        text = (out / name).read_text()
+        assert "sources.json" not in text
+        assert "example-newsroom" not in text
+    llms = (out / "llms.txt").read_text()
+    assert "/sources.json" in llms
+    assert "not a measurement of any agency or publisher" in llms
+    assert "Not part of the official record" in llms
+    assert "/sources.json" in (out / "robots.txt").read_text()
+
+
+def test_sources_json_never_leaks_a_mailbox_address(health_site):
+    out = health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+    text = (out / "sources.json").read_text()
+    assert publish._EMAIL_ADDR_RE.search(text) is None
+
+
+def test_the_health_surface_adds_no_script(health_site):
+    """docs/code-standards.md §2 rule 10: the site ships one script, on
+    /today.html only. Nothing built here may add a second."""
+    out = health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+    for path in sorted(out.rglob("*.html")):
+        assert "<script" not in path.read_text(), path.name
 
 
 def test_doc_pages_built_from_docs_site(digests, tmp_path, monkeypatch):
