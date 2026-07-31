@@ -3189,3 +3189,27 @@ publisher as degraded because we were pacing ourselves. That is the
 precise error the whole page was written to avoid, arriving through a
 side door. A budget refusal now records as a live, behaving worker with
 a stated pause, and a real fault still counts. 439 tests.
+
+## 2026-07-31 — Third email wave: four more sources were already delivering
+
+Asked what remains to be ingested, the first honest answer was: four
+sources we already have. cms-email, fda-email, federal-reserve-email
+and ssa-email were sitting at `planned` while their bulletins arrived,
+parsed, and went into the database — the same pattern as yesterday's
+four. All four deliver `email-full` rather than teasers, DKIM-verified,
+so the gate-3 evidence was already on disk. Active set 30 -> 34, email
+channel 11 -> 15.
+
+Two of them matter more than the count suggests. SSA's web newsroom
+refuses our client, so the bulletin is the agency's only working path
+into the digest — one more of the blocked eleven re-opened by consent
+rather than by evasion. And federal-reserve-email arrives alongside a
+web channel that the new health page shows as degraded at 37.9%, so the
+email path is now the reliable half of that source.
+
+The lesson is procedural: activation is evidence-gated, but nothing was
+watching for the evidence arriving. A subscription that starts
+delivering does not announce itself, and a source can sit `planned`
+indefinitely while its data accumulates. The health page makes this
+visible now — a `planned` entry with items is a contradiction anyone
+can see on the page — but a check worth automating.

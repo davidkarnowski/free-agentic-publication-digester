@@ -66,7 +66,9 @@ def test_registry_seeds_expected_active_sources():
         "usattorneys-email", "treasury-email", "justice-email",
         "agriculture-email", "fsis-email", "uscis-email", "usps-oig-email",
         # activated 2026-07-30 (second wave) on first live-delivery evidence:
-        "va-email", "irs-email", "fdic-email", "dea-email"}
+        "va-email", "irs-email", "fdic-email", "dea-email",
+        # activated 2026-07-31 (third wave), same evidence gate:
+        "cms-email", "fda-email", "federal-reserve-email", "ssa-email"}
 
 
 # ------------------------------------------------------------ coverage_stats --
@@ -99,9 +101,9 @@ def test_coverage_stats_per_tier_on_real_registry():
     assert set(by_tier) <= set(sources.TIERS)
     assert sum(sum(by.values()) for by in by_tier.values()) == len(entries)
     # Tier 1 carries the active govinfo collections seeded at project start.
-    # govinfo 5 + 7 S2 pilots + DOJ (07-28) + treasury/justice/USDA email (07-30)
-    # + VA email (07-30 second wave)
-    assert by_tier[1].get("active", 0) == 17
+    # govinfo 5 + 7 S2 pilots + DOJ (07-28) + treasury/justice/USDA email
+    # (07-30) + VA email (07-30 second wave) + SSA email (07-31 third wave)
+    assert by_tier[1].get("active", 0) == 18
 
 
 def test_coverage_stats_empty():

@@ -1539,7 +1539,7 @@
     home: https://www.ssa.gov/news/en/press/releases/index.html
     signup: https://public.govdelivery.com/accounts/USSSA/subscriber/new
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
-  status: planned
+  status: active
   added: "2026-07-29"
   notes: "Subscribed and confirmed 2026-07-29 (sender subscription.service@subscriptions.ssa.gov). Sibling of ssa-newsroom, which returns HTTP 403 to our identified client — the first working input for this agency. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
@@ -1759,7 +1759,7 @@
     home: https://www.fda.gov/news-events/fda-newsroom
     signup: https://public.govdelivery.com/accounts/USFDA/subscriber/new
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
-  status: planned
+  status: active
   added: "2026-07-29"
   notes: "Subscribed and confirmed 2026-07-29 (sender usfda@public.govdelivery.com). Corroborating sibling of the active fda-press feed; content evaluation will establish whether the bulletins carry material the feed omits. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
@@ -1776,7 +1776,7 @@
     home: https://www.cms.gov/newsroom
     signup: https://public.govdelivery.com/accounts/USCMS/subscriber/new
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
-  status: planned
+  status: active
   added: "2026-07-29"
   notes: "Subscribed and confirmed 2026-07-29 (sender cmslists@subscriptions.cms.hhs.gov). Sibling of the planned cms-newsroom web entry. The HHS departmental subscription is awaiting email confirmation; NIH Office of Research on Women's Health, the Office on Women's Health, and ODPHP lists are also confirmed and may be registered after evaluation. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
@@ -1841,7 +1841,7 @@
   urls:
     home: https://www.federalreserve.gov/newsevents.htm
   method: Subscription notifications to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
-  status: planned
+  status: active
   added: "2026-07-29"
   notes: "Subscribed and confirmed 2026-07-29 (sender frb-webannouncements@announcements.federalreserve.gov). The Board runs its own notification system rather than GovDelivery, so the adapter must not assume a single platform. Corroborating sibling of the active federal-reserve-news feed. Federal Reserve Bank of New York alerts are also confirmed. Signup URL not recorded: the address inferred from the sender was checked and did not resolve, so only the confirmed sender is asserted here. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
 
@@ -1954,4 +1954,4 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender hudoig@info.hudoig.gov). The signup page returns HTTP 403 to our identified client; recorded as observed, not evaded. Partial coverage for the department: hud-newsroom returns HTTP 403 to our identified client and the HUD-NEWS-L press listserv signup did not complete — the IG stream is oversight material, not the department's own announcements. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
+  notes: "Subscribed and confirmed 2026-07-29 (sender hudoig@info.hudoig.gov). The signup page returns HTTP 403 to our identified client; recorded as observed, not evaded. Partial coverage for the department: hud-newsroom returns HTTP 403 to our identified client and the HUD-NEWS-L press listserv signup did not complete — the IG stream is oversight material, not the department's own announcements. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin. Gate-3 coverage evaluation (2026-07-31, from live delivery): 1 bulletin -> 1 item on 2026-07-30, mode email-full (avg 852 chars). DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage. Gate-3 coverage evaluation (2026-07-31, from live delivery): 4 bulletins -> 4 items on 2026-07-30, mode email-full (avg 1,602 chars). DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage. Gate-3 coverage evaluation (2026-07-31, from live delivery): 1 bulletin -> 1 item on 2026-07-31, mode email-full (avg 757 chars); the web channel is separately active but degraded. DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage. Gate-3 coverage evaluation (2026-07-31, from live delivery): 4 bulletins -> 4 items across 2026-07-30/31, mode email-full (avg 2,234 chars); SSA's web newsroom refuses our client, so this is the agency's only working path. DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage."
