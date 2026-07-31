@@ -1557,3 +1557,15 @@ def test_public_accessibility_statement_is_published():
     assert "hustleyourcity@gmail.com" in text          # a real route to report
     assert "WCAG 2.2" in text and "conformant" in text  # the legal claim
     assert ("accessibility", "Accessibility") in publish._doc_page_index()
+
+
+def test_header_expands_the_acronym(tmp_path):
+    """Branding rule: the acronym is always expanded. The header is the
+    one place a first-time reader meets the name."""
+    (tmp_path / "d").mkdir()
+    (tmp_path / "d" / "2026-07-29.md").write_text("# Daily Digest\n\nBody.\n")
+    publish.build_site(digest_dir=tmp_path / "d", out_dir=tmp_path / "s")
+    page = (tmp_path / "s" / "index.html").read_text()
+    assert "FAPD<span" in page
+    assert "Free Agentic Publication Digester</span></a>" in page
+    assert 'aria-label="Free Agentic Publication Digester (FAPD)"' in page

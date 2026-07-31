@@ -3017,3 +3017,12 @@ one read zero on days that plainly had summaries — and the first
 automated evidence commit was authored as the operator rather than the
 bot, because the rsynced repo's .git/config outranks the image's global
 identity. Both fixed. 392 tests.
+
+## 2026-07-31 — The header says the whole name
+
+The masthead read "FAPD" with the expansion hidden in a title attribute,
+which meant the branding rule (always expand the acronym) was satisfied
+only for readers who hover. It now reads "FAPD — Free Agentic
+Publication Digester" in the header of every page, the expansion set in
+a lighter weight so the mark still reads as the mark and wraps rather
+than pushing the nav off a narrow screen.
