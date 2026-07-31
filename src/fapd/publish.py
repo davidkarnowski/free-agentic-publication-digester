@@ -79,6 +79,7 @@ _STYLE = """\
   --stripe: #f4f6f8;
   --card: #ffffff;
   --accent-on: #ffffff;      /* text on an --accent fill: 8.66:1 */
+  --control-border: #868f99; /* control boundary: 3.22:1 vs --bg */
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -93,9 +94,23 @@ _STYLE = """\
     /* white on the dark accent measured 2.25:1 — the worst number on the
        site, and it carried the "which filters are on" signal. 8.46:1. */
     --accent-on: #0b1116;
+    --control-border: #646f7a;   /* 3.61:1 vs --bg */
   }
 }
 * { box-sizing: border-box; }
+/* Visually hidden but present for assistive technology: the one utility
+   several accessibility fixes share. clip-path rather than clip, and a
+   1px box rather than display:none, so the text stays in the
+   accessibility tree and inside inline layout. */
+.vh {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
@@ -179,12 +194,28 @@ ul { padding-left: 1.3rem; }
 li { margin: 0.35rem 0; }
 li > ul { margin-top: 0.15rem; }
 li li { font-size: 0.95rem; }
+/* `display: block` on a <table> strips the table, row, and cell roles
+   from the accessibility tree, so a counts table is announced as a flat
+   run of numbers with no headers. The horizontal-scroll job moves to a
+   wrapper element, which is also focusable so it can be scrolled from
+   the keyboard (A11Y-03). */
 table {
-  display: block;
-  overflow-x: auto;
   border-collapse: collapse;
   margin: 1rem 0;
   font-size: 0.92rem;
+}
+.table-scroll { overflow-x: auto; margin: 1rem 0; }
+.table-scroll:focus-visible {
+  outline: 3px solid var(--accent); outline-offset: 2px;
+}
+/* The site's own focus indicator: the user-agent ring's contrast against
+   --accent-soft and --card is not ours to control. --accent measures
+   8.51:1 on --bg (light) and 8.24:1 (dark); :where() keeps specificity
+   at zero so nothing existing is overridden. */
+:where(a, button, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 th, td {
   border: 1px solid var(--border);
@@ -221,6 +252,17 @@ img {
   font-size: 0.72rem; letter-spacing: 0.02em; white-space: nowrap;
 }
 .tag-model { border-style: dashed; font-style: italic; }
+/* Filter chips are user interface components, so their boundary needs
+   3:1 (1.4.11): --border measured 1.34:1. Also 2.5.8 Target Size — an
+   entry chip computed 22.0 px tall, and the entry chips are the ones a
+   reader taps while reading an item. 11.52 x 1.6 + 2 x 4.8 + 2 = 30.0 px.
+   Placed BEFORE the branch block on purpose: equal specificity, so the
+   branch rules' currentColor border must come later to win. */
+.filter-chip, .chip-toggle {
+  cursor: pointer; user-select: none;
+  padding-top: 0.3rem; padding-bottom: 0.3rem;
+  border-color: var(--control-border);
+}
 /* Branch colors — deliberately not the red/blue party palette. */
 /* Light-theme hues darkened to clear 4.5:1 (measured 5.02-5.71:1); the
    hues themselves are unchanged, so branches stay off the party palette.
@@ -255,12 +297,24 @@ details.digest-section > summary {
   display: flex; flex-direction: column; gap: 0.25rem;
 }
 details.digest-section > summary::-webkit-details-marker { display: none; }
-.sec-title { font-weight: 650; font-size: 1.05rem; }
-.sec-title::before { content: "▸ "; color: var(--accent); font-size: 0.85em; }
-details.digest-section[open] .sec-title::before { content: "▾ "; }
+/* The section title IS the <summary>'s heading (A11Y-04): a closed
+   <details> keeps its contents out of the accessibility tree, so a
+   heading placed after the summary is invisible to heading navigation
+   and the anchor id it carries scrolls to a collapsed section. Restated
+   here so a real <h2> keeps the summary's compact look. */
+h2.sec-title {
+  font-size: 1.05rem; font-weight: 650;
+  margin: 0; padding: 0; border: 0; color: inherit;
+}
+/* `/ ""` is CSS alternative text: the triangle stays visible and stops
+   being announced as "black right-pointing small triangle" (A11Y-15). */
+h2.sec-title::before { content: "\\25B8\\00a0" / ""; color: var(--accent);
+  font-size: 0.85em; }
+details.digest-section[open] h2.sec-title::before {
+  content: "\\25BE\\00a0" / "";
+}
 summary .sec-blurb { font-size: 0.92rem; color: var(--fg); opacity: 0.85; }
 details.digest-section > *:not(summary) { margin-left: 0.9rem; margin-right: 0.9rem; }
-details.digest-section > .sec-heading { font-size: 1.15rem; margin-top: 0.6rem; }
 details.digest-section[open] > summary .sec-blurb,
 details.digest-section[open] > summary .tags { display: none; }
 
@@ -284,7 +338,7 @@ details.digest-section[open] > summary .tags { display: none; }
   color: var(--accent);
   margin-right: 0.45rem;
 }
-.plain-label::after { content: ":"; }
+.plain-label::after { content: ":" / ""; }
 /* Type styles apply wherever these appear; several call sites emit
    <span class="rule-note">, which the old li-only selector never
    reached, so those notes rendered at body size in full contrast. */
@@ -396,13 +450,38 @@ li.source-note a { color: var(--muted); }
   border: 1px solid var(--border); border-radius: 6px;
   background: var(--stripe); padding: 0.6rem 0.75rem; margin: 1rem 0;
 }
-.filter-lead {
-  margin: 0 0 0.45rem; font-size: 0.85rem; font-weight: 600;
+/* The lead is a real heading (A11Y-13) so the filter is reachable by
+   heading navigation on a page that otherwise had exactly one heading;
+   the h2 defaults are restated away so the bar looks unchanged. */
+h2.filter-lead {
+  margin: 0 0 0.45rem; padding: 0; border: 0;
+  font-size: 0.85rem; font-weight: 600; color: inherit;
 }
 .filter-chip { cursor: pointer; text-decoration: none; }
+/* opacity: 0.7 over a tinted chip measured 2.11–3.10:1 (light) — the
+   count inherits the chip's own compliant color instead (A11Y-05). */
 .filter-n {
-  margin-left: 0.35rem; opacity: 0.7; font-variant-numeric: tabular-nums;
+  margin-left: 0.4rem; font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
+/* Which keywords are active, in words. Pre-rendered and revealed by CSS
+   so the page stays script-free; on an engine without :has() the readout
+   is simply absent, which shows the day unfiltered. */
+.filter-status { margin: 0.4rem 0 0; font-size: 0.8rem; color: var(--muted); }
+.filter-status > span { display: none; }
+.today-stream:not(:has(.filter-cb:checked)) .fs-none { display: inline; }
+.today-stream:has(.filter-cb:checked) .fs-lead { display: inline; }
+/* A CSS counter over the items still displayed: counters do not
+   increment for display:none elements, and counter scope reaches an
+   element's following siblings, so a paragraph after the list can state
+   how many survived the filter. Generated content, so it is a visual
+   readout only — screen readers treat it inconsistently. */
+.today-list { counter-reset: shown 0; }
+.today-list > .today-item { counter-increment: shown; }
+.filter-count {
+  margin: 0.5rem 0 0; font-size: 0.8rem; color: var(--muted);
+}
+.filter-count::after { content: counter(shown) " item(s) shown."; }
 .filter-clear {
   display: none; margin-left: 0.6rem; font-size: 0.78rem; font-weight: 400;
   padding: 0.1rem 0.6rem; border: 1px solid var(--border); border-radius: 999px;
@@ -414,16 +493,25 @@ li.source-note a { color: var(--muted); }
   padding-bottom: 0.4rem; margin-bottom: 0.1rem;
   border-bottom: 1px dashed var(--border);
 }
-.filter-chip, .chip-toggle { cursor: pointer; user-select: none; }
 .chip-toggle:hover { border-color: var(--accent); }
 .filter-note {
   display: block; margin-top: 0.4rem; font-size: 0.75rem; color: var(--muted);
 }
 @media (forced-colors: active) {
-  /* the background fill is discarded in forced colors; the glyph and a
-     thicker border are what remain to show a chip is selected */
-  .filter-chip, .chip-toggle { border-width: 1px; }
+  /* Author colors are replaced by the system palette here: every chip
+     tint collapses to Canvas and the :checked accent fill is discarded,
+     so the check glyph is what carries "this filter is on". Background-
+     coloured shapes (.live-dot) and any border drawn in a custom token
+     need a system colour to stay visible at all. */
+  .tag { border: 1px solid CanvasText; }
+  .filter-chip, .chip-toggle { border: 1px solid ButtonBorder; }
   .filter-cb:checked ~ .filter-bar label { border-width: 3px; }
+  .live-dot { outline: 1px solid CanvasText; }
+  .skip-link { border: 2px solid CanvasText; }
+  .plain { border-left: 3px solid Highlight; }
+  .today-disclosure { border: 1px solid CanvasText; }
+  a:focus-visible, button:focus-visible, .table-scroll:focus-visible,
+  summary:focus-visible { outline: 3px solid Highlight; outline-offset: 2px; }
 }
 @media print {
   /* never print a filtered subset that could read as the whole day */
@@ -573,9 +661,17 @@ def _tag_classes(text, extra_class=""):
 
 
 def _tag_chip(text, extra_class="", title=""):
+    """A chip, plus its `title` repeated as visually-hidden text. The
+    model-generated marker was carried by a dashed border, an italic, and
+    a `title` attribute — none of which a screen reader conveys, and a
+    `title` is unavailable to keyboard and touch entirely. GUIDE §2 wants
+    model-generated text labeled in place; this is that label, in words
+    (A11Y-11)."""
     classes = _tag_classes(text, extra_class)
     title_attr = f' title="{html.escape(title)}"' if title else ""
-    return f'<span class="{classes}"{title_attr}>{html.escape(text)}</span>'
+    note = f'<span class="vh"> ({html.escape(title)})</span>' if title else ""
+    return (f'<span class="{classes}"{title_attr}>'
+            f"{html.escape(text)}{note}</span>")
 
 
 def _chip_tags(html_body):
@@ -596,12 +692,50 @@ def _chip_tags(html_body):
     return _TAGS_P_RE.sub(_sub, html_body)
 
 
+_TABLE_EL_RE = re.compile(r"<table>(.*?)</table>", re.DOTALL)
+_TH_RE = re.compile(r"<th(?=[\s>])")
+_HEAD_ID_RE = re.compile(r'<h[23] id="([^"]+)"')
+
+
+def _accessible_tables(html_body):
+    """Tables keep their semantics: the scroll container moves to a
+    wrapper (display:block on a <table> strips its table, row, and cell
+    roles from the accessibility tree, so a counts table is announced as
+    a flat run of numbers), header cells get scope, and the wrapper is a
+    focusable labelled region so a keyboard-only reader can scroll a wide
+    table (A11Y-03).
+
+    Ordering constraint: `_compact_meta` matches
+    `<table>.*?Digest date.*?</table>` and must run BEFORE this helper,
+    or the wrapper markup lands between it and its table."""
+    out, pos = [], 0
+    for match in _TABLE_EL_RE.finditer(html_body):
+        out.append(html_body[pos:match.start()])
+        heads = _HEAD_ID_RE.findall(html_body[:match.start()])
+        label = (f' aria-labelledby="{heads[-1]}"' if heads
+                 else ' aria-label="Data table"')
+        inner = _TH_RE.sub('<th scope="col"', match.group(1))
+        out.append(f'<div class="table-scroll" role="region" tabindex="0"'
+                   f"{label}><table>{inner}</table></div>")
+        pos = match.end()
+    out.append(html_body[pos:])
+    return "".join(out)
+
+
 def _collapse_sections(html_body):
     """Numbered sections and appendix blocks fold into native <details>
     cards whose summary carries the title, the section's tag chips, and
     its plain-speak synopsis — so the initial page is the day in plain
-    speak, and the full record expands on demand. The h2's anchor id
-    moves to the details element so ToC-style deep links keep working."""
+    speak, and the full record expands on demand.
+
+    The title is the section's <h2> and it lives INSIDE the <summary>,
+    carrying the anchor id (A11Y-04). A closed <details> keeps its
+    contents out of the accessibility tree, so a heading placed after the
+    summary left a 25-heading digest exposing two headings, and the
+    fragment-revealing algorithm opens a target's <details> ancestors,
+    not the target — so an id on the <details> itself scrolled to a
+    section that stayed shut. The id string is unchanged, so existing
+    deep links keep their form and now open what they point at."""
     parts = re.split(r"(?=<h2 )", html_body)
     out = [parts[0]]
     for chunk in parts[1:]:
@@ -616,16 +750,15 @@ def _collapse_sections(html_body):
             r'<p class="plain plain-para">'
             r'<span class="plain-label">In plain terms</span>\s*(.*?)</p>',
             body, re.DOTALL)
-        summary = f'<span class="sec-title">{title}</span>'
+        summary = f'<h2 class="sec-title" id="{anchor}">{title}</h2>'
         if tags_m:
             summary += tags_m.group(0).replace('<p class="tags">', '<span class="tags">') \
                                       .replace("</p>", "</span>")
         if blurb_m:
             summary += f'<span class="sec-blurb">{blurb_m.group(1)}</span>'
         out.append(
-            f'<details class="digest-section" id="{anchor}">'
-            f"<summary>{summary}</summary>"
-            f'<h2 class="sec-heading">{title}</h2>{body}</details>')
+            f'<details class="digest-section">'
+            f"<summary>{summary}</summary>{body}</details>")
     return "".join(out)
 
 
@@ -644,10 +777,16 @@ def _style_digest_body(html_body):
         html_body)
 
     def _rule(match):
+        # The description folds into a tooltip visually, and is restored
+        # as visually-hidden text for assistive technology (A11Y-11): why
+        # an item was selected is the project's core accountability
+        # claim, and a `title` attribute reaches neither keyboard nor
+        # touch. The canonical Markdown was never touched either way.
         rule_id, desc = match.group(1), match.group(2)
         title = html.escape(re.sub(r"<[^>]+>", "", desc), quote=True)
         return (f'<li class="rule-note">Included because: '
-                f'<span class="rule-id" title="{title}">{rule_id}</span></li>')
+                f'<span class="rule-id" title="{title}">{rule_id}'
+                f'<span class="vh"> — {title}</span></span></li>')
 
     html_body = _RULE_LI_RE.sub(_rule, html_body)
     html_body = _SOURCE_LI_RE.sub(
@@ -655,11 +794,15 @@ def _style_digest_body(html_body):
     html_body = _compact_meta(html_body)
     html_body = _chip_tags(html_body)
     html_body = _CONTENTS_RE.sub("", html_body, count=1)
+    html_body = _accessible_tables(html_body)
     html_body = _collapse_sections(html_body)
     return html_body
 
 
-_A_TAG_RE = re.compile(r"<a\b([^>]*)>", re.IGNORECASE)
+# The whole element, not just the opening tag: the new-tab notice
+# (A11Y-12) has to be appended where convention puts it, immediately
+# before </a>. Widening is safe because <a> cannot nest.
+_A_TAG_RE = re.compile(r"<a\b([^>]*)>(.*?)</a>", re.IGNORECASE | re.DOTALL)
 _HREF_ATTR_RE = re.compile(r'href="([^"]*)"', re.IGNORECASE)
 
 
@@ -677,13 +820,21 @@ def _externalize_links(page_html, base=None):
     Markdown-authored citation links, hand-built cards, and the footer
     all obey the same rule). Same-site links, fragments, and non-HTTP
     schemes such as mailto: keep default behavior; `rel` blocks the
-    opened page's access to ours and its referrer."""
+    opened page's access to ours and its referrer.
+
+    A new tab opened without notice is disorienting: focus context
+    changes with no announcement, a magnification user's viewport
+    changes wholesale, and Back stops working. So each such link also
+    states it, in visually-hidden text (3.2.5 technique G201, A11Y-12).
+    The alternative — one page-level sentence — is quieter but leaves a
+    reader who arrives at a single link by link navigation with no
+    warning at all."""
     from urllib.parse import urlsplit
 
     site = _site_host(base)
 
     def _sub(match):
-        attrs = match.group(1)
+        attrs, inner = match.group(1), match.group(2)
         if "target=" in attrs.lower():
             return match.group(0)
         href = _HREF_ATTR_RE.search(attrs)
@@ -694,7 +845,8 @@ def _externalize_links(page_html, base=None):
             return match.group(0)
         if site and parts.netloc.lower().removeprefix("www.") == site:
             return match.group(0)
-        return f'<a{attrs} target="_blank" rel="noopener noreferrer">'
+        return (f'<a{attrs} target="_blank" rel="noopener noreferrer">'
+                f'{inner}<span class="vh"> (opens in a new tab)</span></a>')
 
     return _A_TAG_RE.sub(_sub, page_html)
 
@@ -720,11 +872,20 @@ def _render_page(title, body_html, nav_links, canonical, description=None,
 _NAV_LABELS = {"ai-development": "AI development"}
 
 
-def _doc_nav_links(doc_pages):
+def _nav_link(href, label, here=None):
+    """One nav anchor, marked `aria-current="page"` when it is the page
+    being rendered. Every page emits every link, in the same order — a
+    page linking to itself is the orientation cue a screen reader user
+    arriving mid-site otherwise has to infer (3.2.3, A11Y open q. 8)."""
+    mark = ' aria-current="page"' if here and href == here else ""
+    return f'<a href="{href}"{mark}>{label}</a>'
+
+
+def _doc_nav_links(doc_pages, here=None):
     """Nav anchors for the docs/site explanatory pages (About, Methods, …)."""
     return "".join(
-        f'<a href="{stem}.html">'
-        f'{html.escape(_NAV_LABELS.get(stem, stem.capitalize()))}</a>'
+        _nav_link(f"{stem}.html",
+                  html.escape(_NAV_LABELS.get(stem, stem.capitalize())), here)
         for stem, _title in doc_pages
     )
 
@@ -735,32 +896,42 @@ def _registry_exists():
     return (config.PROJECT_ROOT / "sources" / "registry.yaml").exists()
 
 
+_CURRENT_HREFS = {"index": "index.html", "today": "today.html",
+                  "sources": "sources.html", "blog": "blog.html",
+                  "agents": "agents.html"}
+
+
 def _site_nav(doc_pages=(), *, skip_stem=None, current=None):
     """The site header, identical everywhere (operator, 2026-07-30): the
     digest archive, the live view, the source guide, the blog, every
-    explanatory page, and the agent guide. `current` omits the page's own
-    link, and a link is never emitted for a page that was not built."""
-    links = []
-    if current != "index":
-        links.append('<a href="index.html">All digests</a>')
-    if current != "today":
-        links.append('<a href="today.html">Today (live)</a>')
-    if current != "sources" and _registry_exists():
-        links.append('<a href="sources.html">Sources</a>')
-    if current != "blog" and _blog_exists():
-        links.append('<a href="blog.html">Blog</a>')
-    links.append(_doc_nav_links(p for p in doc_pages if p[0] != skip_stem))
-    if current != "agents":
-        links.append('<a href="agents.html">For agents</a>')
+    explanatory page, and the agent guide. Every page renders every link
+    in the same order; the page's own link is marked `aria-current`
+    rather than dropped. A link is never emitted for a page that was not
+    built."""
+    here = f"{skip_stem}.html" if skip_stem else _CURRENT_HREFS.get(current)
+    links = [_nav_link("index.html", "All digests", here),
+             _nav_link("today.html", "Today (live)", here)]
+    if _registry_exists():
+        links.append(_nav_link("sources.html", "Sources", here))
+    if _blog_exists():
+        links.append(_nav_link("blog.html", "Blog", here))
+    links.append(_doc_nav_links(doc_pages, here))
+    links.append(_nav_link("agents.html", "For agents", here))
     return "".join(links)
 
 
 def _nav_for(dates, i, doc_pages=()):
+    """Prev/next digest links. Out of context — which is how a screen
+    reader's link list presents them — `← 2026-07-28` is a bare date, so
+    each carries its purpose in visually-hidden text (2.4.4, A11Y-16)."""
     links = []
     if i > 0:
-        links.append(f'<a href="{dates[i - 1]}.html">&larr; {dates[i - 1]}</a>')
+        links.append(f'<a href="{dates[i - 1]}.html">&larr; '
+                     f'<span class="vh">Digest for </span>{dates[i - 1]}</a>')
     if i < len(dates) - 1:
-        links.append(f'<a href="{dates[i + 1]}.html">{dates[i + 1]} &rarr;</a>')
+        links.append(f'<a href="{dates[i + 1]}.html">'
+                     f'<span class="vh">Digest for </span>{dates[i + 1]}'
+                     f" &rarr;</a>")
     links.append(_site_nav(doc_pages))
     return "".join(links)
 
@@ -1412,8 +1583,16 @@ def _today_item_row(item, filterable=()):
     gran = item["granule_id"]
     cite = item["package_id"] + (f" / {gran}" if gran else "")
     stamp = item["observed_at"] or ""
+    # A bare clock reading followed by two letters says nothing about
+    # what the number is, and the distinction this project cares about
+    # most — observation time, not publication time — was nowhere in the
+    # markup (1.3.1, A11Y-14). "ET" stays visible and is spoken in full.
     observed = (f'<time class="utc" datetime="{html.escape(stamp)}">'
-                f"{html.escape(_et_clock(stamp))} ET</time>" if stamp else "")
+                f'<span class="vh">Observed at </span>'
+                f"{html.escape(_et_clock(stamp))}"
+                f'<span class="vh"> Eastern time</span>'
+                f'<span aria-hidden="true"> ET</span></time>'
+                if stamp else "")
     url = _today_official_url(item)
     title_html = (f'<a href="{html.escape(url)}">{html.escape(title)}</a>'
                   if url else html.escape(title))
@@ -1522,16 +1701,23 @@ def _filter_chip(tag, count, pairs=None):
     per keyword it shares an entry with, which drives the narrowing."""
     partners = "".join(f" c-{_slug(p)}"
                        for p in sorted((pairs or {}).get(tag, {tag})))
+    # "executive 285" is spoken as a name and a bare number; the unit is
+    # supplied in visually-hidden text (1.3.1, A11Y-14).
     return (f'<label class="{_tag_classes(tag, "filter-chip")}{partners}" '
             f'for="f-{_slug(tag)}">{html.escape(tag)}'
-            f'<span class="filter-n">{count}</span></label>')
+            f'<span class="filter-n"><span class="vh">, </span>{count}'
+            f'<span class="vh"> items</span></span></label>')
 
 
 def _today_filter_bar(facets, total, pairs=None):
     """(inputs, bar_html, css) for the day's keywords: branches on their
     own row, then every remaining keyword in one full listing. Choosing
     a keyword narrows the offered set to keywords that actually share an
-    entry with it, so no combination on offer leads to an empty page."""
+    entry with it, so no combination on offer leads to an empty page.
+
+    The bar is a labelled `role="group"`, not a `<nav>` (A11Y-13): a
+    58-control form group is not navigation, and listing it as such put
+    it in the screen reader's landmark and navigation-region lists."""
     offered = list(facets.items())[:MAX_FILTER_KEYWORDS]
     dropped = len(facets) - len(offered)
     if not offered:
@@ -1567,7 +1753,11 @@ def _today_filter_bar(facets, total, pairs=None):
             # is the signal that survives grayscale and forced-colors
             f'#f-{slug}:checked ~ .filter-bar label[for="f-{slug}"]::before,\n'
             f'#f-{slug}:checked ~ .today-list label[for="f-{slug}"]::before'
-            '{content:"\\2713\\00a0"}\n')
+            '{content:"\\2713\\00a0"}\n'
+            # ...and the status line names it in words, so the change is
+            # stated and not only shown (4.1.3)
+            f".today-stream:has(#f-{slug}:checked) .fs-{slug}"
+            "{display:inline}\n")
 
     branches = [(t_, n) for t_, n in offered if t_ in _BRANCH_ORDER]
     branches.sort(key=lambda kv: _BRANCH_ORDER.index(kv[0]))
@@ -1584,17 +1774,34 @@ def _today_filter_bar(facets, total, pairs=None):
                  + "</div>")
     note = (f'<span class="filter-note">Showing {len(offered)} of '
             f"{len(facets)} keywords.</span>" if dropped else "")
+    # Selecting a keyword changes what is on the page and nothing said so
+    # — the bar's "N item(s) unfiltered" is the before number and never
+    # moves (4.1.3, A11Y-07). One pre-rendered span per keyword, each
+    # revealed by its own checkbox, names the active filters in words.
+    # Whether a live region announces a child that changes from
+    # display:none to display:inline is browser- and AT-dependent; this
+    # is a visible readout that MAY announce, and the public statement
+    # says exactly that.
+    status = (
+        '<p class="filter-status" role="status">'
+        f'<span class="fs-none">No keyword filter is selected; all {total} '
+        "item(s) are shown.</span>"
+        '<span class="fs-lead">Filtered to items tagged: </span>'
+        + "".join(f'<span class="fs-{_slug(t_)}">{html.escape(t_)} </span>'
+                  for t_, _n in offered)
+        + "</p>"
+    )
     bar = (
-        '<nav class="filter-bar" aria-label="Filter the stream by keyword">'
-        '<p class="filter-lead">Filter by keyword '
+        '<div class="filter-bar" role="group" aria-labelledby="filter-heading">'
+        '<h2 class="filter-lead" id="filter-heading">Filter by keyword '
         '<span class="rule-note">click to select, click again to clear — '
         "here or on any entry's own tags · choosing several narrows to "
         "items carrying all of them, and the remaining keywords narrow "
         "to those that appear alongside your choice · counts are for the "
         "unfiltered day · "
         f"{total} item(s) unfiltered</span>"
-        '<button type="reset" class="filter-clear">clear filters</button></p>'
-        f"{rows}{note}</nav>"
+        '<button type="reset" class="filter-clear">clear filters</button></h2>'
+        f"{rows}{status}{note}</div>"
     )
     return "".join(inputs), bar, "".join(css)
 
@@ -1658,7 +1865,10 @@ def build_today(conn, out_dir=None, date=None):
     recent = sorted(
         (p.stem for p in Path(config.DIGEST_DIR).glob("*.md")
          if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.stem)), reverse=True)[:3]
-    recent_links = " · ".join(f'<a href="{d}.html">{d}</a>' for d in recent)
+    # Bare dates are unusable in a screen reader's link list (2.4.4).
+    recent_links = " · ".join(
+        f'<a href="{d}.html"><span class="vh">Digest for </span>{d}</a>'
+        for d in recent)
     intro = (
         "<p>This is the <strong>live view</strong> of the Free Agentic "
         "Publication Digester: official United States federal publications "
@@ -1725,10 +1935,18 @@ def build_today(conn, out_dir=None, date=None):
         parts.append(
             '<form class="today-stream" action="today.html" method="get">'
             + inputs + filter_bar
-            + '<ul class="today-list" id="today-stream" tabindex="-1">'
+            # The stream gets its own heading (A11Y-13): the page had
+            # exactly one heading for 400 KB of content, so there was no
+            # way to reach either the filter or the list by heading. It
+            # sits inside the form as a general sibling of the
+            # checkboxes, which the `~` filter rules require.
+            + '<h2 id="today-stream" tabindex="-1">Observed publications</h2>'
+            + '<ul class="today-list">'
             + "".join(_today_item_row(i, filterable)
                       for i in status["items"])
-            + "</ul></form>")
+            # A CSS counter over the items still displayed — the only
+            # script-free way to state how many survived the filter.
+            + '</ul><p class="filter-count"></p></form>')
 
     nav = _site_nav(_doc_page_index(), current="today")
     head_extra = (f"<style>\n{filter_css}</style>\n" if filter_css else "")

@@ -1,8 +1,16 @@
 # Accessibility audit and remediation plan
 
 *Audit date: 2026-07-30. Audited surface: the live site at
-https://fapd.info, as rendered by `src/fapd/publish.py`. Status: memo
-only — no application code was changed. Last reviewed: 2026-07-30.*
+https://fapd.info, as rendered by `src/fapd/publish.py`. Last reviewed:
+2026-07-30.*
+
+*Remediation status, 2026-07-30: 19 of 20 findings resolved across two
+passes; A11Y-18 stays open because no fix exists at the current DOM
+order. Each finding below carries its own **Status:** line — nothing was
+deleted, because the audit is a record of what the site was, not a task
+list. The public statement built from §6 is now a real page,
+`docs/site/accessibility.md`, rewritten so every sentence is true after
+the work landed, and it names what is still untested.*
 
 ---
 
@@ -117,6 +125,9 @@ A shared visually-hidden utility is used by several fixes. Add it once to
 
 ### A11Y-01 — Critical — 4.1.2 Name, Role, Value
 
+**Status: resolved 2026-07-30** — `aria-label` on every `filter-cb`
+input, as written. Pinned by `test_filter_checkboxes_name_themselves`.
+
 **Where:** `publish._today_filter_bar` (the `<input class="filter-cb">`
 line), `publish._filter_chip`, `publish._entry_tag_chip`.
 
@@ -179,6 +190,11 @@ instruction sentence on each of 58 focus events.
 
 ### A11Y-02 — Critical — 2.4.1 Bypass Blocks
 
+**Status: resolved 2026-07-30** — skip link in `_PAGE`, `id`/`tabindex`
+on `<main>`, `.skip-link` CSS, and the in-page skip on `/today`. Its
+target moved to the stream's own `<h2>` when A11Y-13 landed. Pinned by
+`test_every_page_class_has_a_skip_link_and_main_landmark`.
+
 **Where:** `publish._PAGE`; `publish.build_today`.
 
 There is no skip link anywhere on the site (confirmed: no `.skip-link`,
@@ -229,6 +245,17 @@ parts.append(
 `#f-x:checked ~ .today-list` selectors are unaffected.
 
 ### A11Y-03 — High — 1.3.1 Info and Relationships; 2.1.1 Keyboard
+
+**Status: resolved 2026-07-30** — `_accessible_tables` added and called
+from `_style_digest_body` between the Contents strip and
+`_collapse_sections`, so the `_compact_meta` ordering constraint holds.
+One departure from the replacement above, deliberate: the `<th>` pattern
+is `<th(?=[\s>])` rather than `<th>`, so an aligned column (`<th
+align="left">`, which the tables extension emits for `|:---|`) also gets
+`scope`. Verified on the real 2026-07-29 page: 4 tables, 4 wrappers, 12
+`<th scope="col">`, 0 bare `<th>`, and every `aria-labelledby` resolves
+to an id that exists. Pinned by
+`test_digest_tables_keep_their_semantics`.
 
 **Where:** `publish._STYLE` `table { … }`; `publish._style_digest_body`.
 
@@ -299,6 +326,16 @@ Note the ordering constraint: `_compact_meta` matches
 which it already does.
 
 ### A11Y-04 — High — 1.3.1 Info and Relationships; 2.4.6 Headings and Labels
+
+**Status: resolved 2026-07-30** — heading moved into `<summary>` with
+the anchor id, `<details>` id dropped, `.sec-heading` removed from
+markup and stylesheet. The anchor strings are byte-identical to before,
+checked against the built 2026-07-29 page. One defect in the replacement
+as written: `_STYLE` is not a raw string, so `content: "\25B8\00a0"`
+pasted literally becomes a Python **octal** escape (`\25` -> `\x15`) and
+ships broken CSS. The backslashes must be doubled in the source. Pinned
+by `test_every_digest_heading_is_exposed_and_deep_links_resolve` and
+`test_generated_glyphs_are_not_spoken`.
 
 **Where:** `publish._collapse_sections`.
 
@@ -371,6 +408,12 @@ its exact current string, so existing deep links are unchanged in form
 and now open the section they point at.
 
 ### A11Y-05 — High — 1.4.3 Contrast (Minimum)
+
+**Status: resolved 2026-07-30** — `--accent-on`, the darkened
+light-theme branch hues, and the `:checked` rule landed in an earlier
+pass; the `.filter-n` half (dropping `opacity: 0.7`) was missing and
+landed here. Pinned by `test_selection_is_not_signalled_by_colour_alone`
+and `test_chips_meet_the_target_size_and_boundary_floors`.
 
 **Where:** `publish._STYLE` — the branch-color block, the
 `prefers-color-scheme: dark` block, `.filter-n`, and the generated
@@ -485,6 +528,10 @@ f'#f-{slug}:checked ~ .today-list label[for="f-{slug}"]'
 
 ### A11Y-06 — High — 1.4.1 Use of Color
 
+**Status: resolved 2026-07-30** — check-mark glyph generated per
+keyword, in the bar and on every entry. Pinned by
+`test_selection_is_not_signalled_by_colour_alone`.
+
 **Where:** the generated `:checked` rule in `publish._today_filter_bar`.
 
 Which keywords are currently selected is conveyed **only** by a
@@ -516,6 +563,16 @@ one non-colour signal of selection. A screen reader speaking "check mark
 executive" beside an already-checked control is redundant, not wrong.
 
 ### A11Y-07 — High — 4.1.3 Status Messages
+
+**Status: resolved 2026-07-30, with its limit stated publicly** — both
+(a) and (b) shipped: one `.fs-<slug>` span per keyword inside a
+`role="status"` region, revealed by a generated `:has()` rule, and the
+`.filter-count` CSS counter after the list. This uses `:has()` for the
+readout only; the `:has()` restructure of the filter itself (§5) was NOT
+done. Whether the region announces is untested, and
+`docs/site/accessibility.md` says so in those words rather than claiming
+it. Pinned by `test_today_filter_states_what_is_selected`, which also
+asserts the page still ships exactly one script.
 
 **Where:** `publish.build_today` / `publish._today_filter_bar`.
 
@@ -587,6 +644,12 @@ sketched, with its §2-rule-10 justification, in §7.
 
 ### A11Y-08 — High — beyond baseline (supports 1.4.1, 1.4.11)
 
+**Status: resolved 2026-07-30** — the full `forced-colors` block
+replaced the two-rule placeholder that was already there; the
+placeholder's `:checked ~ label { border-width: 3px }` was kept
+alongside it. Pinned by
+`test_focus_and_forced_colors_have_author_answers`.
+
 **Where:** `publish._STYLE` — no `@media (forced-colors: active)` block
 exists.
 
@@ -621,6 +684,15 @@ reason to land A11Y-06 and A11Y-08 together.
 
 ### A11Y-09 — Medium — 2.5.8 Target Size (Minimum)
 
+**Status: resolved 2026-07-30** — the vertical padding landed together
+with A11Y-10's `--control-border`, in one rule placed **before** the
+branch block. That placement is load-bearing: equal specificity, so had
+the rule stayed in the filter section it would have come later in source
+order and overridden the branch chips' `currentColor` border, silently
+undoing A11Y-10. Pinned by
+`test_chips_meet_the_target_size_and_boundary_floors`, including the
+ordering.
+
 **Where:** `publish._STYLE` `.tag`, `.filter-chip`, `.chip-toggle`.
 
 Computed heights, from `font-size: 0.72rem` (11.52 px), the inherited
@@ -652,6 +724,12 @@ boxes, so the line box grows to contain them and no vertical overlap is
 introduced; no `line-height` change is needed.
 
 ### A11Y-10 — Medium — 1.4.11 Non-text Contrast
+
+**Status: resolved 2026-07-30** — `border-color: currentColor` on the
+branch chips came with A11Y-05 in an earlier pass; the
+`--control-border` token for plain chips was missing and landed here, so
+the finding is now resolved in full. `--border` on cards and table cells
+is left alone, as the finding says.
 
 **Where:** `publish._STYLE` — `--border`, the branch `border-color`
 values.
@@ -692,6 +770,11 @@ container edges, not component boundaries, and 1.4.11 does not reach
 them. Raising it is a §8 item, not a conformance one.
 
 ### A11Y-11 — Medium — 1.3.1 Info and Relationships
+
+**Status: resolved 2026-07-30** — both halves, as written. The verbosity
+is real (104 extra spoken phrases on the audited page) and is named as a
+known limitation on the public statement rather than assumed acceptable;
+manual test 1 in §2 still owes an answer.
 
 **Where:** `publish._tag_chip` (`title=`), `publish._style_digest_body._rule`
 (`.rule-id` `title=`).
@@ -741,6 +824,14 @@ manual listen, not in phase 1.
 
 ### A11Y-12 — Medium — 3.2.5 Change on Request (technique G201)
 
+**Status: resolved 2026-07-30** — `_A_TAG_RE` widened to the whole
+element and the notice appended inside it. Enforcement stays in the
+single point named by code-standards §2 rule 9, so that rule is
+preserved and needs no amendment. Pinned by
+`test_outbound_links_say_they_open_a_new_tab`, which also asserts the
+notice count equals the `target="_blank"` count — no notice on a link
+that does not open a tab.
+
 **Where:** `publish._externalize_links`.
 
 Every outbound link sitewide carries `target="_blank"` with no warning.
@@ -786,6 +877,15 @@ verbosity question put to a real screen-reader session (§2, manual test
 1) before it is called settled.
 
 ### A11Y-13 — Medium — 1.3.1 Info and Relationships; 2.4.6 Headings and Labels
+
+**Status: resolved 2026-07-30** — all three. The `<nav>` became a
+labelled `role="group"`, the lead became `h2.filter-lead`, and the
+stream got `<h2 id="today-stream">Observed publications</h2>` — which
+also takes over the skip-link target from the `<ul>`. One departure: the
+replacement's `bar` string shortens the instruction text; the current,
+longer wording (narrowing behaviour, counts-are-unfiltered) was kept,
+since dropping it was not part of the finding. Pinned by
+`test_filter_bar_is_a_labelled_group_with_headings`.
 
 **Where:** `publish.build_today`, `publish._today_filter_bar`,
 `publish._PAGE`.
@@ -852,6 +952,11 @@ the heading list useless.
 
 ### A11Y-14 — Medium — 1.3.1 Info and Relationships
 
+**Status: resolved 2026-07-30** — both, as written, except that
+`_filter_chip` keeps its `pairs` parameter and the `c-<slug>` partner
+classes that the replacement's signature omitted. Pinned by
+`test_times_and_counts_carry_their_units`.
+
 **Where:** `publish._today_item_row` (`<time>`), `publish._filter_chip`
 (`.filter-n`).
 
@@ -886,6 +991,10 @@ def _filter_chip(tag, count):
 
 ### A11Y-15 — Low — 1.1.1 Non-text Content
 
+**Status: resolved 2026-07-30** — see the escaping defect noted under
+A11Y-04. The check glyph deliberately keeps no alternative text, and a
+test asserts it stays that way.
+
 **Where:** `publish._STYLE` — `.sec-title::before`, `.plain-label::after`.
 
 ```css
@@ -908,6 +1017,10 @@ additionally:
 ```
 
 ### A11Y-16 — Low — 2.4.4 Link Purpose (In Context)
+
+**Status: resolved 2026-07-30** — both, as written. Pinned by
+`test_link_purpose_is_stated_for_bare_date_links`, which walks every
+dated link on `/today` rather than spot-checking one.
 
 **Where:** `publish._nav_for`, `publish.build_today` (`recent_links`).
 
@@ -938,6 +1051,9 @@ recent_links = " · ".join(
 
 ### A11Y-17 — Low — 2.4.7 Focus Visible; 2.4.13 Focus Appearance (AAA)
 
+**Status: resolved 2026-07-30** — as written. Pinned by
+`test_focus_and_forced_colors_have_author_answers`.
+
 **Where:** `publish._STYLE`.
 
 The only author-defined focus style on the site is the generated
@@ -965,6 +1081,11 @@ existing is overridden.
 
 ### A11Y-18 — Low — 2.4.7 Focus Visible (magnification behavior)
 
+**Status: open 2026-07-30 — no fix exists at this DOM order**, exactly
+as the finding says. It is named on the public statement as a known
+limitation. Closing it needs the `:has()` restructure (§5), which is an
+operator decision and was explicitly out of scope for this pass.
+
 **Where:** `publish._STYLE` `.filter-cb`; `publish._today_filter_bar`.
 
 ```css
@@ -991,6 +1112,9 @@ and belongs on the public statement.
 
 ### A11Y-19 — Low — public claim accuracy
 
+**Status: resolved 2026-07-30** — the revised wording is live in
+`docs/site/privacy.md`.
+
 **Where:** `docs/site/privacy.md`, "What this site does not do".
 
 > **No accounts, no forms.** Nothing here accepts input, so nothing
@@ -1010,6 +1134,11 @@ reader would check first. Suggested wording:
 This is a public-claim change and needs operator sign-off (§7).
 
 ### A11Y-20 — Low — CSS defects with accessibility bearing
+
+**Status: resolved 2026-07-30** — all three: `var(--rule)` ->
+`var(--border)`, the `.rule-note` selector split, and
+`tag-status-planned`. Pinned by
+`test_css_defects_found_by_the_audit_stay_fixed`.
 
 **Where:** `publish._STYLE`.
 
@@ -1080,6 +1209,11 @@ Stated because a remediation pass should not undo any of it.
 ---
 
 ## 5. Prioritized remediation plan
+
+*Both phases have landed as of 2026-07-30 — phase 1 first, then phase 2
+and A11Y-19 and the public statement together — except the `:has()`
+restructure below, which was not done. Per-finding detail is on each
+finding's **Status:** line in §3.*
 
 ### Phase 1 — do next (high value, low risk, no public-claim change)
 
@@ -1207,10 +1341,16 @@ and screen-reader user.
 
 ## 6. Draft public accessibility statement
 
-For `docs/site/accessibility.md` when the operator approves it. Not
-created as a file by this memo. It states known limitations as they stand
-**before** any remediation; it must be revised in the same commit as the
-work it describes.
+**Superseded 2026-07-30 by the real page.** The draft below states known
+limitations as they stood **before** any remediation, and it required
+revision in the same commit as the work it describes — which is what
+happened. `docs/site/accessibility.md` now exists and differs from this
+draft in several places, all in the direction of claiming less: it does
+not claim conformance, it says plainly that no assistive technology has
+yet been used on the site, and it says that the filter's readout is
+something you can read rather than something you will be told, because
+whether a CSS-revealed live region announces has not been measured. The
+draft is kept here as written, unrevised, so the two can be compared.
 
 ```markdown
 # Accessibility
@@ -1309,19 +1449,30 @@ including what is not fixed yet.*
 
 ## 7. Open questions for the operator
 
+*Answered 2026-07-30 where marked. The questions themselves are kept as
+asked; the answers are appended, not substituted for them.*
+
 1. **The `:has()` restructure (§5, phase 2).** Rebuilding the filter on
    `:has()` fixes the tab wall, the missing group label, and the
    magnification gap together, and degrades to "show everything" on older
    engines. It is also a rewrite of the one interactive feature on the
    site. Worth doing, or is the phase-1 patch enough for now?
+   **Answered 2026-07-30: not now** — too large a change to fold into an
+   accessibility pass, and it carries browser-support consequences. Still
+   open as its own proposal; A11Y-18 stays open with it.
 2. **A11Y-12 verbosity.** "(opens in a new tab)" on 582 links per live
    page is conventional and satisfies the technique. Is that acceptable,
    or do you want a single page-level statement instead, accepting that
    it does not meet G201?
+   **Answered 2026-07-30: per-link, sitewide.** The verbosity is named on
+   the public statement as a known limitation, with an invitation to say
+   if it is too much — the question is not treated as settled, it is
+   published.
 3. **A11Y-11 verbosity.** Restoring the inclusion-rule description as
    audible text adds 104 spoken phrases to a digest page. The alternative
    is leaving the project's core accountability claim in a
    pointer-only tooltip. Which way?
+   **Answered 2026-07-30: restore it**, on the same terms as question 2.
 4. **Publishing a contact address.** The accessibility statement needs a
    reachable address. `docs/site/privacy.md` currently says the contact
    address "appears in every request our crawler makes and in the
@@ -1330,26 +1481,43 @@ including what is not fixed yet.*
    site's contact posture, and would also engage 3.2.6 Consistent Help
    (the link must appear in the same relative order in the nav on every
    page — `_site_nav` already does this).
+   **Answered 2026-07-30: publish it.** `hustleyourcity@gmail.com`, the
+   address already in `SECURITY.md`, is on the statement.
 5. **A11Y-19.** Approve the revised "No accounts, no forms" wording, or
    supply your own?
+   **Answered 2026-07-30: approved as drafted**, and live in
+   `docs/site/privacy.md`.
 6. **Publishing `/<date>.md`.** The statement's "Alternatives" section
    points at the canonical Markdown, which currently lives only in a
    private repository. Should `publish.build_site` copy the Markdown
    beside each HTML digest? It costs nothing, it is genuinely the easiest
    form for some readers, and it removes a claim we cannot presently
    support.
+   **Still open 2026-07-30** — it changes what the site publishes, which
+   is an operator call. The statement's Alternatives section points at
+   the repository copy, matching what `/agents.html` already says, rather
+   than at a file the site does not serve.
 7. **Minimum type size (beyond baseline).** Chips are 11.5 px and notes
    12.5 px. Both pass every AA criterion and both are small for the
    information they carry — the chips are the filter controls. Raising
    `.tag` to 0.8rem (12.8 px) and the notes to 0.875rem (14 px) would
    change the visual density of every page. Worth it?
+   **Still open 2026-07-30** — left unchanged. Both sizes pass AA, so
+   this is an aesthetic call on every page, not a conformance one.
 8. **`aria-current="page"`.** `_site_nav` omits the current page's own
    link. That is valid and preserves consistent ordering, but a rendered
    link marked `aria-current="page"` gives better orientation, especially
    for screen reader users arriving mid-site. Change, or leave?
+   **Answered 2026-07-30: change.** Every page now renders every nav
+   link, in identical order, with its own marked `aria-current="page"`.
+   Pinned by `test_nav_marks_the_current_page_instead_of_dropping_it`.
 9. **Who runs the manual tests in §2?** The three test classes need a
    human with the actual assistive technology. If that is not available
    in-house, the honest options are to hire it before the launch
    checklist clears, or to publish the statement with the
    "not yet fully tested" limitation stated plainly. The second is
    acceptable; silently omitting it is not.
+   **Answered 2026-07-30: the second, for now.** The public statement's
+   first known limitation is that no assistive technology has been used
+   on this site, and it names the specific pairings still owed. Who runs
+   them, and when, remains an operator decision.

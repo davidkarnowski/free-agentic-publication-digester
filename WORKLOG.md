@@ -17,6 +17,141 @@ Entry format:
 
 ---
 
+## 2026-07-30 18:49 PDT — The accessibility audit's remaining thirteen findings, and a public statement that had to be earned before it could be written (branch feature/accessibility-remediation-phase2)
+
+**Context:** `docs/accessibility.md` is a twenty-finding audit written
+against the live site, each finding carrying its success criterion, the
+exact function, and a measured drop-in replacement. An earlier pass took
+seven of them. This session took the remaining thirteen — A11Y-03, -04,
+-07, -08, -09, -11, -12, -13, -14, -15, -16, -17, -18 — plus the public
+statement in §6, which the memo itself says "must be revised in the same
+commit as the work it describes."
+
+**Work performed.** The two delicate ones first, because they touch the
+digest rendering path and the project's primary artifact.
+
+*A11Y-03, tables.* `display: block` on a `<table>` strips the table,
+row, and cell roles from the accessibility tree in Chrome and Firefox,
+so the four counts tables on a digest page were announced as a flat run
+of numbers with the headers gone — for a counts table, that is the
+numbers losing their labels entirely. A new `_accessible_tables` moves
+the horizontal-scroll job to a `.table-scroll` wrapper, which is also a
+focusable `role="region"` so a keyboard-only reader can scroll a wide
+table at all, and puts `scope="col"` on the header cells. It runs
+between the Contents strip and `_collapse_sections`, which keeps
+`_compact_meta`'s `<table>.*?Digest date.*?</table>` match ahead of it —
+the memo flags that ordering and it is real. One departure: the memo's
+`<th>` pattern is literal, so a column with alignment
+(`<th align="left">`, which the tables extension emits for `|:---|`)
+would have kept no scope; widened to `<th(?=[\s>])`. Checked on the real
+2026-07-29 page: 4 tables, 4 wrappers, 12 scoped header cells, zero bare
+`<th>`, and every generated `aria-labelledby` resolves to an id that
+actually exists on the page.
+
+*A11Y-04, headings and deep links.* Nothing renders `open`, and a closed
+`<details>` keeps its contents out of the accessibility tree — so a
+25-heading digest exposed two headings, and heading navigation, which is
+how most screen reader users move through a long document, did not work
+on the pages that most need it. The same markup broke deep links from
+the other end: the anchor id sat on the `<details>`, and the
+fragment-revealing algorithm opens a target's `<details>` *ancestors*,
+not the target, so `#2-legislation` scrolled to a section that stayed
+shut. Both are one change — the `<h2>` moves inside the `<summary>` and
+takes the id with it. The anchor strings are byte-identical to before,
+verified against the built page, so every deep link that existed still
+resolves and now opens what it points at. The duplicate `.sec-heading`
+that used to sit inside the body is gone from markup and stylesheet.
+
+The rest, briefly: outbound links now say "(opens in a new tab)" —
+inside `_externalize_links`, the single enforcement point code-standards
+§2 rule 9 names, so that rule is preserved rather than amended; the
+model-generated marker and the inclusion-rule description come out of
+`title=` tooltips (unavailable to keyboard, unavailable on touch) into
+visually-hidden text; the filter bar stops being a `<nav>` landmark it
+was never navigation in and becomes a labelled `role="group"` with a
+real `<h2>`, and the stream gets its own `<h2>` — the live page had
+exactly one heading for 400 KB of content; timestamps say they are
+observation times, in Eastern, spoken in full; bare-date links say what
+they are; chips get vertical padding to clear the 24 px target-size
+floor, and a `--control-border` token to clear the 3:1 boundary floor; a
+sitewide `:focus-visible` outline; a real forced-colors block; and CSS
+alternative text on the decorative triangles.
+
+**Two near-misses worth writing down.** The memo's `.sec-title::before`
+replacement is `content: "\25B8\00a0" / ""`. Pasted into `_STYLE`, which
+is not a raw string, `\25` is a Python **octal** escape — the served CSS
+got `\x15B8`, a control character, and the disclosure triangle would
+have silently disappeared from every section on every digest page. Tests
+caught it only because one asserted the literal. The backslashes are
+doubled now and the test says why in a comment. Separately, A11Y-09's
+chip padding and A11Y-10's `--control-border` want to live in the same
+rule, and the memo says in passing to place it *before* the branch-color
+block. That is load-bearing: `.filter-chip` and `.tag-branch-executive`
+have equal specificity, so a rule left in the filter section further
+down would have won on source order and overridden the branch chips'
+`currentColor` border — quietly undoing A11Y-10 while every test still
+passed. The ordering now has its own assertion.
+
+**A11Y-07, and what we will not claim.** Selecting a keyword changes the
+page from 291 items to 6 and nothing said so; the bar's "N item(s)
+unfiltered" is the before number and never moves. Both of the memo's
+script-free answers shipped: one pre-rendered span per keyword inside a
+`role="status"` region, revealed by a generated `:has()` rule, and a CSS
+counter over the items still displayed. What we cannot establish from
+here is whether a live region announces a child that changes from
+`display: none` to `display: inline` — Chrome and NVDA generally do,
+Safari and VoiceOver are inconsistent. So the public page says the
+readout is something you can read, not something you will be told. Note
+this is `:has()` for the readout only; the `:has()` restructure of the
+*filter* was not done.
+
+**Decisions.** `aria-current="page"` (memo open question 8): taken.
+`_site_nav` used to drop the current page's own link; every page now
+renders every link in identical order with its own marked — better
+orientation for a reader arriving mid-site, and consistent ordering is
+preserved either way. Type sizes (question 7): left alone; both pass AA,
+so raising them is an aesthetic call on every page and not ours.
+Publishing `/<date>.md` beside each digest (question 6): not done; it
+changes what the site publishes. The `:has()` restructure (question 1):
+not done, and A11Y-18 stays open with it — there is no fix for the
+magnification gap at the current DOM order, which the statement says
+plainly rather than omitting.
+
+**The statement.** `docs/site/accessibility.md` is built from the memo's
+draft and then rewritten against what actually landed, which meant
+claiming less in several places: it does not claim conformance, it says
+in its second paragraph that no assistive technology has been used on
+this site yet, it names the specific pairings still owed (NVDA/Firefox,
+JAWS/Chrome, VoiceOver on macOS and iOS, forced colors, voice control,
+400% magnification), and it names the verbosity of the per-link and
+per-rule announcements as a limitation with an invitation to say if it
+is too much — rather than treating the memo's own open question as
+settled by having shipped an answer to it. Files in `docs/site/` are
+picked up by `_build_doc_pages`, so it joined the nav, the sitemap, and
+llms.txt with no wiring; verified in a local build, including that its
+own nav entry carries `aria-current`.
+
+**Verified:** ruff clean; 372 pass, 7 skip (was 360/7) — 12 new tests,
+9 existing ones updated where they pinned structure this pass moved. The
+new tests cover the two risky changes specifically: that table semantics
+survive, that every digest heading is exposed and the anchor ids are
+unchanged, and that no `<th>` is left unscoped. Site rendered locally
+and inspected; `site/` reverted before commit and `git status` confirmed
+clean, per the evidence/code split in CLAUDE.md §8.
+
+**Open questions / next steps:** the manual assistive-technology pass is
+the only thing that can close the statement's first limitation, and it
+needs a human with the actual software. The `:has()` restructure is a
+proposal on its own, not an accessibility chore. Two governing-doc
+entries the memo suggests are still unwritten: a code-standards rule
+that presentation changes state their success criterion and keep a
+measured figure, and a CLAUDE.md §9 entry recording that `.filter-cb`'s
+`opacity: 0` is deliberate — a future agent "tidying" it to
+`display: none` would remove the filter from every keyboard and screen
+reader user at once.
+
+---
+
 ## 2026-07-30 12:38 PDT — Digest reimagined: plain-speak-first collapsed view, compact header, section tags live
 
 **Context:** Operator direction from the live screenshots: the header

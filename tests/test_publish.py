@@ -137,17 +137,20 @@ def test_digest_structure_transforms(digests, tmp_path):
 
     # tags -> chips, model keys labeled and visually distinct
     assert '<span class="tag tag-branch-legislative">legislative</span>' in page
-    assert 'class="tag tag-model" title="model-generated key">budget debate</span>' in page
+    assert ('class="tag tag-model" title="model-generated key">budget debate'
+            '<span class="vh"> (model-generated key)</span></span>') in page
 
-    # numbered section + glossary collapse; anchor id moves to details
-    assert '<details class="digest-section" id="1-congressional-floor-activity">' in page
-    assert '<details class="digest-section" id="glossary">' in page
+    # numbered section + glossary collapse; the anchor id rides the h2
+    # inside the summary, where a closed <details> still exposes it
+    assert '<details class="digest-section"><summary>' in page
+    assert ('<h2 class="sec-title" id="1-congressional-floor-activity">'
+            "1. Congressional Floor Activity</h2>") in page
+    assert '<h2 class="sec-title" id="glossary">Glossary</h2>' in page
     # summary carries title, chips, and the plain-speak blurb
-    summary = page.split('<details class="digest-section" id="1-congressional')[1]
-    assert '<span class="sec-title">1. Congressional Floor Activity</span>' in summary
+    summary = page.split('id="1-congressional-floor-activity"')[1]
     assert "The Senate debated the budget." in summary.split("</summary>")[0]
     # Day in Review stays un-collapsed
-    assert '<span class="sec-title">Day in Review</span>' not in page
+    assert 'class="sec-title" id="day-in-review"' not in page
 
 
 def test_digest_readability_classes(digests, tmp_path):
@@ -158,7 +161,8 @@ def test_digest_readability_classes(digests, tmp_path):
     page = (out / "2026-07-01.html").read_text()
     assert '<li class="plain"><span class="plain-label">In plain terms</span>' in page
     assert '<li class="rule-note">Included because: ' in page
-    assert '<span class="rule-id" title="floor item">CREC-SEL-01</span>' in page
+    assert ('<span class="rule-id" title="floor item">CREC-SEL-01'
+            '<span class="vh"> — floor item</span></span>') in page
     assert '<li class="source-note">Source: <a href=' in page
     assert "Included because: CREC-SEL-01 — floor item" not in page  # folded
     css = (out / "style.css").read_text()
@@ -179,8 +183,12 @@ def test_prev_next_navigation(digests, tmp_path):
     publish.build_site(digests, out)
     first = (out / "2026-07-01.html").read_text()
     second = (out / "2026-07-02.html").read_text()
-    assert '2026-07-02.html">2026-07-02' in first  # next
-    assert '2026-07-01.html">&larr; 2026-07-01' in second  # prev
+    # A11Y-16: out of a screen reader's link list these read as bare
+    # dates, so each states its purpose in visually-hidden text.
+    assert ('2026-07-02.html"><span class="vh">Digest for </span>2026-07-02'
+            in first)  # next
+    assert ('2026-07-01.html">&larr; <span class="vh">Digest for </span>'
+            "2026-07-01") in second  # prev
     assert 'href="index.html">All digests</a>' in first
 
 
@@ -339,7 +347,8 @@ def test_sources_page_grouped_sections_and_cards(digests, registry_root, tmp_pat
     # a card: linked name, chip + subtitle, description, folded registry record
     assert '<article class="src-card" id="src-gao-reports">' in page
     assert ('href="https://www.gao.gov/reports" target="_blank"'
-            ' rel="noopener noreferrer">GAO Reports</a>') in page
+            ' rel="noopener noreferrer">GAO Reports'
+            '<span class="vh"> (opens in a new tab)</span></a>') in page
     assert '<span class="tag tag-status-active">active</span>' in page
     assert "Legislative · Tier 1 · RSS feed · Government Accountability Office" in page
     assert "Audit and evaluation reports published on a daily feed." in page
@@ -504,8 +513,9 @@ def test_readme_badges_render_without_a_third_party_request(digests, tmp_path,
     assert 'src="http' not in page and 'src="//' not in page
     # ...but the badge still reads and still links, in a new tab
     assert ('<a href="https://deepwiki.com/owner/repo" target="_blank"'
-            ' rel="noopener noreferrer">Ask DeepWiki</a>') in page
-    assert ">Build</a>" in page
+            ' rel="noopener noreferrer">Ask DeepWiki'
+            '<span class="vh"> (opens in a new tab)</span></a>') in page
+    assert ">Build<span class=\"vh\"> (opens in a new tab)</span></a>" in page
     assert "image</p>" in page                        # empty alt keeps a word
     # no other page class regresses: the digest graphic (a local asset we
     # serve ourselves) still renders as an image
@@ -755,7 +765,7 @@ def test_build_today_renders_section_tag_chips_when_stored(conn, tmp_path):
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
     assert '<p class="today-chips">' in page
-    assert ">stock trading ban</span>" in page
+    assert ">stock trading ban<span class=\"vh\">" in page
     assert 'tag-model" title="model-generated discovery key"' in page
 
 
@@ -943,8 +953,10 @@ def test_local_time_is_additive_and_selfcontained(conn, tmp_path):
     # UTC is in the HTML, machine-readable, and stands alone
     # UTC in datetime= (machine-readable), Eastern on the face (the
     # publishers' clock): 11:30 UTC is 07:30 EDT.
-    assert (f'<time class="utc" datetime="{DATE}T11:30:00Z">07:30:00 ET'
-            "</time>") in page
+    assert (f'<time class="utc" datetime="{DATE}T11:30:00Z">'
+            '<span class="vh">Observed at </span>07:30:00'
+            '<span class="vh"> Eastern time</span>'
+            '<span aria-hidden="true"> ET</span></time>') in page
     assert 'Last updated <time class="utc"' in page
     # the script fetches nothing and stores nothing
     script = page[page.index("<script"):page.index("</script>")]
@@ -1128,8 +1140,10 @@ def test_blog_nav_link_on_every_page_class(digests, devnotes_root, tmp_path):
     for name in ("index.html", "2026-07-01.html", "agents.html",
                  "blog-launch.html"):
         assert 'href="blog.html">Blog</a>' in (out / name).read_text(), name
-    # ...except the index itself, which does not link to itself
-    assert 'href="blog.html">Blog</a>' not in (out / "blog.html").read_text()
+    # ...and the blog index links to itself too, marked as the current
+    # page rather than dropped, so nav order is identical everywhere
+    assert ('<a href="blog.html" aria-current="page">Blog</a>'
+            in (out / "blog.html").read_text())
 
 
 def test_blog_reaches_discovery_surfaces_not_record_surfaces(
@@ -1226,7 +1240,9 @@ def test_every_page_class_has_a_skip_link_and_main_landmark(conn, tmp_path):
     assert '<main id="main" tabindex="-1">' in today
     # and a second skip past the filter bank, to the stream itself
     assert 'href="#today-stream">Skip ' in today
-    assert '<ul class="today-list" id="today-stream"' in today
+    # the target is the stream's own heading (A11Y-13), not the bare <ul>
+    assert ('<h2 id="today-stream" tabindex="-1">Observed publications</h2>'
+            '<ul class="today-list">') in today
     assert today.index('href="#today-stream"') < today.index('id="today-stream"')
 
     (tmp_path / "d").mkdir()
@@ -1269,3 +1285,271 @@ def test_css_defects_found_by_the_audit_stay_fixed():
     assert ".rule-note, .source-note {" in css
     assert "li.rule-note, li.source-note { list-style: none; }" in css
     assert "border: 1px solid var(--border);" in css
+
+
+_TABLE_DIGEST = """# Daily Digest — 2026-07-05
+
+| | |
+|---|---|
+| **Digest date** | 2026-07-05 |
+
+## 1. Congressional Floor Activity
+
+| Chamber | Items |
+|---|---|
+| Senate | 2 |
+| House | 3 |
+
+- **An Item** — A summary sentence.
+  - Included because: CREC-SEL-01 — floor item
+
+## 2. Legislation
+
+Nothing today.
+"""
+
+
+def test_digest_tables_keep_their_semantics(digests, tmp_path):
+    """A11Y-03 (1.3.1, 2.1.1): `display: block` on a <table> removes the
+    table, row, and cell roles in Chrome and Firefox, so a counts table
+    is announced as a flat run of numbers with the headers gone. The
+    scroll job moves to a focusable labelled wrapper instead."""
+    (digests / "2026-07-05.md").write_text(_TABLE_DIGEST)
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "2026-07-05.html").read_text()
+    css = (out / "style.css").read_text()
+
+    # the table itself is a table again
+    assert "table {\n  border-collapse" in css
+    assert "display: block;\n  overflow-x: auto;" not in css
+    assert ".table-scroll { overflow-x: auto;" in css
+
+    # every remaining table sits in a focusable, named scroll region
+    assert page.count("<table>") == page.count('class="table-scroll"') == 1
+    assert ('<div class="table-scroll" role="region" tabindex="0"'
+            ' aria-labelledby="1-congressional-floor-activity"><table>') in page
+    # ...whose label is a heading id that still exists on the page
+    assert 'id="1-congressional-floor-activity"' in page
+    # header cells state which axis they head
+    assert '<th scope="col">Chamber</th>' in page
+    assert "<th>" not in page
+
+    # the compact-meta strip still ran first: its table is gone, not wrapped
+    assert '<div class="digest-meta">' in page
+    assert "Digest date</td>" not in page
+
+
+def test_every_digest_heading_is_exposed_and_deep_links_resolve(digests,
+                                                                 tmp_path):
+    """A11Y-04 (1.3.1, 2.4.6): a closed <details> keeps its contents out
+    of the accessibility tree, so a heading after the summary is not in
+    the heading list; and the fragment-revealing algorithm opens a
+    target's <details> ancestors, not the target, so an id on the
+    <details> scrolled to a section that stayed shut."""
+    (digests / "2026-07-05.md").write_text(_TABLE_DIGEST)
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "2026-07-05.html").read_text()
+
+    # the id string is unchanged, so existing deep links keep their form
+    for anchor in ("1-congressional-floor-activity", "2-legislation"):
+        assert f'<h2 class="sec-title" id="{anchor}">' in page
+        # ...and it is inside the summary, which a closed details exposes
+        head = page.split(f'id="{anchor}"')[0]
+        assert head.rsplit("<summary>", 1)[1] == '<h2 class="sec-title" '
+    # nothing carries the id on the <details> any more, and the duplicate
+    # heading that used to sit inside the body is gone
+    assert '<details class="digest-section" id=' not in page
+    assert "sec-heading" not in page
+    # exactly one element per section owns the anchor
+    assert page.count('id="2-legislation"') == 1
+
+
+def test_outbound_links_say_they_open_a_new_tab(digests, tmp_path, monkeypatch):
+    """A11Y-12 (3.2.5, technique G201): a new tab opened without notice
+    changes focus context with no announcement and stops Back working.
+    The notice rides in the one enforcement point, `_externalize_links`
+    (code-standards §2 rule 9), so no call site grows a second rule."""
+    from fapd import config as _config
+
+    monkeypatch.setattr(_config, "SITE_BASE_URL", "https://fapd.info")
+    body = ('<a href="https://www.govinfo.gov/x">official</a>'
+            '<a href="2026-07-01.html">yesterday</a>'
+            '<a href="#main">jump</a>'
+            '<a href="mailto:x@example.gov">write</a>')
+    page = publish._render_page("T", body, "", "canonical")
+
+    assert ('<a href="https://www.govinfo.gov/x" target="_blank"'
+            ' rel="noopener noreferrer">official'
+            '<span class="vh"> (opens in a new tab)</span></a>') in page
+    # same-site, fragment and mailto links are untouched — no false notice
+    for same_tab in ('<a href="2026-07-01.html">yesterday</a>',
+                     '<a href="#main">jump</a>',
+                     '<a href="mailto:x@example.gov">write</a>'):
+        assert same_tab in page, same_tab
+    assert page.count("(opens in a new tab)") == page.count('target="_blank"')
+    assert ".vh {" in publish._STYLE
+
+
+def test_link_purpose_is_stated_for_bare_date_links(conn, digests, tmp_path):
+    """A11Y-16 (2.4.4): `← 2026-07-28` and `2026-07-29 · 2026-07-28` are
+    bare dates in a screen reader's link list, which is how link
+    navigation presents them."""
+    from conftest import DATE
+
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "2026-07-02.html").read_text()
+    assert '<span class="vh">Digest for </span>2026-07-01' in page
+
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    today = (tmp_path / "today.html").read_text()
+    for link in re.findall(r'<a href="\d{4}-\d{2}-\d{2}\.html">(.*?)</a>',
+                           today):
+        assert link.startswith('<span class="vh">Digest for </span>'), link
+
+
+def test_nav_marks_the_current_page_instead_of_dropping_it(digests, tmp_path):
+    """Open question 8, resolved: every page renders every nav link in
+    the same order (3.2.3), and its own is marked aria-current rather
+    than omitted — orientation for a reader arriving mid-site."""
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    for name, href in (("index.html", "index.html"),
+                       ("agents.html", "agents.html"),
+                       ("about.html", "about.html")):
+        page = (out / name).read_text()
+        assert f'<a href="{href}" aria-current="page">' in page, name
+        assert page.count('aria-current="page"') == 1, name
+    # a digest page is not a nav destination, so nothing is current there
+    assert 'aria-current' not in (out / "2026-07-01.html").read_text()
+
+
+def test_today_filter_states_what_is_selected(conn, tmp_path):
+    """A11Y-07 (4.1.3): selecting a keyword changed what was on the page
+    and nothing said so — the bar's "N item(s) unfiltered" is the before
+    number and never moves. Two script-free readouts: which filters are
+    on, in words, and how many items survived, by CSS counter."""
+    from conftest import DATE
+
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+
+    assert '<p class="filter-status" role="status">' in page
+    assert '<span class="fs-none">No keyword filter is selected; all 2 ' in page
+    assert '<span class="fs-lead">Filtered to items tagged: </span>' in page
+    assert '<span class="fs-executive">executive </span>' in page
+    assert (".today-stream:has(#f-executive:checked) .fs-executive"
+            "{display:inline}") in page
+    # the count of what survives, from a counter the filter cannot fake
+    assert '</ul><p class="filter-count"></p></form>' in page
+    css = publish._STYLE
+    assert ".today-list > .today-item { counter-increment: shown; }" in css
+    assert '.filter-count::after { content: counter(shown)' in css
+    # still no second script
+    assert page.count("<script") == 1
+
+
+def test_filter_bar_is_a_labelled_group_with_headings(conn, tmp_path):
+    """A11Y-13 (1.3.1, 2.4.6): the bar was a <nav> landmark — a 58-control
+    form group is not navigation — and /today carried exactly one heading
+    for 400 KB of content."""
+    from conftest import DATE
+
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+    assert ('<div class="filter-bar" role="group"'
+            ' aria-labelledby="filter-heading">') in page
+    assert '<h2 class="filter-lead" id="filter-heading">Filter by keyword' in page
+    assert '<h2 id="today-stream" tabindex="-1">Observed publications</h2>' in page
+    assert "<nav class=\"filter-bar\"" not in page
+    # the sibling combinator the whole filter rests on still reaches the list
+    assert page.index("filter-cb") < page.index('class="filter-bar"')
+    assert page.index('class="filter-bar"') < page.index('class="today-list"')
+    assert ("#f-executive:checked ~ .today-list > .today-item:not(.k-executive)"
+            "{display:none}") in page
+
+
+def test_times_and_counts_carry_their_units(conn, tmp_path):
+    """A11Y-14 (1.3.1): a clock reading and two letters said nothing
+    about what the number was, and the observation-vs-publication
+    distinction the project cares about most was nowhere in the markup."""
+    from conftest import DATE
+
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+    assert '<span class="vh">Observed at </span>' in page
+    assert '<span class="vh"> Eastern time</span>' in page
+    assert '<span aria-hidden="true"> ET</span>' in page   # still visible
+    assert ('<span class="filter-n"><span class="vh">, </span>1'
+            '<span class="vh"> items</span></span>') in page
+
+
+def test_chips_meet_the_target_size_and_boundary_floors():
+    """A11Y-09 (2.5.8) and the plain-chip half of A11Y-10 (1.4.11): entry
+    chips computed 22.0 px tall and their boundary measured 1.34:1."""
+    css = publish._STYLE
+    assert "padding-top: 0.3rem; padding-bottom: 0.3rem;" in css
+    assert "--control-border: #868f99;" in css       # 3.22:1 vs --bg
+    assert "--control-border: #646f7a;" in css       # dark: 3.61:1
+    # the control-border rule must precede the branch block, or its equal
+    # specificity would beat currentColor and undo A11Y-10
+    assert css.index("border-color: var(--control-border)") < \
+        css.index(".tag-branch-legislative")
+    # the count no longer fades below threshold over a tinted chip: it
+    # inherits the chip's own (now compliant) text colour
+    filter_n = css.split(".filter-n {")[1].split("}")[0]
+    assert "opacity" not in filter_n
+
+
+def test_focus_and_forced_colors_have_author_answers():
+    """A11Y-17 (2.4.7) and A11Y-08: the only author focus style used to
+    be one generated rule on the filter chips, and in forced-colors mode
+    the accent fill is discarded, which is what carried selection."""
+    css = publish._STYLE
+    assert ":where(a, button, summary, [tabindex]):focus-visible {" in css
+    assert "outline: 3px solid var(--accent);" in css
+    forced = css.split("@media (forced-colors: active) {")[1].split("\n}")[0]
+    for rule in (".live-dot { outline: 1px solid CanvasText; }",
+                 ".skip-link { border: 2px solid CanvasText; }",
+                 ".today-disclosure { border: 1px solid CanvasText; }"):
+        assert rule in forced, rule
+    assert "outline: 3px solid Highlight;" in forced
+
+
+def test_generated_glyphs_are_not_spoken():
+    """A11Y-15 (1.1.1): CSS generated content reaches the accessibility
+    tree in Chrome and Safari, so `▸` was announced as "black
+    right-pointing small triangle" before every section title."""
+    css = publish._STYLE
+    # NB the stylesheet is not a raw string: these must survive into the
+    # served CSS as CSS escapes, not as Python octal escapes.
+    assert r'content: "\25B8\00a0" / "";' in css
+    assert r'content: "\25BE\00a0" / "";' in css
+    assert '.plain-label::after { content: ":" / ""; }' in css
+    # the selection check mark keeps NO alternative text on purpose: it
+    # is the one non-colour signal of selection, and `/ ""` reached
+    # Firefox only in late 2024 — an engine without it drops the whole
+    # declaration and the signal with it.
+    assert r'\2713\00a0" / ""' not in publish._STYLE
+
+
+def test_public_accessibility_statement_is_published():
+    """The statement is a site page like any other: docs/site/*.md is
+    picked up by `_build_doc_pages`, so it joins the nav, the sitemap,
+    and llms.txt with no extra wiring."""
+    from fapd import config
+
+    path = config.PROJECT_ROOT / "docs" / "site" / "accessibility.md"
+    if not path.exists():
+        pytest.skip("no docs/site on disk")
+    text = path.read_text(encoding="utf-8")
+    assert "hustleyourcity@gmail.com" in text          # a reachable address
+    assert "Known limitations" in text                 # named, not hidden
+    assert "NVDA" in text and "VoiceOver" in text      # the untested part
+    assert ("accessibility", "Accessibility") in publish._doc_page_index()
