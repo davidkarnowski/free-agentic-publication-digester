@@ -98,12 +98,12 @@ def _capture_probe(conn, source_id, url, resp):
     return provenance.capture(conn, doc_id, url, resp)
 
 
-def _fetch(client, conn, source_id, url, findings):
+def _fetch(client, conn, source_id, url, findings, params=None):
     """One probed fetch: outcome recorded in findings, body captured."""
     event = {"url": url, "outcome": None, "status": None}
     findings["fetches"].append(event)
     try:
-        resp = client.get(url)
+        resp = client.get(url, params=params)
     except RobotsDisallowedError:
         event["outcome"] = "robots_refused"
         doc_id = provenance.get_or_create_document(
@@ -142,20 +142,32 @@ def probe_source(client, conn, entry):
         "sample_item": None,
         "verdict": None,
     }
+    # Imported here, not at module scope: agencies imports parse_feed from
+    # this module. Gate 2 (GUIDE §3) promises the probe exercises the WHOLE
+    # ingestion chain, so it must enumerate through the same adapter the
+    # poll loop will use — otherwise a non-feed source probes as
+    # "unrecognized" and an API source probes as an unauthenticated 403,
+    # neither of which is what ingestion would actually see.
+    from . import agencies
+
     urls = entry.get("urls") or {}
-    start_url = urls.get("feed") or urls.get("index") or urls.get("home")
+    index_url = agencies.source_url(entry)
+    start_url = index_url or urls.get("home")
     if not start_url:
         findings["verdict"] = "no-url"
         return findings
+    adapter = agencies.adapter_for(entry)
+    findings["adapter"] = entry.get("adapter") or "rss"
 
-    resp = _fetch(client, conn, entry["id"], start_url, findings)
+    resp = _fetch(client, conn, entry["id"], start_url, findings,
+                  params=adapter.request_params() if start_url == index_url else None)
     if resp is None:
         findings["verdict"] = findings["fetches"][-1]["outcome"]
         return findings
 
     body = resp.content or b""
     ctype = resp.headers.get("Content-Type", "")
-    fmt, items = parse_feed(body)
+    fmt, items = adapter.items(body, ctype)
 
     # HTML page: try feed autodiscovery once.
     if fmt is None and "html" in ctype:
@@ -179,9 +191,21 @@ def probe_source(client, conn, entry):
             ),
             "newest": items[0] if items else None,
         }
-        # Verify the full ingestion chain with ONE sample article.
+        # Verify the full ingestion chain with ONE sample article — unless
+        # the adapter has already decided never to fetch one. Probing a
+        # page ingestion will never request spends a request (at gao.gov's
+        # 420-second crawl-delay, seven minutes of it) on bytes we have
+        # committed not to ask for; where the decision was made because the
+        # publisher refuses identified clients, it would also mean forcing
+        # what was refused (GUIDE §4).
         sample = next((i for i in items if i["link"]), None)
-        if sample:
+        if sample and not adapter.wants_article():
+            findings["sample_item"] = {
+                "title": sample["title"], "url": sample["link"],
+                "skipped": "adapter ingests index/feed metadata only"
+                           " (wants_article is False)",
+            }
+        elif sample:
             art = _fetch(client, conn, entry["id"], sample["link"], findings)
             if art is not None:
                 text = provenance.normalize_text(

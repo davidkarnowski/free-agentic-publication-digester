@@ -11,7 +11,9 @@ attributed titles (GUIDE §2 attributed-speech rule).
 
 import datetime as dt
 import hashlib
+import json
 import logging
+import re
 import xml.etree.ElementTree as ET
 from urllib.parse import parse_qs, urlsplit, urlunsplit
 
@@ -34,19 +36,34 @@ class SourceAdapter:
     capture, Wayback corroboration, storage. An adapter owns exactly five
     decisions, called in this order:
 
-    0. items(body, content_type) — index/feed bytes -> the item list.
-    1. stable_id(item)  — what makes two sightings the same document.
-    2. wants_article()  — fetch the article page, or feed metadata only.
-    3. extract_text(body, content_type, item) — served bytes -> plain text.
-    4. fallback_text(item) — what to store when no article is available.
+    0. request_params() — the query the index URL is fetched with.
+    1. items(body, content_type) — index/feed bytes -> the item list.
+    2. stable_id(item)  — what makes two sightings the same document.
+    3. wants_article()  — fetch the article page, or feed metadata only.
+    4. extract_text(body, content_type, item) — served bytes -> plain text.
+    5. fallback_text(item) — what to store when no article is available.
 
-    plus two class attributes naming what the source publishes:
-    COLLECTION (default "AGENCYPR") and DOC_TYPE (default "PRESS"). They
-    live on the adapter, not on the registry entry, so an entry can never
-    declare a collection its adapter does not actually produce — a
-    roll-call vote misfiled as AGENCYPR would enter the agency dating
-    rule, the agency accounting, and the executive-branch tagging, all of
-    which GUIDE §3 forbids for legislative record.
+    plus three class attributes naming what the source publishes:
+    COLLECTION (default "AGENCYPR"), DOC_TYPE (default "PRESS") and
+    DATED_BY_PUBLISHER (default False). They live on the adapter, not on
+    the registry entry, so an entry can never declare a collection its
+    adapter does not actually produce — a roll-call vote misfiled as
+    AGENCYPR would enter the agency dating rule, the agency accounting,
+    and the executive-branch tagging, all of which GUIDE §3 forbids for
+    legislative record.
+
+    DATED_BY_PUBLISHER answers "which day does this document belong to".
+    The default is the agency-newsroom answer (GUIDE §3 dating rule): the
+    federal publication day we observed it, because a newsroom publishes
+    same-day and a claimed date is the agency's assertion about mutable
+    web content. True is the govinfo answer, used where the publisher
+    prints an authoritative date and then publishes the record LATER:
+    Congress.gov posts a day's bill actions the following morning, so
+    dating those by observation would file every action under a day on
+    which nothing happened, and the section would be permanently empty.
+    Setting it True means a digest for an earlier day gains items when
+    re-rendered — exactly what CREC, FR and USCOURTS already do, and it
+    is disclosed the same way.
 
     STRUCTURED DETAIL CHANNEL. An adapter may put a JSON-serializable dict
     in item["extra"]; the loop stores it under metadata["details"], nested
@@ -85,6 +102,19 @@ class SourceAdapter:
 
     COLLECTION = "AGENCYPR"
     DOC_TYPE = "PRESS"
+    DATED_BY_PUBLISHER = False
+
+    def request_params(self):
+        """Query parameters for the index/feed fetch; empty by default.
+
+        Feeds take none. An API-backed source returns its page size, sort
+        order and credential here — and ONLY here: HttpClient redacts
+        `api_key` from what the fetch log records of a request's
+        parameters (GUIDE §4), while a key concatenated into the URL
+        string would be logged verbatim. Must not raise for reasons the
+        loop can handle; a missing key raises loudly by design
+        (code-standards §2 r9) and per-source crash isolation records it."""
+        return {}
 
     def items(self, body, content_type):
         """(format_name, [item]) from the fetched index/feed bytes.
@@ -413,11 +443,234 @@ class SenateVotesAdapter(SourceAdapter):
         return "\n".join(lines)
 
 
+# The chambers' own short forms, matching how the Senate's vote records
+# and the Congressional Record write a measure ("S.J.Res. 181"), and the
+# congress.gov URL slug for each. A bill type absent from these tables is
+# skipped rather than guessed at: a wrong slug is a citation that 404s.
+_BILL_DESIGNATIONS = {
+    "HR": "H.R.", "HJRES": "H.J.Res.", "HCONRES": "H.Con.Res.", "HRES": "H.Res.",
+    "S": "S.", "SJRES": "S.J.Res.", "SCONRES": "S.Con.Res.", "SRES": "S.Res.",
+}
+_BILL_SLUGS = {
+    "HR": "house-bill", "HJRES": "house-joint-resolution",
+    "HCONRES": "house-concurrent-resolution", "HRES": "house-resolution",
+    "S": "senate-bill", "SJRES": "senate-joint-resolution",
+    "SCONRES": "senate-concurrent-resolution", "SRES": "senate-resolution",
+}
+# Listing order within a day: House measures, then Senate, each in the
+# conventional bill-then-resolution sequence. It is a stable clerical
+# ordering, not a ranking — GUIDE §3 forbids a rule that prefers one
+# measure over another.
+BILL_TYPE_ORDER = tuple(_BILL_SLUGS)
+
+
+def _ordinal(n):
+    """119 -> '119th' (congress.gov's URL form). 11-13 take 'th'."""
+    if 11 <= n % 100 <= 13:
+        return f"{n}th"
+    return f"{n}{ {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
+
+
+class CongressBillActionsAdapter(SourceAdapter):
+    """Bill actions from the Congress.gov API (GUIDE §3 "Bill actions";
+    evidence gathered live through this client, 2026-07-31).
+
+    The endpoint (``/v3/bill``) enumerates the whole corpus — 429,331
+    records — newest-updated first, 250 to a page (the documented
+    maximum). Each record carries the measure's identity and its
+    ``latestAction``: a date and one sentence of plain legislative
+    English ("Committee on Finance. Ordered to be reported", "Motion to
+    proceed to consideration of measure rejected in Senate"). That
+    sentence IS the content, which is why wants_article() is False —
+    and, separately, why it must be: www.congress.gov answers 403 to our
+    identified client (verified 2026-07-31 on three bill pages), so
+    fetching the page we cite is refused. We ingest what the API offers
+    and never force what the website refuses (GUIDE §3 access hierarchy).
+    The cited link is still the human bill page, because a citation is
+    for a reader with a browser; the API URL would demand a key.
+
+    THREE THINGS ABOUT DATES, ALL MEASURED:
+
+    - ``updateDate`` is when the RECORD changed; ``actionDate`` is when
+      the thing happened. Of 250 records all updated 2026-07-31, actions
+      ranged from 1997 to 2026-07-30. Dating by updateDate would claim a
+      1997 action as today's news, so items() dates by ``actionDate``
+      and bounds itself to config.INDEX_LOOKBACK_DAYS.
+    - The record is published the morning AFTER the action: on
+      2026-07-31 the newest action anywhere on the page was 07-30 (97 of
+      them) and the bulk of a day's actions entered the API between
+      08:00 and 12:00 UTC the next day. Hence DATED_BY_PUBLISHER — see
+      the base class; dating these by observation would file every
+      action under a day on which nothing happened.
+    - ``sort`` is not optional and not safely defaulted. Sent as
+      ``updateDate+desc`` pre-encoded (so requests escapes the plus) the
+      service silently returned ASCENDING order — the oldest records in
+      the corpus, from 1995. It is passed here with a literal space so
+      urlencode produces the ``+`` the service means, and the resulting
+      order is asserted by reading the dates, never assumed.
+
+    IDENTITY is ``{bill}:{actionDate}``: a re-poll of an unchanged
+    record is the same item, a new action on the same bill is a new one.
+    The known cost, disclosed rather than papered over: the endpoint
+    exposes only the LATEST action, so two actions on the same bill on
+    the same day collapse to one item. The alternative — hashing the
+    action text into the identity — trades that under-count for the
+    risk of listing one event twice when the record's text is amended
+    (the Congressional Record citation is appended to action text after
+    the fact), and over-counting is the worse editorial failure."""
+
+    COLLECTION = "BILLACTIONS"
+    DOC_TYPE = "BILLACTION"
+    DATED_BY_PUBLISHER = True
+    FORMAT = "congress-bill-actions"
+    PUBLISHER = "Library of Congress"
+
+    # The documented maximum. One page per poll is the whole request
+    # cost: 749 bill records were updated across 2026-07-30 and 350 by
+    # 19:20 ET on 07-31, so a page of 250 carries roughly eight times the
+    # per-hour update rate the collector's hourly poll has to cover, and
+    # the loop's dedupe accumulates the day across polls. Walking the
+    # corpus is never worth a request — it is 1,717 pages of history the
+    # lookback window would discard.
+    PAGE_LIMIT = 250
+
+    BILL_PAGE = "https://www.congress.gov/bill/{congress}-congress/{slug}/{number}"
+
+    def request_params(self):
+        return {
+            "api_key": config.api_key(),  # redacted from the fetch log by the client
+            "format": "json",
+            "limit": self.PAGE_LIMIT,
+            # A literal space, NOT "+": urlencode writes the plus the
+            # service expects, and a pre-encoded "%2B" made it sort ascending.
+            "sort": "updateDate desc",
+        }
+
+    def wants_article(self):
+        return False  # the action sentence is the content; the page 403s us
+
+    def items(self, body, content_type):
+        try:
+            return self._parse(body)
+        except Exception as exc:  # noqa: BLE001 — items() must not raise
+            logger.warning("congress bill actions: payload unparsable: %r", exc)
+            return None, []
+
+    def _parse(self, body):
+        payload = json.loads((body or b"").decode("utf-8", "replace"))
+        bills = payload.get("bills") if isinstance(payload, dict) else None
+        if not isinstance(bills, list):
+            logger.warning("congress bill actions: response names no bill list")
+            return None, []
+
+        today = dt.date.fromisoformat(publication_date())
+        oldest = today - dt.timedelta(days=config.INDEX_LOOKBACK_DAYS)
+        out, skipped, out_of_window, seen = [], 0, 0, set()
+        for bill in bills:
+            built = self._item(bill) if isinstance(bill, dict) else None
+            if built is None:
+                skipped += 1
+                continue
+            day, item = built
+            if not oldest <= day <= today:
+                out_of_window += 1
+                continue
+            if item["guid"] in seen:
+                continue  # one page can carry a measure twice; identity decides
+            seen.add(item["guid"])
+            out.append(item)
+        out.sort(key=self._sort_key)
+        logger.info("congress bill actions: %d of %d record(s) carry an action in"
+                    " the %d-day window, %d outside it%s", len(out), len(bills),
+                    config.INDEX_LOOKBACK_DAYS, out_of_window,
+                    f", {skipped} unreadable (skipped)" if skipped else "")
+        return self.FORMAT, out
+
+    @staticmethod
+    def _sort_key(item):
+        extra = item["extra"]
+        raw = str(extra.get("bill_number") or "")
+        return (extra.get("action_date") or "",
+                BILL_TYPE_ORDER.index(extra["bill_type"]),
+                int(raw) if raw.isdigit() else 0, raw)
+
+    def _item(self, bill):
+        """(date, item) for one API record, or None if the record does not
+        establish a measure, an action and a readable action date. A record
+        we cannot date is skipped, never dated by observation: claiming
+        Congress acted today when the record does not say so is worse than
+        not listing it."""
+        action = bill.get("latestAction")
+        if not isinstance(action, dict):
+            return None
+        bill_type = str(bill.get("type") or "").strip().upper()
+        number = str(bill.get("number") or "").strip()
+        congress = str(bill.get("congress") or "").strip()
+        text = " ".join(str(action.get("text") or "").split())
+        if bill_type not in _BILL_SLUGS or not (number and congress.isdigit() and text):
+            return None
+        try:
+            day = dt.date.fromisoformat(str(action.get("actionDate") or "").strip())
+        except ValueError:
+            return None
+
+        designation = f"{_BILL_DESIGNATIONS[bill_type]} {number}"
+        title = " ".join(str(bill.get("title") or "").split())
+        link = self.BILL_PAGE.format(congress=_ordinal(int(congress)),
+                                     slug=_BILL_SLUGS[bill_type], number=number)
+        return day, {
+            "title": f"{designation} — {title}" if title else designation,
+            "link": link,
+            "guid": f"congress-action-{congress}-{bill_type.lower()}-{number}"
+                    f":{day.isoformat()}",
+            # Already ISO — report._claimed_day reads it, and it is the day
+            # this document is filed under (DATED_BY_PUBLISHER).
+            "claimed_date": day.isoformat(),
+            "description": text,
+            "description_chars": len(text),
+            "extra": {
+                "publisher": self.PUBLISHER,
+                "congress": congress,
+                "bill_type": bill_type,
+                "bill_number": number,
+                "designation": designation,
+                "bill_title": title,
+                "origin_chamber": str(bill.get("originChamber") or "").strip(),
+                "action_date": day.isoformat(),
+                "action_time": str(action.get("actionTime") or "").strip(),
+                "action_text": text,
+                "api_url": str(bill.get("url") or "").split("?")[0],
+                "record_updated": str(bill.get("updateDate") or "").strip(),
+            },
+        }
+
+    def fallback_text(self, item):
+        """The stored record. wants_article() is False, so this is what the
+        loop stores for every item, disclosed as mode "feed-only". Must not
+        raise and must never come back blank."""
+        extra = item.get("extra") or {}
+        lines = [item.get("title") or extra.get("designation") or "Bill action"]
+        for label, value in (
+            ("Congress", extra.get("congress")),
+            ("Originating chamber", extra.get("origin_chamber")),
+            ("Action recorded", " ".join(p for p in (extra.get("action_date"),
+                                                     extra.get("action_time")) if p)),
+            ("Action", extra.get("action_text") or item.get("description")),
+            ("Record updated", extra.get("record_updated")),
+        ):
+            if value:
+                lines.append(f"{label}: {value}")
+        lines.append(f"Source: {self.PUBLISHER} bill record via the Congress.gov API"
+                     f" ({extra.get('api_url') or item.get('link') or ''})".rstrip())
+        return "\n".join(lines)
+
+
 ADAPTERS = {
     "rss": SourceAdapter,
     "rss-feed-only": FeedOnlyAdapter,
     "usps": UspsAdapter,
     "senate-votes": SenateVotesAdapter,
+    "congress-bill-actions": CongressBillActionsAdapter,
 }
 
 
@@ -432,7 +685,7 @@ def source_url(entry):
 
 # Registry types the agency poll loop can ingest. Widened as adapters
 # arrive; kept here so the three call sites cannot drift apart.
-INGESTIBLE_TYPES = ("rss", "xml-index")
+INGESTIBLE_TYPES = ("rss", "xml-index", "api")
 
 
 def adapter_for(entry):
@@ -481,13 +734,31 @@ def _already_ingested(conn, package_id):
     ).fetchone() is not None
 
 
+def _issue_day(item, dated_by_publisher):
+    """The publication day this document belongs to.
+
+    Default: the federal publication day we observed it (GUIDE §3, amended
+    2026-07-30) — Washington's day, not UTC's, so an 8:30pm-Eastern release
+    belongs to that day and not to the next one UTC had already started.
+    Observation stamps stay UTC regardless.
+
+    DATED_BY_PUBLISHER adapters use the publisher's own date instead, the
+    way every govinfo collection does, because their publisher prints an
+    authoritative date and posts the record later. The ISO check mirrors
+    report._claimed_day's ISO branch exactly; a claim we cannot read falls
+    back to observation, which is the same honest fallback the dating rule
+    itself specifies."""
+    if dated_by_publisher:
+        raw = (item.get("claimed_date") or "").strip()
+        if re.match(r"^\d{4}-\d{2}-\d{2}$", raw[:10]):
+            return raw[:10]
+    return publication_date()
+
+
 def _store_item(conn, entry, item, package_id, text, mode, capture_id, wayback_url,
-                collection="AGENCYPR", doc_type="PRESS"):
+                collection="AGENCYPR", doc_type="PRESS", dated_by_publisher=False):
     now = utc_now_iso()
-    # The publication day is Washington's, not UTC's (GUIDE §3, amended
-    # 2026-07-30): an 8:30pm-Eastern release belongs to that day, not to
-    # the next one UTC had already started. Observation stamps stay UTC.
-    issued = publication_date()
+    issued = _issue_day(item, dated_by_publisher)
     conn.execute(
         "INSERT INTO packages (package_id, collection, date_issued, last_modified,"
         " title, package_link, first_seen_at, fetch_status, fetched_at)"
@@ -508,8 +779,6 @@ def _store_item(conn, entry, item, package_id, text, mode, capture_id, wayback_u
 
 
 def _metadata_json(entry, item, mode, capture_id, wayback_url):
-    import json
-
     meta = {
         "source_id": entry["id"],
         "url": item["link"],
@@ -535,6 +804,9 @@ def poll_source(client, wayback, conn, entry):
     if not feed_url:
         stats["feed_status"] = "no-feed-url"
         return stats
+    # Resolved before the fetch, not after: an API-backed source's query
+    # (page size, sort, credential) is the adapter's to state.
+    adapter = adapter_for(entry)
 
     state = conn.execute(
         "SELECT etag, last_modified FROM feed_state WHERE source_id = ?",
@@ -547,7 +819,8 @@ def poll_source(client, wayback, conn, entry):
         headers["If-Modified-Since"] = state["last_modified"]
 
     try:
-        resp = client.get(feed_url, headers=headers or None)
+        resp = client.get(feed_url, params=adapter.request_params(),
+                          headers=headers or None)
     except (RobotsDisallowedError, requests.RequestException) as exc:
         stats["feed_status"] = f"error:{type(exc).__name__}"
         stats["errors"] += 1
@@ -567,7 +840,6 @@ def poll_source(client, wayback, conn, entry):
     if resp.status_code == 304:
         stats["feed_status"] = "not-modified"
         return stats
-    adapter = adapter_for(entry)
     fmt, items = adapter.items(resp.content or b"",
                                resp.headers.get("Content-Type"))
     if fmt is None:
@@ -640,7 +912,8 @@ def poll_source(client, wayback, conn, entry):
             mode_used = "feed-only"
         _store_item(conn, entry, item, package_id, text, mode_used,
                     capture_id, wayback_url,
-                    collection=adapter.COLLECTION, doc_type=adapter.DOC_TYPE)
+                    collection=adapter.COLLECTION, doc_type=adapter.DOC_TYPE,
+                    dated_by_publisher=adapter.DATED_BY_PUBLISHER)
         stats["new_items"] += 1
         logger.info("%s: [%d/%d] ingested %r (%s)", entry["id"], position,
                     len(pending), item["title"][:70], mode_used)

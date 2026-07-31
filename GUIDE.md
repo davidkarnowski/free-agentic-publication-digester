@@ -115,7 +115,8 @@ reporting component must comply.
   a different subject there tomorrow. Reading order therefore reflects the
   order sections were added, not a hierarchy of importance; nothing in the
   digest ranks its own contents. **Recorded Votes** is the first section
-  added under this rule.
+  added under this rule; **Bill Actions** (§8, added the same day) is the
+  second.
 - **Separate the layers.** Raw data → extracted facts → summaries are stored
   as distinct artifacts. The summary layer can be regenerated or audited
   without re-fetching anything.
@@ -213,6 +214,46 @@ session. Ingestion is bounded to a lookback window
 (`config.INDEX_LOOKBACK_DAYS`); older votes are outside the window, not
 excluded by judgement, and the §3 dating rule governs what a given digest
 day lists exactly as it does for every other source.
+
+### Bill actions (added 2026-07-31)
+
+| Code | Collection | Why |
+|------|-----------|-----|
+| `BILLACTIONS` | Bill actions from the Library of Congress's bill-status record | What a chamber actually did with a bill on a given day — referred, reported, agreed to, rejected |
+
+`BILLS` carries the *text* of legislation as printed and `CREC` carries
+the floor *proceedings*; neither states, in a form a reader can count,
+what happened to a particular bill on a particular day. The Library of
+Congress publishes exactly that through the Congress.gov API: one dated,
+plain-language action per bill (*"Committee on Finance. Ordered to be
+reported"*, *"Motion to proceed to consideration of measure rejected in
+Senate"*). It is a discrete, dated, consequential act — the shape
+mechanical selection can include without judgement. **Selection is by
+existence, not by importance:** every bill action inside the window is
+listed, in bill-designation order, with no rule that could prefer one
+measure over another. The API is reached with the same api.data.gov key
+the govinfo client already holds, and the key rides in request
+*parameters* so §4's redaction keeps it out of the fetch log.
+
+**These items are dated by the publisher, not by observation.** The
+record dates each action by the day the chamber took it (`actionDate`)
+and publishes it the *following* morning: measured 2026-07-31, of the
+250 most recently updated bill records, 97 carried an action dated
+07-30 and **none** carried an action dated 07-31, and the bulk of a
+day's actions entered the API between 08:00 and 12:00 UTC the next day.
+Bill actions are therefore dated exactly as `CREC`, `FR` and `PLAW` are
+dated — by the publisher's own date, so a digest for day D lists the
+actions the record says happened on D — and *not* by the agency-newsroom
+dating rule above, which exists for a source class that publishes
+same-day. The lag is a standing disclosure in the section and under
+Known gaps, like the judicial publication lag it resembles.
+
+**An index is not a feed** applies here as it does to votes: the bill
+endpoint enumerates the entire corpus (429,331 records on 2026-07-31)
+in update-date order. Ingestion reads one page of the most recently
+updated records per poll and bounds itself to
+`config.INDEX_LOOKBACK_DAYS` by action date; anything older is outside
+the window, not excluded by judgement.
 
 ### Judicial branch coverage (amended 2026-07-25)
 
@@ -400,10 +441,21 @@ pages that block identified clients, script-rendered sites whose content
 lives in embedded JSON, report indexes instead of newsrooms. The pipeline
 absorbs this irregularity at **one seam**: the `SourceAdapter` abstraction
 (`agencies.py`). A registry entry may name an adapter (`adapter:` field;
-default `rss`), and the adapter owns exactly four decisions while the
+default `rss`), and the adapter owns exactly six decisions while the
 shared loop owns everything else (conditional GETs, robots, budgets,
 capture, provenance, storage, disclosure):
 
+0. **Enumeration** (`items`, added 2026-07-31) — how the fetched index
+   bytes become the item list, so a source that is not an RSS feed (an
+   XML index, a JSON API) reuses every invariant the loop owns. An
+   `items()` reading an index bounds itself to
+   `config.INDEX_LOOKBACK_DAYS`: a feed is bounded by its publisher, an
+   index is not.
+0a. **Request parameters** (`request_params`, added 2026-07-31) — the
+   query the index URL is fetched with, for sources whose directed
+   channel is an API: page size, sort order, and any credential. Keys
+   ride here and nowhere else, because §4's redaction operates on
+   parameters — a key pasted into a URL string would be logged.
 1. **Identity** (`stable_id`) — what makes two sightings the same
    document (feed GUID; else normalized URL).
 2. **Fetch posture** (`wants_article`) — full article fetch, or
@@ -522,7 +574,10 @@ All LLM prompts are code, versioned, and change through procedure:
 ### Secondary (later phases)
 
 - **Congress.gov API** (`api.congress.gov`, same api.data.gov key) — bill
-  status, actions, cosponsors, votes metadata.
+  status, actions, cosponsors, votes metadata. **Partly promoted
+  2026-07-31:** the `bill` endpoint is active and supplies the
+  `BILLACTIONS` collection above; committee meetings, nominations,
+  treaties and the beta House roll-call endpoint remain later phases.
 - **FederalRegister.gov API** — richer FR metadata (agencies, significance
   flags), no key required.
 

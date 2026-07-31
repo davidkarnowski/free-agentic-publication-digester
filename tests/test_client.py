@@ -134,6 +134,18 @@ def test_api_key_never_appears_in_fetch_log(tmp_path):
         assert "pageSize=10" in url  # non-secret params ARE logged
 
 
+def test_api_key_redaction_is_the_base_clients_rule(tmp_path):
+    """Not a govinfo-only concern: the agency client began carrying an
+    api.data.gov key on 2026-07-31 (Congress.gov), and GUIDE §4 says the
+    key is never in the log whichever client sends it."""
+    from fapd.client import AgencyClient, HttpClient
+
+    for cls in (HttpClient, AgencyClient):
+        shown = cls._redacted_params(
+            object.__new__(cls), {"api_key": "TESTKEY-abc123", "limit": 250})
+        assert shown == {"limit": 250}
+
+
 def test_every_attempt_is_logged(tmp_path):
     client, _, _ = make_client(tmp_path, [FakeResponse(500), FakeResponse()])
     client.get("collections")

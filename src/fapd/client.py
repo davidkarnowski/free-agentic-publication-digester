@@ -105,7 +105,16 @@ class HttpClient:
         return int(budget * (1.0 - config.EOD_BUDGET_RESERVE_FRACTION))
 
     def _redacted_params(self, params):
-        return dict(params or {})
+        """What the fetch log is allowed to record of a request's query.
+
+        `api_key` is stripped for EVERY client, not just the ones that
+        currently send one (GUIDE §4: nothing bypasses logging, and the
+        key is never in the log). This lives in the base because the rule
+        is about the secret, not about which subclass happens to carry
+        it: the agency client began sending an api.data.gov key on
+        2026-07-31 for Congress.gov, and a subclass-local redaction would
+        have leaked it until someone remembered to override this."""
+        return {k: v for k, v in (params or {}).items() if k != "api_key"}
 
     def _post_response(self, resp):
         """Called on non-retried responses before returning."""
@@ -316,9 +325,6 @@ class GovinfoClient(HttpClient):
             params = dict(parse_qsl(parts.query))
             params.pop("api_key", None)  # get() re-adds it; never trust echoed keys
             path = f"{parts.scheme}://{parts.netloc}{parts.path}"
-
-    def _redacted_params(self, params):
-        return {k: v for k, v in (params or {}).items() if k != "api_key"}
 
     def _hourly_ceiling(self):
         return config.MAX_GOVINFO_REQUESTS_PER_HOUR

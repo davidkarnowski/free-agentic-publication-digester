@@ -3712,3 +3712,118 @@ Two related findings from the same memo, not yet acted on: the ledger
 records failed calls with input_tokens 0, so any ceiling counted from it
 undercounts; and rule 14's wording does not say whether its ceiling was
 meant per run or per day. Both are recorded for the operator.
+
+## 2026-07-31 — Phase 3: the `api` adapter, and the day the record is published
+
+Phase 3 of the adapter plan, redirected by the operator away from the
+Federal Register (public-inspection documents are out of scope, and
+govinfo already supplies published FR, so the FR API added nothing) and
+onto **Congress.gov**. That redirect is the right one on coverage
+grounds alone: BILLS contributes zero summaries and seventeen
+counted-only packages on a normal day, and it carries the *text* of
+legislation while saying nothing about what a chamber did with it. Bill
+actions are discrete, dated, countable, and mechanically selectable —
+exactly the shape §2 can include without judgement.
+
+The adapter itself is small, and follows `SenateVotesAdapter` line for
+line: `items()` parses the JSON, emits one item per bill whose
+`latestAction.actionDate` falls inside `INDEX_LOOKBACK_DAYS`, bounds
+itself, and hands the loop structured fields through `item["extra"]`.
+`wants_article()` is False — the action sentence *is* the content.
+Identity is `{bill}:{actionDate}`, so a re-poll of an unchanged record
+is the same item and a new action is a new one. New collection
+`BILLACTIONS`, new digest section 8, appended under the §2 append-only
+rule; sections 1–7 keep their numbers. Zero LLM: every figure comes from
+the published record, the AGENCYPR/VOTES precedent.
+
+Four things the plan assumed turned out otherwise, all of them found by
+asking the live service rather than reading about it.
+
+**The key redaction the plan told me to rely on did not exist.**
+`_redacted_params` was a `GovinfoClient` override; `HttpClient`'s base
+returned every parameter verbatim, and `AgencyClient` inherited that. My
+own exploratory calls proved it: sixteen rows in the local fetch log
+carried the api.data.gov key in plaintext before the fix landed, and
+every request after it is clean (`https://api.congress.gov/v3/bill?
+format=json&limit=250&sort=updateDate+desc`, no key). Redaction moved
+down to the base class, where the rule belongs — it is about the secret,
+not about which subclass happens to carry one — and the sixteen rows
+were scrubbed in place afterwards.
+
+**A pre-encoded sort parameter silently reverses the sort.** Sent as
+`sort=updateDate%2Bdesc` (what `requests` does to a literal `+`) the
+service returned the *oldest* records in the corpus — bills from 1995,
+sorted ascending, with no error. Passed with a literal space it does
+what the documentation says. The order is now verified by reading the
+dates that came back, never assumed from the parameter that was sent.
+
+**One page per poll is right, but not for the stated reason.** The brief
+expected 250 records to cover a day comfortably. They do not: 749 bill
+records were updated across 2026-07-30, and 350 by 19:20 ET on 07-31.
+One page is still the correct request cost, because the collector polls
+hourly and the loop dedupes — 250 per poll against an observed ~31
+updates per hour is about eight times the headroom needed, and walking
+the corpus would be 1,717 pages of history the lookback window discards.
+The one loss case (a >250-update burst inside one poll interval) is
+disclosed in the registry notes rather than defended against.
+
+**And the one that changed the design: the record is published the
+morning after the action.** Of 250 records all updated on 2026-07-31,
+ninety-seven carried an action dated 07-30 and **not one** carried an
+action dated 07-31; slicing the day into four-hour windows put the
+arrival between 08:00 and 12:00 UTC the following day. The agency dating
+rule — file an item under the federal publication day we observed it —
+would therefore have filed every bill action under a day on which
+nothing happened, and section 8 would have rendered empty forever while
+the accounting counted everything as backfill. A feature that cannot
+ever display content is not a feature.
+
+So `SourceAdapter` gains `DATED_BY_PUBLISHER`, opt-in per adapter, and
+`BILLACTIONS` uses the publisher's own `actionDate` — which is not an
+exception but the *normal* case in this pipeline: CREC, FR, PLAW and
+USCOURTS are all dated by the publisher and all arrive after the fact.
+GUIDE §3's dating rule sits inside "Agency newsrooms" and was written
+for mutable web content that publishes same-day; extending it to a
+next-morning legislative record was the mistake, not the rule. The
+consequence — an earlier day's digest gaining items on re-render — is
+what USCOURTS already does, and it is disclosed the same way: a standing
+publication-lag line in the section and under Known gaps.
+
+That decision also removes an exclusion rule the brief expected. With
+items dated by their action date, a stored row's claimed date always
+equals the day it is filed under, so there is no observed-here-but-dated-
+there remainder for a `BILLACTIONS-EX-01` to name. Inventing one that
+can never fire would be accounting theatre. Anything older than the
+window was never ingested at all, and the section's own window statement
+says so.
+
+**A question for the operator, not a silent fix:** `senate-xml` dates
+its votes by observation, and if the Senate ever publishes a vote record
+after the day of the vote, section 7 has the same latent emptiness. The
+Senate appears to publish same-day, so it is probably fine — but nobody
+has measured it, and I am not re-dating a live source's stored history
+on a hunch.
+
+Two supporting changes. `SourceAdapter.request_params()` is a new seam
+(code-standards §1): the query the index URL is fetched with, which is
+where a credential goes and the only place it may go. And the probe
+became adapter-aware — it resolves the URL through `source_url()`,
+sends the adapter's parameters, enumerates through the adapter's
+`items()`, and skips the sample-article fetch when `wants_article()` is
+False. Gate 2 promises the probe exercises the *whole* ingestion chain;
+without this an API source probes as an unauthenticated 403 and an XML
+index probes as "unrecognized", neither of which is what ingestion sees.
+It also stops the probe spending seven minutes of gao.gov's crawl-delay
+on a page we have committed never to request.
+
+Verified live from a laptop, off the server's budget. Probe: `feed-ok`,
+107 of 250 records in window. Ingest: **three requests total** — one
+robots.txt (403, fail-open per RFC 9309), one 250-record page, and a
+second robots consult on the ingest run — 107 items stored, zero article
+fetches, zero errors, char_counts 291–872. The 2026-07-30 render shows
+97 bill actions, coverage `97 | 97 | 0 | 97 | 0`, reconciling; citations
+point at www.congress.gov bill pages, which answer 403 to our identified
+client (verified on three URLs) and are cited anyway, because a citation
+is for a reader with a browser and we never force what a site refuses.
+14 new tests; 454 pass. The rendered digest and manifest were reverted —
+this branch carries code, not evidence.

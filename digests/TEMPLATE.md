@@ -402,6 +402,27 @@ to this date).
 
 ---
 
+## 8. Bill Actions
+
+<!-- Appended as §8 under the GUIDE §2 append-only numbering rule; sections
+     1-7 keep their numbers. What the chambers did with individual measures,
+     as the Library of Congress's bill-status record states it (BILLACTIONS
+     collection, via the Congress.gov API), in bill-designation order, every
+     action in the window listed — selection by existence, not importance
+     (GUIDE §3 "Bill actions"). Dated by the publisher's actionDate, not by
+     observation; the record publishes a day's actions the following
+     morning, and that lag is restated under Known gaps. No exclusion rule:
+     the window bounds ingestion, so there is no dated-elsewhere remainder.
+     Zero LLM. -->
+
+- **[{designation} — {measure_title}]({congress_gov_bill_url})**
+  - Action: {action_text}
+  - {ordinal} Congress · originated in the {origin_chamber}
+  - Included because: BILLACTIONS-SEL-01 — {rule_description}
+  - Source: the Library of Congress's bill-status record via the Congress.gov API; the bill page is linked above
+
+---
+
 ## Terms Used Today
 
 <!-- Static, repo-versioned plain definitions of procedural terms; only
@@ -430,6 +451,7 @@ requests; last watermarks as listed in the header.
 | PLAW | {plaw_pkg_count} | {plaw_doc_count} | {plaw_summarized_count} | {plaw_counted_count} | {plaw_excluded_count} |
 | AGENCYPR | {agencypr_pkg_count} | {agencypr_doc_count} | {agencypr_summarized_count} | {agencypr_counted_count} | {agencypr_excluded_count} |
 | VOTES | {votes_pkg_count} | {votes_doc_count} | {votes_summarized_count} | {votes_counted_count} | {votes_excluded_count} |
+| BILLACTIONS | {billactions_pkg_count} | {billactions_doc_count} | {billactions_summarized_count} | {billactions_counted_count} | {billactions_excluded_count} |
 
 **Exclusion rules applied today:**
 

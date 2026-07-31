@@ -1,5 +1,7 @@
 """Agency ingestion tests: fakes only, no network."""
 
+import json
+
 import pytest
 
 from fapd import agencies, config, db
@@ -568,3 +570,162 @@ def test_senate_votes_ingest_stores_its_own_collection(env, senate_today):
     assert meta["claimed_published_at"] in ("2026-07-29", "2026-07-30")
     assert "channel" not in meta  # collect.py keys web-vs-email on its absence
     assert rows[0]["char_count"] == len(rows[0]["text"]) > 0
+
+
+# ---- Congress.gov bill actions (api adapter, GUIDE §3 bill actions) --------
+
+# Shapes copied from the live payload fetched 2026-07-31: latestAction is
+# the ONLY action exposed, and actionDate is unrelated to updateDate — a
+# record updated today can describe an action from 2014.
+BILL_PAYLOAD = json.dumps({
+    "pagination": {"count": 429331},
+    "bills": [
+        {"congress": 119, "type": "S", "number": "3010",
+         "title": "21st Century Dyslexia Act", "originChamber": "Senate",
+         "updateDate": "2026-07-31",
+         "url": "https://api.congress.gov/v3/bill/119/s/3010?format=json",
+         "latestAction": {"actionDate": "2026-07-30",
+                          "text": "Committee on Health, Education, Labor, and "
+                                  "Pensions. Ordered to be reported."}},
+        {"congress": 119, "type": "SJRES", "number": "199",
+         "title": "A joint resolution providing for congressional disapproval.",
+         "originChamber": "Senate", "updateDate": "2026-07-31",
+         "latestAction": {"actionDate": "2026-07-29", "actionTime": "13:46:00",
+                          "text": "Motion to proceed to consideration of measure "
+                                  "rejected in Senate by Yea-Nay Vote. 47 - 52."}},
+        {"congress": 119, "type": "HR", "number": "7831",
+         "title": "License to Drill Act", "originChamber": "House",
+         "updateDate": "2026-07-31",
+         "latestAction": {"actionDate": "2026-07-29",
+                          "text": "Committee on Energy and Natural Resources."}},
+        # updated today, but the action is from 2014 — outside the window
+        {"congress": 113, "type": "HR", "number": "83", "title": "An old bill.",
+         "originChamber": "House", "updateDate": "2026-07-31",
+         "latestAction": {"actionDate": "2014-07-16", "text": "Became Public Law."}},
+        # a shape we cannot date: skipped, never dated by observation
+        {"congress": 119, "type": "S", "number": "1", "title": "No date.",
+         "latestAction": {"text": "Something happened."}},
+    ],
+}).encode()
+
+
+class FakeCongress:
+    def __init__(self, payload=BILL_PAYLOAD):
+        self.payload, self.calls = payload, []
+
+    def get(self, url, params=None, headers=None):
+        self.calls.append({"url": url, "params": params})
+        return Resp(self.payload, headers={"Content-Type": "application/json"},
+                    url=url)
+
+
+def congress_entry():
+    return {"id": "congress-gov-api", "name": "Congress.gov API",
+            "type": "api", "adapter": "congress-bill-actions",
+            "urls": {"index": "https://api.congress.gov/v3/bill"}}
+
+
+@pytest.fixture
+def congress_today(monkeypatch):
+    """Freeze the publication day and supply a key the adapter can read."""
+    monkeypatch.setattr(agencies, "publication_date", lambda: "2026-07-31")
+    monkeypatch.setenv("GOVINFO_API_KEY", "TESTKEY-abc123")
+
+
+def test_bill_actions_are_bounded_and_dated_by_action_not_update(congress_today):
+    """updateDate is when the RECORD changed; actionDate is when the thing
+    happened. All five rows were updated today; only the three whose ACTION
+    falls inside INDEX_LOOKBACK_DAYS come back."""
+    fmt, items = agencies.CongressBillActionsAdapter().items(
+        BILL_PAYLOAD, "application/json")
+    assert fmt == "congress-bill-actions"
+    assert [i["extra"]["designation"] for i in items] == [
+        "H.R. 7831", "S.J.Res. 199", "S. 3010"]      # by action date, then type
+    assert [i["claimed_date"] for i in items] == [
+        "2026-07-29", "2026-07-29", "2026-07-30"]
+
+
+def test_bill_action_identity_changes_only_when_the_action_does(congress_today):
+    adapter = agencies.CongressBillActionsAdapter()
+    _fmt, items = adapter.items(BILL_PAYLOAD, "application/json")
+    guids = {i["extra"]["designation"]: i["guid"] for i in items}
+    assert guids["S. 3010"] == "congress-action-119-s-3010:2026-07-30"
+    moved = BILL_PAYLOAD.replace(b'"actionDate": "2026-07-30"',
+                                 b'"actionDate": "2026-07-31"')
+    _fmt, again = adapter.items(moved, "application/json")
+    assert "congress-action-119-s-3010:2026-07-31" in {i["guid"] for i in again}
+
+
+def test_bill_action_citation_is_the_public_bill_page(congress_today):
+    """The API URL would demand a key; a citation is for a reader with a
+    browser (GUIDE §2 cite everything)."""
+    _fmt, items = agencies.CongressBillActionsAdapter().items(
+        BILL_PAYLOAD, "application/json")
+    links = {i["extra"]["designation"]: i["link"] for i in items}
+    assert links["S. 3010"] == \
+        "https://www.congress.gov/bill/119th-congress/senate-bill/3010"
+    assert links["S.J.Res. 199"] == \
+        "https://www.congress.gov/bill/119th-congress/senate-joint-resolution/199"
+
+
+def test_ordinal_congress_numbers():
+    assert [agencies._ordinal(n) for n in (111, 112, 113, 119, 121, 122, 123)] == \
+        ["111th", "112th", "113th", "119th", "121st", "122nd", "123rd"]
+
+
+def test_unparsable_bill_payload_is_disclosed_not_raised():
+    """items() must not raise — the loop records 'unparsable' and discloses."""
+    adapter = agencies.CongressBillActionsAdapter()
+    assert adapter.items(b"<html>nope", "text/html") == (None, [])
+    assert adapter.items(b'{"error": "no key"}', "application/json") == (None, [])
+
+
+def test_bill_action_fallback_text_never_blank(congress_today):
+    adapter = agencies.CongressBillActionsAdapter()
+    _fmt, items = adapter.items(BILL_PAYLOAD, "application/json")
+    text = adapter.fallback_text(items[-1])
+    assert "S. 3010 — 21st Century Dyslexia Act" in text
+    assert "Ordered to be reported" in text
+    assert adapter.fallback_text({}).strip()      # must not raise on a bare item
+
+
+def test_bill_actions_ingest_dated_by_publisher(env, congress_today):
+    """The record publishes a day's actions the morning after; dating these
+    by observation would file every one under a day nothing happened on."""
+    client = FakeCongress()
+    stats = agencies.poll_source(client, None, env, congress_entry())
+    assert stats["feed_status"] == "congress-bill-actions:3"
+    assert stats["new_items"] == 3
+    assert stats["articles_fetched"] == 0          # wants_article() is False
+    assert len(client.calls) == 1                  # one page, no article fetches
+
+    # the key rides in params (where the client redacts it), never the URL
+    assert client.calls[0]["url"] == "https://api.congress.gov/v3/bill"
+    assert client.calls[0]["params"]["api_key"] == "TESTKEY-abc123"
+    assert client.calls[0]["params"]["sort"] == "updateDate desc"
+
+    rows = env.execute(
+        "SELECT p.date_issued, e.collection, e.doc_type, e.metadata"
+        " FROM extracted_texts e JOIN packages p USING (package_id)"
+        " ORDER BY p.date_issued, e.package_id").fetchall()
+    assert {r["collection"] for r in rows} == {"BILLACTIONS"}
+    assert {r["doc_type"] for r in rows} == {"BILLACTION"}
+    # filed under the day the chamber acted, not the day we polled (07-31)
+    assert [r["date_issued"] for r in rows] == ["2026-07-29", "2026-07-29",
+                                                "2026-07-30"]
+    meta = json.loads(rows[-1]["metadata"])
+    assert meta["mode"] == "feed-only"
+    assert meta["details"]["action_text"].startswith("Committee on Health")
+    assert "channel" not in meta  # collect.py keys web-vs-email on its absence
+
+
+def test_publisher_dating_is_opt_in_per_adapter(env):
+    """Agency releases keep the GUIDE §3 dating rule: they are filed under
+    the day we observed them, whatever the feed claims."""
+    assert agencies.SourceAdapter.DATED_BY_PUBLISHER is False
+    assert agencies._issue_day({"claimed_date": "2020-01-01"}, False) \
+        == agencies.publication_date()
+    assert agencies._issue_day({"claimed_date": "2020-01-01"}, True) == "2020-01-01"
+    # an unreadable claim falls back to observation, never to a guess
+    assert agencies._issue_day({"claimed_date": "whenever"}, True) \
+        == agencies.publication_date()

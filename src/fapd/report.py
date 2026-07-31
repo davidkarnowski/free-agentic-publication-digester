@@ -51,6 +51,10 @@ RULE_DESCRIPTIONS = {
     "VOTES-SEL-01": "recorded vote of this day in a chamber's own roll-call"
                     " record (every recorded vote is listed, in vote-number"
                     " order; selection is by existence, not importance)",
+    "BILLACTIONS-SEL-01": "action the Library of Congress's bill-status record"
+                          " dates on this day (every bill action in the window is"
+                          " listed, in bill-designation order; selection is by"
+                          " existence, not importance)",
     "USCOURTS-SEL-01": "appellate court opinion (all listed)",
     "USCOURTS-SEL-02": "national court opinion (all listed)",
     "FR-EX-01": "notices counted, not individually summarized",
@@ -259,7 +263,8 @@ def _coverage(conn, date):
     """
     pv = config.PROMPT_VERSION
     cov = {}
-    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR", "VOTES"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR", "VOTES",
+                 "BILLACTIONS"):
         cov[coll] = {
             "packages": _scalar(
                 conn,
@@ -327,6 +332,18 @@ def _coverage(conn, date):
     votes["excluded"] = len(votes_backfill)  # VOTES-EX-01 (dating rule)
     votes["counted"] = votes["units"] - votes["summarized"] - votes["excluded"]
     votes["rules"] = {"VOTES-EX-01": len(votes_backfill)}
+
+    # Bill actions carry no exclusion rule at all. Every action inside the
+    # lookback window is listed, and the collection is dated by the
+    # publisher (GUIDE §3 "Bill actions"), so a stored row's action date IS
+    # the day it is filed under — there is no observed-here-but-dated-there
+    # remainder for a rule to name. Anything older than the window was never
+    # ingested and is disclosed by the section's window statement, not by
+    # the accounting.
+    billactions = cov["BILLACTIONS"]
+    billactions["excluded"] = 0
+    billactions["counted"] = billactions["units"] - billactions["summarized"]
+    billactions["rules"] = {}
 
     notices = _scalar(
         conn,
@@ -646,6 +663,99 @@ def _votes_lines(conn, date):
              " captures preserved."),
             "",
         ]
+    lines += ["---", ""]
+    return lines
+
+
+def _billaction_sort_key(row):
+    """House measures then Senate, bill before resolution, by number —
+    the clerical ordering of a chamber's own calendar. It ranks nothing
+    (GUIDE §3: no rule may prefer one measure over another); rows whose
+    type the adapter did not recognise sort last, deterministically."""
+    from .agencies import BILL_TYPE_ORDER
+
+    details = row["_details"]
+    bill_type = str(details.get("bill_type") or "")
+    number = str(details.get("bill_number") or "")
+    order = (BILL_TYPE_ORDER.index(bill_type) if bill_type in BILL_TYPE_ORDER
+             else len(BILL_TYPE_ORDER))
+    return (order, 0 if number.isdigit() else 1,
+            int(number) if number.isdigit() else 0,
+            _one_line(row["title"] or ""))
+
+
+def _billaction_item_lines(row):
+    from .agencies import _ordinal
+
+    details = row["_details"]
+    url = row["_meta"].get("url")
+    title = _one_line(row["title"] or "") or details.get("designation") or "Bill action"
+    head = f"- **[{title}]({url})**" if url else f"- **{title}**"
+    lines = [head]
+    action = _one_line(details.get("action_text") or "")
+    if action:
+        lines.append(f"  - Action: {action}")
+    chamber = _one_line(details.get("origin_chamber") or "")
+    congress = _one_line(str(details.get("congress") or ""))
+    context = []
+    if congress.isdigit():
+        context.append(f"{_ordinal(int(congress))} Congress")
+    if chamber:
+        context.append(f"originated in the {chamber}")
+    if context:
+        lines.append("  - " + " · ".join(context))
+    lines.append("  - Included because: BILLACTIONS-SEL-01 — "
+                 + RULE_DESCRIPTIONS["BILLACTIONS-SEL-01"])
+    source = ("  - Source: the Library of Congress's bill-status record via the"
+              " Congress.gov API; the bill page is linked above")
+    if row["_meta"].get("wayback_url"):
+        source += f" · [independent archive]({row['_meta']['wayback_url']})"
+    lines.append(source)
+    return lines
+
+
+def _billactions_lines(conn, date):
+    """Section 8: bill actions from the Library of Congress's bill-status
+    record (GUIDE §3 "Bill actions"). Zero LLM — the action sentence is the
+    publisher's own. Appended as section 8 under the GUIDE §2 append-only
+    numbering rule; sections 1-7 keep their numbers."""
+    rows = [dict(r) for r in conn.execute(
+        """
+        SELECT e.title, e.agency, e.metadata
+        FROM extracted_texts e JOIN packages p USING (package_id)
+        WHERE e.collection = 'BILLACTIONS' AND p.date_issued = ?
+        """,
+        (date,),
+    )]
+    for row in rows:
+        try:
+            meta = json.loads(row["metadata"] or "{}")
+        except (TypeError, ValueError):
+            meta = {}
+        row["_meta"] = meta
+        row["_details"] = meta.get("details") or {}
+    lines = [
+        "## 8. Bill Actions",
+        "",
+        f"What the chambers did with individual measures on {date}, as the",
+        "Library of Congress's own bill-status record states it. Every action",
+        "in the ingestion window is listed, in bill-designation order:",
+        "selection is by existence, not by importance, and no rule here",
+        "prefers one measure over another. Section 2 lists the text of bills",
+        "published this day; this section lists what happened to them.",
+        "",
+        ("Publication lag: the record dates an action by the day the chamber"
+         " took it and publishes it the following morning, so this section"
+         " fills in after the day it describes has ended — the same lag the"
+         " judicial section carries, and it is restated under Known gaps."),
+        "",
+    ]
+    if not rows:
+        lines += ["No bill actions dated this day were observed.", ""]
+    for row in sorted(rows, key=_billaction_sort_key):
+        lines += _billaction_item_lines(row)
+    if rows:
+        lines.append("")
     lines += ["---", ""]
     return lines
 
@@ -1130,7 +1240,8 @@ def _coverage_lines(conn, date, cov, embedded_total):
         )
 
     rows = []
-    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR", "VOTES"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR", "VOTES",
+                 "BILLACTIONS"):
         d = cov[coll]
         units = "—" if coll == "BILLS" else str(d["units"])
         rows.append(
@@ -1212,6 +1323,16 @@ def _coverage_lines(conn, date, cov, embedded_total):
         gaps.append(
             "courts post opinions with delay; opinions filed on this date may"
             " appear in later syncs"
+        )
+    # Standing bill-action publication-lag disclosure (GUIDE §3 "Bill
+    # actions"): measured on activation, a day's actions enter the
+    # Congress.gov record the following morning, so a digest rendered at
+    # the end of its own day carries fewer of them than a later re-render.
+    if cov.get("BILLACTIONS", {}).get("units"):
+        gaps.append(
+            "the Library of Congress publishes a day's bill actions the"
+            " following morning; actions taken on this date may appear in"
+            " later polls"
         )
     known_gaps = "; ".join(gaps) + "." if gaps else "none identified."
 
@@ -1365,7 +1486,8 @@ def _validate_coverage(markdown, conn, date):
         raise ValidationError("Coverage Statement section is missing")
     section = markdown.split("## Coverage Statement", 1)[1]
     cov = _coverage(conn, date)
-    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR", "VOTES"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR", "VOTES",
+                 "BILLACTIONS"):
         match = re.search(rf"^\| {coll} \| (.+) \|$", section, re.MULTILINE)
         if match is None:
             raise ValidationError(f"coverage row for {coll} is missing")
@@ -1407,15 +1529,29 @@ def _validate_lexicon(markdown, conn, date):
         )
     ]
     # Agency release titles are attributed official speech, quoted verbatim
-    # in section 6, and measure titles are the chambers' own text quoted in
-    # section 7 (GUIDE §2: "Titles quoted verbatim are quoted, not
-    # endorsed") — the gate polices our prose, not the government's.
+    # in section 6, measure titles are the chambers' own text quoted in
+    # section 7, and bill titles in section 8 are the measure's own — many
+    # of them ("Historic Preservation…") carry words this gate bans in OUR
+    # prose (GUIDE §2: "Titles quoted verbatim are quoted, not endorsed").
+    # The gate polices our prose, not the government's.
     officials += [
         row[0]
         for row in conn.execute(
             "SELECT DISTINCT et.title FROM extracted_texts et"
             " JOIN packages p USING (package_id)"
-            " WHERE et.collection IN ('AGENCYPR', 'VOTES') AND p.date_issued = ?",
+            " WHERE et.collection IN ('AGENCYPR', 'VOTES', 'BILLACTIONS')"
+            " AND p.date_issued = ?",
+            (date,),
+        )
+    ]
+    # The action sentence is quoted verbatim too, and it quotes measure
+    # titles in turn ("Providing for consideration of H.R. …").
+    officials += [
+        row[0]
+        for row in conn.execute(
+            "SELECT DISTINCT json_extract(et.metadata, '$.details.action_text')"
+            " FROM extracted_texts et JOIN packages p USING (package_id)"
+            " WHERE et.collection = 'BILLACTIONS' AND p.date_issued = ?",
             (date,),
         )
     ]
@@ -1579,6 +1715,7 @@ def render(conn, date, out_dir=None):
     lines += _uscourts_lines(conn, date, items)
     lines += _agency_lines(conn, date)
     lines += _votes_lines(conn, date)
+    lines += _billactions_lines(conn, date)
     lines += _glossary_lines("\n".join(lines))
     lines += _coverage_lines(conn, date, _coverage(conn, date), embedded_total)
     lines += _methodology_lines(date, git_short)

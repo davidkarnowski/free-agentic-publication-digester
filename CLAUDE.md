@@ -151,6 +151,14 @@ uv run python scripts/sources_doc.py          # regenerate SOURCES.md after regi
   the Congress. An unbounded `items()` is a request-budget bomb on first
   activation, not a completeness win: the §3 dating rule excludes the tail
   as backfill anyway.
+- **Bill actions are dated by the publisher, agency releases are not**
+  (`SourceAdapter.DATED_BY_PUBLISHER`, GUIDE §3). Congress.gov publishes
+  a day's bill actions the *following* morning — measured 2026-07-31: 97
+  actions dated 07-30 on the page, zero dated 07-31 — so `BILLACTIONS`
+  rows are filed under their `actionDate` like every govinfo collection,
+  which is why a re-render of an earlier day gains items. Dating them by
+  observation, the way the §3 agency dating rule dates newsroom
+  releases, makes section 8 permanently empty. Do not "unify" the two.
 - **The registry keeps `unavailable` entries forever** — a refusal is
   accountability data; a success elsewhere never erases it.
 - **Empty-state digest sections render on purpose** (e.g. PLAW's "No
@@ -214,6 +222,11 @@ confirm-gate.
   with gate-3 notes; 23 stay planned with dated open-window notes.
 - **2026-07-30** — main-is-sacred branching + evidence exemption;
   agent-ops standards adopted from the operator's sibling projects.
+- **2026-07-31** — `api` adapter shipped against Congress.gov's `bill`
+  endpoint (not the Federal Register: the operator ruled
+  public-inspection documents out of scope, and govinfo already supplies
+  published FR). New `BILLACTIONS` collection, digest §8, publisher
+  dating, one request per poll, key redacted in `HttpClient`.
 - **2026-07-30** — Continuous ingestion: single supervisor daemon,
   fully-continuous mechanical layers, batched model layers, EOD-only
   compose; `/today` derived-only, canonical digest frozen at EOD.

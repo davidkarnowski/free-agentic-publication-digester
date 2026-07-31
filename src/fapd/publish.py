@@ -1804,6 +1804,7 @@ _TODAY_COLLECTION_LABELS = {
     "USCOURTS": "Judicial opinion",
     "AGENCYPR": "Agency announcement",
     "VOTES": "Recorded vote",
+    "BILLACTIONS": "Bill action",
 }
 
 
@@ -1812,13 +1813,13 @@ _TODAY_COLLECTION_LABELS = {
 _TODAY_BRANCH = {"CREC": "legislative", "BILLS": "legislative",
                  "PLAW": "legislative", "FR": "executive",
                  "USCOURTS": "judicial", "AGENCYPR": "executive",
-                 "VOTES": "legislative"}
+                 "VOTES": "legislative", "BILLACTIONS": "legislative"}
 _TODAY_DOC_TYPES = {
     "RULE": "final rule", "PRORULE": "proposed rule", "NOTICE": "notice",
     "PRESDOCU": "presidential document", "SENATE": "senate floor",
     "HOUSE": "house floor", "EXTENSIONS": "extensions of remarks",
     "DAILYDIGEST": "daily digest", "PRESS": "press release",
-    "ROLLCALL": "roll-call vote",
+    "ROLLCALL": "roll-call vote", "BILLACTION": "bill action",
 }
 
 

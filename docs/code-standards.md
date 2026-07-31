@@ -28,6 +28,7 @@ optional parameters are the whole pattern.**
 | `run_concurrent(client_factory=, wayback_factory=, conn_factory=)` | `src/fapd/agencies.py` |
 | `Supervisor(sources_builder=)` | `src/fapd/collect.py` — the source-health refresh, injectable so a test drives the cadence without rendering |
 | `SourceAdapter.items(body, content_type)` | `src/fapd/agencies.py` — the enumeration seam: a source's shape (feed, XML index, JSON API) is the adapter's business, the poll loop's invariants are not |
+| `SourceAdapter.request_params()` | `src/fapd/agencies.py` — the request seam: page size, sort order and any credential for the index fetch. Credentials go here and never into a URL string, because `HttpClient._redacted_params` is what keeps them out of the fetch log |
 | `stage_email(conn, entries=, mailbox_factory=, poll=)` | `scripts/run_pipeline.py` |
 | `db.connect(db_path=)` | `src/fapd/db.py` — tests use `tmp_path` DBs |
 | `Supervisor(...factories...)` | `src/fapd/collect.py` (continuous ingestion) |
@@ -161,3 +162,7 @@ them, with a dated line below. Date-only bumps without content review
 are forbidden.
 
 - 2026-07-30 — created (adoption push).
+- 2026-07-31 — §1 gains the `SourceAdapter.request_params()` row, added
+  with the `api` adapter (Congress.gov bill actions): the first source
+  whose index fetch carries a credential, and the reason `api_key`
+  redaction moved down to `HttpClient` where no subclass can forget it.

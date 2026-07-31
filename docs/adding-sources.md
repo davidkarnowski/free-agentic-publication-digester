@@ -33,10 +33,15 @@ could not or chose not to ingest.
    digest section, and the coverage statement. Which collection is the
    ADAPTER's decision, not the registry's (`SourceAdapter.COLLECTION` /
    `DOC_TYPE`): agency releases are AGENCYPR and render in section 6;
-   roll-call votes are VOTES and render in section 7. An entry can
-   therefore never declare a collection its adapter does not produce —
-   misfiling legislative record as AGENCYPR would subject it to the
-   agency dating rule and executive-branch tagging (GUIDE §3).
+   roll-call votes are VOTES and render in section 7; bill actions are
+   BILLACTIONS and render in section 8. An entry can therefore never
+   declare a collection its adapter does not produce — misfiling
+   legislative record as AGENCYPR would subject it to the agency dating
+   rule and executive-branch tagging (GUIDE §3). The adapter also decides
+   *which day* an item belongs to (`DATED_BY_PUBLISHER`): the day we
+   observed it, for newsrooms that publish same-day; the publisher's own
+   date where the record is printed with a date and posted later, as
+   Congress.gov does with bill actions (measured lag: one morning).
 5. **Re-evaluate** on failures or redesigns; status changes are worklog
    events.
 
@@ -63,6 +68,7 @@ only when one of four things genuinely differs:
 | `wants_article` | Fetch the page, or feed metadata only? | Article pages 403 identified clients → `False` (`rss-feed-only`) |
 | `extract_text` | How do served bytes become text? | Script-rendered site embedding JSON-LD `articleBody` → parse the embedded JSON (static parsing of bytes we were sent — never script execution, never browser impersonation) |
 | `fallback_text` | What to store with no article text? | Title + feed description, mode disclosed |
+| `request_params` | What query does the index fetch carry? | An API endpoint's page size and sort order — and its key, which rides here so `HttpClient` can redact it from the fetch log (GUIDE §4). Never build a key into a URL string |
 
 An adapter may also hand the loop structured, render-ready fields by
 putting a dict in `item["extra"]`; they are stored under
@@ -115,6 +121,18 @@ Lessons from the adapters built so far, in the order they will bite you:
   clock. Weigh what the feed already carries (GAO descriptions run ~4,000
   characters) against what the article adds, and say which you chose in
   the registry notes. Whatever the choice, the stored mode discloses it.
+- **"When the record changed" is not "when the thing happened."** Every
+  API-shaped source offers both, and they are not close: 250 Congress.gov
+  bill records all updated on 2026-07-31 carried actions dated anywhere
+  from 1997 to 2026-07-30. Date items by the *event* field and bound the
+  window by it too. Then ask the second question the first one hides —
+  **how long after the event is the record published?** Measure it before
+  choosing `DATED_BY_PUBLISHER`: Congress.gov posts a day's actions the
+  following morning, so dating those by observation would have filed
+  every action under a day on which nothing happened and left the section
+  permanently empty. Sort order deserves the same suspicion: a
+  pre-encoded `sort=updateDate%2Bdesc` came back silently ASCENDING,
+  handing us 1995. Read the dates you got; never assume the order you asked for.
 - **`extract_text` should be defensive; the loop makes failure honest.**
   A raising `extract_text` degrades that one item to `fallback_text` with
   mode `extract-fallback` (the raw capture is already stored — evidence

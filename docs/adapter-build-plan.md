@@ -191,9 +191,37 @@ have.
 **Congress.gov** reuses the adapter with a key — already in `.env` as
 `GOVINFO_API_KEY`, verified against `api.congress.gov/v3` on 2026-07-31. It
 must ride through `AgencyClient.get(url, params=…)` so the key is redacted in
-the fetch log (`_redacted_params`, `client.py:275-276`); GUIDE §4 requires it.
-Ship FR public inspection first; Congress.gov is a second registry entry
-against the same adapter.
+the fetch log (`_redacted_params`, `client.py`); GUIDE §4 requires it.
+
+**SHIPPED 2026-07-31** — `CongressBillActionsAdapter`, new collection
+`BILLACTIONS`, digest section 8, `congress-gov-api` active. Live run: 3
+requests total (robots + one 250-record page + one Wayback save), 102
+items ingested. Four plan/brief assumptions moved, all on measured
+evidence:
+
+- **The api_key redaction was not there to reuse.** `_redacted_params`
+  was a `GovinfoClient` override; the base returned every parameter
+  verbatim, so an agency-client key would have been logged. Redaction
+  moved down to `HttpClient`, where no subclass can forget it.
+- **One page per poll is right, but not because a day fits in one.**
+  749 records were updated across 2026-07-30. A page of 250 covers ~8x
+  the observed hourly update rate and the loop's dedupe accumulates the
+  day across hourly polls; pagination buys nothing at 24 polls a day.
+- **`sort` is load-bearing and silently fails.** Sent pre-encoded
+  (`updateDate%2Bdesc`) the service returned ASCENDING order — the
+  oldest records in the corpus, from 1995. Pass it with a literal space.
+- **The big one: the record is published the morning AFTER the action.**
+  Zero actions dated 07-31 appeared anywhere on 07-31; 97 dated 07-30
+  did, and a day's actions land between 08:00 and 12:00 UTC the next
+  day. Dating these by observation (the agency dating rule) would file
+  every action under a day on which nothing happened, leaving section 8
+  permanently empty. Hence `SourceAdapter.DATED_BY_PUBLISHER` — the
+  govinfo semantic, opt-in per adapter. **This is worth checking against
+  `senate-xml`, which dates votes by observation and may have the same
+  latent emptiness**; the Senate publishes same-day, so it is probably
+  fine, but nobody has measured it. Operator call, not a silent fix.
+
+The public-inspection entry is not built and is out of scope.
 
 ## Phase 4 — DCPD (independent of the adapter work)
 

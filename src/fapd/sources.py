@@ -47,7 +47,8 @@ URL_KEYS = ("collection", "feed", "index", "home", "signup")
 # entries dispatch by `sender`, never by adapter: their adapter value is
 # platform documentation (GUIDE §3), and absence is meaningful — it says
 # the platform is not yet known, so nothing may assume one.
-WEB_ADAPTERS = ("rss", "rss-feed-only", "usps", "senate-votes")
+WEB_ADAPTERS = ("rss", "rss-feed-only", "usps", "senate-votes",
+                "congress-bill-actions")
 EMAIL_PLATFORMS = ("govdelivery",)
 
 _KEBAB_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")

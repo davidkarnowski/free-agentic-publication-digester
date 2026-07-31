@@ -229,6 +229,7 @@ def test_render_structure(digest):
         "### 5.2 Counts by Court Category",
         "## 6. Agency Announcements",
         "## 7. Recorded Votes",
+        "## 8. Bill Actions",
         "## Coverage Statement",
         "## Methodology",
     ):
@@ -652,6 +653,96 @@ def test_banned_word_in_vote_title_is_masked(conn, tmp_path):
              title="A joint resolution on the historic landmark reserve.")
     md = report.render(conn, DATE, out_dir=tmp_path).read_text()
     assert "historic landmark reserve" in md
+
+
+def add_bill_action(conn, package_id, *, bill_type="S", number="3010",
+                    congress="119", title="21st Century Dyslexia Act",
+                    action="Committee on Finance. Ordered to be reported.",
+                    action_date=DATE, chamber="Senate", designation=None):
+    now = "2026-07-23T15:00:00Z"
+    designation = designation or f"{bill_type}. {number}"
+    url = ("https://www.congress.gov/bill/119th-congress/senate-bill/" + number)
+    conn.execute(
+        "INSERT INTO packages (package_id, collection, date_issued, last_modified,"
+        " first_seen_at, fetch_status) VALUES (?, 'BILLACTIONS', ?, ?, ?, 'fetched')",
+        (package_id, action_date, now, now))
+    conn.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection, doc_type,"
+        " title, agency, metadata, text, char_count, extracted_at, extractor_version)"
+        " VALUES (?, '', 'BILLACTIONS', 'BILLACTION', ?, 'Congress.gov API',"
+        " ?, 'body', 4, ?, 1)",
+        (package_id, f"{designation} — {title}",
+         json.dumps({"source_id": "congress-gov-api", "url": url,
+                     "claimed_published_at": action_date, "mode": "feed-only",
+                     "details": {"publisher": "Library of Congress",
+                                 "congress": congress, "bill_type": bill_type,
+                                 "bill_number": number, "designation": designation,
+                                 "bill_title": title, "origin_chamber": chamber,
+                                 "action_date": action_date, "action_text": action}}),
+         now))
+    conn.commit()
+
+
+def test_bill_actions_section(conn, tmp_path):
+    add_bill_action(conn, "PR-congress-gov-api-11111111")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "## 8. Bill Actions" in md
+    assert ("- **[S. 3010 — 21st Century Dyslexia Act]"
+            "(https://www.congress.gov/bill/119th-congress/senate-bill/3010)**") in md
+    assert "  - Action: Committee on Finance. Ordered to be reported." in md
+    assert "  - 119th Congress · originated in the Senate" in md
+    assert "BILLACTIONS-SEL-01 — action the Library of Congress" in md
+    assert "selection is by existence, not importance" in md
+    assert "- [8. Bill Actions](#8-bill-actions)" in md  # ToC
+    assert "| BILLACTIONS | 1 | 1 | 0 | 1 | 0 |" in md   # coverage reconciles
+    # the measured publication lag is a standing Known-gaps disclosure
+    assert "publishes a day's bill actions the following morning" in md
+
+
+def test_bill_actions_listed_in_designation_order(conn, tmp_path):
+    """House measures then Senate, bill before resolution, by number — a
+    clerical ordering, not a ranking (GUIDE §3)."""
+    add_bill_action(conn, "PR-congress-gov-api-aaaaaaaa", bill_type="SJRES",
+                    number="199", designation="S.J.Res. 199", title="Later.")
+    add_bill_action(conn, "PR-congress-gov-api-bbbbbbbb", bill_type="HR",
+                    number="7831", designation="H.R. 7831", title="First.",
+                    chamber="House")
+    add_bill_action(conn, "PR-congress-gov-api-cccccccc", bill_type="S",
+                    number="12", designation="S. 12", title="Middle.")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert md.index("H.R. 7831") < md.index("S. 12") < md.index("S.J.Res. 199")
+
+
+def test_bill_action_dated_another_day_is_not_this_digest(conn, tmp_path):
+    """These are dated by the publisher (GUIDE §3 "Bill actions"), so an
+    action from another day belongs to that day's digest — it is neither
+    listed nor counted here, and no exclusion rule pretends otherwise."""
+    add_bill_action(conn, "PR-congress-gov-api-dddddddd", number="5183",
+                    title="An action from earlier in the week.",
+                    action_date="2026-07-21")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "An action from earlier in the week." not in md
+    assert "| BILLACTIONS | 0 | 0 | 0 | 0 | 0 |" in md
+
+
+def test_bill_actions_empty_state_renders(digest):
+    """Empty sections are disclosure, not a bug (CLAUDE.md §9)."""
+    _path, md = digest
+    assert "## 8. Bill Actions" in md
+    assert "No bill actions dated this day were observed." in md
+    assert "| BILLACTIONS | 0 | 0 | 0 | 0 | 0 |" in md
+
+
+def test_banned_word_in_bill_title_and_action_is_masked(conn, tmp_path):
+    """A measure's title and the record's action sentence are the
+    government's own words, quoted not endorsed — the gate polices our
+    prose. Without masking, "Historic Preservation" would block the day."""
+    add_bill_action(conn, "PR-congress-gov-api-eeeeeeee", number="4242",
+                    title="Historic Preservation Fund Act",
+                    action="Referred to the Subcommittee on Landmark Sites.")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "Historic Preservation Fund Act" in md
+    assert "Subcommittee on Landmark Sites" in md
 
 
 def test_banned_word_in_agency_title_is_masked(conn, tmp_path):

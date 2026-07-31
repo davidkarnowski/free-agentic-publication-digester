@@ -77,7 +77,10 @@ def test_registry_seeds_expected_active_sources():
         "odni-news",
         # activated 2026-07-31 with the xml-index adapter: the first
         # non-feed web source, and the first VOTES-collection source:
-        "senate-xml"}
+        "senate-xml",
+        # activated 2026-07-31 with the api adapter: Congress.gov's bill
+        # endpoint, the first BILLACTIONS-collection source:
+        "congress-gov-api"}
 
 
 # ------------------------------------------------------------ coverage_stats --
@@ -113,7 +116,8 @@ def test_coverage_stats_per_tier_on_real_registry():
     # govinfo 5 + 7 S2 pilots + DOJ (07-28) + treasury/justice/USDA email
     # (07-30) + VA email (07-30 second wave) + SSA email (07-31 third wave)
     # + senate-xml roll-call votes (07-31, first xml-index source)
-    assert by_tier[1].get("active", 0) == 19
+    # + congress-gov-api bill actions (07-31, first api source)
+    assert by_tier[1].get("active", 0) == 20
 
 
 def test_coverage_stats_empty():
