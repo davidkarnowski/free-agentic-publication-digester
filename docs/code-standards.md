@@ -74,6 +74,17 @@ Deviations need an explicit comment explaining why.
    path that bypasses `_render_page`. Same-site links, fragments, and
    non-HTTP schemes (`mailto:`) keep default behavior.
 
+10. **The site ships no script except one** (operator request,
+   2026-07-30). Presentation is server-rendered and complete without
+   JavaScript; the single exception is `publish._LOCAL_TIME_JS`, which
+   appends the reader's local time beside already-rendered UTC stamps on
+   `/today.html`. Any new script must clear the same bar: inline (no
+   external resource), no network call, no storage or cookies, purely
+   additive to content that is already correct without it — and the
+   public privacy claims must be updated in the same commit. Interactive
+   presentation should reach for CSS first; the keyword filter's
+   `:target` pattern is the worked example.
+
 ## §3 Worked example — `stage_email`
 
 The three contracts, each pinned by a test through injected seams

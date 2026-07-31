@@ -355,6 +355,9 @@ li.source-note a { color: var(--muted); }
   font-family: ui-monospace, monospace; font-size: 0.78rem;
   color: var(--muted); margin-right: 0.35rem;
 }
+/* Local time is appended client-side beside the server-rendered UTC
+   stamp; with scripting off, the UTC stamp simply stands alone. */
+.localtime { color: var(--muted); font-size: 0.78rem; }
 .today-summary { margin: 0.2rem 0 0 2.4rem; font-size: 0.92rem; }
 .today-opening { color: var(--muted); }
 .today-chips { margin: 0.15rem 0 0.1rem; }
@@ -1109,7 +1112,9 @@ def _today_item_row(item):
     title = (item["title"] or "").strip() or item["package_id"]
     gran = item["granule_id"]
     cite = item["package_id"] + (f" / {gran}" if gran else "")
-    observed = html.escape((item["observed_at"] or "")[11:16])
+    stamp = item["observed_at"] or ""
+    observed = (f'<time class="utc" datetime="{html.escape(stamp)}">'
+                f'{html.escape(stamp[11:16])}Z</time>' if stamp else "")
     url = _today_official_url(item)
     title_html = (f'<a href="{html.escape(url)}">{html.escape(title)}</a>'
                   if url else html.escape(title))
@@ -1147,7 +1152,7 @@ def _today_item_row(item):
     keys = " ".join(f"k-{_slug(t)}" for t in _today_item_tags(item))
     return (
         f'<li class="today-item {keys}">'
-        f'<span class="today-time">{observed}Z</span> '
+        f'<span class="today-time">{observed}</span> '
         f"<strong>{title_html}</strong> "
         f'<span class="today-chips">{chips}</span>'
         f'<div class="today-item-meta">{meta}</div>{body}</li>'
@@ -1216,6 +1221,31 @@ def _today_filter_bar(facets, total):
     return "".join(anchors), bar, "".join(css)
 
 
+# The site's one script (operator request, 2026-07-30): UTC stamps are
+# server-rendered and complete on their own; this only APPENDS the
+# reader's local equivalent. Inline (no external resource, nothing to
+# block), no network, no storage, no cookies, no tracking — with
+# scripting off the page is exactly what it was before.
+_LOCAL_TIME_JS = """<script>
+(function () {
+  var f;
+  try {
+    f = new Intl.DateTimeFormat(undefined,
+      {hour: "2-digit", minute: "2-digit", timeZoneName: "short"});
+  } catch (e) { return; }
+  document.querySelectorAll("time.utc[datetime]").forEach(function (el) {
+    var d = new Date(el.getAttribute("datetime"));
+    if (isNaN(d)) { return; }
+    var s = document.createElement("span");
+    s.className = "localtime";
+    s.textContent = " (" + f.format(d) + ")";
+    el.after(s);
+  });
+})();
+</script>
+"""
+
+
 def build_today(conn, out_dir=None, date=None):
     """Render site/today.html + today.json from collect.today_status —
     mechanical, zero LLM, derived-only (never committed; gitignored).
@@ -1276,7 +1306,8 @@ def build_today(conn, out_dir=None, date=None):
         f"<h1>Today — {date} (in progress)</h1>",
         f'<p class="today-disclosure">{html.escape(_TODAY_DISCLOSURE)}</p>',
         intro,
-        (f'<p class="today-meta">Last updated {html.escape(now)} · '
+        (f'<p class="today-meta">Last updated <time class="utc"'
+         f' datetime="{html.escape(now)}">{html.escape(now)}</time> · '
          f"{len(status['items'])} item(s) observed so far · "
          f"{status['pending_llm']} item(s) awaiting model summary.</p>"),
     ]
@@ -1302,7 +1333,8 @@ def build_today(conn, out_dir=None, date=None):
     nav = ('<a href="index.html">All digests</a>'
            '<a href="sources.html">Sources</a>'
            '<a href="agents.html">For agents</a>')
-    head_extra = f"<style>\n{filter_css}</style>\n" if filter_css else ""
+    head_extra = (f"<style>\n{filter_css}</style>\n" if filter_css else "")
+    head_extra += _LOCAL_TIME_JS
     page = _render_page(f"Today (live) — {SITE_TITLE}", "".join(parts), nav,
                         "derived-only: not part of the committed record",
                         head_extra=head_extra)
@@ -1392,7 +1424,8 @@ work. Check the source guide for what is ingested today.
 
 ## Courtesy
 
-Everything is static — no auth, no JavaScript, no rate limiting. We ask
+Everything is static — no auth, no rate limiting, and nothing an
+agent needs to execute. We ask
 visiting agents the same courtesy our own crawler practices on government
 sites: identify honestly and use conditional requests. Fetching every
 page daily is entirely fine.

@@ -85,8 +85,9 @@ cited, coverage-accounted digest instead of crawling many official sites
 — and government servers get one paced, disciplined crawler instead of
 many. What agents get:
 
-- Stable digest URLs: `/<YYYY-MM-DD>.html`, static HTML, no JavaScript,
-  no authentication.
+- Stable digest URLs: `/<YYYY-MM-DD>.html`, static HTML, no scripts,
+  no authentication. (The live page adds one inline script that shows
+  timestamps in your local time; it loads nothing and records nothing.)
 - [`/llms.txt`](llms.txt) — a guide to what exists here and where.
 - [`/digests.json`](digests.json) — a machine-readable index of every
   digest, with canonical Markdown paths.

@@ -9,8 +9,13 @@ reused.
 
 - **No data collection.** No cookies, no analytics, no trackers, no
   fingerprinting, no advertising.
-- **No JavaScript.** Pages are static HTML; nothing executes in your
-  browser on our behalf.
+- **No tracking scripts.** The digest pages are pure static HTML. The
+  live page (`/today.html`) carries exactly one small inline script,
+  and all it does is display each timestamp in your local time beside
+  the published UTC time. It makes no network request, sets no cookie,
+  stores nothing, and reports nothing to us — the computation happens
+  in your browser and stays there. With JavaScript disabled the page is
+  identical minus the local-time hint.
 - **No accounts, no forms.** Nothing here accepts input, so nothing
   stores it.
 - **No third-party requests.** Pages load no external fonts, scripts,

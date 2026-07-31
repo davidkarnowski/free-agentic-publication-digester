@@ -218,7 +218,7 @@ page — is a derived, zero-model presentation layer, regenerable at any
 time without touching data or models. On the site, each digest renders
 as a collapsed, plain-speak-first view: section cards whose headers
 carry the title, tag chips, and the plain-language synopsis, expanding
-to the full record on demand — static HTML with no JavaScript.
+to the full record on demand — static HTML with no scripts.
 
 **The validation gate.** Before publication, each digest must pass four
 coded checks: every govinfo citation resolves to a stored record; the

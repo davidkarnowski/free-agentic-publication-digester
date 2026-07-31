@@ -299,7 +299,9 @@ glossary, the Coverage Statement, and a methodology footer. Sample:
 On the site, each digest renders as a collapsed, plain-speak-first
 view: section cards whose headers carry the title, tag chips, and the
 plain-language synopsis, expanding to the full record on demand —
-still static HTML, no JavaScript.
+still static HTML, no scripts. (The derived live page carries one
+inline script that renders timestamps in the reader's local time
+alongside UTC; it loads no external resource and stores nothing.)
 
 ---
 

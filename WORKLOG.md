@@ -2445,3 +2445,26 @@ whole day. today.json gained facets.tags (keyword -> count) and the
 fragment URL pattern; llms.txt documents both. Measured basis: today's
 290 items carry 58 distinct keywords, so the generated CSS is ~15 KB.
 356 tests.
+
+## 2026-07-30 — Local time beside UTC, and the honest cost of it
+
+Operator request: show readers their own local time next to the GMT
+stamps. This cannot be done without client-side code — so it is the
+first script the site has ever shipped, and it was built to earn that.
+UTC stamps are now `<time class="utc" datetime="...">` elements,
+server-rendered, machine-readable, and complete on their own; the
+script only appends a local equivalent in parentheses. It is inline (no
+external resource, nothing to block or track), makes no network call,
+sets no cookie, stores nothing, and runs only on the derived live page
+— digest pages and the index stay entirely script-free, pinned by test.
+With scripting off, the page is exactly what it was.
+
+The part that mattered more than the code: four public pages promised
+"no JavaScript," and that promise had to become true again rather than
+quietly rot. The privacy page now states precisely what the one script
+does and does not do; about, methods, the README, and the agents page
+are corrected in the same commit. Recorded as code-standards §2 rule 10
+with the bar any future script must clear — inline, no network, no
+storage, purely additive, privacy claims updated alongside — and a
+pointer to the keyword filter's :target pattern as the CSS-first
+precedent. 357 tests.

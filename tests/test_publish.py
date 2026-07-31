@@ -815,7 +815,11 @@ def test_today_filter_bar_is_pure_css_and_wired(conn, tmp_path):
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
 
-    assert "<script" not in page.lower()          # the whole point
+    # Filtering itself is script-free; the page's only script is the
+    # local-time enhancement, which is inline and loads nothing.
+    assert page.lower().count("<script") == 1
+    assert "<script src" not in page.lower()
+    assert "localtime" in page
     # every offered keyword: anchor before the bar, chip, and CSS rules
     for slug in ("k-legislative", "k-executive", "k-press-release"):
         assert f'<span class="filter-anchor" id="{slug}"></span>' in page
@@ -853,3 +857,29 @@ def test_today_filter_absent_on_an_empty_day(conn, tmp_path):
     page = (tmp_path / "today.html").read_text()
     assert "filter-bar" not in page and "<style>" not in page
     assert "No items observed yet" in page
+
+
+def test_local_time_is_additive_and_selfcontained(conn, tmp_path):
+    """The one script on the site only APPENDS a local equivalent beside
+    server-rendered UTC stamps: no external resource, no network, no
+    storage, and the page is complete with scripting off."""
+    from conftest import DATE
+
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+
+    # UTC is in the HTML, machine-readable, and stands alone
+    assert f'<time class="utc" datetime="{DATE}T11:30:00Z">11:30Z</time>' in page
+    assert 'Last updated <time class="utc"' in page
+    # the script fetches nothing and stores nothing
+    script = page[page.index("<script"):page.index("</script>")]
+    for forbidden in ("fetch(", "XMLHttpRequest", "localStorage", "cookie",
+                      "src=", "http://", "https://"):
+        assert forbidden not in script, forbidden
+    # other page classes stay script-free
+    (tmp_path / "d").mkdir()
+    (tmp_path / "d" / "2026-07-29.md").write_text("# Daily Digest\n\nBody.\n")
+    publish.build_site(digest_dir=tmp_path / "d", out_dir=tmp_path / "s")
+    assert "<script" not in (tmp_path / "s" / "2026-07-29.html").read_text()
+    assert "<script" not in (tmp_path / "s" / "index.html").read_text()
