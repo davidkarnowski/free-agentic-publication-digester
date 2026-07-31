@@ -43,7 +43,17 @@ work. Check the source guide for what is ingested today.</p>
   URL, and teaser. Poll this (or the Atom feed at <code>/feed.xml</code>) for new
   days; both are small.</li>
 <li><strong>Source guide:</strong> <code>/sources.html</code> — every federal source this pipeline
-  ingests, plans to ingest, or found unavailable, with method and status.</li>
+  ingests, plans to ingest, or found unavailable, with method and status,
+  plus what we actually received from each: items ingested over a trailing
+  window, their average and median length, the delivery mode, and how the
+  source's server answered our requests.</li>
+<li><strong>Source statistics:</strong> <code>/sources.json</code> — the same facts, machine-readable,
+  with the classification thresholds included so any health label can be
+  recomputed from the numbers beside it. Read these as <strong>a description of
+  our ingestion</strong>, not as a measurement of an agency: a 4xx or 5xx is a
+  server declining to return content, and why it declined is not visible
+  to us. This file is not part of the official record and must never be
+  cited as government publication.</li>
 <li><strong>Canonical Markdown</strong> for every digest lives in the public repository
   at
   <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">github.com/davidkarnowski/free-agentic-publication-digester<span class="vh"> (opens in a new tab)</span></a>
@@ -82,7 +92,7 @@ official source each item links to; cite FAPD for the aggregation and
 summaries. The pipeline's code is Apache-2.0.</p>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-07-31T16:55:50Z (UTC). Canonical source:
+  <p>Generated 2026-07-31T17:04:41Z (UTC). Canonical source:
   <code>GUIDE.md §1 (dual audience)</code> in the
   <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in

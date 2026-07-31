@@ -5,6 +5,7 @@
 #   Agent guide:  /agents.html
 #   LLM guide:    /llms.txt
 #   Machine index: /digests.json   Atom: /feed.xml
+#   Source stats:  /sources.json  (our ingestion, not the record)
 # /today.html is a PRELIMINARY live view; the dated digests are
 # the record.
 User-agent: *

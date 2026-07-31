@@ -349,6 +349,45 @@ li.source-note a { color: var(--muted); }
 }
 .tag-status-unavailable { border-style: dashed; }
 .tag-status-excluded { border-style: dotted; }
+/* Source health indicators. State is ALWAYS carried by three signals at
+   once — the word, a glyph, and the colour — because colour alone fails
+   1.4.1, grayscale printing, and forced-colors mode. Contrast measured
+   over the composited chip tint on both --card and --stripe, in both
+   themes: worst case 4.93:1 (delivering on stripe, light). The tint hue
+   stays constant across themes and only the text colour flips, the same
+   pattern the branch chips use. Quiet and no-data keep the plain --muted
+   chip and are distinguished by border style, because neither is an
+   observation of trouble and neither should look like one. */
+.tag-health-delivering {
+  background: rgba(26, 107, 60, 0.14); color: #1a6b3c;
+  border-color: currentColor;
+}
+.tag-health-degraded {
+  background: rgba(138, 75, 0, 0.14); color: #8a4b00;
+  border-color: currentColor;
+}
+.tag-health-no-response {
+  background: rgba(154, 42, 30, 0.14); color: #9a2a1e;
+  border-color: currentColor;
+}
+.tag-health-quiet { border-style: dashed; }
+.tag-health-no-data { border-style: dotted; }
+@media (prefers-color-scheme: dark) {
+  .tag-health-delivering { color: #6ee7a5; }
+  .tag-health-degraded { color: #fbbf24; }
+  .tag-health-no-response { color: #f7a394; }
+}
+.health-glyph { margin-right: 0.25em; }
+.src-stats {
+  margin: 0.5rem 0 0; padding: 0.45rem 0.7rem;
+  background: var(--stripe); border: 1px solid var(--border);
+  border-radius: 6px; font-size: 0.82rem;
+}
+.src-stats p { margin: 0.12rem 0; }
+.src-stat-label { color: var(--muted); }
+.src-unmeasured { color: var(--muted); }
+.health-lead { margin: 0.6rem 0; }
+.health-note { font-size: 0.82rem; color: var(--muted); }
 .today-disclosure {
   border: 1px solid var(--border); border-left: 3px solid var(--accent);
   padding: 0.6rem 0.85rem; font-size: 0.88rem; color: var(--muted);

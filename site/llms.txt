@@ -10,6 +10,7 @@
 - [Atom feed of digests](https://fapd.info/feed.xml)
 - [Today — live in-progress day, PRELIMINARY](https://fapd.info/today.html) (also /today.json, whose `facets.tags` gives keyword counts and whose items carry the same tags for client-side filtering. Items may change until the end-of-day gates freeze the dated digest)
 - [Source guide — what we ingest and why](https://fapd.info/sources.html)
+- [Source health and statistics, machine-readable](https://fapd.info/sources.json) (per source: items ingested over a trailing window and their per-day rate, average/median content length, delivery mode, our request outcomes by HTTP status class, and a health label with the thresholds that produced it, so any label can be recomputed from the numbers in the same file. These describe OUR INGESTION — items we recorded and requests we made — and are not a measurement of any agency or publisher. Not part of the official record; do not cite as government publication.)
 - [Blog — notes on how this project is built](https://fapd.info/blog.html) (commentary ABOUT the project: not digest content, not part of the official record, and not government publication. Cite it as commentary, never as a source for what the government did.)
 - [About this project](https://fapd.info/about.html)
 - [Accessibility](https://fapd.info/accessibility.html)
