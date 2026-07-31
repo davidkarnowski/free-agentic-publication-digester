@@ -138,7 +138,7 @@
   method: Would parse the current term's slip-opinion HTML index and fetch opinion PDFs, drafting syllabus-first (GUIDE §3 phase J2).
   status: planned
   added: "2026-07-26"
-  notes: "First planned non-govinfo primary source, admitted deliberately per GUIDE §3. Slip-opinion index is per-term; the stable .aspx alias should resolve to the current term (verify at activation). Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "First planned non-govinfo primary source, admitted deliberately per GUIDE §3. Slip-opinion index is per-term; the stable .aspx alias should resolve to the current term (verify at activation). Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 # ------------------------------------ planned: cabinet department newsrooms ----
 
@@ -154,7 +154,7 @@
   method: Would parse the press-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: State documents feeds at state.gov/rss-feeds; an indexed live feed exists at state.gov/rss-feed/department-press-briefings/feed/ (implying .../press-releases/feed/). Site soft-blocks some non-browser clients but served our identified client HTTP 200 in July — re-probe the /rss-feed/<category>/feed/ URLs. Email sibling registered 2026-07-29: state-week-email (partial: weekly newsletter, not the press-statement stream) (GUIDE §3 email class; the web status here is unchanged)."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: State documents feeds at state.gov/rss-feeds; an indexed live feed exists at state.gov/rss-feed/department-press-briefings/feed/ (implying .../press-releases/feed/). Site soft-blocks some non-browser clients but served our identified client HTTP 200 in July — re-probe the /rss-feed/<category>/feed/ URLs. Email sibling registered 2026-07-29: state-week-email (partial: weekly newsletter, not the press-statement stream) (GUIDE §3 email class; the web status here is unchanged). Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: treasury-newsroom
   name: Treasury Press Releases
@@ -215,7 +215,7 @@
   method: Would parse the press-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 404 at registered URL — path likely wrong or moved; correct URL and re-probe before concluding availability. URL recovered 2026-07-31 (operator machine, off the server budget): the department retired /pressreleases; its own newsroom page (doi.gov/news/newsroom) points at doi.gov/news, which answers HTTP 200 with the dated press-release index (newest 2026-07-31). The only feed the site advertises is https://www.doi.gov/feeds/content/36980/rss.xml — well-formed RSS, rebuilt today, and carrying ZERO items, so it is deliberately not registered as urls.feed: registering it would point the poller at a door that yields nothing while the index has the material. Left planned; ingestion waits on the html-index adapter, not on the publisher. Re-check the empty feed when that adapter lands — a working feed would be cheaper than parsing the index. Re-probe through scripts/check_sources.py, 2026-07-31: verdict html-only — HTTP 200, 67 KB, 6,508 characters of extracted index text, robots permitting."
+  notes: "Probed 2026-07-26: HTTP 404 at registered URL — path likely wrong or moved; correct URL and re-probe before concluding availability. URL recovered 2026-07-31 (operator machine, off the server budget): the department retired /pressreleases; its own newsroom page (doi.gov/news/newsroom) points at doi.gov/news, which answers HTTP 200 with the dated press-release index (newest 2026-07-31). The only feed the site advertises is https://www.doi.gov/feeds/content/36980/rss.xml — well-formed RSS, rebuilt today, and carrying ZERO items, so it is deliberately not registered as urls.feed: registering it would point the poller at a door that yields nothing while the index has the material. Left planned; ingestion waits on the html-index adapter, not on the publisher. Re-check the empty feed when that adapter lands — a working feed would be cheaper than parsing the index. Re-probe through scripts/check_sources.py, 2026-07-31: verdict html-only — HTTP 200, 67 KB, 6,508 characters of extracted index text, robots permitting. Probed 2026-07-31: registered URL returned 404 (https://www.doi.gov/pressreleases) — the publisher moved or retired it; not a refusal."
 
 - id: agriculture-newsroom
   name: USDA Press Releases
@@ -243,7 +243,7 @@
   method: Would query the Commerce.gov content API /news endpoint (api.data.gov key family) for new items.
   status: unavailable
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF) on the web index. Research 2026-07-28: Commerce publishes a content API at api.commerce.gov/api with a /news endpoint, documented at commerce.gov/data-and-reports/developer-resources/commercegov-api and in the official CommerceGov GitHub repo — a rung-1 door around the WAF. Staleness risk: repo changelog last touched Oct 2019. Re-probe the API with our api.data.gov key; status returns to unavailable if the API is dead. Email sibling registered 2026-07-29: commercial-service-email (partial: trade promotion only, not the press office) (GUIDE §3 email class; the web status here is unchanged)."
+  notes: "Probed 2026-07-26: HTTP 403 to honestly-identified automated client (WAF) on the web index. Research 2026-07-28: Commerce publishes a content API at api.commerce.gov/api with a /news endpoint, documented at commerce.gov/data-and-reports/developer-resources/commercegov-api and in the official CommerceGov GitHub repo — a rung-1 door around the WAF. Staleness risk: repo changelog last touched Oct 2019. Re-probe the API with our api.data.gov key; status returns to unavailable if the API is dead. Email sibling registered 2026-07-29: commercial-service-email (partial: trade promotion only, not the press office) (GUIDE §3 email class; the web status here is unchanged). Probed 2026-07-31: https://www.commerce.gov/news/press-releases answered 403 to our honestly-identified client. Recorded as a refusal."
 
 - id: labor-newsroom
   name: Labor News Releases
@@ -314,7 +314,7 @@
   method: Would parse the newsroom HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: education-newsroom
   name: Education Press Releases
@@ -329,7 +329,7 @@
   method: Would parse the press-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 404 at registered URL — path likely wrong or moved; correct URL and re-probe before concluding availability. Candidate correction: the pre-redesign /news/press-releases path. URL recovered 2026-07-31 (operator machine, off the server budget): the path is singular — /about/news/press-release, not /press-releases. It answers HTTP 200, robots permitting, with a dated index (three items on 2026-07-29/30). No RSS or Atom feed anywhere on the page and none autodiscovered, so there is nothing machine-readable to poll; left planned, awaiting the html-index adapter. Worth noting for a separate email entry: the page offers a GovDelivery subscription (public.govdelivery.com/accounts/USDE/signup/49108), which is the consent-maximal channel we already ingest for other departments. Re-probe through scripts/check_sources.py, 2026-07-31: verdict html-only — HTTP 200, 98 KB, 7,623 characters of extracted index text. ed.gov serves no robots.txt (HTTP 404), so nothing is disallowed."
+  notes: "Probed 2026-07-26: HTTP 404 at registered URL — path likely wrong or moved; correct URL and re-probe before concluding availability. Candidate correction: the pre-redesign /news/press-releases path. URL recovered 2026-07-31 (operator machine, off the server budget): the path is singular — /about/news/press-release, not /press-releases. It answers HTTP 200, robots permitting, with a dated index (three items on 2026-07-29/30). No RSS or Atom feed anywhere on the page and none autodiscovered, so there is nothing machine-readable to poll; left planned, awaiting the html-index adapter. Worth noting for a separate email entry: the page offers a GovDelivery subscription (public.govdelivery.com/accounts/USDE/signup/49108), which is the consent-maximal channel we already ingest for other departments. Re-probe through scripts/check_sources.py, 2026-07-31: verdict html-only — HTTP 200, 98 KB, 7,623 characters of extracted index text. ed.gov serves no robots.txt (HTTP 404), so nothing is disallowed. Probed 2026-07-31: registered URL returned 404 (https://www.ed.gov/about/news/press-releases) — the publisher moved or retired it; not a refusal."
 
 - id: va-newsroom
   name: VA News Releases
@@ -358,7 +358,7 @@
   method: Would parse the news-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 # --------------------------------------- planned: independent agencies ----
 
@@ -405,7 +405,7 @@
   method: Would poll the EDOCS RSS API (api2.fcc.gov, separate host from the www WAF) for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 403 on www.fcc.gov (WAF). Research 2026-07-28: FCC's own RSS documentation page (archived official copy read in full) documents an EDOCS RSS API on a different host — api2.fcc.gov/edocs/public/api/v1/rss/ (combined recent releases) plus per-docType feeds (News_Release, Order, Public_Notice, Statement, Report) and per-bureau feeds. Probe 2026-07-28: api2.fcc.gov answered HTTP 504 (gateway alive, upstream timed out) — not a block, possibly transient or a cold backend. Retry the probe on a later day before any verdict; also try the combined /rss/ endpoint."
+  notes: "Probed 2026-07-26: HTTP 403 on www.fcc.gov (WAF). Research 2026-07-28: FCC's own RSS documentation page (archived official copy read in full) documents an EDOCS RSS API on a different host — api2.fcc.gov/edocs/public/api/v1/rss/ (combined recent releases) plus per-docType feeds (News_Release, Order, Public_Notice, Statement, Report) and per-bureau feeds. Probe 2026-07-28: api2.fcc.gov answered HTTP 504 (gateway alive, upstream timed out) — not a block, possibly transient or a cold backend. Retry the probe on a later day before any verdict; also try the combined /rss/ endpoint. Probed 2026-07-31: https://api2.fcc.gov/edocs/public/api/v1/rss/docTypes/News_Release answered 504 (server-side error, not a refusal); re-probe later."
 
 - id: ftc-newsroom
   name: FTC Press Releases
@@ -463,7 +463,7 @@
   method: Would parse the news-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: fec-newsroom
   name: FEC Press Releases
@@ -477,7 +477,7 @@
   method: Would parse the updates HTML index (filtered to press releases) daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: the OpenFEC API (api.open.fec.gov, api.data.gov key we hold, 1,000 calls/hr documented) covers filings/candidates/committees and legal-enforcement data — a rung-1 complement to the press index, not a replacement for it."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: the OpenFEC API (api.open.fec.gov, api.data.gov key we hold, 1,000 calls/hr documented) covers filings/candidates/committees and legal-enforcement data — a rung-1 complement to the press index, not a replacement for it. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: gsa-newsroom
   name: GSA News Releases
@@ -491,7 +491,7 @@
   method: Would parse the news-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: opm-newsroom
   name: OPM News Releases
@@ -505,7 +505,7 @@
   method: Would parse the newsroom HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 # ------------------------------------------------------------ cross-branch ----
 
@@ -584,7 +584,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Fast channel: the official compilation of the same material arrives later via the planned govinfo DCPD collection. Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: site confirmed WordPress (~2-3 items/day); the platform's /feed/ convention may be live or disabled (the first Trump-era site disabled WP RSS) — one feed-URL check at probe settles it. For presidential documents specifically, the Federal Register API's public-inspection endpoint (see federal-register-api) is the structured, official near-same-day channel and may obviate scraping this site."
+  notes: "Fast channel: the official compilation of the same material arrives later via the planned govinfo DCPD collection. Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: site confirmed WordPress (~2-3 items/day); the platform's /feed/ convention may be live or disabled (the first Trump-era site disabled WP RSS) — one feed-URL check at probe settles it. For presidential documents specifically, the Federal Register API's public-inspection endpoint (see federal-register-api) is the structured, official near-same-day channel and may obviate scraping this site. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 # --------------------------------- planned: IG report aggregator (tier 1) ----
 
@@ -600,7 +600,7 @@
   method: "HTML index diff via AgencyClient (pending content evaluation); aggregator rule: every ingested item must cite the originating Inspector General as its origin, never oversight.gov itself."
   status: planned
   added: "2026-07-26"
-  notes: "Aggregator source class: content is republished, so digest citations must point to the originating IG. Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Aggregator source class: content is republished, so digest citations must point to the originating IG. Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 # --------------------------------- planned: financial regulators (tier 2) ----
 
@@ -631,7 +631,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: conflicting evidence on a GovDelivery-hosted press RSS (public.govdelivery.com/topics/USFDIC_26/feed.rss cited by an integration vendor, but the modern GovDelivery platform generally exposes no public per-topic RSS) — one probe of that URL settles both this source and the GovDelivery-pattern question for every agency marked 'GovDelivery to evaluate'. Separately, BankFind Suite API at api.fdic.gov/banks/docs offers structured bank data (not press). Email sibling registered 2026-07-29: fdic-email (GUIDE §3 email class; the web status here is unchanged)."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: conflicting evidence on a GovDelivery-hosted press RSS (public.govdelivery.com/topics/USFDIC_26/feed.rss cited by an integration vendor, but the modern GovDelivery platform generally exposes no public per-topic RSS) — one probe of that URL settles both this source and the GovDelivery-pattern question for every agency marked 'GovDelivery to evaluate'. Separately, BankFind Suite API at api.fdic.gov/banks/docs offers structured bank data (not press). Email sibling registered 2026-07-29: fdic-email (GUIDE §3 email class; the web status here is unchanged). Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: occ-news
   name: OCC News Releases
@@ -645,7 +645,7 @@
   method: Would poll the documented RSS suite (occ.gov/rss/index-rss.html) for news releases, bulletins, and alerts.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — but research 2026-07-28 found OCC documents an RSS index at occ.gov/rss/index-rss.html with separate feeds for News Releases, Bulletins, Alerts, and Public Service Announcements (Bulletins/Alerts add supervisory-guidance coverage beyond press). Capture exact feed URLs from that page at probe; upgrade type to rss on confirmation."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — but research 2026-07-28 found OCC documents an RSS index at occ.gov/rss/index-rss.html with separate feeds for News Releases, Bulletins, Alerts, and Public Service Announcements (Bulletins/Alerts add supervisory-guidance coverage beyond press). Capture exact feed URLs from that page at probe; upgrade type to rss on confirmation. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: cfpb-newsroom
   name: CFPB Newsroom
@@ -659,7 +659,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: cftc-press
   name: CFTC Press Releases
@@ -673,7 +673,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: ncua-news
   name: NCUA Press Releases
@@ -687,7 +687,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: fhfa-news
   name: FHFA News Releases
@@ -701,7 +701,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 # --------------------------- planned: other regulators/independents (tier 2) ----
 
@@ -717,7 +717,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: ferc-news
   name: FERC News Releases
@@ -745,7 +745,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: sba-newsroom
   name: SBA Newsroom
@@ -773,7 +773,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: ustr-press
   name: USTR Press Releases
@@ -787,7 +787,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: usps-newsroom
   adapter: usps
@@ -819,7 +819,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: fda-press
   name: FDA Press Announcements
@@ -848,7 +848,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: cms-newsroom
   name: CMS Newsroom
@@ -862,7 +862,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Email sibling registered 2026-07-29: cms-email (GUIDE §3 email class; the web status here is unchanged)."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Email sibling registered 2026-07-29: cms-email (GUIDE §3 email class; the web status here is unchanged). Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 # ----------------------------------- planned: Treasury component (tier 2) ----
 
@@ -878,7 +878,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Email sibling registered 2026-07-29: irs-email (GUIDE §3 email class; the web status here is unchanged)."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Email sibling registered 2026-07-29: irs-email (GUIDE §3 email class; the web status here is unchanged). Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 # ------------------------------------ planned: Justice components (tier 2) ----
 
@@ -894,7 +894,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Most FBI case news is published by field offices and by DOJ; the national index is a subset. Probed 2026-07-26: index reachable (HTTP 200); an autodiscovered feed (https://www.fbi.gov/news/press-releases/RSS) was fetched but the advertised feed did not parse as RSS/Atom; investigate."
+  notes: "Most FBI case news is published by field offices and by DOJ; the national index is a subset. Probed 2026-07-26: index reachable (HTTP 200); an autodiscovered feed (https://www.fbi.gov/news/press-releases/RSS) was fetched but the advertised feed did not parse as RSS/Atom; investigate. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: dea-press
   name: DEA Press Releases
@@ -938,7 +938,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "FEMA also posts per-disaster releases; the national index is a subset. Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "FEMA also posts per-disaster releases; the national index is a subset. Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: ice-newsroom
   name: ICE Newsroom
@@ -952,7 +952,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: cbp-newsroom
   name: CBP Media Releases
@@ -966,7 +966,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: tsa-press
   name: TSA Press Releases
@@ -980,7 +980,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: uscis-newsroom
   name: USCIS Newsroom
@@ -994,7 +994,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Email sibling registered 2026-07-29: uscis-email (GUIDE §3 email class; the web status here is unchanged)."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Email sibling registered 2026-07-29: uscis-email (GUIDE §3 email class; the web status here is unchanged). Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: uscg-news
   name: Coast Guard News Releases
@@ -1054,7 +1054,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 - id: noaa-news
   name: NOAA News Releases
@@ -1099,7 +1099,7 @@
   method: HTML index diff via AgencyClient (pending content evaluation)
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 # ------------------------------------ planned: Defense components (tier 2) ----
 
@@ -1344,7 +1344,7 @@
   method: Would poll the documented news-release feeds daily; the v2 API (api.bls.gov, registered key, 500 queries/day) is a later data extension.
   status: planned
   added: "2026-07-28"
-  notes: "Feeds page documented at bls.gov/feed (2026-07-28). Probe 2026-07-28: the guessed URL bls.gov/feed/news_release.rss returned 404 — the convention guess was wrong; robots and host are open (robots.txt HTTP 200, no block). Next step: fetch the bls.gov/feed documentation page itself through AgencyClient to read the exact feed URLs, then re-probe. Resolved 2026-07-31 (operator machine, off the server budget) by doing exactly that: bls.gov/feed/ answers HTTP 200 to our identified client and documents about 55 feeds, and NONE of them is an agency-wide news-release stream. The list is two families: ~42 per-program release feeds (empsit.rss, cpi.rss, ppi.rss, jolts.rss, ...) and ~13 *_latest.rss 'Latest Numbers' data feeds. Sampled evidence: empsit.rss is Atom, 12 items, every one with a guid and a date, ~259-character descriptions, linking to the real news-release pages — genuinely ingestible; bls_latest.rss is a single-item dashboard rollup with no guid, not a news stream. bls.gov/newsroom/ advertises no feed and autodiscovers none. So the correct registered address is the feed directory, not a feed: one registry entry cannot represent this source honestly. Left planned. The right shape is a fan-out — one entry per program feed, starting with the market-sensitive ones (empsit, cpi, ppi, jolts, eci, realer) — or a multi-feed adapter; either is a new-source decision, not a URL correction. Note for whoever picks it up: bls.gov returns 403 to unidentified fetchers but 200 to ours, so read its documentation through AgencyClient. Re-probe through scripts/check_sources.py, 2026-07-31: verdict html-only against the feed directory — HTTP 200, 66 KB, 7,591 characters — which is the accurate verdict, because the registered address is a catalogue of feeds and not a feed."
+  notes: "Feeds page documented at bls.gov/feed (2026-07-28). Probe 2026-07-28: the guessed URL bls.gov/feed/news_release.rss returned 404 — the convention guess was wrong; robots and host are open (robots.txt HTTP 200, no block). Next step: fetch the bls.gov/feed documentation page itself through AgencyClient to read the exact feed URLs, then re-probe. Resolved 2026-07-31 (operator machine, off the server budget) by doing exactly that: bls.gov/feed/ answers HTTP 200 to our identified client and documents about 55 feeds, and NONE of them is an agency-wide news-release stream. The list is two families: ~42 per-program release feeds (empsit.rss, cpi.rss, ppi.rss, jolts.rss, ...) and ~13 *_latest.rss 'Latest Numbers' data feeds. Sampled evidence: empsit.rss is Atom, 12 items, every one with a guid and a date, ~259-character descriptions, linking to the real news-release pages — genuinely ingestible; bls_latest.rss is a single-item dashboard rollup with no guid, not a news stream. bls.gov/newsroom/ advertises no feed and autodiscovers none. So the correct registered address is the feed directory, not a feed: one registry entry cannot represent this source honestly. Left planned. The right shape is a fan-out — one entry per program feed, starting with the market-sensitive ones (empsit, cpi, ppi, jolts, eci, realer) — or a multi-feed adapter; either is a new-source decision, not a URL correction. Note for whoever picks it up: bls.gov returns 403 to unidentified fetchers but 200 to ours, so read its documentation through AgencyClient. Re-probe through scripts/check_sources.py, 2026-07-31: verdict html-only against the feed directory — HTTP 200, 66 KB, 7,591 characters — which is the accurate verdict, because the registered address is a catalogue of feeds and not a feed. Probed 2026-07-31: registered URL returned 404 (https://www.bls.gov/feed/news_release.rss) — the publisher moved or retired it; not a refusal."
 
 - id: odni-news
   name: ODNI Newsroom
@@ -1359,7 +1359,7 @@
   method: Polls the ODNI press-release RSS feed daily; article pages are fetched and extracted, honoring the host's 10-second crawl-delay.
   status: active
   added: "2026-07-28"
-  notes: "RSS section documented at dni.gov/index.php/rss (2026-07-28, surfaced in search results). Probe 2026-07-28: the candidate feed path /index.php/rss/311-odni-news-feed returned 404 (10-byte response); host is open and its robots.txt sets a 10s crawl-delay (honored). Next step: fetch the /index.php/rss section page through AgencyClient to read the real feed URL, then re-probe. Resolved 2026-07-31 (operator machine, off the server budget), and the answer was bigger than a bad path: ODNI has left Joomla AND left the domain. Every /index.php/* address now 301s to archive.dni.gov, where it 404s, and www.dni.gov/newsroom/ redirects to www.odni.gov/newsroom/ — a WordPress site. The 404 was a whole-publisher migration our registry read as a broken link. Do not use the site-wide WordPress feed (odni.gov/feed/): it carries 532 items of which 371 are media-library /download/ attachments and several are bare offsite links to YouTube with empty descriptions. The category feed is the right door. Gate-3 coverage evaluation (2026-07-31, from the probe): https://www.odni.gov/newsroom/press-releases/feed/ answers HTTP 200 with well-formed RSS carrying 54 items — the entire press-release category since the site migration, 2025-02-12 through 2026-06-19 (43 in 2025, 11 in 2026), every one with a guid (the WordPress post id, /?p=NNNNN, so identity does not depend on URL shape) and an RFC 822 date, every link on odni.gov, none with an empty description. Descriptions average 344 characters — teaser length — but the sample article page extracted 8,082 characters, so this ingests at mode full rather than feed-only. What we will NOT see: the newsroom's sibling categories /newsroom/remarks/ and /newsroom/reports/, each presumably its own WordPress feed; those are separate registry entries if wanted, and their absence is the disclosed under-coverage here. Publication is sparse — the newest item at activation was six weeks old — so empty days are the source's normal state, not a fault. One-time activation cost to budget: the feed hands us all 54 items at once and the default adapter fetches each article page, so first ingest spends about 54 requests at this host's 10-second crawl-delay (~9 minutes of wall clock); the dating rule then excludes almost all of them as backfill under AGENCYPR-EX-01. Steady state is one conditional request a day. If the agency class is near its daily ceiling the budget will simply cut the backfill short and the next run resumes it — but prefer to activate on a day with headroom."
+  notes: "RSS section documented at dni.gov/index.php/rss (2026-07-28, surfaced in search results). Probe 2026-07-28: the candidate feed path /index.php/rss/311-odni-news-feed returned 404 (10-byte response); host is open and its robots.txt sets a 10s crawl-delay (honored). Next step: fetch the /index.php/rss section page through AgencyClient to read the real feed URL, then re-probe. Resolved 2026-07-31 (operator machine, off the server budget), and the answer was bigger than a bad path: ODNI has left Joomla AND left the domain. Every /index.php/* address now 301s to archive.dni.gov, where it 404s, and www.dni.gov/newsroom/ redirects to www.odni.gov/newsroom/ — a WordPress site. The 404 was a whole-publisher migration our registry read as a broken link. Do not use the site-wide WordPress feed (odni.gov/feed/): it carries 532 items of which 371 are media-library /download/ attachments and several are bare offsite links to YouTube with empty descriptions. The category feed is the right door. Gate-3 coverage evaluation (2026-07-31, from the probe): https://www.odni.gov/newsroom/press-releases/feed/ answers HTTP 200 with well-formed RSS carrying 54 items — the entire press-release category since the site migration, 2025-02-12 through 2026-06-19 (43 in 2025, 11 in 2026), every one with a guid (the WordPress post id, /?p=NNNNN, so identity does not depend on URL shape) and an RFC 822 date, every link on odni.gov, none with an empty description. Descriptions average 344 characters — teaser length — but the sample article page extracted 8,082 characters, so this ingests at mode full rather than feed-only. What we will NOT see: the newsroom's sibling categories /newsroom/remarks/ and /newsroom/reports/, each presumably its own WordPress feed; those are separate registry entries if wanted, and their absence is the disclosed under-coverage here. Publication is sparse — the newest item at activation was six weeks old — so empty days are the source's normal state, not a fault. One-time activation cost to budget: the feed hands us all 54 items at once and the default adapter fetches each article page, so first ingest spends about 54 requests at this host's 10-second crawl-delay (~9 minutes of wall clock); the dating rule then excludes almost all of them as backfill under AGENCYPR-EX-01. Steady state is one conditional request a day. If the agency class is near its daily ceiling the budget will simply cut the backfill short and the next run resumes it — but prefer to activate on a day with headroom. Probed 2026-07-31: registered URL returned 404 (https://www.dni.gov/index.php/rss/311-odni-news-feed) — the publisher moved or retired it; not a refusal."
 
 - id: cisa-advisories
   name: CISA Cybersecurity Advisories
@@ -1389,7 +1389,7 @@
   method: HTML index diff via AgencyClient (ofac.treasury.gov is a separate host from blocked home.treasury.gov; robots posture unprobed).
   status: planned
   added: "2026-07-28"
-  notes: "OFAC retired its RSS 2025-01-31 (own notice) in favor of GovDelivery email; the recent-actions HTML index remains. Separate-host robots verdict needed. Sanctions List Service API docs page timed out during research — recheck at probe."
+  notes: "OFAC retired its RSS 2025-01-31 (own notice) in favor of GovDelivery email; the recent-actions HTML index remains. Separate-host robots verdict needed. Sanctions List Service API docs page timed out during research — recheck at probe. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher."
 
 # ------------- 2026-07-28 multi-modal survey (docs/dvids-multimodal-*.md) ----
 
@@ -1956,4 +1956,4 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender hudoig@info.hudoig.gov). The signup page returns HTTP 403 to our identified client; recorded as observed, not evaded. Partial coverage for the department: hud-newsroom returns HTTP 403 to our identified client and the HUD-NEWS-L press listserv signup did not complete — the IG stream is oversight material, not the department's own announcements. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin. Gate-3 coverage evaluation (2026-07-31, from live delivery): 1 bulletin -> 1 item on 2026-07-30, mode email-full (avg 852 chars). DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage. Gate-3 coverage evaluation (2026-07-31, from live delivery): 4 bulletins -> 4 items on 2026-07-30, mode email-full (avg 1,602 chars). DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage. Gate-3 coverage evaluation (2026-07-31, from live delivery): 1 bulletin -> 1 item on 2026-07-31, mode email-full (avg 757 chars); the web channel is separately active but degraded. DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage. Gate-3 coverage evaluation (2026-07-31, from live delivery): 4 bulletins -> 4 items across 2026-07-30/31, mode email-full (avg 2,234 chars); SSA's web newsroom refuses our client, so this is the agency's only working path. DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage. Probed 2026-07-31: https://api2.fcc.gov/edocs/public/api/v1/rss/docTypes/News_Release answered 504 (server-side error, not a refusal); re-probe later. Probed 2026-07-31: registered URL returns 404 (https://www.doi.gov/pressreleases) — the publisher moved or retired it; the entry needs a corrected URL before it can be probed again. Not a refusal. Probed 2026-07-31: registered URL returns 404 (https://www.dni.gov/index.php/rss/311-odni-news-feed) — the publisher moved or retired it; the entry needs a corrected URL before it can be probed again. Not a refusal. Probed 2026-07-31: https://www.commerce.gov/news/press-releases answered 403 to our honestly-identified client, consistent with the host's 100% no-content rate in our fetch log. Recorded as a refusal; status moved to unavailable on this evidence. Probed 2026-07-31: registered URL returns 404 (https://www.bls.gov/feed/news_release.rss) — the publisher moved or retired it; the entry needs a corrected URL before it can be probed again. Not a refusal. Probed 2026-07-31: registered URL returns 404 (https://www.ed.gov/about/news/press-releases) — the publisher moved or retired it; the entry needs a corrected URL before it can be probed again. Not a refusal. Probed 2026-07-31: the feed parses (RSS, 10 items, all dated and with guids) but its newest item is 2026-04-21, three months stale, and the linked article returns 404. A working feed carrying stale items with broken citations is not ingestible; left planned. Probed 2026-07-31: the feed is reachable and well-formed but currently carries zero items. Nothing to ingest yet; re-probe. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Gate-3 coverage evaluation (2026-07-31, from the probe): the feed is live and current — 669 items, 668 carrying dates, newest 2026-07-27 — so the dating rule governs and the archive tail is backfill excluded under AGENCYPR-EX-01, not news. Descriptions average 268 characters, comparable to other active teaser sources, and article links resolve to a feed-request wrapper that yields no text to our client, so this ingests feed-only with the mode disclosed per item. The feed carries no guids, so identity comes from the link. Probed 2026-07-31 (operator machine, off the server budget): roll_call_lists/vote_menu_119_2.xml answers 200 with 123 KB of well-formed XML (<vote_summary>, congress/session elements). No key, no robots restriction on the path. Structured roll-call votes — the legislative record the digest is thinnest on. Blocked only on an xml-index adapter. Probed 2026-07-31: clerk.house.gov answers 200 for both the member-votes page and the /evs/<year>/index.asp roll-call index; robots.txt is absent (404), so nothing is disallowed. Per-vote XML lives under the same evs path. No key. Blocked only on an xml-index adapter. Probed 2026-07-31: the API answers 200 with no key (documents.json), and public-inspection-documents/current.json returned 114 documents on public inspection — material published before it formally appears in the Federal Register, which is a capability we do not have from any current source. Blocked only on an adapter. Probed 2026-07-31: api.congress.gov/v3 answers 200 with the api.data.gov key we already hold for govinfo, returning bill data. api.data.gov's manual states one key covers all participating APIs and Congress.gov points there for key usage. No new credential needed; blocked only on an adapter. Evaluated 2026-07-31, NOT probed: this publisher's documentation does not mention api.data.gov, uses an X-Api-Key header, and describes its own registration. A general statement about participating APIs is not this publisher saying our key applies, so no request was made. Needs its own key registration (operator action)."
+  notes: "Subscribed and confirmed 2026-07-29 (sender hudoig@info.hudoig.gov). The signup page returns HTTP 403 to our identified client; recorded as observed, not evaded. Partial coverage for the department: hud-newsroom returns HTTP 403 to our identified client and the HUD-NEWS-L press listserv signup did not complete — the IG stream is oversight material, not the department's own announcements. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin. Gate-3 coverage evaluation (2026-07-31, from live delivery): 1 bulletin -> 1 item on 2026-07-30, mode email-full (avg 852 chars). DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage. Gate-3 coverage evaluation (2026-07-31, from live delivery): 4 bulletins -> 4 items on 2026-07-30, mode email-full (avg 1,602 chars). DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage. Gate-3 coverage evaluation (2026-07-31, from live delivery): 1 bulletin -> 1 item on 2026-07-31, mode email-full (avg 757 chars); the web channel is separately active but degraded. DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage. Gate-3 coverage evaluation (2026-07-31, from live delivery): 4 bulletins -> 4 items across 2026-07-30/31, mode email-full (avg 2,234 chars); SSA's web newsroom refuses our client, so this is the agency's only working path. DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage."

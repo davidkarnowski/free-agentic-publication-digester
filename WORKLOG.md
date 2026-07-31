@@ -3443,3 +3443,33 @@ history, and forty sources' history is currently filed under the wrong
 name. Flagged for the operator rather than untangled in a phase whose
 whole point was to touch nothing but four `urls` maps.
 >>>>>>> 2c78183 (sources: recover four 404 registry addresses; ODNI turns out to have moved domains)
+
+## 2026-07-31 — The probe sweep filed 45 findings under one wrong name
+
+Phase 1's agent found it: the 2026-07-31 sweep appended every one of its
+findings — all forty-five — to `hud-oig-email`'s notes instead of to the
+entries they described. That entry grew to 12,799 characters of other
+sources' history while thirty-nine sources kept saying only "planned"
+with no explanation, which is the precise opposite of what the sweep was
+for. The registry stayed valid and the suite stayed green throughout, so
+nothing failed; the data was just quietly wrong.
+
+The cause was a regex. The notes matcher used `re.S`, which lets `.`
+cross newlines, so `- id: <sid>\n(?:  .*\n)*?  notes: "` could run past
+the target entry entirely and land on some later one. Written once and
+reused for three passes, it misfiled every pass the same way.
+
+Fixed by not using that shape at all: the entry's original notes came
+back from `c81ef72~1` in git history, and the findings were redistributed
+line-wise with explicit entry boundaries computed from the `- id:` lines,
+so a note physically cannot be written outside the entry it belongs to.
+Thirty-nine findings are now filed under their own names; the four
+entries Phase 1 repaired kept its newer notes rather than being
+overwritten with the older ones.
+
+Worth keeping as a lesson about this repository specifically: the
+registry is accountability data, and a bug that misfiles it is not
+detectable by any test we have — validation passes, rendering passes,
+counts are unchanged. Only a reader noticing one entry had swallowed the
+others would catch it. That argues for editing YAML structurally rather
+than textually next time this comes up.
