@@ -801,3 +801,55 @@ def test_external_link_rule_applies_to_digest_and_today_pages(conn, tmp_path,
     publish.build_site(digest_dir=tmp_path / "d", out_dir=tmp_path / "s")
     digest = (tmp_path / "s" / "2026-07-29.html").read_text()
     assert 'href="https://www.govinfo.gov/x" target="_blank"' in digest
+
+
+# ------------------------------------------------------ /today keyword filter --
+
+
+def test_today_filter_bar_is_pure_css_and_wired(conn, tmp_path):
+    """Approved design: anchors + chips + generated :target rules, one
+    keyword at a time, no JavaScript anywhere."""
+    from conftest import DATE
+
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+
+    assert "<script" not in page.lower()          # the whole point
+    # every offered keyword: anchor before the bar, chip, and CSS rules
+    for slug in ("k-legislative", "k-executive", "k-press-release"):
+        assert f'<span class="filter-anchor" id="{slug}"></span>' in page
+        assert f'href="#{slug}"' in page
+        assert (f"#{slug}:target ~ .today-list > .today-item:not(.{slug})"
+                "{display:none}") in page
+        assert f'#{slug}:target ~ .filter-bar a[href="#{slug}"]' in page
+    assert page.index('class="filter-anchor"') < page.index('class="filter-bar"')
+    assert page.index('class="filter-bar"') < page.index('class="today-list"')
+    # items carry their keyword classes
+    assert 'class="today-item k-legislative k-senate-floor"' in page
+    # counts, clear link, print guard
+    assert '<span class="filter-n">1</span>' in page   # each keyword on 1 item
+    assert 'class="filter-clear" href="today.html"' in page
+
+    import json
+    data = json.loads((tmp_path / "today.json").read_text())
+    assert data["facets"]["tags"]["executive"] == 1
+    assert data["facets"]["filter_url"] == "today.html#k-<slugified-tag>"
+
+
+def test_today_filter_caps_and_discloses(conn, tmp_path, monkeypatch):
+    """No silent caps: when the bar truncates it says so in place."""
+    from conftest import DATE
+
+    _seed_today(conn)
+    monkeypatch.setattr(publish, "MAX_FILTER_KEYWORDS", 2)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+    assert "Showing the 2 most common of" in page
+
+
+def test_today_filter_absent_on_an_empty_day(conn, tmp_path):
+    publish.build_today(conn, out_dir=tmp_path, date="2020-01-01")
+    page = (tmp_path / "today.html").read_text()
+    assert "filter-bar" not in page and "<style>" not in page
+    assert "No items observed yet" in page

@@ -39,7 +39,7 @@ _PAGE = """<!DOCTYPE html>
 <link rel="alternate" type="text/plain" href="llms.txt"
       title="LLM guide — this is an AI-first digest of official US federal publications">
 <link rel="stylesheet" href="style.css">
-</head>
+{head_extra}</head>
 <body>
 <header class="site-header">
   <nav>
@@ -363,6 +363,34 @@ li.source-note a { color: var(--muted); }
   margin-left: 2.4rem; font-size: 0.78rem; color: var(--muted);
   overflow-wrap: anywhere;
 }
+/* Keyword filter (pure CSS :target — the site stays JavaScript-free).
+   The per-keyword rules are generated into today.html's own <style>. */
+.filter-anchor { display: block; height: 0; }
+.filter-bar {
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--stripe); padding: 0.6rem 0.75rem; margin: 1rem 0;
+}
+.filter-lead {
+  margin: 0 0 0.45rem; font-size: 0.85rem; font-weight: 600;
+}
+.filter-chip { cursor: pointer; text-decoration: none; }
+.filter-n {
+  margin-left: 0.35rem; opacity: 0.7; font-variant-numeric: tabular-nums;
+}
+.filter-clear {
+  display: none; margin-left: 0.6rem; font-size: 0.78rem; font-weight: 400;
+}
+.filter-more { margin-top: 0.4rem; font-size: 0.8rem; }
+.filter-more summary { cursor: pointer; color: var(--accent); }
+.filter-more .tag { margin-top: 0.3rem; }
+.filter-note {
+  display: block; margin-top: 0.4rem; font-size: 0.75rem; color: var(--muted);
+}
+@media print {
+  /* never print a filtered subset that could read as the whole day */
+  .today-item { display: list-item !important; }
+  .filter-bar { display: none; }
+}
 .live-callout {
   border: 1px solid var(--border); border-left: 3px solid #0f9488;
   border-radius: 4px; background: var(--card);
@@ -586,9 +614,11 @@ def _externalize_links(page_html, base=None):
     return _A_TAG_RE.sub(_sub, page_html)
 
 
-def _render_page(title, body_html, nav_links, canonical, description=None):
+def _render_page(title, body_html, nav_links, canonical, description=None,
+                 head_extra=""):
     return _externalize_links(_PAGE.format(
         title=html.escape(title),
+        head_extra=head_extra,
         description=html.escape(
             description
             or f"{SITE_TAGLINE} Built for human readers and AI agents;"
@@ -1113,12 +1143,77 @@ def _today_item_row(item):
                 f"{html.escape(snippet)}</p>")
     else:
         body = ""
+    # Keyword classes drive the CSS :target filter (no JavaScript).
+    keys = " ".join(f"k-{_slug(t)}" for t in _today_item_tags(item))
     return (
-        f'<li class="today-item"><span class="today-time">{observed}Z</span> '
+        f'<li class="today-item {keys}">'
+        f'<span class="today-time">{observed}Z</span> '
         f"<strong>{title_html}</strong> "
         f'<span class="today-chips">{chips}</span>'
         f'<div class="today-item-meta">{meta}</div>{body}</li>'
     )
+
+
+# Keyword filtering on /today is pure CSS (:target), so the site stays
+# JavaScript-free: each offered keyword gets an empty anchor before the
+# stream, a chip linking to that fragment, and generated rules that hide
+# every item lacking the keyword's class. One keyword at a time, which
+# is what :target allows — and it makes filtered views shareable URLs.
+MAX_FILTER_KEYWORDS = 120       # capped, and disclosed in place when it fires
+FILTER_CHIP_MIN_ITEMS = 2       # rarer keywords fold into a <details> tail
+
+
+def _slug(text):
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
+def _today_filter_facets(items):
+    """keyword -> count, ordered by count then name. Mechanical tags only
+    (branch, document type, agency): model-generated discovery keys are
+    section-level, so they cannot honestly filter individual items."""
+    counts = {}
+    for item in items:
+        for tag in _today_item_tags(item):
+            counts[tag] = counts.get(tag, 0) + 1
+    return dict(sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])))
+
+
+def _today_filter_bar(facets, total):
+    """(anchors, bar_html, css) for the offered keywords. Frequent
+    keywords are chips; the long tail folds into a native <details> so
+    nothing is dropped silently."""
+    offered = list(facets.items())[:MAX_FILTER_KEYWORDS]
+    dropped = len(facets) - len(offered)
+    anchors, chips, tail, css = [], [], [], []
+    for tag, n in offered:
+        slug = _slug(tag)
+        anchors.append(f'<span class="filter-anchor" id="k-{slug}"></span>')
+        chip = (f'<a class="tag filter-chip" href="#k-{slug}">'
+                f'{html.escape(tag)}<span class="filter-n">{n}</span></a>')
+        (chips if n >= FILTER_CHIP_MIN_ITEMS else tail).append(chip)
+        css.append(
+            f"#k-{slug}:target ~ .today-list > .today-item:not(.k-{slug})"
+            "{display:none}\n"
+            f'#k-{slug}:target ~ .filter-bar a[href="#k-{slug}"],\n'
+            f'#k-{slug}:target ~ .filter-bar details a[href="#k-{slug}"]'
+            "{background:var(--accent);color:#fff;border-color:var(--accent)}\n"
+            f"#k-{slug}:target ~ .filter-bar .filter-clear{{display:inline}}\n")
+    if not offered:
+        return "", "", ""
+    tail_html = (
+        f'<details class="filter-more"><summary>more keywords '
+        f'({len(tail)})</summary>{"".join(tail)}</details>' if tail else "")
+    note = (f'<span class="filter-note">Showing the {len(offered)} most '
+            f"common of {len(facets)} keywords.</span>" if dropped else "")
+    bar = (
+        '<nav class="filter-bar" aria-label="Filter the stream by keyword">'
+        '<p class="filter-lead">Filter by keyword '
+        f'<span class="rule-note">one at a time · {total} item(s) '
+        "unfiltered</span>"
+        '<a class="filter-clear" href="today.html">clear filter</a></p>'
+        f'{"".join(chips)}{tail_html}{note}</nav>'
+    )
+    return "".join(anchors), bar, "".join(css)
 
 
 def build_today(conn, out_dir=None, date=None):
@@ -1188,6 +1283,12 @@ def build_today(conn, out_dir=None, date=None):
     if day_chips:
         parts.append('<p class="today-chips">Day so far: '
                      + "".join(day_chips) + "</p>")
+    facets = _today_filter_facets(status["items"])
+    anchors, filter_bar, filter_css = _today_filter_bar(
+        facets, len(status["items"]))
+    if anchors:
+        parts.insert(1, anchors)   # anchors must precede bar and stream
+        parts.append(filter_bar)
     if not status["items"]:
         parts.append("<p>No items observed yet for this publication day. "
                      "Collectors poll continuously; check back.</p>")
@@ -1201,8 +1302,10 @@ def build_today(conn, out_dir=None, date=None):
     nav = ('<a href="index.html">All digests</a>'
            '<a href="sources.html">Sources</a>'
            '<a href="agents.html">For agents</a>')
+    head_extra = f"<style>\n{filter_css}</style>\n" if filter_css else ""
     page = _render_page(f"Today (live) — {SITE_TITLE}", "".join(parts), nav,
-                        "derived-only: not part of the committed record")
+                        "derived-only: not part of the committed record",
+                        head_extra=head_extra)
     (out_dir / "today.html").write_text(page, encoding="utf-8")
 
     json_items = []
@@ -1225,6 +1328,8 @@ def build_today(conn, out_dir=None, date=None):
                    "tags": "mechanical (branch, document type, agency);"
                            " no model-generated item tags yet"},
         "counts": status["counts"],
+        "facets": {"tags": facets,
+                   "filter_url": "today.html#k-<slugified-tag>"},
         "pending_llm": status["pending_llm"],
         "last_observed_at": status["last_observed_at"],
         "items": json_items,
@@ -1339,8 +1444,10 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
         f"- [Machine-readable digest index]({base}/digests.json)",
         f"- [Atom feed of digests]({base}/feed.xml)",
         (f"- [Today — live in-progress day, PRELIMINARY]({base}/today.html)"
-         " (also /today.json; items may change until the end-of-day gates"
-         " freeze the dated digest)"),
+         " (also /today.json, whose `facets.tags` gives keyword counts;"
+         " filter the human page with today.html#k-<slugified-tag>."
+         " Items may change until the end-of-day gates freeze the dated"
+         " digest)"),
         f"- [Source guide — what we ingest and why]({base}/sources.html)",
     ] + [
         f"- [{title}]({base}/{stem}.html)" for stem, title in doc_pages

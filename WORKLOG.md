@@ -2425,3 +2425,23 @@ kind of rude, and the rule's rationale ("not in the same tab as the
 FAPD site") only applies to links that actually leave. Recorded as
 code-standards §2 rule 9 with a do-not-bypass note, pinned by tests
 that cover both the seam and two real page classes. 353 tests.
+
+## 2026-07-30 — Keyword filtering on the live stream, without a line of script
+
+Approved design, built: the live page now opens with a filter bar of the
+keywords actually present in the day's stream, each chip carrying its
+item count. Selecting one highlights it and collapses the stream to
+matching entries. The mechanism is CSS `:target` — an empty anchor per
+keyword before the stream, slug classes on each item, and generated
+rules that hide non-matching items — so the page stays JavaScript-free
+and a filtered view is a shareable, bookmarkable URL
+(today.html#k-judicial), with working back-button history. One keyword
+at a time is what :target allows, which is also what was asked for.
+Frequent keywords are chips; the rarer tail folds into a native
+<details> so nothing is dropped, and if a day ever exceeds 120 keywords
+the bar truncates by frequency and says so in place. A print rule forces
+every item visible so nobody prints a filtered subset that reads as the
+whole day. today.json gained facets.tags (keyword -> count) and the
+fragment URL pattern; llms.txt documents both. Measured basis: today's
+290 items carry 58 distinct keywords, so the generated CSS is ~15 KB.
+356 tests.
