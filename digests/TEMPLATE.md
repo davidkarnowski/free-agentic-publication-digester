@@ -367,6 +367,41 @@ to this date).
 
 ---
 
+## 6. Agency Announcements
+
+<!-- Official agency releases (web feeds and email bulletins) the agencies
+     themselves date on this day. Attributed speech, never asserted fact
+     (GUIDE §2); titles quoted verbatim; zero LLM in the pilot. Releases
+     the agency dates elsewhere are counted under AGENCYPR-EX-01. -->
+
+#### {agency_name}
+
+- **[{release_title}]({release_url})** — dated {claimed_date} by the agency
+  - Included because: AGENCYPR-SEL-01 — {rule_description}
+  - Source: agency newsroom (above) · [independent archive]({wayback_url})
+
+---
+
+## 7. Recorded Votes
+
+<!-- Appended as §7 under the GUIDE §2 append-only numbering rule: sections
+     1-6 keep their numbers because a reader who cited one must find the
+     same subject there tomorrow. Roll-call votes from the chambers' own
+     XML records (VOTES collection), in vote-number order, every one in the
+     window listed — selection by existence, not importance (GUIDE §3).
+     Votes the chamber dates on another day inside the index lookback
+     window are counted under VOTES-EX-01. Zero LLM. -->
+
+#### {chamber_name}
+
+- **[Vote {vote_number} — {measure}: {question}]({vote_record_url})** — {result_with_tally}.
+  - {measure_title}
+  - Tally: Yea {yeas} · Nay {nays} · Present {present} · Not Voting {not_voting}
+  - Included because: VOTES-SEL-01 — {rule_description}
+  - Source: the chamber's own roll-call record (linked above) · [independent archive]({wayback_url})
+
+---
+
 ## Terms Used Today
 
 <!-- Static, repo-versioned plain definitions of procedural terms; only
@@ -392,6 +427,9 @@ requests; last watermarks as listed in the header.
 | BILLS | {bills_pkg_count} | — | {bills_summarized_count} | {bills_counted_count} | {bills_excluded_count} |
 | FR | {fr_pkg_count} | {fr_granule_count} | {fr_summarized_count} | {fr_counted_count} | {fr_excluded_count} |
 | USCOURTS | {uscourts_pkg_count} | {uscourts_opinion_count} | {uscourts_summarized_count} | {uscourts_counted_count} | {uscourts_excluded_count} |
+| PLAW | {plaw_pkg_count} | {plaw_doc_count} | {plaw_summarized_count} | {plaw_counted_count} | {plaw_excluded_count} |
+| AGENCYPR | {agencypr_pkg_count} | {agencypr_doc_count} | {agencypr_summarized_count} | {agencypr_counted_count} | {agencypr_excluded_count} |
+| VOTES | {votes_pkg_count} | {votes_doc_count} | {votes_summarized_count} | {votes_counted_count} | {votes_excluded_count} |
 
 **Exclusion rules applied today:**
 
