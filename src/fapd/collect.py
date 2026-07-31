@@ -125,8 +125,19 @@ def pending_map_items(conn, date):
             " AND prompt_version = ?",
             (item["package_id"], item["granule_id"], config.PROMPT_VERSION),
         ).fetchone()
-        if not row:
-            pending.append(item)
+        if row:
+            continue
+        # An item we have already failed on N times is not pending work,
+        # it is a disclosed gap (GUIDE §6 r14). Without this the ladder
+        # re-ran every 15 minutes forever at ~29K input tokens a retry.
+        spent = conn.execute(
+            "SELECT attempts FROM summary_attempts WHERE package_id = ?"
+            " AND granule_id = ? AND prompt_version = ? AND layer = 'map'",
+            (item["package_id"], item["granule_id"], config.PROMPT_VERSION),
+        ).fetchone()
+        if spent and spent[0] >= config.MAX_ITEM_SUMMARY_ATTEMPTS:
+            continue
+        pending.append(item)
     return pending
 
 

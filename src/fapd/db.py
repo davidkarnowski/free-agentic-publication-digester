@@ -238,6 +238,22 @@ CREATE TABLE IF NOT EXISTS collector_state (
     consecutive_errors INTEGER NOT NULL DEFAULT 0
 );
 
+-- Summarization attempts per item (GUIDE §6 rule 14). The retry ceiling
+-- is per RUN, and the collector calls analyze.run every 15 minutes for
+-- every pending date — so an item that cannot be summarized was retried
+-- forever at ~29K input tokens a go (measured 2026-07-31: 1,345 single
+-- retries, 39.7M tokens). Attempts are remembered so the ladder ends.
+CREATE TABLE IF NOT EXISTS summary_attempts (
+    package_id     TEXT NOT NULL,
+    granule_id     TEXT NOT NULL DEFAULT '',
+    prompt_version INTEGER NOT NULL,
+    layer          TEXT NOT NULL DEFAULT 'map',
+    attempts       INTEGER NOT NULL DEFAULT 0,
+    last_at        TEXT,
+
+    PRIMARY KEY (package_id, granule_id, prompt_version, layer)
+);
+
 -- Section-level tags (GUIDE §6 r12a): mechanical branch/agency tags plus
 -- model discovery keys, one row per (date, section, tag).
 CREATE TABLE IF NOT EXISTS section_tags (

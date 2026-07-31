@@ -21,6 +21,7 @@ import json
 import logging
 
 from . import config, rules
+from .sync import utc_now_iso
 
 logger = logging.getLogger("fapd.analyze")
 
@@ -250,6 +251,30 @@ def _plain_call(llm, stats, entries, purpose):
     return _parse_reply(result["text"]), result
 
 
+def _record_attempts(conn, layer, items):
+    """Count a failed summarization attempt per item (GUIDE §6 r14).
+
+    The per-run retry ceiling resets every cycle, and the collector runs
+    analyze every 15 minutes for every pending date — so without a
+    durable count an item that cannot be summarized is retried forever.
+    Measured 2026-07-31 before this existed: 1,345 single retries,
+    39,712,610 input tokens, 60% of the day."""
+    now = utc_now_iso()
+    for pid, gid in items:
+        conn.execute(
+            "INSERT INTO summary_attempts (package_id, granule_id,"
+            " prompt_version, layer, attempts, last_at)"
+            " VALUES (?, ?, ?, ?, 1, ?)"
+            " ON CONFLICT (package_id, granule_id, prompt_version, layer)"
+            " DO UPDATE SET attempts = attempts + 1, last_at = excluded.last_at",
+            (pid, gid, config.PROMPT_VERSION, layer, now))
+    conn.commit()
+    if items:
+        logger.info("%s: recorded a failed attempt for %d item(s); items reaching"
+                    " %d attempts are left unsummarized and disclosed",
+                    layer, len(items), config.MAX_ITEM_SUMMARY_ATTEMPTS)
+
+
 def _log_retry_ceiling(layer, queue, stats):
     """Anything past the single-retry ceiling is left unsummarized and
     said so — the coverage accounting is what discloses it. Silence here
@@ -361,6 +386,8 @@ def run_plain(conn, llm, date):
                 {"package_id": row["package_id"], "granule_id": row["granule_id"]}
             )
     _log_retry_ceiling("plain", retry_queue, stats)
+    _record_attempts(conn, "plain",
+                     [(r["package_id"], r["granule_id"]) for r in retry_queue])
     return stats
 
 
@@ -430,4 +457,6 @@ def run(conn, llm, date):
                 }
             )
     _log_retry_ceiling("map", retry_queue, stats)
+    _record_attempts(conn, "map",
+                     [(i["package_id"], i["granule_id"]) for i, _t in retry_queue])
     return stats

@@ -142,6 +142,13 @@ MAX_RETRY_BATCH_ITEMS = 5
 # 62% of that day's spend. Past this ceiling an item is left unsummarized
 # and disclosed by the coverage accounting, which is what it is for.
 MAX_SINGLE_RETRIES_PER_RUN = 12
+# ...and a per-ITEM ceiling, because the per-run one resets every cycle.
+# The collector runs analyze every 15 minutes for each pending date, so a
+# permanently unsummarizable item was retried indefinitely: on 2026-07-31
+# that produced 1,345 single retries and 39.7M input tokens, 60% of the
+# day. After this many attempts an item is left unsummarized and
+# disclosed by the coverage accounting, which is what rule 14 intends.
+MAX_ITEM_SUMMARY_ATTEMPTS = 3
 LLM_TIMEOUT = 300  # seconds per call
 
 # GUIDE.md §3: scope. Order is sync order. USCOURTS added 2026-07-25 (J1).

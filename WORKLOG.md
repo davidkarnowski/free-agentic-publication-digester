@@ -3674,3 +3674,41 @@ cycle with an unmoved journal still refreshes once the interval elapses),
 and a health-refresh failure cannot cost the live page — reporting on our
 own health is the least important thing that worker does, and it must not
 be able to break the page it rides along with. 456 tests.
+
+## 2026-07-31 — The retry ceiling had a hole, and it cost 39.7M tokens
+
+The live-summary design agent, measuring per-call costs from the ledger,
+noticed something worth more than the memo it was writing: rule 14's
+retry ceiling is enforced per `analyze.run`, and the collector calls
+`analyze.run` every fifteen minutes for every pending date. Twelve single
+retries per run, ninety-six runs a day, two dates, two layers — the
+ceiling was decorative.
+
+Today's ledger confirms it: **65,902,611 input tokens**, nearly four times
+yesterday's 17.4M, of which 1,345 `map:retry-single` calls account for
+39,712,610 — 60% of the day. This morning's scope fix bounded *which*
+days the layer works on; it never bounded how many times a single stubborn
+item could be bought.
+
+`pending_map_items` was the mechanism: it returned any selected item with
+no summary row, with no memory of how often we had already failed on it.
+So an item that cannot be summarized — for whatever reason — came back
+every cycle, forever, at about 29,000 input tokens a retry.
+
+Fixed durably. A `summary_attempts` table remembers failures per item and
+prompt version; `analyze.run` records one for every item that survives
+the retry ladder unsummarized; `pending_map_items` stops offering an item
+that has reached `MAX_ITEM_SUMMARY_ATTEMPTS` (3). Past that ceiling the
+item is a disclosed gap rather than pending work, which is exactly what
+rule 14 says should happen — the coverage accounting already reports it,
+so the digest does not change at all. Only the bill does.
+
+The test pins the boundary in both directions, and pins that one stuck
+item cannot stall the rest of the day. CLAUDE.md §9 gains the note, since
+the per-run ceiling looks sufficient right up until you notice how often
+the caller runs. 457 tests.
+
+Two related findings from the same memo, not yet acted on: the ledger
+records failed calls with input_tokens 0, so any ceiling counted from it
+undercounts; and rule 14's wording does not say whether its ceiling was
+meant per run or per day. Both are recorded for the operator.

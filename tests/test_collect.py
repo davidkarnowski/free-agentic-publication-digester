@@ -547,3 +547,34 @@ def test_health_refresh_failure_never_costs_the_live_page(tmp_path,
     out = worker.run_cycle()
     assert out["rebuilt"] is True and out["items"] == 3   # page still built
     assert out["health_refreshed"] is False
+
+
+def test_an_item_we_keep_failing_stops_being_pending_work(conn):
+    """GUIDE §6 r14's ceiling was per RUN, and the collector runs analyze
+    every 15 minutes per pending date — so an unsummarizable item was
+    retried forever. Measured 2026-07-31 before this fix: 1,345 single
+    retries, 39,712,610 input tokens, 60% of the day's spend."""
+    seed_corpus(conn)
+    before = collect.pending_map_items(conn, DATE)
+    assert before, "corpus should offer pending work"
+    item = before[0]
+
+    for n in range(1, config.MAX_ITEM_SUMMARY_ATTEMPTS + 1):
+        conn.execute(
+            "INSERT INTO summary_attempts (package_id, granule_id,"
+            " prompt_version, layer, attempts, last_at)"
+            " VALUES (?, ?, ?, 'map', ?, 'x')"
+            " ON CONFLICT (package_id, granule_id, prompt_version, layer)"
+            " DO UPDATE SET attempts = excluded.attempts",
+            (item["package_id"], item["granule_id"], config.PROMPT_VERSION, n))
+        conn.commit()
+        still = {(i["package_id"], i["granule_id"])
+                 for i in collect.pending_map_items(conn, DATE)}
+        key = (item["package_id"], item["granule_id"])
+        if n < config.MAX_ITEM_SUMMARY_ATTEMPTS:
+            assert key in still, f"attempt {n} should still be retried"
+        else:
+            assert key not in still, "at the ceiling it becomes a disclosed gap"
+
+    # the rest of the day is untouched — one stuck item must not stall others
+    assert len(collect.pending_map_items(conn, DATE)) == len(before) - 1

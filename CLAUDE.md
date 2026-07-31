@@ -122,6 +122,12 @@ uv run python scripts/sources_doc.py          # regenerate SOURCES.md after regi
 - **Collectors see a smaller budget than the finalizer** (85%, GUIDE §4
   reserve). A client constructed `reserve_exempt=True` is the finalizer;
   nothing else should be.
+- **The retry ceiling is per ITEM as well as per run** (GUIDE §6 r14,
+  `MAX_ITEM_SUMMARY_ATTEMPTS`). The per-run ceiling alone resets every
+  cycle and the collector runs analyze every 15 minutes per pending date,
+  so an unsummarizable item was retried indefinitely — 1,345 single
+  retries and 39.7M input tokens on 2026-07-31, 60% of the day. An item
+  past the ceiling is a disclosed gap, not pending work.
 - **Single-item LLM retries are the expensive path by design** — group
   retries first (`MAX_RETRY_BATCH_ITEMS`); the 2026-07-29 ledger showed
   25 single retries costing 645K input tokens (42% of the day).
