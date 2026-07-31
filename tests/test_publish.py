@@ -870,7 +870,10 @@ def test_local_time_is_additive_and_selfcontained(conn, tmp_path):
     page = (tmp_path / "today.html").read_text()
 
     # UTC is in the HTML, machine-readable, and stands alone
-    assert f'<time class="utc" datetime="{DATE}T11:30:00Z">11:30Z</time>' in page
+    # UTC in datetime= (machine-readable), Eastern on the face (the
+    # publishers' clock): 11:30 UTC is 07:30 EDT.
+    assert (f'<time class="utc" datetime="{DATE}T11:30:00Z">07:30 ET</time>'
+            in page)
     assert 'Last updated <time class="utc"' in page
     # the script fetches nothing and stores nothing
     script = page[page.index("<script"):page.index("</script>")]

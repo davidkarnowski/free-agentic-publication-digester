@@ -8,6 +8,7 @@ import json
 from conftest import DATE, LONG_TEXT, seed_corpus, seed_item
 
 from fapd import collect, config
+from fapd.sync import publication_date
 
 NOW = dt.datetime(2026, 7, 30, 12, 0, tzinfo=dt.UTC)
 
@@ -364,7 +365,7 @@ def test_render_worker_rebuilds_once_then_skips(tmp_path, monkeypatch):
 
     sup, conn_factory = make_supervisor(tmp_path, monkeypatch,
                                         today_builder=builder)
-    today = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d")
+    today = publication_date()   # the ET publication day, not UTC's
     _seed_today_journal(conn_factory, today)
 
     worker = next(w for w in sup.workers if w.name == "render")
@@ -401,3 +402,25 @@ def test_render_worker_rebuilds_when_artifact_missing(tmp_path, monkeypatch):
     worker.run_cycle()
     worker.run_cycle()
     assert len(calls) == 2  # every cycle rebuilds while the file is absent
+
+
+def test_eod_targets_the_publication_day_that_just_closed(conn):
+    """The finalizer's target is computed from Eastern, so it finalizes
+    the publication day that actually closed — and a DST shift cannot
+    move it. At 09:00 UTC (05:00 ET) on Jul 31, that day is Jul 30."""
+    worker = collect.EODWorker.__new__(collect.EODWorker)
+    at_9utc = dt.datetime(2026, 7, 31, 9, 0, tzinfo=dt.UTC)
+    assert worker.eod_due(conn, at_9utc) == "2026-07-30"
+
+    # winter (EST): 09:00 UTC is 04:00 ET, same reasoning
+    assert worker.eod_due(
+        conn, dt.datetime(2026, 1, 15, 9, 0, tzinfo=dt.UTC)) == "2026-01-14"
+
+    # before the hour: not due at all
+    assert worker.eod_due(
+        conn, dt.datetime(2026, 7, 31, 3, 0, tzinfo=dt.UTC)) is None
+
+    # once recorded, the same day does not refire
+    collect.record_state(conn, "eod", ok=True,
+                         stats={"ran": True, "date": "2026-07-30"})
+    assert worker.eod_due(conn, at_9utc) is None

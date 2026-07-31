@@ -232,16 +232,42 @@ direct HTML index pages where no feed exists). Governing rules:
   can be edited or removed without notice. Digest sections built on this
   class carry a standing disclosure, and §7 (Provenance) governs how
   captures are preserved and how changes are detected and disclosed.
-- **Dating rule (added 2026-07-28).** A digest for day D lists only
-  releases the agency itself dates on D (claimed publication date, parsed
-  to a UTC day). Items *first observed* on D but claimed earlier — feed
+- **The federal publication day (amended 2026-07-30).** A publication
+  day runs **midnight to midnight Eastern time in Washington, D.C.**
+  (`America/New_York`, DST handled by the zone), because that is the
+  clock the publishers keep: the Federal Register's morning release,
+  floor proceedings, opinion postings, agency announcements. This is
+  the boundary for every digest date, for the live `/today` view, and
+  for the end-of-day finalizer's target.
+
+  The rule replaces dating by UTC day, which was wrong in a specific and
+  visible way: midnight UTC is 8 p.m. Eastern, so an agency release
+  issued at 8:30 p.m. Eastern was filed under the *following*
+  publication day — a day the government had not yet begun — and the
+  live view rolled over while Washington was still working.
+
+  **Observation timestamps remain UTC** and are stored, rendered
+  (`<time datetime>`), and served in machine surfaces as UTC: what is
+  Eastern is the *day a document belongs to*, never the record of when
+  we saw it. govinfo material is unaffected — its `dateIssued` is the
+  publisher's own, already Eastern-based; the change binds the sources
+  we date ourselves (agency web and email releases).
+
+  **Applied forward only.** Items already dated under the UTC rule are
+  not re-dated: the published record is never rewritten to match a later
+  policy (§7). The transition date is named in the worklog and on the
+  public methods page, so a reader comparing an old digest to a new one
+  can see why a boundary moved.
+- **Dating rule (added 2026-07-28; boundary amended 2026-07-30).** A
+  digest for day D lists only releases the agency itself dates on D
+  (claimed publication date, resolved to a federal publication day). Items *first observed* on D but claimed earlier — feed
   backfill, newly activated sources, bootstrap sweeps — are **not**
   today's news and are excluded from the listing under `AGENCYPR-EX-01`,
   but they are never silent: the coverage accounting names their count,
   and their captures/documents are stored normally. An item carrying no
   parseable claimed date falls back to the observed date (listed on the
-  day we first saw it, disclosed as dated by observation — the only
-  honest option). Claimed dates and observed dates remain separately
+  publication day we first saw it, disclosed as dated by observation —
+  the only honest option). Claimed dates and observed dates remain separately
   stored, always (§7 T3/T4: a claimed date is the agency's assertion, not
   our finding).
 - Ingestion obeys §4 unchanged: paced, budgeted (its own daily bucket),

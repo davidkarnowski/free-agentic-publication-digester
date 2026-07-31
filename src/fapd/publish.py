@@ -1061,6 +1061,20 @@ _TODAY_DOC_TYPES = {
 }
 
 
+def _et_hhmm(utc_stamp):
+    """HH:MM in Washington for a stored UTC stamp — the clock the
+    publishers keep. The machine-readable UTC value stays in the
+    element's datetime attribute, and the page's one script appends the
+    reader's own local time beside it."""
+    import datetime as _dt
+
+    try:
+        when = _dt.datetime.fromisoformat(utc_stamp)
+    except ValueError:
+        return utc_stamp[11:16]
+    return when.astimezone(config.PUBLICATION_TZ).strftime("%H:%M")
+
+
 def _today_doc_label(item):
     if item["collection"] == "USCOURTS":
         return "court opinion"
@@ -1114,7 +1128,7 @@ def _today_item_row(item):
     cite = item["package_id"] + (f" / {gran}" if gran else "")
     stamp = item["observed_at"] or ""
     observed = (f'<time class="utc" datetime="{html.escape(stamp)}">'
-                f'{html.escape(stamp[11:16])}Z</time>' if stamp else "")
+                f"{html.escape(_et_hhmm(stamp))} ET</time>" if stamp else "")
     url = _today_official_url(item)
     title_html = (f'<a href="{html.escape(url)}">{html.escape(title)}</a>'
                   if url else html.escape(title))
@@ -1250,14 +1264,14 @@ def build_today(conn, out_dir=None, date=None):
     """Render site/today.html + today.json from collect.today_status —
     mechanical, zero LLM, derived-only (never committed; gitignored).
     Empty days render on purpose: disclosure, then 'no items yet'."""
-    import datetime as _dt
     import json as _json
 
     from .collect import today_status
 
     out_dir = Path(out_dir or config.SITE_DIR)
     out_dir.mkdir(parents=True, exist_ok=True)
-    date = date or _dt.datetime.now(_dt.UTC).strftime("%Y-%m-%d")
+    from .sync import publication_date
+    date = date or publication_date()
     status = today_status(conn, date)
     now = utc_now_iso()
 
@@ -1292,6 +1306,16 @@ def build_today(conn, out_dir=None, date=None):
         "(branch of government, document type, agency), and either a "
         "labeled summary or the unedited opening words of the official "
         "text.</p>"
+        "<p><strong>About the dates and times on this page.</strong> A "
+        "publication day here runs on <strong>Eastern time in "
+        "Washington, D.C.</strong> — the clock the publishers themselves "
+        "keep, from the Federal Register's morning release to the close "
+        "of floor proceedings. This page therefore covers midnight to "
+        "midnight Eastern, and rolls over to the next day at midnight "
+        "Eastern. Times are shown in Eastern; if your browser runs "
+        "scripts, your own local time appears beside each one. The "
+        "underlying timestamps are UTC and are readable in the page "
+        "markup and in today.json.</p>"
         "<p>For whole-day context, read the <strong>dated digests</strong> — "
         "each one a validated, frozen record of a complete publication day "
         "with plain-language summaries, coverage accounting, and a Day in "
@@ -1307,8 +1331,8 @@ def build_today(conn, out_dir=None, date=None):
         f'<p class="today-disclosure">{html.escape(_TODAY_DISCLOSURE)}</p>',
         intro,
         (f'<p class="today-meta">Last updated <time class="utc"'
-         f' datetime="{html.escape(now)}">{html.escape(now)}</time> · '
-         f"{len(status['items'])} item(s) observed so far · "
+         f' datetime="{html.escape(now)}">{html.escape(_et_hhmm(now))} ET'
+         f"</time> · {len(status['items'])} item(s) observed so far · "
          f"{status['pending_llm']} item(s) awaiting model summary.</p>"),
     ]
     if day_chips:

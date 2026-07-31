@@ -4,6 +4,7 @@ not operator discipline."""
 
 import os
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 
@@ -129,9 +130,18 @@ ANALYZE_MIN_INTERVAL_MIN = 15
 # Past this fraction of a class's daily request budget, its collector
 # doubles its interval for the rest of the UTC day (EOD headroom).
 BUDGET_BACKPRESSURE_FRACTION = 0.7
+# The federal publication day (GUIDE §3, amended 2026-07-30). Washington's
+# clock is the publishers' clock; dating by UTC filed evening releases
+# under the following day. Observation timestamps stay UTC — only the
+# publication day a document belongs to is Eastern.
+PUBLICATION_TZ = ZoneInfo("America/New_York")
+PUBLICATION_TZ_LABEL = "Eastern time (Washington, D.C.)"
+
 # EOD finalizer (in-supervisor, docs/continuous-ingestion.md §9): fires
-# once per UTC day at/after this hour — 09:00 UTC ≈ 4-5am US Eastern,
-# the §4 off-peak window. Evidence pushes gate on FAPD_EVIDENCE_PUSH=1.
+# once per UTC day at/after this hour — 09:00 UTC is 4-5am US Eastern,
+# the §4 off-peak window, safely past the Eastern midnight boundary that
+# closes the publication day it finalizes. Evidence pushes gate on
+# FAPD_EVIDENCE_PUSH=1.
 EOD_UTC_HOUR = 9
 EVIDENCE_PUSH = os.environ.get("FAPD_EVIDENCE_PUSH", "") == "1"
 

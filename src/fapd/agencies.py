@@ -18,7 +18,7 @@ import requests
 from . import config, provenance
 from .client import HttpClient, RobotsDisallowedError
 from .probe import parse_feed
-from .sync import utc_now_iso
+from .sync import publication_date, utc_now_iso
 
 logger = logging.getLogger("fapd.agencies")
 
@@ -203,11 +203,15 @@ def _already_ingested(conn, package_id):
 
 def _store_item(conn, entry, item, package_id, text, mode, capture_id, wayback_url):
     now = utc_now_iso()
+    # The publication day is Washington's, not UTC's (GUIDE §3, amended
+    # 2026-07-30): an 8:30pm-Eastern release belongs to that day, not to
+    # the next one UTC had already started. Observation stamps stay UTC.
+    issued = publication_date()
     conn.execute(
         "INSERT INTO packages (package_id, collection, date_issued, last_modified,"
         " title, package_link, first_seen_at, fetch_status, fetched_at)"
         " VALUES (?, 'AGENCYPR', ?, ?, ?, ?, ?, 'fetched', ?)",
-        (package_id, now[:10], now, item["title"], item["link"], now, now),
+        (package_id, issued, now, item["title"], item["link"], now, now),
     )
     conn.execute(
         "INSERT INTO extracted_texts (package_id, granule_id, collection, doc_type,"

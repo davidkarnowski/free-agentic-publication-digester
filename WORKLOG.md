@@ -2468,3 +2468,32 @@ with the bar any future script must clear — inline, no network, no
 storage, purely additive, privacy claims updated alongside — and a
 pointer to the keyword filter's :target pattern as the CSS-first
 precedent. 357 tests.
+
+## 2026-07-30 — The federal publication day is Washington's, not UTC's
+
+GUIDE §3 amended first, then implemented. The operator noticed the live
+page emptying itself in the evening; the box made the case plainly —
+`UTC: 2026-07-31 00:20` while `ET: 2026-07-30 20:20 EDT`. Midnight UTC
+is 8 p.m. Eastern, so we were rolling over the live view, and filing
+agency releases, into a publication day the government had not started.
+
+A publication day now runs midnight to midnight Eastern
+(`America/New_York`, DST handled by the zone) — the clock the
+publishers keep. `sync.publication_date()` is the single boundary,
+consumed by agency ingest, email ingest, the /today renderer, and the
+EOD finalizer's target (computed from Eastern so no DST shift can
+misfire it). Observation timestamps stay UTC everywhere they are
+stored, rendered in `<time datetime>`, and served to agents: what is
+Eastern is the day a document belongs to, never the record of when we
+saw it. govinfo material needed nothing — its dateIssued was already
+the publisher's Eastern-based date; the change binds the sources we
+date ourselves.
+
+Applied forward only. Items dated under the old UTC rule are not
+re-dated — the published record is not rewritten to match a later
+policy — and the transition is named in GUIDE, in the public methods
+page, and here, so a reader comparing an old digest to a new one can
+see why a boundary moved. The live page now says all of this in plain
+words above the stream, shows times in Eastern with the reader's local
+time appended beside them, and the tests pin the 8 p.m. case that
+started it, the winter EST case, and the finalizer's target. 359 tests.

@@ -120,6 +120,12 @@ uv run python scripts/sources_doc.py          # regenerate SOURCES.md after regi
   contract ("reported, not hidden"), pinned by tests.
 - **USCOURTS syncs only a 7-day date_issued window** (USCOURTS-FETCH-01)
   — old-case lastModified churn is listed, skipped, and disclosed.
+- **Publication days are Eastern, observation stamps are UTC** (GUIDE
+  §3, amended 2026-07-30). `sync.publication_date()` is the single
+  source of that boundary — used by agency/email ingest, the `/today`
+  renderer, and the EOD target. Never date a document with
+  `now[:10]`/UTC again, and never convert a stored observation stamp to
+  Eastern: what is Eastern is the day a document belongs to.
 - **`scripts/digest.py` imports the analysis layer lazily** — report-only
   runs must work even if analysis modules break.
 - **`LLMClient._ensure_backend_column`** does an in-place ALTER — the

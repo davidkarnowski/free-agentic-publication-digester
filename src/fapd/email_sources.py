@@ -50,7 +50,7 @@ import time
 from urllib.parse import unquote, urlsplit, urlunsplit
 
 from . import config, provenance
-from .sync import utc_now_iso
+from .sync import publication_date, utc_now_iso
 
 logger = logging.getLogger("fapd.email_sources")
 
@@ -472,11 +472,13 @@ def _url_seen_elsewhere(conn, url):
 
 def _store_item(conn, entry, item, package_id, text, mode, capture_id, dkim):
     now = utc_now_iso()
+    # Publication day in Washington (GUIDE §3, amended 2026-07-30).
+    issued = publication_date()
     conn.execute(
         "INSERT INTO packages (package_id, collection, date_issued, last_modified,"
         " title, package_link, first_seen_at, fetch_status, fetched_at)"
         " VALUES (?, ?, ?, ?, ?, ?, ?, 'fetched', ?)",
-        (package_id, COLLECTION, now[:10], now, item["title"], item.get("url"),
+        (package_id, COLLECTION, issued, now, item["title"], item.get("url"),
          now, now))
     metadata = json.dumps({
         "source_id": entry["id"],

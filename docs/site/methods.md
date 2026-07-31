@@ -220,6 +220,18 @@ as a collapsed, plain-speak-first view: section cards whose headers
 carry the title, tag chips, and the plain-language synopsis, expanding
 to the full record on demand — static HTML with no scripts.
 
+**What a "day" means here.** A publication day runs midnight to
+midnight **Eastern time in Washington, D.C.** — the clock the publishers
+themselves keep, from the Federal Register's morning release to the close
+of floor proceedings. A digest dated 2026-07-30 therefore covers that
+Eastern day, and the live page rolls over at Eastern midnight. Times
+displayed on the site are Eastern; the underlying timestamps are UTC and
+remain readable in the page markup and the machine surfaces. This
+boundary was adopted on 2026-07-30, replacing a UTC day boundary that
+filed evening releases under the following day; digests published before
+that date keep their original dating, because the record is not
+rewritten to match a later policy.
+
 **The validation gate.** Before publication, each digest must pass four
 coded checks: every govinfo citation resolves to a stored record; the
 Coverage Statement's arithmetic reconciles internally and against the

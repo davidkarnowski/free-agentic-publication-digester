@@ -189,3 +189,32 @@ def test_collect_cli_passes_flags_to_supervisor(monkeypatch):
     collect_cli.main(["--once", "--no-llm", "--interval-email", "5"])
     assert captured["llm_enabled"] is False
     assert captured["intervals"] == {"email": 5}
+
+
+# --------------------------------------------- federal publication day (§3) --
+
+
+def test_publication_day_is_washingtons_not_utcs():
+    """GUIDE §3 (amended 2026-07-30). Midnight UTC is 8pm Eastern, so a
+    release observed at 20:20 ET on July 30 belongs to July 30 — dating
+    it by UTC filed it under July 31, a day the government had not yet
+    started."""
+    import datetime as dt
+
+    from fapd.sync import publication_date, publication_date_of
+
+    evening = dt.datetime(2026, 7, 31, 0, 20, tzinfo=dt.UTC)   # 20:20 EDT 7/30
+    assert evening.strftime("%Y-%m-%d") == "2026-07-31"         # what UTC said
+    assert publication_date(evening) == "2026-07-30"            # what we now say
+
+    # just after Eastern midnight the day does roll
+    assert publication_date(
+        dt.datetime(2026, 7, 31, 4, 1, tzinfo=dt.UTC)) == "2026-07-31"
+    # winter: EST is UTC-5, so 05:00 UTC is still the previous day
+    assert publication_date(
+        dt.datetime(2026, 1, 15, 4, 30, tzinfo=dt.UTC)) == "2026-01-14"
+
+    assert publication_date_of("2026-07-31T00:20:00Z") == "2026-07-30"
+    assert publication_date_of("2026-07-31T00:20:00+00:00") == "2026-07-30"
+    assert publication_date_of("not a stamp") is None
+    assert publication_date_of("") is None

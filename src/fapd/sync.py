@@ -48,6 +48,33 @@ def utc_now_iso():
     return dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def publication_date(when=None):
+    """The federal publication day (GUIDE §3, amended 2026-07-30): the
+    calendar date in Washington, D.C., because that is the clock the
+    publishers keep — the Federal Register's 8:45 a.m. release, floor
+    proceedings, opinion postings. Midnight UTC is 8 p.m. Eastern, so
+    dating by UTC filed an evening release under the next publication
+    day and rolled the live view over while Washington was still
+    working. Observation timestamps stay UTC; only the day a document
+    belongs to is Eastern. DST is handled by the zone itself."""
+    when = when or dt.datetime.now(dt.UTC)
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=dt.UTC)
+    return when.astimezone(config.PUBLICATION_TZ).strftime("%Y-%m-%d")
+
+
+def publication_date_of(iso_stamp):
+    """Publication day for a stored UTC stamp ('...Z' or offset form).
+    Returns None when the stamp is unparseable — callers fall back to
+    the current publication day rather than inventing one."""
+    if not iso_stamp:
+        return None
+    try:
+        return publication_date(dt.datetime.fromisoformat(iso_stamp))
+    except ValueError:
+        return None
+
+
 def sync_collection(client, conn, collection, *, list_only=False, max_downloads=None):
     """One delta-sync run for one collection. Returns a stats dict."""
     started_at = utc_now_iso()

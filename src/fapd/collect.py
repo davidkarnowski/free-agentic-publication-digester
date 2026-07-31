@@ -17,7 +17,7 @@ import threading
 import uuid
 
 from . import config
-from .sync import utc_now_iso
+from .sync import publication_date, utc_now_iso
 
 logger = logging.getLogger("fapd.collect")
 
@@ -401,7 +401,7 @@ class RenderWorker(Worker):
     name = "render"
 
     def cycle(self, conn, cycle_id):
-        date = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d")
+        date = publication_date()
         newest = conn.execute(
             "SELECT MAX(observed_at) FROM item_journal WHERE digest_date = ?",
             (date,)).fetchone()[0] or ""
@@ -433,7 +433,9 @@ class EODWorker(Worker):
         now = now or dt.datetime.now(dt.UTC)
         if now.hour < config.EOD_UTC_HOUR:
             return None
-        target = (now - dt.timedelta(days=1)).strftime("%Y-%m-%d")
+        # The publication day that just closed in Washington — computed
+        # from Eastern so a DST shift can never target the wrong day.
+        target = publication_date(now - dt.timedelta(days=1))
         row = conn.execute(
             "SELECT last_result FROM collector_state WHERE worker = 'eod'"
         ).fetchone()
