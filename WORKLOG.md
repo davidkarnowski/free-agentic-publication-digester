@@ -3344,7 +3344,6 @@ will actually meet it — code-standards §1, adding-sources, CLAUDE.md §9:
 an index is not a feed. A feed is bounded by its publisher; the Senate's
 vote menu lists every vote of the Congress. 441 tests.
 
-<<<<<<< HEAD
 ## 2026-07-31 — GUIDE amendments for recorded votes
 
 Governance before code, per §10. Two amendments, both narrow.
@@ -3369,7 +3368,6 @@ reading order reflects the order sections were added rather than any
 hierarchy — which is the right trade for a digest that deliberately
 declines to rank its own contents. Recorded Votes is the first section
 added under the rule.
-=======
 ## 2026-07-31 — Phase 1: four 404s, four different stories
 
 Four registry sources were answering 404. The plan called them the
@@ -3442,7 +3440,6 @@ suite is green, so nothing is broken; but notes are accountability
 history, and forty sources' history is currently filed under the wrong
 name. Flagged for the operator rather than untangled in a phase whose
 whole point was to touch nothing but four `urls` maps.
->>>>>>> 2c78183 (sources: recover four 404 registry addresses; ODNI turns out to have moved domains)
 
 ## 2026-07-31 — The probe sweep filed 45 findings under one wrong name
 
@@ -3507,3 +3504,25 @@ written at 16:32 today, after the snapshot. That is direct evidence the
 analyze-scope change works: a day that had zero model summaries got them
 within the hour once the worker stopped grinding 2024 dates, and pending
 now sits at zero across all three in-scope days.
+
+## 2026-07-31 — Conflict markers, committed and then removed
+
+The Phase 1 merge left three merge-conflict marker lines in this file,
+committed. Phase 2's agent found them and correctly declined to touch
+them: this file is append-only, and an agent that starts editing history
+because it looks wrong is a worse problem than the markers.
+
+Cause, worth recording because it will recur: the resolution ran as
+`cd <worktree> && python3 - <<'EOF' …`, the `cd` failed because the shell
+was already in that directory, and `&&` therefore skipped the whole
+resolution. The next command staged the file and continued the rebase, so
+an unresolved file was committed by a sequence that looked successful —
+the rebase reported "4 files changed" and the suite passed, because
+markers in a Markdown log break nothing mechanical.
+
+Removed here as a correction rather than a rewrite: only the three marker
+lines are gone, and both entries they separated stay exactly as written,
+in the order they were written. Nothing in the record is altered or
+reordered. Added the lesson to CLAUDE.md §8 next to the never-amend rule,
+since the two are about the same thing — this log is evidence, and
+evidence is corrected forward, never tidied.
