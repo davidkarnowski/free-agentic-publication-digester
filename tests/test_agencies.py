@@ -328,3 +328,72 @@ def test_usps_poll_is_feed_only_and_dedupes_url_variants(env):
         "https://about.usps.com/newsroom/national-releases/2026/0711-barbie.htm",
         "https://about.usps.com/newsroom/national-releases/2026/0704-declaration.htm",
     }
+
+
+# ------------------------------------------------- the items() seam (P0) --
+
+
+class IndexAdapter(agencies.SourceAdapter):
+    """A non-feed source: enumerates from an index the feed parser cannot
+    read, and needs no article fetch."""
+
+    def items(self, body, content_type):
+        rows = [ln.split("|") for ln in body.decode().splitlines() if ln.strip()]
+        return "test-index", [
+            {"title": t, "link": u, "guid": g,
+             "claimed_date": "Tue, 28 Jul 2026 12:00:00 +0000",
+             "description": "", "description_chars": 0}
+            for g, t, u in rows
+        ]
+
+    def wants_article(self):
+        return False
+
+
+def test_items_seam_ingests_a_non_feed_source(env, monkeypatch):
+    """The whole point of Phase 0: a shape probe.parse_feed cannot read
+    still reaches storage, and inherits dedupe, mode disclosure, dating
+    and identity from the loop unchanged."""
+    monkeypatch.setitem(agencies.ADAPTERS, "test-index", IndexAdapter)
+
+    class IndexClient:
+        def get(self, url, params=None, headers=None):
+            return Resp(b"v1|First vote|https://x.gov/v1\nv2|Second|https://x.gov/v2",
+                        headers={"Content-Type": "application/xml"})
+
+    e = {**entry(), "adapter": "test-index",
+         "urls": {"index": "https://x.gov/votes/index.xml"}}
+    stats = agencies.run(IndexClient(), None, env, [e])[0]
+    assert stats["feed_status"] == "test-index:2"
+    assert stats["new_items"] == 2
+    assert stats["articles_fetched"] == 0        # wants_article() is False
+
+    rows = env.execute(
+        "SELECT package_id, metadata, text FROM extracted_texts"
+        " ORDER BY package_id").fetchall()
+    assert len(rows) == 2
+    assert all('"mode": "feed-only"' in r["metadata"] for r in rows)
+    # identity came from the adapter's guid, not the URL
+    assert rows[0]["package_id"] == agencies._package_id("gao-reports", "v1")
+
+    # a second poll ingests nothing new — dedupe is the loop's, not the
+    # adapter's, so every future adapter inherits it
+    again = agencies.run(IndexClient(), None, env, [e])[0]
+    assert again["new_items"] == 0
+
+
+def test_source_url_resolves_index_and_collection_keys():
+    """poll_source and host_groups must resolve identically, or a source
+    is grouped under one host and fetched from another."""
+    assert agencies.source_url({"urls": {"feed": "https://a.gov/f"}}) == "https://a.gov/f"
+    assert agencies.source_url({"urls": {"index": "https://b.gov/i"}}) == "https://b.gov/i"
+    assert agencies.source_url({"urls": {"collection": "https://c.gov/c"}}) == "https://c.gov/c"
+    assert agencies.source_url({"urls": {}}) is None
+
+    groups = agencies.host_groups([
+        {"id": "a", "urls": {"feed": "https://one.gov/f"}},
+        {"id": "b", "urls": {"index": "https://one.gov/i"}},   # same host
+        {"id": "c", "urls": {"index": "https://two.gov/i"}},
+    ])
+    assert sorted(groups) == ["one.gov", "two.gov"]
+    assert len(groups["one.gov"]) == 2      # one client, one pacing clock

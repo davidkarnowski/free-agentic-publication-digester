@@ -29,13 +29,22 @@ class SourceAdapter:
     to handle unique publication interfaces without touching the shared
     poll loop. The loop owns everything that must never vary per source —
     conditional requests, robots enforcement, pacing/budgets, provenance
-    capture, Wayback corroboration, storage. An adapter owns exactly four
+    capture, Wayback corroboration, storage. An adapter owns exactly five
     decisions, called in this order:
 
+    0. items(body, content_type) — index/feed bytes -> the item list.
     1. stable_id(item)  — what makes two sightings the same document.
     2. wants_article()  — fetch the article page, or feed metadata only.
     3. extract_text(body, content_type, item) — served bytes -> plain text.
     4. fallback_text(item) — what to store when no article is available.
+
+    AN INDEX IS NOT A FEED. A feed carries recent items; an index can
+    carry an entire session (the Senate's vote menu lists every vote of
+    the Congress). An items() implementation reading an index MUST bound
+    itself to config.INDEX_LOOKBACK_DAYS before returning, or first
+    activation spends hundreds of requests fetching articles the §3
+    dating rule then excludes as backfill. The default below reads feeds,
+    which are already bounded by the publisher.
 
     IDENTITY IS A COMPATIBILITY CONTRACT. package ids are derived from
     stable_id's output (PR-<source>-<sha8 of stable_id>), and dedupe keys
@@ -53,6 +62,19 @@ class SourceAdapter:
     raw capture is already stored either way, so evidence survives).
     stable_id and fallback_text must not raise; they run before any
     storage exists for the item."""
+
+    def items(self, body, content_type):
+        """(format_name, [item]) from the fetched index/feed bytes.
+
+        Items carry the probe.parse_feed shape: title, link, guid,
+        claimed_date, description. `claimed_date` must be RFC 822 or
+        ISO-8601-prefixed or report._claimed_day cannot read it and the
+        item is dated by observation instead (GUIDE §3 dating rule).
+
+        Returning (None, []) marks the response unparsable — the loop
+        records that and discloses it. Must not raise: it runs before any
+        storage exists, like stable_id and fallback_text."""
+        return parse_feed(body)
 
     def stable_id(self, item):
         # Frozen: see IDENTITY IS A COMPATIBILITY CONTRACT above.
@@ -155,6 +177,20 @@ ADAPTERS = {
 }
 
 
+# The registry key an entry publishes from. Feeds use `feed`; index and
+# API entries use `index`/`collection`. poll_source and host_groups must
+# resolve identically or a source would be grouped under one host and
+# fetched from another, breaking the one-client-per-host pacing promise.
+def source_url(entry):
+    urls = entry.get("urls") or {}
+    return urls.get("feed") or urls.get("index") or urls.get("collection")
+
+
+# Registry types the agency poll loop can ingest. Widened as adapters
+# arrive; kept here so the three call sites cannot drift apart.
+INGESTIBLE_TYPES = ("rss",)
+
+
 def adapter_for(entry):
     name = entry.get("adapter") or "rss"
     try:
@@ -243,7 +279,7 @@ def poll_source(client, wayback, conn, entry):
     """One conditional poll of one active source. Returns stats."""
     stats = {"id": entry["id"], "feed_status": None, "new_items": 0,
              "articles_fetched": 0, "wayback_submitted": 0, "errors": 0}
-    feed_url = (entry.get("urls") or {}).get("feed")
+    feed_url = source_url(entry)
     if not feed_url:
         stats["feed_status"] = "no-feed-url"
         return stats
@@ -279,14 +315,14 @@ def poll_source(client, wayback, conn, entry):
     if resp.status_code == 304:
         stats["feed_status"] = "not-modified"
         return stats
-    fmt, items = parse_feed(resp.content or b"")
-    if not fmt:
+    adapter = adapter_for(entry)
+    fmt, items = adapter.items(resp.content or b"",
+                               resp.headers.get("Content-Type"))
+    if fmt is None:
         stats["feed_status"] = "unparsable"
         stats["errors"] += 1
         return stats
     stats["feed_status"] = f"{fmt}:{len(items)}"
-
-    adapter = adapter_for(entry)
     pending, seen = [], set()
     for item in items:
         if not item["link"]:
@@ -384,8 +420,8 @@ def host_groups(entries):
     worker, one client, and therefore one pacing clock."""
     groups = {}
     for entry in entries:
-        feed = (entry.get("urls") or {}).get("feed") or ""
-        groups.setdefault(urlsplit(feed).netloc.lower(), []).append(entry)
+        groups.setdefault(
+            urlsplit(source_url(entry) or "").netloc.lower(), []).append(entry)
     return groups
 
 

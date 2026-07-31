@@ -35,6 +35,16 @@ could not or chose not to ingest.
 
 ## When the interface is irregular: write an adapter
 
+An adapter owns five decisions. `items()` is the newest (2026-07-31) and
+the one that makes non-feed sources possible at all: it turns the fetched
+index bytes into the item list, so an XML index or a JSON API can reuse
+every invariant the loop owns. **An index is not a feed** — a feed is
+bounded by its publisher, but an index can list an entire congressional
+session, so an `items()` reading an index must bound itself to
+`config.INDEX_LOOKBACK_DAYS` before returning. Skipping that buys
+hundreds of article fetches for items the §3 dating rule then excludes as
+backfill.
+
 Most sources need **no code** — the default RSS adapter handles them. An
 adapter (subclass of `agencies.SourceAdapter`, registered in
 `agencies.ADAPTERS`, named by the entry's `adapter:` field) is warranted

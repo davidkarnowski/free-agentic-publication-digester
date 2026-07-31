@@ -41,7 +41,7 @@ def main() -> int:
 
     from fapd.sources import load_registry
     entries = [e for e in load_registry()
-               if e["status"] == "active" and e["type"] == "rss"]
+               if e["status"] == "active" and e["type"] in agencies.INGESTIBLE_TYPES]
     if args.ids:
         wanted = set(args.ids.split(","))
         entries = [e for e in entries if e["id"] in wanted]

@@ -44,6 +44,13 @@ MAX_REQUESTS_PER_DAY = 6000
 # anything older is a deliberate, throttled bulkdata backfill.
 INITIAL_SYNC_LOOKBACK_DAYS = 3
 
+# An index is not a feed (GUIDE §3): a feed is bounded by its publisher,
+# an index can list an entire congressional session. Adapters reading an
+# index bound themselves to this window before the per-item article
+# fetch — otherwise first activation buys hundreds of requests' worth of
+# items the dating rule then excludes as backfill.
+INDEX_LOOKBACK_DAYS = 7
+
 REQUEST_TIMEOUT = 30  # seconds
 MAX_ATTEMPTS = 5  # total tries per request, including the first
 BACKOFF_BASE_SECONDS = 2.0  # 2, 4, 8, 16 between retries

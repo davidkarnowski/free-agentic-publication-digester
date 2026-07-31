@@ -580,6 +580,7 @@ class Supervisor:
         return build_today(conn, date=date)
 
     def _build_workers(self, iv):
+        from . import agencies
         from .agencies import host_groups
 
         workers = [
@@ -587,7 +588,8 @@ class Supervisor:
             EmailWorker(self, iv.get("email", config.EMAIL_POLL_INTERVAL_MIN)),
         ]
         rss = [e for e in self.registry()
-               if e["status"] == "active" and e["type"] == "rss"]
+               if e["status"] == "active"
+               and e["type"] in agencies.INGESTIBLE_TYPES]
         for host, entries in sorted(host_groups(rss).items()):
             workers.append(AgencyHostWorker(
                 self, host, entries,

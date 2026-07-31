@@ -139,6 +139,12 @@ uv run python scripts/sources_doc.py          # regenerate SOURCES.md after regi
   runs must work even if analysis modules break.
 - **`LLMClient._ensure_backend_column`** does an in-place ALTER — the
   deliberate micro-migration pattern for additive ledger changes.
+- **Index adapters bound their own lookback** (`config.INDEX_LOOKBACK_DAYS`).
+  `SourceAdapter.items()` is the enumeration seam; a feed is bounded by its
+  publisher but an index is not — the Senate vote menu lists every vote of
+  the Congress. An unbounded `items()` is a request-budget bomb on first
+  activation, not a completeness win: the §3 dating rule excludes the tail
+  as backfill anyway.
 - **The registry keeps `unavailable` entries forever** — a refusal is
   accountability data; a success elsewhere never erases it.
 - **Empty-state digest sections render on purpose** (e.g. PLAW's "No

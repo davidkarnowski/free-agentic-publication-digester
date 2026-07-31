@@ -26,6 +26,7 @@ optional parameters are the whole pattern.**
 | `HttpClient(...)` pacing/log seams | `src/fapd/client.py` |
 | `MailboxClient(...)` + `poll_mailbox(dkim_verifier=)` | `src/fapd/email_sources.py` |
 | `run_concurrent(client_factory=, wayback_factory=, conn_factory=)` | `src/fapd/agencies.py` |
+| `SourceAdapter.items(body, content_type)` | `src/fapd/agencies.py` — the enumeration seam: a source's shape (feed, XML index, JSON API) is the adapter's business, the poll loop's invariants are not |
 | `stage_email(conn, entries=, mailbox_factory=, poll=)` | `scripts/run_pipeline.py` |
 | `db.connect(db_path=)` | `src/fapd/db.py` — tests use `tmp_path` DBs |
 | `Supervisor(...factories...)` | `src/fapd/collect.py` (continuous ingestion) |

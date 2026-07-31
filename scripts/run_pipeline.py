@@ -82,7 +82,8 @@ def stage_agencies():
     host waits behind another's pacing clock — gao.gov asks for 420s
     between requests, and serial polling made every other agency wait."""
     entries = [e for e in load_registry()
-               if e["status"] == "active" and e["type"] == "rss"]
+               if e["status"] == "active"
+               and e["type"] in agencies.INGESTIBLE_TYPES]
     groups = agencies.host_groups(entries)
     print(f"   {len(entries)} source(s) across {len(groups)} host(s)", flush=True)
     results = agencies.run_concurrent(entries)

@@ -3314,3 +3314,32 @@ carries every vote of the Congress. Any `items()` implementation must
 bound its lookback before the per-item fetch, or first activation spends
 hundreds of requests on material the dating rule excludes as backfill
 anyway.
+
+## 2026-07-31 — Phase 0: the enumeration seam
+
+The adapter interface owned four decisions — identity, article policy,
+extraction, fallback — and enumeration was not among them. It was
+hard-coded to probe.parse_feed, which is the entire reason the pipeline
+could ingest exactly one shape. `SourceAdapter.items(body, content_type)`
+closes that, with a base implementation that delegates to parse_feed so
+every existing adapter behaves identically; the acceptance bar for this
+phase was the whole suite passing with no behavioural change, and it did.
+
+Two supporting fixes. `source_url(entry)` resolves feed/index/collection
+in one place, used by both `poll_source` and `host_groups` — they read
+`urls.feed` separately before, which would have grouped an index source
+under one host while fetching it from another and quietly broken the
+one-client-per-host pacing promise. And `INGESTIBLE_TYPES` replaces three
+scattered `type == "rss"` filters so widening happens once rather than in
+three places that could drift.
+
+The new test earned its keep immediately: rewriting the enumeration block
+silently dropped both the unparsable guard and the `feed_status`
+assignment, and the seam test caught both before they could ship. It
+proves a shape parse_feed cannot read reaches storage and inherits
+dedupe, mode disclosure, dating and identity from the loop unchanged.
+
+Recorded the obligation that comes with the seam in three places an agent
+will actually meet it — code-standards §1, adding-sources, CLAUDE.md §9:
+an index is not a feed. A feed is bounded by its publisher; the Senate's
+vote menu lists every vote of the Congress. 441 tests.
