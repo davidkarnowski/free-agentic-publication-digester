@@ -17,6 +17,7 @@ import threading
 import uuid
 
 from . import config
+from .client import BudgetExceededError
 from .sync import publication_date, utc_now_iso
 
 logger = logging.getLogger("fapd.collect")
@@ -289,6 +290,16 @@ class Worker:
             stats = self.cycle(conn, cycle_id)
             record_state(conn, self.name, ok=True, stats=stats)
             return stats
+        except BudgetExceededError as exc:
+            # Our own budget refusing us is the policy working, not a
+            # failure: the worker is alive and behaving. Recording it as
+            # an error inflated the backoff and — once the source-health
+            # page started reading consecutive_errors — reported the
+            # publisher as degraded because WE were pacing ourselves.
+            logger.info("%s: paused by our own budget — %s", self.name, exc)
+            record_state(conn, self.name, ok=True,
+                         stats={"paused": "budget", "detail": str(exc)})
+            return {"paused": "budget"}
         except Exception as exc:  # noqa: BLE001 — a worker failure must not
             # kill the supervisor; the error streak is the health signal.
             logger.warning("%s cycle failed: %r — continuing", self.name, exc)

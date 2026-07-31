@@ -3153,3 +3153,39 @@ data" against them would have misrepresented a documented refusal as an
 absence of evidence. The registry note on each card already carries the
 observed refusal verbatim, which is the stronger record. Worth
 revisiting if probe results ever land in the fetch log.
+
+## 2026-07-31 — Source health, and the first thing it caught was us
+
+The source guide now reports, per source, what we actually observed:
+items ingested over a trailing fourteen days and a per-day rate, average
+and median content length, delivery mode, and our requests to the host
+broken out as answered, declined, or unanswered — with a health label
+that must be derivable from the numbers printed beside it. Five labels,
+thresholds published on the page and interpolated from the constants so
+the description cannot drift from the rule.
+
+The framing was the risk. A health page is the easiest place on this
+site to start editorialising about agencies, so every label describes
+our ingestion of a source, never the institution, and a test scans the
+whole label vocabulary for verdict words and fails on any of them. A
+4xx or 5xx is the server declining; whether that is load, maintenance,
+or throttling is not visible from outside and is not guessed.
+
+Two numbers make the case for the page existing. Content length turns
+out to be the sharpest measure of how much an agency actually gives
+citizens: defense-newsroom averages 161 characters an item and
+justice-newsroom 326 — a headline and a link — while labor-newsroom
+averages 111,346 and cisa-advisories 35,175. And the fetch column found
+that all of our recent 503s come from one host, api.govinfo.gov, on its
+generated-on-demand zip endpoint.
+
+Then the page immediately caught something it was not built for, and it
+was us. The govinfo collections came up degraded with "8 consecutive
+failed cycles" — but the cycles had not failed. They had been refused by
+our own hourly ceiling, which is the policy working exactly as designed.
+Recording a self-imposed pause as an error inflated the worker's backoff
+and then, once health started reading that counter, published the
+publisher as degraded because we were pacing ourselves. That is the
+precise error the whole page was written to avoid, arriving through a
+side door. A budget refusal now records as a live, behaving worker with
+a stated pause, and a real fault still counts. 439 tests.

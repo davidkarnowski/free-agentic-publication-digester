@@ -463,3 +463,40 @@ def test_eod_targets_the_publication_day_that_just_closed(conn):
     collect.record_state(conn, "eod", ok=True,
                          stats={"ran": True, "date": "2026-07-30"})
     assert worker.eod_due(conn, at_9utc) is None
+
+
+def test_our_own_budget_pause_is_not_a_collector_error(tmp_path, monkeypatch):
+    """Hitting a limit we imposed on ourselves is the policy working.
+    Recorded as an error it inflated the worker's backoff and — once the
+    source-health page began reading consecutive_errors — published the
+    publisher as degraded because we were pacing ourselves."""
+    from fapd.client import BudgetExceededError
+
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+
+    def refuse(self, conn, cycle_id):
+        raise BudgetExceededError("501 govinfo requests in the last hour")
+
+    monkeypatch.setattr(collect.GovinfoWorker, "cycle", refuse)
+    worker = next(w for w in sup.workers if w.name == "govinfo")
+    assert worker.run_cycle() == {"paused": "budget"}
+
+    conn = conn_factory()
+    row = conn.execute(
+        "SELECT consecutive_errors, last_ok_at, last_result FROM"
+        " collector_state WHERE worker = 'govinfo'").fetchone()
+    assert row["consecutive_errors"] == 0        # not a failure
+    assert row["last_ok_at"] is not None         # the worker is alive
+    assert json.loads(row["last_result"])["paused"] == "budget"
+    conn.close()
+
+    # a real fault still counts
+    monkeypatch.setattr(collect.GovinfoWorker, "cycle",
+                        lambda self, c, i: (_ for _ in ()).throw(
+                            ConnectionError("socket")))
+    worker.run_cycle()
+    conn = conn_factory()
+    assert conn.execute(
+        "SELECT consecutive_errors FROM collector_state WHERE worker='govinfo'"
+    ).fetchone()[0] == 1
+    conn.close()
