@@ -2590,3 +2590,55 @@ stream. Exactness would need a rule per combination, which is precisely
 the explosion being avoided — and the reset button is one click away.
 Recorded in the function's docstring rather than left for someone to
 discover. 363 tests.
+## 2026-07-30 — The site gets a blog, and an allowlist to keep it honest
+
+The launch article has been sitting in `docs/devnotes/` with nowhere to
+go. Publishing it meant answering a question the site had not had to
+answer before: what happens when the project wants to say something in
+its own voice, on a site whose whole premise is that it does not have
+one.
+
+The answer is separation, stated everywhere it could matter. A post
+carries a line under its title saying it is commentary about the
+project and not part of the daily digest or the official record; the
+index says the same thing and points at the dated digests for what the
+government actually published; the `llms.txt` entry says it a third
+time, in the register an agent will parse — cite it as commentary,
+never as a source for what the government did. And the blog does not
+appear in `digests.json` or the Atom feed at all. Those two enumerate
+the record. An agent polling the feed for new days must never be handed
+an opinion piece wearing a digest's clothes, so the commentary simply
+is not in there. (A separate blog feed would be the honest way to offer
+change discovery for posts; it is not built, and is worth doing only if
+somebody asks for it.)
+
+The part that took the most care is what does *not* publish.
+`docs/devnotes/` is internal — drafts, working notes, and the
+directory's own README, all written for contributors. The obvious
+implementation, glob the directory, would have turned every future
+devnote into a public post the moment somebody saved a file. So
+publication runs off an explicit allowlist in `publish.py`: a tuple of
+(filename, slug, date) with exactly one entry today. The comment above
+it says plainly that a directory scan is not an acceptable
+simplification, and a test asserts the sibling devnote and the README
+never appear — a future glob fails that test on purpose rather than
+quietly shipping someone's notes.
+
+URL layout is `blog.html` plus `blog-<slug>.html`, flat in the site
+root. Digests own `/<YYYY-MM-DD>.html` exactly, so the `blog-` prefix
+cannot collide with one, and staying flat means posts inherit the
+shared shell's relative paths (`style.css`, `index.html`, `llms.txt`)
+without a second rendering path — a `blog/` subdirectory would have
+needed one, and a second rendering path is exactly how the sitewide
+new-tab rule would eventually get bypassed. Posts go through the same
+`_render_page` as everything else, so the article's outbound links got
+their `target="_blank"` for free, and the pages ship no script.
+
+Title and teaser are read from the article itself: the h1 for the
+title, and the first sentence of the first ordinary paragraph for the
+card — `_post_teaser` mirrors `_teaser`'s shape but skips the h1, the
+italic dateline, and the section heading rather than looking for a Day
+in Review. Nothing about the blog costs a token, and a missing
+allowlisted file yields no page, no nav link, and no sitemap entry
+rather than a broken link. 359 tests (8 new; 7 skip in a worktree
+without the local data DBs).

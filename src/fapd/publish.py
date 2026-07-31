@@ -416,6 +416,45 @@ li.source-note a { color: var(--muted); }
   display: inline-block; width: 0.55em; height: 0.55em;
   border-radius: 50%; background: #0f9488; margin-right: 0.4em;
 }
+/* Blog (blog.html + blog-<slug>.html): commentary about the project, kept
+   visually separate from digest content. Cards mirror the digest-list card
+   shape rather than sharing its selector, so the two can diverge. */
+.post-list { list-style: none; padding: 0; }
+.post-list li {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+  margin: 0.8rem 0;
+}
+.post-list a.post-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-decoration: none;
+}
+.post-list .post-date {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.post-list p.teaser {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.post-meta {
+  margin: 0.2rem 0 1.4rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.post-back {
+  margin-top: 2.4rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+}
 """
 
 _DATE_MD_RE = re.compile(r"^\d{4}-\d{2}-\d{2}\.md$")
@@ -673,9 +712,9 @@ def _registry_exists():
 
 def _site_nav(doc_pages=(), *, skip_stem=None, current=None):
     """The site header, identical everywhere (operator, 2026-07-30): the
-    digest archive, the live view, the source guide, every explanatory
-    page, and the agent guide. `current` omits the page's own link, and
-    a link is never emitted for a page that was not built."""
+    digest archive, the live view, the source guide, the blog, every
+    explanatory page, and the agent guide. `current` omits the page's own
+    link, and a link is never emitted for a page that was not built."""
     links = []
     if current != "index":
         links.append('<a href="index.html">All digests</a>')
@@ -683,6 +722,8 @@ def _site_nav(doc_pages=(), *, skip_stem=None, current=None):
         links.append('<a href="today.html">Today (live)</a>')
     if current != "sources" and _registry_exists():
         links.append('<a href="sources.html">Sources</a>')
+    if current != "blog" and _blog_exists():
+        links.append('<a href="blog.html">Blog</a>')
     links.append(_doc_nav_links(p for p in doc_pages if p[0] != skip_stem))
     if current != "agents":
         links.append('<a href="agents.html">For agents</a>')
@@ -982,6 +1023,145 @@ def _build_sources_page(out_dir, doc_pages=()):
     return True
 
 
+# ---------------------------------------------------------------------------
+# Blog (blog.html + blog-<slug>.html)
+# ---------------------------------------------------------------------------
+# Commentary about the project — how it is built and why — deliberately
+# separate from the digests, which are the official-record surface. Nothing
+# here enters digests.json or the Atom feed; mixing commentary into those
+# would misrepresent what they contain.
+#
+# PUBLICATION IS BY ALLOWLIST, NEVER BY GLOB.  docs/devnotes/ is the
+# project's INTERNAL development-narrative directory: working notes, drafts,
+# and its own README all live there and are written for contributors, not
+# readers of fapd.info. A devnote becomes public only when a person adds it
+# to `_BLOG_POSTS` below, on purpose, with a slug and a publication date.
+# Do not replace this tuple with a directory scan, and do not add an entry
+# just because a file exists — that would publish internal notes the moment
+# somebody wrote one.
+#
+# URL layout: `blog.html` for the index, `blog-<slug>.html` for each post,
+# flat in the site root. Digest URLs are exactly `/<YYYY-MM-DD>.html`, so the
+# `blog-` prefix cannot collide with them (or with a doc page's stem), and
+# staying flat keeps every page on the same relative paths the shared shell
+# already emits — `style.css`, `index.html`, `llms.txt` — so posts need no
+# second rendering path. A `blog/` subdirectory would have required one.
+_BLOG_DIR = ("docs", "devnotes")
+
+# (source filename in docs/devnotes/, url slug, publication date)
+_BLOG_POSTS = (
+    ("2026-07-30-launch-article.md", "launch", "2026-07-30"),
+)
+
+
+def _post_teaser(md_text):
+    """First sentence of a post's own opening prose, for index cards — the
+    blog counterpart of `_teaser` for digests. The title, an italic
+    dateline, section headings, quotes and lists are skipped; the first
+    ordinary paragraph supplies the sentence."""
+    for block in md_text.split("\n\n"):
+        para = " ".join(block.split())
+        if not para or para[0] in "#*_>-|":
+            continue
+        return re.split(r"(?<=[.;])\s", para, maxsplit=1)[0] or None
+    return None
+
+
+def _blog_sources():
+    """[(slug, date, title, teaser, markdown, canonical)] for the allowlisted
+    posts that exist on disk, newest first. An allowlisted file that is
+    missing is skipped rather than fatal, so a rename degrades to no page
+    instead of a broken link. Files NOT in `_BLOG_POSTS` are never read."""
+    posts = []
+    for filename, slug, date in _BLOG_POSTS:
+        path = config.PROJECT_ROOT.joinpath(*_BLOG_DIR, filename)
+        if not path.is_file():
+            continue
+        md_text = path.read_text(encoding="utf-8")
+        match = _H1_RE.search(md_text)
+        title = match.group(1) if match else slug.replace("-", " ").capitalize()
+        posts.append((slug, date, title, _post_teaser(md_text), md_text,
+                      "/".join(_BLOG_DIR) + f"/{filename}"))
+    return sorted(posts, key=lambda p: p[1], reverse=True)
+
+
+def _blog_exists():
+    """Whether blog.html will exist — the nav must not link a page that was
+    not built (same contract as `_registry_exists`)."""
+    return any(config.PROJECT_ROOT.joinpath(*_BLOG_DIR, f).is_file()
+               for f, _slug, _date in _BLOG_POSTS)
+
+
+def _blog_body(posts):
+    cards = []
+    for slug, date, title, teaser, _md, _canonical in posts:
+        teaser_html = (f'<p class="teaser">{html.escape(teaser)}</p>'
+                       if teaser else "")
+        cards.append(
+            f'<li><a class="post-title" href="blog-{slug}.html">'
+            f"{html.escape(title)}</a>"
+            f'<span class="post-date">{html.escape(date)}</span>'
+            f"{teaser_html}</li>")
+    return (
+        "<h1>Blog</h1>"
+        "<p>Notes on how the Free Agentic Publication Digester is built: "
+        "the pipeline, the editorial gates, and the access policy it keeps "
+        "with the servers it reads. These posts are commentary about the "
+        "project. They are not part of the daily digest and not part of the "
+        'official record — for what the government published, read the '
+        '<a href="index.html">dated digests</a>.</p>'
+        f'<ul class="post-list">{"".join(cards)}</ul>'
+    )
+
+
+def _blog_post_body(date, md_text):
+    """A post rendered through the site's ordinary Markdown pipeline: the
+    article's own words, an explicit publication date under its title, and a
+    link back to the index. No digest readability layer — that layer encodes
+    digest conventions (inclusion rules, citations) a post does not have."""
+    _MD.reset()
+    body = _MD.convert(md_text)
+    meta = (f'<p class="post-meta">Published {html.escape(date)} · '
+            "commentary about the project, not part of the daily digest or "
+            "the official record</p>")
+    head, sep, tail = body.partition("</h1>")
+    body = head + sep + meta + tail if sep else meta + body
+    return (body + '<p class="post-back"><a href="blog.html">'
+                   "&larr; All posts</a></p>")
+
+
+def _build_blog(out_dir, doc_pages=()):
+    """Render blog.html plus one page per allowlisted post. Returns
+    [(slug, date, title)] for the machine surfaces; an empty list means no
+    index page was written and nothing links to one."""
+    posts = _blog_sources()
+    if not posts:
+        return []
+    brand = SITE_TITLE.split(" — ")[0]
+    for slug, date, title, _teaser, md_text, canonical in posts:
+        page = _render_page(
+            # No brand suffix when the post's own title already carries it.
+            title if brand in title else f"{title} — {SITE_TITLE}",
+            _blog_post_body(date, md_text),
+            # A post keeps the Blog nav link (it is not the index); only the
+            # index omits its own.
+            _site_nav(doc_pages),
+            canonical,
+        )
+        (out_dir / f"blog-{slug}.html").write_text(page, encoding="utf-8")
+    index = _render_page(
+        f"Blog — {SITE_TITLE}",
+        _blog_body(posts),
+        _site_nav(doc_pages, current="blog"),
+        "/".join(_BLOG_DIR) + "/ (allowlisted posts only)",
+        description=("Notes on how the Free Agentic Publication Digester is "
+                     "built — commentary about the project, not part of the "
+                     "daily digest."),
+    )
+    (out_dir / "blog.html").write_text(index, encoding="utf-8")
+    return [(slug, date, title) for slug, date, title, _t, _m, _c in posts]
+
+
 def build_site(digest_dir=None, out_dir=None):
     """Convert every digest to HTML plus an index. Returns stats."""
     digest_dir = Path(digest_dir or config.DIGEST_DIR)
@@ -1027,8 +1207,9 @@ def build_site(digest_dir=None, out_dir=None):
             f"{teaser_html}</li>"
         )
     sources_built = _build_sources_page(out_dir, doc_pages)
+    blog_posts = _build_blog(out_dir, doc_pages)
     _build_agent_surfaces(out_dir, dates, teasers, doc_pages,
-                          base=config.SITE_BASE_URL)
+                          base=config.SITE_BASE_URL, blog_posts=blog_posts)
     sources_link = (
         '<p class="tagline"><a href="sources.html">Source guide</a> — every '
         "federal source we ingest, plan to ingest, or have evaluated, with "
@@ -1061,6 +1242,7 @@ def build_site(digest_dir=None, out_dir=None):
         "pages": len(files),
         "assets": assets_copied,
         "doc_pages": len(doc_pages),
+        "blog_posts": len(blog_posts),
         "out_dir": out_dir,
     }
 
@@ -1600,8 +1782,14 @@ def _atom_escape(text):
     return html.escape(text or "", quote=True)
 
 
-def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
-    """llms.txt, digests.json, feed.xml, robots.txt, sitemap.xml, agents.html."""
+def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
+                          blog_posts=()):
+    """llms.txt, digests.json, feed.xml, robots.txt, sitemap.xml, agents.html.
+
+    Blog posts reach the discovery surfaces (llms.txt, sitemap.xml) and
+    stay out of the record surfaces (digests.json, feed.xml) on purpose:
+    those two enumerate official-record digests, and an agent polling them
+    must never receive project commentary as though it were one."""
     import json as _json
 
     newest = dates[-1] if dates else None
@@ -1634,7 +1822,12 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
          " Items may change until the end-of-day gates freeze the dated"
          " digest)"),
         f"- [Source guide — what we ingest and why]({base}/sources.html)",
-    ] + [
+    ] + ([
+        (f"- [Blog — notes on how this project is built]({base}/blog.html)"
+         " (commentary ABOUT the project: not digest content, not part of"
+         " the official record, and not government publication. Cite it as"
+         " commentary, never as a source for what the government did.)"),
+    ] if blog_posts else []) + [
         f"- [{title}]({base}/{stem}.html)" for stem, title in doc_pages
     ] + [
         f"- [Access guide for agents]({base}/agents.html)",
@@ -1705,6 +1898,8 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
     urls = (
         ["index.html", "today.html", "sources.html", "agents.html"]
         + [f"{stem}.html" for stem, _title in doc_pages]
+        + (["blog.html"] if blog_posts else [])
+        + [f"blog-{slug}.html" for slug, _date, _title in blog_posts]
         + [f"{d}.html" for d in dates]
     )
     sitemap = (

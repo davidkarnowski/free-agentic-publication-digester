@@ -970,3 +970,166 @@ def test_filter_pairs_are_symmetric_and_include_self():
     assert "legislative" in pairs["legislative"]
     assert "legislative" not in pairs["final rule"]   # different entries
     assert pairs["epa"] == {"executive", "final rule", "epa"}
+
+
+# --------------------------------------------------------------- the blog --
+
+_LAUNCH_MD = """# Announcing the Free Agentic Publication Digester: one reader
+
+*Dev notes, 2026-07-30. The launch article — why this project exists.*
+
+## The problem, plainly
+
+If you want to know what the government did, you have two options. Both
+are bad in different ways.
+
+Read the primary record, or read [coverage](https://example.com/story).
+"""
+
+_INTERNAL_MD = """# Source adapters and polite crawling
+
+An internal devnote that nobody put on the allowlist.
+"""
+
+
+@pytest.fixture
+def devnotes_root(tmp_path, monkeypatch):
+    """A project root holding both an allowlisted post and an internal
+    devnote — the allowlist, not the directory, decides what publishes."""
+    from fapd import config
+
+    root = tmp_path / "root"
+    notes = root / "docs" / "devnotes"
+    notes.mkdir(parents=True)
+    (notes / "2026-07-30-launch-article.md").write_text(_LAUNCH_MD)
+    (notes / "2026-07-28-source-adapters-and-polite-crawling.md").write_text(
+        _INTERNAL_MD)
+    (notes / "README.md").write_text("# Development notes\n\nInternal.\n")
+    monkeypatch.setattr(config, "PROJECT_ROOT", root)
+    return root
+
+
+def test_blog_index_lists_the_post_with_date_and_teaser(digests, devnotes_root,
+                                                        tmp_path):
+    out = tmp_path / "site"
+    stats = publish.build_site(digests, out)
+    assert stats["blog_posts"] == 1
+    index = (out / "blog.html").read_text()
+    assert "<h1>Blog</h1>" in index
+    assert 'href="blog-launch.html">Announcing the Free Agentic' in index
+    assert '<span class="post-date">2026-07-30</span>' in index
+    # teaser mirrors _teaser: the first sentence of the opening prose,
+    # skipping the h1, the italic dateline, and the section heading
+    assert ('<p class="teaser">If you want to know what the government did, '
+            "you have two options.</p>") in index
+    # the index says what a post is, and is not
+    assert "not part of the daily digest" in index
+
+
+def test_blog_post_page_renders_with_date_and_back_link(digests, devnotes_root,
+                                                        tmp_path):
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    post = (out / "blog-launch.html").read_text()
+    assert "<title>Announcing the Free Agentic Publication Digester" in post
+    assert ">Announcing the Free Agentic Publication Digester" in post
+    # the publication date sits directly under the article's own title
+    assert '</h1><p class="post-meta">Published 2026-07-30' in post
+    assert "not part of the daily digest or the official record" in post
+    assert ('<p class="post-back"><a href="blog.html">&larr; All posts</a></p>'
+            in post)
+    # canonical-source footer names the markdown it came from
+    assert "docs/devnotes/2026-07-30-launch-article.md" in post
+    # the post's own outbound links obey the sitewide new-tab rule
+    assert ('<a href="https://example.com/story" target="_blank"'
+            ' rel="noopener noreferrer">') in post
+
+
+def test_blog_publication_is_by_allowlist_not_by_directory(digests,
+                                                           devnotes_root,
+                                                           tmp_path):
+    """docs/devnotes/ is internal; only files named in publish._BLOG_POSTS
+    become pages. A future directory glob would fail this test on purpose."""
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    built = {p.name for p in out.glob("blog*.html")}
+    assert built == {"blog.html", "blog-launch.html"}
+    index = (out / "blog.html").read_text()
+    assert "source-adapters" not in index
+    assert "polite crawling" not in index
+    assert "Development notes" not in index          # the directory README
+    assert "README.md" not in {f for f, _s, _d in publish._BLOG_POSTS}
+    sitemap = (out / "sitemap.xml").read_text()
+    assert "source-adapters" not in sitemap
+
+
+def test_blog_nav_link_on_every_page_class(digests, devnotes_root, tmp_path):
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    for name in ("index.html", "2026-07-01.html", "agents.html",
+                 "blog-launch.html"):
+        assert 'href="blog.html">Blog</a>' in (out / name).read_text(), name
+    # ...except the index itself, which does not link to itself
+    assert 'href="blog.html">Blog</a>' not in (out / "blog.html").read_text()
+
+
+def test_blog_reaches_discovery_surfaces_not_record_surfaces(
+        digests, devnotes_root, tmp_path, monkeypatch):
+    """sitemap + llms.txt announce the blog; digests.json and the Atom feed
+    stay purely official-record, so an agent polling them never receives
+    commentary as a digest."""
+    monkeypatch.setattr(publish.config, "SITE_BASE_URL", "")
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    sitemap = (out / "sitemap.xml").read_text()
+    assert "<loc>/blog.html</loc>" in sitemap
+    assert "<loc>/blog-launch.html</loc>" in sitemap
+    llms = (out / "llms.txt").read_text()
+    assert "(/blog.html)" in llms
+    assert "not part of the official record" in llms
+    assert "blog" not in (out / "digests.json").read_text()
+    assert "blog" not in (out / "feed.xml").read_text()
+
+
+def test_blog_pages_ship_no_script(digests, devnotes_root, tmp_path):
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    for name in ("blog.html", "blog-launch.html"):
+        assert "<script" not in (out / name).read_text(), name
+
+
+def test_blog_degrades_gracefully_when_the_post_is_missing(digests, tmp_path,
+                                                           monkeypatch):
+    """An allowlisted file that is not on disk yields no page, no nav link,
+    and no sitemap entry — never a broken link."""
+    from fapd import config
+
+    empty_root = tmp_path / "empty"
+    (empty_root / "docs" / "devnotes").mkdir(parents=True)
+    monkeypatch.setattr(config, "PROJECT_ROOT", empty_root)
+    out = tmp_path / "site"
+    stats = publish.build_site(digests, out)
+    assert stats["blog_posts"] == 0
+    assert not (out / "blog.html").exists()
+    assert 'href="blog.html"' not in (out / "index.html").read_text()
+    assert 'href="blog.html"' not in (out / "2026-07-01.html").read_text()
+    assert "blog.html" not in (out / "sitemap.xml").read_text()
+    assert "blog.html" not in (out / "llms.txt").read_text()
+
+
+def test_blog_renders_the_real_launch_article(digests, tmp_path):
+    """The committed article publishes; its sibling devnote does not."""
+    from fapd import config
+
+    article = (config.PROJECT_ROOT / "docs" / "devnotes"
+               / "2026-07-30-launch-article.md")
+    if not article.exists():
+        pytest.skip("no launch article on disk")
+    out = tmp_path / "site"
+    stats = publish.build_site(digests, out)
+    assert stats["blog_posts"] == 1
+    post = (out / "blog-launch.html").read_text()
+    assert "one polite reader for the official record" in post
+    assert "The record was always yours" in post
+    assert not (out / "blog-source-adapters-and-polite-crawling.html").exists()
+    assert "source-adapters" not in (out / "blog.html").read_text()
