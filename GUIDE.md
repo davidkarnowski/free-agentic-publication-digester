@@ -494,9 +494,40 @@ All LLM prompts are code, versioned, and change through procedure:
 We are guests on public infrastructure. Rules, enforced in code, not by
 discipline:
 
-- **Self-imposed budget:** max **1 request/second sustained per host** and a
-  daily cap (start: 2,000 requests/day) — roughly 1% of what GPO permits. The
-  client refuses to exceed it.
+- **Self-imposed budget:** max **1 request/second sustained per host**, an
+  **hourly ceiling**, and a daily cap. The client refuses to exceed any of
+  them, counting from the fetch log so the limits hold across processes and
+  restarts.
+
+  **Amended 2026-07-31 (operator-authorised, on evidence).** The govinfo
+  daily cap rises from 2,000 to **6,000 requests/day**, and a ceiling of
+  **500 requests/hour** is added. The evidence, recorded because a budget
+  change is not made on preference: api.data.gov — the shared GSA service
+  govinfo runs on — documents **1,000 requests per hour per key** and
+  answers **429** when that is exceeded. In three days of logs we have
+  received **no 429 of any kind**, and at 2,000/day we averaged about **83
+  requests per hour**, roughly 8% of the allowance. The hourly ceiling is
+  half of what the publisher permits and is the limit that actually keeps
+  us clear of theirs; the daily figure is bounded by it. The ceiling binds
+  every client including the end-of-day finalizer — it is the publisher's
+  limit, not ours, and nothing exempts anyone from it.
+
+  **What this amendment does not do.** It does not raise the per-second
+  pace, does not weaken any crawl-delay, and does not change the rule that
+  the answer to slowness is fewer requests. **Failed attempts still count
+  against the budget** — a 503 cost the server a request whatever it
+  returned to us. On 2026-07-30, 882 of 4,868 govinfo requests were 503s,
+  so roughly a fifth of the day's allowance was spent on the server's own
+  unavailability; the response to that is fewer requests, never faster
+  retries.
+
+  **Finalizer reserve (added 2026-07-31).** Continuous collectors may spend
+  only **85%** of a daily budget; the remainder is reserved for the
+  end-of-day finalizer. On 2026-07-30 the collectors spent all 2,000
+  govinfo requests on historical backlog and the finalizer could not sync
+  the day it was finalizing, so that day's digest carries no Congressional
+  Record, no bills and no public laws at all. A day already collected is
+  published even if its top-up sync cannot run; the gap is disclosed.
 - **Concurrency across hosts only — never against one.** Ingestion may poll
   distinct hosts in parallel (added 2026-07-28: one worker per host group,
   each with its own client), because politeness is a promise made to each
@@ -707,6 +738,25 @@ of the code, not of operator discipline.
    the end-of-day finalizer: its staleness rule would otherwise
    recompose on nearly every intraday batch, and the Day in Review
    describes a completed day by definition.
+
+- **Rule 13 — we do not buy days we will not publish (added
+  2026-07-31).** The analyze layer works only on the current publication
+  day and the one before it (the day the end-of-day finalizer freezes).
+  Post-dated digests are not published, so a token spent on an older day
+  is taken from the day that will be. Items older than the window stay
+  pending and are disclosed by the coverage accounting; they are never
+  silently dropped. Evidence: on 2026-07-30 the layer wrote 184 summaries
+  across eleven dates reaching back to 2024-06-18 while the digest day
+  itself received none.
+- **Rule 14 — the retry ladder has a ceiling (added 2026-07-31).** Group
+  retries first (rule unchanged); single-item retries stop at a configured
+  ceiling per run, past which the item is left unsummarized and said so.
+  A backend with a large fixed per-call cost makes single retries almost
+  pure overhead: measured 2026-07-30 on the CLI backend, ~29K input tokens
+  per call regardless of payload, and 366 single retries cost 10,860,137
+  input tokens — 62% of the day — to buy summaries of ~800 tokens each.
+  Disclosure is cheaper than completeness bought at that price, and the
+  coverage statement is where it is disclosed.
 
 ## 7. Provenance & Tamper-Evidence
 

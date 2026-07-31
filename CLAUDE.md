@@ -113,6 +113,15 @@ uv run python scripts/sources_doc.py          # regenerate SOURCES.md after regi
   to slowness is fewer requests (feed-only mode), never faster ones.
 - **No daily LLM token cap is enforced yet** — GUIDE §6 rule 8 is
   measure-first; the ledger exists precisely to set the cap from data.
+- **The analyze layer only ever works on the current publication day and
+  the one before it** (GUIDE §6 r13). Older pending items are deliberate
+  disclosure, not a backlog to drain — draining it is what starved the
+  digest day on 2026-07-30.
+- **Failed requests count against the request budget on purpose** — a 503
+  cost the server a request. Do not "fix" the budget by excluding them.
+- **Collectors see a smaller budget than the finalizer** (85%, GUIDE §4
+  reserve). A client constructed `reserve_exempt=True` is the finalizer;
+  nothing else should be.
 - **Single-item LLM retries are the expensive path by design** — group
   retries first (`MAX_RETRY_BATCH_ITEMS`); the 2026-07-29 ledger showed
   25 single retries costing 645K input tokens (42% of the day).
