@@ -2642,3 +2642,25 @@ in Review. Nothing about the blog costs a token, and a missing
 allowlisted file yields no page, no nav link, and no sitemap entry
 rather than a broken link. 359 tests (8 new; 7 skip in a worktree
 without the local data DBs).
+
+## 2026-07-30 — Blog goes up; PDF comes off the list
+
+The launch article is published. `blog.html` indexes posts and each
+lands at `blog-<slug>.html` — flat and prefixed, because digests own
+`/<YYYY-MM-DD>.html` exactly and a flat post inherits the shared page
+shell's relative paths, so no second rendering path exists to
+eventually drift from the sitewide new-tab rule. Publication is by
+allowlist, never by glob: `docs/devnotes/` is internal development
+narrative, and a file becomes public only when someone adds it to
+`_BLOG_POSTS` with a slug and a date. Tests assert the neighbouring
+devnote and the directory README stay unpublished — the failure mode
+worth pinning is not "the blog broke" but "the blog published
+something nobody meant to publish". Blog joins the nav and the sitemap
+and gets a line in llms.txt marking it commentary about the project;
+digests.json and the Atom feed are deliberately untouched, because
+those describe the official record and folding opinion into them would
+misrepresent what an agent is reading.
+
+PDF render-and-serve is struck from the launch checklist at the
+operator's word, the same day it was requested. The design notes stay
+in git history rather than being deleted outright. 371 tests.
