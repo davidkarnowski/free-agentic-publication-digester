@@ -3279,3 +3279,38 @@ Also recorded that regulations.gov was deliberately not probed: its docs
 describe their own registration and a different header, and a general
 statement about participating APIs is not that publisher telling us our
 key applies.
+
+## 2026-07-31 — The adapter build-out plan
+
+Wrote `docs/adapter-build-plan.md`: a code-level, phase-by-phase plan for
+the 70 planned sources, approved by the operator and written into the
+repository so any agent can pick it up from the code rather than from a
+session transcript.
+
+The architectural finding it rests on is small and load-bearing.
+`SourceAdapter` covers identity, article policy, extraction, and
+fallback — but not **enumeration**, which is hard-coded to
+`probe.parse_feed` at agencies.py:282. That single missing hook is why
+the pipeline can ingest exactly one shape. Adding `items(body,
+content_type)`, with a base implementation that delegates to parse_feed
+so nothing existing changes, unlocks xml-index, api, and html-index
+adapters at once. Everything else those adapters need — conditional
+GETs, robots, pacing, budgets, capture and hashing, dedupe, storage,
+mode disclosure, manifests — is already shape-agnostic.
+
+Two operator decisions are recorded in the plan. Roll-call votes get
+appended as section 7 rather than inserted at 2, so anchors in published
+digests keep matching future ones. Federal Register public-inspection
+documents fold into the Federal Register section rather than getting
+their own — with one integrity point left open rather than decided
+quietly: those documents are filed but not published, and the Coverage
+Statement is a validated claim about what the government published, so
+the plan counts them under a named marker and asks the operator to
+confirm before that phase merges.
+
+A third obligation the plan makes binding on every future adapter: an
+index is not a feed. A feed carries recent items; Senate's vote menu
+carries every vote of the Congress. Any `items()` implementation must
+bound its lookback before the per-item fetch, or first activation spends
+hundreds of requests on material the dating rule excludes as backfill
+anyway.
