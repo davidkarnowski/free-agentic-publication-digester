@@ -2664,3 +2664,51 @@ misrepresent what an agent is reading.
 PDF render-and-serve is struck from the launch checklist at the
 operator's word, the same day it was requested. The design notes stay
 in git history rather than being deleted outright. 371 tests.
+
+## 2026-07-30 — Accessibility audit, and fixing what tonight's work broke
+
+An audit agent went through the live pages against WCAG 2.2 AA and past
+it; docs/accessibility.md carries all 20 findings with measured numbers
+and drop-in replacements. Two were critical, and both were mine, made
+tonight:
+
+The filter's shared-label design — one checkbox referenced by a chip in
+the bar and by a label on every matching entry — is what makes clicking
+a tag on an entry and clicking it in the bar the same act. It also means
+286 labels point at one input, and HTML-AAM computes an accessible name
+by concatenating every label's text. The checkbox for "executive"
+announced its own keyword 286 times, roughly 2,600 characters, with no
+way to hear what the control does or to stop it short of leaving. Fixed
+with aria-label, which wins over <label>, so the design survives and the
+name becomes "Filter to executive — 285 item(s)".
+
+There was no skip link anywhere on the site, and /today made that
+materially worse: a keyboard user walked the header and then 58
+invisible checkboxes before reaching the first item. Skip links now lead
+every page, plus a second in-page skip past the filter bank.
+
+Contrast measurements caught the colors I chose: the dark-theme selected
+chip was white on light blue at 2.25:1 — the worst number on the site,
+on the one element that says which filters are on. An --accent-on token
+takes it to 8.46:1, and the light-theme branch hues are darkened (not
+changed — they stay off the party palette) from 2.95-4.11:1 to
+5.02-5.71:1. Selection also stopped being color-only: a check glyph
+marks selected chips, which is what survives grayscale and forced
+colors, where the background fill is simply discarded.
+
+Two latent CSS defects surfaced on the way. `--rule` was never defined,
+so the border on the mandatory GUIDE §5 disclosure box was invalid and
+dropped entirely. `.rule-note` was styled only as `li.rule-note` while
+two call sites emit spans, so those notes rendered at body size in full
+contrast — the opposite of the subtle-metadata intent.
+
+And the audit caught a public claim I had made false: privacy.md said
+"No accounts, no forms. Nothing here accepts input", while /today now
+ships a form with 58 checkboxes. The substance held — nothing is
+submitted, stored, or readable by us — but the sentence did not, so it
+now says what is actually true. That is twice tonight that a feature
+quietly outdated a published promise; the pattern is worth naming.
+
+Remaining findings, including the table semantics and collapsed-heading
+issues, stay in the memo with nine open questions for the operator.
+375 tests.

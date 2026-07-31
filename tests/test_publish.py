@@ -825,7 +825,7 @@ def test_today_filter_bar_is_pure_css_and_wired(conn, tmp_path):
     assert 'href="#k-' not in page
     assert "filter-anchor" not in page
     for slug in ("f-legislative", "f-executive", "f-press-release"):
-        assert f'<input type="checkbox" class="filter-cb" id="{slug}">' in page
+        assert f'<input type="checkbox" class="filter-cb" id="{slug}"' in page
         assert f'for="{slug}"' in page
         k = slug[2:]
         assert (f"#{slug}:checked ~ .today-list > .today-item:not(.k-{k})"
@@ -1133,3 +1133,80 @@ def test_blog_renders_the_real_launch_article(digests, tmp_path):
     assert "The record was always yours" in post
     assert not (out / "blog-source-adapters-and-polite-crawling.html").exists()
     assert "source-adapters" not in (out / "blog.html").read_text()
+
+
+# ------------------------------------------------------- accessibility --
+
+
+def test_filter_checkboxes_name_themselves(conn, tmp_path):
+    """A11Y-01 (4.1.2): one checkbox is referenced by a label in the bar
+    and by one on every matching entry, and HTML-AAM concatenates them
+    all into the accessible name — hundreds of repetitions. aria-label
+    wins over <label>, so the shared-label design survives with a name a
+    person can actually listen to."""
+    from conftest import DATE
+
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+    assert ('<input type="checkbox" class="filter-cb" id="f-executive"'
+            ' aria-label="Filter to executive — 1 item(s)">') in page
+    # 2.5.3 Label in Name: the visible text leads the accessible name
+    assert 'aria-label="Filter to press release' in page
+
+
+def test_every_page_class_has_a_skip_link_and_main_landmark(conn, tmp_path):
+    """A11Y-02 (2.4.1): without this, a keyboard user on /today walks the
+    header and then 58 invisible checkboxes before the first item."""
+    from conftest import DATE
+
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    today = (tmp_path / "today.html").read_text()
+    assert '<a class="skip-link" href="#main">Skip to main content</a>' in today
+    assert '<main id="main" tabindex="-1">' in today
+    # and a second skip past the filter bank, to the stream itself
+    assert 'href="#today-stream">Skip ' in today
+    assert '<ul class="today-list" id="today-stream"' in today
+    assert today.index('href="#today-stream"') < today.index('id="today-stream"')
+
+    (tmp_path / "d").mkdir()
+    (tmp_path / "d" / "2026-07-29.md").write_text("# Daily Digest\n\nBody.\n")
+    publish.build_site(digest_dir=tmp_path / "d", out_dir=tmp_path / "s")
+    for name in ("index.html", "2026-07-29.html", "about.html"):
+        page = (tmp_path / "s" / name).read_text()
+        assert 'class="skip-link" href="#main"' in page, name
+        assert '<main id="main"' in page, name
+        assert '<nav aria-label="Site">' in page, name
+
+
+def test_selection_is_not_signalled_by_colour_alone(conn, tmp_path):
+    """A11Y-06 (1.4.1): a check glyph marks selected chips, and it is
+    also what survives grayscale and forced-colors, where the accent
+    fill is discarded."""
+    from conftest import DATE
+
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+    assert ('#f-executive:checked ~ .filter-bar label[for="f-executive"]::before'
+            in page)
+    assert '{content:"\\2713\\00a0"}' in page
+    # contrast token, not a hardcoded white, on the selected fill
+    assert "color:var(--accent-on)" in page
+    # the rest lives in the shared stylesheet
+    assert "@media (forced-colors: active)" in publish._STYLE
+    assert "--accent-on: #0b1116;" in publish._STYLE   # dark theme: 8.46:1
+    assert "color: #4448b8;" in publish._STYLE         # light legislative 5.71:1
+
+
+def test_css_defects_found_by_the_audit_stay_fixed():
+    """A11Y-20: `--rule` was never defined, so the whole border
+    declaration on the mandatory disclosure box was invalid and dropped;
+    `.rule-note` was styled only as `li.rule-note` while two call sites
+    emit spans, which therefore rendered at body size."""
+    css = publish._STYLE
+    assert "var(--rule)" not in css
+    assert ".rule-note, .source-note {" in css
+    assert "li.rule-note, li.source-note { list-style: none; }" in css
+    assert "border: 1px solid var(--border);" in css

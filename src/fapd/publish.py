@@ -41,14 +41,15 @@ _PAGE = """<!DOCTYPE html>
 <link rel="stylesheet" href="style.css">
 {head_extra}</head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 <header class="site-header">
-  <nav>
+  <nav aria-label="Site">
     <a class="brand" href="index.html" title="Free Agentic Publication Digester"
        aria-label="Free Agentic Publication Digester (FAPD)">FAPD</a>
     <span class="nav-links">{nav_links}</span>
   </nav>
 </header>
-<main>
+<main id="main" tabindex="-1">
 {body}
 </main>
 <footer class="site-footer">
@@ -77,6 +78,7 @@ _STYLE = """\
   --border: #d8dde3;
   --stripe: #f4f6f8;
   --card: #ffffff;
+  --accent-on: #ffffff;      /* text on an --accent fill: 8.66:1 */
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -88,6 +90,9 @@ _STYLE = """\
     --border: #2c343c;
     --stripe: #171d23;
     --card: #151a20;
+    /* white on the dark accent measured 2.25:1 — the worst number on the
+       site, and it carried the "which filters are on" signal. 8.46:1. */
+    --accent-on: #0b1116;
   }
 }
 * { box-sizing: border-box; }
@@ -101,6 +106,14 @@ body {
   line-height: 1.6;
   font-size: 1rem;
 }
+.skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 10;
+  padding: 0.5rem 0.9rem;
+  background: var(--card); color: var(--accent);
+  border: 2px solid var(--accent); border-radius: 0 0 6px 0;
+  font-size: 0.95rem; text-decoration: none;
+}
+.skip-link:focus { left: 0; }
 .site-header {
   border-bottom: 1px solid var(--border);
   background: var(--accent-soft);
@@ -209,21 +222,24 @@ img {
 }
 .tag-model { border-style: dashed; font-style: italic; }
 /* Branch colors — deliberately not the red/blue party palette. */
+/* Light-theme hues darkened to clear 4.5:1 (measured 5.02-5.71:1); the
+   hues themselves are unchanged, so branches stay off the party palette.
+   currentColor borders also lift the 3:1 non-text contrast floor. */
 .tag-branch-legislative {
-  background: rgba(99, 102, 241, 0.14); color: #5a5fd0;
-  border-color: rgba(99, 102, 241, 0.55);
+  background: rgba(99, 102, 241, 0.14); color: #4448b8;
+  border-color: currentColor;
 }
 .tag-branch-executive {
-  background: rgba(13, 148, 136, 0.14); color: #0f9488;
-  border-color: rgba(13, 148, 136, 0.55);
+  background: rgba(13, 148, 136, 0.14); color: #0b6b62;
+  border-color: currentColor;
 }
 .tag-branch-judicial {
-  background: rgba(217, 119, 6, 0.14); color: #c07207;
-  border-color: rgba(217, 119, 6, 0.55);
+  background: rgba(217, 119, 6, 0.14); color: #8a5206;
+  border-color: currentColor;
 }
 .tag-branch-cross {
   background: rgba(107, 114, 128, 0.14);
-  border-color: rgba(107, 114, 128, 0.55);
+  border-color: currentColor;
 }
 @media (prefers-color-scheme: dark) {
   .tag-branch-legislative { color: #9fa0f2; }
@@ -269,12 +285,15 @@ details.digest-section[open] > summary .tags { display: none; }
   margin-right: 0.45rem;
 }
 .plain-label::after { content: ":"; }
-li.rule-note, li.source-note {
+/* Type styles apply wherever these appear; several call sites emit
+   <span class="rule-note">, which the old li-only selector never
+   reached, so those notes rendered at body size in full contrast. */
+.rule-note, .source-note {
   font-size: 0.78rem;
   color: var(--muted);
-  list-style: none;
   margin: 0.1rem 0;
 }
+li.rule-note, li.source-note { list-style: none; }
 li.source-note a { color: var(--muted); }
 .rule-id {
   border-bottom: 1px dotted var(--muted);
@@ -344,7 +363,7 @@ li.source-note a { color: var(--muted); }
 .tag-status-unavailable { border-style: dashed; }
 .tag-status-excluded { border-style: dotted; }
 .today-disclosure {
-  border: 1px solid var(--rule); border-left: 3px solid var(--accent);
+  border: 1px solid var(--border); border-left: 3px solid var(--accent);
   padding: 0.6rem 0.85rem; font-size: 0.88rem; color: var(--muted);
   border-radius: 4px;
 }
@@ -399,6 +418,12 @@ li.source-note a { color: var(--muted); }
 .chip-toggle:hover { border-color: var(--accent); }
 .filter-note {
   display: block; margin-top: 0.4rem; font-size: 0.75rem; color: var(--muted);
+}
+@media (forced-colors: active) {
+  /* the background fill is discarded in forced colors; the glyph and a
+     thicker border are what remain to show a chip is selected */
+  .filter-chip, .chip-toggle { border-width: 1px; }
+  .filter-cb:checked ~ .filter-bar label { border-width: 3px; }
 }
 @media print {
   /* never print a filtered subset that could read as the whole day */
@@ -1491,22 +1516,36 @@ def _today_filter_bar(facets, total, pairs=None):
         return "", "", ""
 
     inputs, css = [], []
-    for tag, _n in offered:
+    for tag, n in offered:
         slug = _slug(tag)
-        inputs.append(f'<input type="checkbox" class="filter-cb" id="f-{slug}">')
+        # One checkbox is referenced by a <label> in the bar AND by one on
+        # every matching entry — hundreds of them. HTML-AAM concatenates
+        # every label's text into the accessible name, so without this
+        # aria-label the control announces its keyword hundreds of times
+        # (measured: ~2,600 characters for "executive"). aria-label wins
+        # over <label>, so the shared-label design survives intact.
+        inputs.append(
+            f'<input type="checkbox" class="filter-cb" id="f-{slug}"'
+            f' aria-label="Filter to {html.escape(tag, quote=True)}'
+            f' — {n} item(s)">')
         css.append(
             f"#f-{slug}:checked ~ .today-list > .today-item:not(.k-{slug})"
             "{display:none}\n"
             f'#f-{slug}:checked ~ .filter-bar label[for="f-{slug}"],\n'
             f'#f-{slug}:checked ~ .today-list label[for="f-{slug}"]'
-            "{background:var(--accent);color:#fff;border-color:var(--accent)}\n"
+            "{background:var(--accent);color:var(--accent-on);border-color:var(--accent)}\n"
             f'#f-{slug}:focus-visible ~ .filter-bar label[for="f-{slug}"]'
             "{outline:2px solid var(--accent);outline-offset:2px}\n"
             f"#f-{slug}:checked ~ .filter-bar .filter-clear"
             "{display:inline-block}\n"
             # narrow the remaining options to keywords seen alongside this one
             f"#f-{slug}:checked ~ .filter-bar label:not(.c-{slug})"
-            "{display:none}\n")
+            "{display:none}\n"
+            # a glyph, not only a color, marks what is selected — and it
+            # is the signal that survives grayscale and forced-colors
+            f'#f-{slug}:checked ~ .filter-bar label[for="f-{slug}"]::before,\n'
+            f'#f-{slug}:checked ~ .today-list label[for="f-{slug}"]::before'
+            '{content:"\\2713\\00a0"}\n')
 
     branches = [(t_, n) for t_, n in offered if t_ in _BRANCH_ORDER]
     branches.sort(key=lambda kv: _BRANCH_ORDER.index(kv[0]))
@@ -1659,9 +1698,12 @@ def build_today(conn, out_dir=None, date=None):
         # stream, newest first — no section headings; every entry names
         # its own branch, agency, and document type.
         parts.append(
+            f'<a class="skip-link" href="#today-stream">Skip '
+            f"{len(facets)} keyword filters and go to the stream</a>")
+        parts.append(
             '<form class="today-stream" action="today.html" method="get">'
             + inputs + filter_bar
-            + '<ul class="today-list">'
+            + '<ul class="today-list" id="today-stream" tabindex="-1">'
             + "".join(_today_item_row(i, filterable)
                       for i in status["items"])
             + "</ul></form>")

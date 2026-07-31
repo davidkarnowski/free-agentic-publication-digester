@@ -16,8 +16,10 @@ reused.
   stores nothing, and reports nothing to us — the computation happens
   in your browser and stays there. With JavaScript disabled the page is
   identical minus the local-time hint.
-- **No accounts, no forms.** Nothing here accepts input, so nothing
-  stores it.
+- **No accounts, no data entry.** The live page's keyword filter is a
+  plain HTML form whose state never leaves your browser: it is not
+  submitted, not stored, and not readable by us. Nothing on this site
+  collects, transmits, or retains anything you type or click.
 - **No third-party requests.** Pages load no external fonts, scripts,
   images, or embeds — your visit talks to this server and no one else.
 
