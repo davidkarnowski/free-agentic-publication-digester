@@ -25,7 +25,7 @@ repository disagrees, this dated snapshot is the current one.
   newsrooms, 11 email bulletins, 5 govinfo collections), 76 planned,
   19 recorded unavailable, 2 evaluated and excluded.
 - **Latest digest:** [2026-07-29](digests/2026-07-29.md).
-- **Test suite:** 319 tests.
+- **Test suite:** 377 tests (verified by collection 2026-07-30).
 
 ---
 

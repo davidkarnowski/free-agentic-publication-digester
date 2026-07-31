@@ -2778,3 +2778,32 @@ the real README and asserts no page anywhere references an external
 image; that one costs nothing and will catch the next occurrence
 whoever adds it. 363 tests collected, 2 new (356 pass, 7 skip in a
 worktree without the local data DBs), ruff clean.
+
+## 2026-07-30 — DeepWiki badge, and a promise kept by test rather than habit
+
+The README carries an Ask DeepWiki badge for GitHub readers. The
+interesting part was that README.md is not only a GitHub file — it
+renders into the site as readme.html, and a conventional badge is a
+remote image, which would have made every visit to that page fetch
+bytes from a third party and quietly falsified the privacy page's "your
+visit talks to this server and no one else."
+
+Rather than special-case one vendor, `_textualize_external_images`
+demotes any Markdown image whose source leaves the site — https, http,
+or protocol-relative — to its alt text before rendering, so the badge
+becomes a plain link (which the sitewide rule then opens in a new tab)
+and no off-site byte is requested. A test now scans every rendered page
+for external image references, so the guarantee is enforced by the
+suite instead of by remembering. Ordering turned out to be load-bearing
+and is commented: the image rule must run before the README link
+rewriter, which would otherwise swallow a protocol-relative badge and
+produce the right output for the wrong reason.
+
+On the badge itself, stated plainly because the folklore says
+otherwise: it is a link and a visible signal. Whether it changes how
+often DeepWiki re-indexes is not something we can verify from here, and
+it is not claimed.
+
+Also reconciled the README's stale "319 tests" against a real
+collection — 377 — rather than leaving three numbers disagreeing across
+README, worklog, and the suite.
