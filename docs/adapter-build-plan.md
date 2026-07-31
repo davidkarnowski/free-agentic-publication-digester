@@ -118,7 +118,26 @@ own documentation, update `urls` in `sources/registry.yaml`, re-probe with
 regenerate `SOURCES.md` in the same commit (code-standards §7.5). Cheapest
 possible recovery — do it first.
 
-## Phase 2 — `xml-index` adapter + roll-call votes
+## Phase 2 — `xml-index` adapter + roll-call votes — SENATE SHIPPED 2026-07-31
+
+**Status:** `SenateVotesAdapter` built and `senate-xml` activated; live run
+ingested 8 votes for 10 agency requests (robots + index + 8 records).
+**House deferred:** the plan assumed an XML index. It is not one —
+`clerk.house.gov/evs/2026/index.asp` is a 7 KB HTML `<TABLE>` of the ~15
+most recent votes linking to `cgi-bin/vote.asp`, `index.xml` 404s, and
+`clerk.house.gov/Votes` is a 249 KB JavaScript application. The per-vote
+`roll<NNN>.xml` files are real (82 KB, full member positions) and the host
+publishes no robots.txt at all, so the House is blocked on the Phase 5
+`html-index` adapter, not on the publisher. `house-clerk-votes` stays
+`planned` with that finding recorded. Two other plan assumptions moved:
+the collection is an ADAPTER attribute rather than a registry field (a
+registry field would need `sources.OPTIONAL_FIELDS` to change, which this
+plan defers to Phase 5, and would let an entry declare a collection its
+adapter does not produce), and no rule was added to `rules.py` — votes
+follow the AGENCYPR precedent of rendering from `extracted_texts` at zero
+LLM cost, so `VOTES-SEL-01`/`VOTES-EX-01` live in `report.RULE_DESCRIPTIONS`
+only. Putting them in `rules.RULES` would route every vote through the
+analyze layer for a summary the published record already states.
 
 **New collection `VOTES`** — these are not agency announcements, and
 `_store_item` (`agencies.py:204-239`) hard-codes `collection='AGENCYPR'`.

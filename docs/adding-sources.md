@@ -26,10 +26,17 @@ could not or chose not to ingest.
    notes: what does this source publish in total, and what fraction will
    ingestion see? (Feed depth vs. publication volume; teasers vs. full
    text; GUIDs present?) Under-coverage is disclosed at onboarding.
-4. **Activate:** set `status: active`. RSS sources are picked up by
+4. **Activate:** set `status: active`. Sources whose `type` is in
+   `agencies.INGESTIBLE_TYPES` are picked up by
    `scripts/ingest_agencies.py` automatically. Items flow through
-   provenance capture (hashes, Wayback corroboration), the AGENCYPR
-   collection, digest section 6, and the coverage statement.
+   provenance capture (hashes, Wayback corroboration), a collection, a
+   digest section, and the coverage statement. Which collection is the
+   ADAPTER's decision, not the registry's (`SourceAdapter.COLLECTION` /
+   `DOC_TYPE`): agency releases are AGENCYPR and render in section 6;
+   roll-call votes are VOTES and render in section 7. An entry can
+   therefore never declare a collection its adapter does not produce —
+   misfiling legislative record as AGENCYPR would subject it to the
+   agency dating rule and executive-branch tagging (GUIDE §3).
 5. **Re-evaluate** on failures or redesigns; status changes are worklog
    events.
 
@@ -56,6 +63,14 @@ only when one of four things genuinely differs:
 | `wants_article` | Fetch the page, or feed metadata only? | Article pages 403 identified clients → `False` (`rss-feed-only`) |
 | `extract_text` | How do served bytes become text? | Script-rendered site embedding JSON-LD `articleBody` → parse the embedded JSON (static parsing of bytes we were sent — never script execution, never browser impersonation) |
 | `fallback_text` | What to store with no article text? | Title + feed description, mode disclosed |
+
+An adapter may also hand the loop structured, render-ready fields by
+putting a dict in `item["extra"]`; they are stored under
+`metadata["details"]` and read by the digest instead of re-parsing stored
+prose. `items()` populates what the index establishes; `extract_text` may
+replace it with a richer dict built from the article bytes (the Senate
+vote menu publishes an empty tally — the numbers exist only in the
+per-vote record).
 
 ### Access hierarchy and transformation (GUIDE §3)
 

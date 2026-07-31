@@ -74,7 +74,10 @@ def test_registry_seeds_expected_active_sources():
         # activated 2026-07-31 after the stale-URL recovery: ODNI moved off
         # Joomla and off dni.gov entirely; its WordPress press-release
         # category feed on odni.gov probes feed-ok with guids and full text:
-        "odni-news"}
+        "odni-news",
+        # activated 2026-07-31 with the xml-index adapter: the first
+        # non-feed web source, and the first VOTES-collection source:
+        "senate-xml"}
 
 
 # ------------------------------------------------------------ coverage_stats --
@@ -109,7 +112,8 @@ def test_coverage_stats_per_tier_on_real_registry():
     # Tier 1 carries the active govinfo collections seeded at project start.
     # govinfo 5 + 7 S2 pilots + DOJ (07-28) + treasury/justice/USDA email
     # (07-30) + VA email (07-30 second wave) + SSA email (07-31 third wave)
-    assert by_tier[1].get("active", 0) == 18
+    # + senate-xml roll-call votes (07-31, first xml-index source)
+    assert by_tier[1].get("active", 0) == 19
 
 
 def test_coverage_stats_empty():

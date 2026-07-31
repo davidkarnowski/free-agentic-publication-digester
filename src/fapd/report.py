@@ -48,6 +48,9 @@ RULE_DESCRIPTIONS = {
     "AGENCYPR-SEL-01": "official agency release dated this day by the agency"
                        " (all such releases from active sources are listed;"
                        " titles only in the pilot)",
+    "VOTES-SEL-01": "recorded vote of this day in a chamber's own roll-call"
+                    " record (every recorded vote is listed, in vote-number"
+                    " order; selection is by existence, not importance)",
     "USCOURTS-SEL-01": "appellate court opinion (all listed)",
     "USCOURTS-SEL-02": "national court opinion (all listed)",
     "FR-EX-01": "notices counted, not individually summarized",
@@ -57,6 +60,8 @@ RULE_DESCRIPTIONS = {
     "USCOURTS-EX-02": "bankruptcy court opinions counted, not individually summarized",
     "AGENCYPR-EX-01": "release dated outside this day by the agency (feed"
                       " backfill / newly activated source) — counted, not listed",
+    "VOTES-EX-01": "recorded vote the chamber dates on another day (inside the"
+                   " index lookback window) — counted, not listed",
 }
 
 # CREC-EX-01 mechanical evidence threshold (characters of extracted floor text).
@@ -254,7 +259,7 @@ def _coverage(conn, date):
     """
     pv = config.PROMPT_VERSION
     cov = {}
-    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR", "VOTES"):
         cov[coll] = {
             "packages": _scalar(
                 conn,
@@ -316,6 +321,12 @@ def _coverage(conn, date):
     agencypr["counted"] = (agencypr["units"] - agencypr["summarized"]
                            - agencypr["excluded"])
     agencypr["rules"] = {"AGENCYPR-EX-01": len(agency_backfill)}
+
+    votes = cov["VOTES"]
+    _, votes_backfill = _votes_rows(conn, date)
+    votes["excluded"] = len(votes_backfill)  # VOTES-EX-01 (dating rule)
+    votes["counted"] = votes["units"] - votes["summarized"] - votes["excluded"]
+    votes["rules"] = {"VOTES-EX-01": len(votes_backfill)}
 
     notices = _scalar(
         conn,
@@ -511,6 +522,128 @@ def _agency_lines(conn, date):
              " release(s) the agencies date on other days (feed backfill from"
              " newly activated sources). Excluded under AGENCYPR-EX-01;"
              " counted in the Coverage Statement; captures preserved."),
+            "",
+        ]
+    lines += ["---", ""]
+    return lines
+
+
+def _votes_rows(conn, date):
+    """(listed, backfill) for digest day `date`. Same shape and the same
+    dating rule as :func:`_agency_rows`: a vote belongs to the day the
+    chamber records it, not the day we happened to read the index. A vote
+    the chamber dates elsewhere inside the lookback window is counted
+    under VOTES-EX-01, never listed as today's."""
+    rows = [dict(r) for r in conn.execute(
+        """
+        SELECT e.title, e.agency, e.metadata
+        FROM extracted_texts e JOIN packages p USING (package_id)
+        WHERE e.collection = 'VOTES' AND p.date_issued = ?
+        """,
+        (date,),
+    )]
+    listed, backfill = [], []
+    for r in rows:
+        try:
+            meta = json.loads(r["metadata"] or "{}")
+        except (TypeError, ValueError):
+            meta = {}
+        r["_meta"] = meta
+        r["_details"] = meta.get("details") or {}
+        claimed = _claimed_day(meta)
+        (listed if claimed == date or claimed is None else backfill).append(r)
+    return listed, backfill
+
+
+def _vote_sort_key(row):
+    """Chamber, then vote number ascending — the chambers' own ordering
+    (GUIDE §3: vote-number order, no rule that ranks one question above
+    another). Unnumbered rows sort last within their chamber."""
+    details = row["_details"]
+    raw = str(details.get("vote_number") or "")
+    return (details.get("chamber") or row["agency"] or "",
+            0 if raw.isdigit() else 1,
+            int(raw) if raw.isdigit() else 0,
+            _one_line(row["title"] or ""))
+
+
+# The order the chambers themselves report a tally in.
+_TALLY_ORDER = ("Yea", "Nay", "Present", "Not Voting")
+
+
+def _vote_item_lines(row):
+    details = row["_details"]
+    url = row["_meta"].get("url")
+    number = str(details.get("vote_number") or "").lstrip("0")
+    subject = ": ".join(
+        p for p in (details.get("issue"), details.get("question")) if p)
+    label = f"Vote {number}" if number else "Vote"
+    if subject:
+        label += f" — {subject}"
+    head = f"- **[{label}]({url})**" if url else f"- **{label}**"
+    if details.get("result"):
+        head += f" — {_one_line(details['result'])}."
+    lines = [head]
+    title = _one_line(row["title"] or "")
+    if title and title != subject:
+        lines.append(f"  - {title}")
+    tally = details.get("tally") or {}
+    if tally:
+        # Fixed order, not the stored dict's: metadata is serialized with
+        # sort_keys, which would print "Nay … Yea" — alphabetical order of
+        # positions is not how a chamber reports a vote.
+        ordered = [p for p in _TALLY_ORDER if p in tally]
+        ordered += sorted(p for p in tally if p not in _TALLY_ORDER)
+        lines.append("  - Tally: "
+                     + " · ".join(f"{p} {tally[p]}" for p in ordered))
+    lines.append("  - Included because: VOTES-SEL-01 — "
+                 + RULE_DESCRIPTIONS["VOTES-SEL-01"])
+    source = "  - Source: the chamber's own roll-call record (linked above)"
+    if row["_meta"].get("wayback_url"):
+        source += f" · [independent archive]({row['_meta']['wayback_url']})"
+    lines.append(source)
+    return lines
+
+
+def _votes_lines(conn, date):
+    """Section 7: roll-call votes from the chambers' own XML records
+    (GUIDE §3 "Recorded votes"). Zero LLM: every figure here is read from
+    the published record. Appended as section 7 under the GUIDE §2
+    append-only numbering rule — sections 1-6 keep their numbers because
+    a reader who cited one must find the same subject there tomorrow."""
+    rows, backfill = _votes_rows(conn, date)
+    lines = [
+        "## 7. Recorded Votes",
+        "",
+        f"Roll-call votes the chambers themselves record on {date}, in",
+        "vote-number order. Every recorded vote in the window is listed:",
+        "selection is by existence, not by importance, and no rule here",
+        "prefers one question over another. Tallies and member positions",
+        "come from the chamber's own published vote record, captured and",
+        "hashed like every other source. This is the chambers' vote record",
+        "itself; section 1.3 lists the Congressional Record granules in",
+        "which votes were printed.",
+        "",
+    ]
+    if not rows:
+        lines += ["No recorded votes dated this day were observed.", ""]
+    by_chamber: dict = {}
+    for row in sorted(rows, key=_vote_sort_key):
+        by_chamber.setdefault(
+            row["_details"].get("chamber") or row["agency"] or "(chamber not stated)",
+            []).append(row)
+    for chamber, group in by_chamber.items():
+        lines += [f"#### {chamber}", ""]
+        for row in group:
+            lines += _vote_item_lines(row)
+        lines.append("")
+    if backfill:
+        lines += [
+            (f"Also observed this day, not listed above: {len(backfill)}"
+             " recorded vote(s) the chambers date on other days (the index"
+             " lookback window reaches back further than one day). Excluded"
+             " under VOTES-EX-01; counted in the Coverage Statement;"
+             " captures preserved."),
             "",
         ]
     lines += ["---", ""]
@@ -997,7 +1130,7 @@ def _coverage_lines(conn, date, cov, embedded_total):
         )
 
     rows = []
-    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR", "VOTES"):
         d = cov[coll]
         units = "—" if coll == "BILLS" else str(d["units"])
         rows.append(
@@ -1016,6 +1149,7 @@ def _coverage_lines(conn, date, cov, embedded_total):
             "FR-EX-01",
             "USCOURTS-EX-01",
             "USCOURTS-EX-02",
+            "VOTES-EX-01",
         )
         if (n := rule_counts.get(rid, 0))
     ]
@@ -1231,7 +1365,7 @@ def _validate_coverage(markdown, conn, date):
         raise ValidationError("Coverage Statement section is missing")
     section = markdown.split("## Coverage Statement", 1)[1]
     cov = _coverage(conn, date)
-    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR"):
+    for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR", "VOTES"):
         match = re.search(rf"^\| {coll} \| (.+) \|$", section, re.MULTILINE)
         if match is None:
             raise ValidationError(f"coverage row for {coll} is missing")
@@ -1273,14 +1407,15 @@ def _validate_lexicon(markdown, conn, date):
         )
     ]
     # Agency release titles are attributed official speech, quoted verbatim
-    # in section 6 (GUIDE §2: "Titles quoted verbatim are quoted, not
+    # in section 6, and measure titles are the chambers' own text quoted in
+    # section 7 (GUIDE §2: "Titles quoted verbatim are quoted, not
     # endorsed") — the gate polices our prose, not the government's.
     officials += [
         row[0]
         for row in conn.execute(
             "SELECT DISTINCT et.title FROM extracted_texts et"
             " JOIN packages p USING (package_id)"
-            " WHERE et.collection = 'AGENCYPR' AND p.date_issued = ?",
+            " WHERE et.collection IN ('AGENCYPR', 'VOTES') AND p.date_issued = ?",
             (date,),
         )
     ]
@@ -1443,6 +1578,7 @@ def render(conn, date, out_dir=None):
     lines += _plaw_lines(conn, date, items)
     lines += _uscourts_lines(conn, date, items)
     lines += _agency_lines(conn, date)
+    lines += _votes_lines(conn, date)
     lines += _glossary_lines("\n".join(lines))
     lines += _coverage_lines(conn, date, _coverage(conn, date), embedded_total)
     lines += _methodology_lines(date, git_short)

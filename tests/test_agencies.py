@@ -397,3 +397,174 @@ def test_source_url_resolves_index_and_collection_keys():
     ])
     assert sorted(groups) == ["one.gov", "two.gov"]
     assert len(groups["one.gov"]) == 2      # one client, one pacing clock
+
+
+# ---- Senate roll-call votes (xml-index adapter, GUIDE §3 recorded votes) ----
+
+# Shapes copied from the live bytes fetched 2026-07-31: no year on the menu's
+# vote_date, an always-empty vote_tally, and an en-bloc row that carries no
+# issue/question/result at all.
+VOTE_MENU = b"""<?xml version="1.0" encoding="UTF-8"?>
+<vote_summary>
+  <congress>119</congress><session>2</session><congress_year>2026</congress_year>
+  <votes>
+    <vote><vote_number>00217</vote_number><vote_date>30-Jul</vote_date>
+      <issue>S.Res. 817</issue><question>On the Resolution
+         </question><result>Agreed to</result><vote_tally>
+        </vote_tally><title>S. Res. 817; An executive resolution.</title></vote>
+    <vote><vote_number>00216</vote_number><vote_date>29-Jul</vote_date>
+      <issue>S.J.Res. 181</issue><question>On the Motion to Discharge</question>
+      <result>Rejected</result><vote_tally/>
+      <title>Motion to Discharge S.J. Res. 181.</title></vote>
+    <vote><vote_number>00124</vote_number><vote_date>14-May</vote_date>
+      <en_bloc/><vote_tally/><title>Confirmation: En Bloc Nominations.</title></vote>
+    <vote><vote_number>00003</vote_number><vote_date>garbage</vote_date>
+      <issue>PN1</issue><question>On the Nomination</question>
+      <result>Confirmed</result><title>Confirmation: someone.</title></vote>
+  </votes>
+</vote_summary>"""
+
+VOTE_RECORD = b"""<?xml version="1.0" encoding="UTF-8"?><roll_call_vote>
+  <congress>119</congress><session>2</session><congress_year>2026</congress_year>
+  <vote_number>217</vote_number><vote_date>July 30, 2026,  01:46 PM</vote_date>
+  <vote_question_text>On the Resolution S.Res. 817</vote_question_text>
+  <vote_document_text>An executive resolution.</vote_document_text>
+  <vote_result_text>Resolution Agreed to (2-1)</vote_result_text>
+  <question>On the Resolution</question><vote_title>S. Res. 817</vote_title>
+  <vote_result>Resolution Agreed to</vote_result>
+  <count><yeas>2</yeas><nays>1</nays><present/><absent>1</absent></count>
+  <members>
+    <member><member_full>Banks (R-IN)</member_full><vote_cast>Yea</vote_cast></member>
+    <member><member_full>Armstrong (R-OK)</member_full><vote_cast>Yea</vote_cast></member>
+    <member><member_full>Baldwin (D-WI)</member_full><vote_cast>Nay</vote_cast></member>
+    <member><member_full>Alsobrooks (D-MD)</member_full>
+      <vote_cast>Not Voting</vote_cast></member>
+  </members>
+</roll_call_vote>"""
+
+
+class FakeSenate:
+    """Serves the menu at the index URL and the record at every vote URL."""
+
+    def __init__(self, menu=VOTE_MENU, record=VOTE_RECORD):
+        self.menu, self.record, self.calls = menu, record, []
+
+    def get(self, url, params=None, headers=None):
+        self.calls.append(url)
+        body = self.menu if "roll_call_lists" in url else self.record
+        return Resp(body, headers={"Content-Type": "text/xml"}, url=url)
+
+
+def senate_entry():
+    return {"id": "senate-xml", "name": "Senate.gov XML services",
+            "adapter": "senate-votes",
+            "urls": {"index": "https://www.senate.gov/legislative/LIS/"
+                              "roll_call_lists/vote_menu_119_2.xml"}}
+
+
+@pytest.fixture
+def senate_today(monkeypatch):
+    """Freeze the publication day so the lookback window is deterministic."""
+    monkeypatch.setattr(agencies, "publication_date", lambda: "2026-07-31")
+
+
+def test_vote_menu_is_bounded_to_the_lookback_window(senate_today):
+    """AN INDEX IS NOT A FEED: the live menu carries a whole session (217
+    votes on 2026-07-31). Only votes inside INDEX_LOOKBACK_DAYS come back,
+    so first activation costs a handful of article fetches, not hundreds."""
+    fmt, items = agencies.SenateVotesAdapter().items(VOTE_MENU, "text/xml")
+    assert fmt == "senate-vote-menu"
+    # 00124 is months old; 00003's date is unreadable — neither is returned.
+    assert [i["extra"]["vote_number"] for i in items] == ["00216", "00217"]
+
+
+def test_vote_dates_are_iso_so_the_digest_can_read_them(senate_today):
+    """The menu writes '30-Jul' with no year; report._claimed_day parses
+    RFC 822 or an ISO prefix and nothing else, so an unconverted menu date
+    would silently date every vote by observation instead of by when the
+    Senate actually voted."""
+    from fapd import report
+
+    _fmt, items = agencies.SenateVotesAdapter().items(VOTE_MENU, "text/xml")
+    claimed = [i["claimed_date"] for i in items]
+    assert claimed == ["2026-07-29", "2026-07-30"]
+    assert [report._claimed_day({"claimed_published_at": c}) for c in claimed] \
+        == ["2026-07-29", "2026-07-30"]
+
+
+def test_vote_menu_urls_and_identity(senate_today):
+    _fmt, items = agencies.SenateVotesAdapter().items(VOTE_MENU, "text/xml")
+    latest = items[-1]
+    assert latest["link"] == ("https://www.senate.gov/legislative/LIS/roll_call_votes/"
+                              "vote1192/vote_119_2_00217.xml")
+    assert latest["guid"] == "senate-vote-119-2-00217"
+
+
+def test_unparsable_menu_is_disclosed_not_raised():
+    """items() must not raise — the loop records 'unparsable' and discloses."""
+    assert agencies.SenateVotesAdapter().items(b"<html>nope", "text/html") == (None, [])
+    assert agencies.SenateVotesAdapter().items(b"<other/>", "text/xml") == (None, [])
+
+
+def test_vote_record_extracts_tally_and_positions(senate_today):
+    adapter = agencies.SenateVotesAdapter()
+    _fmt, items = adapter.items(VOTE_MENU, "text/xml")
+    item = items[-1]
+    text = adapter.extract_text(VOTE_RECORD, "text/xml", item)
+    assert "Result: Resolution Agreed to (2-1)" in text
+    assert "Tally: Yea 2; Nay 1; Present 0; Not Voting 1" in text
+    assert "Yea (2): Armstrong (R-OK), Banks (R-IN)" in text   # sorted roster
+    assert "Not Voting (1): Alsobrooks (D-MD)" in text
+    # structured fields reach metadata so the digest never re-parses prose
+    assert item["extra"]["tally"] == {"Yea": 2, "Nay": 1, "Present": 0,
+                                      "Not Voting": 1}
+    assert item["extra"]["result"] == "Resolution Agreed to (2-1)"
+    assert item["extra"]["chamber"] == "United States Senate"
+
+
+def test_vote_record_mismatch_is_disclosed_not_reconciled(senate_today):
+    """A published count that disagrees with the member list is reported as
+    served, never silently corrected to whichever we prefer."""
+    adapter = agencies.SenateVotesAdapter()
+    _fmt, items = adapter.items(VOTE_MENU, "text/xml")
+    skewed = VOTE_RECORD.replace(b"<yeas>2</yeas>", b"<yeas>9</yeas>")
+    text = adapter.extract_text(skewed, "text/xml", items[-1])
+    assert "the published count records 9 Yea, the member list 2" in text
+
+
+def test_malformed_vote_record_degrades_the_item_not_the_source(senate_today):
+    """extract_text may raise; the loop stores menu metadata instead, and
+    fallback_text must never raise and never come back blank."""
+    adapter = agencies.SenateVotesAdapter()
+    _fmt, items = adapter.items(VOTE_MENU, "text/xml")
+    with pytest.raises(ValueError):
+        adapter.extract_text(b"<not_a_vote/>", "text/xml", items[-1])
+    assert adapter.fallback_text(items[-1]).strip()
+
+
+def test_senate_votes_ingest_stores_its_own_collection(env, senate_today):
+    """Votes are legislative record: they must never land in AGENCYPR, whose
+    accounting, dating rule and executive-branch tagging are not theirs."""
+    import json as _json
+
+    client, wb = FakeSenate(), FakeWayback()
+    stats = agencies.poll_source(client, wb, env, senate_entry())
+    assert stats["feed_status"] == "senate-vote-menu:2"
+    assert stats["new_items"] == 2
+    assert stats["articles_fetched"] == 2
+    # one index fetch + one per in-window vote; nothing for the rest
+    assert len(client.calls) == 3
+
+    rows = env.execute(
+        "SELECT collection, doc_type, title, text, char_count, metadata"
+        " FROM extracted_texts ORDER BY package_id").fetchall()
+    assert {r["collection"] for r in rows} == {"VOTES"}
+    assert {r["doc_type"] for r in rows} == {"ROLLCALL"}
+    assert env.execute(
+        "SELECT COUNT(*) FROM packages WHERE collection='AGENCYPR'").fetchone()[0] == 0
+    meta = _json.loads(rows[0]["metadata"])
+    assert meta["mode"] == "full"
+    assert meta["details"]["chamber"] == "United States Senate"
+    assert meta["claimed_published_at"] in ("2026-07-29", "2026-07-30")
+    assert "channel" not in meta  # collect.py keys web-vs-email on its absence
+    assert rows[0]["char_count"] == len(rows[0]["text"]) > 0

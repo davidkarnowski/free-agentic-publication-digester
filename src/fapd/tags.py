@@ -25,6 +25,7 @@ SECTION_BRANCH = {
     "presidential": "executive",
     "judicial": "judicial",
     "agency": "executive",
+    "votes": "legislative",
 }
 
 _TAG_PROMPT = """For EACH digest section below, produce up to three short tags

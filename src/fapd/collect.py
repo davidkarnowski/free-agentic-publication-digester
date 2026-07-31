@@ -27,11 +27,14 @@ logger = logging.getLogger("fapd.collect")
 # ---------------------------------------------------------------------------
 
 # Class predicates over extracted_texts rows. Agency and email items share
-# the AGENCYPR collection; the channel lives in item metadata.
+# the AGENCYPR collection; the channel lives in item metadata. VOTES rides
+# the same web poll loop (an xml-index adapter, GUIDE §3 recorded votes) but
+# under its own collection code, so it is agency-CLASS work — the worker and
+# the budget — while never being agency CONTENT.
 _CLASS_WHERE = {
-    "govinfo": "e.collection != 'AGENCYPR'",
-    "agency": ("e.collection = 'AGENCYPR' AND COALESCE("
-               "json_extract(e.metadata, '$.channel'), '') != 'email'"),
+    "govinfo": "e.collection NOT IN ('AGENCYPR', 'VOTES')",
+    "agency": ("(e.collection = 'VOTES' OR (e.collection = 'AGENCYPR' AND COALESCE("
+               "json_extract(e.metadata, '$.channel'), '') != 'email'))"),
     "email": ("e.collection = 'AGENCYPR' AND "
               "json_extract(e.metadata, '$.channel') = 'email'"),
 }

@@ -227,6 +227,8 @@ def test_render_structure(digest):
         "## 5. Judicial Activity",
         "### 5.1 Appellate and National Court Opinions",
         "### 5.2 Counts by Court Category",
+        "## 6. Agency Announcements",
+        "## 7. Recorded Votes",
         "## Coverage Statement",
         "## Methodology",
     ):
@@ -564,6 +566,92 @@ def test_agency_announcements_section(conn, tmp_path):
     assert "[independent archive](https://web.archive.org/web/20260723/https://gao.gov/x)" in md
     assert "- [6. Agency Announcements](#6-agency-announcements)" in md  # ToC
     assert "| AGENCYPR |" in md  # coverage row
+
+
+def add_vote(conn, package_id, *, number, claimed, title, result="Agreed to (50-47)",
+             issue="S.Res. 817", question="On the Resolution", tally=None,
+             wayback=None):
+    now = "2026-07-23T15:00:00Z"
+    url = ("https://www.senate.gov/legislative/LIS/roll_call_votes/vote1192/"
+           f"vote_119_2_{number}.xml")
+    conn.execute(
+        "INSERT INTO packages (package_id, collection, date_issued, last_modified,"
+        " first_seen_at, fetch_status) VALUES (?, 'VOTES', ?, ?, ?, 'fetched')",
+        (package_id, DATE, now, now))
+    conn.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection, doc_type,"
+        " title, agency, metadata, text, char_count, extracted_at, extractor_version)"
+        " VALUES (?, '', 'VOTES', 'ROLLCALL', ?, 'Senate.gov XML services',"
+        " ?, 'body', 4, ?, 1)",
+        (package_id, title,
+         json.dumps({"source_id": "senate-xml", "url": url,
+                     "claimed_published_at": claimed, "mode": "full",
+                     "wayback_url": wayback,
+                     "details": {"chamber": "United States Senate",
+                                 "vote_number": number, "issue": issue,
+                                 "question": question, "result": result,
+                                 "tally": tally or {"Yea": 50, "Nay": 47}}}),
+         now))
+    conn.commit()
+
+
+def test_recorded_votes_section(conn, tmp_path):
+    add_vote(conn, "PR-senate-xml-11111111", number="00217", claimed=DATE,
+             title="S. Res. 817; An executive resolution.",
+             # stored sort_keys-first, so the renderer must reorder it
+             tally={"Nay": 47, "Not Voting": 3, "Present": 0, "Yea": 50},
+             wayback="https://web.archive.org/web/20260723/https://senate.gov/v")
+    path = report.render(conn, DATE, out_dir=tmp_path)
+    md = path.read_text()
+    assert "## 7. Recorded Votes" in md
+    assert "#### United States Senate" in md
+    assert "**[Vote 217 — S.Res. 817: On the Resolution]" in md
+    assert "— Agreed to (50-47)." in md
+    assert "  - Tally: Yea 50 · Nay 47 · Present 0 · Not Voting 3" in md
+    assert "VOTES-SEL-01 — recorded vote of this day" in md
+    assert "selection is by existence, not by importance" in md
+    assert "- [7. Recorded Votes](#7-recorded-votes)" in md  # ToC
+    assert "| VOTES |" in md  # coverage row
+
+
+def test_recorded_votes_listed_in_vote_number_order(conn, tmp_path):
+    """GUIDE §3: vote-number order, no rule that ranks one question above
+    another. The index hands them back newest-first."""
+    add_vote(conn, "PR-senate-xml-bbbbbbbb", number="00217", claimed=DATE,
+             title="Later vote.")
+    add_vote(conn, "PR-senate-xml-aaaaaaaa", number="00099", claimed=DATE,
+             title="Earlier vote.")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert md.index("Vote 99 ") < md.index("Vote 217 ")
+
+
+def test_vote_dated_another_day_is_counted_not_listed(conn, tmp_path):
+    """The lookback window reaches back further than one day; VOTES-EX-01
+    keeps those out of today's list and inside the arithmetic."""
+    add_vote(conn, "PR-senate-xml-cccccccc", number="00210", claimed="2026-07-21",
+             title="A vote from earlier in the week.")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "A vote from earlier in the week." not in md
+    assert "1 recorded vote(s) the chambers date on other days" in md
+    assert "VOTES-EX-01" in md
+    row = re.search(r"^\| VOTES \| (.+) \|$", md, re.MULTILINE).group(1)
+    assert [c.strip() for c in row.split("|")] == ["1", "1", "0", "0", "1"]
+
+
+def test_recorded_votes_empty_state_renders(digest):
+    """Empty sections are disclosure, not a bug (CLAUDE.md §9)."""
+    _path, md = digest
+    assert "## 7. Recorded Votes" in md
+    assert "No recorded votes dated this day were observed." in md
+    assert "| VOTES | 0 | 0 | 0 | 0 | 0 |" in md
+
+
+def test_banned_word_in_vote_title_is_masked(conn, tmp_path):
+    """A measure's own title is the chamber's text, quoted not endorsed."""
+    add_vote(conn, "PR-senate-xml-dddddddd", number="00218", claimed=DATE,
+             title="A joint resolution on the historic landmark reserve.")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "historic landmark reserve" in md
 
 
 def test_banned_word_in_agency_title_is_masked(conn, tmp_path):

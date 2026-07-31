@@ -3526,3 +3526,90 @@ in the order they were written. Nothing in the record is altered or
 reordered. Added the lesson to CLAUDE.md §8 next to the never-amend rule,
 since the two are about the same thing — this log is evidence, and
 evidence is corrected forward, never tidied.
+## 2026-07-31 — The Senate votes; the House publishes a table
+
+Phase 2 of the adapter plan: the `xml-index` shape, a new `VOTES`
+collection, and digest section 7. The Senate shipped. The House did not,
+and finding out why was most of the value of the day.
+
+The plan said `clerk.house.gov/evs/2026/index.asp` would carry
+`rollNNN.xml` links. It does not. It is a 7 KB HTML `<TABLE>` — uppercase
+tags, `<FONT FACE="Arial">`, a `<META HTTP-EQUIV="Refresh">` — listing
+about fifteen recent votes, each linking to `cgi-bin/vote.asp?year=&
+rollnumber=`. `evs/2026/index.xml` is a 404. `clerk.house.gov/Votes` is a
+249 KB JavaScript application. The per-vote XML is entirely real —
+`evs/2026/roll283.xml` answers 200 with 82,500 bytes, full metadata,
+party subtotals and every member's position — and the host publishes no
+robots.txt at all, so nothing there is refused. The House is simply an
+HTML-index source wearing an XML source's clothes, which puts it behind
+the Phase 5 adapter and its unsettled budget question, not behind a
+publisher. That finding is now in the entry's notes, and the entry stays
+`planned`. Shipping half of it would have meant writing an HTML table
+parser inside an adapter named for XML, and then owning it forever.
+
+The Senate is the opposite: two documents, both XML, both exactly what
+they claim. The session menu lists 217 votes — the whole of the 119th's
+second session, January through July — and the per-vote record carries
+the tally. Two things about it decided the design. Its `<vote_tally>`
+element is present and empty on all 217, so the numbers exist only in the
+per-vote file: `wants_article()` has to be True or the digest can report
+that a vote happened and not what it decided. And its `<vote_date>` reads
+`30-Jul`, with no year, which `report._claimed_day` cannot read at all —
+an unconverted menu date would have dated every vote by observation, so
+the digest would have claimed the Senate voted today on votes taken last
+week. The year comes from the menu's own `<congress_year>`; the month
+abbreviation is mapped from a fixed table rather than `strptime("%b")`,
+which reads the process's LC_TIME locale and would have made the render
+machine-dependent.
+
+Those two facts together are the whole argument for the lookback bound.
+True `wants_article()` against an unbounded index is 217 article fetches
+on first activation, of which the dating rule then lists at most one
+day's worth; bounded to seven days it was eight. The live run cost ten
+agency requests — robots, the index, eight records — and returned eight
+votes at mode `full`, roughly 2 KB of text each: question, measure,
+result, tally, and every senator by name and position. That is the shape
+the constant was written for, now demonstrated rather than asserted.
+
+`VOTES` is its own collection because GUIDE §3 says these are legislative
+record, not agency communication, and AGENCYPR carries an agency dating
+rule and executive-branch tagging that would both be wrong here. The
+plan proposed reading the collection from the registry entry; it is read
+from the adapter instead. A registry field would have needed
+`sources.OPTIONAL_FIELDS` to change — which the plan itself defers to
+Phase 5 — and, worse, would have made it possible to write an entry
+whose declared collection and actual adapter disagree, which is precisely
+the misfiling the separation exists to prevent. `SourceAdapter.COLLECTION`
+cannot lie about what its own `extract_text` produces.
+
+No rule was added to `rules.py`. That module feeds the analyze layer, so
+a `VOTES-SEL-01` there would have sent all eight votes to a model for a
+summary the published record already states in a sentence — GUIDE §6
+rule 2 in its plainest form. Votes follow the AGENCYPR precedent: the
+section renders straight out of `extracted_texts` at zero tokens, and the
+rule ids live in `report.RULE_DESCRIPTIONS` where the reader-facing text
+belongs. One small asymmetry was left alone deliberately: `AGENCYPR-EX-01`
+is not in the Coverage Statement's fired-rules list even though it fires,
+so its "Excluded by rule" column has a number and no explanation.
+`VOTES-EX-01` was added to that list rather than copying the omission,
+but AGENCYPR's was not changed — that would rewrite output for days
+already published, and it is the operator's call.
+
+Section 7 is appended, not inserted, under the §2 rule adopted today.
+There is a real chance of confusing it with §1.3, which is also called
+Recorded Votes: §1.3 lists Congressional Record granules in which a vote
+was printed, §7 is the chamber's own vote record with the tally. The
+section text says so in as many words rather than relying on the reader
+to work it out.
+
+Two things found and not fixed. `WORKLOG.md` currently contains committed
+merge-conflict markers around lines 3347-3445, from the Phase 1 merge;
+this file is append-only and never retroactively edited, so resolving
+them is the operator's decision, not an agent's. And
+`scripts/check_sources.py` reports `unrecognized:text/xml` for
+`senate-xml` even now that it ingests cleanly, because the probe still
+enumerates with `probe.parse_feed` and knows nothing about adapters —
+harmless, but it means gate 2 proves reachability and robots for an
+xml-index source and not much else. Teaching the probe to enumerate
+through `agencies.adapter_for(entry).items(...)` needs a lazy import
+(agencies imports probe), and belongs to whoever picks up Phase 3.

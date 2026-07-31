@@ -1278,13 +1278,14 @@
   description: "The Senate's officially documented directory of XML files: roll-call vote menus and individual votes, the committee hearings/meetings schedule, the floor schedule, and nine nomination-status files (pending, confirmed, withdrawn, failed — civilian and non-civilian). The only machine source for Senate votes."
   type: xml-index
   tier: 1
+  adapter: senate-votes
   urls:
     home: https://www.senate.gov/general/common/generic/XML_Availability.htm
-    index: https://www.senate.gov/legislative/LIS/roll_call_lists/
-  method: Would poll the documented XML URLs (vote menus by congress/session, schedules, nomination files) and diff.
-  status: planned
+    index: https://www.senate.gov/legislative/LIS/roll_call_lists/vote_menu_119_2.xml
+  method: "Conditional GET of the current session's roll-call vote menu; the senate-votes adapter bounds enumeration to config.INDEX_LOOKBACK_DAYS and fetches one per-vote XML record per in-window vote. Stored under the VOTES collection (GUIDE §3 recorded votes), never AGENCYPR."
+  status: active
   added: "2026-07-28"
-  notes: "XML-availability page fetched 2026-07-28 — publisher-documented machine files. Complements congress-gov-api, whose roll-call endpoint is House-only."
+  notes: "Gate 3 (2026-07-31, live through the identified client): the menu answers 200 text/xml, 123,670 bytes, and lists the WHOLE session — 217 <vote> elements from 05-Jan to 30-Jul, so ingestion sees 100% of the Senate's recorded votes but must bound itself (8 fell inside the 7-day lookback that day: 1 index fetch + 8 records = 9 requests). Two coverage limits, both disclosed rather than papered over: (a) vote_date carries NO YEAR ('30-Jul') and vote_tally is present but EMPTY on all 217, so the tally exists only in the per-vote record, which is why wants_article() is True; (b) 2 of 217 rows are en-bloc confirmations carrying no issue/question/result — their title alone identifies them. Per-vote URL pattern vote{congress}{session}/vote_{c}_{s}_{NNNNN}.xml verified by fetching vote_119_2_00217.xml (200, 28,745 bytes, all 100 member positions). The index URL names the current congress/session and must be advanced when session 3 opens. Complements congress-gov-api, whose roll-call endpoint is House-only."
 
 - id: house-clerk-votes
   name: House Clerk roll-call votes
@@ -1299,7 +1300,7 @@
   method: Would walk the numeric roll-call sequence from a watermark, fetching new vote XML files.
   status: planned
   added: "2026-07-28"
-  notes: "Vote XML files verifiably exist and are indexed (2026-07-28). The formal schema documentation lives on xml.house.gov, which 403'd research fetchers — read it via our identified client at probe."
+  notes: "Vote XML files verifiably exist and are indexed (2026-07-28). The formal schema documentation lives on xml.house.gov, which 403'd research fetchers — read it via our identified client at probe. 2026-07-31, live: the per-vote XML is confirmed (evs/2026/roll283.xml → 200 text/xml, 82,500 bytes, full metadata + member positions) and clerk.house.gov publishes NO robots.txt (404, nothing disallowed), but the YEAR INDEX IS HTML, NOT XML — evs/2026/index.asp is a 7 KB <TABLE> of ~15 recent votes linking to cgi-bin/vote.asp, evs/2026/index.xml is 404, and clerk.house.gov/Votes is a 249 KB JavaScript application. So this entry needs the html-index adapter (plan Phase 5), not the xml-index one that activated senate-xml; it stays planned rather than ship half-understood. Type stays xml-index because the per-vote records are XML; revisit the type when the index adapter lands."
 
 - id: docs-house-gov
   name: House Document Repository (floor + committee)
