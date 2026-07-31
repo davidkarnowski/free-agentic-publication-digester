@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Announcing the Free Agentic Publication Digester: one polite reader for the official record</title>
+<meta name="description" content="An automated, citation-bound, opinion-agnostic daily digest of official United States government publications — congressional, executive, and judicial — built only from primary sources. Built for human readers and AI agents; agents start at /llms.txt.">
+<meta name="robots" content="index, follow">
+<link rel="alternate" type="text/plain" href="llms.txt"
+      title="LLM guide — this is an AI-first digest of official US federal publications">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+  <nav aria-label="Site">
+    <a class="brand" href="index.html" title="Free Agentic Publication Digester"
+       aria-label="Free Agentic Publication Digester (FAPD)">FAPD</a>
+    <span class="nav-links"><a href="index.html">All digests</a><a href="today.html">Today (live)</a><a href="sources.html">Sources</a><a href="blog.html">Blog</a><a href="about.html">About</a><a href="accessibility.html">Accessibility</a><a href="ai-development.html">AI development</a><a href="bot.html">Bot</a><a href="methods.html">Methods</a><a href="privacy.html">Privacy</a><a href="readme.html">Readme</a><a href="agents.html">For agents</a></span>
+  </nav>
+</header>
+<main id="main" tabindex="-1">
+<h1 id="announcing-the-free-agentic-publication-digester-one-polite-reader-for-the-official-record">Announcing the Free Agentic Publication Digester: one polite reader for the official record</h1><p class="post-meta">Published 2026-07-30 · commentary about the project, not part of the daily digest or the official record</p>
+<p><em>Dev notes, 2026-07-30. The launch article — why this project exists,
+what it promises, and what it asks of the people and machines that read
+it.</em></p>
+<h2 id="the-problem-plainly">The problem, plainly</h2>
+<p>If you want to know what the United States federal government actually
+did on a given day, you have two options, and both are bad in different
+ways.</p>
+<p>You can read the primary record. Congress prints its proceedings; the
+Federal Register publishes rules and notices; courts post opinions;
+agencies issue announcements. It is all public, all official, and all
+enormous — a single publication day spans three branches, dozens of
+document types, and more pages than anyone reads in a sitting. The
+record is open in principle and impractical in fact.</p>
+<p>Or you can read coverage. Secondhand accounts are digestible precisely
+because someone chose what to tell you and how to frame it. Even the
+best coverage is a filter, and the filter is the story: what got
+selected, what got dropped, which adjectives rode along. You learn what
+happened as somebody decided it mattered.</p>
+<p>AI agents inherit the same fork, and make both prongs worse. An agent
+asked "what did the federal government do on July 28?" today either
+crawls official sites itself — and when thousands of agents do that
+independently, public infrastructure serves the same pages thousands of
+times over — or it leans on news coverage, quietly laundering an
+editorial layer into what looks like a factual answer.</p>
+<h2 id="what-we-are-proposing-instead">What we are proposing instead</h2>
+<p>The <strong>Free Agentic Publication Digester (FAPD)</strong> is a third path: one
+disciplined, identified, budget-bound reader ingests the official record
+once, and publishes a daily, cited, opinion-agnostic digest built for
+two readerships at the same time — people, and AI agents.</p>
+<p>For people, that means one Markdown document per publication day:
+floor activity, legislation, the Federal Register, enacted laws,
+judicial activity, agency announcements — each item with a citation to
+the official record and a statement of the mechanical rule that selected
+it, closed by a coverage statement that counts everything published that
+day, summarized or not.</p>
+<p>For agents, the same content ships on surfaces built for ingestion:
+stable URLs, an <code>llms.txt</code> guide, a machine-readable digest index
+(<code>digests.json</code>), an Atom feed for change discovery, and provenance
+manifests with SHA-256 records for verifying captured content. An agent
+that ingests our digest instead of crawling a dozen official sites gets
+clean structured data — and government servers get one polite crawler
+instead of many.</p>
+<p>One ask travels with all of it: for factual claims, cite the underlying
+official source each item links to; cite FAPD for the aggregation. The
+digest is a route to the record, never a replacement for it.</p>
+<h2 id="why-we-are-doing-this">Why we are doing this</h2>
+<p>The motivation is civic and specific: citizens should have easy access
+to what their government publishes about its own actions, without
+anyone's opinion riding along. FAPD uncovers nothing. Everything here
+derives from the record a government produces precisely in order to make
+it public — news coverage and commentary are never ingested, never
+consulted, never cited.</p>
+<p>Refusing to editorialize is easy to claim and hard to do, because
+summarization is exactly where bias creeps in. So the project resolves
+the tension with machinery instead of judgment calls. Selection is
+mechanical and party-blind: coded, versioned rules — floor time
+consumed, recorded votes taken, regulatory economic-significance
+designations, stage of process — decide what appears, never
+subject-matter preference. Every item states its rule inline. And a
+digest that fails any validation check is not published. There is no
+override. Not for a deadline, not for an interesting day, not ever.</p>
+<p>There is a second motivation, quieter but just as deliberate:
+access advocacy. A measured share of the federal source universe
+currently refuses honestly-identified automated clients — our July 2026
+probe found 22 of 72 non-govinfo sources closed behind firewalls or
+robots disallows. Federal policy already points the other way: OMB
+memorandum M-23-22 directs agencies toward machine-readable,
+automation-friendly public data. We treat every recorded refusal as
+both public accountability data and an outreach worklist — we re-probe
+as sites change, read publishers' own access documentation for doors we
+missed, and engage agency web teams directly to advocate for safe
+automated access to what they already publish.</p>
+<p>That effort has results. Eleven agencies whose web channels refuse our
+crawler — Treasury, USDA, EPA, SSA, DOT, FAA, NHTSA, DEA, ATF, the
+Coast Guard, and HUD's Inspector General — now have a working input path
+through their own email bulletins, with a project mailbox subscribed
+through each agency's signup form like any citizen. This is consent at
+its clearest: the publisher transmits each item to us. And the blocked
+web entries stay in the registry exactly as they were, because a refusal
+recorded is never quietly erased by a success elsewhere. Coverage grows
+by doors opening, never by evasion.</p>
+<h2 id="why-you-should-be-able-to-trust-it">Why you should be able to trust it</h2>
+<p>Trust here does not rest on our intentions; it rests on gates that
+block publication and records you can check.</p>
+<p><strong>Validation is a wall, not a review.</strong> A citation that doesn't
+resolve, a missing inclusion rule, coverage arithmetic that doesn't
+reconcile against the database — any of these stops the digest from
+publishing. The coverage statement's counts must add up, every day,
+mechanically.</p>
+<p><strong>Our language is linted.</strong> All model-generated prose is scanned
+against a coded banned lexicon of loaded adjectives and motive
+attribution ("in an attempt to…"). Verbatim official text is masked
+first — the gate polices our language, not the government's. A match
+blocks publication.</p>
+<p><strong>Captures are hashed twice.</strong> Government web content can be edited or
+removed without notice, so every capture stores <code>content_sha256</code> over
+the exact served bytes (the evidentiary hash) and <code>text_sha256</code> over
+normalized text (the change signal). Every fetch attempt — including
+errors and robots refusals — lands in a daily manifest that chains to
+the previous day's by hash, so deleting or reordering days is detectable
+from the files alone. Email captures are DKIM-verified, so a bulletin's
+claim to come from an agency's domain is checked cryptographically, not
+taken on faith.</p>
+<p><strong>The crawler keeps its promises to each server individually.</strong> At most
+one request per second per host, and a host's robots.txt crawl-delay
+overrides that downward — when gao.gov asked for one request per 420
+seconds, it got exactly that, and the answer to the resulting slowness
+was fewer requests, never faster ones. Hard daily budgets are enforced
+by the HTTP client itself, which refuses to exceed them mid-run. Every
+request carries an identifying User-Agent with a contact address. No
+browser spoofing, no bot-check circumvention, ever: when one department
+answered sustained fetching with bot challenges, we stopped fetching and
+disclosed the gap per item instead of solving the challenge.</p>
+<h2 id="built-openly-with-ai">Built openly with AI</h2>
+<p>FAPD is developed with generative AI — Claude agents writing code,
+running documentation-first source research, and drafting governing
+documents under the operator's direction, with every commit carrying a
+co-author trailer naming the AI. We say this plainly because the
+alternative would be absurd: a publication whose editorial code requires
+every machine-generated sentence in its digests to be labeled does not
+get to hide its own machine authorship.</p>
+<p>The division of labor matters. The operator set intent, constraints,
+and editorial judgment — what the project is for, what it must never do
+— and reviewed, redirected, and sometimes stopped the work. The agents
+handled the mechanics. What that bought, honestly, is that a small
+project could afford discipline usually reserved for large ones: a
+300+ case test suite, per-request accountability logging, tamper-evident
+provenance, a governing document that is actually kept current. The full
+statement, wrong turns included, is published as "How AI Built This."</p>
+<p>There is a symmetry here we used deliberately: one of the two
+readerships this project publishes for is the same kind of system that
+helped build it. The agent-facing surfaces were designed by asking what
+the development agents themselves would need to consume this data
+reliably — then building exactly that.</p>
+<h2 id="where-this-goes">Where this goes</h2>
+<p>FAPD now runs as a continuous system: per-source collectors on their
+own clocks (the 420-second host collects in the background all day,
+bothering no one), email ingested as it arrives, and a canonical digest
+frozen by the validation gates at end of day. A live <code>/today</code> view of
+the in-progress day, clearly marked preliminary, is the next surface to
+ship.</p>
+<p>The design is forkable on purpose. The editorial gates, provenance
+model, and access discipline are jurisdiction-neutral; pointing the
+codebase at another government's official publication interfaces means
+replacing the source registry and the parsers, not the rules. If your
+jurisdiction publishes an official record, this machinery can read it.</p>
+<p>And the standing invitation remains open: to every agency whose
+<code>unavailable</code> entry sits in our registry — the door is yours to open.
+Safe, sane automated access to what you already publish for the public
+costs you one polite reader and gains your record a wider audience,
+human and machine alike.</p>
+<h2 id="where-to-find-it">Where to find it</h2>
+<p>The digest publishes daily at <strong><a href="https://fapd.info">fapd.info</a></strong>. Agents
+should start at <a href="https://fapd.info/llms.txt">/llms.txt</a> and
+<a href="https://fapd.info/agents.html">/agents.html</a>; change discovery is the
+Atom feed, and the index is <code>digests.json</code>. The repository — code,
+governing documents, source registry, and the hash-chained provenance
+manifests — is public:
+<a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">github.com/davidkarnowski/free-agentic-publication-digester<span class="vh"> (opens in a new tab)</span></a>.</p>
+<p>For claims, cite the official source. For the aggregation, cite FAPD.
+The record was always yours; we just made it readable.</p><p class="post-back"><a href="blog.html">&larr; All posts</a></p>
+</main>
+<footer class="site-footer">
+  <p>Generated 2026-07-31T03:13:46Z (UTC). Canonical source:
+  <code>docs/devnotes/2026-07-30-launch-article.md</code> in the
+  <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
+  every item cites its official source; methodology in
+  <code>GUIDE.md</code> §2.</p>
+  <p>Content licensed
+  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0<span class="vh"> (opens in a new tab)</span></a> —
+  reuse with attribution to FAPD (Free Agentic Publication Digester);
+  quoted official government text is
+  public domain (17 U.S.C. § 105). Code licensed Apache-2.0.</p>
+</footer>
+</body>
+</html>

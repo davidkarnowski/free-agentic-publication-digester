@@ -4,17 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Methods — Free Agentic Publication Digester — Daily Federal Digest</title>
+<meta name="description" content="An automated, citation-bound, opinion-agnostic daily digest of official United States government publications — congressional, executive, and judicial — built only from primary sources. Built for human readers and AI agents; agents start at /llms.txt.">
+<meta name="robots" content="index, follow">
+<link rel="alternate" type="text/plain" href="llms.txt"
+      title="LLM guide — this is an AI-first digest of official US federal publications">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 <header class="site-header">
-  <nav>
+  <nav aria-label="Site">
     <a class="brand" href="index.html" title="Free Agentic Publication Digester"
        aria-label="Free Agentic Publication Digester (FAPD)">FAPD</a>
-    <span class="nav-links"><a href="index.html">All digests</a><a href="sources.html">Sources</a><a href="about.html">About</a><a href="ai-development.html">AI development</a><a href="bot.html">Bot</a><a href="privacy.html">Privacy</a><a href="readme.html">Readme</a><a href="agents.html">For agents</a></span>
+    <span class="nav-links"><a href="index.html">All digests</a><a href="today.html">Today (live)</a><a href="sources.html">Sources</a><a href="blog.html">Blog</a><a href="about.html">About</a><a href="accessibility.html">Accessibility</a><a href="ai-development.html">AI development</a><a href="bot.html">Bot</a><a href="methods.html" aria-current="page">Methods</a><a href="privacy.html">Privacy</a><a href="readme.html">Readme</a><a href="agents.html">For agents</a></span>
   </nav>
 </header>
-<main>
+<main id="main" tabindex="-1">
 <h1 id="methods">Methods</h1>
 <p>How the Free Agentic Publication Digester (FAPD) makes each digest, in
 pipeline order: where documents come from
@@ -216,7 +221,18 @@ page — is a derived, zero-model presentation layer, regenerable at any
 time without touching data or models. On the site, each digest renders
 as a collapsed, plain-speak-first view: section cards whose headers
 carry the title, tag chips, and the plain-language synopsis, expanding
-to the full record on demand — static HTML with no JavaScript.</p>
+to the full record on demand — static HTML with no scripts.</p>
+<p><strong>What a "day" means here.</strong> A publication day runs midnight to
+midnight <strong>Eastern time in Washington, D.C.</strong> — the clock the publishers
+themselves keep, from the Federal Register's morning release to the close
+of floor proceedings. A digest dated 2026-07-30 therefore covers that
+Eastern day, and the live page rolls over at Eastern midnight. Times
+displayed on the site are Eastern; the underlying timestamps are UTC and
+remain readable in the page markup and the machine surfaces. This
+boundary was adopted on 2026-07-30, replacing a UTC day boundary that
+filed evening releases under the following day; digests published before
+that date keep their original dating, because the record is not
+rewritten to match a later policy.</p>
 <p><strong>The validation gate.</strong> Before publication, each digest must pass four
 coded checks: every govinfo citation resolves to a stored record; the
 Coverage Statement's arithmetic reconciles internally and against the
@@ -226,12 +242,13 @@ rule. A digest that fails any check is not published — there is no
 override.</p>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-07-30T21:21:15Z (UTC). Canonical source:
-  <code>docs/site/methods.md</code> in the repository. Selection is mechanical and
+  <p>Generated 2026-07-31T03:13:45Z (UTC). Canonical source:
+  <code>docs/site/methods.md</code> in the
+  <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in
   <code>GUIDE.md</code> §2.</p>
   <p>Content licensed
-  <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> —
+  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0<span class="vh"> (opens in a new tab)</span></a> —
   reuse with attribution to FAPD (Free Agentic Publication Digester);
   quoted official government text is
   public domain (17 U.S.C. § 105). Code licensed Apache-2.0.</p>

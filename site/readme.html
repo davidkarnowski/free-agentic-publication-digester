@@ -4,18 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free Agentic Publication Digester (FAPD)</title>
+<meta name="description" content="An automated, citation-bound, opinion-agnostic daily digest of official United States government publications — congressional, executive, and judicial — built only from primary sources. Built for human readers and AI agents; agents start at /llms.txt.">
+<meta name="robots" content="index, follow">
+<link rel="alternate" type="text/plain" href="llms.txt"
+      title="LLM guide — this is an AI-first digest of official US federal publications">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 <header class="site-header">
-  <nav>
+  <nav aria-label="Site">
     <a class="brand" href="index.html" title="Free Agentic Publication Digester"
        aria-label="Free Agentic Publication Digester (FAPD)">FAPD</a>
-    <span class="nav-links"><a href="index.html">All digests</a><a href="sources.html">Sources</a><a href="about.html">About</a><a href="ai-development.html">AI development</a><a href="bot.html">Bot</a><a href="methods.html">Methods</a><a href="privacy.html">Privacy</a><a href="agents.html">For agents</a></span>
+    <span class="nav-links"><a href="index.html">All digests</a><a href="today.html">Today (live)</a><a href="sources.html">Sources</a><a href="blog.html">Blog</a><a href="about.html">About</a><a href="accessibility.html">Accessibility</a><a href="ai-development.html">AI development</a><a href="bot.html">Bot</a><a href="methods.html">Methods</a><a href="privacy.html">Privacy</a><a href="readme.html" aria-current="page">Readme</a><a href="agents.html">For agents</a></span>
   </nav>
 </header>
-<main>
+<main id="main" tabindex="-1">
 <h1 id="free-agentic-publication-digester-fapd">Free Agentic Publication Digester (FAPD)</h1>
+<p><a href="https://deepwiki.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">Ask DeepWiki<span class="vh"> (opens in a new tab)</span></a></p>
 <p>FAPD is an automated pipeline that reads the official publications of the
 United States federal government — congressional floor proceedings, bills,
 the Federal Register, enacted laws, federal court opinions, and agency
@@ -36,7 +42,7 @@ repository disagrees, this dated snapshot is the current one.</p>
   newsrooms, 11 email bulletins, 5 govinfo collections), 76 planned,
   19 recorded unavailable, 2 evaluated and excluded.</li>
 <li><strong>Latest digest:</strong> <a href="2026-07-29.html">2026-07-29</a>.</li>
-<li><strong>Test suite:</strong> 319 tests.</li>
+<li><strong>Test suite:</strong> 377 tests (verified by collection 2026-07-30).</li>
 </ul>
 <hr />
 <h2 id="philosophy">Philosophy</h2>
@@ -279,7 +285,9 @@ glossary, the Coverage Statement, and a methodology footer. Sample:
 <p>On the site, each digest renders as a collapsed, plain-speak-first
 view: section cards whose headers carry the title, tag chips, and the
 plain-language synopsis, expanding to the full record on demand —
-still static HTML, no JavaScript.</p>
+still static HTML, no scripts. (The derived live page carries one
+inline script that renders timestamps in the reader's local time
+alongside UTC; it loads no external resource and stores nothing.)</p>
 <hr />
 <h2 id="setup">Setup</h2>
 <p><code>sh
@@ -353,12 +361,13 @@ is at <code>docs/site/ai-development.md</code>
 </ul>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-07-30T21:21:15Z (UTC). Canonical source:
-  <code>README.md</code> in the repository. Selection is mechanical and
+  <p>Generated 2026-07-31T03:13:45Z (UTC). Canonical source:
+  <code>README.md</code> in the
+  <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in
   <code>GUIDE.md</code> §2.</p>
   <p>Content licensed
-  <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> —
+  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0<span class="vh"> (opens in a new tab)</span></a> —
   reuse with attribution to FAPD (Free Agentic Publication Digester);
   quoted official government text is
   public domain (17 U.S.C. § 105). Code licensed Apache-2.0.</p>

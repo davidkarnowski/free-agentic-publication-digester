@@ -4,17 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>About this project — Free Agentic Publication Digester — Daily Federal Digest</title>
+<meta name="description" content="An automated, citation-bound, opinion-agnostic daily digest of official United States government publications — congressional, executive, and judicial — built only from primary sources. Built for human readers and AI agents; agents start at /llms.txt.">
+<meta name="robots" content="index, follow">
+<link rel="alternate" type="text/plain" href="llms.txt"
+      title="LLM guide — this is an AI-first digest of official US federal publications">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 <header class="site-header">
-  <nav>
+  <nav aria-label="Site">
     <a class="brand" href="index.html" title="Free Agentic Publication Digester"
        aria-label="Free Agentic Publication Digester (FAPD)">FAPD</a>
-    <span class="nav-links"><a href="index.html">All digests</a><a href="sources.html">Sources</a><a href="ai-development.html">AI development</a><a href="bot.html">Bot</a><a href="methods.html">Methods</a><a href="privacy.html">Privacy</a><a href="readme.html">Readme</a><a href="agents.html">For agents</a></span>
+    <span class="nav-links"><a href="index.html">All digests</a><a href="today.html">Today (live)</a><a href="sources.html">Sources</a><a href="blog.html">Blog</a><a href="about.html" aria-current="page">About</a><a href="accessibility.html">Accessibility</a><a href="ai-development.html">AI development</a><a href="bot.html">Bot</a><a href="methods.html">Methods</a><a href="privacy.html">Privacy</a><a href="readme.html">Readme</a><a href="agents.html">For agents</a></span>
   </nav>
 </header>
-<main>
+<main id="main" tabindex="-1">
 <h1 id="about-this-project">About this project</h1>
 <p>The Free Agentic Publication Digester (FAPD) is an automated pipeline
 that reads the official
@@ -92,8 +97,9 @@ cited, coverage-accounted digest instead of crawling many official sites
 — and government servers get one paced, disciplined crawler instead of
 many. What agents get:</p>
 <ul>
-<li>Stable digest URLs: <code>/&lt;YYYY-MM-DD&gt;.html</code>, static HTML, no JavaScript,
-  no authentication.</li>
+<li>Stable digest URLs: <code>/&lt;YYYY-MM-DD&gt;.html</code>, static HTML, no scripts,
+  no authentication. (The live page adds one inline script that shows
+  timestamps in your local time; it loads nothing and records nothing.)</li>
 <li><a href="llms.txt"><code>/llms.txt</code></a> — a guide to what exists here and where.</li>
 <li><a href="digests.json"><code>/digests.json</code></a> — a machine-readable index of every
   digest, with canonical Markdown paths.</li>
@@ -128,12 +134,13 @@ code, not by operator discipline:</p>
 </ul>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-07-30T21:21:15Z (UTC). Canonical source:
-  <code>docs/site/about.md</code> in the repository. Selection is mechanical and
+  <p>Generated 2026-07-31T03:13:45Z (UTC). Canonical source:
+  <code>docs/site/about.md</code> in the
+  <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in
   <code>GUIDE.md</code> §2.</p>
   <p>Content licensed
-  <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> —
+  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0<span class="vh"> (opens in a new tab)</span></a> —
   reuse with attribution to FAPD (Free Agentic Publication Digester);
   quoted official government text is
   public domain (17 U.S.C. § 105). Code licensed Apache-2.0.</p>

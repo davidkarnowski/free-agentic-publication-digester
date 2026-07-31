@@ -1,4 +1,12 @@
-# AI agents and crawlers are welcome here — see /agents.html
+# AI agents and crawlers are welcome here — indexing is
+# encouraged. This is an AI-first digest of official US federal
+# publications, built for machine ingestion as much as human
+# reading.
+#   Agent guide:  /agents.html
+#   LLM guide:    /llms.txt
+#   Machine index: /digests.json   Atom: /feed.xml
+# /today.html is a PRELIMINARY live view; the dated digests are
+# the record.
 User-agent: *
 Allow: /
 

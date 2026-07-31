@@ -4,17 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy &amp; licensing — Free Agentic Publication Digester — Daily Federal Digest</title>
+<meta name="description" content="An automated, citation-bound, opinion-agnostic daily digest of official United States government publications — congressional, executive, and judicial — built only from primary sources. Built for human readers and AI agents; agents start at /llms.txt.">
+<meta name="robots" content="index, follow">
+<link rel="alternate" type="text/plain" href="llms.txt"
+      title="LLM guide — this is an AI-first digest of official US federal publications">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 <header class="site-header">
-  <nav>
+  <nav aria-label="Site">
     <a class="brand" href="index.html" title="Free Agentic Publication Digester"
        aria-label="Free Agentic Publication Digester (FAPD)">FAPD</a>
-    <span class="nav-links"><a href="index.html">All digests</a><a href="sources.html">Sources</a><a href="about.html">About</a><a href="ai-development.html">AI development</a><a href="bot.html">Bot</a><a href="methods.html">Methods</a><a href="readme.html">Readme</a><a href="agents.html">For agents</a></span>
+    <span class="nav-links"><a href="index.html">All digests</a><a href="today.html">Today (live)</a><a href="sources.html">Sources</a><a href="blog.html">Blog</a><a href="about.html">About</a><a href="accessibility.html">Accessibility</a><a href="ai-development.html">AI development</a><a href="bot.html">Bot</a><a href="methods.html">Methods</a><a href="privacy.html" aria-current="page">Privacy</a><a href="readme.html">Readme</a><a href="agents.html">For agents</a></span>
   </nav>
 </header>
-<main>
+<main id="main" tabindex="-1">
 <h1 id="privacy-licensing">Privacy &amp; licensing</h1>
 <p>The <strong>Free Agentic Publication Digester (FAPD)</strong> publishes a static
 website. This page states, for humans and for AI agents alike, exactly
@@ -24,10 +29,17 @@ reused.</p>
 <ul>
 <li><strong>No data collection.</strong> No cookies, no analytics, no trackers, no
   fingerprinting, no advertising.</li>
-<li><strong>No JavaScript.</strong> Pages are static HTML; nothing executes in your
-  browser on our behalf.</li>
-<li><strong>No accounts, no forms.</strong> Nothing here accepts input, so nothing
-  stores it.</li>
+<li><strong>No tracking scripts.</strong> The digest pages are pure static HTML. The
+  live page (<code>/today.html</code>) carries exactly one small inline script,
+  and all it does is display each timestamp in your local time beside
+  the published UTC time. It makes no network request, sets no cookie,
+  stores nothing, and reports nothing to us — the computation happens
+  in your browser and stays there. With JavaScript disabled the page is
+  identical minus the local-time hint.</li>
+<li><strong>No accounts, no data entry.</strong> The live page's keyword filter is a
+  plain HTML form whose state never leaves your browser: it is not
+  submitted, not stored, and not readable by us. Nothing on this site
+  collects, transmits, or retains anything you type or click.</li>
 <li><strong>No third-party requests.</strong> Pages load no external fonts, scripts,
   images, or embeds — your visit talks to this server and no one else.</li>
 </ul>
@@ -44,7 +56,7 @@ Transparency logs), like every HTTPS site's.</p>
 <h2 id="licensing">Licensing</h2>
 <ul>
 <li><strong>Digests, site pages, and explanatory documents:</strong>
-  <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> — reuse
+  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0<span class="vh"> (opens in a new tab)</span></a> — reuse
   freely with credit to "FAPD — Free Agentic Publication Digester."</li>
 <li><strong>The pipeline code:</strong> Apache-2.0, in the project repository.</li>
 <li><strong>Quoted official government text</strong> is public domain
@@ -62,12 +74,13 @@ transparency page: <a href="bot.html">Our crawler</a>.</p>
 and in the repository metadata.</p>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-07-30T21:21:15Z (UTC). Canonical source:
-  <code>docs/site/privacy.md</code> in the repository. Selection is mechanical and
+  <p>Generated 2026-07-31T03:13:45Z (UTC). Canonical source:
+  <code>docs/site/privacy.md</code> in the
+  <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in
   <code>GUIDE.md</code> §2.</p>
   <p>Content licensed
-  <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> —
+  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0<span class="vh"> (opens in a new tab)</span></a> —
   reuse with attribution to FAPD (Free Agentic Publication Digester);
   quoted official government text is
   public domain (17 U.S.C. § 105). Code licensed Apache-2.0.</p>
