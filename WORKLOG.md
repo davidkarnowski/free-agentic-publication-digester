@@ -2497,3 +2497,21 @@ see why a boundary moved. The live page now says all of this in plain
 words above the stream, shows times in Eastern with the reader's local
 time appended beside them, and the tests pin the 8 p.m. case that
 started it, the winter EST case, and the finalizer's target. 359 tests.
+
+## 2026-07-30 — The finalizer runs when the day ends (00:00 ET)
+
+Operator: run the digest at midnight Eastern, when the publishing day
+actually closes. The hour gate moves from `EOD_UTC_HOUR = 9` to
+`EOD_ET_HOUR = 0` and is now read on Washington's clock rather than
+UTC's — deliberately, because midnight ET is 04:00 UTC in summer and
+05:00 in winter, so a fixed UTC hour would drift an hour at every DST
+change and finalize at the wrong moment half the year. Tests pin both
+the new contract (Jul 30 becomes due at 00:05 ET Jul 31, not before,
+and only once) and the Eastern-gate property itself, by setting the
+hour to 6 and checking that 09:00 UTC (05:00 EDT) is still too early.
+
+One consequence worth stating: finalizing the instant a day closes
+removes the several-hour settling margin the 09:00 UTC schedule had.
+Items the collectors observe after midnight Eastern are dated to the
+new publication day by the §3 fallback and appear in that day's digest
+instead — consistent and disclosed, but a tighter boundary than before.

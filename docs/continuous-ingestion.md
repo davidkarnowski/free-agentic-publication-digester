@@ -143,7 +143,8 @@ anyway: the supervisor pauses collector workers during finalization
   `fapd-site:/app/site`; `env_file: .env` (server-side, never synced);
   a mounted read-only deploy key for evidence pushes.
 - **EODWorker inside the supervisor** replaces host scheduling: at the
-  configured off-peak time (US Eastern) it sets a pause event all
+  configured hour on Washington's clock (EOD_ET_HOUR = 0 — when
+  the publication day ends) it sets a pause event all
   collector workers respect, runs the finalizer stages in-process,
   makes the evidence commit with the guard-shell pattern (stage
   explicit paths → assert staged-set equality in one `&&` chain →

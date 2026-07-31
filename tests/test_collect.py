@@ -270,21 +270,45 @@ def test_eod_worker_absent_unless_enabled(tmp_path, monkeypatch):
     assert not any(w.name == "eod" for w in sup.workers)
 
 
-def test_eod_due_only_after_hour_and_once_per_day(tmp_path, monkeypatch):
+def test_eod_fires_when_the_publication_day_ends_once_per_day(tmp_path,
+                                                             monkeypatch):
+    """EOD_ET_HOUR = 0 (operator, 2026-07-30): finalize a publication day
+    as soon as it closes in Washington, and only once."""
     sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
     worker = collect.EODWorker(sup, 10)
     conn = conn_factory()
-    before = dt.datetime(2026, 7, 30, config.EOD_UTC_HOUR - 1, 0, tzinfo=dt.UTC)
-    after = dt.datetime(2026, 7, 30, config.EOD_UTC_HOUR, 5, tzinfo=dt.UTC)
-    assert worker.eod_due(conn, now=before) is None
-    assert worker.eod_due(conn, now=after) == "2026-07-29"
-    # once recorded, not due again for the same target
+
+    # 00:05 ET on Jul 31 (= 04:05 UTC): Jul 30 has just ended
+    just_after_midnight_et = dt.datetime(2026, 7, 31, 4, 5, tzinfo=dt.UTC)
+    assert worker.eod_due(conn, now=just_after_midnight_et) == "2026-07-30"
+
+    # 23:55 ET on Jul 30 (= 03:55 UTC Jul 31): Jul 30 is still open, so the
+    # day on offer is the one before it, not Jul 30
+    still_jul30_et = dt.datetime(2026, 7, 31, 3, 55, tzinfo=dt.UTC)
+    assert worker.eod_due(conn, now=still_jul30_et) == "2026-07-29"
+
     collect.record_state(conn, "eod", ok=True,
-                         stats={"ran": True, "date": "2026-07-29"})
-    assert worker.eod_due(conn, now=after) is None
-    # ...but due again the next day
-    next_day = after + dt.timedelta(days=1)
-    assert worker.eod_due(conn, now=next_day) == "2026-07-30"
+                         stats={"ran": True, "date": "2026-07-30"})
+    assert worker.eod_due(conn, now=just_after_midnight_et) is None
+    assert worker.eod_due(
+        conn, now=just_after_midnight_et + dt.timedelta(days=1)) == "2026-07-31"
+    conn.close()
+
+
+def test_eod_hour_gate_is_read_on_washingtons_clock(tmp_path, monkeypatch):
+    """The gate is Eastern, not UTC — otherwise a fixed UTC hour would
+    drift by an hour at every DST change."""
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    worker = collect.EODWorker(sup, 10)
+    conn = conn_factory()
+    monkeypatch.setattr(config, "EOD_ET_HOUR", 6)   # 6am in Washington
+
+    # 09:00 UTC = 05:00 EDT — before the gate in Eastern terms
+    assert worker.eod_due(
+        conn, now=dt.datetime(2026, 7, 31, 9, 0, tzinfo=dt.UTC)) is None
+    # 11:00 UTC = 07:00 EDT — past it
+    assert worker.eod_due(
+        conn, now=dt.datetime(2026, 7, 31, 11, 0, tzinfo=dt.UTC)) == "2026-07-30"
     conn.close()
 
 
@@ -415,10 +439,6 @@ def test_eod_targets_the_publication_day_that_just_closed(conn):
     # winter (EST): 09:00 UTC is 04:00 ET, same reasoning
     assert worker.eod_due(
         conn, dt.datetime(2026, 1, 15, 9, 0, tzinfo=dt.UTC)) == "2026-01-14"
-
-    # before the hour: not due at all
-    assert worker.eod_due(
-        conn, dt.datetime(2026, 7, 31, 3, 0, tzinfo=dt.UTC)) is None
 
     # once recorded, the same day does not refire
     collect.record_state(conn, "eod", ok=True,

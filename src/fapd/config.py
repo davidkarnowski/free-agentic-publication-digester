@@ -138,11 +138,14 @@ PUBLICATION_TZ = ZoneInfo("America/New_York")
 PUBLICATION_TZ_LABEL = "Eastern time (Washington, D.C.)"
 
 # EOD finalizer (in-supervisor, docs/continuous-ingestion.md §9): fires
-# once per UTC day at/after this hour — 09:00 UTC is 4-5am US Eastern,
-# the §4 off-peak window, safely past the Eastern midnight boundary that
-# closes the publication day it finalizes. Evidence pushes gate on
+# once per publication day at/after this hour, read on WASHINGTON's
+# clock — 0 means the finalizer runs when the publication day it
+# finalizes actually ends (operator, 2026-07-30). Expressed in Eastern,
+# not UTC, because midnight ET is 04:00 UTC in summer and 05:00 in
+# winter; a fixed UTC hour would drift by an hour twice a year. Still
+# inside the §4 off-peak window. Evidence pushes gate on
 # FAPD_EVIDENCE_PUSH=1.
-EOD_UTC_HOUR = 9
+EOD_ET_HOUR = 0
 EVIDENCE_PUSH = os.environ.get("FAPD_EVIDENCE_PUSH", "") == "1"
 
 # Rule USCOURTS-FETCH-01 (GUIDE §3 judicial): USCOURTS delta listings carry

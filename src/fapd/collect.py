@@ -428,10 +428,12 @@ class EODWorker(Worker):
     name = "eod"
 
     def eod_due(self, conn, now=None):
-        """The digest date to finalize, or None. Due when past the EOD
-        hour and the newest complete day hasn't been finalized yet."""
+        """The publication day to finalize, or None. Due once that day
+        has closed in Washington and has not been finalized yet — the
+        hour gate is read on Eastern, so it means the same clock time
+        year-round (config.EOD_ET_HOUR = 0: run when the day ends)."""
         now = now or dt.datetime.now(dt.UTC)
-        if now.hour < config.EOD_UTC_HOUR:
+        if now.astimezone(config.PUBLICATION_TZ).hour < config.EOD_ET_HOUR:
             return None
         # The publication day that just closed in Washington — computed
         # from Eastern so a DST shift can never target the wrong day.
