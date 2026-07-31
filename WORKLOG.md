@@ -3613,3 +3613,38 @@ harmless, but it means gate 2 proves reachability and robots for an
 xml-index source and not much else. Teaching the probe to enumerate
 through `agencies.adapter_for(entry).items(...)` needs a lazy import
 (agencies imports probe), and belongs to whoever picks up Phase 3.
+
+## 2026-07-31 — Phase 4 has no viable target, and that is the finding
+
+Phase 4 was to add DCPD. Probing first — the discipline that has now paid
+three times today — turned up two things that cancel the phase.
+
+`DCPD` is not a govinfo collection code. The collections endpoint does
+not list it and every query returns zero; the real code is `CPD`, and
+package IDs are prefixed `DCPD-`, which is almost certainly how the
+registry acquired the wrong one. Building the plan literally would have
+produced a parser, selection rules, a digest section and coverage
+arithmetic against a code that returns nothing forever.
+
+CPD itself is live — 62 packages in 14 days — but publishes with about a
+five-week lag: newest dateIssued 2026-06-23 when probed on 07-31. Under
+the §3 dating rule those documents belong to digest days published five
+weeks ago and never re-rendered, so CPD would enter the archive and never
+reach a reader. Presidential documents are meanwhile already carried
+same-day through FR PRESDOCU — 1 today, 2 on 07-29, 2 on 07-28, 8 on
+07-23.
+
+The operator redirected to CRPT and CHRG, and the same check disqualified
+both. Of 200 CRPT packages changed in 21 days the newest is dated
+1971-01-02: they are SERIALSET digitisation of 1970-71 reports, not
+current ones. CHRG's newest issue date is 31 days old and the packages
+actually changing day to day are dated 2024-2025. Neither has a single
+package dated within 7 days.
+
+The generalisation is worth stating plainly: **govinfo's same-day
+collections are already fully covered.** CREC, BILLS, FR, USCOURTS and
+PLAW are the ones that publish on the day they describe; every remaining
+govinfo collection is either lagged by weeks or dominated by
+retrospective digitisation. There is no sixth collection to add for a
+daily digest. Evidence recorded on all three entries so the next person
+to look at them reads the measurement rather than repeating it.
