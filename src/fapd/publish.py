@@ -368,7 +368,11 @@ li.source-note a { color: var(--muted); }
 }
 /* Keyword filter (pure CSS :target — the site stays JavaScript-free).
    The per-keyword rules are generated into today.html's own <style>. */
-.filter-anchor { display: block; height: 0; }
+/* Visually hidden but focusable: keyboard users still reach every chip. */
+.filter-cb {
+  position: absolute; width: 1px; height: 1px;
+  opacity: 0; pointer-events: none;
+}
 .filter-bar {
   border: 1px solid var(--border); border-radius: 6px;
   background: var(--stripe); padding: 0.6rem 0.75rem; margin: 1rem 0;
@@ -382,10 +386,16 @@ li.source-note a { color: var(--muted); }
 }
 .filter-clear {
   display: none; margin-left: 0.6rem; font-size: 0.78rem; font-weight: 400;
+  padding: 0.1rem 0.6rem; border: 1px solid var(--border); border-radius: 999px;
+  background: var(--card); color: var(--accent); cursor: pointer;
+  font-family: inherit;
 }
-.filter-more { margin-top: 0.4rem; font-size: 0.8rem; }
-.filter-more summary { cursor: pointer; color: var(--accent); }
-.filter-more .tag { margin-top: 0.3rem; }
+.filter-row { margin-top: 0.35rem; line-height: 2.1; }
+.filter-branches {
+  padding-bottom: 0.4rem; margin-bottom: 0.1rem;
+  border-bottom: 1px dashed var(--border);
+}
+.filter-chip { cursor: pointer; }
 .filter-note {
   display: block; margin-top: 0.4rem; font-size: 0.75rem; color: var(--muted);
 }
@@ -485,13 +495,20 @@ _BRANCH_CHIP_CLASSES = {
 }
 
 
-def _tag_chip(text, extra_class="", title=""):
+def _tag_classes(text, extra_class=""):
+    """Chip classes for a tag — branch tags carry their site-wide color
+    wherever they appear, listing entry or filter control."""
     classes = "tag"
     branch = _BRANCH_CHIP_CLASSES.get(text.strip().lower())
     if branch:
         classes += f" {branch}"
     if extra_class:
         classes += f" {extra_class}"
+    return classes
+
+
+def _tag_chip(text, extra_class="", title=""):
+    classes = _tag_classes(text, extra_class)
     title_attr = f' title="{html.escape(title)}"' if title else ""
     return f'<span class="{classes}"{title_attr}>{html.escape(text)}</span>'
 
@@ -1061,18 +1078,19 @@ _TODAY_DOC_TYPES = {
 }
 
 
-def _et_hhmm(utc_stamp):
-    """HH:MM in Washington for a stored UTC stamp — the clock the
-    publishers keep. The machine-readable UTC value stays in the
-    element's datetime attribute, and the page's one script appends the
-    reader's own local time beside it."""
+def _et_clock(utc_stamp):
+    """HH:MM:SS in Washington for a stored UTC stamp — the clock the
+    publishers keep, to the second we actually recorded. The
+    machine-readable UTC value stays in the element's datetime
+    attribute, and the page's one script appends the reader's own local
+    time beside it."""
     import datetime as _dt
 
     try:
         when = _dt.datetime.fromisoformat(utc_stamp)
     except ValueError:
-        return utc_stamp[11:16]
-    return when.astimezone(config.PUBLICATION_TZ).strftime("%H:%M")
+        return utc_stamp[11:19]
+    return when.astimezone(config.PUBLICATION_TZ).strftime("%H:%M:%S")
 
 
 def _today_doc_label(item):
@@ -1128,7 +1146,7 @@ def _today_item_row(item):
     cite = item["package_id"] + (f" / {gran}" if gran else "")
     stamp = item["observed_at"] or ""
     observed = (f'<time class="utc" datetime="{html.escape(stamp)}">'
-                f"{html.escape(_et_hhmm(stamp))} ET</time>" if stamp else "")
+                f"{html.escape(_et_clock(stamp))} ET</time>" if stamp else "")
     url = _today_official_url(item)
     title_html = (f'<a href="{html.escape(url)}">{html.escape(title)}</a>'
                   if url else html.escape(title))
@@ -1173,13 +1191,18 @@ def _today_item_row(item):
     )
 
 
-# Keyword filtering on /today is pure CSS (:target), so the site stays
-# JavaScript-free: each offered keyword gets an empty anchor before the
-# stream, a chip linking to that fragment, and generated rules that hide
-# every item lacking the keyword's class. One keyword at a time, which
-# is what :target allows — and it makes filtered views shareable URLs.
-MAX_FILTER_KEYWORDS = 120       # capped, and disclosed in place when it fires
-FILTER_CHIP_MIN_ITEMS = 2       # rarer keywords fold into a <details> tail
+# Keyword filtering on /today is pure CSS, so the site stays script-free.
+# The state lives in hidden checkboxes rather than URL fragments (:target,
+# used until 2026-07-30): a fragment link makes the browser scroll to the
+# anchor, and it cannot be un-clicked. A checkbox toggles off when its
+# chip is clicked again, moves the viewport not at all, and a native
+# reset button clears every selection without a line of JavaScript.
+# Selecting several keywords narrows to items carrying all of them.
+# Safety ceiling only — the bar lists every keyword the day produced
+# (operator, 2026-07-30: "a full listing, not a truncated listing").
+# If a day ever exceeded this the bar would say so in place.
+MAX_FILTER_KEYWORDS = 400
+_BRANCH_ORDER = ("legislative", "executive", "judicial", "cross-branch")
 
 
 def _slug(text):
@@ -1197,42 +1220,61 @@ def _today_filter_facets(items):
     return dict(sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])))
 
 
+def _filter_chip(tag, count):
+    """A chip is a <label> for its hidden checkbox, wearing exactly the
+    classes the same tag wears on a listing entry — so a branch keeps its
+    color whether you are reading it or filtering by it."""
+    return (f'<label class="{_tag_classes(tag, "filter-chip")}" '
+            f'for="f-{_slug(tag)}">{html.escape(tag)}'
+            f'<span class="filter-n">{count}</span></label>')
+
+
 def _today_filter_bar(facets, total):
-    """(anchors, bar_html, css) for the offered keywords. Frequent
-    keywords are chips; the long tail folds into a native <details> so
-    nothing is dropped silently."""
+    """(inputs, bar_html, css) for the day's keywords: branches on their
+    own row, then every remaining keyword in one full listing."""
     offered = list(facets.items())[:MAX_FILTER_KEYWORDS]
     dropped = len(facets) - len(offered)
-    anchors, chips, tail, css = [], [], [], []
-    for tag, n in offered:
-        slug = _slug(tag)
-        anchors.append(f'<span class="filter-anchor" id="k-{slug}"></span>')
-        chip = (f'<a class="tag filter-chip" href="#k-{slug}">'
-                f'{html.escape(tag)}<span class="filter-n">{n}</span></a>')
-        (chips if n >= FILTER_CHIP_MIN_ITEMS else tail).append(chip)
-        css.append(
-            f"#k-{slug}:target ~ .today-list > .today-item:not(.k-{slug})"
-            "{display:none}\n"
-            f'#k-{slug}:target ~ .filter-bar a[href="#k-{slug}"],\n'
-            f'#k-{slug}:target ~ .filter-bar details a[href="#k-{slug}"]'
-            "{background:var(--accent);color:#fff;border-color:var(--accent)}\n"
-            f"#k-{slug}:target ~ .filter-bar .filter-clear{{display:inline}}\n")
     if not offered:
         return "", "", ""
-    tail_html = (
-        f'<details class="filter-more"><summary>more keywords '
-        f'({len(tail)})</summary>{"".join(tail)}</details>' if tail else "")
-    note = (f'<span class="filter-note">Showing the {len(offered)} most '
-            f"common of {len(facets)} keywords.</span>" if dropped else "")
+
+    inputs, css = [], []
+    for tag, _n in offered:
+        slug = _slug(tag)
+        inputs.append(f'<input type="checkbox" class="filter-cb" id="f-{slug}">')
+        css.append(
+            f"#f-{slug}:checked ~ .today-list > .today-item:not(.k-{slug})"
+            "{display:none}\n"
+            f'#f-{slug}:checked ~ .filter-bar label[for="f-{slug}"]'
+            "{background:var(--accent);color:#fff;border-color:var(--accent)}\n"
+            f'#f-{slug}:focus-visible ~ .filter-bar label[for="f-{slug}"]'
+            "{outline:2px solid var(--accent);outline-offset:2px}\n"
+            f"#f-{slug}:checked ~ .filter-bar .filter-clear"
+            "{display:inline-block}\n")
+
+    branches = [(t_, n) for t_, n in offered if t_ in _BRANCH_ORDER]
+    branches.sort(key=lambda kv: _BRANCH_ORDER.index(kv[0]))
+    rest = [(t_, n) for t_, n in offered if t_ not in _BRANCH_ORDER]
+
+    rows = ""
+    if branches:
+        rows += ('<div class="filter-row filter-branches">'
+                 + "".join(_filter_chip(t_, n) for t_, n in branches)
+                 + "</div>")
+    if rest:
+        rows += ('<div class="filter-row">'
+                 + "".join(_filter_chip(t_, n) for t_, n in rest) + "</div>")
+    note = (f'<span class="filter-note">Showing {len(offered)} of '
+            f"{len(facets)} keywords.</span>" if dropped else "")
     bar = (
         '<nav class="filter-bar" aria-label="Filter the stream by keyword">'
         '<p class="filter-lead">Filter by keyword '
-        f'<span class="rule-note">one at a time · {total} item(s) '
-        "unfiltered</span>"
-        '<a class="filter-clear" href="today.html">clear filter</a></p>'
-        f'{"".join(chips)}{tail_html}{note}</nav>'
+        '<span class="rule-note">click to select, click again to clear · '
+        "choosing several narrows to items carrying all of them · "
+        f"{total} item(s) unfiltered</span>"
+        '<button type="reset" class="filter-clear">clear filters</button></p>'
+        f"{rows}{note}</nav>"
     )
-    return "".join(anchors), bar, "".join(css)
+    return "".join(inputs), bar, "".join(css)
 
 
 # The site's one script (operator request, 2026-07-30): UTC stamps are
@@ -1245,7 +1287,8 @@ _LOCAL_TIME_JS = """<script>
   var f;
   try {
     f = new Intl.DateTimeFormat(undefined,
-      {hour: "2-digit", minute: "2-digit", timeZoneName: "short"});
+      {hour: "2-digit", minute: "2-digit", second: "2-digit",
+       timeZoneName: "short"});
   } catch (e) { return; }
   document.querySelectorAll("time.utc[datetime]").forEach(function (el) {
     var d = new Date(el.getAttribute("datetime"));
@@ -1331,7 +1374,7 @@ def build_today(conn, out_dir=None, date=None):
         f'<p class="today-disclosure">{html.escape(_TODAY_DISCLOSURE)}</p>',
         intro,
         (f'<p class="today-meta">Last updated <time class="utc"'
-         f' datetime="{html.escape(now)}">{html.escape(_et_hhmm(now))} ET'
+         f' datetime="{html.escape(now)}">{html.escape(_et_clock(now))} ET'
          f"</time> · {len(status['items'])} item(s) observed so far · "
          f"{status['pending_llm']} item(s) awaiting model summary.</p>"),
     ]
@@ -1339,20 +1382,24 @@ def build_today(conn, out_dir=None, date=None):
         parts.append('<p class="today-chips">Day so far: '
                      + "".join(day_chips) + "</p>")
     facets = _today_filter_facets(status["items"])
-    anchors, filter_bar, filter_css = _today_filter_bar(
+    inputs, filter_bar, filter_css = _today_filter_bar(
         facets, len(status["items"]))
-    if anchors:
-        parts.insert(1, anchors)   # anchors must precede bar and stream
-        parts.append(filter_bar)
     if not status["items"]:
         parts.append("<p>No items observed yet for this publication day. "
                      "Collectors poll continuously; check back.</p>")
     else:
-        # One chronological stream, newest first — no section headings;
-        # every entry names its own branch, agency, and document type.
-        parts.append('<ul class="today-list">'
-                     + "".join(_today_item_row(i) for i in status["items"])
-                     + "</ul>")
+        # The form is what makes filtering work without script: the
+        # checkboxes, the bar, and the stream are siblings inside it (so
+        # the CSS sibling combinator reaches the list), and its native
+        # reset button clears every selection at once. One chronological
+        # stream, newest first — no section headings; every entry names
+        # its own branch, agency, and document type.
+        parts.append(
+            '<form class="today-stream" action="today.html" method="get">'
+            + inputs + filter_bar
+            + '<ul class="today-list">'
+            + "".join(_today_item_row(i) for i in status["items"])
+            + "</ul></form>")
 
     nav = ('<a href="index.html">All digests</a>'
            '<a href="sources.html">Sources</a>'
@@ -1385,7 +1432,9 @@ def build_today(conn, out_dir=None, date=None):
                            " no model-generated item tags yet"},
         "counts": status["counts"],
         "facets": {"tags": facets,
-                   "filter_url": "today.html#k-<slugified-tag>"},
+                   "note": "filter items client-side on items[].tags;"
+                           " the human page offers the same keywords as"
+                           " toggles"},
         "pending_llm": status["pending_llm"],
         "last_observed_at": status["last_observed_at"],
         "items": json_items,
@@ -1501,8 +1550,8 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
         f"- [Machine-readable digest index]({base}/digests.json)",
         f"- [Atom feed of digests]({base}/feed.xml)",
         (f"- [Today — live in-progress day, PRELIMINARY]({base}/today.html)"
-         " (also /today.json, whose `facets.tags` gives keyword counts;"
-         " filter the human page with today.html#k-<slugified-tag>."
+         " (also /today.json, whose `facets.tags` gives keyword counts and"
+         " whose items carry the same tags for client-side filtering."
          " Items may change until the end-of-day gates freeze the dated"
          " digest)"),
         f"- [Source guide — what we ingest and why]({base}/sources.html)",

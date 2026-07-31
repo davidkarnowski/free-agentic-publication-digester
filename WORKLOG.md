@@ -2515,3 +2515,26 @@ removes the several-hour settling margin the 09:00 UTC schedule had.
 Items the collectors observe after midnight Eastern are dated to the
 new publication day by the §3 fallback and appear in that day's digest
 instead — consistent and disclosed, but a tighter boundary than before.
+
+## 2026-07-30 — Filter chips become toggles; branches get their own row
+
+Operator feedback on the live filter, four parts, all landing together.
+Clicking a selected chip now clears it, and clicking any chip moves the
+viewport not at all — both fixed by the same change: the filter state
+moved from URL fragments (`:target`) to hidden checkboxes. A fragment
+link makes the browser scroll to its anchor and cannot be un-clicked; a
+checkbox toggles, and changes no URL, so the page does not move. The
+stream is wrapped in a form so the checkboxes, the bar, and the list are
+siblings (the CSS sibling combinator needs that) and so a native reset
+button can clear every selection at once — still not one line of
+script. Selecting several keywords now narrows to items carrying all of
+them, stated in the bar rather than left to be discovered.
+
+The chips also stopped looking like strangers to the entries they
+filter: a chip wears exactly the classes the same tag wears in the
+listing, so branch keywords keep their colors, and the three branches
+now sit on their own row above a full listing of every remaining
+keyword — no truncation, no folded tail (the 400 ceiling is a safety
+stop that would announce itself if it ever fired). Timestamps gained
+seconds on both clocks: entries read as Eastern to the second, with the
+reader's own local time appended beside them. 360 tests.

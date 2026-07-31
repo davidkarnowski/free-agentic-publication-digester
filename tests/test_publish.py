@@ -807,38 +807,45 @@ def test_external_link_rule_applies_to_digest_and_today_pages(conn, tmp_path,
 
 
 def test_today_filter_bar_is_pure_css_and_wired(conn, tmp_path):
-    """Approved design: anchors + chips + generated :target rules, one
-    keyword at a time, no JavaScript anywhere."""
+    """Checkbox model (operator, 2026-07-30): chips toggle off when
+    clicked again and move the viewport not at all, because the state is
+    a checkbox rather than a URL fragment. Still zero script."""
     from conftest import DATE
 
     _seed_today(conn)
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
 
-    # Filtering itself is script-free; the page's only script is the
-    # local-time enhancement, which is inline and loads nothing.
-    assert page.lower().count("<script") == 1
-    assert "<script src" not in page.lower()
-    assert "localtime" in page
-    # every offered keyword: anchor before the bar, chip, and CSS rules
-    for slug in ("k-legislative", "k-executive", "k-press-release"):
-        assert f'<span class="filter-anchor" id="{slug}"></span>' in page
-        assert f'href="#{slug}"' in page
-        assert (f"#{slug}:target ~ .today-list > .today-item:not(.{slug})"
+    # no fragment links means no scroll jump and no un-clickable state
+    assert 'href="#k-' not in page
+    assert "filter-anchor" not in page
+    for slug in ("f-legislative", "f-executive", "f-press-release"):
+        assert f'<input type="checkbox" class="filter-cb" id="{slug}">' in page
+        assert f'for="{slug}"' in page
+        k = slug[2:]
+        assert (f"#{slug}:checked ~ .today-list > .today-item:not(.k-{k})"
                 "{display:none}") in page
-        assert f'#{slug}:target ~ .filter-bar a[href="#{slug}"]' in page
-    assert page.index('class="filter-anchor"') < page.index('class="filter-bar"')
+        assert f'#{slug}:checked ~ .filter-bar label[for="{slug}"]' in page
+        assert f'#{slug}:focus-visible ~ .filter-bar label[for="{slug}"]' in page
+
+    # the form is what lets the reset button clear everything without JS
+    assert '<form class="today-stream"' in page
+    assert '<button type="reset" class="filter-clear">' in page
+    assert page.index("filter-cb") < page.index('class="filter-bar"')
     assert page.index('class="filter-bar"') < page.index('class="today-list"')
-    # items carry their keyword classes
+
+    # branch keywords sit on their own row and keep their listing colors
+    branch_row = page.split('class="filter-row filter-branches"')[1].split(
+        "</div>")[0]
+    assert "tag-branch-legislative filter-chip" in branch_row
+    assert "tag-branch-executive filter-chip" in branch_row
+    assert "press release" not in branch_row      # non-branch keywords below
     assert 'class="today-item k-legislative k-senate-floor"' in page
-    # counts, clear link, print guard
-    assert '<span class="filter-n">1</span>' in page   # each keyword on 1 item
-    assert 'class="filter-clear" href="today.html"' in page
 
     import json
     data = json.loads((tmp_path / "today.json").read_text())
     assert data["facets"]["tags"]["executive"] == 1
-    assert data["facets"]["filter_url"] == "today.html#k-<slugified-tag>"
+    assert "client-side" in data["facets"]["note"]
 
 
 def test_today_filter_caps_and_discloses(conn, tmp_path, monkeypatch):
@@ -849,7 +856,7 @@ def test_today_filter_caps_and_discloses(conn, tmp_path, monkeypatch):
     monkeypatch.setattr(publish, "MAX_FILTER_KEYWORDS", 2)
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
-    assert "Showing the 2 most common of" in page
+    assert "Showing 2 of" in page
 
 
 def test_today_filter_absent_on_an_empty_day(conn, tmp_path):
@@ -872,8 +879,8 @@ def test_local_time_is_additive_and_selfcontained(conn, tmp_path):
     # UTC is in the HTML, machine-readable, and stands alone
     # UTC in datetime= (machine-readable), Eastern on the face (the
     # publishers' clock): 11:30 UTC is 07:30 EDT.
-    assert (f'<time class="utc" datetime="{DATE}T11:30:00Z">07:30 ET</time>'
-            in page)
+    assert (f'<time class="utc" datetime="{DATE}T11:30:00Z">07:30:00 ET'
+            "</time>") in page
     assert 'Last updated <time class="utc"' in page
     # the script fetches nothing and stores nothing
     script = page[page.index("<script"):page.index("</script>")]
