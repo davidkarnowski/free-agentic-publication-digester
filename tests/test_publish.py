@@ -304,6 +304,12 @@ def registry_root(tmp_path, monkeypatch):
     (root / "sources").mkdir(parents=True)
     (root / "sources" / "registry.yaml").write_text(_REGISTRY_YAML)
     monkeypatch.setattr(config, "PROJECT_ROOT", root)
+    # The database paths are absolute and computed at import, so patching
+    # PROJECT_ROOT alone leaves them pointing at the developer machine's
+    # real data/ — which made health render here but not in CI. Pin them
+    # inside the isolated root so these tests answer the same way anywhere.
+    monkeypatch.setattr(config, "PIPELINE_DB", root / "data" / "fapd.db")
+    monkeypatch.setattr(config, "FETCH_LOG_DB", root / "data" / "fetch_log.db")
     return root
 
 
@@ -354,9 +360,10 @@ def test_sources_page_grouped_sections_and_cards(digests, registry_root, tmp_pat
     assert "Audit and evaluation reports published on a daily feed." in page
     assert '<details class="src-more"><summary>Registry record</summary>' in page
     assert "<dt>Registry id</dt><dd><code>govinfo-test</code></dd>" in page
-    # the old SOURCES.md giant table is gone: the directory is cards, and
-    # the only table the page may carry is the health key (below), which
-    # this fixture has no databases to populate
+    # the old SOURCES.md giant table is gone: the directory is cards. The
+    # health key is the page's only table and needs databases, which this
+    # fixture pins absent — otherwise the assertion below passes in CI and
+    # fails on a developer machine that happens to have data/.
     assert "<th>Method</th>" not in page
     assert "<table>" not in page
 
@@ -749,8 +756,17 @@ def test_health_degrades_gracefully_without_databases(health_site):
     assert all(s.get("health") is None for s in data["sources"])
 
 
-def test_sources_json_carries_the_same_facts_as_the_page(health_site):
+def test_sources_json_carries_the_same_facts_as_the_page(health_site,
+                                                         monkeypatch):
     import json
+
+    from fapd import config as _config
+
+    # Machine surfaces emit absolute URLs when a base is configured (the
+    # same rule digests.json follows). Pin it empty so this test asserts
+    # the relative form deterministically; the absolute form is asserted
+    # in its own test below.
+    monkeypatch.setattr(_config, "SITE_BASE_URL", "")
 
     out = health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
     data = json.loads((out / "sources.json").read_text())
@@ -1969,3 +1985,19 @@ def test_header_expands_the_acronym(tmp_path):
     assert "FAPD<span" in page
     assert "Free Agentic Publication Digester</span></a>" in page
     assert 'aria-label="Free Agentic Publication Digester (FAPD)"' in page
+
+
+def test_sources_json_uses_absolute_urls_when_a_base_is_configured(
+        health_site, monkeypatch):
+    """Agents fetching sources.json off-site need resolvable links, the
+    same contract digests.json keeps."""
+    import json
+
+    from fapd import config as _config
+
+    monkeypatch.setattr(_config, "SITE_BASE_URL", "https://fapd.info")
+    out = health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+    data = json.loads((out / "sources.json").read_text())
+    news = next(s for s in data["sources"] if s["id"] == "example-newsroom")
+    assert news["card"] == (
+        "https://fapd.info/sources.html#src-example-newsroom")
