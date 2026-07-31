@@ -1,7 +1,7 @@
 {
  "available": true,
  "canonical": "sources/registry.yaml",
- "generated": "2026-07-31T20:19:02Z",
+ "generated": "2026-07-31T21:53:26Z",
  "health_labels": {
   "degraded": "at least 10% of our requests in the window returned no content, or the collector recorded 3 or more consecutive failed cycles",
   "delivering": "items arrived within the last 7 day(s) and our requests to this source's server were answered",
@@ -20,8 +20,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-crec",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:19:13Z",
-    "last_ok_at": "2026-07-31T19:19:13Z",
+    "last_cycle_at": "2026-07-31T20:28:54Z",
+    "last_ok_at": "2026-07-31T20:28:54Z",
     "worker": "govinfo"
    },
    "days_since_item": 1,
@@ -29,21 +29,21 @@
    "delivery_mode_note": null,
    "description": "The Congressional Record is the official verbatim record of congressional proceedings, published by the Government Publishing Office each day a chamber is in session. This collection carries the daily edition \u2014 House and Senate floor debate, Extensions of Remarks, and the Daily Digest \u2014 as structured XML (~2 MB of text on a typical session day) with PDF page images.",
    "fetch": {
-    "answered": 6869,
-    "attempts": 8233,
+    "answered": 7172,
+    "attempts": 8678,
     "client_error": 1,
-    "error_rate": 0.1656747236730232,
-    "error_rate_pct": 16.6,
+    "error_rate": 0.17354229085042636,
+    "error_rate_pct": 17.4,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-07-31T20:17:18.536+00:00",
+    "last_ok_at": "2026-07-31T21:46:54.321+00:00",
     "no_response": 4,
-    "server_error": 1359,
+    "server_error": 1501,
     "shared_with_sources": 5,
-    "unanswered": 1364
+    "unanswered": 1506
    },
    "fetch_note": null,
    "health": "degraded",
-   "health_reason": "1364 of 8233 request(s) to api.govinfo.gov returned no content (16.6%, at or above the 10% mark).",
+   "health_reason": "1506 of 8678 request(s) to api.govinfo.gov returned no content (17.4%, at or above the 10% mark).",
    "id": "govinfo-crec",
    "identified_by": {
     "key": "CREC",
@@ -75,8 +75,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-bills",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:19:13Z",
-    "last_ok_at": "2026-07-31T19:19:13Z",
+    "last_cycle_at": "2026-07-31T20:28:54Z",
+    "last_ok_at": "2026-07-31T20:28:54Z",
     "worker": "govinfo"
    },
    "days_since_item": 1,
@@ -84,21 +84,21 @@
    "delivery_mode_note": null,
    "description": "Congress publishes bill and resolution text through the Government Publishing Office at each printed stage (introduced, engrossed, enrolled, and others). This collection carries the full text as XML, with roughly 60-70 new or revised bill printings on a typical publication day (~28 KB of text each).",
    "fetch": {
-    "answered": 6869,
-    "attempts": 8233,
+    "answered": 7172,
+    "attempts": 8678,
     "client_error": 1,
-    "error_rate": 0.1656747236730232,
-    "error_rate_pct": 16.6,
+    "error_rate": 0.17354229085042636,
+    "error_rate_pct": 17.4,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-07-31T20:17:18.536+00:00",
+    "last_ok_at": "2026-07-31T21:46:54.321+00:00",
     "no_response": 4,
-    "server_error": 1359,
+    "server_error": 1501,
     "shared_with_sources": 5,
-    "unanswered": 1364
+    "unanswered": 1506
    },
    "fetch_note": null,
    "health": "degraded",
-   "health_reason": "1364 of 8233 request(s) to api.govinfo.gov returned no content (16.6%, at or above the 10% mark).",
+   "health_reason": "1506 of 8678 request(s) to api.govinfo.gov returned no content (17.4%, at or above the 10% mark).",
    "id": "govinfo-bills",
    "identified_by": {
     "key": "BILLS",
@@ -130,8 +130,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-fr",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:19:13Z",
-    "last_ok_at": "2026-07-31T19:19:13Z",
+    "last_cycle_at": "2026-07-31T20:28:54Z",
+    "last_ok_at": "2026-07-31T20:28:54Z",
     "worker": "govinfo"
    },
    "days_since_item": 0,
@@ -139,21 +139,21 @@
    "delivery_mode_note": null,
    "description": "The Federal Register is the executive branch's daily journal, compiled by the Office of the Federal Register and published each business day. This collection carries final rules, proposed rules, notices, and presidential documents as structured XML (~2.6 MB of text per issue), with an agency-written abstract per document.",
    "fetch": {
-    "answered": 6869,
-    "attempts": 8233,
+    "answered": 7172,
+    "attempts": 8678,
     "client_error": 1,
-    "error_rate": 0.1656747236730232,
-    "error_rate_pct": 16.6,
+    "error_rate": 0.17354229085042636,
+    "error_rate_pct": 17.4,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-07-31T20:17:18.536+00:00",
+    "last_ok_at": "2026-07-31T21:46:54.321+00:00",
     "no_response": 4,
-    "server_error": 1359,
+    "server_error": 1501,
     "shared_with_sources": 5,
-    "unanswered": 1364
+    "unanswered": 1506
    },
    "fetch_note": null,
    "health": "degraded",
-   "health_reason": "1364 of 8233 request(s) to api.govinfo.gov returned no content (16.6%, at or above the 10% mark).",
+   "health_reason": "1506 of 8678 request(s) to api.govinfo.gov returned no content (17.4%, at or above the 10% mark).",
    "id": "govinfo-fr",
    "identified_by": {
     "key": "FR",
@@ -180,13 +180,13 @@
   },
   {
    "added": "2026-07-26",
-   "avg_chars": 11594,
+   "avg_chars": 12160,
    "branch": "judicial",
    "card": "https://fapd.info/sources.html#src-govinfo-uscourts",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:19:13Z",
-    "last_ok_at": "2026-07-31T19:19:13Z",
+    "last_cycle_at": "2026-07-31T20:28:54Z",
+    "last_ok_at": "2026-07-31T20:28:54Z",
     "worker": "govinfo"
    },
    "days_since_item": 1,
@@ -194,32 +194,32 @@
    "delivery_mode_note": null,
    "description": "The federal judiciary provides opinions to the Government Publishing Office through a partnership with the Administrative Office of the U.S. Courts. This collection carries opinions from ~140 participating appellate, district, bankruptcy, and national courts as case-shaped packages, posted with a lag after filing; it is participation-based, not the complete federal judicial record.",
    "fetch": {
-    "answered": 6869,
-    "attempts": 8233,
+    "answered": 7172,
+    "attempts": 8678,
     "client_error": 1,
-    "error_rate": 0.1656747236730232,
-    "error_rate_pct": 16.6,
+    "error_rate": 0.17354229085042636,
+    "error_rate_pct": 17.4,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-07-31T20:17:18.536+00:00",
+    "last_ok_at": "2026-07-31T21:46:54.321+00:00",
     "no_response": 4,
-    "server_error": 1359,
+    "server_error": 1501,
     "shared_with_sources": 5,
-    "unanswered": 1364
+    "unanswered": 1506
    },
    "fetch_note": null,
    "health": "degraded",
-   "health_reason": "1364 of 8233 request(s) to api.govinfo.gov returned no content (16.6%, at or above the 10% mark).",
+   "health_reason": "1506 of 8678 request(s) to api.govinfo.gov returned no content (17.4%, at or above the 10% mark).",
    "id": "govinfo-uscourts",
    "identified_by": {
     "key": "USCOURTS",
     "kind": "collection"
    },
-   "items": 6248,
-   "items_per_day": 446.29,
+   "items": 6626,
+   "items_per_day": 473.29,
    "last_item_date": "2026-07-30",
    "max_chars": 1007446,
    "measured": true,
-   "median_chars": 4160,
+   "median_chars": 4378,
    "method": "govinfo collections API delta sync",
    "min_chars": 55,
    "name": "U.S. Courts Opinions (USCOURTS)",
@@ -240,8 +240,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-plaw",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:19:13Z",
-    "last_ok_at": "2026-07-31T19:19:13Z",
+    "last_cycle_at": "2026-07-31T20:28:54Z",
+    "last_ok_at": "2026-07-31T20:28:54Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -249,21 +249,21 @@
    "delivery_mode_note": null,
    "description": "After a bill becomes law by presidential signature or veto override, the Government Publishing Office publishes the enacted text as a slip law. This collection carries public and private law text, typically appearing weeks after enactment; same-day text is available through the BILLS enrolled stage.",
    "fetch": {
-    "answered": 6869,
-    "attempts": 8233,
+    "answered": 7172,
+    "attempts": 8678,
     "client_error": 1,
-    "error_rate": 0.1656747236730232,
-    "error_rate_pct": 16.6,
+    "error_rate": 0.17354229085042636,
+    "error_rate_pct": 17.4,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-07-31T20:17:18.536+00:00",
+    "last_ok_at": "2026-07-31T21:46:54.321+00:00",
     "no_response": 4,
-    "server_error": 1359,
+    "server_error": 1501,
     "shared_with_sources": 5,
-    "unanswered": 1364
+    "unanswered": 1506
    },
    "fetch_note": null,
    "health": "degraded",
-   "health_reason": "1364 of 8233 request(s) to api.govinfo.gov returned no content (16.6%, at or above the 10% mark).",
+   "health_reason": "1506 of 8678 request(s) to api.govinfo.gov returned no content (17.4%, at or above the 10% mark).",
    "id": "govinfo-plaw",
    "identified_by": {
     "key": "PLAW",
@@ -295,8 +295,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-chrg",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:19:13Z",
-    "last_ok_at": "2026-07-31T19:19:13Z",
+    "last_cycle_at": "2026-07-31T20:28:54Z",
+    "last_ok_at": "2026-07-31T20:28:54Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -304,17 +304,17 @@
    "delivery_mode_note": null,
    "description": "Congressional committees publish their hearing records through the Government Publishing Office. This collection carries printed hearing transcripts \u2014 witness testimony and member questioning \u2014 released weeks to months after the hearing date.",
    "fetch": {
-    "answered": 6869,
-    "attempts": 8233,
+    "answered": 7172,
+    "attempts": 8678,
     "client_error": 1,
-    "error_rate": 0.1656747236730232,
-    "error_rate_pct": 16.6,
+    "error_rate": 0.17354229085042636,
+    "error_rate_pct": 17.4,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-07-31T20:17:18.536+00:00",
+    "last_ok_at": "2026-07-31T21:46:54.321+00:00",
     "no_response": 4,
-    "server_error": 1359,
+    "server_error": 1501,
     "shared_with_sources": 5,
-    "unanswered": 1364
+    "unanswered": 1506
    },
    "fetch_note": null,
    "health": null,
@@ -350,8 +350,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-crpt",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:19:13Z",
-    "last_ok_at": "2026-07-31T19:19:13Z",
+    "last_cycle_at": "2026-07-31T20:28:54Z",
+    "last_ok_at": "2026-07-31T20:28:54Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -359,17 +359,17 @@
    "delivery_mode_note": null,
    "description": "House, Senate, and conference committees report legislation with written analyses. This collection carries committee reports \u2014 a committee's explanation of a bill's purpose, provisions, and cost \u2014 published through the Government Publishing Office as bills advance.",
    "fetch": {
-    "answered": 6869,
-    "attempts": 8233,
+    "answered": 7172,
+    "attempts": 8678,
     "client_error": 1,
-    "error_rate": 0.1656747236730232,
-    "error_rate_pct": 16.6,
+    "error_rate": 0.17354229085042636,
+    "error_rate_pct": 17.4,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-07-31T20:17:18.536+00:00",
+    "last_ok_at": "2026-07-31T21:46:54.321+00:00",
     "no_response": 4,
-    "server_error": 1359,
+    "server_error": 1501,
     "shared_with_sources": 5,
-    "unanswered": 1364
+    "unanswered": 1506
    },
    "fetch_note": null,
    "health": null,
@@ -405,8 +405,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-dcpd",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:19:13Z",
-    "last_ok_at": "2026-07-31T19:19:13Z",
+    "last_cycle_at": "2026-07-31T20:28:54Z",
+    "last_ok_at": "2026-07-31T20:28:54Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -414,17 +414,17 @@
    "delivery_mode_note": null,
    "description": "The Office of the Federal Register compiles presidential materials released by the White House press secretary. This collection carries that compilation \u2014 statements, remarks, executive orders, proclamations, and nominations \u2014 published on a lag behind the events themselves.",
    "fetch": {
-    "answered": 6869,
-    "attempts": 8233,
+    "answered": 7172,
+    "attempts": 8678,
     "client_error": 1,
-    "error_rate": 0.1656747236730232,
-    "error_rate_pct": 16.6,
+    "error_rate": 0.17354229085042636,
+    "error_rate_pct": 17.4,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-07-31T20:17:18.536+00:00",
+    "last_ok_at": "2026-07-31T21:46:54.321+00:00",
     "no_response": 4,
-    "server_error": 1359,
+    "server_error": 1501,
     "shared_with_sources": 5,
-    "unanswered": 1364
+    "unanswered": 1506
    },
    "fetch_note": null,
    "health": null,
@@ -1807,8 +1807,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-bulkdata",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:19:13Z",
-    "last_ok_at": "2026-07-31T19:19:13Z",
+    "last_cycle_at": "2026-07-31T20:28:54Z",
+    "last_ok_at": "2026-07-31T20:28:54Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -1816,17 +1816,17 @@
    "delivery_mode_note": null,
    "description": "The Government Publishing Office operates a bulk-data repository alongside the govinfo API. It serves complete XML directory trees for BILLS, the Federal Register, the Congressional Record, CFR/eCFR, and bill status \u2014 the intended channel for multi-day historical backfills rather than item-by-item API calls.",
    "fetch": {
-    "answered": 6869,
-    "attempts": 8233,
+    "answered": 7172,
+    "attempts": 8678,
     "client_error": 1,
-    "error_rate": 0.1656747236730232,
-    "error_rate_pct": 16.6,
+    "error_rate": 0.17354229085042636,
+    "error_rate_pct": 17.4,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-07-31T20:17:18.536+00:00",
+    "last_ok_at": "2026-07-31T21:46:54.321+00:00",
     "no_response": 4,
-    "server_error": 1359,
+    "server_error": 1501,
     "shared_with_sources": 5,
-    "unanswered": 1364
+    "unanswered": 1506
    },
    "fetch_note": null,
    "health": null,
@@ -5030,8 +5030,8 @@
    "card": "https://fapd.info/sources.html#src-treasury-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 0,
@@ -5074,8 +5074,8 @@
    "card": "https://fapd.info/sources.html#src-fincen-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5118,8 +5118,8 @@
    "card": "https://fapd.info/sources.html#src-ofr-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5161,8 +5161,8 @@
    "card": "https://fapd.info/sources.html#src-irs-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5205,8 +5205,8 @@
    "card": "https://fapd.info/sources.html#src-ssa-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 0,
@@ -5244,13 +5244,13 @@
   },
   {
    "added": "2026-07-29",
-   "avg_chars": 795,
+   "avg_chars": 805,
    "branch": "executive",
    "card": "https://fapd.info/sources.html#src-justice-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 0,
@@ -5260,18 +5260,18 @@
    "fetch": null,
    "fetch_note": "Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.",
    "health": "delivering",
-   "health_reason": "29 item(s) in the last 14 days; most recent 2026-07-31, delivered by email.",
+   "health_reason": "31 item(s) in the last 14 days; most recent 2026-07-31, delivered by email.",
    "id": "justice-email",
    "identified_by": {
     "key": "justice-email",
     "kind": "source_id"
    },
-   "items": 29,
-   "items_per_day": 2.07,
+   "items": 31,
+   "items_per_day": 2.21,
    "last_item_date": "2026-07-31",
    "max_chars": 1548,
    "measured": true,
-   "median_chars": 762,
+   "median_chars": 780,
    "method": "Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).",
    "min_chars": 40,
    "name": "Justice Department News (email)",
@@ -5293,8 +5293,8 @@
    "card": "https://fapd.info/sources.html#src-usattorneys-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 0,
@@ -5304,14 +5304,14 @@
    "fetch": null,
    "fetch_note": "Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.",
    "health": "delivering",
-   "health_reason": "118 item(s) in the last 14 days; most recent 2026-07-31, delivered by email.",
+   "health_reason": "125 item(s) in the last 14 days; most recent 2026-07-31, delivered by email.",
    "id": "usattorneys-email",
    "identified_by": {
     "key": "usattorneys-email",
     "kind": "source_id"
    },
-   "items": 118,
-   "items_per_day": 8.43,
+   "items": 125,
+   "items_per_day": 8.93,
    "last_item_date": "2026-07-31",
    "max_chars": 997,
    "measured": true,
@@ -5337,8 +5337,8 @@
    "card": "https://fapd.info/sources.html#src-dea-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5381,8 +5381,8 @@
    "card": "https://fapd.info/sources.html#src-atf-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5425,8 +5425,8 @@
    "card": "https://fapd.info/sources.html#src-transportation-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5469,8 +5469,8 @@
    "card": "https://fapd.info/sources.html#src-faa-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5513,8 +5513,8 @@
    "card": "https://fapd.info/sources.html#src-nhtsa-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5557,8 +5557,8 @@
    "card": "https://fapd.info/sources.html#src-epa-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5601,8 +5601,8 @@
    "card": "https://fapd.info/sources.html#src-agriculture-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 0,
@@ -5640,13 +5640,13 @@
   },
   {
    "added": "2026-07-29",
-   "avg_chars": 280,
+   "avg_chars": 1454,
    "branch": "executive",
    "card": "https://fapd.info/sources.html#src-fsis-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 0,
@@ -5656,18 +5656,18 @@
    "fetch": null,
    "fetch_note": "Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.",
    "health": "delivering",
-   "health_reason": "6 item(s) in the last 14 days; most recent 2026-07-31, delivered by email.",
+   "health_reason": "7 item(s) in the last 14 days; most recent 2026-07-31, delivered by email.",
    "id": "fsis-email",
    "identified_by": {
     "key": "fsis-email",
     "kind": "source_id"
    },
-   "items": 6,
-   "items_per_day": 0.43,
+   "items": 7,
+   "items_per_day": 0.5,
    "last_item_date": "2026-07-31",
-   "max_chars": 643,
+   "max_chars": 8494,
    "measured": true,
-   "median_chars": 184,
+   "median_chars": 239,
    "method": "Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).",
    "min_chars": 66,
    "name": "FSIS Recalls and Public Health Alerts (email)",
@@ -5689,8 +5689,8 @@
    "card": "https://fapd.info/sources.html#src-uscg-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5732,8 +5732,8 @@
    "card": "https://fapd.info/sources.html#src-uscis-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 2,
@@ -5776,8 +5776,8 @@
    "card": "https://fapd.info/sources.html#src-fda-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5820,8 +5820,8 @@
    "card": "https://fapd.info/sources.html#src-cms-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5864,8 +5864,8 @@
    "card": "https://fapd.info/sources.html#src-va-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5908,8 +5908,8 @@
    "card": "https://fapd.info/sources.html#src-commercial-service-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5951,8 +5951,8 @@
    "card": "https://fapd.info/sources.html#src-state-week-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5995,8 +5995,8 @@
    "card": "https://fapd.info/sources.html#src-federal-reserve-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 0,
@@ -6038,8 +6038,8 @@
    "card": "https://fapd.info/sources.html#src-fdic-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 0,
@@ -6082,8 +6082,8 @@
    "card": "https://fapd.info/sources.html#src-cpsc-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6126,8 +6126,8 @@
    "card": "https://fapd.info/sources.html#src-pbgc-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6169,8 +6169,8 @@
    "card": "https://fapd.info/sources.html#src-eac-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6212,8 +6212,8 @@
    "card": "https://fapd.info/sources.html#src-ussc-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6255,8 +6255,8 @@
    "card": "https://fapd.info/sources.html#src-usps-oig-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -6299,8 +6299,8 @@
    "card": "https://fapd.info/sources.html#src-hud-oig-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-07-31T19:32:03Z",
-    "last_ok_at": "2026-07-31T19:32:03Z",
+    "last_cycle_at": "2026-07-31T20:34:24Z",
+    "last_ok_at": "2026-07-31T20:34:24Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6355,9 +6355,9 @@
    "www.justice.gov",
    "www.noaa.gov"
   ],
-  "items_per_day": 676.4,
-  "items_window": 9469,
-  "requests_window": 9494,
+  "items_per_day": 704.1,
+  "items_window": 9857,
+  "requests_window": 9939,
   "sources_measured": 37,
   "sources_registered": 127,
   "sources_with_fetch_errors": 10,
