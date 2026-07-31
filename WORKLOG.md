@@ -2942,3 +2942,21 @@ it is not claimed.
 Also reconciled the README's stale "319 tests" against a real
 collection — 377 — rather than leaving three numbers disagreeing across
 README, worklog, and the suite.
+
+## 2026-07-31 — Accessibility statement cut to what it must say
+
+Operator: much less prose, and make sure the legal gap is covered. The
+statement went from 1,269 words to 344. What stayed is what a statement
+has to carry to be one: the standard (WCAG 2.2 AA), an explicit
+conformance claim with its date (partially conformant, 2026-07-30), the
+known limitations named rather than buried, a working way to report a
+problem, and the alternative formats. What went is the explaining —
+paragraphs justifying why we chose to state things, the roadmap of which
+screen readers we plan to test with, and an apology for verbosity that
+was itself verbose.
+
+The limitations are unchanged in substance; only their telling is
+shorter. Its test now pins the substance — that the untested-with-real-
+assistive-technology gap is stated, that a real contact route exists,
+and that the conformance claim names its standard — rather than pinning
+particular product names, which is what broke when the wording changed.

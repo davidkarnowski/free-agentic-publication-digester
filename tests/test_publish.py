@@ -1551,5 +1551,9 @@ def test_public_accessibility_statement_is_published():
     text = path.read_text(encoding="utf-8")
     assert "hustleyourcity@gmail.com" in text          # a reachable address
     assert "Known limitations" in text                 # named, not hidden
-    assert "NVDA" in text and "VoiceOver" in text      # the untested part
+    # the untested-with-real-AT limitation is stated (wording may vary;
+    # the substance is what the statement must not lose)
+    assert "assistive technology" in text
+    assert "hustleyourcity@gmail.com" in text          # a real route to report
+    assert "WCAG 2.2" in text and "conformant" in text  # the legal claim
     assert ("accessibility", "Accessibility") in publish._doc_page_index()
