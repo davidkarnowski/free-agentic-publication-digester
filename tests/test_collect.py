@@ -108,7 +108,26 @@ def test_trigger_never_fires_with_nothing_pending(conn):
 def test_dates_with_pending(conn):
     seed_corpus(conn)
     collect.journal_new(conn, "govinfo", "c1")
-    assert DATE in collect.dates_with_pending(conn)
+    # the corpus is a fixed historical date, so ask without the age bound
+    assert DATE in collect.dates_with_pending(conn, max_age_days=10_000)
+
+
+def test_analyze_scope_excludes_days_we_will_never_publish(conn):
+    """We do not publish post-dated digests, so a day past the window is
+    left pending and disclosed rather than bought: on 2026-07-30 the
+    worker wrote 184 summaries across eleven dates back to 2024-06-18
+    while the digest day itself received none."""
+    seed_corpus(conn)
+    collect.journal_new(conn, "govinfo", "c1")
+    assert collect.dates_with_pending(conn) == []          # DATE is historical
+
+    today = publication_date()
+    conn.execute(
+        "INSERT INTO item_journal (observed_at, source_class, package_id,"
+        " granule_id, collection, digest_date, event) VALUES"
+        " ('x', 'govinfo', 'P-NEW', 'G', 'FR', ?, 'ingested')", (today,))
+    conn.commit()
+    assert collect.dates_with_pending(conn) == [today]
 
 
 # ------------------------------------------------------------ today_status --

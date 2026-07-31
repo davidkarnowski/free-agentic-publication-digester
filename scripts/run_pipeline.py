@@ -36,7 +36,7 @@ from fapd import (
     report,
     tags,
 )
-from fapd.client import GovinfoClient
+from fapd.client import BudgetExceededError, GovinfoClient
 from fapd.publish import build_site
 from fapd.sources import load_registry
 from fapd.sync import sync_collection
@@ -56,10 +56,20 @@ def done(t0):
 
 
 def stage_sync(conn):
-    """govinfo delta sync for every collection. Returns the request count."""
-    with GovinfoClient() as client:
+    """govinfo delta sync for every collection. Returns the request count.
+
+    Runs reserve_exempt: this is the finalizer, and the reserve exists for
+    exactly this call. A budget shortfall here is reported and the run
+    continues — the day's items were collected hours ago, sync is a
+    top-up, and refusing to publish a collected day because a top-up
+    could not run is the wrong failure (2026-07-30: it cost a day)."""
+    with GovinfoClient(reserve_exempt=True) as client:
         for collection in config.COLLECTIONS:
-            stats = sync_collection(client, conn, collection, max_downloads=100)
+            try:
+                stats = sync_collection(client, conn, collection, max_downloads=100)
+            except BudgetExceededError as exc:
+                print(f"   {collection:9} SKIPPED — {exc}", flush=True)
+                continue
             print(f"   {collection:9} listed={stats['listed']:5} "
                   f"downloaded={stats['downloaded']:4} failed={stats['failed']:3} "
                   f"pending_remaining={stats['pending_remaining']:5}", flush=True)

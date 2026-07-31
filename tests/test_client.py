@@ -82,6 +82,7 @@ def test_paces_consecutive_requests_to_one_per_second(tmp_path):
 
 
 def test_daily_budget_enforced_from_persistent_log(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "EOD_BUDGET_RESERVE_FRACTION", 0.0)
     monkeypatch.setattr(config, "MAX_REQUESTS_PER_DAY", 2)
     client, _, _ = make_client(tmp_path, [FakeResponse(), FakeResponse(), FakeResponse()])
     client.get("collections")
@@ -195,6 +196,7 @@ def robots_resp(body, status=200):
 
 
 def test_budget_buckets_are_separate(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "EOD_BUDGET_RESERVE_FRACTION", 0.0)
     monkeypatch.setattr(config, "MAX_REQUESTS_PER_DAY", 1)
     monkeypatch.setattr(config, "MAX_AGENCY_REQUESTS_PER_DAY", 3)
     gov = GovinfoClient(db_path=tmp_path / "fetch_log.db",
@@ -211,6 +213,7 @@ def test_budget_buckets_are_separate(tmp_path, monkeypatch):
 
 
 def test_legacy_null_client_rows_count_as_govinfo(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "EOD_BUDGET_RESERVE_FRACTION", 0.0)
     monkeypatch.setattr(config, "MAX_REQUESTS_PER_DAY", 2)
     import datetime as dt
     import sqlite3
@@ -286,3 +289,46 @@ def test_retry_after_http_date_form(tmp_path):
     )
     client.get("collections")
     assert any(80 <= s <= 91 for s in clock.sleeps)  # honored the date form
+
+
+def test_collectors_stop_short_of_the_finalizer_reserve(tmp_path, monkeypatch):
+    """2026-07-30: collectors spent all 2,000 govinfo requests on backlog
+    and the finalizer could not sync the day it was finalizing. The
+    reserve is the fix — collectors see a smaller budget than the
+    finalizer does."""
+    monkeypatch.setattr(config, "MAX_REQUESTS_PER_DAY", 10)
+    monkeypatch.setattr(config, "EOD_BUDGET_RESERVE_FRACTION", 0.2)
+    collector, _, _ = make_client(tmp_path, [FakeResponse() for _ in range(12)])
+    assert collector._effective_daily_budget() == 8      # 10 - 20%
+    for _ in range(8):
+        collector.get("collections")
+    with pytest.raises(BudgetExceededError):
+        collector.get("collections")
+
+    # the finalizer may spend into the reserve the collectors were kept out of
+    finalizer = GovinfoClient(db_path=tmp_path / "fetch_log.db",
+                              session=FakeSession([FakeResponse()]),
+                              sleep=lambda s: None, reserve_exempt=True)
+    assert finalizer._effective_daily_budget() == 10
+    finalizer.get("collections")                          # 9th — allowed
+
+
+def test_hourly_ceiling_keeps_us_far_from_the_documented_limit(tmp_path,
+                                                               monkeypatch):
+    """api.data.gov documents 1,000 requests/hour and answers 429 above
+    it. Our ceiling is half that, enforced from the fetch log so it holds
+    across processes — it is what makes a larger daily budget safe."""
+    monkeypatch.setattr(config, "MAX_GOVINFO_REQUESTS_PER_HOUR", 3)
+    monkeypatch.setattr(config, "EOD_BUDGET_RESERVE_FRACTION", 0.0)
+    client, _, _ = make_client(tmp_path, [FakeResponse() for _ in range(5)])
+    for _ in range(3):
+        client.get("collections")
+    with pytest.raises(BudgetExceededError, match="hourly ceiling"):
+        client.get("collections")
+    # the ceiling binds the finalizer too: it is the publisher's limit,
+    # not ours, and no reserve exempts anyone from it
+    finalizer = GovinfoClient(db_path=tmp_path / "fetch_log.db",
+                              session=FakeSession([FakeResponse()]),
+                              sleep=lambda s: None, reserve_exempt=True)
+    with pytest.raises(BudgetExceededError, match="hourly ceiling"):
+        finalizer.get("collections")

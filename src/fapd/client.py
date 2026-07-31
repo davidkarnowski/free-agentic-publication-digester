@@ -63,7 +63,11 @@ class HttpClient:
 
     CLIENT_NAME = "http"
 
-    def __init__(self, db_path=None, session=None, sleep=time.sleep, monotonic=time.monotonic):
+    def __init__(self, db_path=None, session=None, sleep=time.sleep,
+                 monotonic=time.monotonic, reserve_exempt=False):
+        # reserve_exempt: only the end-of-day finalizer sets this, so the
+        # reserve it spends is the one the collectors were kept out of.
+        self.reserve_exempt = reserve_exempt
         self._db_path = db_path or config.FETCH_LOG_DB
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._db = sqlite3.connect(self._db_path)
@@ -88,6 +92,18 @@ class HttpClient:
     def _daily_budget(self):
         return config.MAX_REQUESTS_PER_DAY
 
+    def _effective_daily_budget(self):
+        """The budget THIS client may spend. Continuous collectors stop
+        short of the full daily figure so the end-of-day finalizer always
+        has requests left to sync the day it is finalizing; a client
+        constructed with reserve_exempt=True (the finalizer) may spend it
+        all. Added 2026-07-31 after collectors spent all 2,000 govinfo
+        requests on backlog and the finalizer could not run."""
+        budget = self._daily_budget()
+        if self.reserve_exempt:
+            return budget
+        return int(budget * (1.0 - config.EOD_BUDGET_RESERVE_FRACTION))
+
     def _redacted_params(self, params):
         return dict(params or {})
 
@@ -108,6 +124,7 @@ class HttpClient:
 
         for attempt in range(1, config.MAX_ATTEMPTS + 1):
             self._check_daily_budget()
+            self._check_hourly_ceiling()
             self._pace(min_interval)
             logger.debug("GET %s (attempt %d/%d)", shown_url, attempt, config.MAX_ATTEMPTS)
             started = self._monotonic()
@@ -181,16 +198,44 @@ class HttpClient:
     def _utc_day_start():
         return dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT00:00:00")
 
+    def requests_last_hour(self):
+        since = (dt.datetime.now(dt.UTC)
+                 - dt.timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
+        (n,) = self._db.execute(
+            "SELECT COUNT(*) FROM fetch_log WHERE ts_utc >= ?"
+            " AND (client = ? OR (? = 'govinfo' AND client IS NULL))",
+            (since, self.CLIENT_NAME, self.CLIENT_NAME),
+        ).fetchone()
+        return n
+
+    def _hourly_ceiling(self):
+        """The per-hour ceiling for this class, or None for no ceiling."""
+
+    def _check_hourly_ceiling(self):
+        ceiling = self._hourly_ceiling()
+        if ceiling is None:
+            return
+        n = self.requests_last_hour()
+        if n >= ceiling:
+            logger.error(
+                "hourly %s ceiling reached: %d/%d in the last 60 minutes"
+                " — refusing", self.CLIENT_NAME, n, ceiling)
+            raise BudgetExceededError(
+                f"{n} {self.CLIENT_NAME} requests in the last hour; the"
+                f" hourly ceiling is {ceiling} per GUIDE.md §4 (half of the"
+                " publisher's documented allowance)")
+
     def _check_daily_budget(self):
         n = self.requests_today()
-        if n >= self._daily_budget():
+        if n >= self._effective_daily_budget():
             logger.error(
-                "daily %s budget exhausted: %d/%d requests (UTC day) — refusing",
-                self.CLIENT_NAME, n, self._daily_budget(),
+                "daily %s budget exhausted: %d/%d requests (UTC day)%s — refusing",
+                self.CLIENT_NAME, n, self._effective_daily_budget(),
+                "" if self.reserve_exempt else " [collector share]",
             )
             raise BudgetExceededError(
                 f"{n} {self.CLIENT_NAME} requests already made today (UTC);"
-                f" daily budget is {self._daily_budget()} per GUIDE.md §4"
+                f" budget is {self._effective_daily_budget()} per GUIDE.md §4"
             )
 
     def _pace(self, min_interval=None):
@@ -274,6 +319,9 @@ class GovinfoClient(HttpClient):
 
     def _redacted_params(self, params):
         return {k: v for k, v in (params or {}).items() if k != "api_key"}
+
+    def _hourly_ceiling(self):
+        return config.MAX_GOVINFO_REQUESTS_PER_HOUR
 
     def _post_response(self, resp):
         remaining = (resp.headers.get("X-RateLimit-Remaining") or "").strip()

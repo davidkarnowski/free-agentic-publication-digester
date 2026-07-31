@@ -68,6 +68,8 @@ def test_gather_is_mechanical_and_complete(conn, tmp_path):
     assert m["tokens"]["retry_input"] == 30000
     assert m["tokens"]["retry_share_pct"] == 48.4
     assert m["llm_errors"][0]["error"].startswith("LLMError")
+    # model events carry no digest_date of their own; the count has to go
+    # through each item's ingest row (the old query read zero here)
     assert m["coverage"] == [
         {"date": DATE, "ingested": 2, "summarized": 1, "plain": 0}]
     # errors sort first so a sick worker tops the table

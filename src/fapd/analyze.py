@@ -250,6 +250,21 @@ def _plain_call(llm, stats, entries, purpose):
     return _parse_reply(result["text"]), result
 
 
+def _log_retry_ceiling(layer, queue, stats):
+    """Anything past the single-retry ceiling is left unsummarized and
+    said so — the coverage accounting is what discloses it. Silence here
+    would look like completeness."""
+    over = len(queue) - config.MAX_SINGLE_RETRIES_PER_RUN
+    if over > 0:
+        logger.info(
+            "%s: %d item(s) past the %d single-retry ceiling — left"
+            " unsummarized and disclosed by coverage, not retried singly"
+            " (~%dK input tokens each on the CLI backend)",
+            layer, over, config.MAX_SINGLE_RETRIES_PER_RUN, 29)
+        stats.setdefault("retry_ceiling_skipped", 0)
+        stats["retry_ceiling_skipped"] += over
+
+
 def _retry_in_groups(llm, stats, rows, call, harvest, purpose):
     """Retry missing items in small groups, returning those still missing.
 
@@ -339,12 +354,13 @@ def run_plain(conn, llm, date):
         llm, stats, retry_queue, _plain_call,
         lambda group, mapping, result: _harvest_plain(conn, stats, group, mapping, result),
         "plain:retry-group")
-    for row in retry_queue:
+    for row in retry_queue[:config.MAX_SINGLE_RETRIES_PER_RUN]:
         mapping, result = _plain_call(llm, stats, [row], "plain:retry-single")
         if _harvest_plain(conn, stats, [row], mapping, result):
             stats["failed_items"].append(
                 {"package_id": row["package_id"], "granule_id": row["granule_id"]}
             )
+    _log_retry_ceiling("plain", retry_queue, stats)
     return stats
 
 
@@ -402,7 +418,7 @@ def run(conn, llm, date):
         llm, stats, retry_queue, _call,
         lambda group, mapping, result: _harvest(conn, stats, group, mapping, result),
         "map:retry-group")
-    for entry in retry_queue:
+    for entry in retry_queue[:config.MAX_SINGLE_RETRIES_PER_RUN]:
         mapping, result = _call(llm, stats, [entry], "map:retry-single")
         if _harvest(conn, stats, [entry], mapping, result):
             item = entry[0]
@@ -413,4 +429,5 @@ def run(conn, llm, date):
                     "rule_id": item["rule_id"],
                 }
             )
+    _log_retry_ceiling("map", retry_queue, stats)
     return stats

@@ -99,17 +99,27 @@ def gather(conn, date, *, fetch_db=None, ledger_db=None):
     finally:
         ldb.close()
 
+    # Model events are journaled without a digest_date, so counting them
+    # per day has to go through the ingest row for the same item. The
+    # earlier query grouped every event by digest_date directly and so
+    # reported zero summarized on days that plainly had summaries — a
+    # feedback loop that under-reported itself (found 2026-07-31).
     m["coverage"] = [
         {"date": d, "ingested": ing, "summarized": s or 0, "plain": pl or 0}
         for d, ing, s, pl in conn.execute(
             """
-            SELECT digest_date, COUNT(DISTINCT CASE WHEN event='ingested'
-                       THEN package_id || '|' || granule_id END),
-                   COUNT(DISTINCT CASE WHEN event='summarized'
-                       THEN package_id || '|' || granule_id END),
-                   COUNT(DISTINCT CASE WHEN event='plain'
-                       THEN package_id || '|' || granule_id END)
-            FROM item_journal WHERE digest_date >= date(?, '-3 days')
+            SELECT i.digest_date,
+                   COUNT(*),
+                   SUM(EXISTS (SELECT 1 FROM item_journal e
+                               WHERE e.package_id = i.package_id
+                                 AND e.granule_id = i.granule_id
+                                 AND e.event = 'summarized')),
+                   SUM(EXISTS (SELECT 1 FROM item_journal e
+                               WHERE e.package_id = i.package_id
+                                 AND e.granule_id = i.granule_id
+                                 AND e.event = 'plain'))
+            FROM item_journal i
+            WHERE i.event = 'ingested' AND i.digest_date >= date(?, '-3 days')
             GROUP BY 1 ORDER BY 1 DESC
             """, (date,))
     ]

@@ -157,9 +157,27 @@ def trigger_fires(conn, date, *, now=None):
     )
 
 
-def dates_with_pending(conn):
+def dates_with_pending(conn, max_age_days=None):
     """Digest dates that have journaled items newer than their model
-    coverage — candidates for an analyze cycle (newest first)."""
+    coverage — candidates for an analyze cycle (newest first).
+
+    Bounded to the last `max_age_days + 1` publication days
+    (config.ANALYZE_MAX_AGE_DAYS by default). We do not publish
+    post-dated digests, so tokens spent on a day that will never be
+    published are taken from the day that will: on 2026-07-30 the worker
+    wrote 184 summaries across eleven dates reaching back to 2024-06-18
+    while the digest day itself received none. Older pending items stay
+    pending and are disclosed by the coverage accounting rather than
+    quietly bought."""
+    if max_age_days is None:
+        max_age_days = config.ANALYZE_MAX_AGE_DAYS
+    floor = (dt.datetime.now(dt.UTC)
+             - dt.timedelta(days=max_age_days + 1)).astimezone(
+                 config.PUBLICATION_TZ).strftime("%Y-%m-%d")
+    return [d for d in _all_dates_with_pending(conn) if d >= floor]
+
+
+def _all_dates_with_pending(conn):
     return [r["digest_date"] for r in conn.execute(
         """
         SELECT DISTINCT digest_date FROM item_journal

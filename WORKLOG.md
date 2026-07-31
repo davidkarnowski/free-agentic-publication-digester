@@ -2960,3 +2960,60 @@ shorter. Its test now pins the substance — that the untested-with-real-
 assistive-technology gap is stated, that a real contact route exists,
 and that the conformance claim names its standard — rather than pinning
 particular product names, which is what broke when the wording changed.
+
+## 2026-07-31 — Budgets, scope, and the retry ceiling
+
+The overnight run published 2026-07-30 and made the first automated
+evidence push, and the insight loop it wrote is what exposed the rest:
+17,441,543 input tokens for the run day, 79.5% of it retries, and a
+digest day containing no Congressional Record, no bills and no public
+laws at all — because the govinfo budget was gone before those
+collections synced. Of 301 items collected for the day, 28 were
+summarized, every one of them an official Federal Register preamble
+costing nothing. The 17.4M tokens bought 184 summaries spread across
+eleven other dates, reaching back to 2024-06-18.
+
+Four changes, each tied to a number in that paragraph.
+
+**The analyze worker stops buying days we will not publish.** We do not
+issue post-dated digests, so a token spent on 2024-06-18 is taken from
+today. `dates_with_pending` is now bounded to the current publication
+day and the one before it — the day the finalizer freezes just after
+midnight. Older pending items stay pending and are disclosed by the
+coverage accounting, which is what it is for.
+
+**Single retries get a ceiling.** The CLI backend costs ~29K input
+tokens per call whatever the payload, so a single-item retry buys one
+~800-token summary at the price of a whole batch; 366 of them cost
+10,860,137 tokens, 62% of the day. Past twelve per run the item is left
+unsummarized and said so in the log — silence there would read as
+completeness.
+
+**The govinfo budget rises, and an hourly ceiling makes that safe.**
+Evidence first, per §4: api.data.gov, the shared GSA service govinfo
+runs on, documents 1,000 requests per hour per key and answers 429 above
+it. We have never received a 429 — 3 days of logs show 200s and 503s
+only — and at 2,000/day we averaged about 83 requests an hour, roughly
+8% of the allowance. The daily budget goes to 6,000, bounded by a new
+ceiling of 500 requests per hour, half of what the publisher permits,
+counted from the fetch log so it holds across processes. The ceiling
+binds the finalizer too: it is the publisher's limit, not ours.
+
+Worth recording plainly: 882 of 4,868 govinfo requests over three days
+came back 503. Those still count against the budget, deliberately — a
+503 cost the server a request whatever it returned to us — so roughly a
+fifth of the day's allowance is spent on the server's own unavailability
+before any policy of ours applies.
+
+**The finalizer gets a reserve.** Collectors now stop at 85% of the
+daily budget; only the finalizer may spend the rest, and a sync
+shortfall no longer aborts it. Refusing to publish a day that was
+collected hours ago because a top-up could not run is the wrong failure,
+and on 2026-07-30 it cost twelve retries and a stuck EOD worker.
+
+Two smaller truths: the insight loop was under-reporting itself —
+summarized and plain events carry no digest_date, so grouping them by
+one read zero on days that plainly had summaries — and the first
+automated evidence commit was authored as the operator rather than the
+bot, because the rsynced repo's .git/config outranks the image's global
+identity. Both fixed. 392 tests.

@@ -24,7 +24,13 @@ if [ -n "$BAD" ]; then
   git reset --mixed >/dev/null; exit 2
 fi
 
-git commit -m "Daily pipeline evidence ${DATE_TAG} (automated)
+# The container image sets the bot identity globally, but the rsynced
+# repo carries the operator's .git/config, which wins — the first
+# automated push on 2026-07-31 was authored as the operator. Name the
+# identity on the commit itself so it cannot be overridden.
+git -c user.name="fapd-pipeline" \
+    -c user.email="fapd-pipeline@users.noreply.github.com" \
+    commit -m "Daily pipeline evidence ${DATE_TAG} (automated)
 
 Digest, provenance manifest, and site as produced and validated by the
 end-of-day finalizer run on the VPS backend container.

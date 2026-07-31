@@ -31,7 +31,13 @@ BULKDATA_BASE = "https://www.govinfo.gov/bulkdata"
 
 # GUIDE.md §4: ~1% of GPO's permitted rate. Do not raise without a GUIDE change.
 MAX_REQUESTS_PER_SECOND = 1.0
-MAX_REQUESTS_PER_DAY = 2000
+# Raised 2,000 -> 6,000 on 2026-07-31 (operator-authorised, GUIDE §4
+# amended with the evidence): api.data.gov documents 1,000 requests per
+# HOUR per key and answers 429 above it; we have never received a 429, and
+# at 2,000/day we averaged ~83/hour, about 8% of the allowance. The daily
+# figure is bounded by MAX_GOVINFO_REQUESTS_PER_HOUR below, which is what
+# actually keeps us away from the publisher's limit.
+MAX_REQUESTS_PER_DAY = 6000
 
 # GUIDE.md §4: a sync with no stored watermark must NOT walk open-ended history
 # (BILLS alone is ~289k packages). First pull starts at now minus this window;
@@ -55,6 +61,19 @@ SOURCES_REGISTRY = PROJECT_ROOT / "sources" / "registry.yaml"
 # GUIDE §3/§4: agency newsrooms get their own daily request bucket so agency
 # crawling can never consume the govinfo budget (or vice versa).
 MAX_AGENCY_REQUESTS_PER_DAY = 500
+
+# Hourly ceiling (GUIDE §4, added 2026-07-31). api.data.gov — the shared GSA
+# service govinfo runs on — documents 1,000 requests per hour per key and
+# answers 429 when it is exceeded. We have never seen a 429. This ceiling is
+# half of what the key permits, enforced from the fetch log so it holds
+# across processes, and it is what makes a larger DAILY budget safe: the day
+# can grow without any hour approaching the publisher's stated limit.
+MAX_GOVINFO_REQUESTS_PER_HOUR = 500
+# Reserved for the end-of-day finalizer. Collectors stop at this fraction of
+# the daily budget; only the finalizer may spend the remainder. On
+# 2026-07-30 the collectors spent all 2,000 govinfo requests on backlog and
+# the finalizer then could not sync the day it was finalizing.
+EOD_BUDGET_RESERVE_FRACTION = 0.15
 # GUIDE §7: bump when the text-normalization/extraction logic changes;
 # text_sha256 values are only comparable within one normalizer version.
 NORMALIZER_VERSION = 1
@@ -109,6 +128,13 @@ MAX_PLAIN_BATCH_ITEMS = 25  # inputs are stored summaries (~170 tokens each)
 # single-item plain retries cost 645,778 input tokens — 42% of that day's
 # spend — to recover items the first pass had merely truncated away.
 MAX_RETRY_BATCH_ITEMS = 5
+# Ceiling on single-item retries per run (GUIDE §6, added 2026-07-31). The
+# CLI backend costs ~29K input tokens per call whatever the payload, so a
+# single retry buys one ~800-token summary for the price of a full batch.
+# Measured 2026-07-30: 366 single retries burned 10,860,137 input tokens —
+# 62% of that day's spend. Past this ceiling an item is left unsummarized
+# and disclosed by the coverage accounting, which is what it is for.
+MAX_SINGLE_RETRIES_PER_RUN = 12
 LLM_TIMEOUT = 300  # seconds per call
 
 # GUIDE.md §3: scope. Order is sync order. USCOURTS added 2026-07-25 (J1).
@@ -127,6 +153,13 @@ TODAY_RENDER_INTERVAL_MIN = 5
 # bound; successive analyze cycles at least MIN_INTERVAL apart.
 ANALYZE_MAX_LATENCY_MIN = 60
 ANALYZE_MIN_INTERVAL_MIN = 15
+# How far back the analyze worker will look (GUIDE §6, added 2026-07-31).
+# We do not publish post-dated digests, so spending on a day that will never
+# be published starves the day that will: on 2026-07-30 the worker produced
+# 184 summaries across eleven dates back to 2024-06-18 while the digest day
+# itself received none. 1 = the current publication day and the one before
+# it, which is the day the finalizer freezes just after midnight.
+ANALYZE_MAX_AGE_DAYS = 1
 # Past this fraction of a class's daily request budget, its collector
 # doubles its interval for the rest of the UTC day (EOD headroom).
 BUDGET_BACKPRESSURE_FRACTION = 0.7
