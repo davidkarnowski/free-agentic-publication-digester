@@ -786,6 +786,23 @@ def _rewrite_readme_links(md_text):
     return _README_PLAIN_LINK.sub(r"`\1`", md_text)
 
 
+# Off-site images are demoted to their alt text before any page renders.
+# A README badge is an ordinary open-source convention on GitHub, but the
+# same markdown rendered into readme.html would make every visitor's
+# browser fetch an image from a third party — exactly what
+# docs/site/privacy.md promises never happens ("no external fonts,
+# scripts, images, or embeds"). Dropping the <img> and keeping the words
+# leaves the surrounding link intact and clickable, so the badge still
+# does its job here; only the outbound request is gone. Stated as a rule
+# over any off-site host — including protocol-relative `//host/...` — so
+# the next badge someone adds is handled without a code change.
+_EXTERNAL_IMAGE = re.compile(r"!\[([^\]]*)\]\(\s*(?:https?:)?//[^)]*\)")
+
+
+def _textualize_external_images(md_text):
+    return _EXTERNAL_IMAGE.sub(lambda m: m.group(1).strip() or "image", md_text)
+
+
 def _doc_sources():
     """[(markdown, stem, title, canonical)] for every explanatory page —
     docs/site/*.md plus the repo README. Separated from rendering so any
@@ -795,13 +812,18 @@ def _doc_sources():
     doc_dir = config.PROJECT_ROOT / "docs" / "site"
     if doc_dir.is_dir():
         for path in sorted(doc_dir.glob("*.md"), key=lambda p: p.stem):
-            md_text = path.read_text(encoding="utf-8")
+            md_text = _textualize_external_images(
+                path.read_text(encoding="utf-8"))
             match = _H1_RE.search(md_text)
             title = match.group(1) if match else path.stem.capitalize()
             docs.append((md_text, path.stem, title, f"docs/site/{path.name}"))
     readme = config.PROJECT_ROOT / "README.md"
     if readme.exists():
-        md_text = _rewrite_readme_links(readme.read_text(encoding="utf-8"))
+        # Images first: an image's URL is not a link the rewriter should
+        # reason about, and demoting it early keeps a badge's own link the
+        # only link left on that line.
+        md_text = _rewrite_readme_links(
+            _textualize_external_images(readme.read_text(encoding="utf-8")))
         match = _H1_RE.search(md_text)
         title = match.group(1) if match else "README"
         docs.append((md_text, "readme", title, "README.md"))

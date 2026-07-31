@@ -1,5 +1,7 @@
 # Free Agentic Publication Digester (FAPD)
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/davidkarnowski/free-agentic-publication-digester)
+
 FAPD is an automated pipeline that reads the official publications of the
 United States federal government — congressional floor proceedings, bills,
 the Federal Register, enacted laws, federal court opinions, and agency

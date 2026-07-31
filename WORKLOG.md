@@ -2712,3 +2712,69 @@ quietly outdated a published promise; the pattern is worth naming.
 Remaining findings, including the table semantics and collapsed-heading
 issues, stay in the memo with nine open questions for the operator.
 375 tests.
+## 2026-07-30 — A badge on GitHub, no third party on the site
+
+DeepWiki builds an AI-readable wiki of a public repository, and the
+convention for wiring it up is the one every open-source project
+already knows: paste a badge into the README, `[![Ask
+DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/<owner>/<repo>)`.
+Confirmed live rather than from memory — `deepwiki.com/badge.svg`
+returns the real "Ask DeepWiki" SVG, and the repo's own DeepWiki page
+resolves — though the page itself does not document the markup, so the
+form came from the badge asset plus the generator's published pattern.
+Worth being honest about what it buys: the badge is a link and a signal
+that the project points at its wiki. DeepWiki's re-indexing is
+DeepWiki's business, and the claim that a badge "keeps content fresh"
+is the convention's folklore, not something this project can verify.
+The badge is cheap and conventional; it is not a guarantee of anything.
+
+The trap is that `README.md` is not only a GitHub file. `publish.py`
+renders it into the site as `readme.html`, and `docs/site/privacy.md`
+tells every visitor, in plain words, that pages "load no external
+fonts, scripts, images, or embeds — your visit talks to this server and
+no one else." A remote badge image is precisely an external image.
+Merged unthinkingly, the badge would have made a published privacy
+promise false for every reader of `/readme.html`, silently, and the
+only evidence would have been in someone's network tab. That is a worse
+failure than a broken link: it is the site saying something untrue
+about itself.
+
+Two bad resolutions were available and both were refused. Weakening the
+privacy page to say "almost no third-party requests" trades a clean
+guarantee for a badge, which is a terrible exchange rate. Keeping the
+badge out of the README entirely would have let the site's constraint
+quietly dictate the repository's conventions, which is the tail wagging
+the dog — GitHub readers are a real audience with different needs.
+
+So the badge goes in the README exactly as the convention expects, and
+the site strips the *fetch* while keeping the *meaning*.
+`_textualize_external_images` sits next to `_rewrite_readme_links` and
+demotes any Markdown image whose source leaves this site — `https:`,
+`http:`, or protocol-relative `//host/...` — to its alt text before the
+page renders. `[![Ask DeepWiki](https://deepwiki.com/badge.svg)](…)`
+becomes `[Ask DeepWiki](…)`: still a sentence, still a link, still
+opens in a new tab under the sitewide rule, and zero bytes requested
+from anyone but us. Deliberately stated over *any* off-site host rather
+than one vendor's domain, so the next badge somebody adds is handled
+without a code change; and applied to `docs/site/*.md` on the same
+line of reasoning, not just the README.
+
+One ordering detail mattered. Running the image rule *before*
+`_rewrite_readme_links` is not cosmetic: the existing plain-link
+rewriter matches `[text](target)` and would happily swallow the inner
+`![alt](//host/x.svg)` of a protocol-relative badge, degrading it to
+code text by accident. That produced the right-looking output for the
+wrong reason — the kind of near-miss that works until the day the
+rewriter changes. Images resolve first, then links; each rule owns what
+it is about.
+
+Tests pin both halves: a README carrying three flavours of external
+badge (https, protocol-relative, and an empty-alt tracking pixel)
+renders with no `src="http`, no `src="//`, and the DeepWiki link intact
+and clickable, while the digest page's local graphic still renders as
+an image — the rule is about where the bytes come from, not about
+images. Plus a cheap sitewide tripwire that builds the real site from
+the real README and asserts no page anywhere references an external
+image; that one costs nothing and will catch the next occurrence
+whoever adds it. 363 tests collected, 2 new (356 pass, 7 skip in a
+worktree without the local data DBs), ruff clean.

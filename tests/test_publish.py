@@ -1,5 +1,7 @@
 """Static-site builder tests: synthetic digests in tmp; no network."""
 
+import re
+
 import pytest
 
 from fapd import publish
@@ -472,6 +474,63 @@ def test_readme_rendered_with_repo_links_rewritten(digests, tmp_path, monkeypatc
     assert "<code>GUIDE.md</code>" in page        # ...but still named
     assert "README.md" in page                    # canonical-source footer
     assert 'href="readme.html">Readme</a>' in (out / "2026-07-01.html").read_text()
+
+
+def test_readme_badges_render_without_a_third_party_request(digests, tmp_path,
+                                                            monkeypatch):
+    """A README badge is a remote image, and docs/site/privacy.md promises
+    pages load no external images. Both survive: the badge's <img> is
+    demoted to its alt text, the link around it stays clickable, and
+    local images (digest graphics) are untouched."""
+    from fapd import config
+
+    root = tmp_path / "root"
+    root.mkdir()
+    (root / "README.md").write_text(
+        "# Free Agentic Publication Digester (FAPD)\n\n"
+        "[![Ask DeepWiki](https://deepwiki.com/badge.svg)]"
+        "(https://deepwiki.com/owner/repo)\n"
+        "[![Build](//img.example.com/b.svg)](https://ci.example.com/repo)\n"
+        "![](https://tracker.example.com/pixel.gif)\n"
+    )
+    monkeypatch.setattr(config, "PROJECT_ROOT", root)
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "readme.html").read_text()
+
+    assert "deepwiki.com/badge.svg" not in page       # no off-site fetch
+    assert "img.example.com" not in page
+    assert "tracker.example.com" not in page
+    assert 'src="http' not in page and 'src="//' not in page
+    # ...but the badge still reads and still links, in a new tab
+    assert ('<a href="https://deepwiki.com/owner/repo" target="_blank"'
+            ' rel="noopener noreferrer">Ask DeepWiki</a>') in page
+    assert ">Build</a>" in page
+    assert "image</p>" in page                        # empty alt keeps a word
+    # no other page class regresses: the digest graphic (a local asset we
+    # serve ourselves) still renders as an image
+    assert ('<img alt="Graphic from 2026-1 (printed page 1)"'
+            ' src="assets/2026-07-01/g.png"'
+            ) in (out / "2026-07-01.html").read_text()
+    # the rule is about where the bytes come from, not about images
+    assert publish._textualize_external_images(
+        "![Seal](assets/seal.png)") == "![Seal](assets/seal.png)"
+    assert publish._textualize_external_images(
+        '![B](https://x.test/b.svg "t")') == "B"
+
+
+_EXTERNAL_IMG = re.compile(r"<img[^>]*\bsrc=\"(?:https?:)?//", re.IGNORECASE)
+
+
+def test_no_page_on_the_site_references_an_external_image(digests, tmp_path):
+    """Cheap sitewide tripwire for the privacy claim (docs/site/privacy.md:
+    'no external fonts, scripts, images, or embeds'). Built from the real
+    repo docs and README, so the next badge added anywhere trips this."""
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    offenders = [p.name for p in sorted(out.glob("*.html"))
+                 if _EXTERNAL_IMG.search(p.read_text())]
+    assert offenders == []
 
 
 def test_site_base_url_absolutizes_machine_surfaces(digests, tmp_path, monkeypatch):
