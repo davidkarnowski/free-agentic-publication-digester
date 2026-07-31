@@ -2538,3 +2538,31 @@ keyword — no truncation, no folded tail (the 400 ceiling is a safety
 stop that would announce itself if it ever fired). Timestamps gained
 seconds on both clocks: entries read as Eastern to the second, with the
 reader's own local time appended beside them. 360 tests.
+
+## 2026-07-30 — One header everywhere; entry tags become the filter
+
+Two operator notes, both about making the live page behave like part of
+the site rather than a thing beside it.
+
+The header is now built in one place (`_site_nav`) and used by every
+page class — digests, index, sources, the explanatory pages, the agent
+guide, and /today, which had been carrying a hardcoded three-link stub
+and so hid About, Methods, AI development, Privacy, and Bot from anyone
+reading the live view. Doc-page discovery was factored out of rendering
+(`_doc_sources`/`_doc_page_index`) so /today, which rebuilds on its own
+clock, can construct the same nav without re-rendering the site. The
+refactor caught a real regression on the way: a nav that always links
+the source guide would link a page that does not exist when the
+registry is absent, so the link is now conditional on the registry, and
+the degrade test that found it stays.
+
+Entry tags are now controls. Because filter state lives in checkboxes,
+a tag under an entry can simply be a <label> for the same checkbox the
+bar drives — one checkbox, two labels, no state of its own and nothing
+to keep in sync. Click "environmental protection agency" on an entry
+you just read and the stream narrows to that agency; the matching bar
+chip lights up at the same moment, because both are styled off the same
+:checked rule. Selections stack: each keyword contributes its own
+hide-what-doesn't-match rule, so two selections leave the entries
+carrying both. Tags outside the offered set render as inert spans
+rather than dead controls. 361 tests.

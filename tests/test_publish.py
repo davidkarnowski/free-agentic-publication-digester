@@ -653,8 +653,13 @@ def test_build_today_citation_metadata_and_item_tags(conn, tmp_path):
     assert "govinfo API" in page
     assert "CREC-2026-07-23 / PgS1" in page
     # mechanical item tags: branch + doc-type words
-    assert '<span class="tag tag-branch-legislative">legislative</span>' in page
-    assert '<span class="tag">senate floor</span>' in page  # non-branch: plain chip
+    # entry tags are controls for the same checkboxes the filter bar
+    # drives, so clicking one on an entry and one in the bar are the
+    # same act — and branch tags keep their colors either way
+    assert ('<label class="tag tag-branch-legislative chip-toggle" '
+            'for="f-legislative">legislative</label>') in page
+    assert ('<label class="tag chip-toggle" for="f-senate-floor">'
+            "senate floor</label>") in page
     # summarized item carries its inclusion rule as a subtle note
     assert '<span class="rule-note">CREC-SEL-01</span>' in page
     # the unsummarized agency item -> labeled verbatim opening + channel
@@ -711,8 +716,8 @@ def test_build_today_newest_first_with_branch_colors_and_intro(conn, tmp_path):
         ["AGENCYPR-x", "CREC-2026-07-23"]
 
     page = (tmp_path / "today.html").read_text()
-    assert 'class="tag tag-branch-legislative">legislative</span>' in page
-    assert 'class="tag tag-branch-executive">executive</span>' in page
+    assert 'class="tag tag-branch-legislative chip-toggle"' in page
+    assert 'class="tag tag-branch-executive chip-toggle"' in page
     assert "live view" in page
     assert "whole-day context" in page and 'href="index.html">all digests' in page
     # head is bot-friendly: description meta + llms.txt alternate link
@@ -893,3 +898,32 @@ def test_local_time_is_additive_and_selfcontained(conn, tmp_path):
     publish.build_site(digest_dir=tmp_path / "d", out_dir=tmp_path / "s")
     assert "<script" not in (tmp_path / "s" / "2026-07-29.html").read_text()
     assert "<script" not in (tmp_path / "s" / "index.html").read_text()
+
+
+def test_entry_tags_and_bar_chips_drive_the_same_state(conn, tmp_path):
+    """Clicking a tag on an entry and clicking it in the filter bar are
+    one act: both are labels for the same checkbox, so the selection
+    cannot drift out of sync, and several selections stack (each adds a
+    rule, so only items carrying all of them survive)."""
+    from conftest import DATE
+
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+
+    stream = page.split('class="today-list"')[1]
+    assert 'for="f-legislative"' in stream          # entry chip is a control
+    bar = page.split('class="filter-bar"')[1].split('class="today-list"')[0]
+    assert 'for="f-legislative"' in bar             # ...same target as the bar
+    assert page.count('id="f-legislative"') == 1    # one checkbox, two labels
+
+    # selection styling reaches both places
+    assert ('#f-legislative:checked ~ .filter-bar label[for="f-legislative"],'
+            in page)
+    assert ('#f-legislative:checked ~ .today-list label[for="f-legislative"]'
+            in page)
+    # stacking is independent per keyword: each rule hides non-matching items
+    assert ("#f-executive:checked ~ .today-list > .today-item:not(.k-executive)"
+            "{display:none}") in page
+    assert ("#f-press-release:checked ~ .today-list >"
+            " .today-item:not(.k-press-release){display:none}") in page

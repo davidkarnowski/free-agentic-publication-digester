@@ -395,7 +395,8 @@ li.source-note a { color: var(--muted); }
   padding-bottom: 0.4rem; margin-bottom: 0.1rem;
   border-bottom: 1px dashed var(--border);
 }
-.filter-chip { cursor: pointer; }
+.filter-chip, .chip-toggle { cursor: pointer; user-select: none; }
+.chip-toggle:hover { border-color: var(--accent); }
 .filter-note {
   display: block; margin-top: 0.4rem; font-size: 0.75rem; color: var(--muted);
 }
@@ -664,17 +665,37 @@ def _doc_nav_links(doc_pages):
     )
 
 
+def _registry_exists():
+    """Whether sources.html will exist — the source guide is rendered from
+    the registry, so an absent registry means no page to link to."""
+    return (config.PROJECT_ROOT / "sources" / "registry.yaml").exists()
+
+
+def _site_nav(doc_pages=(), *, skip_stem=None, current=None):
+    """The site header, identical everywhere (operator, 2026-07-30): the
+    digest archive, the live view, the source guide, every explanatory
+    page, and the agent guide. `current` omits the page's own link, and
+    a link is never emitted for a page that was not built."""
+    links = []
+    if current != "index":
+        links.append('<a href="index.html">All digests</a>')
+    if current != "today":
+        links.append('<a href="today.html">Today (live)</a>')
+    if current != "sources" and _registry_exists():
+        links.append('<a href="sources.html">Sources</a>')
+    links.append(_doc_nav_links(p for p in doc_pages if p[0] != skip_stem))
+    if current != "agents":
+        links.append('<a href="agents.html">For agents</a>')
+    return "".join(links)
+
+
 def _nav_for(dates, i, doc_pages=()):
     links = []
     if i > 0:
         links.append(f'<a href="{dates[i - 1]}.html">&larr; {dates[i - 1]}</a>')
     if i < len(dates) - 1:
         links.append(f'<a href="{dates[i + 1]}.html">{dates[i + 1]} &rarr;</a>')
-    links.append('<a href="index.html">All digests</a>')
-    links.append('<a href="today.html">Today (live)</a>')
-    links.append('<a href="sources.html">Sources</a>')
-    links.append(_doc_nav_links(doc_pages))
-    links.append('<a href="agents.html">For agents</a>')
+    links.append(_site_nav(doc_pages))
     return "".join(links)
 
 
@@ -699,11 +720,11 @@ def _rewrite_readme_links(md_text):
     return _README_PLAIN_LINK.sub(r"`\1`", md_text)
 
 
-def _build_doc_pages(out_dir):
-    """Render every docs/site/*.md explanatory page (About, Methods, …) plus
-    the repo-root README (as readme.html, repo links rewritten to their site
-    equivalents) to site/<stem>.html. Returns a sorted list of (stem, title)
-    for pages built; absent sources simply yield no pages."""
+def _doc_sources():
+    """[(markdown, stem, title, canonical)] for every explanatory page —
+    docs/site/*.md plus the repo README. Separated from rendering so any
+    page (notably the independently-rebuilt /today) can construct the
+    same navigation without re-rendering the site."""
     docs = []
     doc_dir = config.PROJECT_ROOT / "docs" / "site"
     if doc_dir.is_dir():
@@ -718,6 +739,18 @@ def _build_doc_pages(out_dir):
         match = _H1_RE.search(md_text)
         title = match.group(1) if match else "README"
         docs.append((md_text, "readme", title, "README.md"))
+    return docs
+
+
+def _doc_page_index():
+    """[(stem, title)] — the nav's view of the explanatory pages."""
+    return [(stem, title) for _t, stem, title, _c in _doc_sources()]
+
+
+def _build_doc_pages(out_dir):
+    """Render every explanatory page to site/<stem>.html; returns the
+    (stem, title) index. Absent sources simply yield no pages."""
+    docs = _doc_sources()
     doc_pages = [(stem, title) for _t, stem, title, _c in docs]
     brand = SITE_TITLE.split(" — ")[0]
     for md_text, stem, title, canonical in docs:
@@ -727,11 +760,7 @@ def _build_doc_pages(out_dir):
             # No brand suffix when the page title already carries it (README)
             title if brand in title else f"{title} — {SITE_TITLE}",
             body,
-            '<a href="index.html">All digests</a>'
-            '<a href="today.html">Today (live)</a>'
-            '<a href="sources.html">Sources</a>'
-            + _doc_nav_links(p for p in doc_pages if p[0] != stem)
-            + '<a href="agents.html">For agents</a>',
+            _site_nav(doc_pages, skip_stem=stem),
             canonical,
         )
         (out_dir / f"{stem}.html").write_text(page, encoding="utf-8")
@@ -946,9 +975,7 @@ def _build_sources_page(out_dir, doc_pages=()):
     page = _render_page(
         f"Sources — {SITE_TITLE}",
         _sources_body(entries),
-        '<a href="index.html">All digests</a>'
-        '<a href="today.html">Today (live)</a>' + _doc_nav_links(doc_pages)
-        + '<a href="agents.html">For agents</a>',
+        _site_nav(doc_pages, current="sources"),
         "sources/registry.yaml",
     )
     (out_dir / "sources.html").write_text(page, encoding="utf-8")
@@ -1022,9 +1049,7 @@ def build_site(digest_dir=None, out_dir=None):
     )
     index = _render_page(
         SITE_TITLE, index_body,
-        '<a href="today.html">Today (live)</a>'
-        + ('<a href="sources.html">Sources</a>' if sources_built else "")
-        + _doc_nav_links(doc_pages),
+        _site_nav(doc_pages, current="index"),
         "digests/",
     )
     (out_dir / "index.html").write_text(index, encoding="utf-8")
@@ -1140,7 +1165,20 @@ def _today_channel_label(item):
     return "web feed"
 
 
-def _today_item_row(item):
+def _entry_tag_chip(tag, filterable):
+    """An entry's tag is a control when the day offers it as a filter:
+    a <label> for the very checkbox the filter bar drives, so clicking a
+    tag on an entry and clicking it in the bar are the same act and the
+    two stay in sync with no state of their own. Tags outside the
+    offered set stay inert spans rather than dead controls."""
+    slug = _slug(tag)
+    if slug in filterable:
+        return (f'<label class="{_tag_classes(tag, "chip-toggle")}" '
+                f'for="f-{slug}">{html.escape(tag)}</label>')
+    return _tag_chip(tag)
+
+
+def _today_item_row(item, filterable=()):
     title = (item["title"] or "").strip() or item["package_id"]
     gran = item["granule_id"]
     cite = item["package_id"] + (f" / {gran}" if gran else "")
@@ -1150,7 +1188,8 @@ def _today_item_row(item):
     url = _today_official_url(item)
     title_html = (f'<a href="{html.escape(url)}">{html.escape(title)}</a>'
                   if url else html.escape(title))
-    chips = "".join(_tag_chip(t) for t in _today_item_tags(item))
+    chips = "".join(_entry_tag_chip(t, filterable)
+                    for t in _today_item_tags(item))
 
     coll_label = _TODAY_COLLECTION_LABELS.get(
         item["collection"], item["collection"] or "publication")
@@ -1244,7 +1283,8 @@ def _today_filter_bar(facets, total):
         css.append(
             f"#f-{slug}:checked ~ .today-list > .today-item:not(.k-{slug})"
             "{display:none}\n"
-            f'#f-{slug}:checked ~ .filter-bar label[for="f-{slug}"]'
+            f'#f-{slug}:checked ~ .filter-bar label[for="f-{slug}"],\n'
+            f'#f-{slug}:checked ~ .today-list label[for="f-{slug}"]'
             "{background:var(--accent);color:#fff;border-color:var(--accent)}\n"
             f'#f-{slug}:focus-visible ~ .filter-bar label[for="f-{slug}"]'
             "{outline:2px solid var(--accent);outline-offset:2px}\n"
@@ -1268,8 +1308,9 @@ def _today_filter_bar(facets, total):
     bar = (
         '<nav class="filter-bar" aria-label="Filter the stream by keyword">'
         '<p class="filter-lead">Filter by keyword '
-        '<span class="rule-note">click to select, click again to clear · '
-        "choosing several narrows to items carrying all of them · "
+        '<span class="rule-note">click to select, click again to clear — '
+        "here or on any entry's own tags · choosing several narrows to "
+        "items carrying all of them · "
         f"{total} item(s) unfiltered</span>"
         '<button type="reset" class="filter-clear">clear filters</button></p>'
         f"{rows}{note}</nav>"
@@ -1348,7 +1389,9 @@ def build_today(conn, out_dir=None, date=None):
         "official record, the channel it arrived through, mechanical tags "
         "(branch of government, document type, agency), and either a "
         "labeled summary or the unedited opening words of the official "
-        "text.</p>"
+        "text. Those tags are clickable: selecting one here or in the "
+        "filter bar narrows the stream to matching entries, and picking "
+        "several narrows to entries carrying all of them.</p>"
         "<p><strong>About the dates and times on this page.</strong> A "
         "publication day here runs on <strong>Eastern time in "
         "Washington, D.C.</strong> — the clock the publishers themselves "
@@ -1384,6 +1427,7 @@ def build_today(conn, out_dir=None, date=None):
     facets = _today_filter_facets(status["items"])
     inputs, filter_bar, filter_css = _today_filter_bar(
         facets, len(status["items"]))
+    filterable = {_slug(k) for k in list(facets)[:MAX_FILTER_KEYWORDS]}
     if not status["items"]:
         parts.append("<p>No items observed yet for this publication day. "
                      "Collectors poll continuously; check back.</p>")
@@ -1398,12 +1442,11 @@ def build_today(conn, out_dir=None, date=None):
             '<form class="today-stream" action="today.html" method="get">'
             + inputs + filter_bar
             + '<ul class="today-list">'
-            + "".join(_today_item_row(i) for i in status["items"])
+            + "".join(_today_item_row(i, filterable)
+                      for i in status["items"])
             + "</ul></form>")
 
-    nav = ('<a href="index.html">All digests</a>'
-           '<a href="sources.html">Sources</a>'
-           '<a href="agents.html">For agents</a>')
+    nav = _site_nav(_doc_page_index(), current="today")
     head_extra = (f"<style>\n{filter_css}</style>\n" if filter_css else "")
     head_extra += _LOCAL_TIME_JS
     page = _render_page(f"Today (live) — {SITE_TITLE}", "".join(parts), nav,
@@ -1529,9 +1572,7 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base=""):
     page = _render_page(
         f"Access for AI Agents — {SITE_TITLE}",
         _MD.convert(_AGENTS_MD),
-        '<a href="index.html">All digests</a>'
-        '<a href="today.html">Today (live)</a>'
-        '<a href="sources.html">Sources</a>',
+        _site_nav(doc_pages, current="agents"),
         "GUIDE.md §1 (dual audience)",
     )
     (out_dir / "agents.html").write_text(page, encoding="utf-8")
