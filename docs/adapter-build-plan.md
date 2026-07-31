@@ -82,9 +82,37 @@ registering a stub adapter via `monkeypatch.setitem(agencies.ADAPTERS, ...)`
 (the sanctioned pattern, `tests/test_agencies.py:151`) proving a non-feed
 `items()` reaches storage.
 
-## Phase 1 — stale URLs (registry only, no code)
+## Phase 1 — stale URLs (registry only, no code) — **DONE 2026-07-31**
 
-Interior, Education, BLS, ODNI. Find each publisher's current address from its
+**Outcome: 1 of 4 recovered.** `odni-news` is active (RSS, 54 items, all
+dated and with guids, sample article 8,082 chars). The other three stayed
+planned, and what they taught is worth more than the count:
+
+- **ODNI had not moved a path, it moved publishers.** Every
+  `dni.gov/index.php/*` address 301s to an archive domain and 404s there;
+  the live newsroom is on `odni.gov` — Joomla to WordPress, different
+  domain. Generalise it: **a 404 is an unanswered question about a
+  publisher, not evidence about a path.**
+- **Empty-but-valid feeds are a category this plan lacked.** Interior
+  advertises one feed; it is well-formed, rebuilt daily, and carries zero
+  items. It was deliberately *not* registered as `urls.feed`, because
+  `source_url()` prefers feed over index and would aim the poller at a
+  door yielding nothing while the material sits on the index. Phase 5's
+  "35 advertise no feed" should read **no *usable* feed**.
+- **BLS is not a URL fix and is in no phase.** It publishes ~55 feeds,
+  none agency-wide — ~42 per-program release feeds plus data rollups.
+  `empsit.rss` is Atom with guids, dates and real release links; genuinely
+  ingestible. Fixing `bls-news` needs a **fan-out to one registry entry per
+  program feed** (empsit, cpi, ppi, jolts, eci first) or a multi-feed
+  adapter. That is a new-source decision requiring the operator, not a
+  correction.
+- **Reading a publisher's own documentation may need our own client.**
+  `bls.gov`, `dni.gov`/`odni.gov` and `ed.gov` all answer 403 to generic
+  research fetchers but 200 to `AgencyClient`. GUIDE §3's
+  continued-engagement step therefore runs through the project's identified
+  client, not a browser-shaped one.
+
+Original scope, for the record: Interior, Education, BLS, ODNI. Find each publisher's current address from its
 own documentation, update `urls` in `sources/registry.yaml`, re-probe with
 `scripts/check_sources.py --ids …`, record the dated finding in `notes`,
 regenerate `SOURCES.md` in the same commit (code-standards §7.5). Cheapest
@@ -126,26 +154,20 @@ register in `ADAPTERS` (`:151`) **and** `sources.WEB_ADAPTERS`
 Coverage arithmetic must reconcile — `report.py:1247-1252` raises otherwise,
 and that is a publication-blocking gate.
 
-## Phase 3 — `api` adapter + Federal Register public inspection
+## Phase 3 — `api` adapter (**revised 2026-07-31**)
 
-**Adapter `fr-public-inspection`.** `items()` parses
-`public-inspection-documents/current.json` (`results[]`; 114 documents when
-probed). Keyless. The JSON carries title, agencies, type and URLs, so
-`wants_article()` → `False` and the mode records `feed-only`.
+**Operator decision, 2026-07-31: public-inspection documents are out of
+scope.** "Don't fold the filed docs into the FR count, let's work with
+published docs only." That settles the open question by removing it: the
+Coverage Statement continues to state exactly what the government
+published, and nothing filed-but-unpublished enters it. The
+`fr-public-inspection` adapter is therefore **not built**, and the
+Federal Register API adds nothing we do not already receive through the
+govinfo FR collection.
 
-**Operator decision: fold into the Federal Register section**, not a separate
-one — implement the presentation exactly so. One integrity point to settle
-before merge, flagged rather than decided here:
-
-> The Coverage Statement is validated against the database
-> (`report._validate_coverage:1234-1263`) and states what the government
-> published that day. Public-inspection documents are filed but **not
-> published**. This plan therefore counts them under a named marker
-> (`FR-PI-01`) inside the Federal Register block and labels each item "on
-> public inspection — not yet published", so it reads as one section while the
-> arithmetic stays true. Merging them into the published FR count instead
-> requires a GUIDE §2 amendment, because the digest would assert as published
-> something that is not. **Confirm which before this phase merges.**
+**The api adapter's first target becomes Congress.gov**, which adds
+legislative material we genuinely lack rather than duplicating what we
+have.
 
 **Congress.gov** reuses the adapter with a key — already in `.env` as
 `GOVINFO_API_KEY`, verified against `api.congress.gov/v3` on 2026-07-31. It
@@ -236,9 +258,12 @@ Per phase, in order:
 
 ## Open items for the operator
 
-1. Public-inspection counting (Phase 3) — named marker inside the FR block, or
-   a GUIDE §2 amendment merging them into the published FR count?
+1. ~~Public-inspection counting (Phase 3)~~ — **settled 2026-07-31**: out of
+   scope, published documents only. The FR count states what was published.
 2. Phase 5 budget: 35 html-index sources against a class budget that hit its
    ceiling on 2026-07-31.
 3. regulations.gov needs its own key registration — an operator action; its
    documentation does not sanction reusing the api.data.gov key.
+4. **BLS fan-out (new, from Phase 1)** — one registry entry per program feed,
+   or a multi-feed adapter? ~55 feeds exist, none agency-wide. Needs an
+   operator decision on how many programs are in scope before any code.

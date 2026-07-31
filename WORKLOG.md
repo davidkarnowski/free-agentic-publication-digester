@@ -3473,3 +3473,37 @@ detectable by any test we have — validation passes, rendering passes,
 counts are unchanged. Only a reader noticing one entry had swallowed the
 others would catch it. That argues for editing YAML structurally rather
 than textually next time this comes up.
+
+## 2026-07-31 — Keeping the build plan true as it executes
+
+Folded Phase 1's outcome and the operator's Phase 3 decision back into
+docs/adapter-build-plan.md, so an agent picking up a later phase reads
+what is true rather than what was expected.
+
+Three things Phase 1 taught that the plan did not anticipate. ODNI had
+not moved a path, it moved publishers — every dni.gov/index.php address
+now archives and 404s while the live newsroom sits on odni.gov, a
+different domain and a different CMS; the generalisation is that a 404 is
+an unanswered question about a publisher, not evidence about a path.
+Interior advertises a feed that is well-formed, rebuilt daily, and
+completely empty, which is a category the plan lacked — Phase 5's "35
+advertise no feed" should read no *usable* feed. And BLS turns out not to
+be a URL fix at all: ~55 feeds, none agency-wide, so it needs a fan-out
+to one entry per program feed and an operator decision about scope. It is
+now open item 4 rather than a line inside a finished phase.
+
+Phase 3 shrank. The operator ruled public-inspection documents out of
+scope — published documents only — which settles the open integrity
+question by removing it rather than answering it: nothing filed but
+unpublished can enter a Coverage Statement that claims to state what the
+government published. The fr-public-inspection adapter will not be built,
+and since govinfo already gives us published FR, the api adapter's first
+real target is Congress.gov, which adds material we actually lack.
+
+Also chased down the discrepancy flagged in the sparsity analysis: the
+digest's coverage table claimed 11 CREC summaries for 07-30 where a
+database snapshot had shown none. Both were right — the summaries were
+written at 16:32 today, after the snapshot. That is direct evidence the
+analyze-scope change works: a day that had zero model summaries got them
+within the hour once the worker stopped grinding 2024 dates, and pending
+now sits at zero across all three in-scope days.
