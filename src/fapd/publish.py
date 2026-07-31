@@ -14,6 +14,7 @@ from pathlib import Path
 import markdown
 
 from . import config, sources
+from . import health as health_mod
 from .sync import utc_now_iso
 
 SITE_TITLE = "Free Agentic Publication Digester — Daily Federal Digest"
@@ -421,6 +422,45 @@ li.source-note a { color: var(--muted); }
 }
 .tag-status-unavailable { border-style: dashed; }
 .tag-status-excluded { border-style: dotted; }
+/* Source health indicators. State is ALWAYS carried by three signals at
+   once — the word, a glyph, and the colour — because colour alone fails
+   1.4.1, grayscale printing, and forced-colors mode. Contrast measured
+   over the composited chip tint on both --card and --stripe, in both
+   themes: worst case 4.93:1 (delivering on stripe, light). The tint hue
+   stays constant across themes and only the text colour flips, the same
+   pattern the branch chips use. Quiet and no-data keep the plain --muted
+   chip and are distinguished by border style, because neither is an
+   observation of trouble and neither should look like one. */
+.tag-health-delivering {
+  background: rgba(26, 107, 60, 0.14); color: #1a6b3c;
+  border-color: currentColor;
+}
+.tag-health-degraded {
+  background: rgba(138, 75, 0, 0.14); color: #8a4b00;
+  border-color: currentColor;
+}
+.tag-health-no-response {
+  background: rgba(154, 42, 30, 0.14); color: #9a2a1e;
+  border-color: currentColor;
+}
+.tag-health-quiet { border-style: dashed; }
+.tag-health-no-data { border-style: dotted; }
+@media (prefers-color-scheme: dark) {
+  .tag-health-delivering { color: #6ee7a5; }
+  .tag-health-degraded { color: #fbbf24; }
+  .tag-health-no-response { color: #f7a394; }
+}
+.health-glyph { margin-right: 0.25em; }
+.src-stats {
+  margin: 0.5rem 0 0; padding: 0.45rem 0.7rem;
+  background: var(--stripe); border: 1px solid var(--border);
+  border-radius: 6px; font-size: 0.82rem;
+}
+.src-stats p { margin: 0.12rem 0; }
+.src-stat-label { color: var(--muted); }
+.src-unmeasured { color: var(--muted); }
+.health-lead { margin: 0.6rem 0; }
+.health-note { font-size: 0.82rem; color: var(--muted); }
 .today-disclosure {
   border: 1px solid var(--border); border-left: 3px solid var(--accent);
   padding: 0.6rem 0.85rem; font-size: 0.88rem; color: var(--muted);
@@ -1091,10 +1131,139 @@ def _status_chip(status):
     return f'<span class="tag {css_class}">{label}</span>'
 
 
-def _source_card(entry):
+# ---------------------------------------------------------------------------
+# Source health rendering (fapd.health computes; this only renders)
+# ---------------------------------------------------------------------------
+# Editorial constraint, stated where the code is so it cannot be lost: every
+# label and every sentence below describes OUR INGESTION of a source, never
+# the publisher. "No response on 12 of 40 requests" is an observation we
+# recorded; "unreliable agency" is an opinion, is not derivable from
+# anything in the databases, and is not publishable here (GUIDE §2). The
+# glyphs are decorative duplicates of the words beside them, so they are
+# hidden from assistive technology rather than spoken as box-drawing names.
+
+_HEALTH_GLYPHS = {
+    "delivering": "●",    # filled circle
+    "quiet": "○",         # hollow circle
+    "degraded": "▲",      # triangle
+    "no-response": "✕",   # multiplication x
+    "no-data": "—",       # em dash
+}
+_HEALTH_WORDS = {
+    "delivering": "delivering",
+    "quiet": "quiet",
+    "degraded": "degraded",
+    "no-response": "no response",
+    "no-data": "no data",
+}
+
+
+def _health_chip(label):
+    """Colour + glyph + word, in that order of redundancy. The visually
+    hidden prefix supplies the noun: out of context, "quiet" alone does
+    not say what is quiet (1.3.1)."""
+    word = _HEALTH_WORDS.get(label, label)
+    glyph = _HEALTH_GLYPHS.get(label, "")
+    return (f'<span class="tag tag-health-{label}">'
+            f'<span class="health-glyph" aria-hidden="true">{glyph}</span>'
+            f'<span class="vh">Ingestion health: </span>'
+            f"{html.escape(word)}</span>")
+
+
+def _n(value):
+    """Thousands-separated integer, or an em dash when we have no value."""
+    return f"{value:,}" if isinstance(value, int) else "&mdash;"
+
+
+def _fetch_sentence(fetch):
+    """The request outcomes for one host, by status class. Every number is
+    a count of requests WE made; none of them measures the publisher."""
+    bits = [
+        f"{_n(fetch['attempts'])} request(s)",
+        f"{_n(fetch['answered'])} answered",
+        f"{_n(fetch['client_error'])} declined (4xx)",
+        f"{_n(fetch['server_error'])} server declined (5xx)",
+        f"{_n(fetch['no_response'])} no response",
+    ]
+    line = (f'<p><span class="src-stat-label">Our requests to '
+            f"{html.escape(fetch['host'])}:</span> " + " · ".join(bits)
+            + f" &mdash; {fetch['error_rate_pct']}% returned no content</p>")
+    extra = []
+    if fetch.get("last_ok_at"):
+        extra.append("last answered request "
+                     f"{html.escape(fetch['last_ok_at'])} UTC")
+    if fetch.get("shared_with_sources", 1) > 1:
+        extra.append(f"this host serves {fetch['shared_with_sources']} "
+                     "registered sources, so these figures are host-wide")
+    if extra:
+        line += f'<p class="src-stat-label">{"; ".join(extra)}.</p>'
+    return line
+
+
+def _health_block(record):
+    """The per-card statistics panel. Renders only what was actually
+    measured: an absent number is omitted or shown as an em dash, never
+    filled in with a zero that would read as an observation."""
+    if not record:
+        return ""
+    if not record["measured"]:
+        return (f'<p class="src-stats src-unmeasured">'
+                f"{html.escape(record['health_reason'])} Ingestion "
+                f"statistics are shown for active sources only.</p>")
+
+    parts = []
+    if record["items"]:
+        parts.append(
+            f'<p><span class="src-stat-label">Items ingested:</span> '
+            f"{_n(record['items'])} in {record['window_days']} days "
+            f"({record['items_per_day']} per day) · most recent "
+            f"{html.escape(record['last_item_date'] or '')}</p>")
+    else:
+        recent = (f"most recent {html.escape(record['last_item_date'])}"
+                  if record["last_item_date"] else
+                  "none recorded in the lookback period")
+        parts.append(
+            f'<p><span class="src-stat-label">Items ingested:</span> '
+            f"none in the last {record['window_days']} days &mdash; "
+            f"{recent}</p>")
+    if record["avg_chars"] is not None:
+        parts.append(
+            f'<p><span class="src-stat-label">Content length:</span> '
+            f"{_n(record['avg_chars'])} characters average, "
+            f"{_n(record['median_chars'])} median "
+            f"(shortest {_n(record['min_chars'])}, "
+            f"longest {_n(record['max_chars'])})</p>")
+    if record["delivery_mode"]:
+        note = record.get("delivery_mode_note")
+        parts.append(
+            f'<p><span class="src-stat-label">Delivery mode:</span> '
+            f"<code>{html.escape(record['delivery_mode'])}</code>"
+            + (f" &mdash; {html.escape(note)}" if note else "") + "</p>")
+    if record["fetch"]:
+        parts.append(_fetch_sentence(record["fetch"]))
+    elif record.get("fetch_note"):
+        parts.append(f'<p class="src-stat-label">'
+                     f"{html.escape(record['fetch_note'])}</p>")
+    collector = record.get("collector")
+    if collector and collector.get("consecutive_errors"):
+        parts.append(
+            f'<p><span class="src-stat-label">Collector:</span> '
+            f"{collector['consecutive_errors']} consecutive cycle(s) ended "
+            f"in an error; last completed cycle "
+            f"{html.escape(collector.get('last_ok_at') or 'not recorded')}</p>")
+    # The label itself already sits in the card's subtitle; repeating the
+    # chip here would announce it twice. What belongs here is only the
+    # sentence that shows how the label follows from the numbers above.
+    parts.append(f'<p class="src-stat-label">'
+                 f"{html.escape(record['health_reason'])}</p>")
+    return f'<div class="src-stats">{"".join(parts)}</div>'
+
+
+def _source_card(entry, health_record=None):
     """One registry entry as a card: linked name, status chip + subtitle,
-    the registry's descriptive text, and the full registry record (id,
-    added date, method, notes) folded into a native <details>."""
+    the registry's descriptive text, its measured ingestion statistics and
+    health indicator, and the full registry record (id, added date,
+    method, notes) folded into a native <details>."""
     urls = entry["urls"]
     link = urls.get("home") or next(iter(urls.values()))
     subtitle = html.escape(
@@ -1117,20 +1286,23 @@ def _source_card(entry):
     if notes:
         record.append(
             f"<dt>Notes</dt><dd>{html.escape(_redact_addresses(notes))}</dd>")
+    chip = (f" {_health_chip(health_record['health'])}"
+            if health_record and health_record.get("health") else "")
     return (
         f'<article class="src-card" id="src-{html.escape(entry["id"])}">'
         f'<h4 class="src-name"><a href="{html.escape(link, quote=True)}">'
         f"{html.escape(entry['name'])}</a></h4>"
-        f'<p class="src-sub">{_status_chip(entry["status"])} {subtitle}</p>'
+        f'<p class="src-sub">{_status_chip(entry["status"])}{chip} {subtitle}</p>'
         f'<p class="src-desc">{html.escape(entry["description"])}</p>'
         f"{signup}"
+        f"{_health_block(health_record)}"
         f'<details class="src-more"><summary>Registry record</summary>'
         f'<dl>{"".join(record)}</dl></details>'
         "</article>"
     )
 
 
-def _source_section(anchor, title, intro_html, group_entries):
+def _source_section(anchor, title, intro_html, group_entries, health=None):
     """A source group as h2 + intro + Active/Planned h3 subgroups of cards
     (registry order within each subgroup — registry order is precedence)."""
     parts = [f'<h2 id="{anchor}">{title}</h2>', intro_html]
@@ -1139,11 +1311,85 @@ def _source_section(anchor, title, intro_html, group_entries):
         if not subset:
             continue
         parts.append(f"<h3>{status.capitalize()} ({len(subset)})</h3>")
-        parts.extend(_source_card(e) for e in subset)
+        parts.extend(_source_card(e, (health or {}).get(e["id"]))
+                     for e in subset)
     return "".join(parts)
 
 
-def _sources_body(entries):
+def _health_section(health):
+    """The directory-wide health summary: what the labels mean, how many
+    sources wear each one, and the aggregate volume — placed before the
+    cards so a reader knows where to look before scrolling 127 of them.
+
+    Renders a disclosed "not available" when the databases are absent
+    (a fresh clone, or CI), because the alternative is a page of zeroes
+    that reads as an outage."""
+    parts = ['<h2 id="source-health">Source health and statistics</h2>']
+    if not health or not health.get("available"):
+        reason = (health or {}).get("unavailable_reason",
+                                    "no pipeline database in this build")
+        parts.append(
+            "<p>Per-source statistics are not available in this build &mdash; "
+            f"{html.escape(reason)}. The directory below is rendered from "
+            "the registry alone.</p>")
+        return "".join(parts)
+
+    summary = health["summary"]
+    counts = summary["health_counts"]
+    defs = health["label_definitions"]
+    t = health["thresholds"]
+
+    parts.append(
+        "<p>These figures describe <strong>this project's ingestion of "
+        "each source</strong>, and nothing else. They are counts of items "
+        "we recorded and of requests we made, taken mechanically from the "
+        "pipeline's own databases at build time. They are not a "
+        "measurement of any agency, department, or publisher, and no "
+        "label below is a judgement about one.</p>")
+    parts.append(
+        f'<p class="src-counts"><strong>{summary["delivering"]}</strong> of '
+        f'{summary["sources_measured"]} active sources delivered items in '
+        f'the {summary["window_days"]} days ending '
+        f'{html.escape(health["window_end"])} &mdash; '
+        f'{_n(summary["items_window"])} item(s) in all, about '
+        f'{summary["items_per_day"]} per day across the directory. '
+        f'{summary["sources_with_fetch_errors"]} source(s) recorded '
+        f'requests that returned no content, across '
+        f'{len(summary["hosts_with_fetch_errors"])} host(s), out of '
+        f'{_n(summary["requests_window"])} request(s) we made.</p>')
+
+    rows = "".join(
+        f"<tr><td>{_health_chip(label)}</td>"
+        f"<td>{html.escape(defs[label])}</td>"
+        f'<td>{counts[label]}</td></tr>'
+        for label in health_mod.HEALTH_ORDER)
+    parts.append(
+        "<table><thead><tr><th>Indicator</th><th>What we observed</th>"
+        "<th>Active sources</th></tr></thead>"
+        f"<tbody>{rows}</tbody></table>")
+
+    parts.append(
+        f'<p class="health-note">Thresholds, so any label can be checked '
+        f'against the numbers on its card: the window is the last '
+        f'{t["window_days"]} days; a source with no item for more than '
+        f'{t["quiet_after_days"]} days is <em>quiet</em>; ingestion is '
+        f'<em>degraded</em> when {t["degraded_error_rate_pct"]}% or more of '
+        f'our requests returned no content (counted only once at least '
+        f'{t["min_attempts_for_rate"]} requests were made), or when the '
+        f'collector recorded {t["degraded_consecutive_errors"]} or more '
+        f'consecutive failed cycles. "Most recent item" looks back up to '
+        f'{t["recency_lookback_days"]} days. Item counts are dated by '
+        f'publication day in Washington; request counts are stamped UTC.</p>')
+    parts.append(f'<p class="health-note">{html.escape(health_mod.FETCH_DISCLAIMER)}'
+                 "</p>")
+    if not health.get("fetch_log_available"):
+        parts.append('<p class="health-note">The request log is not present '
+                     "in this build, so request statistics are omitted "
+                     "rather than shown as zero.</p>")
+    return "".join(parts)
+
+
+def _sources_body(entries, health=None):
     counts = {s: sum(1 for e in entries if e["status"] == s)
               for s in sources.STATUSES}
     # Counts read in page order (the order sections appear), not enum order.
@@ -1171,8 +1417,10 @@ def _sources_body(entries):
         f'<dl class="status-key">{status_key}</dl>',
         (f'<p class="tagline">Tiers state coverage against a defined '
          f"universe: {tiers_text}.</p>"),
+        _health_section(health),
     ]
 
+    records = (health or {}).get("sources") or {}
     listed = [e for e in entries if e["status"] in ("active", "planned")]
     parts.append(_source_section(
         "govinfo-collections", "Official govinfo collections",
@@ -1180,14 +1428,14 @@ def _sources_body(entries):
         "Publishing Office through govinfo.gov — the core official record "
         "the digest is built from. Each collection syncs through the "
         "govinfo collections API with per-collection watermarks.</p>",
-        [e for e in listed if e["type"] == "govinfo-collection"]))
+        [e for e in listed if e["type"] == "govinfo-collection"], records))
     parts.append(_source_section(
         "agency-web-channels", "Agency newsrooms and web channels",
         "<p>Press-release feeds and indexes, APIs, and bulk data that "
         "agencies publish on the web, read through the project's "
         "robots-respecting identified client. The subtitle on each card "
         "names the channel type.</p>",
-        [e for e in listed if e["type"] in _WEB_TYPES]))
+        [e for e in listed if e["type"] in _WEB_TYPES], records))
     parts.append(_source_section(
         "agency-email-bulletins", "Agency email bulletins",
         "<p>Bulletins the agencies themselves distribute by subscription "
@@ -1196,7 +1444,7 @@ def _sources_body(entries):
         "from the message body. Sender and mailbox addresses are recorded "
         "in the registry, not republished here; where a registry note "
         "quotes one, it appears as [address withheld].</p>",
-        [e for e in listed if e["type"] == "email"]))
+        [e for e in listed if e["type"] == "email"], records))
 
     unavailable = [e for e in entries if e["status"] == "unavailable"]
     if unavailable:
@@ -1213,7 +1461,8 @@ def _sources_body(entries):
             "agency offers a subscription email channel instead, a sibling "
             "entry appears above and the refusal here stands on the "
             "record.</p>")
-        parts.extend(_source_card(e) for e in unavailable)
+        parts.extend(_source_card(e, records.get(e["id"]))
+                     for e in unavailable)
 
     excluded = [e for e in entries if e["status"] == "evaluated-excluded"]
     if excluded:
@@ -1224,23 +1473,39 @@ def _sources_body(entries):
             "they do not publish new federal government actions. The "
             "evaluation is kept so the decision stays visible and "
             "revisitable.</p>")
-        parts.extend(_source_card(e) for e in excluded)
+        parts.extend(_source_card(e, records.get(e["id"]))
+                     for e in excluded)
 
-    return "".join(parts)
+    # The health key is the page's only table; it goes through the same
+    # helper the digest pages use so its scroll wrapper, region label,
+    # and `scope` attributes are the ones already audited (A11Y-03).
+    return _accessible_tables("".join(parts))
 
 
-def _build_sources_page(out_dir, doc_pages=()):
-    """Render the source guide as a human-readable directory derived from
-    sources/registry.yaml at build time. Returns True if the page was built."""
+def _registry_entries():
+    """The validated registry, or [] when there is none on disk — the same
+    contract as `_registry_exists`, but returning the data so the page and
+    the health computation read the file once between them."""
     registry_path = config.PROJECT_ROOT / "sources" / "registry.yaml"
     if not registry_path.exists():
+        return []
+    return sources.load_registry(registry_path)
+
+
+def _build_sources_page(out_dir, doc_pages=(), entries=(), health=None):
+    """Render the source guide as a human-readable directory derived from
+    sources/registry.yaml at build time. Returns True if the page was built."""
+    if not entries:
         return False
-    entries = sources.load_registry(registry_path)
     page = _render_page(
         f"Sources — {SITE_TITLE}",
-        _sources_body(entries),
+        _sources_body(entries, health),
         _site_nav(doc_pages, current="sources"),
         "sources/registry.yaml",
+        description=("Every federal source the Free Agentic Publication "
+                     "Digester ingests, plans to ingest, or has evaluated — "
+                     "with the items, content lengths, and request outcomes "
+                     "we recorded for each."),
     )
     (out_dir / "sources.html").write_text(page, encoding="utf-8")
     return True
@@ -1385,8 +1650,14 @@ def _build_blog(out_dir, doc_pages=()):
     return [(slug, date, title) for slug, date, title, _t, _m, _c in posts]
 
 
-def build_site(digest_dir=None, out_dir=None):
-    """Convert every digest to HTML plus an index. Returns stats."""
+def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
+               fetch_db=None):
+    """Convert every digest to HTML plus an index. Returns stats.
+
+    The database paths are injected (docs/code-standards.md §2 rule 3) so
+    a test can point the source-health computation at throwaway SQLite
+    files. Absent databases are not an error: `health.source_health`
+    reports itself unavailable and the source guide says so in place."""
     digest_dir = Path(digest_dir or config.DIGEST_DIR)
     out_dir = Path(out_dir or config.SITE_DIR)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -1429,14 +1700,24 @@ def build_site(digest_dir=None, out_dir=None):
             f'<li><a class="date" href="{date}.html">Daily Digest — {date}</a>'
             f"{teaser_html}</li>"
         )
-    sources_built = _build_sources_page(out_dir, doc_pages)
+    registry_entries = _registry_entries()
+    # Computed once and shared by the human page and the machine surface,
+    # so the two can never disagree about a number.
+    source_stats = (
+        health_mod.source_health(registry_entries, pipeline_db=pipeline_db,
+                                 fetch_db=fetch_db)
+        if registry_entries else None)
+    sources_built = _build_sources_page(out_dir, doc_pages, registry_entries,
+                                        source_stats)
     blog_posts = _build_blog(out_dir, doc_pages)
     _build_agent_surfaces(out_dir, dates, teasers, doc_pages,
-                          base=config.SITE_BASE_URL, blog_posts=blog_posts)
+                          base=config.SITE_BASE_URL, blog_posts=blog_posts,
+                          entries=registry_entries, health=source_stats)
     sources_link = (
         '<p class="tagline"><a href="sources.html">Source guide</a> — every '
         "federal source we ingest, plan to ingest, or have evaluated, with "
-        "method and status.</p>" if sources_built else ""
+        "method, status, and the items and request outcomes we recorded "
+        "for each.</p>" if sources_built else ""
     )
     live_callout = (
         '<p class="live-callout"><a href="today.html">'
@@ -2022,7 +2303,17 @@ work. Check the source guide for what is ingested today.
   URL, and teaser. Poll this (or the Atom feed at `/feed.xml`) for new
   days; both are small.
 - **Source guide:** `/sources.html` — every federal source this pipeline
-  ingests, plans to ingest, or found unavailable, with method and status.
+  ingests, plans to ingest, or found unavailable, with method and status,
+  plus what we actually received from each: items ingested over a trailing
+  window, their average and median length, the delivery mode, and how the
+  source's server answered our requests.
+- **Source statistics:** `/sources.json` — the same facts, machine-readable,
+  with the classification thresholds included so any health label can be
+  recomputed from the numbers beside it. Read these as **a description of
+  our ingestion**, not as a measurement of an agency: a 4xx or 5xx is a
+  server declining to return content, and why it declined is not visible
+  to us. This file is not part of the official record and must never be
+  cited as government publication.
 - **Canonical Markdown** for every digest lives in the public repository
   at
   [github.com/davidkarnowski/free-agentic-publication-digester](https://github.com/davidkarnowski/free-agentic-publication-digester)
@@ -2069,14 +2360,76 @@ def _atom_escape(text):
     return html.escape(text or "", quote=True)
 
 
+def _sources_json(entries, health, base=""):
+    """The machine twin of sources.html: the registry plus the same
+    mechanical statistics and the same health labels, with the thresholds
+    that produced them included so an agent can recompute any label from
+    the numbers in the same document.
+
+    Deliberately its own file rather than a section of digests.json: that
+    surface and the Atom feed enumerate the OFFICIAL RECORD, and an agent
+    polling them must never receive our operational statistics as though
+    they were something the government published."""
+    records = (health or {}).get("sources") or {}
+    listed = []
+    for entry in entries:
+        record = dict(records.get(entry["id"], {"id": entry["id"],
+                                                "name": entry["name"]}))
+        record["description"] = entry["description"]
+        record["method"] = _redact_addresses(entry["method"])
+        record["notes"] = _redact_addresses(entry["notes"])
+        record["urls"] = dict(entry["urls"])
+        record["added"] = entry["added"]
+        record["card"] = (f"{base}/sources.html#src-{entry['id']}" if base
+                          else f"sources.html#src-{entry['id']}")
+        listed.append(record)
+    payload = {
+        "title": f"{SITE_TITLE} — source directory and ingestion statistics",
+        "generated": utc_now_iso(),
+        "canonical": "sources/registry.yaml",
+        "human_page": f"{base}/sources.html" if base else "sources.html",
+        "available": bool(health and health.get("available")),
+        "scope": (
+            "Statistics describe THIS PROJECT'S INGESTION of each source — "
+            "items we recorded and requests we made. They are not a "
+            "measurement of any agency, department, or publisher, and no "
+            "health label is a judgement about one. An HTTP 4xx or 5xx is "
+            "a server declining to return content; the reason is not "
+            "visible to us and is not inferred."),
+        "measurement": (
+            "Health is computed for sources whose registry status is "
+            "'active'; every other entry carries measured: false. Item "
+            "counts are dated by publication day in Washington, D.C.; "
+            "request counts are stamped UTC and include retries. Requests "
+            "are attributed by host, so sources sharing a host report the "
+            "same request figures (see fetch.shared_with_sources)."),
+        "sources": listed,
+    }
+    if health:
+        payload.update({
+            "window": {"days": health["window_days"],
+                       "start": health["window_start"],
+                       "end": health["window_end"]},
+            "thresholds": health["thresholds"],
+            "health_labels": health["label_definitions"],
+            "summary": health["summary"],
+        })
+        if not health.get("available"):
+            payload["unavailable_reason"] = health.get("unavailable_reason")
+    return payload
+
+
 def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
-                          blog_posts=()):
-    """llms.txt, digests.json, feed.xml, robots.txt, sitemap.xml, agents.html.
+                          blog_posts=(), entries=(), health=None):
+    """llms.txt, digests.json, sources.json, feed.xml, robots.txt,
+    sitemap.xml, agents.html.
 
     Blog posts reach the discovery surfaces (llms.txt, sitemap.xml) and
     stay out of the record surfaces (digests.json, feed.xml) on purpose:
     those two enumerate official-record digests, and an agent polling them
-    must never receive project commentary as though it were one."""
+    must never receive project commentary as though it were one. The same
+    rule keeps sources.json separate: it is what we ingested and how, not
+    what the government published."""
     import json as _json
 
     newest = dates[-1] if dates else None
@@ -2110,6 +2463,16 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
          " digest)"),
         f"- [Source guide — what we ingest and why]({base}/sources.html)",
     ] + ([
+        (f"- [Source health and statistics, machine-readable]({base}/sources.json)"
+         " (per source: items ingested over a trailing window and their"
+         " per-day rate, average/median content length, delivery mode,"
+         " our request outcomes by HTTP status class, and a health label"
+         " with the thresholds that produced it, so any label can be"
+         " recomputed from the numbers in the same file. These describe"
+         " OUR INGESTION — items we recorded and requests we made — and"
+         " are not a measurement of any agency or publisher. Not part of"
+         " the official record; do not cite as government publication.)"),
+    ] if entries else []) + ([
         (f"- [Blog — notes on how this project is built]({base}/blog.html)"
          " (commentary ABOUT the project: not digest content, not part of"
          " the official record, and not government publication. Cite it as"
@@ -2145,10 +2508,18 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
         ],
     }, indent=1, sort_keys=True) + "\n", encoding="utf-8")
 
+    # sources.json — the source directory and our ingestion statistics.
+    # Written only when a registry exists, matching sources.html: the nav
+    # and llms.txt must never point at a file that was not built.
+    if entries:
+        (out_dir / "sources.json").write_text(
+            _json.dumps(_sources_json(entries, health, base), indent=1,
+                        sort_keys=True) + "\n", encoding="utf-8")
+
     # feed.xml (Atom)
-    entries = []
+    feed_entries = []
     for d in reversed(dates[-20:]):
-        entries.append(
+        feed_entries.append(
             f"<entry><title>Daily Digest — {d}</title>"
             f'<link href="{base}/{d}.html"/>'
             f"<id>tag:fapd,{d}:digest</id>"
@@ -2162,7 +2533,7 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
         f'<link href="{base}/"/>'
         f"<id>tag:fapd:digests</id>"
         f"<updated>{utc_now_iso()}</updated>"
-        + "".join(entries) + "</feed>\n"
+        + "".join(feed_entries) + "</feed>\n"
     )
     (out_dir / "feed.xml").write_text(feed, encoding="utf-8")
 
@@ -2177,6 +2548,7 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
         "#   Agent guide:  /agents.html\n"
         "#   LLM guide:    /llms.txt\n"
         "#   Machine index: /digests.json   Atom: /feed.xml\n"
+        "#   Source stats:  /sources.json  (our ingestion, not the record)\n"
         "# /today.html is a PRELIMINARY live view; the dated digests are\n"
         "# the record.\n"
         f"User-agent: *\nAllow: /\n\nSitemap: {base}/sitemap.xml\n",

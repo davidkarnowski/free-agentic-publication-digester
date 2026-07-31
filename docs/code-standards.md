@@ -29,6 +29,8 @@ optional parameters are the whole pattern.**
 | `stage_email(conn, entries=, mailbox_factory=, poll=)` | `scripts/run_pipeline.py` |
 | `db.connect(db_path=)` | `src/fapd/db.py` — tests use `tmp_path` DBs |
 | `Supervisor(...factories...)` | `src/fapd/collect.py` (continuous ingestion) |
+| `source_health(entries, pipeline_db=, fetch_db=, today=, window_days=)` | `src/fapd/health.py` — reads both DBs read-only; the date seam makes a trailing window testable |
+| `build_site(digest_dir, out_dir, pipeline_db=, fetch_db=)` | `src/fapd/publish.py` — carries the health seam through to the site build |
 
 New code that talks to the network, a subprocess, a clock, or an LLM
 **must** expose the same shape of seam and add a row here (same commit).
