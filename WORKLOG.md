@@ -3213,3 +3213,46 @@ delivering does not announce itself, and a source can sit `planned`
 indefinitely while its data accumulates. The health page makes this
 visible now — a `planned` entry with items is a contradiction anyone
 can see on the page — but a check worth automating.
+
+## 2026-07-31 — Probe sweep: 42 sources, and the blocker is mostly us
+
+Probed every planned web-channel source end to end from the operator
+machine, deliberately off the server's budget: 92 requests, robots
+honored throughout, one host's 10-second crawl-delay obeyed.
+
+The headline is not the two feeds that worked. It is that **33 of 42
+are reachable and are not refusing us** — 200s, robots permitting, no
+machine-readable feed advertised. For most of the planned backlog the
+blocker is an html-index adapter we have not written, not an agency
+withholding anything, and the registry had been recording our own
+unbuilt capability in the same word it uses for genuine gaps. All 33
+now carry a dated note saying which it is.
+
+Four more of the six errors are our own stale URLs (Interior,
+Education, BLS, ODNI all 404 at the registered address) — publishers
+reorganised and the registry did not notice. One is a real refusal:
+commerce.gov answers 403 to our identified client, consistent with its
+100% no-content rate in the fetch log, so it moves to unavailable on
+that evidence. One is a 504, the server having a bad moment, left
+planned to re-probe.
+
+usps-newsroom activated: feed live and current (669 items, 668 dated,
+newest four days old), descriptions at teaser length, article links
+resolving to a wrapper that yields no text — so feed-only with the mode
+disclosed, identity from the link since the feed has no guids.
+
+sba-newsroom deliberately not activated, and it is the more useful
+case: its feed parses perfectly — ten items, all dated, all with guids
+— and is three months stale with 404ing article links. Structure is not
+freshness. A viability gate that only measured well-formedness would
+have activated a source that publishes nothing and cites broken pages.
+
+Also confirmed by documentation and one request: our api.data.gov key
+authenticates against api.congress.gov (200, real bill data), which
+opens Congress.gov and CRS with no new credential. We did not try it
+against regulations.gov — that publisher's docs do not mention
+api.data.gov, use a different header, and describe their own
+registration, and a general statement about participating APIs is not
+that publisher telling us our key applies.
+
+Active 34 -> 35, planned 76 -> 70, unavailable 19 -> 20.

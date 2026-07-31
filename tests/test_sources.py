@@ -68,7 +68,9 @@ def test_registry_seeds_expected_active_sources():
         # activated 2026-07-30 (second wave) on first live-delivery evidence:
         "va-email", "irs-email", "fdic-email", "dea-email",
         # activated 2026-07-31 (third wave), same evidence gate:
-        "cms-email", "fda-email", "federal-reserve-email", "ssa-email"}
+        "cms-email", "fda-email", "federal-reserve-email", "ssa-email",
+        # activated 2026-07-31 from the probe sweep (feed live and current):
+        "usps-newsroom"}
 
 
 # ------------------------------------------------------------ coverage_stats --
