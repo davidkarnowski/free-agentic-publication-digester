@@ -93,7 +93,7 @@
   method: Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4).
   status: planned
   added: "2026-07-26"
-  notes: "Publication lag means hearing transcripts are not day-shaped; date semantics need a rule before activation."
+  notes: "Publication lag means hearing transcripts are not day-shaped; date semantics need a rule before activation. Probed 2026-07-31 through the govinfo API: newest dateIssued 2026-06-30, a 31-day lag, and the packages actually changing day to day are dated 2024-2025. Zero dated within 7 days. Hearings are substantive but reach govinfo long after the hearing, so under the §3 dating rule they would not land on a current digest day."
 
 - id: govinfo-crpt
   name: Congressional Reports (CRPT)
@@ -107,7 +107,7 @@
   method: Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4).
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: " Probed 2026-07-31 through the govinfo API: of 200 packages changed in the trailing 21 days, the newest dateIssued is 1971-01-02 — they are SERIALSET digitisation of 1970-71 committee reports, not current ones. Zero packages dated within 7 days. What changes daily in this collection is retrospective scanning, so under the §3 dating rule it would contribute nothing to a current digest."
 
 - id: govinfo-dcpd
   name: Daily Compilation of Presidential Documents (DCPD)
@@ -121,7 +121,7 @@
   method: Would sync via the govinfo collections API delta mechanism once enabled (GUIDE §7 Phase 4).
   status: planned
   added: "2026-07-26"
-  notes: ""
+  notes: " Probed 2026-07-31 through the govinfo API. TWO findings. (1) `DCPD` is not a govinfo collection code — the collections endpoint does not list it, and every query returns zero. The real code is `CPD` (Compilation of Presidential Documents, 18,441 packages); package IDs are prefixed DCPD-, which is the likely source of this entry's error. (2) CPD is live (62 packages in 14 days) but publishes with roughly a five-week lag — newest dateIssued 2026-06-23 when probed on 07-31 — so under the §3 dating rule its documents belong to digest days already published and never re-rendered. Presidential documents are already carried same-day through FR PRESDOCU (FR-SEL-03). One document per package, no granules, no xmlLink (txt/pdf/zip only)."
 
 # ----------------------------------------------------- planned: judicial ----
 
