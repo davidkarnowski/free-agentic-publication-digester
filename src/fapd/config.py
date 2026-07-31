@@ -155,6 +155,11 @@ EMAIL_POLL_INTERVAL_MIN = 15
 # /today re-render check (zero tokens, zero requests — journal watermark
 # comparison; rebuilds only when a cycle journaled something new).
 TODAY_RENDER_INTERVAL_MIN = 5
+# Source-health refresh. Deliberately on a CLOCK, not on the journal
+# watermark: a source that starts failing journals nothing, so a
+# watermark trigger would refresh health for every case except the one
+# that matters. Zero tokens, zero requests — SQL and a render (~1.3s).
+SOURCE_HEALTH_REFRESH_MIN = 15
 # Model layers fire on batch-threshold-or-age, never per item (§6 r12):
 # a full map batch, or the oldest pending item older than the latency
 # bound; successive analyze cycles at least MIN_INTERVAL apart.

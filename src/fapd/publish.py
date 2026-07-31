@@ -7,6 +7,7 @@ filesystem, GitHub Pages, or any static host, on desktop and mobile.
 """
 
 import html
+import json as _json_mod
 import re
 import shutil
 from pathlib import Path
@@ -1648,6 +1649,35 @@ def _build_blog(out_dir, doc_pages=()):
     )
     (out_dir / "blog.html").write_text(index, encoding="utf-8")
     return [(slug, date, title) for slug, date, title, _t, _m, _c in posts]
+
+
+def refresh_sources(out_dir=None, *, pipeline_db=None, fetch_db=None,
+                    doc_pages=None):
+    """Rebuild sources.html and sources.json alone — the health figures,
+    not the whole site.
+
+    build_site() runs once a day in the end-of-day finalizer, which is
+    the wrong cadence for health: a source that starts failing produces
+    NO journal movement, so the live page's watermark trigger cannot see
+    it either, and the outage would sit unreported until the next EOD.
+    This path is SQL plus a render, no tokens and no requests, so the
+    collector can call it on its own clock (docs/code-standards §2 r5:
+    re-rendering must always cost zero tokens)."""
+    out_dir = Path(out_dir or config.SITE_DIR)
+    registry_path = config.PROJECT_ROOT / "sources" / "registry.yaml"
+    if not registry_path.exists():
+        return {"built": False, "reason": "no registry"}
+    entries = sources.load_registry(registry_path)
+    hp = health_mod.source_health(entries, pipeline_db=pipeline_db,
+                              fetch_db=fetch_db)
+    if doc_pages is None:
+        doc_pages = _doc_page_index()
+    _build_sources_page(out_dir, doc_pages, entries, hp)
+    (out_dir / "sources.json").write_text(
+        _json_mod.dumps(_sources_json(entries, hp, config.SITE_BASE_URL),
+                        indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    return {"built": True, "sources": len(entries),
+            "measured": bool(getattr(hp, "available", True))}
 
 
 def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,

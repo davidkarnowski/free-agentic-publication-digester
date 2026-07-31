@@ -500,3 +500,50 @@ def test_our_own_budget_pause_is_not_a_collector_error(tmp_path, monkeypatch):
         "SELECT consecutive_errors FROM collector_state WHERE worker='govinfo'"
     ).fetchone()[0] == 1
     conn.close()
+
+
+def test_source_health_refreshes_on_a_clock_not_the_journal(tmp_path,
+                                                            monkeypatch):
+    """A source that starts failing journals nothing, so the watermark
+    trigger that drives /today would refresh health for every case except
+    the one the page exists to show. Health runs on its own clock."""
+    calls = []
+    sup, _conn_factory = make_supervisor(
+        tmp_path, monkeypatch, today_builder=lambda c, date=None: {
+            "date": date, "items": 0, "pending_llm": 0, "out_dir": None})
+    monkeypatch.setattr(sup, "sources_builder",
+                        lambda: calls.append(1) or {"built": True})
+    worker = next(w for w in sup.workers if w.name == "render")
+
+    first = worker.run_cycle()
+    assert first["health_refreshed"] is True and len(calls) == 1
+
+    # a second cycle with nothing new in the journal still must not
+    # refresh again immediately — the clock, not the watermark, governs
+    second = worker.run_cycle()
+    assert second["health_refreshed"] is False and len(calls) == 1
+    assert second["health_at"] == first["health_at"]   # stamp carried over
+
+    # ...but once the interval elapses it refreshes even though the
+    # journal never moved, which is the whole point
+    monkeypatch.setattr(config, "SOURCE_HEALTH_REFRESH_MIN", 0)
+    third = worker.run_cycle()
+    assert third["health_refreshed"] is True and len(calls) == 2
+
+
+def test_health_refresh_failure_never_costs_the_live_page(tmp_path,
+                                                          monkeypatch):
+    """Reporting on our own health is the least important thing the
+    render worker does; it must not be able to break the page."""
+    sup, _ = make_supervisor(
+        tmp_path, monkeypatch, today_builder=lambda c, date=None: {
+            "date": date, "items": 3, "pending_llm": 0, "out_dir": None})
+
+    def boom():
+        raise RuntimeError("two databases walked into a bar")
+
+    monkeypatch.setattr(sup, "sources_builder", boom)
+    worker = next(w for w in sup.workers if w.name == "render")
+    out = worker.run_cycle()
+    assert out["rebuilt"] is True and out["items"] == 3   # page still built
+    assert out["health_refreshed"] is False

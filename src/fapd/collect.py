@@ -432,6 +432,23 @@ class RenderWorker(Worker):
 
     name = "render"
 
+    def _refresh_health(self, prev, now):
+        """Source health on a clock, not on the journal watermark — a
+        failing source produces no journal movement, so the watermark
+        would never trigger for the case the page exists to show."""
+        last = prev.get("health_at")
+        if last:
+            age = (dt.datetime.fromisoformat(now)
+                   - dt.datetime.fromisoformat(last)).total_seconds() / 60
+            if age < config.SOURCE_HEALTH_REFRESH_MIN:
+                return None
+        try:
+            return self.sup.sources_builder()
+        except Exception as exc:  # noqa: BLE001 — health reporting must
+            # never cost the live page; the gap shows as a stale stamp.
+            logger.warning("source health refresh failed: %r", exc)
+            return None
+
     def cycle(self, conn, cycle_id):
         date = publication_date()
         newest = conn.execute(
@@ -441,12 +458,17 @@ class RenderWorker(Worker):
             "SELECT last_result FROM collector_state WHERE worker = 'render'"
         ).fetchone()
         prev = json.loads(row["last_result"]) if row and row["last_result"] else {}
+        now = utc_now_iso()
+        health = self._refresh_health(prev, now)
+        health_at = now if health else prev.get("health_at")
         if (prev.get("date") == date and prev.get("through") == newest
                 and (config.SITE_DIR / "today.html").exists()):
-            return {"date": date, "rebuilt": False, "through": newest}
+            return {"date": date, "rebuilt": False, "through": newest,
+                    "health_refreshed": bool(health), "health_at": health_at}
         stats = self.sup.today_builder(conn, date=date)
         return {"date": date, "rebuilt": True, "through": newest,
-                "items": stats["items"], "pending_llm": stats["pending_llm"]}
+                "items": stats["items"], "pending_llm": stats["pending_llm"],
+                "health_refreshed": bool(health), "health_at": health_at}
 
 
 class EODWorker(Worker):
@@ -526,7 +548,8 @@ class Supervisor:
                  wayback_factory=None, mailbox_factory=None, poll=None,
                  llm_factory=None, llm_enabled=True, intervals=None,
                  eod_enabled=False, finalizer_runner=None,
-                 evidence_runner=None, today_builder=None):
+                 evidence_runner=None, today_builder=None,
+                 sources_builder=None):
         from . import db, email_sources
         from .client import AgencyClient, GovinfoClient
         from .sources import load_registry
@@ -544,6 +567,7 @@ class Supervisor:
         self.finalizer_runner = finalizer_runner or _run_finalizer
         self.evidence_runner = evidence_runner or _run_evidence_commit
         self.today_builder = today_builder or self._default_today_builder
+        self.sources_builder = sources_builder or self._default_sources_builder
         self.eod_enabled = eod_enabled
         iv = intervals or {}
         self.workers = self._build_workers(iv)
@@ -581,6 +605,12 @@ class Supervisor:
         from .publish import build_today
 
         return build_today(conn, date=date)
+
+    @staticmethod
+    def _default_sources_builder():
+        from .publish import refresh_sources
+
+        return refresh_sources()
 
     def _build_workers(self, iv):
         from . import agencies

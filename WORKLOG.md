@@ -3648,3 +3648,29 @@ govinfo collection is either lagged by weeks or dominated by
 retrospective digitisation. There is no sixth collection to add for a
 daily digest. Evidence recorded on all three entries so the next person
 to look at them reads the measurement rather than repeating it.
+
+## 2026-07-31 — Source health refreshes on a clock, not the journal
+
+The operator asked how often source health updates. The answer was: once
+a day, in the end-of-day finalizer, plus whenever someone deploys — and
+that is the wrong cadence for the thing the page exists to report.
+
+The reason is sharper than "daily is slow". The live page rebuilds when
+the item journal's watermark moves, which is the right trigger for a
+stream of arrivals. But **a source that starts failing journals nothing**
+— no items, no watermark movement, no rebuild. Keying health off the same
+trigger would have refreshed it for every case except an outage, which is
+the only case anyone checks the page for.
+
+So `publish.refresh_sources()` rebuilds sources.html and sources.json
+alone — SQL and a render, ~1.3 seconds, no tokens and no requests — and
+the render worker calls it on a fifteen-minute clock independent of the
+journal, tracking the last refresh in its own collector_state row. A
+failing source now surfaces within a quarter hour instead of within a
+day.
+
+Two contracts pinned by tests: the clock governs, not the watermark (a
+cycle with an unmoved journal still refreshes once the interval elapses),
+and a health-refresh failure cannot cost the live page — reporting on our
+own health is the least important thing that worker does, and it must not
+be able to break the page it rides along with. 456 tests.
