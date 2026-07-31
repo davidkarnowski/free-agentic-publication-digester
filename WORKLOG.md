@@ -3344,6 +3344,7 @@ will actually meet it — code-standards §1, adding-sources, CLAUDE.md §9:
 an index is not a feed. A feed is bounded by its publisher; the Senate's
 vote menu lists every vote of the Congress. 441 tests.
 
+<<<<<<< HEAD
 ## 2026-07-31 — GUIDE amendments for recorded votes
 
 Governance before code, per §10. Two amendments, both narrow.
@@ -3368,3 +3369,77 @@ reading order reflects the order sections were added rather than any
 hierarchy — which is the right trade for a digest that deliberately
 declines to rank its own contents. Recorded Votes is the first section
 added under the rule.
+=======
+## 2026-07-31 — Phase 1: four 404s, four different stories
+
+Four registry sources were answering 404. The plan called them the
+cheapest possible recovery, and they were cheap — 38 requests, no code —
+but the assumption behind the phase turned out to be wrong. "Stale URL"
+suggested four typos. What we actually found was four distinct failures,
+only one of which a corrected path could fix.
+
+**Interior** moved /pressreleases to /news and the index is healthy —
+HTTP 200, newest item dated the day we probed. The department advertises
+exactly one feed, doi.gov/feeds/content/36980/rss.xml, and it is
+well-formed, rebuilt today, and carries zero items. Deliberately *not*
+registered as `urls.feed`: with `source_url` preferring feed over index,
+registering it would aim the poller at a door that yields nothing while
+the material sits on the index. Recorded in the notes instead, to
+re-check when the html-index adapter lands.
+
+**Education** was one character: the path is /about/news/press-release,
+singular. It answers 200 and lists items dated the day before, and there
+is no feed anywhere on it, none autodiscovered — so a corrected URL buys
+nothing until Phase 5. It does offer a GovDelivery subscription, which
+is a door we already know how to open; noted for a future email entry
+rather than acted on here.
+
+**BLS** was the phase's real lesson. The 2026-07-28 note guessed
+news_release.rss from convention; reading the publisher's own catalogue
+showed the convention doesn't exist. BLS publishes ~55 feeds and not one
+of them is agency-wide: ~42 per-program release feeds and ~13
+"Latest Numbers" data feeds. empsit.rss is genuinely good — Atom, guids,
+dates, links to the real release pages — and bls_latest.rss is a
+single-item dashboard rollup. So `bls-news`, as one entry, cannot be
+made true by any URL. It needs a fan-out to one entry per program feed,
+or a multi-feed adapter, and either is a new-source decision rather than
+a correction. Left planned, with the address pointed at the catalogue
+and the reason written down. Worth remembering separately: bls.gov
+returns 403 to unidentified fetchers and 200 to ours, so its own
+documentation is only readable through AgencyClient — the politeness
+stack was the thing that made the research possible.
+
+**ODNI** was not a stale URL at all. Every /index.php/* address now
+301s to archive.dni.gov and 404s there, and www.dni.gov/newsroom/
+redirects to **www.odni.gov** — the agency left Joomla and left the
+domain, and our registry read a whole-publisher migration as a broken
+link. That is the part worth generalising: a 404 is not evidence about a
+path, it is an unanswered question about a publisher, and the only way
+to tell the two apart is to go read what the publisher says about
+itself.
+
+ODNI is now active, the first web source activated since the probe
+sweep. Its WordPress press-release category feed carries 54 items —
+the whole category since the migration, February 2025 through June 2026,
+every one with a post-id guid, an RFC 822 date, and an on-domain link —
+and the sample article extracted 8,082 characters, so it ingests at mode
+full rather than on 344-character teasers. The site-wide odni.gov/feed/
+was the trap: 532 items, 371 of them media-library downloads and several
+bare YouTube links with empty descriptions. Two things are disclosed in
+the entry rather than smoothed over: the sibling /remarks/ and /reports/
+categories are not covered, and first ingest will spend about 54 requests
+at this host's honored 10-second crawl-delay before the dating rule
+excludes nearly all of it as backfill. Steady state is one conditional
+request a day, and the source publishes two to four items a month, so
+empty days are normal here and not a fault.
+
+One thing found in passing and deliberately not fixed: the 2026-07-31
+probe sweep (c81ef72) appended every one of its ~40 findings to a single
+registry entry's notes — `hud-oig-email` now carries the observations of
+forty sources it has nothing to do with, including the four 404 findings
+that belong to the entries repaired here. The registry loads and the
+suite is green, so nothing is broken; but notes are accountability
+history, and forty sources' history is currently filed under the wrong
+name. Flagged for the operator rather than untangled in a phase whose
+whole point was to touch nothing but four `urls` maps.
+>>>>>>> 2c78183 (sources: recover four 404 registry addresses; ODNI turns out to have moved domains)

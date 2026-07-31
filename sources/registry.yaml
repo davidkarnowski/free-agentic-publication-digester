@@ -210,11 +210,12 @@
   type: html-index
   tier: 1
   urls:
-    home: https://www.doi.gov/pressreleases
+    home: https://www.doi.gov/news/newsroom
+    index: https://www.doi.gov/news
   method: Would parse the press-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 404 at registered URL — path likely wrong or moved; correct URL and re-probe before concluding availability."
+  notes: "Probed 2026-07-26: HTTP 404 at registered URL — path likely wrong or moved; correct URL and re-probe before concluding availability. URL recovered 2026-07-31 (operator machine, off the server budget): the department retired /pressreleases; its own newsroom page (doi.gov/news/newsroom) points at doi.gov/news, which answers HTTP 200 with the dated press-release index (newest 2026-07-31). The only feed the site advertises is https://www.doi.gov/feeds/content/36980/rss.xml — well-formed RSS, rebuilt today, and carrying ZERO items, so it is deliberately not registered as urls.feed: registering it would point the poller at a door that yields nothing while the index has the material. Left planned; ingestion waits on the html-index adapter, not on the publisher. Re-check the empty feed when that adapter lands — a working feed would be cheaper than parsing the index. Re-probe through scripts/check_sources.py, 2026-07-31: verdict html-only — HTTP 200, 67 KB, 6,508 characters of extracted index text, robots permitting."
 
 - id: agriculture-newsroom
   name: USDA Press Releases
@@ -323,11 +324,12 @@
   type: html-index
   tier: 1
   urls:
-    home: https://www.ed.gov/about/news/press-releases
+    home: https://www.ed.gov/about/news
+    index: https://www.ed.gov/about/news/press-release
   method: Would parse the press-release HTML index daily for new items.
   status: planned
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: HTTP 404 at registered URL — path likely wrong or moved; correct URL and re-probe before concluding availability. Candidate correction: the pre-redesign /news/press-releases path."
+  notes: "Probed 2026-07-26: HTTP 404 at registered URL — path likely wrong or moved; correct URL and re-probe before concluding availability. Candidate correction: the pre-redesign /news/press-releases path. URL recovered 2026-07-31 (operator machine, off the server budget): the path is singular — /about/news/press-release, not /press-releases. It answers HTTP 200, robots permitting, with a dated index (three items on 2026-07-29/30). No RSS or Atom feed anywhere on the page and none autodiscovered, so there is nothing machine-readable to poll; left planned, awaiting the html-index adapter. Worth noting for a separate email entry: the page offers a GovDelivery subscription (public.govdelivery.com/accounts/USDE/signup/49108), which is the consent-maximal channel we already ingest for other departments. Re-probe through scripts/check_sources.py, 2026-07-31: verdict html-only — HTTP 200, 98 KB, 7,623 characters of extracted index text. ed.gov serves no robots.txt (HTTP 404), so nothing is disallowed."
 
 - id: va-newsroom
   name: VA News Releases
@@ -1337,27 +1339,27 @@
   type: rss
   tier: 2
   urls:
-    home: https://www.bls.gov/feed
-    feed: https://www.bls.gov/feed/news_release.rss
+    home: https://www.bls.gov/newsroom/
+    index: https://www.bls.gov/feed/
   method: Would poll the documented news-release feeds daily; the v2 API (api.bls.gov, registered key, 500 queries/day) is a later data extension.
   status: planned
   added: "2026-07-28"
-  notes: "Feeds page documented at bls.gov/feed (2026-07-28). Probe 2026-07-28: the guessed URL bls.gov/feed/news_release.rss returned 404 — the convention guess was wrong; robots and host are open (robots.txt HTTP 200, no block). Next step: fetch the bls.gov/feed documentation page itself through AgencyClient to read the exact feed URLs, then re-probe."
+  notes: "Feeds page documented at bls.gov/feed (2026-07-28). Probe 2026-07-28: the guessed URL bls.gov/feed/news_release.rss returned 404 — the convention guess was wrong; robots and host are open (robots.txt HTTP 200, no block). Next step: fetch the bls.gov/feed documentation page itself through AgencyClient to read the exact feed URLs, then re-probe. Resolved 2026-07-31 (operator machine, off the server budget) by doing exactly that: bls.gov/feed/ answers HTTP 200 to our identified client and documents about 55 feeds, and NONE of them is an agency-wide news-release stream. The list is two families: ~42 per-program release feeds (empsit.rss, cpi.rss, ppi.rss, jolts.rss, ...) and ~13 *_latest.rss 'Latest Numbers' data feeds. Sampled evidence: empsit.rss is Atom, 12 items, every one with a guid and a date, ~259-character descriptions, linking to the real news-release pages — genuinely ingestible; bls_latest.rss is a single-item dashboard rollup with no guid, not a news stream. bls.gov/newsroom/ advertises no feed and autodiscovers none. So the correct registered address is the feed directory, not a feed: one registry entry cannot represent this source honestly. Left planned. The right shape is a fan-out — one entry per program feed, starting with the market-sensitive ones (empsit, cpi, ppi, jolts, eci, realer) — or a multi-feed adapter; either is a new-source decision, not a URL correction. Note for whoever picks it up: bls.gov returns 403 to unidentified fetchers but 200 to ours, so read its documentation through AgencyClient. Re-probe through scripts/check_sources.py, 2026-07-31: verdict html-only against the feed directory — HTTP 200, 66 KB, 7,591 characters — which is the accurate verdict, because the registered address is a catalogue of feeds and not a feed."
 
 - id: odni-news
   name: ODNI Newsroom
   branch: executive
   parent_org: Office of the Director of National Intelligence
-  description: "The Office of the Director of National Intelligence coordinates the intelligence community. Its Joomla newsroom carries press releases, statements, and declassification announcements, a few items per week — the pipeline's only prospective intelligence-community coverage."
+  description: "The Office of the Director of National Intelligence coordinates the intelligence community. Its newsroom carries press releases, statements, and declassification announcements at a low but steady rate — roughly two to four a month — and is the pipeline's only intelligence-community coverage."
   type: rss
   tier: 2
   urls:
-    home: https://www.dni.gov/index.php/newsroom
-    feed: https://www.dni.gov/index.php/rss/311-odni-news-feed
-  method: Would poll the documented ODNI news RSS feed daily for new items.
-  status: planned
+    home: https://www.odni.gov/newsroom/
+    feed: https://www.odni.gov/newsroom/press-releases/feed/
+  method: Polls the ODNI press-release RSS feed daily; article pages are fetched and extracted, honoring the host's 10-second crawl-delay.
+  status: active
   added: "2026-07-28"
-  notes: "RSS section documented at dni.gov/index.php/rss (2026-07-28, surfaced in search results). Probe 2026-07-28: the candidate feed path /index.php/rss/311-odni-news-feed returned 404 (10-byte response); host is open and its robots.txt sets a 10s crawl-delay (honored). Next step: fetch the /index.php/rss section page through AgencyClient to read the real feed URL, then re-probe."
+  notes: "RSS section documented at dni.gov/index.php/rss (2026-07-28, surfaced in search results). Probe 2026-07-28: the candidate feed path /index.php/rss/311-odni-news-feed returned 404 (10-byte response); host is open and its robots.txt sets a 10s crawl-delay (honored). Next step: fetch the /index.php/rss section page through AgencyClient to read the real feed URL, then re-probe. Resolved 2026-07-31 (operator machine, off the server budget), and the answer was bigger than a bad path: ODNI has left Joomla AND left the domain. Every /index.php/* address now 301s to archive.dni.gov, where it 404s, and www.dni.gov/newsroom/ redirects to www.odni.gov/newsroom/ — a WordPress site. The 404 was a whole-publisher migration our registry read as a broken link. Do not use the site-wide WordPress feed (odni.gov/feed/): it carries 532 items of which 371 are media-library /download/ attachments and several are bare offsite links to YouTube with empty descriptions. The category feed is the right door. Gate-3 coverage evaluation (2026-07-31, from the probe): https://www.odni.gov/newsroom/press-releases/feed/ answers HTTP 200 with well-formed RSS carrying 54 items — the entire press-release category since the site migration, 2025-02-12 through 2026-06-19 (43 in 2025, 11 in 2026), every one with a guid (the WordPress post id, /?p=NNNNN, so identity does not depend on URL shape) and an RFC 822 date, every link on odni.gov, none with an empty description. Descriptions average 344 characters — teaser length — but the sample article page extracted 8,082 characters, so this ingests at mode full rather than feed-only. What we will NOT see: the newsroom's sibling categories /newsroom/remarks/ and /newsroom/reports/, each presumably its own WordPress feed; those are separate registry entries if wanted, and their absence is the disclosed under-coverage here. Publication is sparse — the newest item at activation was six weeks old — so empty days are the source's normal state, not a fault. One-time activation cost to budget: the feed hands us all 54 items at once and the default adapter fetches each article page, so first ingest spends about 54 requests at this host's 10-second crawl-delay (~9 minutes of wall clock); the dating rule then excludes almost all of them as backfill under AGENCYPR-EX-01. Steady state is one conditional request a day. If the agency class is near its daily ceiling the budget will simply cut the backfill short and the next run resumes it — but prefer to activate on a day with headroom."
 
 - id: cisa-advisories
   name: CISA Cybersecurity Advisories

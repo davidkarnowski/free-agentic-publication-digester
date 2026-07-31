@@ -70,7 +70,11 @@ def test_registry_seeds_expected_active_sources():
         # activated 2026-07-31 (third wave), same evidence gate:
         "cms-email", "fda-email", "federal-reserve-email", "ssa-email",
         # activated 2026-07-31 from the probe sweep (feed live and current):
-        "usps-newsroom"}
+        "usps-newsroom",
+        # activated 2026-07-31 after the stale-URL recovery: ODNI moved off
+        # Joomla and off dni.gov entirely; its WordPress press-release
+        # category feed on odni.gov probes feed-ok with guids and full text:
+        "odni-news"}
 
 
 # ------------------------------------------------------------ coverage_stats --
