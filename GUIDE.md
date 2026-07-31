@@ -108,6 +108,14 @@ reporting component must comply.
   what was published that day, what we summarized, and what we deliberately
   did not (with counts). Silent omission is the failure mode we most guard
   against.
+- **Digest sections are append-only in numbering (added 2026-07-31).** A new
+  section is added at the end of the substantive sections, before the
+  Glossary — never inserted, because section numbers are anchors and a
+  reader who cited `#3-federal-register` in a published digest must not find
+  a different subject there tomorrow. Reading order therefore reflects the
+  order sections were added, not a hierarchy of importance; nothing in the
+  digest ranks its own contents. **Recorded Votes** is the first section
+  added under this rule.
 - **Separate the layers.** Raw data → extracted facts → summaries are stored
   as distinct artifacts. The summary layer can be regenerated or audited
   without re-fetching anything.
@@ -176,6 +184,35 @@ reporting component must comply.
 | `USCOURTS` | United States Courts Opinions | Judicial branch: opinions from participating federal courts |
 
 Start with `CREC`, `BILLS`, `FR`; add the rest once the pipeline is stable.
+
+### Recorded votes (added 2026-07-31)
+
+| Code | Collection | Why |
+|------|-----------|-----|
+| `VOTES` | Senate and House roll-call votes | What each chamber actually decided, and how each member voted |
+
+Roll-call votes are published by the chambers themselves as structured
+XML — the Senate's vote menu and per-vote records, the House Clerk's
+roll-call index — not through govinfo, so they arrive through the agency
+poll loop with an `xml-index` adapter rather than a collection sync. They
+are nonetheless **legislative record, not agency communication**, and are
+stored under their own collection code so they never enter the
+`AGENCYPR` accounting, the agency dating rule, or the executive-branch
+tagging that class carries.
+
+Why they are in scope at all: the Congressional Record carries floor
+*proceedings* and BILLS carries the *text*, but neither states the
+outcome in a form a reader can count. A recorded vote is a discrete,
+dated, consequential act — exactly the shape mechanical selection can
+include without judgement. Selection is by existence, not by importance:
+every recorded vote of the day is listed, in vote-number order, with no
+rule that could prefer one question over another.
+
+**An index is not a feed.** A chamber's vote index lists an entire
+session. Ingestion is bounded to a lookback window
+(`config.INDEX_LOOKBACK_DAYS`); older votes are outside the window, not
+excluded by judgement, and the §3 dating rule governs what a given digest
+day lists exactly as it does for every other source.
 
 ### Judicial branch coverage (amended 2026-07-25)
 

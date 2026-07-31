@@ -3343,3 +3343,28 @@ Recorded the obligation that comes with the seam in three places an agent
 will actually meet it — code-standards §1, adding-sources, CLAUDE.md §9:
 an index is not a feed. A feed is bounded by its publisher; the Senate's
 vote menu lists every vote of the Congress. 441 tests.
+
+## 2026-07-31 — GUIDE amendments for recorded votes
+
+Governance before code, per §10. Two amendments, both narrow.
+
+§3 gains a `VOTES` collection with its own subsection rather than a row
+in the govinfo table, because roll-call votes do not come from govinfo:
+the chambers publish them themselves as structured XML. The subsection
+says why they are in scope at all — the Congressional Record carries
+proceedings and BILLS carries text, but neither states the outcome in a
+form a reader can count — and pins the selection rule to existence
+rather than importance: every recorded vote of the day, in vote-number
+order, with no rule that could prefer one question over another. It also
+records that they are legislative record, not agency communication, and
+so are stored under their own code where the AGENCYPR dating rule and
+executive-branch tagging cannot reach them.
+
+§2 gains a rule that had been an unstated habit until the operator had to
+decide it: digest sections are append-only in numbering. A section number
+is an anchor, and a reader who cited "#3-federal-register" in a published
+digest must not find a different subject there tomorrow. The cost is that
+reading order reflects the order sections were added rather than any
+hierarchy — which is the right trade for a digest that deliberately
+declines to rank its own contents. Recorded Votes is the first section
+added under the rule.
