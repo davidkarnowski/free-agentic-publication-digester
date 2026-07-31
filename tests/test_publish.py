@@ -927,3 +927,46 @@ def test_entry_tags_and_bar_chips_drive_the_same_state(conn, tmp_path):
             "{display:none}") in page
     assert ("#f-press-release:checked ~ .today-list >"
             " .today-item:not(.k-press-release){display:none}") in page
+
+
+def test_filter_options_narrow_to_keywords_that_co_occur(conn, tmp_path):
+    """Choosing a keyword should stop offering keywords that never share
+    an entry with it — otherwise the bar invites combinations that can
+    only produce an empty stream."""
+    from conftest import DATE
+
+    _seed_today(conn)   # CREC item: legislative/senate floor; VA item: executive/press release/va
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+
+    # one narrowing rule per keyword, not one per absent pair
+    assert ("#f-legislative:checked ~ .filter-bar label:not(.c-legislative)"
+            "{display:none}") in page
+
+    bar = page.split('class="filter-bar"')[1].split('class="today-list"')[0]
+    # 'senate floor' shares its entry with 'legislative' -> stays offered
+    assert 'c-legislative' in bar.split('for="f-senate-floor"')[0].rsplit(
+        "<label", 1)[1]
+    # 'press release' never appears alongside 'legislative' -> filtered out
+    press_chip = bar.split('for="f-press-release"')[0].rsplit("<label", 1)[1]
+    assert "c-legislative" not in press_chip
+    assert "c-executive" in press_chip and "c-va" in press_chip
+    # a keyword always pairs with itself, so the chosen chip stays visible
+    # (and therefore stays clickable to clear)
+    leg_chip = bar.split('for="f-legislative"')[0].rsplit("<label", 1)[1]
+    assert "c-legislative" in leg_chip
+
+
+def test_filter_pairs_are_symmetric_and_include_self():
+    items = [
+        {"collection": "CREC", "doc_type": "SENATE", "agency": None,
+         "source_id": None},
+        {"collection": "FR", "doc_type": "RULE", "agency": "EPA",
+         "source_id": None},
+    ]
+    pairs = publish._today_filter_pairs(items)
+    assert "legislative" in pairs["senate floor"]
+    assert "senate floor" in pairs["legislative"]
+    assert "legislative" in pairs["legislative"]
+    assert "legislative" not in pairs["final rule"]   # different entries
+    assert pairs["epa"] == {"executive", "final rule", "epa"}

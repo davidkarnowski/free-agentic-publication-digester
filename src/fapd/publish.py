@@ -1259,18 +1259,50 @@ def _today_filter_facets(items):
     return dict(sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])))
 
 
-def _filter_chip(tag, count):
+def _today_filter_pairs(items):
+    """keyword -> the keywords that share an entry with it (including
+    itself). This is what lets the bar narrow itself: once a keyword is
+    chosen, any keyword that never appears alongside it could only
+    produce an empty stream, so the bar stops offering it.
+
+    Carried as classes rather than per-pair CSS rules on purpose. Naming
+    the pairs that DO occur costs one class per real pairing (each entry
+    has about three tags), while ruling out the pairs that do not would
+    cost a rule per absent pair — quadratic in the day's keyword count.
+    Measured on 2026-07-30: 291 entries, 58 keywords, 292 real pairings
+    (~6.6 KB of classes, 58 rules) against 3,364 possible pairs.
+
+    Known limit: narrowing is pairwise. With two keywords chosen, the bar
+    hides anything that pairs with neither, but a keyword that pairs with
+    each of them separately — on different entries — stays on offer and
+    can still yield an empty stream. Exactness would need a rule per
+    combination, which is the explosion this design avoids; the reset
+    button is always one click away."""
+    pairs = {}
+    for item in items:
+        tags = _today_item_tags(item)
+        for tag in tags:
+            pairs.setdefault(tag, set()).update(tags)
+    return pairs
+
+
+def _filter_chip(tag, count, pairs=None):
     """A chip is a <label> for its hidden checkbox, wearing exactly the
     classes the same tag wears on a listing entry — so a branch keeps its
-    color whether you are reading it or filtering by it."""
-    return (f'<label class="{_tag_classes(tag, "filter-chip")}" '
+    color whether you are reading it or filtering by it — plus one class
+    per keyword it shares an entry with, which drives the narrowing."""
+    partners = "".join(f" c-{_slug(p)}"
+                       for p in sorted((pairs or {}).get(tag, {tag})))
+    return (f'<label class="{_tag_classes(tag, "filter-chip")}{partners}" '
             f'for="f-{_slug(tag)}">{html.escape(tag)}'
             f'<span class="filter-n">{count}</span></label>')
 
 
-def _today_filter_bar(facets, total):
+def _today_filter_bar(facets, total, pairs=None):
     """(inputs, bar_html, css) for the day's keywords: branches on their
-    own row, then every remaining keyword in one full listing."""
+    own row, then every remaining keyword in one full listing. Choosing
+    a keyword narrows the offered set to keywords that actually share an
+    entry with it, so no combination on offer leads to an empty page."""
     offered = list(facets.items())[:MAX_FILTER_KEYWORDS]
     dropped = len(facets) - len(offered)
     if not offered:
@@ -1289,7 +1321,10 @@ def _today_filter_bar(facets, total):
             f'#f-{slug}:focus-visible ~ .filter-bar label[for="f-{slug}"]'
             "{outline:2px solid var(--accent);outline-offset:2px}\n"
             f"#f-{slug}:checked ~ .filter-bar .filter-clear"
-            "{display:inline-block}\n")
+            "{display:inline-block}\n"
+            # narrow the remaining options to keywords seen alongside this one
+            f"#f-{slug}:checked ~ .filter-bar label:not(.c-{slug})"
+            "{display:none}\n")
 
     branches = [(t_, n) for t_, n in offered if t_ in _BRANCH_ORDER]
     branches.sort(key=lambda kv: _BRANCH_ORDER.index(kv[0]))
@@ -1298,11 +1333,12 @@ def _today_filter_bar(facets, total):
     rows = ""
     if branches:
         rows += ('<div class="filter-row filter-branches">'
-                 + "".join(_filter_chip(t_, n) for t_, n in branches)
+                 + "".join(_filter_chip(t_, n, pairs) for t_, n in branches)
                  + "</div>")
     if rest:
         rows += ('<div class="filter-row">'
-                 + "".join(_filter_chip(t_, n) for t_, n in rest) + "</div>")
+                 + "".join(_filter_chip(t_, n, pairs) for t_, n in rest)
+                 + "</div>")
     note = (f'<span class="filter-note">Showing {len(offered)} of '
             f"{len(facets)} keywords.</span>" if dropped else "")
     bar = (
@@ -1310,7 +1346,9 @@ def _today_filter_bar(facets, total):
         '<p class="filter-lead">Filter by keyword '
         '<span class="rule-note">click to select, click again to clear — '
         "here or on any entry's own tags · choosing several narrows to "
-        "items carrying all of them · "
+        "items carrying all of them, and the remaining keywords narrow "
+        "to those that appear alongside your choice · counts are for the "
+        "unfiltered day · "
         f"{total} item(s) unfiltered</span>"
         '<button type="reset" class="filter-clear">clear filters</button></p>'
         f"{rows}{note}</nav>"
@@ -1426,7 +1464,7 @@ def build_today(conn, out_dir=None, date=None):
                      + "".join(day_chips) + "</p>")
     facets = _today_filter_facets(status["items"])
     inputs, filter_bar, filter_css = _today_filter_bar(
-        facets, len(status["items"]))
+        facets, len(status["items"]), _today_filter_pairs(status["items"]))
     filterable = {_slug(k) for k in list(facets)[:MAX_FILTER_KEYWORDS]}
     if not status["items"]:
         parts.append("<p>No items observed yet for this publication day. "

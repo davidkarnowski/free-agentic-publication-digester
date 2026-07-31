@@ -2566,3 +2566,27 @@ chip lights up at the same moment, because both are styled off the same
 hide-what-doesn't-match rule, so two selections leave the entries
 carrying both. Tags outside the offered set render as inert spans
 rather than dead controls. 361 tests.
+
+## 2026-07-30 — The filter bar narrows itself
+
+Operator: once a keyword is chosen, stop offering keywords that cannot
+appear with it. That is faceted narrowing, and the whole question was
+how to do it in CSS without the byte count exploding.
+
+The naive shape — a rule per pair that must be ruled out — is quadratic
+in the day's keyword count: 58 keywords is 3,364 possible pairs, and
+nearly all of them are absent, because an entry carries about three
+tags. Inverting it costs almost nothing: name the pairings that DO
+occur as classes on each chip, then one rule per keyword hides every
+chip not carrying its class. Measured on today's data — 291 entries, 58
+keywords — that is 292 real pairings, about 6.6 KB of classes and 58
+rules, against the 3,364-rule alternative.
+
+Chip counts stay day totals rather than filtered counts (CSS cannot
+recount), so the bar now says so. And the narrowing is honestly
+pairwise: with two keywords chosen, a keyword that pairs with each of
+them on different entries survives and can still produce an empty
+stream. Exactness would need a rule per combination, which is precisely
+the explosion being avoided — and the reset button is one click away.
+Recorded in the function's docstring rather than left for someone to
+discover. 363 tests.
