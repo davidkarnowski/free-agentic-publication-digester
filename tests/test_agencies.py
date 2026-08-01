@@ -1,7 +1,7 @@
 """Agency ingestion tests: fakes only, no network."""
 
-import json
 import datetime as dt
+import json
 import pathlib
 
 import pytest

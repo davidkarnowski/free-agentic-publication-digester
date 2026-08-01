@@ -124,7 +124,7 @@ def test_coverage_stats_per_tier_on_real_registry():
     # + senate-xml roll-call votes (07-31, first xml-index source)
     # + congress-gov-api bill actions (07-31, first api source)
     # + dhs-newsroom (07-31, first tier-1 html-index source)
-    assert by_tier[1].get("active", 0) == 20
+    assert by_tier[1].get("active", 0) == 21
 
 
 def test_coverage_stats_empty():
