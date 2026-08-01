@@ -30,6 +30,10 @@ from . import config
 
 logger = logging.getLogger("fapd.client")
 
+# Distinguishes "nothing cached" from a cached "this host has no robots.txt",
+# which is a real verdict (RFC 9309: 4xx means allow).
+_MISS = object()
+
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS fetch_log (
     id INTEGER PRIMARY KEY,
@@ -41,6 +45,12 @@ CREATE TABLE IF NOT EXISTS fetch_log (
     attempt INTEGER NOT NULL,
     error TEXT
 );
+CREATE TABLE IF NOT EXISTS robots_cache (
+    host       TEXT PRIMARY KEY,
+    body       TEXT,          -- NULL: no robots.txt / 4xx -> allow (RFC 9309)
+    fetched_at REAL NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_fetch_log_ts ON fetch_log (ts_utc);
 """
 
@@ -355,6 +365,32 @@ class AgencyClient(HttpClient):
     def _daily_budget(self):
         return config.MAX_AGENCY_REQUESTS_PER_DAY
 
+    def _robots_from_db(self, host):
+        """The cached parser, None for a known-absent robots.txt, or
+        _MISS when we have nothing fresh enough to use."""
+        row = self._db.execute(
+            "SELECT body, fetched_at FROM robots_cache WHERE host = ?",
+            (host,)).fetchone()
+        if not row:
+            return _MISS
+        body, fetched_at = row
+        if (time.time() - fetched_at) >= self.ROBOTS_TTL_SECONDS:
+            return _MISS
+        if body is None:
+            return None
+        try:
+            return Protego.parse(body)
+        except Exception:  # noqa: BLE001 — a corrupt cache re-fetches
+            return _MISS
+
+    def _store_robots(self, host, body):
+        self._db.execute(
+            "INSERT INTO robots_cache (host, body, fetched_at) VALUES (?, ?, ?)"
+            " ON CONFLICT (host) DO UPDATE SET body = excluded.body,"
+            " fetched_at = excluded.fetched_at",
+            (host, body, time.time()))
+        self._db.commit()
+
     def get(self, url, params=None, headers=None):
         verdict, crawl_delay = self._robots_verdict(url)
         if verdict is False:
@@ -372,13 +408,27 @@ class AgencyClient(HttpClient):
 
     def _robots_verdict(self, url):
         """(allowed, crawl_delay). Fail-open on 4xx per RFC 9309; fail-closed
-        temporarily on 5xx/network errors."""
+        temporarily on 5xx/network errors.
+
+        The cache is persisted (finding F-007). It used to live only on the
+        instance, and the collector builds a fresh client every cycle — so
+        the 24-hour TTL never survived one poll and every cycle re-asked
+        permission it already had. At hourly polling across 22 hosts that
+        is 528 robots fetches a day where 22 will do, roughly half of the
+        class budget spent on a question already answered."""
         host = urlsplit(url).netloc
         cached = self._robots.get(host)
         if cached and (self._monotonic() - cached[1]) < self.ROBOTS_TTL_SECONDS:
             parser = cached[0]
         else:
-            parser = self._fetch_robots(host)
+            parser = self._robots_from_db(host)
+            if parser is _MISS:
+                parser, body = self._fetch_robots(host)
+                # A temporary disallow (5xx/network) is deliberately not
+                # persisted: it is a statement about this moment, not about
+                # the host, and outliving the outage would be wrong.
+                if parser is not False:
+                    self._store_robots(host, body)
             self._robots[host] = (parser, self._monotonic())
         if parser is None:  # no robots.txt / 4xx: allow (RFC 9309)
             return True, None
@@ -389,16 +439,18 @@ class AgencyClient(HttpClient):
         return allowed, float(delay) if delay else None
 
     def _fetch_robots(self, host):
+        """(verdict, body). body is the text to cache, or None when the
+        verdict itself is 'no robots.txt here'."""
         robots_url = f"https://{host}/robots.txt"
         try:
             resp = HttpClient.get(self, robots_url)  # paced, budgeted, logged
         except requests.HTTPError as exc:
             status = getattr(exc.response, "status_code", None)
             if status is not None and 400 <= status < 500:
-                return None  # 4xx: treat as allow-all (RFC 9309)
-            return False  # 5xx after retries: temporary disallow
+                return None, None  # 4xx: treat as allow-all (RFC 9309)
+            return False, None  # 5xx after retries: temporary disallow
         except requests.RequestException:
-            return False  # network failure: temporary disallow
+            return False, None  # network failure: temporary disallow
         if resp.status_code == 304 or not resp.text:
-            return None
-        return Protego.parse(resp.text)
+            return None, None
+        return Protego.parse(resp.text), resp.text

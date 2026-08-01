@@ -613,6 +613,24 @@ discipline:
   unavailability; the response to that is fewer requests, never faster
   retries.
 
+  **Agency class raised 500 -> 1,500/day (amended 2026-07-31,
+  operator-authorised).** The condition set was "as long as we aren't
+  violating any bot/server restraints set by source servers", so the
+  evidence is what those servers actually declare. **No publisher
+  declares a daily request cap** — robots.txt has no such directive, and
+  none of our hosts sets the `Request-rate` or `Visit-time` extensions.
+  What they declare is **crawl-delay**, which governs spacing, not volume,
+  and which we honor exactly and unchanged: gao.gov 420s, fda.gov 30s,
+  fema.gov 15s, justice.gov and odni.gov 10s, ftc.gov 5s. At hourly
+  polling each host receives about **24 requests a day — one an hour**.
+
+  The raise was made **after** removing the waste it would otherwise have
+  funded: the robots cache lived on a client instance while the collector
+  built a fresh client every cycle, so a 24-hour TTL never survived one
+  poll and roughly half of every cycle re-asked permission already
+  granted (F-007). Fixing that first is the §4 principle applied to
+  ourselves — fewer requests before more allowance.
+
   **Finalizer reserve (added 2026-07-31).** Continuous collectors may spend
   only **85%** of a daily budget; the remainder is reserved for the
   end-of-day finalizer. On 2026-07-30 the collectors spent all 2,000

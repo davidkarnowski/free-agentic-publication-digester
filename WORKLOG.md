@@ -3919,3 +3919,45 @@ is not being activated.
 469 tests. Separately, and in its own commit: `test_uscourts_fetch_policy`
 had a literal 2026-07-24 in it against a window measured from `now()`,
 and started failing when the UTC day rolled over mid-session.
+
+## 2026-07-31 — Hourly polling, paid for by deleting waste first
+
+The operator asked for at least hourly cycles for the html-index class,
+"as long as we aren't violating any bot/server restraints set by source
+servers". That condition turned out to be the easy half: **no publisher
+declares a daily request cap.** robots.txt has no such directive, none of
+our hosts sets the Request-rate or Visit-time extensions, and what they
+do declare — crawl-delay — governs spacing, not volume, and is honored
+exactly and unchanged (gao.gov 420s, fda.gov 30s, fema.gov 15s,
+justice.gov and odni.gov 10s, ftc.gov 5s). At hourly, each host receives
+about twenty-four requests a day. One an hour.
+
+The real constraint was our own 500/day cap, and roughly half of what it
+was buying was nothing at all. The robots cache lived on the client
+instance, and `AgencyHostWorker.cycle` builds a fresh client every cycle
+— so a 24-hour TTL never survived a single poll, and every cycle
+re-asked permission it had already been granted. At hourly across 22
+hosts that is 528 robots fetches a day where 22 will do. Finding F-007,
+open since the collector shipped, and it was quietly setting the price of
+every cadence discussion since.
+
+So the cache moved into `fetch_log.db`, where it survives both a new
+client and the container restarts that deploys cause. One deliberate
+exception: a temporary disallow from a 5xx or a network failure is not
+persisted. That verdict is a statement about a moment, not about a host,
+and caching it for a day would outlive the outage and lock us out of a
+publisher who never refused us.
+
+Only then the budget: 500 -> 1,500/day, recorded in GUIDE §4 with the
+evidence above and with the order of operations stated, because it is the
+§4 principle applied to ourselves — fewer requests before more allowance.
+Had the raise come first it would have funded 528 pointless fetches.
+
+Also worth noting what did NOT change: the per-second pace, every
+crawl-delay, the failed-requests-still-count rule, and the finalizer
+reserve. And the design rejected along the way — a separate slower worker
+for the html-index class would have split a host across two workers with
+two clients and two pacing clocks, breaking §4's promise that sources
+sharing a host share a clock. No host carries mixed types today, so it
+would have worked until someone registered an RSS feed alongside an HTML
+index on one domain. 485 tests.

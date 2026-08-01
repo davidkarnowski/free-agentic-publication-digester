@@ -67,7 +67,17 @@ SOURCES_REGISTRY = PROJECT_ROOT / "sources" / "registry.yaml"
 
 # GUIDE §3/§4: agency newsrooms get their own daily request bucket so agency
 # crawling can never consume the govinfo budget (or vice versa).
-MAX_AGENCY_REQUESTS_PER_DAY = 500
+# Raised 500 -> 1500 on 2026-07-31 (operator-authorised: "at least hourly
+# update cycles as long as we aren't violating any bot/server restraints
+# set by source servers", GUIDE §4 amended with the evidence). Hourly
+# across the active hosts is ~24 requests per host per day — one an hour.
+# No publisher declares a daily cap: robots.txt has no such directive,
+# and none of ours sets Request-rate or Visit-time. What they DO declare
+# is crawl-delay, which is spacing, and which we honor exactly and
+# separately (gao.gov 420s, fda.gov 30s, fema.gov 15s, justice.gov and
+# odni.gov 10s, ftc.gov 5s). The raise was made only after removing the
+# waste it would otherwise have paid for — see F-007, the robots cache.
+MAX_AGENCY_REQUESTS_PER_DAY = 1500
 
 # Hourly ceiling (GUIDE §4, added 2026-07-31). api.data.gov — the shared GSA
 # service govinfo runs on — documents 1,000 requests per hour per key and

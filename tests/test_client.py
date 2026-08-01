@@ -344,3 +344,49 @@ def test_hourly_ceiling_keeps_us_far_from_the_documented_limit(tmp_path,
                               sleep=lambda s: None, reserve_exempt=True)
     with pytest.raises(BudgetExceededError, match="hourly ceiling"):
         finalizer.get("collections")
+
+
+def test_robots_cache_survives_a_new_client(tmp_path, monkeypatch):
+    """F-007: the cache lived on the instance while the collector builds a
+    fresh client every cycle, so a 24-hour TTL never survived one poll.
+    At hourly polling that is 528 robots fetches a day where 22 will do."""
+    monkeypatch.setattr(config, "EOD_BUDGET_RESERVE_FRACTION", 0.0)
+    responses = [robots_resp("User-agent: *\nAllow: /"), FakeResponse(),
+                 FakeResponse()]
+    first, _, _ = make_agency(tmp_path, responses)
+    first.get("https://x.gov/a")
+    fetched_by_first = [c for c in first._session.calls
+                        if "robots" in c["url"]]
+    assert len(fetched_by_first) == 1
+
+    # a second client over the same fetch-log DB must NOT re-ask
+    second = AgencyClient(db_path=tmp_path / "fetch_log.db",
+                          session=FakeSession([FakeResponse()]),
+                          sleep=lambda s: None)
+    second.get("https://x.gov/b")
+    assert not [c for c in second._session.calls
+                if "robots" in c["url"]], \
+        "the second client re-fetched robots.txt the first already cached"
+    second.close()
+
+
+def test_a_temporary_disallow_is_not_persisted(tmp_path, monkeypatch):
+    """A 5xx is a statement about this moment, not about the host —
+    caching it for 24 hours would outlive the outage and lock us out."""
+    import requests as _requests
+
+    monkeypatch.setattr(config, "EOD_BUDGET_RESERVE_FRACTION", 0.0)
+    class DownSession:
+        def __init__(self):
+            self.calls = []
+
+        def get(self, url, params=None, headers=None, timeout=None):
+            raise _requests.ConnectionError("host down")
+
+    client = AgencyClient(db_path=tmp_path / "fetch_log.db",
+                          session=DownSession(), sleep=lambda s: None)
+    with pytest.raises(RobotsDisallowedError):
+        client.get("https://y.gov/a")
+    row = client._db.execute(
+        "SELECT COUNT(*) FROM robots_cache WHERE host = 'y.gov'").fetchone()
+    assert row[0] == 0, "a temporary disallow must not be cached"
