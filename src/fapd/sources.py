@@ -17,10 +17,19 @@ import yaml
 
 REGISTRY_PATH = Path(__file__).resolve().parents[2] / "sources" / "registry.yaml"
 
-OPTIONAL_FIELDS = ("adapter", "sender")  # per-source strategy (GUIDE §3);
+OPTIONAL_FIELDS = ("adapter", "sender", "index_item_path")
+# per-source strategy (GUIDE §3).
 # `sender`: for type: email, the confirmed From address(es) — a string or a
 # list. It is the allowlist the mailbox adapter matches against: a message
 # whose sender maps to no registered source is never parsed.
+# `index_item_path`: for type: html-index, a URL PATH PREFIX that an
+# anchor must match to count as a listing entry (e.g. "/newsroom/") —
+# added 2026-07-31 with the html-index adapter. Deliberately a prefix and
+# not a selector expression: a query language in the registry would put
+# page-structure knowledge where no test can exercise it, and every hint
+# added so far has been "the releases live under this path, the navigation
+# does not". Anything a prefix cannot express belongs in an adapter
+# subclass, where it can be tested against captured bytes.
 REQUIRED_FIELDS = (
     "id",
     "name",
@@ -48,7 +57,7 @@ URL_KEYS = ("collection", "feed", "index", "home", "signup")
 # platform documentation (GUIDE §3), and absence is meaningful — it says
 # the platform is not yet known, so nothing may assume one.
 WEB_ADAPTERS = ("rss", "rss-feed-only", "usps", "senate-votes",
-                "congress-bill-actions")
+                "congress-bill-actions", "html-index")
 EMAIL_PLATFORMS = ("govdelivery",)
 
 _KEBAB_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -140,6 +149,15 @@ def _validate(entry: dict, seen_ids: set[str], seen_senders: dict[str, str]) -> 
         if adapter not in allowed:
             _fail(entry, f"adapter {adapter!r} not in {allowed} "
                          f"for type {entry['type']!r}")
+
+    hint = entry.get("index_item_path")
+    if hint is not None:
+        if entry["type"] != "html-index":
+            _fail(entry, "field 'index_item_path' is only valid on type "
+                         "'html-index' entries")
+        if not isinstance(hint, str) or not hint.startswith("/"):
+            _fail(entry, f"index_item_path {hint!r} must be a URL path prefix "
+                         f"beginning with '/'")
 
     _validate_sender(entry, seen_senders)
 

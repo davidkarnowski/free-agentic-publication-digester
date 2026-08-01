@@ -15,7 +15,8 @@ import json
 import logging
 import re
 import xml.etree.ElementTree as ET
-from urllib.parse import parse_qs, urlsplit, urlunsplit
+from html.parser import HTMLParser
+from urllib.parse import parse_qs, urljoin, urlsplit, urlunsplit
 
 import requests
 
@@ -115,6 +116,17 @@ class SourceAdapter:
         loop can handle; a missing key raises loudly by design
         (code-standards §2 r9) and per-source crash isolation records it."""
         return {}
+
+    def __init__(self, entry=None):
+        """The registry entry being polled, or None.
+
+        Added 2026-07-31 for HtmlIndexAdapter, which needs two things no
+        other hook supplies: the index URL (a listing page's hrefs are
+        relative, and items() is handed bytes, not a URL) and the entry's
+        optional `index_item_path` hint. adapter_for passes it; direct
+        construction without an entry stays valid, so every existing
+        adapter and test is unaffected."""
+        self.entry = entry or {}
 
     def items(self, body, content_type):
         """(format_name, [item]) from the fetched index/feed bytes.
@@ -665,12 +677,480 @@ class CongressBillActionsAdapter(SourceAdapter):
         return "\n".join(lines)
 
 
+_MONTH_NUMBERS = {
+    "january": 1, "february": 2, "march": 3, "april": 4, "may": 5, "june": 6,
+    "july": 7, "august": 8, "september": 9, "october": 10, "november": 11,
+    "december": 12, "jan": 1, "feb": 2, "mar": 3, "apr": 4, "jun": 6,
+    "jul": 7, "aug": 8, "sept": 9, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+}
+# Longest-first alternation so "June" is not read as "Jun" + a stray "e",
+# and an explicit table rather than strptime("%b"): %b reads the process's
+# LC_TIME, which would make what the digest lists depend on the locale of
+# the machine that rendered it (Phase 2 finding, 2026-07-31).
+_MONTH_NAME = "|".join(sorted(_MONTH_NUMBERS, key=len, reverse=True))
+_DATE_PATTERNS = (
+    # (kind, regex, field order) — kind is stored in metadata so an auditor
+    # can see which syntax produced a listed date.
+    ("iso", re.compile(r"\b(20\d\d)-(\d{2})-(\d{2})\b"), "ymd"),
+    ("month-day-year", re.compile(
+        rf"\b({_MONTH_NAME})\.?\s+(\d{{1,2}})(?:st|nd|rd|th)?,?\s+(20\d\d)\b",
+        re.IGNORECASE), "mdy"),
+    ("day-month-year", re.compile(
+        rf"\b(\d{{1,2}})(?:st|nd|rd|th)?\s+({_MONTH_NAME})\.?,?\s+(20\d\d)\b",
+        re.IGNORECASE), "dmy"),
+    # US ordering. Every source in this registry is a US federal publisher
+    # writing for a US audience; a European d/m/y reading would silently
+    # transpose 07/08 dates. Stated here so the assumption is auditable.
+    ("slash", re.compile(r"\b(\d{1,2})/(\d{1,2})/(20\d\d|\d\d)\b"), "mdy-slash"),
+)
+
+
+def _iso_day(value):
+    """An ISO-8601-prefixed string -> date, or None. Used for <time
+    datetime="..."> attributes, which may carry a full timestamp."""
+    match = re.match(r"^(20\d\d)-(\d{2})-(\d{2})", (value or "").strip())
+    if not match:
+        return None
+    try:
+        return dt.date(*(int(g) for g in match.groups()))
+    except ValueError:
+        return None
+
+
+def _find_dates(text):
+    """[(date, kind, matched text)] for every calendar date the string
+    states, in the order the patterns are declared. Never raises."""
+    found = []
+    for kind, pattern, order in _DATE_PATTERNS:
+        for match in pattern.finditer(text):
+            a, b, c = match.groups()
+            try:
+                if order == "ymd":
+                    day = dt.date(int(a), int(b), int(c))
+                elif order == "mdy":
+                    day = dt.date(int(c), _MONTH_NUMBERS[a.lower()], int(b))
+                elif order == "dmy":
+                    day = dt.date(int(c), _MONTH_NUMBERS[b.lower()], int(a))
+                else:
+                    year = int(c)
+                    day = dt.date(year + 2000 if year < 100 else year,
+                                  int(a), int(b))
+            except (ValueError, KeyError):
+                continue
+            found.append((day, kind, match.group(0)))
+    return found
+
+
+class _ListingParser(HTMLParser):
+    """One structural pass over a listing page, stdlib only.
+
+    Records three things in document order: every anchor (href, its link
+    text, the element that contains it), every date the page states (in a
+    <time datetime> attribute or in running text), and every element's own
+    text. Elements are kept as a parent-pointer tree so the adapter can
+    ask the only question that matters — which anchor and which date
+    belong to the same listing entry — structurally rather than by
+    scanning bytes for a nearby-looking string.
+
+    Malformed markup is the normal case on these pages: an unmatched
+    </div> pops nothing, an unclosed <li> is closed by its successor's
+    close, and text inside <script>/<style>/<svg> never counts. None of
+    that raises; a listing that confuses the parser yields fewer items,
+    which the adapter reports rather than papering over."""
+
+    _VOID = frozenset({"area", "base", "br", "col", "embed", "hr", "img",
+                       "input", "link", "meta", "param", "source", "track",
+                       "wbr"})
+    _SKIP = frozenset({"script", "style", "noscript", "template", "svg", "head"})
+    # Deep pathological nesting is a parser problem, not a publisher one.
+    _MAX_DEPTH = 200
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.parents = [-1]          # node 0 is the synthetic document root
+        self.tags = [""]
+        self.skipped = [False]
+        self.stack = [0]
+        self.anchors = []            # {href, text, node, order}
+        self.dates = []              # {day, kind, raw, node, order}
+        self.texts = []              # (node, order, text)
+        self._order = 0
+        self._skip_depth = 0
+        self._open_anchor = None
+        self._buffers = {}           # node -> [first order, [chunks]]
+
+    # -- tree -----------------------------------------------------------
+    def _push(self, tag):
+        self.parents.append(self.stack[-1])
+        self.tags.append(tag)
+        self.skipped.append(tag in self._SKIP)
+        self.stack.append(len(self.parents) - 1)
+
+    def _pop(self, node):
+        self._flush(node)
+        if self.skipped[node]:
+            self._skip_depth = max(0, self._skip_depth - 1)
+        if self._open_anchor is not None and self._open_anchor["node"] == node:
+            self._close_anchor()
+
+    def _flush(self, node):
+        entry = self._buffers.pop(node, None)
+        if not entry:
+            return
+        order, chunks = entry
+        text = " ".join("".join(chunks).split())
+        if not text:
+            return
+        self.texts.append((node, order, text))
+        for day, kind, raw in _find_dates(text):
+            self.dates.append({"day": day, "kind": kind, "raw": raw,
+                               "node": node, "order": order})
+
+    # -- anchors --------------------------------------------------------
+    def _close_anchor(self):
+        anchor = self._open_anchor
+        self._open_anchor = None
+        anchor["text"] = " ".join("".join(anchor["parts"]).split())
+        del anchor["parts"]
+        self.anchors.append(anchor)
+
+    # -- HTMLParser hooks -----------------------------------------------
+    def handle_starttag(self, tag, attrs):
+        if tag in self._VOID:
+            return
+        if len(self.stack) > self._MAX_DEPTH:
+            return
+        self._push(tag)
+        node = self.stack[-1]
+        if self.skipped[node]:
+            self._skip_depth += 1
+            return
+        if self._skip_depth:
+            return
+        values = dict(attrs)
+        if tag == "a":
+            if self._open_anchor is not None:  # unclosed <a>; the outer wins
+                self._close_anchor()
+            self._open_anchor = {"href": (values.get("href") or "").strip(),
+                                 "node": node, "order": self._order,
+                                 "parts": []}
+        elif tag == "time":
+            day = _iso_day(values.get("datetime"))
+            if day is not None:
+                # A machine-written attribute beats prose: it is the
+                # publisher's own statement of the day, unambiguous.
+                self.dates.append({"day": day, "kind": "time-attribute",
+                                   "raw": values.get("datetime", ""),
+                                   "node": node, "order": self._order})
+
+    def handle_startendtag(self, tag, attrs):
+        if tag not in self._VOID:
+            self.handle_starttag(tag, attrs)
+            self.handle_endtag(tag)
+
+    def handle_endtag(self, tag):
+        if tag in self._VOID:
+            return
+        for depth in range(len(self.stack) - 1, 0, -1):
+            if self.tags[self.stack[depth]] != tag:
+                continue
+            for _ in range(len(self.stack) - depth):
+                self._pop(self.stack.pop())
+            return
+        # No matching open tag: a stray close. Ignore it, as a browser does.
+
+    def handle_data(self, data):
+        self._order += 1
+        if self._skip_depth or not data.strip():
+            return
+        if self._open_anchor is not None:
+            self._open_anchor["parts"].append(data)
+        buffer = self._buffers.setdefault(self.stack[-1], [self._order, []])
+        buffer[1].append(data)
+
+    def close(self):
+        super().close()
+        while len(self.stack) > 1:
+            self._pop(self.stack.pop())
+        self._flush(0)
+
+
+class HtmlIndexAdapter(SourceAdapter):
+    """Listing pages that carry no usable feed (probe 2026-07-31: 33 of 42
+    web sources answered 200, robots permitting, and advertised none).
+
+    AN INDEX PAGE IS NOT A FEED, AND THE DATING RULE IS WHY. GUIDE §3 lets
+    a feed item with no parseable date fall back to the observed date —
+    honest, because a feed carries what the publisher just published. A
+    listing page carries 20-50 entries reaching back months. Observation-
+    dating those would file dozens of old releases into today's digest AS
+    TODAY'S NEWS, and the backfill exclusion (AGENCYPR-EX-01) could not
+    catch a single one, because their claimed day would equal the digest
+    day. So this adapter inverts the feed rule: **an entry whose date this
+    parser cannot read is skipped, not observation-dated**, and the number
+    skipped is logged on every poll. A source that mostly yields skips is
+    a source we should not have activated; the log is how that shows up.
+
+    HOW AN ENTRY IS FOUND. One stdlib pass builds a parent-pointer tree of
+    the page (_ListingParser). For each plausible article anchor the
+    adapter walks up to the innermost ancestor whose subtree states any
+    date — the listing entry's own block. That block is accepted as the
+    entry only if it looks like one entry rather than the whole list:
+    either it holds at most MAX_BLOCK_ANCHORS links, or every date under
+    it names the same day (the date-headed grouping OFAC's Recent Actions
+    uses). The chosen date must also sit within MAX_DATE_DISTANCE text
+    runs of the anchor. Those two guards are what stop the failure mode
+    that would be worst: nrc.gov's listing states no per-entry dates at
+    all, only "Page Last Reviewed/Updated Tuesday, January 06, 2026" in
+    its footer — a naive nearest-date parser would stamp that footer date
+    onto 40 links, and this one returns nothing at all instead.
+
+    NO ARTICLE FETCHES. wants_article() is False, for budget before
+    access: the agency class holds 500 requests a day and hit that ceiling
+    on 2026-07-31. A listing carries what section 6 actually renders — an
+    attributed title, a URL, an agency-stated date (report._agency_lines
+    reads nothing else) — so an article fetch would multiply this class's
+    request count by the item count to enrich stored text nothing
+    currently reads. Mode is disclosed per item as "feed-only"; if a
+    source later needs full text, that is a separate adapter and a
+    separate budget decision, not a default.
+
+    PER-SOURCE HINT. The optional registry field `index_item_path`
+    restricts entries to anchors whose URL path starts with that string —
+    the one hint that repeatedly separates releases from the navigation
+    around them, and deliberately not a selector language. Everything else
+    is heuristic and identical across sources.
+
+    IDENTITY. These sources have no ingestion history, so URLs are
+    normalized freely (GUIDE §7 T5, docs/adding-sources.md): lowercased
+    scheme and host, fragment dropped, trailing slash dropped, query kept
+    — some listings identify an entry only by ?id=, and dropping the query
+    would collapse distinct releases into one."""
+
+    FORMAT = "html-index"
+    # A listing entry block holding more links than this is the list, not
+    # an entry — unless every date under it agrees, which is the shape of
+    # a date-headed group, and even then not past MAX_GROUP_ANCHORS.
+    MAX_BLOCK_ANCHORS = 4
+    MAX_GROUP_ANCHORS = 12
+    # A link repeated this often is furniture, not an entry: whitehouse.gov
+    # tags every release with its category ("Presidential Actions") and
+    # OFAC tags every action "Sanctions List Updates", both linked, both
+    # inside the entry's own block, and both otherwise indistinguishable
+    # from a release. A release is linked once, occasionally twice
+    # (thumbnail and headline).
+    MAX_LINK_REPEATS = 2
+    # ...and however tidy the markup looks, the date must be near the link
+    # in reading order. Counted in text runs, not characters.
+    MAX_DATE_DISTANCE = 60
+    # Belt and braces on a mis-parse: with wants_article() False this costs
+    # no requests, but it bounds what one bad page can push into a digest.
+    MAX_ITEMS = 60
+    # Titles shorter than this are navigation ("More", "Read", "News").
+    MIN_TITLE_CHARS = 12
+
+    def wants_article(self):
+        return False
+
+    def items(self, body, content_type):
+        try:
+            return self._parse(body, content_type)
+        except Exception as exc:  # noqa: BLE001 — items() must not raise
+            logger.warning("%s: html index unparsable: %r",
+                           self.entry.get("id", "html-index"), exc)
+            return None, []
+
+    # -- parsing --------------------------------------------------------
+    def _parse(self, body, content_type):
+        base = source_url(self.entry) or ""
+        parser = _ListingParser()
+        parser.feed(provenance.decode_body(body, content_type))
+        parser.close()
+
+        anchors = [a for a in parser.anchors if self._is_article_anchor(a, base)]
+        anchors = self._drop_repeats(anchors, base)
+        if not anchors:
+            logger.info("%s: listing page yielded no article links",
+                        self.entry.get("id", "html-index"))
+            return self.FORMAT, []
+
+        ancestry = _AncestryIndex(parser.parents)
+        anchor_counts, dates_by_node = ancestry.tally(anchors, parser.dates)
+        today = dt.date.fromisoformat(publication_date())
+        oldest = today - dt.timedelta(days=config.INDEX_LOOKBACK_DAYS)
+
+        out, seen, undated, outside = [], set(), 0, 0
+        for anchor in anchors:
+            dated = self._date_for(anchor, ancestry, anchor_counts, dates_by_node)
+            if dated is None:
+                undated += 1
+                continue
+            block, date_event = dated
+            if not oldest <= date_event["day"] <= today:
+                outside += 1
+                continue
+            link = urljoin(base, anchor["href"])
+            key = self._normalize(link)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(self._item(anchor, link, key, block, date_event,
+                                  ancestry, parser))
+        truncated = max(0, len(out) - self.MAX_ITEMS)
+        logger.info(
+            "%s: listing has %d article link(s); %d dated inside the %d-day"
+            " lookback, %d dated outside it, %d skipped for no readable date%s",
+            self.entry.get("id", "html-index"), len(anchors), len(out),
+            config.INDEX_LOOKBACK_DAYS, outside, undated,
+            f", {truncated} dropped over the {self.MAX_ITEMS}-item cap"
+            if truncated else "")
+        return self.FORMAT, out[:self.MAX_ITEMS]
+
+    def _is_article_anchor(self, anchor, base):
+        href = anchor["href"]
+        if not href or href.startswith(("#", "mailto:", "javascript:", "tel:")):
+            return False
+        if len(anchor["text"]) < self.MIN_TITLE_CHARS or " " not in anchor["text"]:
+            return False
+        link = urljoin(base, href)
+        parts, base_parts = urlsplit(link), urlsplit(base)
+        if parts.scheme not in ("http", "https"):
+            return False
+        # Offsite links on a newsroom page are other people's publications;
+        # this project cites the agency's own record (GUIDE §1).
+        if base_parts.netloc and parts.netloc.lower() != base_parts.netloc.lower():
+            return False
+        if parts.path.rstrip("/") == base_parts.path.rstrip("/"):
+            return False  # the listing linking to itself (pagination, "current")
+        hint = (self.entry.get("index_item_path") or "").strip()
+        return not hint or parts.path.startswith(hint)
+
+    def _drop_repeats(self, anchors, base):
+        counts = {}
+        for anchor in anchors:
+            key = self._normalize(urljoin(base, anchor["href"]))
+            counts[key] = counts.get(key, 0) + 1
+        return [a for a in anchors
+                if counts[self._normalize(urljoin(base, a["href"]))]
+                <= self.MAX_LINK_REPEATS]
+
+    def _date_for(self, anchor, ancestry, anchor_counts, dates_by_node):
+        """(block node, date event) for the entry this anchor belongs to,
+        or None when the page states no date that is credibly this
+        entry's. None is the honest answer, and the common one."""
+        for node in ancestry.chain(anchor["node"]):
+            events = dates_by_node.get(node)
+            if not events:
+                continue
+            count = anchor_counts.get(node, 0)
+            if count > self.MAX_BLOCK_ANCHORS and (
+                    count > self.MAX_GROUP_ANCHORS
+                    or len({e["day"] for e in events}) > 1):
+                return None  # this is the list, not one of its entries
+            best = min(events, key=lambda e: (abs(e["order"] - anchor["order"]),
+                                              e["kind"] != "time-attribute"))
+            if abs(best["order"] - anchor["order"]) > self.MAX_DATE_DISTANCE:
+                return None  # a page-furniture date (footer "last reviewed")
+            return node, best
+        return None
+
+    def _item(self, anchor, link, key, block, date_event, ancestry, parser):
+        description = self._description(anchor, block, ancestry, parser)
+        return {
+            "title": anchor["text"],
+            "link": link,
+            # No listing page publishes GUIDs; the normalized URL is the
+            # publisher's own identifier for the entry.
+            "guid": key,
+            # ISO-8601 so report._claimed_day can read it. Anything else
+            # would silently date the item by observation instead.
+            "claimed_date": date_event["day"].isoformat(),
+            "description": description,
+            "description_chars": len(description),
+            "extra": {
+                "index_url": source_url(self.entry) or "",
+                # How we dated it, and from what text — the audit trail for
+                # the one decision this adapter makes that could mislead.
+                "date_syntax": date_event["kind"],
+                "date_text": date_event["raw"],
+            },
+        }
+
+    def _description(self, anchor, block, ancestry, parser):
+        """The listing entry's own text minus its title — the teaser, when
+        the publisher writes one. This is what gets stored (wants_article
+        is False), so it is the item's content, not decoration."""
+        parts = []
+        for node, _order, text in parser.texts:
+            if node == anchor["node"] or not ancestry.contains(block, node):
+                continue
+            if ancestry.contains(anchor["node"], node):
+                continue  # markup inside the title link
+            if text not in parts:
+                parts.append(text)
+        return " ".join(parts)[:800].strip()
+
+    def _normalize(self, url):
+        parts = urlsplit(url)
+        return urlunsplit((parts.scheme.lower(), parts.netloc.lower(),
+                           parts.path.rstrip("/") or "/", parts.query, ""))
+
+    def stable_id(self, item):
+        # No history to preserve (activated 2026-07-31), so identity is the
+        # normalized URL from the start — see IDENTITY in the class docstring.
+        return item.get("guid") or self._normalize(item.get("link") or "")
+
+    def fallback_text(self, item):
+        """Title plus the listing's own teaser. Never raises, never blank
+        for an item that reached here: items() only emits titled anchors."""
+        parts = [item.get("title") or "", item.get("description") or ""]
+        return " — ".join(p for p in parts if p) or (item.get("link") or "")
+
+
+class _AncestryIndex:
+    """Parent-pointer walks, memoized. The listing parser produces one
+    parent array; every question the adapter asks of the tree ("which
+    block contains this anchor", "is this text inside that block") is a
+    walk up it, and the same walks repeat across dozens of anchors."""
+
+    def __init__(self, parents):
+        self._parents = parents
+        self._chains = {}
+
+    def chain(self, node):
+        """(node, its parent, ..., root) — the node itself first."""
+        cached = self._chains.get(node)
+        if cached is None:
+            chain, current = [], node
+            while current >= 0:
+                chain.append(current)
+                current = self._parents[current]
+            cached = self._chains[node] = tuple(chain)
+        return cached
+
+    def contains(self, ancestor, node):
+        return ancestor in self.chain(node)
+
+    def tally(self, anchors, dates):
+        """(anchors per subtree, date events per subtree) for every node
+        that has any — one pass up from each leaf, not a tree walk."""
+        anchor_counts, dates_by_node = {}, {}
+        for anchor in anchors:
+            for node in self.chain(anchor["node"]):
+                anchor_counts[node] = anchor_counts.get(node, 0) + 1
+        for event in dates:
+            for node in self.chain(event["node"]):
+                dates_by_node.setdefault(node, []).append(event)
+        return anchor_counts, dates_by_node
+
+
 ADAPTERS = {
     "rss": SourceAdapter,
     "rss-feed-only": FeedOnlyAdapter,
     "usps": UspsAdapter,
     "senate-votes": SenateVotesAdapter,
     "congress-bill-actions": CongressBillActionsAdapter,
+    "html-index": HtmlIndexAdapter,
 }
 
 
@@ -685,13 +1165,13 @@ def source_url(entry):
 
 # Registry types the agency poll loop can ingest. Widened as adapters
 # arrive; kept here so the three call sites cannot drift apart.
-INGESTIBLE_TYPES = ("rss", "xml-index", "api")
+INGESTIBLE_TYPES = ("rss", "xml-index", "api", "html-index")
 
 
 def adapter_for(entry):
     name = entry.get("adapter") or "rss"
     try:
-        return ADAPTERS[name]()
+        return ADAPTERS[name](entry)
     except KeyError:
         raise ValueError(
             f"source {entry.get('id', '<no id>')!r}: unknown adapter {name!r} "

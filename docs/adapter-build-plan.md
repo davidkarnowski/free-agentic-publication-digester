@@ -1,6 +1,6 @@
 # Adapter and source build-out plan
 
-*2026-07-31. Status: approved by the operator, not yet built. Any agent
+*2026-07-31. Status: phases 0-2 and 5 built; 3 revised, 4 outstanding. Any agent
 may pick this up phase by phase. Companion to `docs/adding-sources.md`
 (the five gates), `docs/code-standards.md` (§1 seams, §2 rules), and
 GUIDE §3 (source lifecycle) / §4 (respectful access). Evidence behind
@@ -242,19 +242,57 @@ entry `govinfo-dcpd` already exists (`sources/registry.yaml:112-124`).
 6. Corpus: `tests/conftest.py` `seed_corpus` + `EXPECTED_RULES`, and
    `tests/test_rules.py` exclusion-key expectations.
 
-## Phase 5 — `html-index` adapter (35 sources) — gated
+## Phase 5 — `html-index` adapter — ADAPTER SHIPPED 2026-07-31, 4 sources active
 
-Highest unlock, highest cost. **Do not start until the request-budget question
-is settled**: 35 sources fetching an index plus article pages materially
-changes daily load, and the agency class hit 500/500 on 2026-07-31.
+**Built against the 33 captured listing pages, activated on four.** The
+budget question the gate named is *not* settled and did not need to be:
+`wants_article()` is False, so a source costs **one request per poll**, not
+one plus one per item. Four active html-index sources cost four requests a
+poll; the same four on RSS-style article fetching would have cost ~34. The
+cadence decision the operator still owns is therefore "how many sources at
+what interval", a much smaller question than the gate assumed.
 
-When it proceeds: `items()` extracts `(title, link, date)` from a listing page
-heuristically (anchors inside repeated article/li structures) with an optional
-per-source CSS selector in the registry — which needs a new optional field, so
-`sources.OPTIONAL_FIELDS` (`sources.py:20`) changes first, because unknown
-fields are rejected (`sources.py:90-92`). Build against the bytes the probe
-already captured in `data/captures/` (`docs/adding-sources.md:67-71`) rather
-than fetching live.
+**Live run, 2026-07-31 (this machine):** 4 requests → 30 items stored, 0
+article fetches, 0 errors. 12 items carried the digest day and rendered in
+section 6; 18 were agency-dated earlier and were excluded under
+AGENCYPR-EX-01 and counted — the dating rule working, not a loss.
+
+**What the parser does.** One stdlib `html.parser` pass builds a
+parent-pointer tree; for each plausible article anchor it walks up to the
+innermost ancestor whose subtree states a date, and accepts that block as
+the entry only if the block looks like one entry (few links, or one agreed
+date) and the date sits near the anchor in reading order. No dependency was
+added.
+
+**The rule that matters most, and it inverts the feed rule:** an entry whose
+date cannot be read is **skipped, not observation-dated**. nrc.gov proves
+why — its "index" is a menu of year archives whose only date is a footer
+"Page Last Reviewed/Updated Tuesday, January 06, 2026"; a nearest-date
+parser would have stamped that onto 164 links, and observation-dating them
+would have put them in the digest as today's news where `AGENCYPR-EX-01`
+could not reach them. cbp.gov proves it twice: every entry there carries the
+same template `<time datetime="2020-09-30T12:00:00+01:00">`, and only the
+lookback window kept it out.
+
+**Yield across the 33 captures:** 21 produce correctly dated real releases,
+12 produce nothing. Of those 12, three are *correct* zeros (CBP's template
+date, TSA and SCOTUS with nothing inside the window) and nine are listings
+assembled client-side that state no date in the bytes served to us — a
+publisher-side limit, not an adapter gap. Every one of the 29 that stay
+planned now carries its measured result in its registry notes.
+
+**Registry field added:** `index_item_path` (`sources.OPTIONAL_FIELDS`), a URL
+path prefix, not a selector language. energy.gov is the case that needs it
+(its mega-menu shares blocks with its releases); it is registered nowhere
+yet because energy.gov is not being activated.
+
+**Still open:** SCOTUS slip opinions parse cleanly but are judicial record —
+activating them under AGENCYPR would subject opinions to the agency dating
+rule and executive-branch tagging, so they need their own adapter
+`COLLECTION` first, the way roll-call votes got `VOTES`. OFAC parses cleanly
+and was refused at the door: on 2026-07-31 23:57Z `ofac.treasury.gov` closed
+the connection on every one of five robots.txt attempts, so the client fell
+closed. Recheck; do not retry into submission.
 
 ## Governance gates (first, per GUIDE §10)
 
@@ -307,8 +345,15 @@ Per phase, in order:
 
 1. ~~Public-inspection counting (Phase 3)~~ — **settled 2026-07-31**: out of
    scope, published documents only. The FR count states what was published.
-2. Phase 5 budget: 35 html-index sources against a class budget that hit its
-   ceiling on 2026-07-31.
+2. ~~Phase 5 budget: 35 html-index sources against a class budget that hit its
+   ceiling on 2026-07-31.~~ — **reframed 2026-07-31 by measurement.** The
+   adapter fetches the listing and nothing else, so the cost is one request
+   per source per poll, not the ~48/source the gate feared. At the current
+   60-minute agency interval, each additional html-index source costs 24
+   requests a day. 21 of the 33 captured sources parse acceptably; activating
+   all 21 hourly would cost ~504/day on its own, which is the whole class
+   budget — so the live question is a cadence one: 21 sources at 2-hourly is
+   ~252/day, at 3-hourly ~168/day. Operator's call, now with arithmetic.
 3. regulations.gov needs its own key registration — an operator action; its
    documentation does not sanction reusing the api.data.gov key.
 4. **BLS fan-out (new, from Phase 1)** — one registry entry per program feed,

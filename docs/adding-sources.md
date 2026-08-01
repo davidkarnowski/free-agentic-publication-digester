@@ -57,6 +57,25 @@ session, so an `items()` reading an index must bound itself to
 hundreds of article fetches for items the §3 dating rule then excludes as
 backfill.
 
+**And an index item with no date is dropped, not observation-dated.**
+GUIDE §3 lets a *feed* item with no parseable date fall back to the
+observed date — honest, because a feed carries what the publisher just
+published. A listing page carries 20–50 entries reaching back months, so
+the same fallback would file dozens of old releases into today's digest as
+today's news, and `AGENCYPR-EX-01` could not catch one of them: their
+claimed day would equal the digest day. An `items()` reading an index
+therefore parses a date per entry or drops the entry, and logs how many it
+dropped (`HtmlIndexAdapter`, 2026-07-31). If a source drops most of what
+it lists, that is the source telling you it should not be active.
+
+Dates must also be **ISO-8601 or RFC 822** by the time they leave
+`items()`: `report._claimed_day` reads nothing else, so "July 30, 2026"
+passed through verbatim is silently replaced by the observation day —
+the failure the paragraph above exists to prevent. Convert with an
+explicit month table, never `strptime("%b")`, which reads the process's
+`LC_TIME` and would make the digest depend on the locale of the machine
+that rendered it.
+
 Most sources need **no code** — the default RSS adapter handles them. An
 adapter (subclass of `agencies.SourceAdapter`, registered in
 `agencies.ADAPTERS`, named by the entry's `adapter:` field) is warranted
@@ -69,6 +88,15 @@ only when one of four things genuinely differs:
 | `extract_text` | How do served bytes become text? | Script-rendered site embedding JSON-LD `articleBody` → parse the embedded JSON (static parsing of bytes we were sent — never script execution, never browser impersonation) |
 | `fallback_text` | What to store with no article text? | Title + feed description, mode disclosed |
 | `request_params` | What query does the index fetch carry? | An API endpoint's page size and sort order — and its key, which rides here so `HttpClient` can redact it from the fetch log (GUIDE §4). Never build a key into a URL string |
+
+An adapter may read one **per-source hint** from its registry entry. The
+only one that exists is `index_item_path` (type `html-index`): a URL path
+prefix an anchor must match to count as a listing entry, for sites whose
+navigation and whose releases are otherwise indistinguishable. It is a
+prefix and not a selector expression on purpose — a query language in the
+registry would put page-structure knowledge where no test can exercise it.
+Anything a prefix cannot express belongs in an adapter subclass, tested
+against captured bytes.
 
 An adapter may also hand the loop structured, render-ready fields by
 putting a dict in `item["extra"]`; they are stored under

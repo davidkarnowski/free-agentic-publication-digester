@@ -1,6 +1,8 @@
 """Agency ingestion tests: fakes only, no network."""
 
 import json
+import datetime as dt
+import pathlib
 
 import pytest
 
@@ -729,3 +731,211 @@ def test_publisher_dating_is_opt_in_per_adapter(env):
     # an unreadable claim falls back to observation, never to a guess
     assert agencies._issue_day({"claimed_date": "whenever"}, True) \
         == agencies.publication_date()
+# ------------------------------------------- the html-index adapter (P5) --
+#
+# Fixtures are verbatim slices of the listing regions of the bytes those
+# five publishers served on 2026-07-31, captured by the probe sweep and
+# stored content-addressed under data/captures. Nothing in them is
+# rewritten: an adapter tested against markup we invented would only be
+# tested against our idea of what a listing page looks like, and the four
+# shapes below (USWDS collection list, Drupal views rows, a date-headed
+# grouping, and an HTML table) differ from each other more than any
+# invented pair would have.
+
+FIXTURES = pathlib.Path(__file__).parent / "fixtures" / "html_index"
+
+
+def index_entry(source_id, url, **extra):
+    return {"id": source_id, "name": source_id, "type": "html-index",
+            "adapter": "html-index", "urls": {"index": url}, **extra}
+
+
+def fixture(name):
+    return (FIXTURES / f"{name}.html").read_bytes()
+
+
+@pytest.fixture
+def index_today(monkeypatch):
+    """Freeze the publication day: the fixtures were served 2026-07-31, so
+    the lookback window has to be evaluated as of that day forever."""
+    monkeypatch.setattr(agencies, "publication_date", lambda: "2026-07-31")
+
+
+def parse_fixture(name, url, **extra):
+    adapter = agencies.HtmlIndexAdapter(index_entry(name, url, **extra))
+    return adapter.items(fixture(name), "text/html; charset=utf-8")
+
+
+def test_html_index_reads_a_uswds_collection_list(index_today):
+    """dhs.gov: each entry is an <li> holding a <time datetime> and two
+    links to the same release (calendar tile and headline)."""
+    fmt, items = parse_fixture("dhs-newsroom", "https://www.dhs.gov/news-releases")
+    assert fmt == "html-index"
+    assert [i["claimed_date"] for i in items] == ["2026-07-31", "2026-07-30"]
+    assert items[0]["title"] == ("DHS Announces the Addition of 43 Companies to"
+                                " the UFLPA Entity List")
+    assert items[0]["link"] == ("https://www.dhs.gov/news/2026/07/31/"
+                                "dhs-announces-addition-43-companies-uflpa-entity-list")
+    assert items[0]["extra"]["date_syntax"] == "time-attribute"
+    # the listing's own teaser is the item's content: no article is fetched
+    assert "Forced Labor Enforcement Task Force" in items[0]["description"]
+
+
+def test_html_index_reads_drupal_views_rows(index_today):
+    """fema.gov: title, body and a <time datetime> carrying a full
+    timestamp, in three sibling divs rather than one nested block."""
+    _fmt, items = parse_fixture(
+        "fema-news", "https://www.fema.gov/about/news-multimedia/press-releases")
+    assert [i["claimed_date"] for i in items] == ["2026-07-31", "2026-07-30",
+                                                 "2026-07-30"]
+    assert items[0]["extra"]["date_text"] == "2026-07-31T09:30:00Z"
+    assert items[0]["description"].startswith("BATON ROUGE, La.")
+
+
+def test_html_index_reads_a_table_and_us_slash_dates(index_today):
+    """cftc.gov: a <table> whose date cell and link cell are siblings, and
+    whose visible date is 07/31/2026 — read month-first, as a US federal
+    publisher writing for a US audience."""
+    _fmt, items = parse_fixture("cftc-press",
+                               "https://www.cftc.gov/PressRoom/PressReleases")
+    assert [i["claimed_date"] for i in items] == ["2026-07-31", "2026-07-30"]
+    assert items[0]["link"].endswith("/PressRoom/PressReleases/9275-26")
+
+
+def test_html_index_reads_prose_dates_and_drops_repeated_links(index_today):
+    """ofac.treasury.gov: no <time> element anywhere — the day is prose,
+    "July 30, 2026". Each entry also links the same "Sanctions List
+    Updates" category page from inside its own block, otherwise
+    indistinguishable from a release; it is dropped for repeating."""
+    _fmt, items = parse_fixture("ofac-recent-actions",
+                               "https://ofac.treasury.gov/recent-actions")
+    assert [i["claimed_date"] for i in items] == ["2026-07-30", "2026-07-29",
+                                                 "2026-07-27"]
+    assert all(i["extra"]["date_syntax"] == "month-day-year" for i in items)
+    assert not any("sanctions-list-updates" in i["link"] for i in items)
+
+
+def test_html_index_drops_undated_entries_rather_than_dating_them(index_today):
+    """THE FAILURE THIS ADAPTER EXISTS TO AVOID. nrc.gov's news index is a
+    menu of year archives: many links, and exactly one date on the page —
+    "Page Last Reviewed/Updated Tuesday, January 06, 2026" in the footer.
+    A nearest-date parser would stamp that day onto every link. Dating them
+    by observation instead would be worse: they would enter the digest as
+    today's news and AGENCYPR-EX-01 could not exclude them, because their
+    claimed day would equal the digest day. The honest answer is no items."""
+    fmt, items = parse_fixture("nrc-news",
+                              "https://www.nrc.gov/reading-rm/doc-collections/news/")
+    assert fmt == "html-index"          # parsed fine; it just states no entries
+    assert items == []
+
+
+def test_html_index_lookback_bounds_what_a_listing_can_cost(index_today, monkeypatch):
+    """An index is not a feed: it reaches back months. Bounded to the
+    current day, the same FEMA listing yields only that day's releases."""
+    monkeypatch.setattr(config, "INDEX_LOOKBACK_DAYS", 0)
+    _fmt, items = parse_fixture(
+        "fema-news", "https://www.fema.gov/about/news-multimedia/press-releases")
+    assert [i["claimed_date"] for i in items] == ["2026-07-31"]
+
+
+def test_html_index_item_path_hint_filters_to_the_release_section(index_today):
+    """The one per-source hint is a URL path prefix, and it is a filter:
+    a prefix that matches nothing must leave nothing, not everything."""
+    _fmt, items = parse_fixture("dhs-newsroom", "https://www.dhs.gov/news-releases",
+                                index_item_path="/news/2026/07/31/")
+    assert [i["claimed_date"] for i in items] == ["2026-07-31"]
+    _fmt, none = parse_fixture("dhs-newsroom", "https://www.dhs.gov/news-releases",
+                               index_item_path="/nothing-here/")
+    assert none == []
+
+
+def test_html_index_identity_is_the_normalized_url(index_today):
+    """These sources start with no history, so identity normalizes from the
+    first poll (GUIDE §7 T5) — but the query string is kept, because some
+    listings identify an entry only by ?id=."""
+    adapter = agencies.HtmlIndexAdapter(index_entry("x", "https://x.gov/news"))
+    assert adapter.stable_id({"link": "HTTPS://X.GOV/News/a/#top"}) \
+        == "https://x.gov/News/a"
+    assert adapter.stable_id({"link": "https://x.gov/n?id=7"}) == "https://x.gov/n?id=7"
+    # guid wins when items() set one, so identity survives a link rewrite
+    assert adapter.stable_id({"guid": "g", "link": "https://x.gov/z"}) == "g"
+
+
+def test_html_index_never_raises_and_never_fetches_articles(index_today):
+    """items(), stable_id() and fallback_text() run before any storage
+    exists, so none of them may raise; wants_article() is False by design."""
+    adapter = agencies.HtmlIndexAdapter(index_entry("x", "https://x.gov/news"))
+    assert adapter.wants_article() is False
+    assert adapter.items(b"\xff\xfe not html at all", "text/html") == ("html-index", [])
+    assert adapter.items(b"<div><a href='/a'>", "text/html") == ("html-index", [])
+    assert adapter.fallback_text({"title": "T", "description": "D"}) == "T — D"
+    assert adapter.fallback_text({"link": "https://x.gov/a"}) == "https://x.gov/a"
+
+
+def test_html_index_dates_are_iso_so_the_digest_can_read_them(index_today):
+    """report._claimed_day parses RFC 822 or an ISO prefix and nothing
+    else. "July 30, 2026" straight off the page would be unreadable to it,
+    and the item would be dated by observation — the exact lie this
+    adapter refuses to tell."""
+    from fapd import report
+
+    _fmt, items = parse_fixture("ofac-recent-actions",
+                               "https://ofac.treasury.gov/recent-actions")
+    assert [report._claimed_day({"claimed_published_at": i["claimed_date"]})
+            for i in items] == ["2026-07-30", "2026-07-29", "2026-07-27"]
+
+
+def test_html_index_date_syntaxes_are_locale_independent():
+    """strptime('%b') reads LC_TIME; a month table does not. Every syntax
+    seen across the 33 captured listings, read the same on any machine."""
+    assert agencies._find_dates("July 30, 2026")[0][0] == dt.date(2026, 7, 30)
+    assert agencies._find_dates("Jul. 30, 2026")[0][0] == dt.date(2026, 7, 30)
+    assert agencies._find_dates("Sept 3, 2026")[0][0] == dt.date(2026, 9, 3)
+    assert agencies._find_dates("30 July 2026")[0][0] == dt.date(2026, 7, 30)
+    assert agencies._find_dates("2026-07-30")[0][0] == dt.date(2026, 7, 30)
+    assert agencies._find_dates("07/30/2026")[0][0] == dt.date(2026, 7, 30)
+    assert agencies._find_dates("7/30/26")[0][0] == dt.date(2026, 7, 30)
+    # not a date: no year, an impossible day, a version-looking string
+    assert agencies._find_dates("Jul 30") == []
+    assert agencies._find_dates("February 31, 2026") == []
+    assert agencies._find_dates("release 13/45/2026") == []
+
+
+def test_html_index_ingest_stores_agency_releases_feed_only(env, index_today):
+    """End to end through the shared loop: one request for the listing and
+    none for the entries, AGENCYPR collection, mode disclosed as feed-only."""
+    import json as _json
+
+    class FakeIndex:
+        def __init__(self):
+            self.calls = []
+
+        def get(self, url, params=None, headers=None):
+            self.calls.append(url)
+            return Resp(fixture("fema-news"),
+                        headers={"Content-Type": "text/html; charset=utf-8"})
+
+    entry = {**index_entry(
+        "fema-news", "https://www.fema.gov/about/news-multimedia/press-releases"),
+        "name": "FEMA"}
+    client = FakeIndex()
+    stats = agencies.poll_source(client, FakeWayback(), env, entry)
+    assert stats["feed_status"] == "html-index:3"
+    assert stats["new_items"] == 3
+    assert stats["articles_fetched"] == 0
+    assert len(client.calls) == 1        # the listing, and nothing else
+
+    rows = env.execute(
+        "SELECT collection, doc_type, title, text, metadata FROM extracted_texts"
+        " ORDER BY package_id").fetchall()
+    assert {r["collection"] for r in rows} == {"AGENCYPR"}
+    assert {r["doc_type"] for r in rows} == {"PRESS"}
+    metas = [_json.loads(r["metadata"]) for r in rows]
+    assert {m["mode"] for m in metas} == {"feed-only"}
+    assert all(m["claimed_published_at"].startswith("2026-07-3") for m in metas)
+    assert all("channel" not in m for m in metas)   # collect.py keys on absence
+    assert all(m["details"]["date_syntax"] == "time-attribute" for m in metas)
+    assert all(r["text"].strip() for r in rows)
+
+    # a second poll ingests nothing: identity is the normalized URL
+    assert agencies.poll_source(client, FakeWayback(), env, entry)["new_items"] == 0

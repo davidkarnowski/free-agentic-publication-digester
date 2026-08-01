@@ -3827,3 +3827,95 @@ client (verified on three URLs) and are cited anyway, because a citation
 is for a reader with a browser and we never force what a site refuses.
 14 new tests; 454 pass. The rendered digest and manifest were reverted —
 this branch carries code, not evidence.
+## 2026-07-31 — The html-index adapter, and the date that must not be guessed
+
+Phase 5 of the adapter plan: the last and largest shape, 33 listing pages
+that answer 200 with robots permitting and simply advertise no feed. The
+plan gated it on the request budget, because 35 sources fetching an index
+*plus each article* was thought to change daily load materially. The gate
+dissolved on inspection. Section 6 renders an attributed title, a URL and
+the agency's date, and nothing else; `report._agency_lines` reads no
+stored text at all. So `wants_article()` is False, and a source costs one
+request per poll rather than one plus one per item. Four sources went
+live tonight for **four requests** and thirty stored items.
+
+The real hazard was never the budget. **A feed is bounded and its items
+carry dates; an index page is neither.** GUIDE §3 lets a feed item with no
+parseable date fall back to the observation date — "the only honest
+option", because a feed carries what was just published. Apply that rule
+to a listing page and it becomes a lie: the page lists 20–50 entries
+reaching back months, and every one of them would enter today's digest
+dated today. `AGENCYPR-EX-01` could not catch a single one, because their
+claimed day would *equal* the digest day. So this adapter inverts the
+rule. An entry whose date cannot be read is skipped, and the count is
+logged on every poll.
+
+Two of the captures argue that case better than any reasoning could.
+nrc.gov's news "index" is a menu of year archives — 164 links, and
+exactly one date on the whole page: "Page Last Reviewed/Updated Tuesday,
+January 06, 2026", in the footer. A nearest-date parser stamps that onto
+all 164. cbp.gov is worse, because it looks well-formed: every entry
+carries a real `<time datetime>` element, and every one of them says
+`2020-09-30T12:00:00+01:00` — a template default. Only the lookback
+window kept those out, and if that placeholder had happened to say today,
+nothing would have. Both are pinned by tests; nrc.gov is a fixture.
+
+The parser is one `html.parser` pass building a parent-pointer tree, no
+new dependency (the dependency list stays at nine). For each plausible
+article anchor it walks up to the innermost ancestor whose subtree states
+a date — the entry's own block — and accepts it only if the block looks
+like one entry rather than the whole list: at most four links, or one
+agreed date, and the date within sixty text runs of the anchor. Those two
+guards are what reject nrc.gov. A third rule, added after whitehouse.gov
+listed "Presidential Actions" as though it were a release, drops any link
+repeated more than twice: a category tag lives inside each entry's block
+and is otherwise indistinguishable from the entry itself.
+
+Dates are converted to ISO before they leave `items()`, from an explicit
+month table. `report._claimed_day` reads RFC 822 or an ISO prefix and
+nothing else, so "July 30, 2026" passed through verbatim is silently
+replaced by the observation day — the exact failure above, arriving by a
+different door. And the table rather than `strptime("%b")` because %b
+reads `LC_TIME`: the same bytes would otherwise produce different digests
+on different machines. That one bit us in Phase 2 and did not get a
+second chance.
+
+Yield, honestly: of the 33 captured listings, **21 produce correctly
+dated real releases and 12 produce nothing**. Three of the twelve are
+*correct* zeros — CBP's template date, TSA and SCOTUS with nothing inside
+the seven-day window. The other nine are listings assembled client-side
+that state no date in the bytes served to us; that is a publisher-side
+limit, and the honest response is to record it, not to execute their
+JavaScript. Every one of the 29 sources that stay planned now carries its
+own measured result in its registry notes, so nobody has to re-derive
+this.
+
+Four activated, not twenty-one: dhs-newsroom (tier 1), fema-news,
+cftc-press, eeoc-newsroom. They were chosen to cover all three date
+syntaxes the corpus contains — `<time datetime>`, prose "July 30, 2026",
+and the 07/31/2026 table form — and each was read off its captured bytes
+entry by entry before being flipped. Thirty items ingested, twelve dated
+the digest day and rendered, eighteen agency-dated earlier and excluded
+as backfill, coverage reconciling at 30 published / 30 accounted / 0
+unaccounted.
+
+Two sources parse cleanly and are still not active, for reasons worth
+recording. SCOTUS slip opinions are judicial record, and AGENCYPR would
+subject them to the agency dating rule and executive-branch tagging —
+they need their own `COLLECTION` the way roll-call votes got `VOTES`.
+And OFAC, which parsed beautifully at 17:44Z, refused at the door at
+23:57Z: five attempts at `ofac.treasury.gov/robots.txt`, every one closed
+without a response, so the client fell closed and fetched nothing. That
+is the correct posture and not something to retry into submission. It
+also cost us the fourth prose-dated candidate, which is how eeoc-newsroom
+got the seat.
+
+One new registry field, `index_item_path` — a URL path prefix, not a
+selector expression. A query language in the registry would put
+page-structure knowledge somewhere no test can reach it. energy.gov is
+the case that needs it, and it is registered nowhere, because energy.gov
+is not being activated.
+
+469 tests. Separately, and in its own commit: `test_uscourts_fetch_policy`
+had a literal 2026-07-24 in it against a window measured from `now()`,
+and started failing when the UTC day rolled over mid-session.

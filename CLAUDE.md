@@ -145,6 +145,19 @@ uv run python scripts/sources_doc.py          # regenerate SOURCES.md after regi
   runs must work even if analysis modules break.
 - **`LLMClient._ensure_backend_column`** does an in-place ALTER — the
   deliberate micro-migration pattern for additive ledger changes.
+- **An undated index entry is DROPPED, never observation-dated** — the
+  inverse of the feed rule, deliberately. GUIDE §3 lets a feed item with
+  no parseable date fall back to the observed date because a feed carries
+  what was just published; a listing page carries months of entries, so
+  the same fallback would file dozens of old releases as today's news and
+  `AGENCYPR-EX-01` could not catch them (their claimed day would equal the
+  digest day). `HtmlIndexAdapter` logs the drop count on every poll; a
+  source that mostly drops is a source that should not be active.
+- **`HtmlIndexAdapter.wants_article()` is False on budget grounds, not
+  access grounds** — a listing carries everything section 6 renders
+  (title, URL, agency-stated date), so an article fetch would multiply the
+  agency class's request count by the item count for text nothing reads.
+  Four sources cost four requests per poll.
 - **Index adapters bound their own lookback** (`config.INDEX_LOOKBACK_DAYS`).
   `SourceAdapter.items()` is the enumeration seam; a feed is bounded by its
   publisher but an index is not — the Senate vote menu lists every vote of

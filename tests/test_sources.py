@@ -80,7 +80,13 @@ def test_registry_seeds_expected_active_sources():
         "senate-xml",
         # activated 2026-07-31 with the api adapter: Congress.gov's bill
         # endpoint, the first BILLACTIONS-collection source:
-        "congress-gov-api"}
+        "congress-gov-api",
+        # activated 2026-07-31 with the html-index adapter, from the 33
+        # captured listing pages of the 07-31 probe sweep. Four, not
+        # thirty-three: each was read off its captured bytes and verified
+        # to yield real releases carrying the publisher's own dates, and
+        # the class request budget makes cadence the operator's call:
+        "dhs-newsroom", "fema-news", "cftc-press", "eeoc-newsroom"}
 
 
 # ------------------------------------------------------------ coverage_stats --
@@ -117,6 +123,7 @@ def test_coverage_stats_per_tier_on_real_registry():
     # (07-30) + VA email (07-30 second wave) + SSA email (07-31 third wave)
     # + senate-xml roll-call votes (07-31, first xml-index source)
     # + congress-gov-api bill actions (07-31, first api source)
+    # + dhs-newsroom (07-31, first tier-1 html-index source)
     assert by_tier[1].get("active", 0) == 20
 
 
