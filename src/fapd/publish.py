@@ -2165,6 +2165,30 @@ def build_today(conn, out_dir=None, date=None):
     from .sync import publication_date
     date = date or publication_date()
     status = today_status(conn, date)
+    # The live page must apply the SAME dating discipline the digest does.
+    # It keys off the journal's digest_date, which for agency items is our
+    # OBSERVATION day — so first-activation backfill (usps-newsroom shipped
+    # 664 items dated back to 2021, odni-news 54) rendered as though it were
+    # today's news, while the digest correctly excluded it under
+    # AGENCYPR-EX-01. Same helper as report.py, so the two cannot drift.
+    from .report import _claimed_day
+
+    todays, backfill = [], []
+    for _i in status["items"]:
+        try:
+            meta = _json_mod.loads(_i.get("metadata") or "{}")
+        except (TypeError, ValueError):
+            meta = {}
+        claimed = _claimed_day(meta) if meta else None
+        if claimed is None:
+            claimed = _claimed_day({"claimed_published_at":
+                                    _i.get("claimed_published_at")})
+        _i["claimed_day"] = claimed
+        _i["is_backfill"] = bool(claimed and claimed != date)
+        (backfill if _i["is_backfill"] else todays).append(_i)
+    status["items"] = todays
+    status["backfill"] = backfill
+
     now = utc_now_iso()
 
     # Day-so-far chips (GUIDE §6 r12a): the date's stored section tags,
@@ -2230,7 +2254,13 @@ def build_today(conn, out_dir=None, date=None):
         (f'<p class="today-meta">Last updated <time class="utc"'
          f' datetime="{html.escape(now)}">{html.escape(_et_clock(now))} ET'
          f"</time> · {len(status['items'])} item(s) observed so far · "
-         f"{status['pending_llm']} item(s) awaiting model summary.</p>"),
+         f"{status['pending_llm']} item(s) awaiting model summary."
+         + (f" A further {len(status['backfill'])} item(s) arrived today"
+            " that their publishers date earlier; they are not this day's"
+            " news and are listed in the dated digest's coverage"
+            " accounting, not here."
+            if status.get("backfill") else "")
+         + "</p>"),
     ]
     if day_chips:
         parts.append('<p class="today-chips">Day so far: '
@@ -2277,12 +2307,14 @@ def build_today(conn, out_dir=None, date=None):
     (out_dir / "today.html").write_text(page, encoding="utf-8")
 
     json_items = []
-    for i in status["items"]:
+    for i in list(status["items"]) + list(status.get("backfill") or []):
         row = {k: v for k, v in i.items() if k != "opening"}
         row["opening_verbatim"] = i["opening"]  # official text, unedited
         row["official_url"] = _today_official_url(i)
         row["channel_label"] = _today_channel_label(i)
         row["tags"] = _today_item_tags(i)       # mechanical, zero-LLM
+        row["claimed_day"] = i.get("claimed_day")
+        row["is_backfill"] = bool(i.get("is_backfill"))
         json_items.append(row)
     (out_dir / "today.json").write_text(_json.dumps({
         "date": date,
@@ -2296,6 +2328,11 @@ def build_today(conn, out_dir=None, date=None):
                    "tags": "mechanical (branch, document type, agency);"
                            " no model-generated item tags yet"},
         "counts": status["counts"],
+        "backfill_count": len(status.get("backfill") or []),
+        "backfill_note": ("items observed today that their publisher dates"
+                          " earlier; excluded from this day's listing under"
+                          " the GUIDE §3 dating rule, and reported in the"
+                          " dated digest's coverage accounting"),
         "facets": {"tags": facets,
                    "note": "filter items client-side on items[].tags;"
                            " the human page offers the same keywords as"

@@ -2001,3 +2001,48 @@ def test_sources_json_uses_absolute_urls_when_a_base_is_configured(
     news = next(s for s in data["sources"] if s["id"] == "example-newsroom")
     assert news["card"] == (
         "https://fapd.info/sources.html#src-example-newsroom")
+
+
+def test_today_excludes_publisher_backdated_items(conn, tmp_path):
+    """The live page keys off our OBSERVATION day, so first-activation
+    backfill rendered as today's news: usps-newsroom shipped 664 items
+    dated back to 2021 and odni-news 54, all visible on /today while the
+    digest correctly excluded them under AGENCYPR-EX-01. The live view
+    must apply the same dating rule the digest does."""
+    import json
+
+    from conftest import DATE
+
+    _seed_today(conn)
+    # an item observed today that its publisher dates years ago
+    conn.execute("INSERT INTO packages (package_id, collection, date_issued,"
+                 " last_modified, title, first_seen_at) VALUES"
+                 " ('PR-old', 'AGENCYPR', ?, 'x', 'Old release', 'x')", (DATE,))
+    conn.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection,"
+        " doc_type, title, text, char_count, metadata, extracted_at,"
+        " extractor_version) VALUES ('PR-old', '', 'AGENCYPR', 'PRESS',"
+        " 'Old release', 'body', 4, ?, 'x', 1)",
+        (('{"source_id": "usps-newsroom", "mode": "feed-only",'
+          ' "claimed_published_at": "Fri, 24 Sep 2021 10:00:00 +0000"}'),))
+    conn.execute(
+        "INSERT INTO item_journal (observed_at, source_class, package_id,"
+        " granule_id, collection, source_id, digest_date, event) VALUES"
+        " (?, 'agency', 'PR-old', '', 'AGENCYPR', 'usps-newsroom', ?,"
+        "  'ingested')", (f"{DATE}T12:00:00Z", DATE))
+    conn.commit()
+
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+
+    assert "Old release" not in page, "a 2021 release must not read as today's news"
+    assert "publishers date earlier" in page          # disclosed, not hidden
+    assert "VA announces a claims program" in page    # today's items still shown
+
+    # agents still get everything, labelled
+    data = json.loads((tmp_path / "today.json").read_text())
+    assert data["backfill_count"] == 1
+    old = next(i for i in data["items"] if i["package_id"] == "PR-old")
+    assert old["is_backfill"] is True and old["claimed_day"] == "2021-09-24"
+    live = next(i for i in data["items"] if i["package_id"] == "AGENCYPR-x")
+    assert live["is_backfill"] is False

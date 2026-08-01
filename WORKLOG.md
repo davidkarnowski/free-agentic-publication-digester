@@ -3961,3 +3961,45 @@ two clients and two pacing clocks, breaking §4's promise that sources
 sharing a host share a clock. No host carries mixed types today, so it
 would have worked until someone registered an RSS feed alongside an HTML
 index on one domain. 485 tests.
+
+## 2026-07-31 — The live page was calling 2021 press releases today's news
+
+The operator opened /today and found it listing very old press releases.
+It was: **721 of 1,054 items claimed publisher dates before 25 July**,
+the oldest from September 2021. 664 came from usps-newsroom and 54 from
+odni-news — both activated today, both with feeds carrying their whole
+archive.
+
+Nobody missed the backfill. Phase 1's agent wrote that ODNI's feed "hands
+over all 54 items at once… before the dating rule excludes nearly all of
+it as backfill", and usps-newsroom's own activation note says its 669
+items are "the archive tail… backfill excluded under AGENCYPR-EX-01, not
+news". Both were right about the digest. What nobody checked is that the
+LIVE page had no such rule.
+
+The mechanism: `/today` lists journal rows by `digest_date`, which for
+agency items is our OBSERVATION day — so anything ingested today appears
+under today, whatever the publisher says. The digest reaches the opposite
+conclusion for the same items because `report._agency_rows` compares the
+claimed day against the digest day and files the mismatch as backfill.
+Two artifacts, one dating rule, applied in only one of them.
+
+Fixed by having the live page ask the same question with the same code:
+`build_today` now partitions on `report._claimed_day` — the identical
+helper, imported rather than reimplemented, so the two cannot drift — and
+renders only items the publisher dates today or does not date at all. The
+rest are counted and disclosed in place rather than hidden: "a further N
+item(s) arrived today that their publishers date earlier". today.json
+keeps every item and labels each with `claimed_day` and `is_backfill`,
+because an agent may legitimately want the archive; a human reading a
+page headed "Today" may not.
+
+The regression test seeds a 2021 release beside a live one and asserts
+the old one is absent from the page, the disclosure is present, and the
+JSON carries both with the right flags. 486 tests.
+
+The general lesson is about the two-artifact model itself: the digest and
+the live page are meant to differ in freshness and finality, not in
+editorial rules. Any rule that decides what belongs to a day has to be
+applied in both, and the way to guarantee that is to share the function
+rather than the intention.
