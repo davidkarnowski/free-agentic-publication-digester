@@ -304,10 +304,17 @@ def test_crec_download_inventories_granules(conn, raw_dir):
 
 def test_uscourts_fetch_policy_skips_old_cases(conn):
     # Rule USCOURTS-FETCH-01: churn on old cases is listed but not archived.
+    # The window the rule enforces is measured from now(), so the in-window
+    # case has to be too: a literal date here passes until the calendar
+    # walks past it and then fails for reasons that have nothing to do with
+    # the rule (it did, on 2026-08-01, having been written on 2026-07-25).
+    import datetime as _dt
+
+    recent = (_dt.datetime.now(_dt.UTC) - _dt.timedelta(days=1)).strftime("%Y-%m-%d")
     client = FakeClient()
     client.pages["collections/USCOURTS/"] = listing([
         {"packageId": "USCOURTS-ca9-1_26-cv-1", "lastModified": "2026-07-25T01:00:00Z",
-         "dateIssued": "2026-07-24"},
+         "dateIssued": recent},
         {"packageId": "USCOURTS-idb-1_04-bk-1", "lastModified": "2026-07-25T01:00:00Z",
          "dateIssued": "2011-03-02"},
     ])
