@@ -1,7 +1,7 @@
 {
  "available": true,
  "canonical": "sources/registry.yaml",
- "generated": "2026-08-01T12:29:26Z",
+ "generated": "2026-08-01T14:11:54Z",
  "health_labels": {
   "degraded": "at least 10% of our requests in the window returned no content, or the collector recorded 3 or more consecutive failed cycles",
   "delivering": "items arrived within the last 7 day(s) and our requests to this source's server were answered",
@@ -20,8 +20,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-crec",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T11:09:31Z",
-    "last_ok_at": "2026-08-01T11:09:31Z",
+    "last_cycle_at": "2026-08-01T12:59:10Z",
+    "last_ok_at": "2026-08-01T12:59:10Z",
     "worker": "govinfo"
    },
    "days_since_item": 2,
@@ -29,21 +29,21 @@
    "delivery_mode_note": null,
    "description": "The Congressional Record is the official verbatim record of congressional proceedings, published by the Government Publishing Office each day a chamber is in session. This collection carries the daily edition \u2014 House and Senate floor debate, Extensions of Remarks, and the Daily Digest \u2014 as structured XML (~2 MB of text on a typical session day) with PDF page images.",
    "fetch": {
-    "answered": 9181,
-    "attempts": 13199,
+    "answered": 9481,
+    "attempts": 13714,
     "client_error": 1,
-    "error_rate": 0.3044170012879764,
-    "error_rate_pct": 30.4,
+    "error_rate": 0.30866268047250983,
+    "error_rate_pct": 30.9,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-01T12:26:50.778+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.163+00:00",
     "no_response": 4,
-    "server_error": 4013,
+    "server_error": 4228,
     "shared_with_sources": 5,
-    "unanswered": 4018
+    "unanswered": 4233
    },
    "fetch_note": null,
    "health": "degraded",
-   "health_reason": "4018 of 13199 request(s) to api.govinfo.gov returned no content (30.4%, at or above the 10% mark).",
+   "health_reason": "4233 of 13714 request(s) to api.govinfo.gov returned no content (30.9%, at or above the 10% mark).",
    "id": "govinfo-crec",
    "identified_by": {
     "key": "CREC",
@@ -75,8 +75,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-bills",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T11:09:31Z",
-    "last_ok_at": "2026-08-01T11:09:31Z",
+    "last_cycle_at": "2026-08-01T12:59:10Z",
+    "last_ok_at": "2026-08-01T12:59:10Z",
     "worker": "govinfo"
    },
    "days_since_item": 2,
@@ -84,21 +84,21 @@
    "delivery_mode_note": null,
    "description": "Congress publishes bill and resolution text through the Government Publishing Office at each printed stage (introduced, engrossed, enrolled, and others). This collection carries the full text as XML, with roughly 60-70 new or revised bill printings on a typical publication day (~28 KB of text each).",
    "fetch": {
-    "answered": 9181,
-    "attempts": 13199,
+    "answered": 9481,
+    "attempts": 13714,
     "client_error": 1,
-    "error_rate": 0.3044170012879764,
-    "error_rate_pct": 30.4,
+    "error_rate": 0.30866268047250983,
+    "error_rate_pct": 30.9,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-01T12:26:50.778+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.163+00:00",
     "no_response": 4,
-    "server_error": 4013,
+    "server_error": 4228,
     "shared_with_sources": 5,
-    "unanswered": 4018
+    "unanswered": 4233
    },
    "fetch_note": null,
    "health": "degraded",
-   "health_reason": "4018 of 13199 request(s) to api.govinfo.gov returned no content (30.4%, at or above the 10% mark).",
+   "health_reason": "4233 of 13714 request(s) to api.govinfo.gov returned no content (30.9%, at or above the 10% mark).",
    "id": "govinfo-bills",
    "identified_by": {
     "key": "BILLS",
@@ -130,8 +130,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-fr",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T11:09:31Z",
-    "last_ok_at": "2026-08-01T11:09:31Z",
+    "last_cycle_at": "2026-08-01T12:59:10Z",
+    "last_ok_at": "2026-08-01T12:59:10Z",
     "worker": "govinfo"
    },
    "days_since_item": 1,
@@ -139,21 +139,21 @@
    "delivery_mode_note": null,
    "description": "The Federal Register is the executive branch's daily journal, compiled by the Office of the Federal Register and published each business day. This collection carries final rules, proposed rules, notices, and presidential documents as structured XML (~2.6 MB of text per issue), with an agency-written abstract per document.",
    "fetch": {
-    "answered": 9181,
-    "attempts": 13199,
+    "answered": 9481,
+    "attempts": 13714,
     "client_error": 1,
-    "error_rate": 0.3044170012879764,
-    "error_rate_pct": 30.4,
+    "error_rate": 0.30866268047250983,
+    "error_rate_pct": 30.9,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-01T12:26:50.778+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.163+00:00",
     "no_response": 4,
-    "server_error": 4013,
+    "server_error": 4228,
     "shared_with_sources": 5,
-    "unanswered": 4018
+    "unanswered": 4233
    },
    "fetch_note": null,
    "health": "degraded",
-   "health_reason": "4018 of 13199 request(s) to api.govinfo.gov returned no content (30.4%, at or above the 10% mark).",
+   "health_reason": "4233 of 13714 request(s) to api.govinfo.gov returned no content (30.9%, at or above the 10% mark).",
    "id": "govinfo-fr",
    "identified_by": {
     "key": "FR",
@@ -180,13 +180,13 @@
   },
   {
    "added": "2026-07-26",
-   "avg_chars": 11855,
+   "avg_chars": 11621,
    "branch": "judicial",
    "card": "https://fapd.info/sources.html#src-govinfo-uscourts",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T11:09:31Z",
-    "last_ok_at": "2026-08-01T11:09:31Z",
+    "last_cycle_at": "2026-08-01T12:59:10Z",
+    "last_ok_at": "2026-08-01T12:59:10Z",
     "worker": "govinfo"
    },
    "days_since_item": 1,
@@ -194,32 +194,32 @@
    "delivery_mode_note": null,
    "description": "The federal judiciary provides opinions to the Government Publishing Office through a partnership with the Administrative Office of the U.S. Courts. This collection carries opinions from ~140 participating appellate, district, bankruptcy, and national courts as case-shaped packages, posted with a lag after filing; it is participation-based, not the complete federal judicial record.",
    "fetch": {
-    "answered": 9181,
-    "attempts": 13199,
+    "answered": 9481,
+    "attempts": 13714,
     "client_error": 1,
-    "error_rate": 0.3044170012879764,
-    "error_rate_pct": 30.4,
+    "error_rate": 0.30866268047250983,
+    "error_rate_pct": 30.9,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-01T12:26:50.778+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.163+00:00",
     "no_response": 4,
-    "server_error": 4013,
+    "server_error": 4228,
     "shared_with_sources": 5,
-    "unanswered": 4018
+    "unanswered": 4233
    },
    "fetch_note": null,
    "health": "degraded",
-   "health_reason": "4018 of 13199 request(s) to api.govinfo.gov returned no content (30.4%, at or above the 10% mark).",
+   "health_reason": "4233 of 13714 request(s) to api.govinfo.gov returned no content (30.9%, at or above the 10% mark).",
    "id": "govinfo-uscourts",
    "identified_by": {
     "key": "USCOURTS",
     "kind": "collection"
    },
-   "items": 8317,
-   "items_per_day": 594.07,
+   "items": 8577,
+   "items_per_day": 612.64,
    "last_item_date": "2026-07-31",
    "max_chars": 1007446,
    "measured": true,
-   "median_chars": 4146,
+   "median_chars": 3960,
    "method": "govinfo collections API delta sync",
    "min_chars": 55,
    "name": "U.S. Courts Opinions (USCOURTS)",
@@ -240,8 +240,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-plaw",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T11:09:31Z",
-    "last_ok_at": "2026-08-01T11:09:31Z",
+    "last_cycle_at": "2026-08-01T12:59:10Z",
+    "last_ok_at": "2026-08-01T12:59:10Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -249,21 +249,21 @@
    "delivery_mode_note": null,
    "description": "After a bill becomes law by presidential signature or veto override, the Government Publishing Office publishes the enacted text as a slip law. This collection carries public and private law text, typically appearing weeks after enactment; same-day text is available through the BILLS enrolled stage.",
    "fetch": {
-    "answered": 9181,
-    "attempts": 13199,
+    "answered": 9481,
+    "attempts": 13714,
     "client_error": 1,
-    "error_rate": 0.3044170012879764,
-    "error_rate_pct": 30.4,
+    "error_rate": 0.30866268047250983,
+    "error_rate_pct": 30.9,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-01T12:26:50.778+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.163+00:00",
     "no_response": 4,
-    "server_error": 4013,
+    "server_error": 4228,
     "shared_with_sources": 5,
-    "unanswered": 4018
+    "unanswered": 4233
    },
    "fetch_note": null,
    "health": "degraded",
-   "health_reason": "4018 of 13199 request(s) to api.govinfo.gov returned no content (30.4%, at or above the 10% mark).",
+   "health_reason": "4233 of 13714 request(s) to api.govinfo.gov returned no content (30.9%, at or above the 10% mark).",
    "id": "govinfo-plaw",
    "identified_by": {
     "key": "PLAW",
@@ -295,8 +295,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-chrg",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T11:09:31Z",
-    "last_ok_at": "2026-08-01T11:09:31Z",
+    "last_cycle_at": "2026-08-01T12:59:10Z",
+    "last_ok_at": "2026-08-01T12:59:10Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -304,17 +304,17 @@
    "delivery_mode_note": null,
    "description": "Congressional committees publish their hearing records through the Government Publishing Office. This collection carries printed hearing transcripts \u2014 witness testimony and member questioning \u2014 released weeks to months after the hearing date.",
    "fetch": {
-    "answered": 9181,
-    "attempts": 13199,
+    "answered": 9481,
+    "attempts": 13714,
     "client_error": 1,
-    "error_rate": 0.3044170012879764,
-    "error_rate_pct": 30.4,
+    "error_rate": 0.30866268047250983,
+    "error_rate_pct": 30.9,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-01T12:26:50.778+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.163+00:00",
     "no_response": 4,
-    "server_error": 4013,
+    "server_error": 4228,
     "shared_with_sources": 5,
-    "unanswered": 4018
+    "unanswered": 4233
    },
    "fetch_note": null,
    "health": null,
@@ -350,8 +350,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-crpt",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T11:09:31Z",
-    "last_ok_at": "2026-08-01T11:09:31Z",
+    "last_cycle_at": "2026-08-01T12:59:10Z",
+    "last_ok_at": "2026-08-01T12:59:10Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -359,17 +359,17 @@
    "delivery_mode_note": null,
    "description": "House, Senate, and conference committees report legislation with written analyses. This collection carries committee reports \u2014 a committee's explanation of a bill's purpose, provisions, and cost \u2014 published through the Government Publishing Office as bills advance.",
    "fetch": {
-    "answered": 9181,
-    "attempts": 13199,
+    "answered": 9481,
+    "attempts": 13714,
     "client_error": 1,
-    "error_rate": 0.3044170012879764,
-    "error_rate_pct": 30.4,
+    "error_rate": 0.30866268047250983,
+    "error_rate_pct": 30.9,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-01T12:26:50.778+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.163+00:00",
     "no_response": 4,
-    "server_error": 4013,
+    "server_error": 4228,
     "shared_with_sources": 5,
-    "unanswered": 4018
+    "unanswered": 4233
    },
    "fetch_note": null,
    "health": null,
@@ -405,8 +405,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-dcpd",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T11:09:31Z",
-    "last_ok_at": "2026-08-01T11:09:31Z",
+    "last_cycle_at": "2026-08-01T12:59:10Z",
+    "last_ok_at": "2026-08-01T12:59:10Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -414,17 +414,17 @@
    "delivery_mode_note": null,
    "description": "The Office of the Federal Register compiles presidential materials released by the White House press secretary. This collection carries that compilation \u2014 statements, remarks, executive orders, proclamations, and nominations \u2014 published on a lag behind the events themselves.",
    "fetch": {
-    "answered": 9181,
-    "attempts": 13199,
+    "answered": 9481,
+    "attempts": 13714,
     "client_error": 1,
-    "error_rate": 0.3044170012879764,
-    "error_rate_pct": 30.4,
+    "error_rate": 0.30866268047250983,
+    "error_rate_pct": 30.9,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-01T12:26:50.778+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.163+00:00",
     "no_response": 4,
-    "server_error": 4013,
+    "server_error": 4228,
     "shared_with_sources": 5,
-    "unanswered": 4018
+    "unanswered": 4233
    },
    "fetch_note": null,
    "health": null,
@@ -611,8 +611,8 @@
    "card": "https://fapd.info/sources.html#src-defense-newsroom",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:25:03Z",
-    "last_ok_at": "2026-08-01T10:25:03Z",
+    "last_cycle_at": "2026-08-01T12:30:00Z",
+    "last_ok_at": "2026-08-01T12:30:00Z",
     "worker": "host:www.defense.gov"
    },
    "days_since_item": 1,
@@ -620,13 +620,13 @@
    "delivery_mode_note": "the feed's own summary \u2014 the source publishes no more than this through this channel",
    "description": "The Department of Defense directs the armed forces and military policy. This RSS feed carries its news releases and stories \u2014 operations, contracts, and personnel announcements \u2014 as title-only items (10 most recent; no description text), with full text only on article pages that block automated clients.",
    "fetch": {
-    "answered": 49,
-    "attempts": 87,
+    "answered": 51,
+    "attempts": 89,
     "client_error": 38,
-    "error_rate": 0.4367816091954023,
-    "error_rate_pct": 43.7,
+    "error_rate": 0.42696629213483145,
+    "error_rate_pct": 42.7,
     "host": "www.defense.gov",
-    "last_ok_at": "2026-08-01T12:26:51.473+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.862+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -634,7 +634,7 @@
    },
    "fetch_note": null,
    "health": "degraded",
-   "health_reason": "38 of 87 request(s) to www.defense.gov returned no content (43.7%, at or above the 10% mark).",
+   "health_reason": "38 of 89 request(s) to www.defense.gov returned no content (42.7%, at or above the 10% mark).",
    "id": "defense-newsroom",
    "identified_by": {
     "key": "defense-newsroom",
@@ -667,8 +667,8 @@
    "card": "https://fapd.info/sources.html#src-justice-newsroom",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:24:55Z",
-    "last_ok_at": "2026-08-01T10:24:55Z",
+    "last_cycle_at": "2026-08-01T12:30:08Z",
+    "last_ok_at": "2026-08-01T12:30:08Z",
     "worker": "host:www.justice.gov"
    },
    "days_since_item": 1,
@@ -676,13 +676,13 @@
    "delivery_mode_note": "the feed's own summary \u2014 the source publishes no more than this through this channel",
    "description": "The Department of Justice enforces federal law and represents the United States in court. Its Office of Public Affairs channel carries national press releases \u2014 indictments, plea agreements, settlements, and policy announcements \u2014 typically many items per business day across litigating divisions.",
    "fetch": {
-    "answered": 110,
-    "attempts": 111,
+    "answered": 112,
+    "attempts": 113,
     "client_error": 1,
-    "error_rate": 0.009009009009009009,
+    "error_rate": 0.008849557522123894,
     "error_rate_pct": 0.9,
     "host": "www.justice.gov",
-    "last_ok_at": "2026-08-01T12:26:51.274+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.738+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -690,7 +690,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "113 item(s) in the last 14 days; most recent 2026-07-31; 1 of 111 request(s) to www.justice.gov returned no content.",
+   "health_reason": "113 item(s) in the last 14 days; most recent 2026-07-31; 1 of 113 request(s) to www.justice.gov returned no content.",
    "id": "justice-newsroom",
    "identified_by": {
     "key": "justice-newsroom",
@@ -874,8 +874,8 @@
    "card": "https://fapd.info/sources.html#src-labor-newsroom",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:24:59Z",
-    "last_ok_at": "2026-08-01T10:24:59Z",
+    "last_cycle_at": "2026-08-01T12:30:03Z",
+    "last_ok_at": "2026-08-01T12:30:03Z",
     "worker": "host:www.dol.gov"
    },
    "days_since_item": 2,
@@ -883,13 +883,13 @@
    "delivery_mode_note": "full article text, fetched from the item's own page",
    "description": "The Department of Labor administers wage, workplace-safety, and benefits law and publishes major employment statistics. This RSS feed carries its national news releases \u2014 enforcement actions, rulemakings, and program announcements \u2014 with near-full-text descriptions (10 most recent items, ~1,800 characters each; article pages extract at ~6,000 characters).",
    "fetch": {
-    "answered": 101,
-    "attempts": 101,
+    "answered": 103,
+    "attempts": 103,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.dol.gov",
-    "last_ok_at": "2026-08-01T12:26:51.264+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.669+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -897,7 +897,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "15 item(s) in the last 14 days; most recent 2026-07-30; 0 of 101 request(s) to www.dol.gov returned no content.",
+   "health_reason": "15 item(s) in the last 14 days; most recent 2026-07-30; 0 of 103 request(s) to www.dol.gov returned no content.",
    "id": "labor-newsroom",
    "identified_by": {
     "key": "labor-newsroom",
@@ -1181,8 +1181,8 @@
    "card": "https://fapd.info/sources.html#src-va-newsroom",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:25:03Z",
-    "last_ok_at": "2026-08-01T10:25:03Z",
+    "last_cycle_at": "2026-08-01T12:30:13Z",
+    "last_ok_at": "2026-08-01T12:30:13Z",
     "worker": "host:news.va.gov"
    },
    "days_since_item": 1,
@@ -1190,13 +1190,13 @@
    "delivery_mode_note": "full article text, fetched from the item's own page",
    "description": "The Department of Veterans Affairs provides health care, benefits, and memorial services to veterans. This WordPress feed carries VA news releases and feature stories with teaser-length descriptions (30 most recent items, ~140 characters each; article pages extract at ~6,000 characters).",
    "fetch": {
-    "answered": 127,
-    "attempts": 128,
+    "answered": 129,
+    "attempts": 130,
     "client_error": 0,
-    "error_rate": 0.0078125,
+    "error_rate": 0.007692307692307693,
     "error_rate_pct": 0.8,
     "host": "news.va.gov",
-    "last_ok_at": "2026-08-01T12:26:51.234+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.809+00:00",
     "no_response": 1,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -1204,7 +1204,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "39 item(s) in the last 14 days; most recent 2026-07-31; 1 of 128 request(s) to news.va.gov returned no content.",
+   "health_reason": "39 item(s) in the last 14 days; most recent 2026-07-31; 1 of 130 request(s) to news.va.gov returned no content.",
    "id": "va-newsroom",
    "identified_by": {
     "key": "va-newsroom",
@@ -1241,13 +1241,13 @@
    "delivery_mode_note": "the feed's own summary \u2014 the source publishes no more than this through this channel",
    "description": "The Department of Homeland Security oversees border security, immigration enforcement, cybersecurity, and disaster response. Its news-release index carries departmental press releases and secretarial statements, typically several items per week; component agencies publish separately.",
    "fetch": {
-    "answered": 17,
-    "attempts": 17,
+    "answered": 19,
+    "attempts": 19,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.dhs.gov",
-    "last_ok_at": "2026-08-01T12:26:51.493+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.882+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -1255,7 +1255,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "10 item(s) in the last 14 days; most recent 2026-07-31; 0 of 17 request(s) to www.dhs.gov returned no content.",
+   "health_reason": "10 item(s) in the last 14 days; most recent 2026-07-31; 0 of 19 request(s) to www.dhs.gov returned no content.",
    "id": "dhs-newsroom",
    "identified_by": {
     "key": "dhs-newsroom",
@@ -1339,8 +1339,8 @@
    "card": "https://fapd.info/sources.html#src-sec-newsroom",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:24:52Z",
-    "last_ok_at": "2026-08-01T10:24:52Z",
+    "last_cycle_at": "2026-08-01T12:30:10Z",
+    "last_ok_at": "2026-08-01T12:30:10Z",
     "worker": "host:www.sec.gov"
    },
    "days_since_item": 2,
@@ -1348,13 +1348,13 @@
    "delivery_mode_note": "full article text, fetched from the item's own page",
    "description": "The Securities and Exchange Commission regulates securities markets and public-company disclosure. This RSS feed carries its press releases \u2014 enforcement actions, rulemakings, and commission announcements \u2014 as teaser descriptions (25 recent items, ~250 characters each; article pages extract at ~5,000 characters).",
    "fetch": {
-    "answered": 114,
-    "attempts": 114,
+    "answered": 116,
+    "attempts": 116,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.sec.gov",
-    "last_ok_at": "2026-08-01T12:26:51.204+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.612+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -1362,7 +1362,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "26 item(s) in the last 14 days; most recent 2026-07-30; 0 of 114 request(s) to www.sec.gov returned no content.",
+   "health_reason": "26 item(s) in the last 14 days; most recent 2026-07-30; 0 of 116 request(s) to www.sec.gov returned no content.",
    "id": "sec-newsroom",
    "identified_by": {
     "key": "sec-newsroom",
@@ -1446,8 +1446,8 @@
    "card": "https://fapd.info/sources.html#src-ftc-newsroom",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:24:45Z",
-    "last_ok_at": "2026-08-01T10:24:45Z",
+    "last_cycle_at": "2026-08-01T12:30:03Z",
+    "last_ok_at": "2026-08-01T12:30:03Z",
     "worker": "host:www.ftc.gov"
    },
    "days_since_item": 1,
@@ -1455,13 +1455,13 @@
    "delivery_mode_note": "full article text, fetched from the item's own page",
    "description": "The Federal Trade Commission enforces antitrust and consumer-protection law. This RSS feed carries its press releases \u2014 complaints, settlements, rule actions, and consumer-refund programs \u2014 with paragraph-length descriptions (10 most recent items, ~500 characters each; article pages extract at ~9,000 characters).",
    "fetch": {
-    "answered": 100,
-    "attempts": 100,
+    "answered": 102,
+    "attempts": 102,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.ftc.gov",
-    "last_ok_at": "2026-08-01T12:26:51.334+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.821+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -1469,7 +1469,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "12 item(s) in the last 14 days; most recent 2026-07-31; 0 of 100 request(s) to www.ftc.gov returned no content.",
+   "health_reason": "12 item(s) in the last 14 days; most recent 2026-07-31; 0 of 102 request(s) to www.ftc.gov returned no content.",
    "id": "ftc-newsroom",
    "identified_by": {
     "key": "ftc-newsroom",
@@ -1502,8 +1502,8 @@
    "card": "https://fapd.info/sources.html#src-nasa-newsroom",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:24:47Z",
-    "last_ok_at": "2026-08-01T10:24:47Z",
+    "last_cycle_at": "2026-08-01T12:30:11Z",
+    "last_ok_at": "2026-08-01T12:30:11Z",
     "worker": "host:www.nasa.gov"
    },
    "days_since_item": 0,
@@ -1511,13 +1511,13 @@
    "delivery_mode_note": "full article text, fetched from the item's own page",
    "description": "NASA conducts the civil space program and aeronautics research. This RSS feed carries the agency's breaking-news releases \u2014 missions, launches, crew activities, and research announcements \u2014 as teaser descriptions (10 most recent items, ~300 characters each; article pages extract at ~9,000 characters).",
    "fetch": {
-    "answered": 107,
-    "attempts": 107,
+    "answered": 109,
+    "attempts": 109,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.nasa.gov",
-    "last_ok_at": "2026-08-01T12:26:51.194+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.582+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -1525,7 +1525,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "37 item(s) in the last 14 days; most recent 2026-08-01; 0 of 107 request(s) to www.nasa.gov returned no content.",
+   "health_reason": "37 item(s) in the last 14 days; most recent 2026-08-01; 0 of 109 request(s) to www.nasa.gov returned no content.",
    "id": "nasa-newsroom",
    "identified_by": {
     "key": "nasa-newsroom",
@@ -1808,8 +1808,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-bulkdata",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T11:09:31Z",
-    "last_ok_at": "2026-08-01T11:09:31Z",
+    "last_cycle_at": "2026-08-01T12:59:10Z",
+    "last_ok_at": "2026-08-01T12:59:10Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -1817,17 +1817,17 @@
    "delivery_mode_note": null,
    "description": "The Government Publishing Office operates a bulk-data repository alongside the govinfo API. It serves complete XML directory trees for BILLS, the Federal Register, the Congressional Record, CFR/eCFR, and bill status \u2014 the intended channel for multi-day historical backfills rather than item-by-item API calls.",
    "fetch": {
-    "answered": 9181,
-    "attempts": 13199,
+    "answered": 9481,
+    "attempts": 13714,
     "client_error": 1,
-    "error_rate": 0.3044170012879764,
-    "error_rate_pct": 30.4,
+    "error_rate": 0.30866268047250983,
+    "error_rate_pct": 30.9,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-01T12:26:50.778+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.163+00:00",
     "no_response": 4,
-    "server_error": 4013,
+    "server_error": 4228,
     "shared_with_sources": 5,
-    "unanswered": 4018
+    "unanswered": 4233
    },
    "fetch_note": null,
    "health": null,
@@ -1858,27 +1858,27 @@
   },
   {
    "added": "2026-07-26",
-   "avg_chars": 6368,
+   "avg_chars": 6075,
    "branch": "legislative",
    "card": "https://fapd.info/sources.html#src-gao-reports",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:25:12Z",
-    "last_ok_at": "2026-08-01T10:25:12Z",
+    "last_cycle_at": "2026-08-01T12:30:07Z",
+    "last_ok_at": "2026-08-01T12:30:07Z",
     "worker": "host:www.gao.gov"
    },
-   "days_since_item": 2,
+   "days_since_item": 0,
    "delivery_mode": "feed-only",
    "delivery_mode_note": "the feed's own summary \u2014 the source publishes no more than this through this channel",
    "description": "The Government Accountability Office is Congress's audit and oversight arm. This RSS feed carries its reports and testimonies \u2014 program audits, evaluations, and legal decisions \u2014 with long report-summary descriptions (25 recent items, ~4,000 characters each; report pages extract at ~9,000 characters).",
    "fetch": {
-    "answered": 99,
-    "attempts": 99,
+    "answered": 101,
+    "attempts": 101,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.gao.gov",
-    "last_ok_at": "2026-08-01T12:26:51.442+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.841+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -1886,18 +1886,18 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "34 item(s) in the last 14 days; most recent 2026-07-30; 0 of 99 request(s) to www.gao.gov returned no content.",
+   "health_reason": "38 item(s) in the last 14 days; most recent 2026-08-01; 0 of 101 request(s) to www.gao.gov returned no content.",
    "id": "gao-reports",
    "identified_by": {
     "key": "gao-reports",
     "kind": "source_id"
    },
-   "items": 34,
-   "items_per_day": 2.43,
-   "last_item_date": "2026-07-30",
+   "items": 38,
+   "items_per_day": 2.71,
+   "last_item_date": "2026-08-01",
    "max_chars": 19164,
    "measured": true,
-   "median_chars": 6027,
+   "median_chars": 4524,
    "method": "RSS poll via AgencyClient, feed metadata only (crawl-delay economics; see notes).",
    "min_chars": 317,
    "name": "GAO Reports & Testimonies",
@@ -1973,13 +1973,13 @@
    "delivery_mode_note": null,
    "description": "The Congressional Research Service provides nonpartisan policy and legal analysis to members and committees of Congress. New and updated CRS reports, released under 2018 appropriations law, typically several items per business day.",
    "fetch": {
-    "answered": 13,
-    "attempts": 15,
+    "answered": 15,
+    "attempts": 17,
     "client_error": 2,
-    "error_rate": 0.13333333333333333,
-    "error_rate_pct": 13.3,
+    "error_rate": 0.11764705882352941,
+    "error_rate_pct": 11.8,
     "host": "api.congress.gov",
-    "last_ok_at": "2026-08-01T12:26:51.894+00:00",
+    "last_ok_at": "2026-08-01T14:10:22.283+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -2120,8 +2120,8 @@
    "card": "https://fapd.info/sources.html#src-federal-reserve-news",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:24:56Z",
-    "last_ok_at": "2026-08-01T10:24:56Z",
+    "last_cycle_at": "2026-08-01T12:29:58Z",
+    "last_ok_at": "2026-08-01T12:29:58Z",
     "worker": "host:www.federalreserve.gov"
    },
    "days_since_item": 1,
@@ -2129,13 +2129,13 @@
    "delivery_mode_note": "full article text, fetched from the item's own page",
    "description": "The Board of Governors of the Federal Reserve System conducts monetary policy and regulates bank holding companies. This RSS feed carries all board press releases \u2014 FOMC statements, monetary-policy actions, banking regulation, and enforcement \u2014 as title-plus-teaser items (20 recent, ~110 characters of description; article pages extract at ~10,000 characters).",
    "fetch": {
-    "answered": 74,
-    "attempts": 112,
+    "answered": 76,
+    "attempts": 114,
     "client_error": 38,
-    "error_rate": 0.3392857142857143,
-    "error_rate_pct": 33.9,
+    "error_rate": 0.3333333333333333,
+    "error_rate_pct": 33.3,
     "host": "www.federalreserve.gov",
-    "last_ok_at": "2026-08-01T12:26:51.284+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.666+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -2143,7 +2143,7 @@
    },
    "fetch_note": null,
    "health": "degraded",
-   "health_reason": "38 of 112 request(s) to www.federalreserve.gov returned no content (33.9%, at or above the 10% mark).",
+   "health_reason": "38 of 114 request(s) to www.federalreserve.gov returned no content (33.3%, at or above the 10% mark).",
    "id": "federal-reserve-news",
    "identified_by": {
     "key": "federal-reserve-news",
@@ -2330,13 +2330,13 @@
    "delivery_mode_note": "the feed's own summary \u2014 the source publishes no more than this through this channel",
    "description": "The Commodity Futures Trading Commission regulates U.S. derivatives markets. Its press-release index carries enforcement actions, rulemaking announcements, and commissioner statements, typically a few items per week.",
    "fetch": {
-    "answered": 17,
-    "attempts": 17,
+    "answered": 19,
+    "attempts": 19,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.cftc.gov",
-    "last_ok_at": "2026-08-01T12:26:51.311+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.727+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -2344,7 +2344,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "5 item(s) in the last 14 days; most recent 2026-07-31; 0 of 17 request(s) to www.cftc.gov returned no content.",
+   "health_reason": "5 item(s) in the last 14 days; most recent 2026-07-31; 0 of 19 request(s) to www.cftc.gov returned no content.",
    "id": "cftc-press",
    "identified_by": {
     "key": "cftc-press",
@@ -2581,13 +2581,13 @@
    "delivery_mode_note": "the feed's own summary \u2014 the source publishes no more than this through this channel",
    "description": "The Equal Employment Opportunity Commission enforces federal workplace anti-discrimination law. Its newsroom index carries press releases on lawsuits, settlements, and enforcement guidance, typically a few items per week.",
    "fetch": {
-    "answered": 17,
-    "attempts": 17,
+    "answered": 19,
+    "attempts": 19,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.eeoc.gov",
-    "last_ok_at": "2026-08-01T12:26:51.624+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.987+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -2595,7 +2595,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "6 item(s) in the last 14 days; most recent 2026-07-31; 0 of 17 request(s) to www.eeoc.gov returned no content.",
+   "health_reason": "6 item(s) in the last 14 days; most recent 2026-07-31; 0 of 19 request(s) to www.eeoc.gov returned no content.",
    "id": "eeoc-newsroom",
    "identified_by": {
     "key": "eeoc-newsroom",
@@ -2778,8 +2778,8 @@
    "card": "https://fapd.info/sources.html#src-usps-newsroom",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:24:49Z",
-    "last_ok_at": "2026-08-01T10:24:49Z",
+    "last_cycle_at": "2026-08-01T12:30:08Z",
+    "last_ok_at": "2026-08-01T12:30:08Z",
     "worker": "host:about.usps.com"
    },
    "days_since_item": 1,
@@ -2787,13 +2787,13 @@
    "delivery_mode_note": "the feed's own summary \u2014 the source publishes no more than this through this channel",
    "description": "The United States Postal Service is an independent establishment providing mail and package delivery. This autodiscovered RSS feed carries national news releases \u2014 stamp issuances, rates, service changes, and operations \u2014 as lede-paragraph descriptions with unusually deep history (668 items, ~270 characters each, no GUIDs); feed links route through a JavaScript redirect interstitial that carries no article text.",
    "fetch": {
-    "answered": 19,
-    "attempts": 19,
+    "answered": 21,
+    "attempts": 21,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "about.usps.com",
-    "last_ok_at": "2026-08-01T12:26:51.548+00:00",
+    "last_ok_at": "2026-08-01T14:10:22.001+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -2801,7 +2801,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "666 item(s) in the last 14 days; most recent 2026-07-31; 0 of 19 request(s) to about.usps.com returned no content.",
+   "health_reason": "666 item(s) in the last 14 days; most recent 2026-07-31; 0 of 21 request(s) to about.usps.com returned no content.",
    "id": "usps-newsroom",
    "identified_by": {
     "key": "usps-newsroom",
@@ -2884,8 +2884,8 @@
    "card": "https://fapd.info/sources.html#src-fda-press",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:24:45Z",
-    "last_ok_at": "2026-08-01T10:24:45Z",
+    "last_cycle_at": "2026-08-01T12:30:10Z",
+    "last_ok_at": "2026-08-01T12:30:10Z",
     "worker": "host:www.fda.gov"
    },
    "days_since_item": 3,
@@ -2893,13 +2893,13 @@
    "delivery_mode_note": "full article text, fetched from the item's own page",
    "description": "The Food and Drug Administration regulates drugs, medical devices, food safety, and tobacco. This RSS feed carries its press announcements \u2014 approvals, recalls, enforcement actions, and public-health advisories \u2014 as teaser descriptions (20 recent items, ~230 characters each; article pages extract cleanly at ~7,000 characters).",
    "fetch": {
-    "answered": 107,
-    "attempts": 107,
+    "answered": 109,
+    "attempts": 109,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.fda.gov",
-    "last_ok_at": "2026-08-01T12:26:51.533+00:00",
+    "last_ok_at": "2026-08-01T14:10:21.964+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -2907,7 +2907,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "21 item(s) in the last 14 days; most recent 2026-07-29; 0 of 107 request(s) to www.fda.gov returned no content.",
+   "health_reason": "21 item(s) in the last 14 days; most recent 2026-07-29; 0 of 109 request(s) to www.fda.gov returned no content.",
    "id": "fda-press",
    "identified_by": {
     "key": "fda-press",
@@ -3244,13 +3244,13 @@
    "delivery_mode_note": "the feed's own summary \u2014 the source publishes no more than this through this channel",
    "description": "The Federal Emergency Management Agency, within DHS, coordinates federal disaster response and recovery. Its national press-release index carries disaster declarations, response updates, and assistance-program announcements; volume rises sharply during active disasters.",
    "fetch": {
-    "answered": 17,
-    "attempts": 17,
+    "answered": 19,
+    "attempts": 19,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.fema.gov",
-    "last_ok_at": "2026-08-01T12:26:51.555+00:00",
+    "last_ok_at": "2026-08-01T14:10:22.042+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -3258,7 +3258,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "9 item(s) in the last 14 days; most recent 2026-07-31; 0 of 17 request(s) to www.fema.gov returned no content.",
+   "health_reason": "9 item(s) in the last 14 days; most recent 2026-07-31; 0 of 19 request(s) to www.fema.gov returned no content.",
    "id": "fema-news",
    "identified_by": {
     "key": "fema-news",
@@ -3691,8 +3691,8 @@
    "card": "https://fapd.info/sources.html#src-noaa-news",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:24:53Z",
-    "last_ok_at": "2026-08-01T10:24:53Z",
+    "last_cycle_at": "2026-08-01T12:30:24Z",
+    "last_ok_at": "2026-08-01T12:30:24Z",
     "worker": "host:www.noaa.gov"
    },
    "days_since_item": 4,
@@ -3700,13 +3700,13 @@
    "delivery_mode_note": "the feed's own summary \u2014 the source publishes no more than this through this channel",
    "description": "The National Oceanic and Atmospheric Administration, within Commerce, runs the National Weather Service and ocean, climate, and fisheries programs. Its news-release index carries announcements on weather, climate data, fisheries rules, and research, typically several items per week.",
    "fetch": {
-    "answered": 46,
-    "attempts": 84,
+    "answered": 48,
+    "attempts": 86,
     "client_error": 38,
-    "error_rate": 0.4523809523809524,
-    "error_rate_pct": 45.2,
+    "error_rate": 0.4418604651162791,
+    "error_rate_pct": 44.2,
     "host": "www.noaa.gov",
-    "last_ok_at": "2026-08-01T12:26:51.551+00:00",
+    "last_ok_at": "2026-08-01T14:10:22.111+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -3714,7 +3714,7 @@
    },
    "fetch_note": null,
    "health": "degraded",
-   "health_reason": "38 of 84 request(s) to www.noaa.gov returned no content (45.2%, at or above the 10% mark).",
+   "health_reason": "38 of 86 request(s) to www.noaa.gov returned no content (44.2%, at or above the 10% mark).",
    "id": "noaa-news",
    "identified_by": {
     "key": "noaa-news",
@@ -3747,8 +3747,8 @@
    "card": "https://fapd.info/sources.html#src-nist-news",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:25:00Z",
-    "last_ok_at": "2026-08-01T10:25:00Z",
+    "last_cycle_at": "2026-08-01T12:30:06Z",
+    "last_ok_at": "2026-08-01T12:30:06Z",
     "worker": "host:www.nist.gov"
    },
    "days_since_item": 4,
@@ -3756,13 +3756,13 @@
    "delivery_mode_note": "full article text, fetched from the item's own page",
    "description": "The National Institute of Standards and Technology, within Commerce, develops measurement science and technical standards. Its news index carries announcements on standards publications, research results, and technology programs, typically several items per week.",
    "fetch": {
-    "answered": 122,
-    "attempts": 122,
+    "answered": 124,
+    "attempts": 124,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.nist.gov",
-    "last_ok_at": "2026-08-01T12:26:51.580+00:00",
+    "last_ok_at": "2026-08-01T14:10:22.090+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -3770,7 +3770,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "40 item(s) in the last 14 days; most recent 2026-07-28; 0 of 122 request(s) to www.nist.gov returned no content.",
+   "health_reason": "40 item(s) in the last 14 days; most recent 2026-07-28; 0 of 124 request(s) to www.nist.gov returned no content.",
    "id": "nist-news",
    "identified_by": {
     "key": "nist-news",
@@ -4103,8 +4103,8 @@
    "card": "https://fapd.info/sources.html#src-uscourts-news",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:25:04Z",
-    "last_ok_at": "2026-08-01T10:25:04Z",
+    "last_cycle_at": "2026-08-01T12:30:23Z",
+    "last_ok_at": "2026-08-01T12:30:23Z",
     "worker": "host:news.uscourts.gov"
    },
    "days_since_item": 2,
@@ -4112,13 +4112,13 @@
    "delivery_mode_note": "full article text, fetched from the item's own page",
    "description": "The Administrative Office of the U.S. Courts supports the federal judiciary's administration. Its news index on uscourts.gov carries articles on judiciary operations, rulemaking, and Judicial Conference actions, typically a few items per week.",
    "fetch": {
-    "answered": 81,
-    "attempts": 81,
+    "answered": 83,
+    "attempts": 83,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "news.uscourts.gov",
-    "last_ok_at": "2026-08-01T12:26:51.950+00:00",
+    "last_ok_at": "2026-08-01T14:10:22.284+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -4126,7 +4126,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "12 item(s) in the last 14 days; most recent 2026-07-30; 0 of 81 request(s) to news.uscourts.gov returned no content.",
+   "health_reason": "12 item(s) in the last 14 days; most recent 2026-07-30; 0 of 83 request(s) to news.uscourts.gov returned no content.",
    "id": "uscourts-news",
    "identified_by": {
     "key": "uscourts-news",
@@ -4316,13 +4316,13 @@
    "delivery_mode_note": "the feed's own summary \u2014 the source publishes no more than this through this channel",
    "description": "The Library of Congress's official API for structured legislative data: committee meetings with witnesses and documents, nominations, treaties, bill actions and cosponsors, House roll-call votes (beta), daily Congressional Record metadata, and CRS reports. Fills the committee-activity and nominations coverage the pipeline currently lacks entirely.",
    "fetch": {
-    "answered": 13,
-    "attempts": 15,
+    "answered": 15,
+    "attempts": 17,
     "client_error": 2,
-    "error_rate": 0.13333333333333333,
-    "error_rate_pct": 13.3,
+    "error_rate": 0.11764705882352941,
+    "error_rate_pct": 11.8,
     "host": "api.congress.gov",
-    "last_ok_at": "2026-08-01T12:26:51.894+00:00",
+    "last_ok_at": "2026-08-01T14:10:22.283+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -4330,7 +4330,7 @@
    },
    "fetch_note": null,
    "health": "degraded",
-   "health_reason": "2 of 15 request(s) to api.congress.gov returned no content (13.3%, at or above the 10% mark).",
+   "health_reason": "2 of 17 request(s) to api.congress.gov returned no content (11.8%, at or above the 10% mark).",
    "id": "congress-gov-api",
    "identified_by": {
     "key": "congress-gov-api",
@@ -4419,13 +4419,13 @@
    "delivery_mode_note": "full article text, fetched from the item's own page",
    "description": "The Senate's officially documented directory of XML files: roll-call vote menus and individual votes, the committee hearings/meetings schedule, the floor schedule, and nine nomination-status files (pending, confirmed, withdrawn, failed \u2014 civilian and non-civilian). The only machine source for Senate votes.",
    "fetch": {
-    "answered": 23,
-    "attempts": 23,
+    "answered": 25,
+    "attempts": 25,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.senate.gov",
-    "last_ok_at": "2026-08-01T12:26:51.958+00:00",
+    "last_ok_at": "2026-08-01T14:10:22.519+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -4433,7 +4433,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "8 item(s) in the last 14 days; most recent 2026-07-31; 0 of 23 request(s) to www.senate.gov returned no content.",
+   "health_reason": "8 item(s) in the last 14 days; most recent 2026-07-31; 0 of 25 request(s) to www.senate.gov returned no content.",
    "id": "senate-xml",
    "identified_by": {
     "key": "senate-xml",
@@ -4670,8 +4670,8 @@
    "card": "https://fapd.info/sources.html#src-odni-news",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:25:05Z",
-    "last_ok_at": "2026-08-01T10:25:05Z",
+    "last_cycle_at": "2026-08-01T12:30:15Z",
+    "last_ok_at": "2026-08-01T12:30:15Z",
     "worker": "host:www.odni.gov"
    },
    "days_since_item": 1,
@@ -4679,13 +4679,13 @@
    "delivery_mode_note": "full article text, fetched from the item's own page",
    "description": "The Office of the Director of National Intelligence coordinates the intelligence community. Its newsroom carries press releases, statements, and declassification announcements at a low but steady rate \u2014 roughly two to four a month \u2014 and is the pipeline's only intelligence-community coverage.",
    "fetch": {
-    "answered": 69,
-    "attempts": 69,
+    "answered": 71,
+    "attempts": 71,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.odni.gov",
-    "last_ok_at": "2026-08-01T12:26:51.864+00:00",
+    "last_ok_at": "2026-08-01T14:10:22.167+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -4693,7 +4693,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "54 item(s) in the last 14 days; most recent 2026-07-31; 0 of 69 request(s) to www.odni.gov returned no content.",
+   "health_reason": "54 item(s) in the last 14 days; most recent 2026-07-31; 0 of 71 request(s) to www.odni.gov returned no content.",
    "id": "odni-news",
    "identified_by": {
     "key": "odni-news",
@@ -4726,8 +4726,8 @@
    "card": "https://fapd.info/sources.html#src-cisa-advisories",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:24:47Z",
-    "last_ok_at": "2026-08-01T10:24:47Z",
+    "last_cycle_at": "2026-08-01T12:30:04Z",
+    "last_ok_at": "2026-08-01T12:30:04Z",
     "worker": "host:www.cisa.gov"
    },
    "days_since_item": 2,
@@ -4735,13 +4735,13 @@
    "delivery_mode_note": "full article text, fetched from the item's own page",
    "description": "The Cybersecurity and Infrastructure Security Agency publishes cybersecurity advisories, alerts, and the Known Exploited Vulnerabilities (KEV) catalog \u2014 federal directives and warnings that constitute an action category the pipeline does not cover at all.",
    "fetch": {
-    "answered": 126,
-    "attempts": 126,
+    "answered": 128,
+    "attempts": 128,
     "client_error": 0,
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.cisa.gov",
-    "last_ok_at": "2026-08-01T12:26:51.802+00:00",
+    "last_ok_at": "2026-08-01T14:10:22.194+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -4749,7 +4749,7 @@
    },
    "fetch_note": null,
    "health": "delivering",
-   "health_reason": "45 item(s) in the last 14 days; most recent 2026-07-30; 0 of 126 request(s) to www.cisa.gov returned no content.",
+   "health_reason": "45 item(s) in the last 14 days; most recent 2026-07-30; 0 of 128 request(s) to www.cisa.gov returned no content.",
    "id": "cisa-advisories",
    "identified_by": {
     "key": "cisa-advisories",
@@ -5035,8 +5035,8 @@
    "card": "https://fapd.info/sources.html#src-treasury-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5079,8 +5079,8 @@
    "card": "https://fapd.info/sources.html#src-fincen-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5123,8 +5123,8 @@
    "card": "https://fapd.info/sources.html#src-ofr-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5166,8 +5166,8 @@
    "card": "https://fapd.info/sources.html#src-irs-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 2,
@@ -5210,8 +5210,8 @@
    "card": "https://fapd.info/sources.html#src-ssa-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5254,8 +5254,8 @@
    "card": "https://fapd.info/sources.html#src-justice-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5298,8 +5298,8 @@
    "card": "https://fapd.info/sources.html#src-usattorneys-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5342,8 +5342,8 @@
    "card": "https://fapd.info/sources.html#src-dea-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 2,
@@ -5386,8 +5386,8 @@
    "card": "https://fapd.info/sources.html#src-atf-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5430,8 +5430,8 @@
    "card": "https://fapd.info/sources.html#src-transportation-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5474,8 +5474,8 @@
    "card": "https://fapd.info/sources.html#src-faa-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5518,8 +5518,8 @@
    "card": "https://fapd.info/sources.html#src-nhtsa-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5562,8 +5562,8 @@
    "card": "https://fapd.info/sources.html#src-epa-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5606,8 +5606,8 @@
    "card": "https://fapd.info/sources.html#src-agriculture-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5650,8 +5650,8 @@
    "card": "https://fapd.info/sources.html#src-fsis-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5694,8 +5694,8 @@
    "card": "https://fapd.info/sources.html#src-uscg-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5737,8 +5737,8 @@
    "card": "https://fapd.info/sources.html#src-uscis-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 3,
@@ -5781,8 +5781,8 @@
    "card": "https://fapd.info/sources.html#src-fda-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 2,
@@ -5825,8 +5825,8 @@
    "card": "https://fapd.info/sources.html#src-cms-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 2,
@@ -5869,8 +5869,8 @@
    "card": "https://fapd.info/sources.html#src-va-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 2,
@@ -5913,8 +5913,8 @@
    "card": "https://fapd.info/sources.html#src-commercial-service-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5956,8 +5956,8 @@
    "card": "https://fapd.info/sources.html#src-state-week-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -6000,8 +6000,8 @@
    "card": "https://fapd.info/sources.html#src-federal-reserve-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -6043,8 +6043,8 @@
    "card": "https://fapd.info/sources.html#src-fdic-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -6087,8 +6087,8 @@
    "card": "https://fapd.info/sources.html#src-cpsc-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6131,8 +6131,8 @@
    "card": "https://fapd.info/sources.html#src-pbgc-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6174,8 +6174,8 @@
    "card": "https://fapd.info/sources.html#src-eac-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6217,8 +6217,8 @@
    "card": "https://fapd.info/sources.html#src-ussc-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6260,8 +6260,8 @@
    "card": "https://fapd.info/sources.html#src-usps-oig-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": 2,
@@ -6304,8 +6304,8 @@
    "card": "https://fapd.info/sources.html#src-hud-oig-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T10:40:47Z",
-    "last_ok_at": "2026-08-01T10:40:47Z",
+    "last_cycle_at": "2026-08-01T12:44:50Z",
+    "last_ok_at": "2026-08-01T12:44:50Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6361,9 +6361,9 @@
    "www.justice.gov",
    "www.noaa.gov"
   ],
-  "items_per_day": 893.2,
-  "items_window": 12505,
-  "requests_window": 14872,
+  "items_per_day": 912.1,
+  "items_window": 12769,
+  "requests_window": 15431,
   "sources_measured": 42,
   "sources_registered": 127,
   "sources_with_fetch_errors": 11,
