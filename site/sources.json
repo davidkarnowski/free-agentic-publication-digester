@@ -1,7 +1,7 @@
 {
  "available": true,
  "canonical": "sources/registry.yaml",
- "generated": "2026-08-02T00:54:33Z",
+ "generated": "2026-08-02T01:50:21Z",
  "health_labels": {
   "degraded": "at least 10% of our requests in the window returned no content, or the collector recorded 3 or more consecutive failed cycles",
   "delivering": "items arrived within the last 7 day(s) and our requests to this source's server were answered",
@@ -20,8 +20,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-crec",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:47:05Z",
-    "last_ok_at": "2026-08-01T23:47:05Z",
+    "last_cycle_at": "2026-08-02T01:21:41Z",
+    "last_ok_at": "2026-08-02T01:21:41Z",
     "worker": "govinfo"
    },
    "days_since_item": 2,
@@ -35,7 +35,7 @@
     "error_rate": 0.2947300771208226,
     "error_rate_pct": 29.5,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-02T00:45:36.921+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.304+00:00",
     "no_response": 4,
     "server_error": 4581,
     "shared_with_sources": 5,
@@ -75,8 +75,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-bills",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:47:05Z",
-    "last_ok_at": "2026-08-01T23:47:05Z",
+    "last_cycle_at": "2026-08-02T01:21:41Z",
+    "last_ok_at": "2026-08-02T01:21:41Z",
     "worker": "govinfo"
    },
    "days_since_item": 2,
@@ -90,7 +90,7 @@
     "error_rate": 0.2947300771208226,
     "error_rate_pct": 29.5,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-02T00:45:36.921+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.304+00:00",
     "no_response": 4,
     "server_error": 4581,
     "shared_with_sources": 5,
@@ -130,8 +130,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-fr",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:47:05Z",
-    "last_ok_at": "2026-08-01T23:47:05Z",
+    "last_cycle_at": "2026-08-02T01:21:41Z",
+    "last_ok_at": "2026-08-02T01:21:41Z",
     "worker": "govinfo"
    },
    "days_since_item": 1,
@@ -145,7 +145,7 @@
     "error_rate": 0.2947300771208226,
     "error_rate_pct": 29.5,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-02T00:45:36.921+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.304+00:00",
     "no_response": 4,
     "server_error": 4581,
     "shared_with_sources": 5,
@@ -180,13 +180,13 @@
   },
   {
    "added": "2026-07-26",
-   "avg_chars": 12090,
+   "avg_chars": 12177,
    "branch": "judicial",
    "card": "https://fapd.info/sources.html#src-govinfo-uscourts",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:47:05Z",
-    "last_ok_at": "2026-08-01T23:47:05Z",
+    "last_cycle_at": "2026-08-02T01:21:41Z",
+    "last_ok_at": "2026-08-02T01:21:41Z",
     "worker": "govinfo"
    },
    "days_since_item": 1,
@@ -200,7 +200,7 @@
     "error_rate": 0.2947300771208226,
     "error_rate_pct": 29.5,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-02T00:45:36.921+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.304+00:00",
     "no_response": 4,
     "server_error": 4581,
     "shared_with_sources": 5,
@@ -214,12 +214,12 @@
     "key": "USCOURTS",
     "kind": "collection"
    },
-   "items": 10471,
-   "items_per_day": 747.93,
+   "items": 10715,
+   "items_per_day": 765.36,
    "last_item_date": "2026-07-31",
    "max_chars": 1007446,
    "measured": true,
-   "median_chars": 4142,
+   "median_chars": 4195,
    "method": "govinfo collections API delta sync",
    "min_chars": 55,
    "name": "U.S. Courts Opinions (USCOURTS)",
@@ -240,8 +240,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-plaw",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:47:05Z",
-    "last_ok_at": "2026-08-01T23:47:05Z",
+    "last_cycle_at": "2026-08-02T01:21:41Z",
+    "last_ok_at": "2026-08-02T01:21:41Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -255,7 +255,7 @@
     "error_rate": 0.2947300771208226,
     "error_rate_pct": 29.5,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-02T00:45:36.921+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.304+00:00",
     "no_response": 4,
     "server_error": 4581,
     "shared_with_sources": 5,
@@ -295,8 +295,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-chrg",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:47:05Z",
-    "last_ok_at": "2026-08-01T23:47:05Z",
+    "last_cycle_at": "2026-08-02T01:21:41Z",
+    "last_ok_at": "2026-08-02T01:21:41Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -310,7 +310,7 @@
     "error_rate": 0.2947300771208226,
     "error_rate_pct": 29.5,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-02T00:45:36.921+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.304+00:00",
     "no_response": 4,
     "server_error": 4581,
     "shared_with_sources": 5,
@@ -350,8 +350,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-crpt",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:47:05Z",
-    "last_ok_at": "2026-08-01T23:47:05Z",
+    "last_cycle_at": "2026-08-02T01:21:41Z",
+    "last_ok_at": "2026-08-02T01:21:41Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -365,7 +365,7 @@
     "error_rate": 0.2947300771208226,
     "error_rate_pct": 29.5,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-02T00:45:36.921+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.304+00:00",
     "no_response": 4,
     "server_error": 4581,
     "shared_with_sources": 5,
@@ -405,8 +405,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-dcpd",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:47:05Z",
-    "last_ok_at": "2026-08-01T23:47:05Z",
+    "last_cycle_at": "2026-08-02T01:21:41Z",
+    "last_ok_at": "2026-08-02T01:21:41Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -420,7 +420,7 @@
     "error_rate": 0.2947300771208226,
     "error_rate_pct": 29.5,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-02T00:45:36.921+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.304+00:00",
     "no_response": 4,
     "server_error": 4581,
     "shared_with_sources": 5,
@@ -626,7 +626,7 @@
     "error_rate": 0.3220338983050847,
     "error_rate_pct": 32.2,
     "host": "www.defense.gov",
-    "last_ok_at": "2026-08-02T00:45:38.531+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.973+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -682,7 +682,7 @@
     "error_rate": 0.007042253521126761,
     "error_rate_pct": 0.7,
     "host": "www.justice.gov",
-    "last_ok_at": "2026-08-02T00:45:47.226+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.768+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -889,7 +889,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.dol.gov",
-    "last_ok_at": "2026-08-02T00:45:38.200+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.736+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -1196,7 +1196,7 @@
     "error_rate": 0.00625,
     "error_rate_pct": 0.6,
     "host": "news.va.gov",
-    "last_ok_at": "2026-08-02T00:45:38.208+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.762+00:00",
     "no_response": 1,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -1247,7 +1247,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.dhs.gov",
-    "last_ok_at": "2026-08-02T00:45:38.435+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.967+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -1339,8 +1339,8 @@
    "card": "https://fapd.info/sources.html#src-sec-newsroom",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:32:13Z",
-    "last_ok_at": "2026-08-01T23:32:13Z",
+    "last_cycle_at": "2026-08-02T00:55:44Z",
+    "last_ok_at": "2026-08-02T00:55:44Z",
     "worker": "host:www.sec.gov"
    },
    "days_since_item": 2,
@@ -1354,7 +1354,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.sec.gov",
-    "last_ok_at": "2026-08-02T00:45:38.191+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.793+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -1461,7 +1461,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.ftc.gov",
-    "last_ok_at": "2026-08-02T00:45:42.286+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.839+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -1517,7 +1517,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.nasa.gov",
-    "last_ok_at": "2026-08-02T00:45:38.208+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.719+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -1808,8 +1808,8 @@
    "card": "https://fapd.info/sources.html#src-govinfo-bulkdata",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:47:05Z",
-    "last_ok_at": "2026-08-01T23:47:05Z",
+    "last_cycle_at": "2026-08-02T01:21:41Z",
+    "last_ok_at": "2026-08-02T01:21:41Z",
     "worker": "govinfo"
    },
    "days_since_item": null,
@@ -1823,7 +1823,7 @@
     "error_rate": 0.2947300771208226,
     "error_rate_pct": 29.5,
     "host": "api.govinfo.gov",
-    "last_ok_at": "2026-08-02T00:45:36.921+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.304+00:00",
     "no_response": 4,
     "server_error": 4581,
     "shared_with_sources": 5,
@@ -1878,7 +1878,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.gao.gov",
-    "last_ok_at": "2026-08-02T00:52:38.345+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.873+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -1979,7 +1979,7 @@
     "error_rate": 0.043478260869565216,
     "error_rate_pct": 4.3,
     "host": "api.congress.gov",
-    "last_ok_at": "2026-08-02T00:45:41.456+00:00",
+    "last_ok_at": "2026-08-02T01:49:38.396+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -2135,7 +2135,7 @@
     "error_rate": 0.26573426573426573,
     "error_rate_pct": 26.6,
     "host": "www.federalreserve.gov",
-    "last_ok_at": "2026-08-02T00:45:39.298+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.851+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -2336,7 +2336,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.cftc.gov",
-    "last_ok_at": "2026-08-02T00:45:39.236+00:00",
+    "last_ok_at": "2026-08-02T01:49:37.826+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -2587,7 +2587,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.eeoc.gov",
-    "last_ok_at": "2026-08-02T00:45:39.294+00:00",
+    "last_ok_at": "2026-08-02T01:49:38.077+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -2793,7 +2793,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "about.usps.com",
-    "last_ok_at": "2026-08-02T00:45:39.559+00:00",
+    "last_ok_at": "2026-08-02T01:49:38.147+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -2899,7 +2899,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.fda.gov",
-    "last_ok_at": "2026-08-02T00:46:08.602+00:00",
+    "last_ok_at": "2026-08-02T01:49:38.109+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -3250,7 +3250,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.fema.gov",
-    "last_ok_at": "2026-08-02T00:45:54.264+00:00",
+    "last_ok_at": "2026-08-02T01:49:38.038+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -3706,7 +3706,7 @@
     "error_rate": 0.33043478260869563,
     "error_rate_pct": 33.0,
     "host": "www.noaa.gov",
-    "last_ok_at": "2026-08-02T00:45:40.346+00:00",
+    "last_ok_at": "2026-08-02T01:49:38.101+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -3762,7 +3762,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.nist.gov",
-    "last_ok_at": "2026-08-02T00:45:40.389+00:00",
+    "last_ok_at": "2026-08-02T01:49:38.102+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -4118,7 +4118,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "news.uscourts.gov",
-    "last_ok_at": "2026-08-02T00:45:40.747+00:00",
+    "last_ok_at": "2026-08-02T01:49:38.678+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -4322,7 +4322,7 @@
     "error_rate": 0.043478260869565216,
     "error_rate_pct": 4.3,
     "host": "api.congress.gov",
-    "last_ok_at": "2026-08-02T00:45:41.456+00:00",
+    "last_ok_at": "2026-08-02T01:49:38.396+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -4425,7 +4425,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.senate.gov",
-    "last_ok_at": "2026-08-02T00:45:41.431+00:00",
+    "last_ok_at": "2026-08-02T01:49:38.278+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -4685,7 +4685,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.odni.gov",
-    "last_ok_at": "2026-08-02T00:45:50.779+00:00",
+    "last_ok_at": "2026-08-02T01:49:38.308+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -4741,7 +4741,7 @@
     "error_rate": 0.0,
     "error_rate_pct": 0.0,
     "host": "www.cisa.gov",
-    "last_ok_at": "2026-08-02T00:45:42.509+00:00",
+    "last_ok_at": "2026-08-02T01:49:38.331+00:00",
     "no_response": 0,
     "server_error": 0,
     "shared_with_sources": 1,
@@ -5035,8 +5035,8 @@
    "card": "https://fapd.info/sources.html#src-treasury-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5079,8 +5079,8 @@
    "card": "https://fapd.info/sources.html#src-fincen-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5123,8 +5123,8 @@
    "card": "https://fapd.info/sources.html#src-ofr-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5166,8 +5166,8 @@
    "card": "https://fapd.info/sources.html#src-irs-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 2,
@@ -5210,8 +5210,8 @@
    "card": "https://fapd.info/sources.html#src-ssa-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 0,
@@ -5254,8 +5254,8 @@
    "card": "https://fapd.info/sources.html#src-justice-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5298,8 +5298,8 @@
    "card": "https://fapd.info/sources.html#src-usattorneys-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5342,8 +5342,8 @@
    "card": "https://fapd.info/sources.html#src-dea-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 2,
@@ -5386,8 +5386,8 @@
    "card": "https://fapd.info/sources.html#src-atf-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5430,8 +5430,8 @@
    "card": "https://fapd.info/sources.html#src-transportation-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5474,8 +5474,8 @@
    "card": "https://fapd.info/sources.html#src-faa-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5518,8 +5518,8 @@
    "card": "https://fapd.info/sources.html#src-nhtsa-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5562,8 +5562,8 @@
    "card": "https://fapd.info/sources.html#src-epa-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5606,8 +5606,8 @@
    "card": "https://fapd.info/sources.html#src-agriculture-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5650,8 +5650,8 @@
    "card": "https://fapd.info/sources.html#src-fsis-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -5694,8 +5694,8 @@
    "card": "https://fapd.info/sources.html#src-uscg-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5737,8 +5737,8 @@
    "card": "https://fapd.info/sources.html#src-uscis-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 3,
@@ -5781,8 +5781,8 @@
    "card": "https://fapd.info/sources.html#src-fda-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 2,
@@ -5825,8 +5825,8 @@
    "card": "https://fapd.info/sources.html#src-cms-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 2,
@@ -5869,8 +5869,8 @@
    "card": "https://fapd.info/sources.html#src-va-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 2,
@@ -5913,8 +5913,8 @@
    "card": "https://fapd.info/sources.html#src-commercial-service-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -5956,8 +5956,8 @@
    "card": "https://fapd.info/sources.html#src-state-week-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -6000,8 +6000,8 @@
    "card": "https://fapd.info/sources.html#src-federal-reserve-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -6043,8 +6043,8 @@
    "card": "https://fapd.info/sources.html#src-fdic-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 1,
@@ -6087,8 +6087,8 @@
    "card": "https://fapd.info/sources.html#src-cpsc-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6131,8 +6131,8 @@
    "card": "https://fapd.info/sources.html#src-pbgc-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6174,8 +6174,8 @@
    "card": "https://fapd.info/sources.html#src-eac-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6217,8 +6217,8 @@
    "card": "https://fapd.info/sources.html#src-ussc-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6260,8 +6260,8 @@
    "card": "https://fapd.info/sources.html#src-usps-oig-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": 2,
@@ -6304,8 +6304,8 @@
    "card": "https://fapd.info/sources.html#src-hud-oig-email",
    "collector": {
     "consecutive_errors": 0,
-    "last_cycle_at": "2026-08-01T23:48:16Z",
-    "last_ok_at": "2026-08-01T23:48:16Z",
+    "last_cycle_at": "2026-08-02T01:11:16Z",
+    "last_ok_at": "2026-08-02T01:11:16Z",
     "worker": "email"
    },
    "days_since_item": null,
@@ -6361,8 +6361,8 @@
    "www.justice.gov",
    "www.noaa.gov"
   ],
-  "items_per_day": 1047.6,
-  "items_window": 14666,
+  "items_per_day": 1065.0,
+  "items_window": 14910,
   "requests_window": 17913,
   "sources_measured": 42,
   "sources_registered": 127,
