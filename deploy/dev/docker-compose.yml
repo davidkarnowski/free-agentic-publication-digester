@@ -1,0 +1,94 @@
+name: fapd-dev
+
+# The LOCAL dev stack (deploy/dev/README.md is the runbook): the same
+# backend image recipe as production, against a cold VACUUM INTO seed of
+# the VPS databases, serving on http://localhost:8080 — so rendering
+# changes are seen on production-shaped data BEFORE any deploy. Built by
+# dev-up.sh, which stages repo/ first (the Dockerfile's COPY repo/ /app
+# expects it) and runs the guard checks.
+#
+# Guardrails this file is pinned to by tests/test_dev_stack.py:
+# - the end-of-day flag appears NOWHERE here: a fresh collector_state has
+#   no eod row, so the finalizer — full pipeline, LLM chain, evidence
+#   push — would fire within a cycle of boot.
+# - no secrets/ mount and no evidence-push variable: this stack must be
+#   physically unable to write to the production repository.
+# - the render service overrides the entrypoint entirely, so the prod
+#   image's default supervisor invocation never runs by accident.
+#
+# Resource limits and log rotation are set HERE and not yet in prod —
+# deliberately modeling review D19/R4 so the production compose change
+# (deploy-gated, Operations backlog) copies a tested block. Temporary
+# divergence by intent.
+
+services:
+  web:
+    image: nginx:1.30-alpine        # same pin as production
+    container_name: fapd-dev-web
+    restart: unless-stopped
+    ports: ["8080:80"]              # published directly; no edge proxy in dev
+    volumes:
+      - fapd-site:/usr/share/nginx/html:ro
+    mem_limit: 128m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "3" }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  # Default mode: render-and-exit. Runs exactly the two commands
+  # deploy.sh runs post-up on production (F-009: the site volume seeds
+  # from the image only on FIRST mount — rendering must be explicit).
+  # The origin re-flip deploy.sh also runs is VPS-only (F-008) and is
+  # deliberately not mirrored.
+  render:
+    build:
+      context: .
+      dockerfile: ../vps/Dockerfile.backend
+    image: fapd-dev-backend:latest
+    container_name: fapd-dev-render
+    restart: "no"
+    entrypoint: ["sh", "-c"]
+    command:
+      - uv run python scripts/build_site.py &&
+        uv run python -c 'from fapd import db, publish; publish.build_today(db.connect())'
+    env_file: .env
+    volumes:
+      - fapd-data:/app/data
+      - fapd-site:/app/site
+    mem_limit: 1g
+    cpus: 1.0
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "3" }
+
+  # Opt-in live collection: ONE serial cycle (run_once), mechanical
+  # only, no archive writes. Never the supervisor daemon (the pause/
+  # drain contract is a queued Operations task), never the finalizer.
+  # Requires a SEPARATE dev GOVINFO_API_KEY in .env — budgets count from
+  # each machine's own fetch log, so dev and prod sharing a key would
+  # each believe they are under the publisher's limit.
+  collector:
+    profiles: ["live"]
+    image: fapd-dev-backend:latest
+    container_name: fapd-dev-collector
+    restart: "no"
+    command: ["--once", "--no-llm", "--no-wayback"]
+    env_file: .env
+    volumes:
+      - fapd-data:/app/data
+      - fapd-site:/app/site
+    mem_limit: 1g
+    cpus: 1.0
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "3" }
+
+volumes:
+  fapd-site:
+  fapd-data:

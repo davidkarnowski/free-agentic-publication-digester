@@ -30,11 +30,12 @@ rsync -az --delete --exclude '.DS_Store' \
 # The backend image bakes the tested working tree INCLUDING .git — the
 # EOD finalizer commits evidence from inside the container and pushes to
 # origin over the deploy key, which requires a real repo. Local state
-# (.env, data/) never syncs.
+# (.env, data/) never syncs. The exclude list is shared with the dev
+# stack's stager (deploy/common/repo-excludes.txt) so the two build
+# contexts cannot drift; the bundle rsync above keeps its own inline
+# list on purpose (F-004 — those excludes protect the box's state).
 rsync -az --delete \
-  --exclude '.env' --exclude 'data/' --exclude '.venv/' \
-  --exclude '__pycache__' --exclude '.pytest_cache' --exclude '.ruff_cache' \
-  --exclude '.DS_Store' --exclude 'research/' --exclude '.claude/settings.local.json' \
+  --exclude-from 'deploy/common/repo-excludes.txt' \
   -e "ssh ${SSH_OPTS[*]}" \
   ./ "${VPS}:${REMOTE_DIR}/repo/"
 

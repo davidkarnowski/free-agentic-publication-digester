@@ -28,3 +28,8 @@ research/
 # model); the canonical record is the dated digest the EOD gates freeze.
 site/today.html
 site/today.json
+
+# Dev-stack staged build context (deploy/dev/scripts/dev-up.sh) — a full
+# working-tree copy; covers the gitignored-but-present site/today.* and
+# the .claude re-include leak transitively.
+deploy/dev/repo/

@@ -4129,3 +4129,47 @@ renders banner + designed empty state (the exact scene that motivated
 the work), and the busiest stored day (1,523 items) renders hour
 groups, the filter bar, clean meta lines, and no chrome openings.
 508 tests.
+
+## 2026-08-02 — The dev stack: production's renderer, production's data, your laptop
+
+The v1 dev-stack plan died on one operator question: "How does our local
+dev stack access source content if the VPS is the holder of the db?" It
+seeded from the laptop — half of production's rows, none of the sources
+whose archives caused the /today backfill bug — so it could not have
+caught the bug it existed to catch. v2 fixes exactly that: deploy/dev/
+runs the byte-identical production image recipe against cold VACUUM
+INTO snapshots pulled from the box by an operator-gated dev-seed.sh,
+serving on localhost:8080.
+
+The proof it works is the bug that motivated it, re-proven: rendering
+2026-07-31 (the usps/odni activation day) from the production seed
+lists 1,914 items, excludes and discloses 754 publisher-dated-earlier
+items, and shows not one 2021 release as that day's news.
+
+Mechanics: one shared exclude list (deploy/common/repo-excludes.txt)
+now feeds both deploy.sh's repo export and dev-up.sh's local stager —
+proven a no-op by identical 6,255-entry rsync dry-run file lists — so
+the two build contexts cannot drift; the staged deploy/dev/repo/ is
+itself excluded from the prod export, or a laptop that ran dev-up.sh
+would bake a recursive repo copy into the next production image. The
+one application change is --no-wayback on scripts/collect.py, a null
+context manager through the existing wayback_factory seam, because a
+test run must never write to a public archive.
+
+Guardrails are enforced, not advised, and pinned by test_dev_stack.py:
+no --eod anywhere in deploy/dev/ (a fresh volume still fires the
+finalizer within a cycle — verified the hazard survives the three-clock
+fix); no secrets mount; dev-up.sh refuses FAPD_EVIDENCE_PUSH=1 and an
+absolute SITE_BASE_URL outright (exit 2, verified); live mode is
+--once --no-llm --no-wayback with a separate dev key, because budgets
+count from each machine's own fetch log and a shared key would let dev
+and prod jointly exceed the publisher's limit. Live mode stays
+--once-only until R16's supervisor contract lands. Resource limits and
+log rotation exist in the dev compose and not yet prod — deliberately
+modeling review D19/R4 so the gated prod change copies a tested block.
+
+One found-the-hard-way fix is recorded in the script itself: scp's port
+flag is -P; lowercase -p silently eats the port number as a filename.
+
+Full loop verified: seed -> up -> render on production-shaped data ->
+guard refusals -> wipe -> from-scratch bootstrap -> re-seed. 516 tests.

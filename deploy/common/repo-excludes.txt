@@ -1,0 +1,21 @@
+# The repo-export exclude list — what stays OUT of a backend build context.
+# Used by BOTH stagers so they cannot drift (pinned by tests/test_dev_stack.py):
+#   deploy/vps/scripts/deploy.sh  (second rsync: ./ -> $REMOTE_DIR/repo/)
+#   deploy/dev/scripts/dev-up.sh  (local stage:  ./ -> deploy/dev/repo/)
+# NOTE: this is NOT the bundle-rsync list in deploy.sh's first rsync — those
+# excludes protect the box's own state (.env, secrets/, repo/) and stay
+# inline where finding F-004 put them. The two lists exist for different
+# reasons; do not merge them.
+.env
+data/
+.venv/
+__pycache__
+.pytest_cache
+.ruff_cache
+.DS_Store
+research/
+.claude/settings.local.json
+# The dev stack's own staged build context — without this, a laptop that
+# has run dev-up.sh would bake a recursive copy of the repo into the
+# production image on the next deploy.
+deploy/dev/repo/

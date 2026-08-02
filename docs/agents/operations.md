@@ -128,9 +128,13 @@ gates → docs/code-standards.md → this file.
   single-owner writes, shutdown/SIGTERM) into
   docs/continuous-ingestion.md *before* the local dev stack is built
   against it.
-- **Follow-up assigned by the level-up plan:** revise the dev-stack
-  plan to seed from the VPS (`VACUUM INTO` over scp — the operator's
-  rejection reason on the first draft).
+- ~~Revise the dev-stack plan to seed from the VPS~~ — **built,
+  2026-08-02**: `deploy/dev/` runs the production image recipe against
+  cold `VACUUM INTO` snapshots pulled by the (operator-gated)
+  `dev-seed.sh`; render mode is offline/zero-token, live mode is
+  `--once --no-llm --no-wayback` with a separate dev key. Guardrails
+  pinned by `tests/test_dev_stack.py`; runbook in `deploy/dev/README.md`.
+  Live mode stays `--once`-only until R16's supervisor contract lands.
 
 ## Exit report
 

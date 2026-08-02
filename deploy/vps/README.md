@@ -10,6 +10,9 @@ operator's private server guide — not in this public-bound repo.
 > or by naming a command below). Never infer authorization from a
 > generic "looks good" or from a previous deploy. Local edits and local
 > git commits are not gated — only the VPS side is.
+> `deploy/dev/scripts/dev-seed.sh` (a read-only snapshot pull that
+> leaves only a scratch dir it deletes) follows the same rule: run it
+> only on the operator's explicit ask.
 
 ## Architecture (strict segmentation)
 

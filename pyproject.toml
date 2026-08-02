@@ -38,5 +38,12 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/fapd"]
 
+[tool.pytest.ini_options]
+# Bare `pytest` collects only the real suite. Without this, the dev
+# stack's staged build context (deploy/dev/repo/ — a full working-tree
+# copy including tests/) is collected too, and every test module exists
+# twice under one import name: 29 collection errors.
+testpaths = ["tests"]
+
 [tool.ruff]
 line-length = 100
