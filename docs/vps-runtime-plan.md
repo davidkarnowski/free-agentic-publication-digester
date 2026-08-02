@@ -1,5 +1,15 @@
 # VPS Runtime Plan — the pipeline runs on a VPS; GitHub holds the record
 
+> **STATUS: DONE / SUPERSEDED (2026-07-30).** Everything this plan
+> deferred landed the same day it was written: provisioning, deploy,
+> TLS, the backend container, the bot identity, and evidence pushes
+> (ops-backlog OB-1/OB-11). One decision changed in execution:
+> scheduling is NOT cron/systemd — the in-container `EODWorker` owns
+> it (docs/continuous-ingestion.md §9 is the design authority now).
+> Remaining threads live in ops-backlog: rDNS, Web Bot Auth (OB-3),
+> backup policy (OB-6). The body below is preserved as the decision
+> record; do not build from it.
+
 *Adopted 2026-07-30, superseding [`gh-native-plan.md`](gh-native-plan.md)
 before its T2–T5 evaluation ran. This push records the decision and
 builds the one piece of it that is code (the API LLM backend); VPS

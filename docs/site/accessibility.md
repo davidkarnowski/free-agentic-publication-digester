@@ -11,12 +11,16 @@ navigation.
 We build to **WCAG 2.2 Level AA**. As of 2026-07-30 this site is
 **partially conformant**: a full audit of every page class was completed
 on that date and its findings fixed, with the exceptions listed below.
+The live page was substantially revised on 2026-08-02 (layout, hour
+groupings, a weekend/holiday notice); a follow-up audit of that page is
+queued and this statement will be updated with its date.
 
 The site is static HTML with no framework and no external resources. It
 carries one small script, on the live page only, which adds your local
 time beside each published Eastern time — everything works with
-scripting off. There is no login, no data entry, no timed content, and
-no animation.
+scripting off. There is no login, no timed content, and no animation;
+the only interactive control is the live page's client-side keyword
+filter, which transmits nothing.
 
 ## Known limitations
 

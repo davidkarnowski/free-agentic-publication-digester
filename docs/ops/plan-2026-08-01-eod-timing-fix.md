@@ -1,5 +1,17 @@
 # Stop the EOD re-fire loop and fix the publication-day boundary
 
+> **STATUS: COMPLETE (2026-08-02).** All seven steps landed in
+> `fe8e402`, deployed to the VPS the same day; the loop was verified
+> dead (one firing, durable marker) and the premature 08-01 digest
+> superseded itself at the next EOD, exactly as §"What happens" below
+> predicted. The appendix's dev-stack sketch was superseded by the
+> built stack (`deploy/dev/`, commit `2cb5da6`) — including the
+> `--no-wayback` flag it says "does not exist yet" — and its open
+> question was answered: the dev render is advisory, not a mandatory
+> deploy pre-flight. The remaining EOD gap (the error path can still
+> erase the marker) is review finding D5 / findings F-011. The body
+> below is unchanged: it is the record of the diagnosis.
+
 ## Context
 
 Right now, at **22:58 ET on 2026-08-01**, `digests/2026-08-01.md` is published on
@@ -78,7 +90,7 @@ The gate is inert, not wrong. Three real defects, not four.
    Fast-forward merge to `main`, push.
 6. **Deploy to the VPS** — `deploy/vps/scripts/deploy.sh`, then restart the backend
    container so the supervisor picks up the new `collect.py`. **Approving this plan is
-   the explicit VPS authorization required by CLAUDE.md §12.** Until this deploy lands,
+   the explicit VPS authorization required by CLAUDE.md §13 (Posture; §12 at the time of writing).** Until this deploy lands,
    the loop keeps firing a full pipeline roughly every 20 minutes.
 7. **Verify on the VPS:** tail the supervisor log across at least two EOD cycles and
    confirm exactly one `EOD finalizer firing` line, that `collector_state`'s `eod` row

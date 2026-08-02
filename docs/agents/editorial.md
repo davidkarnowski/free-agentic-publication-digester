@@ -38,8 +38,8 @@ file.
 - **Retry ceilings are per ITEM as well as per run.** The per-run
   ceiling resets every collector cycle (15 min), so before
   `summary_attempts` existed, one unsummarizable item was retried
-  indefinitely: 1,345 single retries and 39.7M input tokens on
-  2026-07-31 — 60% of the day. An item past
+  indefinitely: 1,345 single retries and 39.7M input tokens for publication day
+  2026-07-30 (calls logged 2026-07-31 UTC) — 60% of the day. An item past
   `MAX_ITEM_SUMMARY_ATTEMPTS` is a *disclosed gap*, not pending work.
 - **Only buy days that will be published.** The analyze layer works the
   current publication day and the one before it (GUIDE §6 r13). On

@@ -1,7 +1,8 @@
 # Pre-publication TODO
 
-The launch checklist: everything standing between the private repo and a
-public repo + published site. Items marked **[decision]** need the
+The launch checklist. (Historical framing: written while the repo was
+private; the repo went public and the site went live 2026-07-30 — items
+below that gate remain are post-launch quality gates.) Items marked **[decision]** need the
 operator; the rest are build work. Companion analysis:
 `docs/publication-readiness-2026-07-29.md`. Maintain this file as items
 close (check them off with dates).
@@ -31,7 +32,6 @@ close (check them off with dates).
   into site footer, llms.txt, agents page. Deferred knowingly: the
   editorial spot-audit (queued for the first fully-VPS digest,
   2026-07-30's EOD).
-  it gates are done.
 
 ## Build work
 
@@ -49,7 +49,9 @@ close (check them off with dates).
   backend behind `LLM_BACKEND=api|cli` with a per-tier model mapping
   (CLI stays the local default). Unblocks hosted scheduling and
   decouples the VPS from `claude` CLI tooling.
-- [ ] **Daily scheduling — active track: VPS runtime.** *2026-07-30:
+- [x] **Daily scheduling — active track: VPS runtime.** *Complete: the
+  named remainders both landed 2026-07-30 — /today renderer (OB-8 Done)
+  and canonical VPS evidence pushes (OB-11 Done). History:* *2026-07-30:
   the collector core landed (src/fapd/collect.py — supervisor,
   per-source-class workers, journal, triggers; GUIDE §4/§5/§6 r12
   amendments) and the backend container deployed the same day (real
@@ -94,9 +96,9 @@ close (check them off with dates).
   still missing. On the measured day this collapses ~25 calls to ~5,
   about 500K input tokens. Shortfall logging added to establish whether
   truncation drives the misses before tuning batch size.
-- [ ] **Set the GUIDE §6 rule-8 daily cap** from real baselines now that
-  a judicial-heavy day is measured (1.53M in / 128K out; ordinary days
-  ran ~90K in). Rule 8 deferred the cap until exactly this data existed.
+- [ ] ~~Set the GUIDE §6 rule-8 daily cap~~ **tracked in exactly one
+  place: ops-backlog OB-4** (and prioritized as review R1 in the
+  Editorial agent's backlog). Struck here per the one-file rule.
 
 ### Accuracy & freshness
 - [x] 2026-07-30 **Dated STATUS snapshot** (README "Status (2026-07-30)"
@@ -105,10 +107,15 @@ close (check them off with dates).
   block, so external AI readers stop averaging stale worklog figures
   (lesson from the NotebookLM briefing fact-check). Refresh the date
   with each update; anything elsewhere that disagrees defers to it.
+  *Regressed and re-fixed 2026-08-02 (doc audit): the block sat at
+  2026-07-30 values while every number moved. A block that calls
+  itself authoritative decays fastest — refresh it with each
+  substantive merge, or demote it to pointers at derived surfaces.*
 - [ ] Editorial spot-audit of a full digest against sources (GUIDE §2
   compliance read-through by the operator).
-- [ ] Wayback top-up pass for the ~180 uncorroborated 07-28 captures
-  (spread over later days' 100/day budgets; S3 re-check pass design).
+- [ ] ~~Wayback top-up pass~~ **tracked in exactly one place:
+  ops-backlog OB-5** (F-003 points there too). Struck here per the
+  one-file rule.
 
 ### Source work that continues regardless (the standing pillar)
 - [ ] Probe shortlist Tier A: federal-register-api (public inspection),
@@ -154,7 +161,7 @@ close (check them off with dates).
 
 ## Feature backlog (post-launch, operator-requested)
 
-- [ ] **Section auto-tagging** (requested 2026-07-30). *2026-07-30: the
+- [x] ~~Section auto-tagging~~ **tracked in exactly one place: ops-backlog OB-9** (section layer done; item-level remainder lives there). Struck here per the one-file rule. Original item: **Section auto-tagging** (requested 2026-07-30). *2026-07-30: the
   section layer shipped — GUIDE §6 r12a, `src/fapd/tags.py`, `Tags:`
   lines in the digest and tag chips on the site; item-level tags and
   digests.json/meta emission remain (ops-backlog OB-9).* Original item:

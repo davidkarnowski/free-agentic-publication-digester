@@ -15,6 +15,9 @@ __pycache__
 .DS_Store
 research/
 .claude/settings.local.json
+# Harness agent worktrees — recursive repo copies that must never bake
+# into an image (F-012).
+.claude/worktrees/
 # The dev stack's own staged build context — without this, a laptop that
 # has run dev-up.sh would bake a recursive copy of the repo into the
 # production image on the next deploy.

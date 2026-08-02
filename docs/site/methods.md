@@ -11,7 +11,8 @@ section stands alone; agents may ingest them independently.
 
 **The registry is the scope authority.** Every source ingested, planned,
 evaluated, or found unavailable is recorded in a versioned registry —
-currently 127 sources — and coverage of the federal source universe is
+the [Sources page](sources.html) derives its counts from it live — and
+coverage of the federal source universe is
 measured there, never assumed. Sources are tiered so comprehensiveness
 can be stated against a defined universe: Tier 1 (cabinet departments,
 top independent agencies, legislative support agencies, the White House
@@ -86,7 +87,9 @@ advances only after a listing completes — a failed sync re-lists the
 same window. A first sync with no watermark is date-bounded to a 3-day
 lookback; older history is only ever acquired as a deliberate bulk-data
 backfill, never an open-ended crawl. Requests are paced at 1 per second
-with a 2,000-per-day cap (roughly 1% of what govinfo permits), unchanged
+under a 6,000-per-day cap, itself bounded by a 500-requests-per-hour
+ceiling — half of what the publisher's own api.data.gov documentation
+permits per key, and the constraint that actually binds. Unchanged
 content is never re-downloaded, and server signals (Retry-After, rate
 headers, 5xx backoff) are honored exactly.
 
@@ -104,10 +107,16 @@ day, journaling arrivals with observation timestamps. The binding
 politeness invariants do not loosen with frequency: at most one request
 per second per host (a robots.txt crawl-delay overrides that downward),
 per-class daily budgets enforced by the client, every request logged,
-identified User-Agent. Past 70% of a class's daily budget the collector
-doubles its polling interval for the rest of the day, reserving
-headroom for the end-of-day finalizer — the run that assembles,
-validates, and freezes the canonical dated digest.
+identified User-Agent. Past 70% of the agency class's daily budget its
+collectors double their polling interval for the rest of the budget's
+UTC day; the govinfo class reserves headroom differently — its
+collectors may spend only 85% of the daily budget, the rest belonging
+to the end-of-day finalizer — the run that assembles,
+validates, and freezes the canonical dated digest. One standing
+coverage bound worth knowing: court-opinion packages are archived only
+within a 7-day issued-date window (older entries churn their metadata
+constantly and are listed, skipped, and disclosed), and listing-page
+sources are read 7 days back at most.
 
 **Capture-everything provenance.** Unlike the GPO record, agency web
 content can be edited or removed without notice, so every capture is
@@ -200,12 +209,15 @@ Everything model-derived in a digest is labeled in place.
 
 ## Publication
 
-**Digest anatomy.** Each digest is one Markdown document with a fixed
-skeleton: a metadata header (digest date, data date range, pipeline
-version, per-collection sync watermarks); a table of contents; the Day
-in Review; numbered sections 1–6 (Congressional Floor Activity;
-Legislation; Federal Register; Enacted Laws; Judicial Activity; Agency
-Announcements, which appears as active agency sources contribute); an
+**Digest anatomy.** Each digest is one Markdown document with a
+consistent skeleton: a metadata header (digest date, data date range,
+pipeline version, per-collection sync watermarks); a table of contents;
+the Day in Review (present when the end-of-day composition ran; omitted,
+never fabricated, when it did not); numbered sections 1–8
+(Congressional Floor Activity; Legislation; Federal Register; Enacted
+Laws; Judicial Activity; Agency Announcements; Recorded Votes; Bill
+Actions — section numbers are append-only, so a section keeps its
+number forever); an
 italicized quick-read and a `Tags:` line at the top of major sections;
 a Terms Used Today glossary; the Coverage Statement; and a Methodology
 footer restating the selection and labeling rules. Every item carries
@@ -218,7 +230,10 @@ page — is a derived, zero-model presentation layer, regenerable at any
 time without touching data or models. On the site, each digest renders
 as a collapsed, plain-speak-first view: section cards whose headers
 carry the title, tag chips, and the plain-language synopsis, expanding
-to the full record on demand — static HTML with no scripts.
+to the full record on demand — static HTML. The site ships exactly one
+script, on the live page only: an inline snippet that shows each
+timestamp in your local time beside the published Eastern time. It
+loads nothing, stores nothing, and the page is complete without it.
 
 **What a "day" means here.** A publication day runs midnight to
 midnight **Eastern time in Washington, D.C.** — the clock the publishers
@@ -234,8 +249,14 @@ rewritten to match a later policy.
 
 **The validation gate.** Before publication, each digest must pass four
 coded checks: every govinfo citation resolves to a stored record; the
-Coverage Statement's arithmetic reconciles internally and against the
-database; generated prose clears the banned-lexicon scan (with verbatim
-official text masked); and every rendered item states its inclusion
-rule. A digest that fails any check is not published — there is no
-override.
+rendered Coverage Statement matches the accounting computed from the
+database, cell for cell; generated prose clears the banned-lexicon scan
+(with verbatim official text masked); and every rendered item states
+its inclusion rule. A digest that fails any check is not published —
+there is no override. Honest limits, stated because gates deserve the
+same scrutiny they impose: citation checking covers govinfo links
+(agency, chamber, and Congress.gov citations are recorded but not yet
+resolution-checked), and the coverage check verifies the rendered
+statement against the stored accounting rather than recomputing the
+accounting independently — both strengthenings are on the published
+development backlog.

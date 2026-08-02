@@ -1,6 +1,6 @@
 # FAPD server dossier (pointer + public-safe facts)
 
-*Last reviewed: 2026-07-30.*
+*Last reviewed: 2026-08-02.*
 
 > **The full dossier is private.** This repository is headed for public
 > release, so access details (host, port, user, key path, box quirks)
@@ -20,8 +20,8 @@
 | Containers | `fapd-web` (nginx, inbound-only, zero egress — external `--internal` net `fapd_edge`); `fapd-backend` **live 2026-07-30** (collector supervisor + EOD finalizer, egress-only on `fapd_fapd_backend`, no published ports, volume-coupled to web) |
 | TLS | Let's Encrypt for `fapd.info` + `www`, webroot method via the shared edge proxy, auto-renewing (deploy-hook reload covers it); issued 2026-07-30 |
 | Public surface | `https://fapd.info` — the full digest site (served from the fapd-site volume since 2026-07-30) |
-| Bot git identity (planned) | `fapd-pipeline` with a repo-scoped deploy key, for evidence commits |
-| Backend scheduling (planned) | inside the supervisor container (EODWorker) — host needs only Docker |
+| Bot git identity (live 2026-07-30) | `fapd-pipeline` with a repo-scoped deploy key, for evidence commits |
+| Backend scheduling (live 2026-07-30) | inside the supervisor container (EODWorker) — host needs only Docker |
 
 ## Held items / quirks
 

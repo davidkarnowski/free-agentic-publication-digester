@@ -47,7 +47,7 @@ could not or chose not to ingest.
 
 ## When the interface is irregular: write an adapter
 
-An adapter owns five decisions. `items()` is the newest (2026-07-31) and
+An adapter owns six decisions (GUIDE §3). `items()` is the newest (2026-07-31) and
 the one that makes non-feed sources possible at all: it turns the fetched
 index bytes into the item list, so an XML index or a JSON API can reuse
 every invariant the loop owns. **An index is not a feed** — a feed is

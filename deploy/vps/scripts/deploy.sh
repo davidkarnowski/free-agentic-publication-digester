@@ -6,7 +6,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../../.."  # repo root (scripts -> vps -> deploy -> root)
 
 # Box coordinates come from the environment or ~/.fapd-deploy.env — the
-# public repo carries no server dossier facts (CLAUDE.md §12). Copy
+# public repo carries no server dossier facts (CLAUDE.md §13). Copy
 # deploy/vps/deploy.env.example and fill it in.
 [ -f "$HOME/.fapd-deploy.env" ] && . "$HOME/.fapd-deploy.env"
 : "${SSH_KEY:?set SSH_KEY - path to the box SSH key}"

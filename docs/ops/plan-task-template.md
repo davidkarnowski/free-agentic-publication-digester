@@ -1,7 +1,7 @@
 # Plan-task template
 
 *Required shape for any plan task that touches production, governing
-documents, or the editorial gates (CLAUDE.md §12). Adopted 2026-07-30
+documents, or the editorial gates (CLAUDE.md §13). Adopted 2026-07-30
 from the operator's sibling project.*
 
 Each task states:

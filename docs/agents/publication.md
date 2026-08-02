@@ -82,8 +82,8 @@ docs/accessibility.md → this file.
   than moving the write.
 - The filter bar lists every keyword the day produced (operator,
   2026-07-30) — bounded by `MAX_FILTER_KEYWORDS`, not truncated below
-  it. (A minimum-item threshold for showing the bar at all is fine and
-  planned; per-keyword truncation is not.)
+  it. (`MIN_FILTER_ITEMS` gates whether the bar renders at all —
+  shipped 2026-08-02; per-keyword truncation remains forbidden.)
 
 ## Code expectations
 

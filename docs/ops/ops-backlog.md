@@ -13,10 +13,17 @@ one.*
 ---
 
 **OB-1 — Backend container deployment (`fapd-backend`)**
-- **Gap:** the VPS serves only the placeholder; the pipeline still runs
-  on the operator machine.
-- **Trigger:** operator says go, after the continuous-ingestion
-  workstream merges.
+- **Done 2026-07-30:** the backend container runs the pipeline on the
+  VPS (supervisor + EODWorker, egress-only network, `fapd-data`/
+  `fapd-site` volumes, server-side `.env`, mounted deploy key); the
+  real site serves on fapd.info. deploy.sh carries the test gate,
+  load-bearing excludes (F-004), and the post-up steps (F-008/F-009).
+  No `/fapd-deploy` skill was built — deploy.sh is the runbook's
+  script. Original sketch kept below for the record.
+- **Gap (historical):** the VPS served only the placeholder; the
+  pipeline ran on the operator machine.
+- **Trigger (historical):** operator says go, after the
+  continuous-ingestion workstream merges.
 - **Sketch:** `deploy/vps/Dockerfile.backend` (python:3.12-slim + uv +
   git); compose service under `profiles: ["backend"]`, egress-only
   private network, `fapd-data` + `fapd-site` volumes, `.env` via
@@ -128,13 +135,13 @@ one.*
 **OB-9 — Section auto-tagging build**
 - **Gap:** `item_tags` schema exists (B2); no taggers, no rendering.
 - **Trigger:** operator go (was requested 2026-07-30; schema-first by
+  design).
 - **Done 2026-07-30 (section layer):** GUIDE §6 r12a; tags.py
   (mechanical branch/agency + batched discovery keys,
   TAG_PROMPT_VERSION, lexicon-gated via the digest); canonical
   Tags: lines with model keys labeled in place; site renders
   chips. Remaining: digests.json/meta emission + item-level
   tags (item_tags stays schema-ready).
-  design).
 - **Sketch:** mechanical branch/agency taggers (zero tokens); LLM 1–3
   word discovery keys as a new §3a surface (`TAG_PROMPT_VERSION`, cheap
   tier, lexicon-gated, labeled model-derived); chips on section

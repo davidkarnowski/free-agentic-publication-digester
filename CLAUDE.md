@@ -39,8 +39,8 @@ GUIDE.md §1–§2.
 | Language | Python ≥3.12, `uv`-managed, hatchling build |
 | Deps | deliberately few: requests, python-dotenv, pyyaml, pypdf, pillow, markdown, protego, dkimpy, anthropic |
 | Storage | SQLite ×3: `data/fapd.db` (pipeline), `data/fetch_log.db` (every HTTP attempt), `data/llm_ledger.db` (every LLM call) |
-| Site | static HTML, no JS, no framework — `publish.py` renders it |
-| Lint/tests | ruff (line 100), pytest (295+ tests), CI on push/PR |
+| Site | static HTML, no framework — `publish.py` renders it; exactly one script (the live page's local-time snippet, code-standards §2 r10) |
+| Lint/tests | ruff (line 100), pytest (500+ tests; bare `pytest` collects `tests/` only via pyproject `testpaths` — the dev stack's staged repo copy would otherwise double-collect), CI on push/PR |
 | LLM | pluggable backends: `claude` CLI (local default) / Anthropic API (`LLM_BACKEND=api`); tier aliases resolved per backend via `config.LLM_MODELS` |
 
 ## 4. Repository layout
@@ -59,8 +59,11 @@ GUIDE.md §1–§2.
 
 ## 5. Database model — read before editing SQL
 
-- All three DBs are **WAL mode with 30s busy_timeout** — multi-process
-  access is a design feature (collector + finalizer coexist).
+- `data/fapd.db` is **WAL mode with 30s busy_timeout** — multi-process
+  access is a design feature (collector + finalizer coexist). Honest
+  current state: `fetch_log.db` sets busy_timeout but not WAL, and
+  `llm_ledger.db` sets neither — aligning the two audit DBs is on the
+  Corpus backlog; do not describe all three as WAL until it lands.
 - `db.connect()` runs the full `_DDL` (`IF NOT EXISTS`) on every
   connect: schema additions are self-migrating; destructive changes are
   deliberate one-shot scripts, never startup DDL.
@@ -87,6 +90,8 @@ uv run python scripts/digest.py --date D      # (re)render one digest
 uv run python scripts/collect.py --once       # one collector cycle (after B-workstream)
 uv run python scripts/audit.py                # our server footprint
 uv run python scripts/sources_doc.py          # regenerate SOURCES.md after registry edits
+deploy/dev/scripts/dev-seed.sh                # (operator-gated) pull VPS snapshots
+deploy/dev/scripts/dev-up.sh                  # local prod-image render at localhost:8080
 ```
 
 ## 8. Branching & commits
@@ -234,18 +239,21 @@ live in `.claude/agents/fapd-*.md` (tracked).
 | Prompts / model layers | `analyze.py`, `compose.py`, `tags.py`, `insight.py` — GUIDE §3a governs changes |
 | Daily ops feedback loop | `src/fapd/insight.py` → `provenance/runs/insight-<date>.md` (OB-2) |
 | Digest layout & validation gates | `src/fapd/report.py` |
-| Site & agent surfaces | `src/fapd/publish.py` |
+| Site & agent surfaces | `src/fapd/publish.py` (+ `fedcal.py` for the weekend/holiday banner) |
 | Provenance / hashes | `src/fapd/provenance.py`, `PROVENANCE.md` |
 | Email ingestion | `src/fapd/email_sources.py`, `docs/email-sources.md` |
 | Continuous ingestion | `src/fapd/collect.py`, `docs/continuous-ingestion.md` |
 | VPS / deploy | `deploy/vps/README.md`, `docs/ops/` |
+| Local pre-deploy testing | `deploy/dev/README.md` (prod image + VPS data seed) |
+| Section-agent instructions | `docs/agents/` (§11) |
 
 ## 13. Posture
 
-- **Repo is private until the launch checklist gates clear**
-  (docs/pre-publication-todo.md); everything is written as if already
-  public (GUIDE §9) — no personal paths, no secrets, dossier facts about
-  the shared VPS live in the operator's private tree, not here.
+- **Repo is PUBLIC (since 2026-07-30)** and the site is live; write
+  accordingly (GUIDE §9) — no personal paths, no secrets, dossier facts
+  about the shared VPS live in the operator's private tree, not here.
+  A repository this public documents itself: prose that overclaims what
+  the code does is a defect (see the 2026-08-02 doc audit).
 - **Never propose raising request budgets, loosening validation gates,
   or evading an access refusal to fix a symptom** — these are GUIDE
   changes, made by the operator, or they don't happen.
@@ -279,6 +287,11 @@ live in `.claude/agents/fapd-*.md` (tracked).
 - **2026-07-30** — Continuous ingestion: single supervisor daemon,
   fully-continuous mechanical layers, batched model layers, EOD-only
   compose; `/today` derived-only, canonical digest frozen at EOD.
+- **2026-08-02** — EOD three-clock fix (Eastern default_date, durable
+  finalized marker, explicit --date) deployed; premature 08-01 digest
+  superseded itself. Same day: /today overhaul + `fedcal.py`
+  weekend/holiday banner; local dev stack (`deploy/dev/`) seeding from
+  VPS `VACUUM INTO` snapshots.
 - **2026-08-02** — System segmented into five sections with tracked
   agent instruction files (`docs/agents/`, launchers in
   `.claude/agents/`), per the Spiralyst pattern: explicit edit

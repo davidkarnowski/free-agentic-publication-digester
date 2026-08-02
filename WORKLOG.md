@@ -4173,3 +4173,53 @@ flag is -P; lowercase -p silently eats the port number as a filename.
 
 Full loop verified: seed -> up -> render on production-shaped data ->
 guard refusals -> wipe -> from-scratch bootstrap -> re-seed. 516 tests.
+
+## 2026-08-02 — The doc audit: 324 claims, and the paper was 55% right
+
+The operator called for a full documentation review — repo docs AND the
+site's public pages — with one standard: what the public reads must
+match what the collectors and renderers actually do. Three parallel
+auditors swept the three corpora against HEAD. ~324 discrete claims
+checked, ~130 findings, everything ownable fixed the same day
+(docs/doc-audit-2026-08-02.md is the full record; GUIDE.md drift is
+listed there FOR-OPERATOR, untouched).
+
+The findings that mattered most, each a class:
+
+- **Public strength claims about gates that cannot fire.** The about
+  and methods pages said a digest "whose arithmetic does not reconcile
+  is not published" — review D6 had already shown that check is an
+  algebraic identity. The pages now state exactly what the gates verify
+  and their published honest limits. Same for "DKIM-verified on
+  arrival" (the code checks and discloses; it does not gate).
+- **Agent surfaces that mislead agents.** today.json ships backfill
+  inside items[] while its own backfill_note said backfill was
+  "excluded" — an agent iterating items[] would publish 2021 archive
+  releases as today's news. llms.txt and the labels block now tell
+  agents to filter is_backfill and what day_context means.
+- **The runbook that couldn't run.** deploy/vps/README.md described a
+  bare rsync + `up -d` that silently skips the profile-gated backend
+  and none of the three load-bearing post-up steps. And the weekly CVE
+  guide still had the VPS inventory commented out "activates at OB-1"
+  — the sweep was skipping fapd-backend, the container that runs
+  Python, uv, Node and the claude CLI against untrusted content.
+- **Renumbering broke the safety citations.** Yesterday's CLAUDE.md §11
+  insertion silently re-pointed every "§12" reference — all four of
+  which cited the VPS authorization gate or the no-dossier rule — at a
+  file-locations table. Fixed; the §-reference pattern is now on
+  notice.
+- **The schema authority documented 1½ of 3 databases.** schema.md
+  gained the eight missing tables, the finalized-marker contract the
+  three-clock incident turned on, and lost a column that never existed.
+- **The registry of incidents was missing its biggest incident.**
+  F-011 (the three-clock loop) and F-012 (harness worktrees baked into
+  build contexts — found BY this audit, excluded in the same commit)
+  join the findings register.
+
+One auditor finding was rejected on direct code knowledge (the email
+cross-channel dedup exists: _url_seen_elsewhere), which is its own
+lesson about verifying the verifiers.
+
+The meta-lesson mirrors the code review's: the accurate docs were the
+drift-tested ones (SOURCES.md, the agents ownership matrix, the dev
+stack README). What can drift, will; what is pinned, holds. 516 tests.

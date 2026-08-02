@@ -24,9 +24,9 @@ retry a refusal under a different guise.
 Only official government publication channels — the interfaces
 publishers built to be read:
 
-1. **APIs and bulk data first** (govinfo.gov's api.data.gov service is
-   the overwhelming majority of our traffic — key-authenticated and
-   rate-limited by them and by us).
+1. **APIs and bulk data first** (govinfo.gov's api.data.gov service
+   carries the largest request budget of any class — key-authenticated
+   and rate-limited by them and by us).
 2. **RSS/Atom feeds and newsroom pages** agencies publish, only where
    no API exists.
 3. **Email bulletins** agencies send to our subscribed project mailbox

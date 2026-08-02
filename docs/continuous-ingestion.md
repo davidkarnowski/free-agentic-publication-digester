@@ -3,7 +3,7 @@
 *Adopted 2026-07-30 (GUIDE §3/§4/§5/§6 amendments of the same date).
 This document is the authority for the collector architecture; the
 next-push designs (§8–§10) are complete here so those builds need no
-re-design. Last reviewed: 2026-07-30.*
+re-design. Last reviewed: 2026-08-02 (doc audit; §3/§5/§8/§9 corrected to code truth).*
 
 ## §1 Why
 
@@ -39,9 +39,11 @@ things to health-check.
 | Worker | Calls | Why it's already incremental |
 |---|---|---|
 | GovinfoWorker | `sync.sync_collection(client, conn, c, max_downloads=50)` then `extract.run(conn)` | watermark delta; extract staleness-keyed |
-| AgencyHostWorker (one per `host_groups()` key) | `agencies.poll_source(...)` per entry | `feed_state` conditional GETs → 304s |
-| EmailWorker | `email_sources.poll_mailbox(mbox, conn, entries)` | `mailbox_state` UID watermark |
-| AnalyzeWorker | `analyze.run` / `analyze.run_plain` on trigger | keyed by `(package, granule, prompt_version)` |
+| AgencyHostWorker (one per `host_groups()` key) | `agencies._poll_isolated(...)` per entry (the crash-isolating wrapper around `poll_source`) | `feed_state` conditional GETs → 304s |
+| EmailWorker | `email_sources.poll_mailbox(mbox, conn, entries)` (registry filtered to configured email senders; short-circuits when IMAP is unconfigured) | `mailbox_state` UID watermark |
+| AnalyzeWorker | `analyze.run` / `analyze.run_plain` on trigger — dates bounded to `ANALYZE_MAX_AGE_DAYS` (§6 r13) and items past `MAX_ITEM_SUMMARY_ATTEMPTS` excluded (r14) | keyed by `(package, granule, prompt_version)` |
+| RenderWorker (§8) | `publish.build_today` on journal-watermark movement (5-min clock); `publish.refresh_sources` on its own 15-min clock | zero tokens, zero requests |
+| EODWorker (§9; only with `--eod`) | `run_pipeline.py --date <target>` as a subprocess, then the evidence commit when enabled | once per closed publication day, durable `finalized` marker |
 
 **Journaling is reconciliation, not instrumentation:** after each
 cycle the worker inserts `item_journal` rows for items present in the
@@ -76,11 +78,19 @@ same way. Fidelity is cycle-granularity and disclosed; dating rules
 Same clients, same per-request politeness, same logging. Cadences:
 govinfo ~30 min (`GOVINFO_POLL_INTERVAL_MIN`), agency hosts ~60 min
 (`AGENCY_POLL_INTERVAL_MIN`), mailbox ~15 min
-(`EMAIL_POLL_INTERVAL_MIN`), all jittered. **Backpressure:** past 70%
-of a class's daily budget the worker doubles its interval for the rest
-of the UTC day — EOD headroom is reserved. Manifest: the current day's
-`export_manifest` re-runs after any cycle that captured (deterministic
-full-day rewrite — verified intraday-safe).
+(`EMAIL_POLL_INTERVAL_MIN`), /today render check ~5 min
+(`TODAY_RENDER_INTERVAL_MIN`), source health ~15 min
+(`SOURCE_HEALTH_REFRESH_MIN`), EOD check every 10 min (hard-coded
+default in `_build_workers`), all jittered. **Backpressure:** past 70%
+of the AGENCY class's daily budget its host workers double their
+interval for the rest of the UTC day — the other classes reserve EOD
+headroom via the 15% finalizer reserve instead; extending backpressure
+beyond the agency class is an open GUIDE §4 alignment item. Manifest:
+the current day's `export_manifest` re-runs after any agency cycle
+that produced NEW items (a cycle of only 304s/unchanged captures
+reaches the committed manifest at the next new-item cycle or EOD).
+Known limit, review D11: the export is truncate-then-write and host
+workers run concurrently — single-owner/atomic export is queued.
 
 ## §6 State (schema authority: docs/schema.md)
 
@@ -119,20 +129,28 @@ anyway: the supervisor pauses collector workers during finalization
 `collect.today_status(conn, date)` → `site/today.html` + `today.json`:
 
 - Data contract: mechanical counts + per-item rows (title, source,
-  citation, official/model summary if present, `observed_at`) grouped
-  by digest section; `pending_llm` count shown as "N items awaiting
-  model summary."
-- Mandatory disclosure header (GUIDE §5 wording) + "Last updated HH:MM
-  UTC" + per-section newest-item timestamps.
+  citation, official/model summary if present, `observed_at`), one
+  chronological stream with ET hour headings (2026-08-02) — not digest
+  sections; `pending_llm` shown as "N items awaiting model summary."
+- The §3 dating rule applied live: items the publisher dates on another
+  day split out as backfill (shared helper with report.py), counted and
+  disclosed, never listed as today's news (2026-07-31 incident).
+- A weekend/federal-holiday notice (`fedcal.reduced_publishing`,
+  2026-08-02) on the page and as `day_context` in today.json; openings
+  gated by a mechanical prose check so scraped nav chrome never renders.
+- Mandatory disclosure header (GUIDE §5 wording) + "Last updated" in
+  ET with the reader's local time appended by the site's one script.
 - No Day-in-Review, no section synopses — labeled "composed at end of
   day."
-- A RenderWorker rebuilds after any cycle that journaled ≥1 item
-  (fully continuous, zero tokens). Never committed; excluded from the
-  Atom feed; `llms.txt`/`robots.txt` gain a `/today` pointer labeled
-  preliminary. Tags (once OB-9 lands) render as section chips here
-  first.
+- The RenderWorker is an independent worker on a ~5-minute clock: it
+  rebuilds when the journal watermark moved (or today.html is missing)
+  and separately refreshes source health on a 15-minute clock —
+  clock-driven on purpose, because a failing source journals nothing.
+  Never committed; excluded from the Atom feed; `llms.txt`/`robots.txt`
+  carry a `/today` pointer labeled preliminary. Section tags render as
+  day-so-far chips.
 
-## §9 Next push: backend container (OB-1)
+## §9 Backend container (OB-1 — LIVE since 2026-07-30)
 
 - `deploy/vps/Dockerfile.backend`: `python:3.12-slim` + uv + git; repo
   at `/app`; entrypoint `scripts/collect.py` (run_forever).
@@ -142,20 +160,33 @@ anyway: the supervisor pauses collector workers during finalization
   proxy/web/public); volumes `fapd-data:/app/data`,
   `fapd-site:/app/site`; `env_file: .env` (server-side, never synced);
   a mounted read-only deploy key for evidence pushes.
-- **EODWorker inside the supervisor** replaces host scheduling: at the
-  configured hour on Washington's clock (EOD_ET_HOUR = 0 — when
-  the publication day ends) it sets a pause event all
-  collector workers respect, runs the finalizer stages in-process,
-  makes the evidence commit with the guard-shell pattern (stage
-  explicit paths → assert staged-set equality in one `&&` chain →
-  commit as `fapd-pipeline` → push), clears the pause. Host needs only
-  Docker.
-- `fapd-web` swaps its placeholder bind for `fapd-site:...:ro` in the
-  same deploy. `deploy.sh` gains the test gate + image build; excludes
-  stay load-bearing (`.env`, `data/` never sync). `/fapd-deploy` skill
-  lands with this runbook.
+- **EODWorker inside the supervisor** replaces host scheduling. Once
+  the publication day has closed on Washington's clock (EOD_ET_HOUR =
+  0; the target is always the PREVIOUS Eastern day, so "due at any
+  hour" is the intended meaning) and the durable `finalized` marker in
+  `collector_state.last_result` does not already cover the target, it:
+  sets a pause event all collector workers respect (checked at cycle
+  start — in-flight cycles are NOT drained, finding F-006/R16), runs
+  `scripts/run_pipeline.py --date <target>` **as a subprocess** (its
+  own process, its own connections; the explicit --date is half of the
+  2026-08-02 three-clock fix — run_pipeline otherwise picks its own
+  day), records `finalized` through EVERY return path (the other half:
+  a bare status once erased the marker and re-fired the pipeline every
+  ~20 minutes), then — only on exit 0 and only when
+  `FAPD_EVIDENCE_PUSH=1` — runs the evidence commit
+  (`deploy/vps/scripts/evidence-commit.sh`: repo-root guard, stage the
+  evidence paths, ABORT unless the staged set is a SUBSET of the
+  allowlist, commit with the `fapd-pipeline` identity named on the
+  commit itself, push over the deploy key), and clears the pause in a
+  `finally`. Host needs only Docker.
+- `fapd-web` serves `fapd-site:...:ro`. `deploy.sh` carries the test
+  gate, the two rsyncs (bundle + repo export via
+  `deploy/common/repo-excludes.txt`), the image build, and three
+  post-up steps (in-container site rebuild per F-009, /today rebuild,
+  origin re-flip per F-008). No `/fapd-deploy` skill exists; deploy.sh
+  is the runbook's script.
 
-## §10 Next push: tagging build (OB-9)
+## §10 Tagging build (OB-9 — section layer LIVE 2026-07-30; item-level tags remain)
 
 Mechanical taggers (zero tokens): branch from collection
 (CREC/BILLS/PLAW→legislative, FR/AGENCYPR→executive,

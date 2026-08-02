@@ -338,7 +338,7 @@ Per phase, in order:
 5. Render: `uv run python scripts/digest.py --date <today>` — the new section
    appears, the Coverage Statement reconciles (it raises otherwise), citations
    resolve.
-6. Deploy only after a green local render; the VPS gate in `CLAUDE.md` §12
+6. Deploy only after a green local render; the VPS gate in `CLAUDE.md` §13
    applies.
 
 ## Open items for the operator

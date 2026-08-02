@@ -1,12 +1,15 @@
 # SQLite Schema — Pipeline Metadata Store
 
-Status: living design document, per GUIDE.md §5. Covers Phase 1 (Fetch &
-store: package inventory, granule inventory, delta-sync watermarks) and
-Phase 2 (Extraction: normalized text records and graphic assets — see the
-Extraction section at the end).
+Status: living design document, per GUIDE.md §5. Covers all five layers
+of `data/fapd.db` (fetch & store; extraction; analysis; provenance;
+continuous ingestion), plus the two companion databases the pipeline
+keeps beside it (`fetch_log.db`, `llm_ledger.db`).
 
 - **Database file:** `data/fapd.db` (repo-relative, like all paths in
-  this project — GUIDE §9).
+  this project — GUIDE §9). `db.connect()` sets `busy_timeout = 30000`
+  FIRST, then `foreign_keys`, then `journal_mode = WAL` — the WAL
+  switch needs an exclusive lock and concurrent host workers race on
+  it, so the timeout must already be armed (ordering is load-bearing).
 - **Raw documents are not stored in the database.** They live on the
   filesystem under `data/raw/<collection>/<dateIssued>/` (GUIDE §5); the
   database stores the *path* and the fetch bookkeeping.
@@ -272,9 +275,22 @@ run IDs.
 ## The separate `fetch_log.db`
 
 Already exists; owned by the HTTP client (`config.FETCH_LOG_DB`, at
-`data/fetch_log.db`). It records every outbound request — columns: `ts_utc`,
-`url`, `params` (with `api_key` stripped), `status`, `bytes`, `elapsed_ms`,
-`attempt`, `error` — satisfying GUIDE §4 "log every request."
+`data/fetch_log.db`). Two tables:
+
+`fetch_log` records every outbound request — columns: `id`, `ts_utc`,
+`url` (logged pre-redacted: `api_key` is stripped from the query string
+before the row is written; there is no separate params column),
+`status`, `bytes`, `elapsed_ms`, `attempt`, `error`, and `client`
+(added by in-place micro-migration; NULL rows are historical govinfo
+traffic) — satisfying GUIDE §4 "log every request."
+
+`robots_cache` (added 2026-07-31, finding F-007) — `host` PK, `body`
+(NULL = known-absent robots.txt, an RFC 9309 allow), `fetched_at`.
+Persists the 24-hour robots verdict across the collector's
+client-per-cycle lifecycle; temporary 5xx disallows are deliberately
+NOT persisted (a statement about a moment must not outlive the outage).
+Pragmas: this DB sets `busy_timeout` only — it is not WAL (aligning it
+is on the Corpus backlog).
 
 It stays a **separate database file**, and this document does not redesign
 it:
@@ -288,6 +304,23 @@ it:
   can be inspected, archived, or truncated independently of the inventory.
 - The only "join" ever needed is human (correlating a `last_error` with its
   request rows by URL and timestamp), which needs no shared schema.
+
+## The separate `llm_ledger.db`
+
+Owned by `LLMClient` (`config.LLM_LEDGER_DB`, at `data/llm_ledger.db`);
+the accountability layer for model spend, paralleling the fetch log
+(GUIDE §6 r7-r8). One table, `llm_calls`: `ts_utc`, `backend`
+(`cli`/`api` — added by the `_ensure_backend_column` in-place ALTER,
+the canonical micro-migration pattern), `model` (the resolved concrete
+model, never the tier alias), `purpose` (`layer:detail`, e.g.
+`map:batch2`), `package_id`/`granule_id`, `input_tokens` (currently the
+SUM of regular + cache-read + cache-creation tokens — splitting the
+three billed components is review R1), `output_tokens`, `duration_ms`,
+`error`. Every call is recorded — failures included — before anyone
+reads the response. No cap is enforced yet (§6 r8 measure-first; the
+ceiling derived from this ledger is the Editorial section's top backlog
+item). Pragmas: neither WAL nor busy_timeout today — aligning it is on
+the Corpus backlog.
 
 ---
 
@@ -331,6 +364,42 @@ is set when the image was extracted from the companion PDF; `status`:
 (boilerplate is always skipped). Replace-on-rerun alongside the package's
 text rows. Index on `package_id`.
 
+## Analysis layer (Phase 3)
+
+### `summaries` (map layer)
+
+The most-queried analysis table: one row per summarized item, keyed by
+`(package_id, granule_id, prompt_version)` — bumping
+`config.PROMPT_VERSION` regenerates this layer only (GUIDE §6 r5).
+`method ∈ official/llm` — official rows are verbatim agency/GPO text
+(FR SUMMARY preambles) stored at zero token cost; `inclusion_rule`
+names the mechanical rule that promoted the item (the digest's
+"Included because" line reads it); `model` and the token columns are
+the per-row share of the batched call that produced it. Reruns skip
+existing rows: a summarized item never costs a second call.
+
+### `section_summaries` / `day_summaries` (compose layer)
+
+EOD-only synthesis, keyed by `(date, section_key, prompt_version)` and
+`(date, prompt_version)` respectively; each versions independently
+(§3a) so phrasing iterations never regenerate factual layers. A stored
+day composition is invalidated when any item summary for the date is
+newer than it (late-arriving Record issues must never leave the
+synthesis stale — the `substr(...,1,19)` timestamp comparison in
+`compose.py` carries the CLAUDE.md §10 confirm-gate).
+
+### `summary_attempts` (GUIDE §6 r14 — the retry ceiling's memory)
+
+`(package_id, granule_id, prompt_version, layer)` → `attempts`,
+`last_at`. The per-run retry ceiling resets every collector cycle, and
+analyze runs every 15 minutes per pending date — so before this table
+existed an unsummarizable item was retried indefinitely (measured
+2026-07-31: 1,345 single retries, 39.7M input tokens, 60% of the day).
+`pending_map_items` excludes items at `MAX_ITEM_SUMMARY_ATTEMPTS`;
+past the ceiling an item is a disclosed gap, not pending work. (Known
+gap, review D4: the plain layer records attempts here but does not yet
+consult them.)
+
 ### `plain_summaries` (plain-speak layer)
 
 One row per plain-language restatement of a `summaries` row. Keyed by
@@ -370,28 +439,55 @@ for the agency poller.
 migration: NULL rows are historical govinfo traffic; budgets are counted
 per client bucket (govinfo vs agency vs wayback).
 
+### `mailbox_state` / `feed_state` (channel watermarks)
+
+`mailbox_state` — one row per polled IMAP folder: `uid_validity`
+(a server-side reset invalidates `last_uid`), `last_uid` (highest
+processed message), `last_polled_at`. `feed_state` — per-source
+conditional-GET validators (`etag`, `last_modified`) plus
+`last_polled_at` for the web poller. Both are pure watermarks: losing
+them costs re-examination, never data.
+
 ## Continuous-ingestion layer (2026-07-30; docs/continuous-ingestion.md)
 
 `item_journal` — the intraday arrival journal, written by **post-cycle
 reconciliation** (`WHERE NOT EXISTS` against the source tables), never
 by the collection functions themselves. One row per (item, event) with
-`event ∈ ingested/summarized/plain`; `observed_at` is the best
-available arrival time per source class (`extracted_at`,
-`documents.first_seen_at`, else journaling time) at cycle granularity —
+`event ∈ ingested/summarized/plain`; `observed_at` is
+`COALESCE(extracted_texts.extracted_at, journaling time)` at cycle
+granularity (one COALESCE, two arms — `documents.first_seen_at` is
+deliberately not consulted) —
 deliberately: dating rules key on claimed publication dates, and the
 journal exists to timestamp the live `/today` view, not to assert
 observation minutes. `digest_date` is the day the item belongs to under
 GUIDE §3 dating rules. Indexed by `(digest_date, observed_at)`.
 
 `collector_state` — one row per collector worker (`govinfo`, `email`,
-`analyze`, `host:<netloc>`): last cycle/ok timestamps, JSON stats of
-the last cycle, `consecutive_errors`. The read surface for
+`analyze`, `render`, `eod`, `host:<netloc>`): last cycle/ok timestamps,
+`last_result` JSON, `consecutive_errors`. The read surface for
 OPS-GUIDE.md and the `/fapd-health` skill; a worker whose
 `consecutive_errors` grows or whose `last_ok_at` goes stale is a
 finding.
 
-`item_tags` — section auto-tagging, **schema-first** (the build is
-ops-backlog OB-9): tags attach to items on the universal
+**`last_result` is durable state, not a status line** (the contract the
+2026-08-02 three-clock incident was made of): `run_cycle` stores
+whatever `cycle()` returns, wholesale, and `EODWorker.eod_due` reads
+the `finalized` key (falling back to `date` for rows written before
+2026-08-02) to decide whether a publication day is already done. Every
+return path of a `cycle()` must therefore carry the keys its readers
+depend on — a bare `{"ran": false}` erased the finalized marker and
+re-ran the full pipeline every ~20 minutes. Known remaining gap
+(review D5): the error path in `run_cycle` still replaces the row;
+the durable fix is a dedicated column.
+
+`section_tags` — the LIVE tag table (2026-07-30, GUIDE §6 r12a): one
+row per `(date, section_key, tag)` with `method ∈ mechanical/llm`;
+mechanical branch/agency tags plus §3a-versioned model discovery keys
+(`prompt_version`, `model` NULL for mechanical). Written by `tags.run`,
+read by the digest's `Tags:` lines and /today's day-so-far chips.
+
+`item_tags` — item-level auto-tagging, **schema-first** (the build is
+ops-backlog OB-9's remainder): tags attach to items on the universal
 `(package_id, granule_id)` key with `tag_kind ∈
 branch/agency/discovery` and `method ∈ mechanical/llm`; the LLM
 discovery keys carry `prompt_version` (a §3a-versioned surface) and

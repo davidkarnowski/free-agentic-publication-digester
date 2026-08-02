@@ -4,8 +4,11 @@ Every observation is an assertion: captures store the exact bytes served
 to our identified client (content-addressed by sha256), attempts that
 yielded no content (304s, robots refusals, errors) are recorded too, and
 each UTC day's events are exported to a committed manifest whose header
-chains to the previous manifest's hash — so days can't be silently
-dropped or reordered without the files themselves showing it.
+chains to the previous manifest's hash. The chain proves a retained
+middle day unaltered; it does NOT by itself detect truncation of the
+newest day or a never-written day (the header carries no predecessor
+date — strengthening it is review item D11). PROVENANCE.md states the
+same limits publicly; keep the two in step.
 
 Honest limits are documented in PROVENANCE.md: hashes prove what was
 served to us; timestamps are backed by git/GitHub ordering and Wayback

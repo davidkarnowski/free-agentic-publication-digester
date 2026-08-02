@@ -27,9 +27,15 @@ For content-bearing responses we store:
 - where enabled, the URL of an independent Wayback Machine snapshot of the
   same page.
 
-Each daily manifest's header contains the SHA-256 of the previous day's
-manifest, forming a chain: removing or reordering days is detectable from
-the files alone.
+Each daily manifest's header contains the SHA-256 of the most recent
+earlier manifest on file, forming a chain. Honest scope of that chain,
+stated precisely: it proves a retained middle manifest was not altered
+(its hash would no longer match the next header), but the header names
+no predecessor date — so the chain cannot by itself prove that the
+newest day was not truncated away or that a day was never written at
+all. Git history and the Wayback corroborations are the current
+witnesses for those cases; strengthening the header with the
+predecessor's date is on the development backlog.
 
 ## What this proves
 
@@ -67,9 +73,18 @@ the files alone.
 
 1. Find the document's line in the relevant `provenance/manifests/*.jsonl`
    (fields: url, ts, `content_sha256`, `text_sha256`, change_kind).
-2. Obtain the stored bytes (local archive `data/captures/<sha[:2]>/<sha>.bin`,
-   or the corresponding published capture bundle).
+2. Obtain the stored bytes (local archive `data/captures/<sha[:2]>/<sha>.bin`;
+   no public capture bundle is published yet — for third-party
+   verification use the item's Wayback URL when one is recorded).
 3. `shasum -a 256 <file>` — the digest must equal the manifest's
    `content_sha256`.
-4. For the manifest chain: `shasum -a 256` of day N's manifest must equal
-   `prev_manifest_sha256` in day N+1's header.
+4. For the manifest chain: `shasum -a 256` of a manifest must equal
+   `prev_manifest_sha256` in the header of the next manifest that exists
+   by filename order (days with no manifest are skipped by the chain —
+   see the honest-scope note above).
+
+One more honesty note: `verify_stored` (the hash recomputation) exists
+as a function and as this manual procedure; the pipeline does not yet
+run it on a schedule. A scheduled integrity sweep is on the development
+backlog — until it lands, archive self-verification happens when a
+person does it.

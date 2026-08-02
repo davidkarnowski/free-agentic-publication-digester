@@ -45,6 +45,6 @@ seeded=$(docker compose -f "$DEV/docker-compose.yml" --project-directory "$DEV" 
 if [ -n "$seeded" ]; then
   echo "==> data vintage: seeded $seeded"
 else
-  echo "==> WARNING: no SEEDED stamp — run scripts/dev-seed.sh (operator-gated) for production-shaped data"
+  echo "==> WARNING: no SEEDED stamp — run deploy/dev/scripts/dev-seed.sh (operator-gated) for production-shaped data"
 fi
 echo "==> dev stack up: http://localhost:8080"

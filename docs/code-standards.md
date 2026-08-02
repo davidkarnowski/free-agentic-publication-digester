@@ -1,7 +1,7 @@
 # FAPD code standards
 
 *Adopted 2026-07-30, adapted from the operator's sibling projects. Read
-before any non-trivial code change. Last reviewed: 2026-07-30.*
+before any non-trivial code change. Last reviewed: 2026-08-02 (doc audit; seams table completed, §2 numbering fixed, §4 counts corrected).*
 
 ## §0 Why this exists — and what kind of document it is
 
@@ -23,18 +23,18 @@ optional parameters are the whole pattern.**
 |---|---|
 | `LLMClient(db_path=, runner=, backend=)` | `src/fapd/llm.py` — runner fakes the CLI; backend fakes the API |
 | `CLIBackend(runner=)` / `AnthropicBackend(client=)` | `src/fapd/llm.py` |
-| `HttpClient(...)` pacing/log seams | `src/fapd/client.py` |
+| `HttpClient(db_path=, session=, sleep=, monotonic=, reserve_exempt=)` | `src/fapd/client.py` — `reserve_exempt=True` marks the EOD finalizer alone (GUIDE §4 reserve); nothing else may claim it |
 | `MailboxClient(...)` + `poll_mailbox(dkim_verifier=)` | `src/fapd/email_sources.py` |
 | `run_concurrent(client_factory=, wayback_factory=, conn_factory=)` | `src/fapd/agencies.py` |
-| `Supervisor(sources_builder=)` | `src/fapd/collect.py` — the source-health refresh, injectable so a test drives the cadence without rendering |
+| `Supervisor(registry=, conn_factory=, govinfo_factory=, agency_factory=, wayback_factory=, mailbox_factory=, poll=, llm_factory=, llm_enabled=, intervals=, eod_enabled=, finalizer_runner=, evidence_runner=, today_builder=, sources_builder=)` | `src/fapd/collect.py` — the full constructor; `finalizer_runner`/`evidence_runner` are the subprocess seams, `today_builder`/`sources_builder` the render seams, `wayback_factory` the dev stack's `--no-wayback` hook |
 | `SourceAdapter.items(body, content_type)` | `src/fapd/agencies.py` — the enumeration seam: a source's shape (feed, XML index, JSON API) is the adapter's business, the poll loop's invariants are not |
 | `SourceAdapter.request_params()` | `src/fapd/agencies.py` — the request seam: page size, sort order and any credential for the index fetch. Credentials go here and never into a URL string, because `HttpClient._redacted_params` is what keeps them out of the fetch log |
 | `SourceAdapter(entry)` | `src/fapd/agencies.py` — the registry entry the adapter is polling, injected by `adapter_for`; optional, so construction without one stays valid. It carries the index URL (a listing page's hrefs are relative and `items()` is handed bytes, not a URL) and the entry's per-source hints |
 | `stage_email(conn, entries=, mailbox_factory=, poll=)` | `scripts/run_pipeline.py` |
 | `db.connect(db_path=)` | `src/fapd/db.py` — tests use `tmp_path` DBs |
-| `Supervisor(...factories...)` | `src/fapd/collect.py` (continuous ingestion) |
 | `source_health(entries, pipeline_db=, fetch_db=, today=, window_days=)` | `src/fapd/health.py` — reads both DBs read-only; the date seam makes a trailing window testable |
 | `build_site(digest_dir, out_dir, pipeline_db=, fetch_db=)` | `src/fapd/publish.py` — carries the health seam through to the site build |
+| `build_today(conn, out_dir=, date=)` / `refresh_sources(out_dir=, pipeline_db=, fetch_db=)` | `src/fapd/publish.py` — the functions `Supervisor` injects as `today_builder`/`sources_builder`; `date=` is what makes past-day renders (and the future raw-day view) possible |
 
 New code that talks to the network, a subprocess, a clock, or an LLM
 **must** expose the same shape of seam and add a row here (same commit).
@@ -70,7 +70,7 @@ Deviations need an explicit comment explaining why.
    failures.** A missing API key raises; a mailbox outage is reported
    and the run continues (`stage_email` contract). Never silently skip.
 
-9. **Outbound links open in a new tab, sitewide** (operator rule,
+9a. **Outbound links open in a new tab, sitewide** (operator rule,
    2026-07-30). Any link whose href leaves fapd.info gets
    `target="_blank" rel="noopener noreferrer"` — so a reader following a
    citation to the official record never loses the digest they were
@@ -83,13 +83,13 @@ Deviations need an explicit comment explaining why.
 10. **The site ships no script except one** (operator request,
    2026-07-30). Presentation is server-rendered and complete without
    JavaScript; the single exception is `publish._LOCAL_TIME_JS`, which
-   appends the reader's local time beside already-rendered UTC stamps on
+   appends the reader's local time beside already-rendered stamps on
    `/today.html`. Any new script must clear the same bar: inline (no
    external resource), no network call, no storage or cookies, purely
    additive to content that is already correct without it — and the
    public privacy claims must be updated in the same commit. Interactive
    presentation should reach for CSS first; the keyword filter's
-   `:target` pattern is the worked example.
+   hidden-checkbox pattern is the worked example.
 
 ## §3 Worked example — `stage_email`
 
@@ -110,8 +110,10 @@ signature, one test per contract.
 - No plugin registries where a dict suffices (`ADAPTERS` is a dict; the
   registry drift-test keeps it honest).
 - No abstract base classes with one implementation. `SourceAdapter`
-  earns its base-class status with four concrete variants and a frozen
-  four-method contract.
+  earns its base-class status with five concrete variants behind six
+  registry keys and a frozen six-decision contract (GUIDE §3:
+  `items`, `request_params`, `stable_id`, `wants_article`,
+  `extract_text`, `fallback_text`).
 - No config knobs for things that never vary. Access-policy constants
   are code on purpose (GUIDE §4) — making them configurable would make
   politeness an operator mood.

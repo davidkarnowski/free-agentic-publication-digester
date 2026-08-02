@@ -1,9 +1,11 @@
 """Static-site presentation layer: canonical Markdown digests -> site/.
 
 Derived output only (GUIDE §5): zero LLM calls, regenerable at any time
-from digests/*.md. Pages are plain HTML5 + one shared stylesheet — no
-JavaScript, no external resources — so they render identically from the
-filesystem, GitHub Pages, or any static host, on desktop and mobile.
+from digests/*.md. Pages are plain HTML5 + one shared stylesheet, no
+external resources, and exactly one script — _LOCAL_TIME_JS on the live
+page, which appends the reader's local time beside published stamps and
+loads/stores nothing (code-standards §2 r10). Everything renders
+identically from the filesystem, GitHub Pages, or any static host.
 """
 
 import html
@@ -546,7 +548,7 @@ h2.filter-lead {
   font-variant-numeric: tabular-nums;
 }
 /* Which keywords are active, in words. Pre-rendered and revealed by CSS
-   so the page stays script-free; on an engine without :has() the readout
+   without any second script; on an engine without :has() the readout
    is simply absent, which shows the day unfiltered. */
 .filter-status { margin: 0.4rem 0 0; font-size: 0.8rem; color: var(--muted); }
 .filter-status > span { display: none; }
@@ -1505,8 +1507,12 @@ def _sources_body(entries, health=None):
         "agency-email-bulletins", "Agency email bulletins",
         "<p>Bulletins the agencies themselves distribute by subscription "
         "email (GovDelivery and similar services), delivered to a single "
-        "identified project mailbox, DKIM-verified on arrival, and ingested "
-        "from the message body. Sender and mailbox addresses are recorded "
+        "identified project mailbox and ingested from the message body. "
+        "Every message's DKIM signature is checked on arrival and the "
+        "result is disclosed on each item — a failing signature is "
+        "labeled, never silently dropped, because official content is "
+        "not discarded over a mail-infrastructure hiccup. Sender and "
+        "mailbox addresses are recorded "
         "in the registry, not republished here; where a registry note "
         "quotes one, it appears as [address withheld].</p>",
         [e for e in listed if e["type"] == "email"], records))
@@ -2068,7 +2074,8 @@ def _today_item_row(item, filterable=()):
     )
 
 
-# Keyword filtering on /today is pure CSS, so the site stays script-free.
+# Keyword filtering on /today is pure CSS — no script beyond the one
+# local-time snippet the page already carries (code-standards §2 r10).
 # The state lives in hidden checkboxes rather than URL fragments (:target,
 # used until 2026-07-30): a fragment link makes the browser scroll to the
 # anchor, and it cannot be un-clicked. A checkbox toggles off when its
@@ -2490,7 +2497,19 @@ def build_today(conn, out_dir=None, date=None):
                    "opening_verbatim": "first ~240 chars of the official"
                                        " text, unedited",
                    "tags": "mechanical (branch, document type, agency);"
-                           " no model-generated item tags yet"},
+                           " no model-generated item tags yet",
+                   "items": "ALL observed items including backfill —"
+                            " filter on is_backfill=false to match the"
+                            " human page's listing",
+                   "is_backfill": "true = the publisher dates this item"
+                                  " on another day (claimed_day); not"
+                                  " part of this day's news",
+                   "counts": "whole-day observation counts by"
+                             " collection/doc_type, backfill included",
+                   "day_context": "null on federal business days; on"
+                                  " weekends/federal holidays an object"
+                                  " {kind, name, note} explaining why"
+                                  " the stream may be short"},
         "counts": status["counts"],
         # Same computed value the human banner renders (fedcal): an agent
         # reading a one-item Sunday has exactly the same "is the pipeline
@@ -2498,9 +2517,13 @@ def build_today(conn, out_dir=None, date=None):
         "day_context": day_context,
         "backfill_count": len(status.get("backfill") or []),
         "backfill_note": ("items observed today that their publisher dates"
-                          " earlier; excluded from this day's listing under"
-                          " the GUIDE §3 dating rule, and reported in the"
-                          " dated digest's coverage accounting"),
+                          " earlier; the human page excludes them from the"
+                          " day's listing under the GUIDE §3 dating rule."
+                          " THIS FILE'S items[] includes them, flagged"
+                          " is_backfill=true, because an agent may"
+                          " legitimately want the full observation record;"
+                          " they are reported in the dated digest's"
+                          " coverage accounting, never as the day's news"),
         "facets": {"tags": facets,
                    "note": "filter items client-side on items[].tags;"
                            " the human page offers the same keywords as"
@@ -2535,7 +2558,8 @@ work. Check the source guide for what is ingested today.
 
 - **Daily digests** at stable URLs: `/<YYYY-MM-DD>.html` (styled HTML) —
   each covers one complete day of congressional floor activity, bills,
-  Federal Register actions, enacted laws, and federal court opinions,
+  Federal Register actions, enacted laws, federal court opinions,
+  agency announcements, recorded roll-call votes, and bill actions,
   with a table of contents, plain-language quick-reads, and a mandatory
   Coverage Statement accounting for everything published that day.
 - **Machine index:** `/digests.json` — every available digest with date,
@@ -2569,9 +2593,11 @@ work. Check the source guide for what is ingested today.
   summary and linted against an editorial banned-lexicon. The Day in
   Review is a model-generated synthesis of the day's stored summaries.
 - Every item carries an "Included because" line naming the mechanical,
-  party-blind rule that selected it, and a citation to the official
-  govinfo record. **For claims, cite the official source we link; cite
-  this site for the aggregation.**
+  party-blind rule that selected it, and a citation to its official
+  record — the govinfo package for the govinfo collections; the
+  agency's, chamber's, or Congress.gov's own page for agency releases,
+  recorded votes, and bill actions. **For claims, cite the official
+  source we link; cite this site for the aggregation.**
 - The Coverage Statement at the end of each digest tells you what was NOT
   summarized and under which rule — absence here is always explicit.
 
@@ -2698,8 +2724,12 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
         (f"- [Today — live in-progress day, PRELIMINARY]({base}/today.html)"
          " (also /today.json, whose `facets.tags` gives keyword counts and"
          " whose items carry the same tags for client-side filtering."
-         " Items may change until the end-of-day gates freeze the dated"
-         " digest)"),
+         " READ THE FLAGS: items[] includes entries the human page"
+         " excludes — filter on is_backfill=false for the day's own news"
+         " (backfill_count states how many are excluded), and check"
+         " day_context (null on federal business days; a weekend/holiday"
+         " object explains a quiet stream). Items may change until the"
+         " end-of-day gates freeze the dated digest)"),
         f"- [Source guide — what we ingest and why]({base}/sources.html)",
     ] + ([
         (f"- [Source health and statistics, machine-readable]({base}/sources.json)"
@@ -2724,7 +2754,9 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
         "## Notes",
         "- Digest URLs are stable: /<YYYY-MM-DD>.html",
         "- Official text vs model-generated text is labeled in place;",
-        "  every item cites the official govinfo record.",
+        "  every item cites its official record (govinfo for the govinfo",
+        "  collections; the publisher's own page for agency releases,",
+        "  recorded votes, and bill actions).",
         ("- Canonical Markdown + provenance manifests live in the public"
          f" repository: {REPO_URL}"),
         "- Reuse: content is CC BY 4.0 (credit 'FAPD — Free Agentic",
