@@ -509,19 +509,38 @@ class EODWorker(Worker):
             "SELECT last_result FROM collector_state WHERE worker = 'eod'"
         ).fetchone()
         if row and row["last_result"]:
-            done_date = json.loads(row["last_result"]).get("date")
+            prev = json.loads(row["last_result"])
+            # `finalized` is the durable marker; `date` is read too so rows
+            # written before 2026-08-02 still count as finalized.
+            done_date = prev.get("finalized") or prev.get("date")
             if done_date and done_date >= target:
                 return None
         return target
 
+    def _last_finalized(self, conn):
+        row = conn.execute(
+            "SELECT last_result FROM collector_state WHERE worker = 'eod'"
+        ).fetchone()
+        if not row or not row["last_result"]:
+            return None
+        prev = json.loads(row["last_result"])
+        return prev.get("finalized") or prev.get("date")
+
     def cycle(self, conn, cycle_id):
+        # Carry the finalized marker through EVERY return. run_cycle records
+        # whatever cycle() returns as last_result, so a bare {"ran": False}
+        # erased the proof that the day had been finalized — eod_due then
+        # saw no date, re-fired, and re-ran the whole pipeline. Measured
+        # 2026-08-02: four full runs and four duplicate evidence commits in
+        # under three hours.
+        finalized = self._last_finalized(conn)
         target = self.eod_due(conn)
         if not target:
-            return {"ran": False}
+            return {"ran": False, "finalized": finalized}
         logger.info("EOD finalizer firing for %s — pausing collectors", target)
         self.sup.pause_event.set()
         try:
-            exit_code = self.sup.finalizer_runner()
+            exit_code = self.sup.finalizer_runner(target)
             pushed = None
             if exit_code == 0 and config.EVIDENCE_PUSH:
                 pushed = self.sup.evidence_runner() == 0
@@ -529,18 +548,25 @@ class EODWorker(Worker):
                 raise RuntimeError(f"finalizer exited {exit_code} for {target}")
             journal_new(conn, "govinfo", cycle_id)  # late finalizer items
             journal_model_events(conn, cycle_id)
-            return {"ran": True, "date": target, "pushed": pushed}
+            return {"ran": True, "date": target, "finalized": target,
+                    "pushed": pushed}
         finally:
             self.sup.pause_event.clear()
 
 
-def _run_finalizer():
+def _run_finalizer(date=None):
+    """Run the daily pipeline for a specific publication day.
+
+    The date is passed explicitly: run_pipeline otherwise picks its own
+    via digest.default_date(), and the two disagreed — on 2026-08-02 the
+    EOD target was 2026-07-31 while the run published 2026-08-01."""
     import subprocess
     import sys
 
-    return subprocess.run(
-        [sys.executable, "scripts/run_pipeline.py"],
-        cwd=config.PROJECT_ROOT, check=False).returncode
+    cmd = [sys.executable, "scripts/run_pipeline.py"]
+    if date:
+        cmd += ["--date", date]
+    return subprocess.run(cmd, cwd=config.PROJECT_ROOT, check=False).returncode
 
 
 def _run_evidence_commit():

@@ -17,14 +17,21 @@ from fapd import config, db, logging_setup, report
 
 
 def default_date(conn):
-    """Newest COMPLETE day: the latest date_issued strictly before today
-    (UTC). A date's record is only complete once the day has ended and the
-    next-morning publications (esp. the Congressional Record) have had a
-    sync to arrive — digesting today's date early would misrepresent it
-    (worklog 2026-07-25)."""
-    import datetime as dt
+    """Newest COMPLETE day: the latest date_issued strictly before the
+    current PUBLICATION day. A date's record is only complete once the day
+    has ended and the next-morning publications (esp. the Congressional
+    Record) have had a sync to arrive — digesting today's date early would
+    misrepresent it (worklog 2026-07-25).
 
-    today = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d")
+    "Today" is Washington's day, not UTC's (GUIDE §3, amended 2026-07-30).
+    This function was written when UTC *was* the boundary and was missed by
+    that amendment: between 20:00 ET and midnight ET, UTC has already
+    rolled over, so it treated the day still in progress as complete. That
+    is a four-hour window every day, and on 2026-08-02 it published an
+    Aug 1 digest at 22:39 ET on Aug 1."""
+    from fapd.sync import publication_date
+
+    today = publication_date()
     return conn.execute(
         "SELECT MAX(p.date_issued) FROM packages p"
         " JOIN extracted_texts e USING (package_id)"

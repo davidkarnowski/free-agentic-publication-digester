@@ -218,3 +218,42 @@ def test_publication_day_is_washingtons_not_utcs():
     assert publication_date_of("2026-07-31T00:20:00+00:00") == "2026-07-30"
     assert publication_date_of("not a stamp") is None
     assert publication_date_of("") is None
+
+
+def test_default_date_uses_washingtons_day_not_utcs(monkeypatch):
+    """Between 20:00 ET and midnight ET, UTC has already rolled over. This
+    function was written when UTC *was* the day boundary and the 2026-07-30
+    Eastern amendment missed it — so for four hours every day it treated
+    the day still in progress as complete. On 2026-08-02 that published an
+    Aug 1 digest at 22:39 ET on Aug 1."""
+    import datetime as dt
+    import tempfile
+    from pathlib import Path
+
+    import digest
+
+    from fapd import db
+
+    # a tiny corpus: one package per day
+    tmp = Path(tempfile.mkdtemp())
+    conn = db.connect(tmp / "m.db")
+    for d in ("2026-07-31", "2026-08-01"):
+        conn.execute("INSERT INTO packages (package_id, collection, date_issued,"
+                     " last_modified, first_seen_at) VALUES (?, 'FR', ?, 'x', 'x')",
+                     (f"P-{d}", d))
+        conn.execute("INSERT INTO extracted_texts (package_id, granule_id,"
+                     " collection, text, char_count, extracted_at,"
+                     " extractor_version) VALUES (?, '', 'FR', 'b', 1, 'x', 1)",
+                     (f"P-{d}",))
+    conn.commit()
+
+    # 02:39 UTC on Aug 2 == 22:39 ET on Aug 1: Aug 1 has NOT ended
+    class FakeDT(dt.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return dt.datetime(2026, 8, 2, 2, 39, tzinfo=dt.UTC)
+
+    monkeypatch.setattr("fapd.sync.dt.datetime", FakeDT)
+    assert digest.default_date(conn) == "2026-07-31", \
+        "digested a publication day that had not ended"
+    conn.close()

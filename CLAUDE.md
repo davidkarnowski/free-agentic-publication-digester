@@ -138,9 +138,23 @@ uv run python scripts/sources_doc.py          # regenerate SOURCES.md after regi
 - **Publication days are Eastern, observation stamps are UTC** (GUIDE
   §3, amended 2026-07-30). `sync.publication_date()` is the single
   source of that boundary — used by agency/email ingest, the `/today`
-  renderer, and the EOD target. Never date a document with
-  `now[:10]`/UTC again, and never convert a stored observation stamp to
-  Eastern: what is Eastern is the day a document belongs to.
+  renderer, the EOD target, and (since 2026-08-02)
+  `scripts/digest.py::default_date()`, a call site the amendment missed:
+  its UTC "today" made the in-progress day look complete for four hours
+  every evening and published an Aug 1 digest at 22:39 ET on Aug 1.
+  Never date a document with `now[:10]`/UTC again, and never convert a
+  stored observation stamp to Eastern: what is Eastern is the day a
+  document belongs to. When auditing this rule, enumerate ALL call
+  sites — `report._claimed_day()` is a known-wrong one (review D1).
+- **A worker's `cycle()` return value is durable state, not a status
+  line** — `run_cycle` stores it wholesale as `collector_state
+  .last_result`, and `EODWorker.eod_due` reads the `finalized` key from
+  it to decide whether a day is done. Every return path must carry the
+  keys a reader depends on: a bare `{"ran": False}` erased the
+  finalized marker and re-ran the full pipeline every ~20 minutes on
+  2026-08-01 (35 duplicate evidence commits). The error path in
+  `run_cycle` still replaces the row (review D5) — bear it in mind
+  until the marker moves to its own column.
 - **`scripts/digest.py` imports the analysis layer lazily** — report-only
   runs must work even if analysis modules break.
 - **`LLMClient._ensure_backend_column`** does an in-place ALTER — the

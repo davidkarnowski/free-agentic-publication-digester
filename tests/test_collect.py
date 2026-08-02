@@ -334,18 +334,23 @@ def test_eod_hour_gate_is_read_on_washingtons_clock(tmp_path, monkeypatch):
 def test_eod_cycle_pauses_runs_finalizer_and_resumes(tmp_path, monkeypatch):
     calls = []
     sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
-    sup.finalizer_runner = lambda: calls.append("finalize") or 0
+    sup.finalizer_runner = lambda date=None: (
+        calls.append(("finalize", date)) or 0)
     sup.evidence_runner = lambda: calls.append("evidence") or 0
     monkeypatch.setattr(config, "EVIDENCE_PUSH", True)
     worker = collect.EODWorker(sup, 10)
     paused_during = []
-    sup.finalizer_runner = lambda: (
-        paused_during.append(sup.pause_event.is_set()), calls.append("finalize"))[0] or 0
+    sup.finalizer_runner = lambda date=None: (
+        paused_during.append(sup.pause_event.is_set()),
+        calls.append(("finalize", date)))[0] or 0
 
     conn = conn_factory()
     monkeypatch.setattr(worker, "eod_due", lambda c, now=None: "2026-07-29")
     stats = worker.cycle(conn, "c1")
-    assert stats == {"ran": True, "date": "2026-07-29", "pushed": True}
+    assert stats == {"ran": True, "date": "2026-07-29",
+                     "finalized": "2026-07-29", "pushed": True}
+    # the finalizer renders the day EOD chose, never one of its own
+    assert ("finalize", "2026-07-29") in calls
     assert paused_during == [True]          # collectors were paused during finalize
     assert not sup.pause_event.is_set()     # and resumed after
     assert "evidence" in calls
@@ -354,7 +359,7 @@ def test_eod_cycle_pauses_runs_finalizer_and_resumes(tmp_path, monkeypatch):
 
 def test_eod_cycle_failure_resumes_and_records_error(tmp_path, monkeypatch):
     sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
-    sup.finalizer_runner = lambda: 1        # validation failed -> exit 1
+    sup.finalizer_runner = lambda date=None: 1   # validation failed -> exit 1
     sup.evidence_runner = lambda: (_ for _ in ()).throw(AssertionError("must not push"))
     monkeypatch.setattr(config, "EVIDENCE_PUSH", True)
     worker = collect.EODWorker(sup, 10)
@@ -578,3 +583,54 @@ def test_an_item_we_keep_failing_stops_being_pending_work(conn):
 
     # the rest of the day is untouched — one stuck item must not stall others
     assert len(collect.pending_map_items(conn, DATE)) == len(before) - 1
+
+
+def test_eod_does_not_forget_that_it_finalized(tmp_path, monkeypatch):
+    """run_cycle records whatever cycle() returns, so a bare
+    {"ran": False} erased the proof that the day was finalized — eod_due
+    then saw no date and re-ran the whole pipeline. Measured 2026-08-02:
+    four full runs and four duplicate evidence commits in three hours."""
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    sup.finalizer_runner = lambda date=None: 0
+    sup.evidence_runner = lambda: 0
+    worker = next(w for w in sup.workers if w.name == "eod") \
+        if any(w.name == "eod" for w in sup.workers) else collect.EODWorker(sup, 10)
+    monkeypatch.setattr(worker, "eod_due", lambda c, now=None: "2026-07-29")
+    first = worker.run_cycle()
+    assert first["ran"] is True and first["finalized"] == "2026-07-29"
+
+    # a later cycle with nothing due must PRESERVE the marker
+    monkeypatch.setattr(worker, "eod_due", lambda c, now=None: None)
+    second = worker.run_cycle()
+    assert second["ran"] is False
+    assert second["finalized"] == "2026-07-29", \
+        "the no-op cycle erased the proof the day was finalized"
+
+    conn = conn_factory()
+    import json as _json
+    stored = _json.loads(conn.execute(
+        "SELECT last_result FROM collector_state WHERE worker='eod'"
+    ).fetchone()[0])
+    assert stored["finalized"] == "2026-07-29"
+    conn.close()
+
+
+def test_eod_is_not_due_again_after_a_no_op_cycle(tmp_path, monkeypatch):
+    """The real regression: finalize, idle, then ask again. Before the
+    fix the idle cycle wiped the marker and the day re-fired."""
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    sup.finalizer_runner = lambda date=None: 0
+    sup.evidence_runner = lambda: 0
+    worker = collect.EODWorker(sup, 10)
+    conn = conn_factory()
+
+    at = dt.datetime(2026, 8, 1, 4, 5, tzinfo=dt.UTC)   # 00:05 ET Aug 1
+    assert worker.eod_due(conn, at) == "2026-07-31"
+    monkeypatch.setattr(worker, "eod_due", lambda c, now=None: "2026-07-31")
+    worker.run_cycle()
+    monkeypatch.undo()
+
+    worker2 = collect.EODWorker(sup, 10)
+    worker2.run_cycle()                       # an idle cycle in between
+    assert worker2.eod_due(conn, at) is None, "the day re-fired after idling"
+    conn.close()

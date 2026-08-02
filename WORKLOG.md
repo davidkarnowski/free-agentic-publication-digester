@@ -4003,3 +4003,54 @@ the live page are meant to differ in freshness and finality, not in
 editorial rules. Any rule that decides what belongs to a day has to be
 applied in both, and the way to guarantee that is to share the function
 rather than the intention.
+
+## 2026-08-02 — Three clocks, one bug: the premature digest and the 35-commit loop
+
+At 22:39 ET on August 1 the operator noticed an August 1 digest already
+published — the day was three hours from over. By the time the diagnosis
+finished, origin/main carried **35 automated evidence commits firing every
+~20 minutes**, each one a complete pipeline run: sync, analyze, compose on
+the strong tier, insight, render, push.
+
+Three independent defects, all the same species — the Eastern
+publication-day rule (GUIDE §3, amended 2026-07-30) applied in one place
+and missed in another:
+
+1. `scripts/digest.py::default_date()` still used the UTC day as "today".
+   Between 20:00 ET and midnight, UTC has rolled over, so the day still in
+   progress looked complete. Four exposed hours, every single day, since
+   the amendment. This chose Aug 1 as a "complete" day on Aug 1 evening.
+2. `EODWorker.cycle()` returned a bare `{"ran": False}` on idle cycles.
+   `run_cycle` stores whatever `cycle()` returns as `collector_state
+   .last_result` — so each idle cycle *overwrote the proof that the day
+   had been finalized*, `eod_due` saw no marker, and the finalizer fired
+   again. That is the 20-minute loop.
+3. `_run_finalizer()` never passed the supervisor's target date to
+   `run_pipeline.py`, which fell through to defect 1 and chose its own —
+   the supervisor targeting 07-31 while the run published 08-01.
+
+Fixes: `default_date()` now asks `sync.publication_date()` — the single
+source of the boundary; `cycle()` carries a `finalized` key through every
+return path (with `date` read as a fallback so pre-fix rows still count);
+the finalizer subprocess gets an explicit `--date`. Three regression
+tests pin the exact conditions: a frozen 22:39-ET clock, a no-op cycle
+that must preserve the marker, and a finalize-idle-ask-again sequence
+that must answer "not due".
+
+No cleanup commit for the premature digest: after the fix, the next EOD
+cycle targets 08-01, sees the stored marker at 07-31, and re-renders the
+digest over the complete day. It supersedes itself; the 35 commits stay
+in history as the evidence they are.
+
+One correction for the record: the EOD hour gate (`EOD_ET_HOUR = 0`) was
+initially reported as a fourth defect. It is not — the target is always
+the *previous* day, which has always ended, so "due at any hour" is the
+intended meaning. Three defects, not four.
+
+The lesson repeats 07-31's, one layer up: a day-boundary rule stated in
+GUIDE prose had nine call sites and no way to enumerate them. The full
+code review commissioned after this (docs/code-review-2026-08-02-amended.md)
+found the same shape in the selection path (`report._claimed_day` compares
+a UTC day to an Eastern day) and proposes the structural fix: one function
+per editorial rule, with a drift test, so a second implementation cannot
+quietly exist.
