@@ -93,6 +93,17 @@ body {
   white-space: nowrap;   /* multi-word labels never break mid-name */
 }
 .nav-links a:hover, .brand:hover { text-decoration: underline; }
+/* The live view is the site's most-visited destination; its link leads
+   the nav and carries the live dot. Secondary pages collapse into a
+   native <details> so twelve undifferentiated links stop wrapping into
+   rows of grey text above every page's h1 (no JS — details is HTML). */
+.nav-links a[href="today.html"] { color: var(--accent); font-weight: 600; }
+.nav-more { display: inline-block; }
+.nav-more summary {
+  cursor: pointer; color: var(--muted); margin-left: 0.9rem;
+  white-space: nowrap;
+}
+.nav-more summary:hover { text-decoration: underline; }
 main {
   max-width: 46rem;
   margin: 0 auto;
@@ -394,23 +405,47 @@ li.source-note a { color: var(--muted); }
   border-radius: 4px;
 }
 .today-meta { font-size: 0.85rem; color: var(--muted); }
-.today-list { list-style: none; padding-left: 0; }
-.today-item { margin: 0.55rem 0; }
+.today-list { list-style: none; padding-left: 0; margin: 0 0 0.6rem; }
+/* A real two-column grid: the time in its own track, the content in the
+   other — actual alignment, replacing the old approximated 2.4rem
+   left-margins. The border is what delimits one item from the next in a
+   long stream. */
+.today-item {
+  display: grid; grid-template-columns: 5.2rem 1fr; gap: 0 0.6rem;
+  margin: 0; padding: 0.45rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.today-item:last-child { border-bottom: 0; }
 .today-time {
   font-family: ui-monospace, monospace; font-size: 0.78rem;
-  color: var(--muted); margin-right: 0.35rem;
+  color: var(--muted); padding-top: 0.15rem;
 }
 /* Local time is appended client-side beside the server-rendered UTC
-   stamp; with scripting off, the UTC stamp simply stands alone. */
+   stamp; with scripting off, the UTC stamp simply stands alone. It
+   lands inside .today-time, so the grid column holds both. */
 .localtime { color: var(--muted); font-size: 0.78rem; }
-.today-summary { margin: 0.2rem 0 0 2.4rem; font-size: 0.92rem; }
+.today-body { min-width: 0; }
+.today-summary { margin: 0.2rem 0 0; font-size: 0.92rem; }
 .today-opening { color: var(--muted); }
 .today-chips { margin: 0.15rem 0 0.1rem; }
 .today-chips .tag { margin-right: 0.25rem; }
 .today-item-meta {
-  margin-left: 2.4rem; font-size: 0.78rem; color: var(--muted);
+  font-size: 0.78rem; color: var(--muted);
   overflow-wrap: anywhere;
 }
+/* Hour headings inside the stream — scannable structure for a 300-item
+   day, and a quiet evening visible as absence. */
+.today-hour {
+  margin: 1.1rem 0 0.2rem; padding: 0; border: 0;
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--muted);
+}
+/* The collapsed how-it-works explainer. */
+.today-about { margin: 0.6rem 0; }
+.today-about summary {
+  cursor: pointer; color: var(--accent); font-size: 0.9rem;
+}
+.today-context { margin: 0.6rem 0; }
 /* Keyword filter (pure CSS :target — the site stays JavaScript-free).
    The per-keyword rules are generated into today.html's own <style>. */
 /* Visually hidden but focusable: keyboard users still reach every chip. */
@@ -447,15 +482,19 @@ h2.filter-lead {
    increment for display:none elements, and counter scope reaches an
    element's following siblings, so a paragraph after the list can state
    how many survived the filter. Generated content, so it is a visual
-   readout only — screen readers treat it inconsistently. */
-.today-list { counter-reset: shown 0; }
+   readout only — screen readers treat it inconsistently. The reset
+   lives on the FORM, not the list: the stream is now several per-hour
+   lists, and a per-list reset would count only the last one. */
+.today-stream { counter-reset: shown 0; }
 .today-list > .today-item { counter-increment: shown; }
 .filter-count {
   margin: 0.5rem 0 0; font-size: 0.8rem; color: var(--muted);
 }
 .filter-count::after { content: counter(shown) " item(s) shown."; }
+/* Always visible (was display:none until a box was checked): the escape
+   hatch the bar's own prose promises must exist before it is needed. */
 .filter-clear {
-  display: none; margin-left: 0.6rem; font-size: 0.78rem; font-weight: 400;
+  margin-left: 0.6rem; font-size: 0.78rem; font-weight: 400;
   padding: 0.1rem 0.6rem; border: 1px solid var(--border); border-radius: 999px;
   background: var(--card); color: var(--accent); cursor: pointer;
   font-family: inherit;
@@ -489,6 +528,15 @@ h2.filter-lead {
   /* never print a filtered subset that could read as the whole day */
   .today-item { display: list-item !important; }
   .filter-bar { display: none; }
+}
+/* The site's first breakpoint (there was none): the item grid stacks —
+   time above title — and dense rows get room to breathe. 40rem covers
+   phones without touching tablets or the 46rem column. */
+@media (max-width: 40rem) {
+  .today-item { grid-template-columns: 1fr; gap: 0; }
+  .today-time { padding-top: 0; }
+  .filter-row { line-height: 2.4; }
+  .nav-links { font-size: 0.9rem; }
 }
 .live-callout {
   border: 1px solid var(--border); border-left: 3px solid #0f9488;
