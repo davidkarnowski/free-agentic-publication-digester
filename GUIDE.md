@@ -186,6 +186,13 @@ reporting component must comply.
 
 Start with `CREC`, `BILLS`, `FR`; add the rest once the pipeline is stable.
 
+*(Status note, 2026-08-02: this table is the adoption plan, not the
+running inventory. Synced today: `CREC`, `BILLS`, `FR`, `USCOURTS`,
+`PLAW` (`config.COLLECTIONS`), plus the two later collections defined
+below this table — `VOTES` and `BILLACTIONS`. `CHRG`, `CRPT`, and
+`DCPD` remain unstarted. The code constant is the inventory; this
+table records why each collection is in scope.)*
+
 ### Recorded votes (added 2026-07-31)
 
 | Code | Collection | Why |
@@ -345,7 +352,17 @@ direct HTML index pages where no feed exists). Governing rules:
   and their captures/documents are stored normally. An item carrying no
   parseable claimed date falls back to the observed date (listed on the
   publication day we first saw it, disclosed as dated by observation —
-  the only honest option). Claimed dates and observed dates remain separately
+  the only honest option **for a feed**, whose publisher bounds it to
+  what was just published). **Amended 2026-08-02, ratifying the
+  behavior shipped with the index adapters on 2026-07-31:** for an
+  **index or listing page** — which carries months of undated archive,
+  not just what is new — the same fallback would file dozens of old
+  releases as today's news in a way `AGENCYPR-EX-01` cannot catch
+  (their claimed day would equal the digest day). An undated index
+  entry is therefore **dropped, never observation-dated**, and the
+  adapter logs the drop count on every poll; a source that mostly
+  drops is a source that should not be active. Claimed dates and
+  observed dates remain separately
   stored, always (§7 T3/T4: a claimed date is the agency's assertion, not
   our finding).
 - Ingestion obeys §4 unchanged: paced, budgeted (its own daily bucket),
@@ -656,10 +673,15 @@ discipline:
   binding invariants do not loosen:** at most 1 request/second per host with
   crawl-delay overriding downward, per-class daily budgets enforced by the
   client, every request logged, identified UA. Frequency is additionally
-  governed by **backpressure**: past 70% of a class's daily budget its
-  collector doubles its interval for the rest of the UTC day, reserving
-  headroom for the end-of-day finalizer — continuous polling must never
-  starve the canonical run.
+  governed by **backpressure** *(scope stated precisely, 2026-08-02)*:
+  past 70% of the **agency class's** daily budget its host collectors
+  double their interval for the rest of the UTC day. The govinfo class
+  is governed differently and deliberately: its collectors may spend
+  only 85% of the daily budget (the finalizer reserve, below) and every
+  govinfo client — finalizer included — obeys the 500/hour publisher
+  ceiling. Extending interval-doubling to the govinfo collector is an
+  open item, not an assumed behavior. Either way the invariant is the
+  same: continuous polling must never starve the canonical run.
 - **Date-bound every sync.** A sync with no stored watermark (first run, or a
   reset) must not walk open-ended history: it starts at now minus a small
   fixed lookback window (`INITIAL_SYNC_LOOKBACK_DAYS`, currently 3 days) and
@@ -731,6 +753,25 @@ without touching upstream:
   validation gates, and committed as the §7 integrity record. Intraday
   state never bypasses a gate: whatever `/today` showed, the canonical
   digest is what the validation gates passed.
+
+  **Amended 2026-08-02 — what the live page may do.** `/today` is not
+  raw arrivals: it applies the *mechanical* editorial layer, and must,
+  because a live page that ignores the §3 dating rule lists archive
+  backfill as today's news (observed 2026-07-31, 721 items). The
+  license and its limits: the live page MAY apply any zero-LLM,
+  deterministic rule the digest also applies — and must do so through
+  the **same shared function**, never a reimplementation — and MAY
+  carry mechanical reader context: the §3 backfill split (counted and
+  disclosed in place), the federal working calendar
+  (`src/fapd/fedcal.py`: the eleven 5 U.S.C. 6103 holidays with OPM
+  observed shifts, pure and dependency-free — a quiet Sunday is the
+  publishers resting, and saying so is disclosure, not editorializing),
+  and mechanical display gates (e.g. the prose check that keeps scraped
+  navigation chrome out of an item's visible body; the suppressed text
+  stays verbatim in today.json). The live page may NOT: run a model,
+  compose, rank, or apply any judgment that is not a named deterministic
+  rule. The machine surface (today.json) always carries the same
+  computed values as the human page, labeled.
 - **Storage:** filesystem for raw documents (`data/raw/<collection>/<date>/`),
   SQLite for metadata and extracted records. No cloud dependency to start.
 - **Language:** Python (mature XML tooling, easy scheduling). Decide at first
@@ -808,7 +849,12 @@ of the code, not of operator discipline.
    from observed load (working figure: ~1M/day) and enforced with a hard
    stop: overflow items stay queued for the next day and are named in the
    Coverage Statement's known gaps — a budget stop must never become a
-   silent omission (§2).
+   silent omission (§2). *(2026-08-02: the measured baseline this rule
+   was waiting for exists — the ledger now holds ordinary days (~90K
+   in), judicial-heavy days (~1.5M), and three runaway incidents (17.4M,
+   39.7M, and a re-fire day) that a cap would have stopped. Building the
+   enforcement is ops-backlog OB-4 / review R1; the cap VALUE is set by
+   the operator from the ledger when that lands.)*
 9. **Plain-speak is a decoupled, batched restatement pass.** The per-item
    plain-language layer (§2) is generated by its own batched pass over
    *stored summaries only* (~170 tokens/item, ~25 items/call), versioned
@@ -858,9 +904,16 @@ of the code, not of operator discipline.
   silently dropped. Evidence: on 2026-07-30 the layer wrote 184 summaries
   across eleven dates reaching back to 2024-06-18 while the digest day
   itself received none.
-- **Rule 14 — the retry ladder has a ceiling (added 2026-07-31).** Group
+- **Rule 14 — the retry ladder has a ceiling (added 2026-07-31; amended
+  2026-08-02 to state the whole mechanism).** Group
   retries first (rule unchanged); single-item retries stop at a configured
-  ceiling per run, past which the item is left unsummarized and said so.
+  ceiling per run — **and at a durable ceiling per ITEM**
+  (`MAX_ITEM_SUMMARY_ATTEMPTS`, remembered in `summary_attempts`),
+  because a per-run ceiling alone resets every collector cycle: analyze
+  runs every 15 minutes per pending date, so a permanently
+  unsummarizable item was retried indefinitely — 1,345 single retries
+  and 39.7M input tokens in one day. Past either ceiling the item is
+  left unsummarized and said so.
   A backend with a large fixed per-call cost makes single retries almost
   pure overhead: measured 2026-07-30 on the CLI backend, ~29K input tokens
   per call regardless of payload, and 366 single retries cost 10,860,137
@@ -881,7 +934,7 @@ exactly what it said.* Anticipated interference and mitigations:
 | Backdating / retro-insertion | `claimed_published_at` vs our `first_seen_at`, always stored separately; claimed dates inside a demonstrably covered window are a flagged anomaly |
 | URL churn | document identity keyed by stable id (feed GUID / normalized URL); url + final_url recorded |
 | Content served differently to us | Wayback Machine snapshot for new captures, within its daily budget (§4) — an independent second witness; best-effort, never blocking, gaps topped up by later passes |
-| "You fabricated the archive" | attempt-level daily manifests (committed) with a previous-day hash chain; git/GitHub history ordering; Wayback corroboration |
+| "You fabricated the archive" | attempt-level daily manifests (committed) with a hash chain over retained manifests, PLUS git/GitHub history ordering and Wayback corroboration — the three together, because the chain alone has stated limits (below) |
 
 Mechanics:
 - **Two hashes per capture:** `content_sha256` (exact decoded entity
@@ -895,8 +948,15 @@ Mechanics:
   (committed) records every *attempt* — captures, 304s, robots refusals,
   errors — because absence must be an assertion (§2): a gap in monitoring
   is on the record as a gap, never ambiguous. Each manifest's header
-  carries the previous manifest's sha256 (deletion or reordering of days
-  is detectable from the files alone).
+  carries the sha256 of the most recent earlier manifest on file.
+  **Honest scope (stated 2026-08-02):** the chain proves a retained
+  middle manifest was not altered; because the header names no
+  predecessor date, it cannot by itself prove the newest day was not
+  truncated or that a day was never written — git history and Wayback
+  are the current witnesses for those cases, and strengthening the
+  header with the predecessor's date is on the development backlog. A
+  provenance claim overstated is a provenance claim broken (§2 applies
+  to our own claims too).
 - **DKIM as corroboration for email-distributed sources (added
   2026-07-29):** for the §3 email class, the stored raw message plus a
   verifying DKIM signature — with the verifying DNS public key archived

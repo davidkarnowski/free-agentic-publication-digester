@@ -4223,3 +4223,30 @@ lesson about verifying the verifiers.
 The meta-lesson mirrors the code review's: the accurate docs were the
 drift-tested ones (SOURCES.md, the agents ownership matrix, the dev
 stack README). What can drift, will; what is pinned, holds. 516 tests.
+
+## 2026-08-02 — The constitution catches up: seven GUIDE amendments
+
+The doc audit ended with eight GUIDE.md findings flagged FOR-OPERATOR;
+the operator authorized the update. Seven amendments landed, each
+ratifying behavior the code already enforces for reasons already
+measured — the constitution catching up to its caselaw:
+
+§3 gains the index carve-out (an undated index entry is dropped, never
+observation-dated — the feed fallback's honesty depends on a publisher
+bounding the feed, and a listing page has no such bound); §3's
+collections table is marked as the adoption plan with the running
+inventory named; §4's backpressure states its true scope (agency class;
+govinfo is governed by the reserve and the publisher's hourly ceiling);
+§5 gains the live-page license — /today may apply any zero-LLM
+deterministic rule the digest applies, through the same shared
+function, and may carry mechanical reader context, which ratifies
+fedcal.py and forbids the live page a model, a ranking, or an unnamed
+judgment; §6 r8 records that the measure-first baseline has arrived
+(the cap build is OB-4/R1; the value stays the operator's); r14 now
+states the whole retry mechanism including the durable per-item
+ceiling; and §7 scopes the manifest chain honestly, with the line that
+justifies the whole pass: a provenance claim overstated is a provenance
+claim broken.
+
+Item 8 (r13's window arithmetic) is a code fix, not a text fix — review
+D14, Editorial backlog.

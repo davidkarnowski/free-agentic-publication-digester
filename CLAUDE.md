@@ -292,6 +292,11 @@ live in `.claude/agents/fapd-*.md` (tracked).
   superseded itself. Same day: /today overhaul + `fedcal.py`
   weekend/holiday banner; local dev stack (`deploy/dev/`) seeding from
   VPS `VACUUM INTO` snapshots.
+- **2026-08-02** — GUIDE amendments ratifying measured behavior
+  (operator-authorized, from the doc audit): §3 index-drop carve-out,
+  §4 backpressure scope, §5 live-page mechanical-editorial license
+  (fedcal governed), §6 r8 baseline-arrived note, r14 per-item ceiling,
+  §7 chain honest scope, §3 collections status note.
 - **2026-08-02** — System segmented into five sections with tracked
   agent instruction files (`docs/agents/`, launchers in
   `.claude/agents/`), per the Spiralyst pattern: explicit edit
