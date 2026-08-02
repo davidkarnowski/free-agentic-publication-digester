@@ -202,7 +202,29 @@ confirm-gate.
   would silently break invalidation. **Confirm with the operator before
   changing any stored-timestamp format.**
 
-## 11. Where to look first
+## 11. Section agents
+
+The system is segmented into five sections with explicit boundaries so
+work can be split across focused agents; `docs/agents/README.md` is the
+router and `docs/agents/orchestration.md` governs dispatch (verbatim
+prompt template, file-ownership matrix, shared-resource rules, and the
+one structural rule: **section agents stage and report; only the
+orchestrator commits**).
+
+| Section | Instructions | Launch for |
+|---|---|---|
+| Acquisition | `docs/agents/acquisition.md` | Sources, adapters, clients, sync, email, registry |
+| Corpus & Provenance | `docs/agents/corpus.md` | Schema, extraction, parsers, captures, manifests |
+| Editorial | `docs/agents/editorial.md` | Rules, model layers, prompts, token economics |
+| Publication | `docs/agents/publication.md` | Digest render, validation gates, the site, /today |
+| Operations | `docs/agents/operations.md` | Supervisor/workers, health, pipeline, VPS stack |
+
+Before section work — delegated or done in the main session — load the
+section file; it carries the area's philosophy, its CLAUDE.md §9 subset,
+its review backlog, and its grep-able audits. Thin launcher definitions
+live in `.claude/agents/fapd-*.md` (tracked).
+
+## 12. Where to look first
 
 | Task | Files |
 |---|---|
@@ -218,7 +240,7 @@ confirm-gate.
 | Continuous ingestion | `src/fapd/collect.py`, `docs/continuous-ingestion.md` |
 | VPS / deploy | `deploy/vps/README.md`, `docs/ops/` |
 
-## 12. Posture
+## 13. Posture
 
 - **Repo is private until the launch checklist gates clear**
   (docs/pre-publication-todo.md); everything is written as if already
@@ -235,7 +257,7 @@ confirm-gate.
 - Plans that touch production or governing docs follow
   `docs/ops/plan-task-template.md`.
 
-## 13. Decision log (append-only, dated)
+## 14. Decision log (append-only, dated)
 
 - **2026-07-30** — Domain `fapd.info`; full-name branding rule (always
   expand "Free Agentic Publication Digester").
@@ -257,3 +279,8 @@ confirm-gate.
 - **2026-07-30** — Continuous ingestion: single supervisor daemon,
   fully-continuous mechanical layers, batched model layers, EOD-only
   compose; `/today` derived-only, canonical digest frozen at EOD.
+- **2026-08-02** — System segmented into five sections with tracked
+  agent instruction files (`docs/agents/`, launchers in
+  `.claude/agents/`), per the Spiralyst pattern: explicit edit
+  surfaces, orchestrator-owned shared files, agents stage but never
+  commit. Drift-tested against the repo.

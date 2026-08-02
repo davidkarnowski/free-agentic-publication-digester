@@ -4054,3 +4054,36 @@ found the same shape in the selection path (`report._claimed_day` compares
 a UTC day to an Eastern day) and proposes the structural fix: one function
 per editorial rule, with a drift test, so a second implementation cannot
 quietly exist.
+
+## 2026-08-02 — The system gets sections, and the sections get agents
+
+The operator called for a level-up: the project has outgrown
+single-context work, and the code review showed defects clustering by
+area. Following the segmentation pattern proven in the operator's
+Spiralyst project (per-role instruction docs with explicit edit
+surfaces, a file-ownership matrix, "agents stage, never commit"), FAPD
+is now five sections: Acquisition, Corpus & Provenance, Editorial,
+Publication, Operations.
+
+Each section has a tracked instruction file in docs/agents/ carrying its
+identity and edit surface, two overriding rules, its governing-doc
+precedence, philosophy with the dated incidents that earned each rule,
+its slice of CLAUDE.md §9, code expectations with grep-able audits, and
+its backlog from the 2026-08-02 review — so a freshly launched agent
+knows the known defects in its area before writing new code on top of
+them. docs/agents/orchestration.md holds the ownership matrix, the
+shared-resource list (config.py, GUIDE.md, the DDL block, conftest —
+orchestrator-owned, changed only via exact diffs in exit reports), the
+verbatim dispatch template, and the one structural rule: only the
+orchestrator commits.
+
+Thin launcher definitions in .claude/agents/fapd-*.md (now tracked via a
+.gitignore re-include) make the five sections selectable agent types;
+each launcher's whole job is pointing at its docs/agents file.
+tests/test_agents_docs.py pins the paper to the repo: launchers must
+reference existing docs, the ownership matrix's paths must exist, the
+CLAUDE.md router must name all five. 493 tests.
+
+The Spiralyst lesson this deliberately imports: boundaries fail when
+they live in intentions, and hold when every rule is either grep-able or
+carries the incident that created it.

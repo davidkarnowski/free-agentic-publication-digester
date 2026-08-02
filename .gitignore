@@ -17,11 +17,12 @@ __pycache__/
 
 # Local research/analysis material (NotebookLM bundles etc.) — never published
 research/
-# Assistant-harness: local settings stay out; skills are tracked project
-# assets. The pattern must be `.claude/*` (not `.claude/`) for the
-# re-include to work.
+# Assistant-harness: local settings stay out; skills and section-agent
+# launchers are tracked project assets. The pattern must be `.claude/*`
+# (not `.claude/`) for the re-includes to work.
 .claude/*
 !.claude/skills/
+!.claude/agents/
 
 # /today live view — derived-only, never committed (GUIDE §5 two-artifact
 # model); the canonical record is the dated digest the EOD gates freeze.
