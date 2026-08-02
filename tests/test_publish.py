@@ -1087,6 +1087,33 @@ def _seed_today(conn):
     conn.commit()
 
 
+def _seed_today_filler(conn, n=3):
+    """Three earlier-observed court opinions: pushes the day past
+    MIN_FILTER_ITEMS so the filter machinery renders, without touching
+    the two hand-inspected items' tags or counts (judicial/court opinion
+    only)."""
+    from conftest import DATE
+
+    for i in range(1, n + 1):
+        conn.execute(
+            "INSERT INTO packages (package_id, collection, date_issued,"
+            " last_modified, title, first_seen_at) VALUES"
+            " (?, 'USCOURTS', ?, 'x', ?, 'x')",
+            (f"USCOURTS-f{i}", DATE, f"Opinion {i}"))
+        conn.execute(
+            "INSERT INTO extracted_texts (package_id, granule_id, collection,"
+            " doc_type, title, text, char_count, metadata, extracted_at,"
+            " extractor_version) VALUES (?, '', 'USCOURTS', 'APPELLATE',"
+            " ?, 'The court affirmed.', 19, '{}', 'x', 1)",
+            (f"USCOURTS-f{i}", f"Opinion {i}"))
+        conn.execute(
+            "INSERT INTO item_journal (observed_at, source_class, package_id,"
+            " granule_id, collection, source_id, digest_date, event) VALUES"
+            " (?, 'govinfo', ?, '', 'USCOURTS', NULL, ?, 'ingested')",
+            (f"{DATE}T08:0{i}:00Z", f"USCOURTS-f{i}", DATE))
+    conn.commit()
+
+
 def test_build_today_renders_disclosure_sections_and_labels(conn, tmp_path):
     from conftest import DATE
 
@@ -1102,7 +1129,10 @@ def test_build_today_renders_disclosure_sections_and_labels(conn, tmp_path):
     assert "<h2>" not in page.split("</h1>")[1]
     assert "Congressional Record" in page and "Agency announcement" in page
     assert "model summary:" in page            # §2 labeling for llm method
-    assert page.index("AGENCYPR-x") < page.index("PgS1")  # newest first
+    # newest first — anchored on titles: the synthetic PR-/AGENCYPR ids
+    # no longer print in a reader's meta line (they stay in today.json)
+    assert (page.index("VA announces a claims program")
+            < page.index("title of PgS1"))
 
     import json
     data = json.loads((tmp_path / "today.json").read_text())
@@ -1128,6 +1158,7 @@ def test_build_today_citation_metadata_and_item_tags(conn, tmp_path):
     from conftest import DATE
 
     _seed_today(conn)
+    _seed_today_filler(conn)   # past MIN_FILTER_ITEMS: chips become controls
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
 
@@ -1194,10 +1225,11 @@ def test_build_today_newest_first_with_branch_colors_and_intro(conn, tmp_path):
     from conftest import DATE
 
     _seed_today(conn)
+    _seed_today_filler(conn)
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     data = json.loads((tmp_path / "today.json").read_text())
     # 11:30 agency item observed after the 10:00 CREC item -> listed first
-    assert [i["package_id"] for i in data["items"]] == \
+    assert [i["package_id"] for i in data["items"][:2]] == \
         ["AGENCYPR-x", "CREC-2026-07-23"]
 
     page = (tmp_path / "today.html").read_text()
@@ -1303,6 +1335,7 @@ def test_today_filter_bar_is_pure_css_and_wired(conn, tmp_path):
     from conftest import DATE
 
     _seed_today(conn)
+    _seed_today_filler(conn)
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
 
@@ -1343,6 +1376,7 @@ def test_today_filter_caps_and_discloses(conn, tmp_path, monkeypatch):
     from conftest import DATE
 
     _seed_today(conn)
+    _seed_today_filler(conn)
     monkeypatch.setattr(publish, "MAX_FILTER_KEYWORDS", 2)
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
@@ -1395,10 +1429,11 @@ def test_entry_tags_and_bar_chips_drive_the_same_state(conn, tmp_path):
     from conftest import DATE
 
     _seed_today(conn)
+    _seed_today_filler(conn)
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
 
-    stream = page.split('class="today-list"')[1]
+    stream = page.split('class="today-list"', 1)[1]  # all hour groups
     assert 'for="f-legislative"' in stream          # entry chip is a control
     bar = page.split('class="filter-bar"')[1].split('class="today-list"')[0]
     assert 'for="f-legislative"' in bar             # ...same target as the bar
@@ -1423,6 +1458,7 @@ def test_filter_options_narrow_to_keywords_that_co_occur(conn, tmp_path):
     from conftest import DATE
 
     _seed_today(conn)   # CREC item: legislative/senate floor; VA item: executive/press release/va
+    _seed_today_filler(conn)
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
 
@@ -1636,6 +1672,7 @@ def test_filter_checkboxes_name_themselves(conn, tmp_path):
     from conftest import DATE
 
     _seed_today(conn)
+    _seed_today_filler(conn)
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
     assert ('<input type="checkbox" class="filter-cb" id="f-executive"'
@@ -1650,6 +1687,7 @@ def test_every_page_class_has_a_skip_link_and_main_landmark(conn, tmp_path):
     from conftest import DATE
 
     _seed_today(conn)
+    _seed_today_filler(conn)
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     today = (tmp_path / "today.html").read_text()
     assert '<a class="skip-link" href="#main">Skip to main content</a>' in today
@@ -1657,8 +1695,10 @@ def test_every_page_class_has_a_skip_link_and_main_landmark(conn, tmp_path):
     # and a second skip past the filter bank, to the stream itself
     assert 'href="#today-stream">Skip ' in today
     # the target is the stream's own heading (A11Y-13), not the bare <ul>
-    assert ('<h2 id="today-stream" tabindex="-1">Observed publications</h2>'
-            '<ul class="today-list">') in today
+    assert '<h2 id="today-stream" tabindex="-1">Observed publications</h2>' in today
+    # the stream now opens with an ET hour heading, then its list
+    assert '<h3 class="today-hour">' in today
+    assert '<ul class="today-list">' in today
     assert today.index('href="#today-stream"') < today.index('id="today-stream"')
 
     (tmp_path / "d").mkdir()
@@ -1678,6 +1718,7 @@ def test_selection_is_not_signalled_by_colour_alone(conn, tmp_path):
     from conftest import DATE
 
     _seed_today(conn)
+    _seed_today_filler(conn)
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
     assert ('#f-executive:checked ~ .filter-bar label[for="f-executive"]::before'
@@ -1851,11 +1892,12 @@ def test_today_filter_states_what_is_selected(conn, tmp_path):
     from conftest import DATE
 
     _seed_today(conn)
+    _seed_today_filler(conn)
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
 
     assert '<p class="filter-status" role="status">' in page
-    assert '<span class="fs-none">No keyword filter is selected; all 2 ' in page
+    assert '<span class="fs-none">No keyword filter is selected; all 5 ' in page
     assert '<span class="fs-lead">Filtered to items tagged: </span>' in page
     assert '<span class="fs-executive">executive </span>' in page
     assert (".today-stream:has(#f-executive:checked) .fs-executive"
@@ -1876,6 +1918,7 @@ def test_filter_bar_is_a_labelled_group_with_headings(conn, tmp_path):
     from conftest import DATE
 
     _seed_today(conn)
+    _seed_today_filler(conn)
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
     assert ('<div class="filter-bar" role="group"'
@@ -1897,6 +1940,7 @@ def test_times_and_counts_carry_their_units(conn, tmp_path):
     from conftest import DATE
 
     _seed_today(conn)
+    _seed_today_filler(conn)
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
     assert '<span class="vh">Observed at </span>' in page
@@ -2046,3 +2090,109 @@ def test_today_excludes_publisher_backdated_items(conn, tmp_path):
     assert old["is_backfill"] is True and old["claimed_day"] == "2021-09-24"
     live = next(i for i in data["items"] if i["package_id"] == "AGENCYPR-x")
     assert live["is_backfill"] is False
+
+
+# ------------------------------------------------- /today level-up (2026-08-02)
+
+
+def test_today_weekend_banner_and_day_context(conn, tmp_path):
+    """Sat/Sun get a factual banner (operator, 2026-08-02): a one-item
+    Sunday reads as 'broken' without saying the publishers are resting.
+    today.json carries the same computed value for agents."""
+    import json
+
+    publish.build_today(conn, out_dir=tmp_path, date="2026-08-01")  # a Saturday
+    page = (tmp_path / "today.html").read_text()
+    assert "Weekend note" in page
+    assert "not a federal business day" in page
+    data = json.loads((tmp_path / "today.json").read_text())
+    assert data["day_context"]["kind"] == "weekend"
+    assert data["day_context"]["name"] == "Saturday"
+
+    # ordinary weekday: no banner, day_context explicitly null
+    publish.build_today(conn, out_dir=tmp_path, date="2026-08-05")  # a Wednesday
+    page = (tmp_path / "today.html").read_text()
+    assert "Weekend note" not in page and "Federal holiday note" not in page
+    data = json.loads((tmp_path / "today.json").read_text())
+    assert data["day_context"] is None
+
+
+def test_today_holiday_banner_names_the_holiday(conn, tmp_path):
+    publish.build_today(conn, out_dir=tmp_path, date="2026-11-26")  # Thanksgiving
+    page = (tmp_path / "today.html").read_text()
+    assert "Federal holiday note" in page
+    assert "Thanksgiving Day" in page
+
+
+def test_opening_suppressed_when_it_is_nav_chrome():
+    """The prose gate on openings: scraped navigation chrome (live nasa
+    example, 2026-08-02) never renders as an item's body; real sentences
+    do. The verbatim text stays in today.json either way."""
+    chrome = ("- NASA Science Explore Search News & Events News & Events "
+              "Recently Published Video Series on NASA+ Podcasts & Audio "
+              "Blogs Newsletters Social Media Media Resources More")
+    assert not publish._looks_like_prose(chrome)
+    assert publish._looks_like_prose(
+        "The Department of Veterans Affairs announced a program today. "
+        "Applications open next month for eligible veterans nationwide.")
+    # short fragments never qualify
+    assert not publish._looks_like_prose("Read more.")
+
+
+def test_filter_bar_hidden_below_item_threshold(conn, tmp_path):
+    """Below MIN_FILTER_ITEMS the bar is overhead, not filtering: no bar,
+    no hidden checkboxes, no generated per-keyword CSS; entry chips fall
+    back to inert spans."""
+    from conftest import DATE
+
+    _seed_today(conn)   # two items < MIN_FILTER_ITEMS
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+    assert "filter-bar" not in page
+    assert "filter-cb" not in page
+    assert 'href="#today-stream">Skip ' not in page
+    assert "chip-toggle" not in page          # chips are inert spans
+    assert "Observed publications" in page    # the stream itself remains
+
+
+def test_today_stream_groups_by_eastern_hour(conn, tmp_path):
+    """Hour headings give a long chronological stream scannable
+    structure: 11:30Z is 7 AM Eastern, 10:00Z is 6 AM — newest group
+    first, each with its own list."""
+    from conftest import DATE
+
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+    assert '<h3 class="today-hour">7 AM Eastern</h3>' in page
+    assert '<h3 class="today-hour">6 AM Eastern</h3>' in page
+    assert (page.index("7 AM Eastern") < page.index("6 AM Eastern"))
+    assert page.count('<ul class="today-list">') == 2
+
+
+def test_today_meta_line_drops_internal_ids_and_raw_dates(conn, tmp_path):
+    """Reader meta lines carry no synthetic PR-/AGENCYPR hash ids and no
+    raw RFC-822 date strings — both stay machine-readable in today.json.
+    govinfo package ids remain: they are real citations."""
+    import json
+
+    from conftest import DATE
+
+    _seed_today(conn)
+    meta = ('{"channel": "email", "dkim": {"result": "pass"},'
+            ' "source_id": "va-email", "url": null,'
+            ' "claimed_published_at": "Thu, 23 Jul 2026 08:30:00 -0400"}')
+    conn.execute(
+        "UPDATE extracted_texts SET metadata = ?"
+        " WHERE package_id = 'AGENCYPR-x'", (meta,))
+    conn.commit()
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+    assert "AGENCYPR-x" not in page                      # internal id off-screen
+    assert "publisher-dated 2026-07-23" in page          # parsed day, not RFC-822
+    assert "Thu, 23 Jul 2026" not in page
+    assert "CREC-2026-07-23 / PgS1" in page              # citation stays
+    data = json.loads((tmp_path / "today.json").read_text())
+    by_pkg = {i["package_id"]: i for i in data["items"]}
+    assert by_pkg["AGENCYPR-x"]["claimed_published_at"] \
+        == "Thu, 23 Jul 2026 08:30:00 -0400"             # raw value preserved

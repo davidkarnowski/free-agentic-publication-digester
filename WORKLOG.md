@@ -4087,3 +4087,45 @@ CLAUDE.md router must name all five. 493 tests.
 The Spiralyst lesson this deliberately imports: boundaries fail when
 they live in intentions, and hold when every rule is either grep-able or
 carries the incident that created it.
+
+## 2026-08-02 — The live page grows up, and learns the federal calendar
+
+The operator's verdict on /today was blunt: get it "up to snuff and
+actually displaying well." An audit of the live page found the evidence
+in one screenshot's worth of facts: on a Sunday it showed exactly one
+item — under 350 words of standing intro, above a filter bar offering
+chips that each read "1", with an item whose visible "opening text" was
+scraped NASA navigation chrome, and nothing anywhere saying that the
+federal government simply doesn't publish much on Sundays.
+
+Nine fixes and a calendar, all zero-LLM, all still no-framework and
+one-script:
+
+The stream is now a real layout — each item a two-column grid (time |
+content) with a separating rule, replacing approximated left-margins;
+ET hour headings give a long day scannable structure; the intro
+collapsed to one visible sentence plus a native <details>; meta lines
+dropped the synthetic PR- hash ids and raw RFC-822 dates (both stay in
+today.json — govinfo ids remain on screen because they are real
+citations); a mechanical prose gate keeps scraped nav chrome out of the
+visible body; the filter bar only renders at 5+ items and its clear
+button is always visible; the empty state is a designed callout that
+keeps the page's heading structure; the nav leads with Today (live)
+carrying the live dot, with secondary pages in a no-JS <details>; and
+the stylesheet gained its first mobile breakpoint.
+
+And the calendar: src/fapd/fedcal.py computes the eleven 5 U.S.C. 6103
+federal holidays with OPM observed shifts, pure and dependency-free.
+On weekends and federal holidays /today opens with a factual banner —
+"Sunday is not a federal business day…" — and today.json carries the
+identical computed value as day_context, because an agent reading a
+one-item Sunday has exactly the same is-it-broken ambiguity the banner
+resolves for a person. Inauguration Day is deliberately excluded
+(D.C.-area only). The weekend wins over a Saturday statutory holiday;
+the observed Friday carries the closure.
+
+Verified against the real database both ways: today's actual Sunday
+renders banner + designed empty state (the exact scene that motivated
+the work), and the busiest stored day (1,523 items) renders hour
+groups, the filter bar, clean meta lines, and no chrome openings.
+508 tests.

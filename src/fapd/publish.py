@@ -167,6 +167,17 @@ body {
   white-space: nowrap;   /* multi-word labels never break mid-name */
 }
 .nav-links a:hover, .brand:hover { text-decoration: underline; }
+/* The live view is the site's most-visited destination; its link leads
+   the nav and carries the live dot. Secondary pages collapse into a
+   native <details> so twelve undifferentiated links stop wrapping into
+   rows of grey text above every page's h1 (no JS — details is HTML). */
+.nav-links a[href="today.html"] { color: var(--accent); font-weight: 600; }
+.nav-more { display: inline-block; }
+.nav-more summary {
+  cursor: pointer; color: var(--muted); margin-left: 0.9rem;
+  white-space: nowrap;
+}
+.nav-more summary:hover { text-decoration: underline; }
 main {
   max-width: 46rem;
   margin: 0 auto;
@@ -468,23 +479,47 @@ li.source-note a { color: var(--muted); }
   border-radius: 4px;
 }
 .today-meta { font-size: 0.85rem; color: var(--muted); }
-.today-list { list-style: none; padding-left: 0; }
-.today-item { margin: 0.55rem 0; }
+.today-list { list-style: none; padding-left: 0; margin: 0 0 0.6rem; }
+/* A real two-column grid: the time in its own track, the content in the
+   other — actual alignment, replacing the old approximated 2.4rem
+   left-margins. The border is what delimits one item from the next in a
+   long stream. */
+.today-item {
+  display: grid; grid-template-columns: 5.2rem 1fr; gap: 0 0.6rem;
+  margin: 0; padding: 0.45rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.today-item:last-child { border-bottom: 0; }
 .today-time {
   font-family: ui-monospace, monospace; font-size: 0.78rem;
-  color: var(--muted); margin-right: 0.35rem;
+  color: var(--muted); padding-top: 0.15rem;
 }
 /* Local time is appended client-side beside the server-rendered UTC
-   stamp; with scripting off, the UTC stamp simply stands alone. */
+   stamp; with scripting off, the UTC stamp simply stands alone. It
+   lands inside .today-time, so the grid column holds both. */
 .localtime { color: var(--muted); font-size: 0.78rem; }
-.today-summary { margin: 0.2rem 0 0 2.4rem; font-size: 0.92rem; }
+.today-body { min-width: 0; }
+.today-summary { margin: 0.2rem 0 0; font-size: 0.92rem; }
 .today-opening { color: var(--muted); }
 .today-chips { margin: 0.15rem 0 0.1rem; }
 .today-chips .tag { margin-right: 0.25rem; }
 .today-item-meta {
-  margin-left: 2.4rem; font-size: 0.78rem; color: var(--muted);
+  font-size: 0.78rem; color: var(--muted);
   overflow-wrap: anywhere;
 }
+/* Hour headings inside the stream — scannable structure for a 300-item
+   day, and a quiet evening visible as absence. */
+.today-hour {
+  margin: 1.1rem 0 0.2rem; padding: 0; border: 0;
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--muted);
+}
+/* The collapsed how-it-works explainer. */
+.today-about { margin: 0.6rem 0; }
+.today-about summary {
+  cursor: pointer; color: var(--accent); font-size: 0.9rem;
+}
+.today-context { margin: 0.6rem 0; }
 /* Keyword filter (pure CSS :target — the site stays JavaScript-free).
    The per-keyword rules are generated into today.html's own <style>. */
 /* Visually hidden but focusable: keyboard users still reach every chip. */
@@ -521,15 +556,19 @@ h2.filter-lead {
    increment for display:none elements, and counter scope reaches an
    element's following siblings, so a paragraph after the list can state
    how many survived the filter. Generated content, so it is a visual
-   readout only — screen readers treat it inconsistently. */
-.today-list { counter-reset: shown 0; }
+   readout only — screen readers treat it inconsistently. The reset
+   lives on the FORM, not the list: the stream is now several per-hour
+   lists, and a per-list reset would count only the last one. */
+.today-stream { counter-reset: shown 0; }
 .today-list > .today-item { counter-increment: shown; }
 .filter-count {
   margin: 0.5rem 0 0; font-size: 0.8rem; color: var(--muted);
 }
 .filter-count::after { content: counter(shown) " item(s) shown."; }
+/* Always visible (was display:none until a box was checked): the escape
+   hatch the bar's own prose promises must exist before it is needed. */
 .filter-clear {
-  display: none; margin-left: 0.6rem; font-size: 0.78rem; font-weight: 400;
+  margin-left: 0.6rem; font-size: 0.78rem; font-weight: 400;
   padding: 0.1rem 0.6rem; border: 1px solid var(--border); border-radius: 999px;
   background: var(--card); color: var(--accent); cursor: pointer;
   font-family: inherit;
@@ -563,6 +602,15 @@ h2.filter-lead {
   /* never print a filtered subset that could read as the whole day */
   .today-item { display: list-item !important; }
   .filter-bar { display: none; }
+}
+/* The site's first breakpoint (there was none): the item grid stacks —
+   time above title — and dense rows get room to breathe. 40rem covers
+   phones without touching tablets or the 46rem column. */
+@media (max-width: 40rem) {
+  .today-item { grid-template-columns: 1fr; gap: 0; }
+  .today-time { padding-top: 0; }
+  .filter-row { line-height: 2.4; }
+  .nav-links { font-size: 0.9rem; }
 }
 .live-callout {
   border: 1px solid var(--border); border-left: 3px solid #0f9488;
@@ -947,22 +995,38 @@ _CURRENT_HREFS = {"index": "index.html", "today": "today.html",
                   "agents": "agents.html"}
 
 
+# Explanatory pages that stay on the primary nav row; the rest collapse
+# into the "More" disclosure (still every page, still one order — the
+# operator's identical-header rule holds, the row just stops wrapping
+# into three lines of grey links above every h1).
+_PRIMARY_DOC_STEMS = ("about",)
+
+
 def _site_nav(doc_pages=(), *, skip_stem=None, current=None):
     """The site header, identical everywhere (operator, 2026-07-30): the
-    digest archive, the live view, the source guide, the blog, every
-    explanatory page, and the agent guide. Every page renders every link
-    in the same order; the page's own link is marked `aria-current`
-    rather than dropped. A link is never emitted for a page that was not
-    built."""
+    live view first (the site's most-visited destination, carrying the
+    live dot), the digest archive, the source guide, the blog, About and
+    the agent guide, then the remaining explanatory pages inside a
+    native <details>. Every page renders every link in the same order;
+    the page's own link is marked `aria-current` rather than dropped. A
+    link is never emitted for a page that was not built."""
     here = f"{skip_stem}.html" if skip_stem else _CURRENT_HREFS.get(current)
-    links = [_nav_link("index.html", "All digests", here),
-             _nav_link("today.html", "Today (live)", here)]
+    today_mark = ' aria-current="page"' if here == "today.html" else ""
+    links = [(f'<a href="today.html"{today_mark}>'
+              '<span class="live-dot" aria-hidden="true"></span>'
+              "Today (live)</a>"),
+             _nav_link("index.html", "All digests", here)]
     if _registry_exists():
         links.append(_nav_link("sources.html", "Sources", here))
     if _blog_exists():
         links.append(_nav_link("blog.html", "Blog", here))
-    links.append(_doc_nav_links(doc_pages, here))
+    primary = [p for p in doc_pages if p[0] in _PRIMARY_DOC_STEMS]
+    more = [p for p in doc_pages if p[0] not in _PRIMARY_DOC_STEMS]
+    links.append(_doc_nav_links(primary, here))
     links.append(_nav_link("agents.html", "For agents", here))
+    if more:
+        links.append('<details class="nav-more"><summary>More</summary>'
+                     + _doc_nav_links(more, here) + "</details>")
     return "".join(links)
 
 
@@ -1898,6 +1962,41 @@ def _entry_tag_chip(tag, filterable):
     return _tag_chip(tag)
 
 
+# Openings are the first ~240 chars of extracted text; for some agency
+# pages that is scraped navigation chrome, not prose (live 2026-08-02:
+# nasa items showed "Explore Search News & Events News & Events Recently
+# Published Video Series…"). A mechanical prose check gates display:
+# real openings carry sentence punctuation and mostly-lowercase running
+# words; chrome carries neither. Suppressed openings stay available
+# verbatim in today.json (opening_verbatim).
+_MIN_PROSE_LOWER_RATIO = 0.5
+
+
+def _looks_like_prose(text):
+    words = (text or "").split()
+    if len(words) < 8:
+        return False
+    if not re.search(r"[.!?](\s|$)", text):
+        return False
+    lower = sum(1 for w in words if w[:1].islower())
+    return lower / len(words) >= _MIN_PROSE_LOWER_RATIO
+
+
+def _et_hour_label(utc_stamp):
+    """'2 PM Eastern' for the ET hour a stamp falls in, or None when the
+    stamp is unparseable — the stream's hour headings, so a 300-item day
+    has scannable structure and a quiet evening is visible as absence."""
+    import datetime as _dt
+
+    try:
+        when = _dt.datetime.fromisoformat(utc_stamp)
+    except (TypeError, ValueError):
+        return None
+    when = when.astimezone(config.PUBLICATION_TZ)
+    hour = when.hour % 12 or 12
+    return f"{hour} {'AM' if when.hour < 12 else 'PM'} Eastern"
+
+
 def _today_item_row(item, filterable=()):
     title = (item["title"] or "").strip() or item["package_id"]
     gran = item["granule_id"]
@@ -1926,9 +2025,17 @@ def _today_item_row(item, filterable=()):
         meta_bits.append(item["agency"].strip())
     elif item["source_id"]:
         meta_bits.append(item["source_id"])
-    meta_bits.append(cite)
-    if item["claimed_published_at"]:
-        meta_bits.append(f"publisher-dated {item['claimed_published_at']}")
+    # A govinfo package id IS the citation and stays on screen; the
+    # synthetic PR-… hash id is an internal artifact — it lives in
+    # today.json, not in a reader's meta line.
+    if item["source_class"] == "govinfo":
+        meta_bits.append(cite)
+    # The publisher's date as the parsed publication day, never the raw
+    # RFC-822 header ("Sun, 02 Aug 2026 04:05:00 +0000" is a wire
+    # format, not reader text). An unparseable claim is omitted here and
+    # preserved verbatim in today.json.
+    if item.get("claimed_day"):
+        meta_bits.append(f"publisher-dated {item['claimed_day']}")
     meta = html.escape(" · ".join(meta_bits))
 
     if item["summary"]:
@@ -1938,7 +2045,7 @@ def _today_item_row(item, filterable=()):
                 "</span>" if item["inclusion_rule"] else "")
         body = (f'<p class="today-summary"><span class="plain-label">'
                 f"{label}:</span> {html.escape(item['summary'])}{rule}</p>")
-    elif item["opening"]:
+    elif item["opening"] and _looks_like_prose(item["opening"]):
         snippet = " ".join(item["opening"].split())
         if len(snippet) > 200:
             snippet = snippet[:200].rsplit(" ", 1)[0] + "…"
@@ -1947,14 +2054,17 @@ def _today_item_row(item, filterable=()):
                 f"{html.escape(snippet)}</p>")
     else:
         body = ""
-    # Keyword classes drive the CSS :target filter (no JavaScript).
+    # Keyword classes drive the CSS checkbox filter (no JavaScript). The
+    # time sits in its own grid column; everything else is wrapped so the
+    # two-column layout is real alignment, not an approximated margin.
     keys = " ".join(f"k-{_slug(t)}" for t in _today_item_tags(item))
     return (
         f'<li class="today-item {keys}">'
-        f'<span class="today-time">{observed}</span> '
+        f'<span class="today-time">{observed}</span>'
+        f'<div class="today-body">'
         f"<strong>{title_html}</strong> "
         f'<span class="today-chips">{chips}</span>'
-        f'<div class="today-item-meta">{meta}</div>{body}</li>'
+        f'<div class="today-item-meta">{meta}</div>{body}</div></li>'
     )
 
 
@@ -1969,6 +2079,10 @@ def _today_item_row(item, filterable=()):
 # (operator, 2026-07-30: "a full listing, not a truncated listing").
 # If a day ever exceeded this the bar would say so in place.
 MAX_FILTER_KEYWORDS = 400
+# Below this many items the filter bar is pure overhead — a wall of
+# chips each reading "1" to filter a stream shorter than the bar itself
+# (live 2026-08-02: a full bar rendered above exactly one item).
+MIN_FILTER_ITEMS = 5
 _BRANCH_ORDER = ("legislative", "executive", "judicial", "cross-branch")
 
 
@@ -2064,8 +2178,6 @@ def _today_filter_bar(facets, total, pairs=None):
             "{background:var(--accent);color:var(--accent-on);border-color:var(--accent)}\n"
             f'#f-{slug}:focus-visible ~ .filter-bar label[for="f-{slug}"]'
             "{outline:2px solid var(--accent);outline-offset:2px}\n"
-            f"#f-{slug}:checked ~ .filter-bar .filter-clear"
-            "{display:inline-block}\n"
             # narrow the remaining options to keywords seen alongside this one
             f"#f-{slug}:checked ~ .filter-bar label:not(.c-{slug})"
             "{display:none}\n"
@@ -2114,11 +2226,8 @@ def _today_filter_bar(facets, total, pairs=None):
     bar = (
         '<div class="filter-bar" role="group" aria-labelledby="filter-heading">'
         '<h2 class="filter-lead" id="filter-heading">Filter by keyword '
-        '<span class="rule-note">click to select, click again to clear — '
-        "here or on any entry's own tags · choosing several narrows to "
-        "items carrying all of them, and the remaining keywords narrow "
-        "to those that appear alongside your choice · counts are for the "
-        "unfiltered day · "
+        '<span class="rule-note">click to select, again to clear; '
+        "several selected narrows to items carrying all of them · "
         f"{total} item(s) unfiltered</span>"
         '<button type="reset" class="filter-clear">clear filters</button></h2>'
         f"{rows}{status}{note}</div>"
@@ -2213,7 +2322,7 @@ def build_today(conn, out_dir=None, date=None):
     recent_links = " · ".join(
         f'<a href="{d}.html"><span class="vh">Digest for </span>{d}</a>'
         for d in recent)
-    intro = (
+    about = (
         "<p>This is the <strong>live view</strong> of the Free Agentic "
         "Publication Digester: official United States federal publications "
         "as our collectors observe them, newest first. Sources are polled "
@@ -2247,8 +2356,31 @@ def build_today(conn, out_dir=None, date=None):
         "<p>This is the live view: official federal publications as our "
         "collectors observe them, newest first. Dated, validated digests "
         'are on the <a href="index.html">main page</a>.</p>')
+    # One sentence stays visible; the full explanation collapses into a
+    # native <details> (no JS). Three paragraphs of standing prose pushed
+    # the stream below the fold on every load, forever.
+    intro = (
+        "<p>Official federal publications as our collectors observe them, "
+        "newest first — refreshed within minutes of arrival. Times are "
+        "Eastern (Washington's clock).</p>"
+        '<details class="today-about"><summary>How this live view works'
+        f"</summary>{about}</details>")
+    # The federal working calendar explains a quiet stream before a
+    # reader (or an agent reading today.json) wonders if the pipeline is
+    # broken: a Sunday /today with one item is the publishers resting,
+    # not us failing (observed live, 2026-08-02).
+    from . import fedcal
+    day_context = fedcal.reduced_publishing(date)
     parts = [
         f"<h1>Today — {date} (in progress)</h1>",
+    ]
+    if day_context:
+        label = ("Weekend note" if day_context["kind"] == "weekend"
+                 else "Federal holiday note")
+        parts.append(
+            f'<div class="live-callout today-context"><strong>{label}:'
+            f"</strong> {html.escape(day_context['note'])}</div>")
+    parts += [
         f'<p class="today-disclosure">{html.escape(_TODAY_DISCLOSURE)}</p>',
         intro,
         (f'<p class="today-meta">Last updated <time class="utc"'
@@ -2266,22 +2398,56 @@ def build_today(conn, out_dir=None, date=None):
         parts.append('<p class="today-chips">Day so far: '
                      + "".join(day_chips) + "</p>")
     facets = _today_filter_facets(status["items"])
-    inputs, filter_bar, filter_css = _today_filter_bar(
-        facets, len(status["items"]), _today_filter_pairs(status["items"]))
-    filterable = {_slug(k) for k in list(facets)[:MAX_FILTER_KEYWORDS]}
+    if len(status["items"]) >= MIN_FILTER_ITEMS:
+        inputs, filter_bar, filter_css = _today_filter_bar(
+            facets, len(status["items"]), _today_filter_pairs(status["items"]))
+    else:
+        # A bar of chips each reading "1" above a stream shorter than the
+        # bar is overhead, not filtering.
+        inputs = filter_bar = filter_css = ""
+    filterable = ({_slug(k) for k in list(facets)[:MAX_FILTER_KEYWORDS]}
+                  if filter_bar else set())
     if not status["items"]:
-        parts.append("<p>No items observed yet for this publication day. "
-                     "Collectors poll continuously; check back.</p>")
+        parts.append('<h2 id="today-stream" tabindex="-1">'
+                     "Observed publications</h2>")
+        parts.append(
+            '<div class="live-callout">No items observed yet for this '
+            "publication day. Collectors poll continuously — govinfo "
+            "about every half hour, agency newsrooms about hourly, email "
+            "bulletins about every fifteen minutes — and this page "
+            "rebuilds within about five minutes of a new arrival.</div>")
     else:
         # The form is what makes filtering work without script: the
         # checkboxes, the bar, and the stream are siblings inside it (so
         # the CSS sibling combinator reaches the list), and its native
         # reset button clears every selection at once. One chronological
-        # stream, newest first — no section headings; every entry names
-        # its own branch, agency, and document type.
-        parts.append(
-            f'<a class="skip-link" href="#today-stream">Skip '
-            f"{len(facets)} keyword filters and go to the stream</a>")
+        # stream, newest first — hour headings for scanability, no
+        # section headings; every entry names its own branch, agency,
+        # and document type.
+        if filter_bar:
+            parts.append(
+                f'<a class="skip-link" href="#today-stream">Skip '
+                f"{len(facets)} keyword filters and go to the stream</a>")
+        # Group consecutive items (already newest-first) by the ET hour
+        # they were observed in. Each hour is its own <ul>; the filter
+        # CSS reaches every list via the general-sibling combinator, and
+        # the shown-counter scope lives on the form so it totals across
+        # lists. Known limit, accepted: an hour heading stays visible
+        # when a filter hides its whole group — CSS cannot know — while
+        # the count line stays truthful.
+        stream = []
+        current_hour = object()
+        for i in status["items"]:
+            hour = _et_hour_label(i["observed_at"] or "")
+            if hour != current_hour:
+                if stream:
+                    stream.append("</ul>")
+                if hour:
+                    stream.append(f'<h3 class="today-hour">{hour}</h3>')
+                stream.append('<ul class="today-list">')
+                current_hour = hour
+            stream.append(_today_item_row(i, filterable))
+        stream.append("</ul>")
         parts.append(
             '<form class="today-stream" action="today.html" method="get">'
             + inputs + filter_bar
@@ -2291,12 +2457,10 @@ def build_today(conn, out_dir=None, date=None):
             # sits inside the form as a general sibling of the
             # checkboxes, which the `~` filter rules require.
             + '<h2 id="today-stream" tabindex="-1">Observed publications</h2>'
-            + '<ul class="today-list">'
-            + "".join(_today_item_row(i, filterable)
-                      for i in status["items"])
+            + "".join(stream)
             # A CSS counter over the items still displayed — the only
             # script-free way to state how many survived the filter.
-            + '</ul><p class="filter-count"></p></form>')
+            + '<p class="filter-count"></p></form>')
 
     nav = _site_nav(_doc_page_index(), current="today")
     head_extra = (f"<style>\n{filter_css}</style>\n" if filter_css else "")
@@ -2328,6 +2492,10 @@ def build_today(conn, out_dir=None, date=None):
                    "tags": "mechanical (branch, document type, agency);"
                            " no model-generated item tags yet"},
         "counts": status["counts"],
+        # Same computed value the human banner renders (fedcal): an agent
+        # reading a one-item Sunday has exactly the same "is the pipeline
+        # broken?" ambiguity the banner resolves. null on business days.
+        "day_context": day_context,
         "backfill_count": len(status.get("backfill") or []),
         "backfill_note": ("items observed today that their publisher dates"
                           " earlier; excluded from this day's listing under"
