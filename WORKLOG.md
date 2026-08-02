@@ -4250,3 +4250,43 @@ claim broken.
 
 Item 8 (r13's window arithmetic) is a code fix, not a text fix — review
 D14, Editorial backlog.
+
+## 2026-08-02 — R2: the claimed day joins the Eastern clock
+
+Review R2, the "wrong in production today" item, in two parts.
+
+D1: `report._claimed_day` converted a publisher's zone-aware pubDate to
+the UTC day while `date_issued` — the other side of the very comparison
+it feeds — is the Eastern publication day. The fix routes zone-aware
+claims through `sync.publication_date`, the single source of the GUIDE
+§3 boundary; zoneless claims stay face-value, mirroring
+`agencies._issue_day`'s ISO branch, because with no zone stated there is
+nothing honest to convert. `_agency_rows`, `_votes_rows`, and
+`publish.build_today` all share the helper, so all three comparisons
+moved to one clock in one edit.
+
+The corpus check turned up a wrinkle the review's framing didn't
+predict: of the four measured items whose UTC and Eastern claimed days
+disagree, none had been misfiled as backfill — three had been wrongly
+LISTED. Agency releases dated 07-29 evening (00:xx UTC 07-30) and
+observed on 07-30 matched the 07-30 digest day under the UTC reading,
+so the digest presented yesterday's dated releases as that day's news.
+The defect ran both directions; the fix closes both. On re-render those
+three classify as AGENCYPR-EX-01 backfill — counted, disclosed, not
+listed. The frozen 07-30 digest stays as published; the record of what
+the pipeline did is the record.
+
+D2: the Coverage Statement promised "Excluded always names the
+mechanical rule" over a fired-rules list built from a hand-kept tuple
+that omitted AGENCYPR-EX-01 — a non-zero excluded column with no rule
+line to account for it. The list now derives from `rule_counts`, which
+already had the answer; insertion order follows `_coverage`'s collection
+order so the render stays deterministic and the existing line order is
+preserved. The next collection added cannot repeat the omission,
+because there is no longer a second list to forget.
+
+Tests: the existing `_claimed_day` test had pinned the defect ("timezone
+conversion to UTC day") and now pins the Eastern day; new regressions
+cover the review's exact measured case (20:30 -0400 → that Eastern day),
+the rolled-over-UTC case, an evening release rendered as listed, and the
+AGENCYPR-EX-01 line in the fired-rules list. 517 tests.

@@ -811,29 +811,51 @@ def test_agency_dating_rule_excludes_backfill(conn, tmp_path):
     under AGENCYPR-EX-01, never listed as today's news."""
     _insert_agency_item(conn, "PR-t-today001", "Todays Release",
                         "Thu, 23 Jul 2026 09:00:00 +0000")
+    _insert_agency_item(conn, "PR-t-evening1", "Evening Release",
+                        "Thu, 23 Jul 2026 21:30:00 -0400")  # UTC day is Jul 24
     _insert_agency_item(conn, "PR-t-backfil1", "March Release",
                         "Mon, 30 Mar 2026 12:00:00 +0000")
     _insert_agency_item(conn, "PR-t-nodate01", "Undated Release", None)
     path = report.render(conn, DATE, out_dir=tmp_path)
     md = path.read_text()
     assert "Todays Release" in md
+    # Review D1 regression: an evening release the agency dates on the digest
+    # day is listed — the UTC comparison used to misfile it as backfill.
+    assert "Evening Release" in md
     assert "Undated Release" in md  # no claimed date -> observed-day fallback
     assert "dated by first observation" in md
     assert "March Release" not in md  # backfill: never listed
     assert "1 release(s) the agencies date on other days" in md
-    assert "AGENCYPR-EX-01" in md
-    # coverage reconciles: 3 units = 0 summarized + 2 counted + 1 excluded
-    assert re.search(r"^\| AGENCYPR \| 3 \| 3 \| 0 \| 2 \| 1 \|$", md, re.MULTILINE)
+    # Review D2 regression: the Coverage Statement's fired-rules list names
+    # AGENCYPR-EX-01 itself, not only section 6's prose several screens up.
+    assert re.search(
+        r"^- AGENCYPR-EX-01: .+ — 1 item\(s\)$", md, re.MULTILINE)
+    # coverage reconciles: 4 units = 0 summarized + 3 counted + 1 excluded
+    assert re.search(r"^\| AGENCYPR \| 4 \| 4 \| 0 \| 3 \| 1 \|$", md, re.MULTILINE)
 
 
 def test_agency_claimed_day_parses_both_forms():
     assert report._claimed_day(
         {"claimed_published_at": "Tue, 28 Jul 2026 23:30:00 -0400"}
-    ) == "2026-07-29"  # timezone conversion to UTC day
+    ) == "2026-07-28"  # Eastern publication day, not the rolled-over UTC day
     assert report._claimed_day(
         {"claimed_published_at": "2026-07-28T09:00:00"}) == "2026-07-28"
     assert report._claimed_day({"claimed_published_at": "gibberish"}) is None
     assert report._claimed_day({}) is None
+
+
+def test_agency_claimed_day_is_the_eastern_day():
+    """Review D1: `date_issued` is the Eastern publication day, so the
+    claimed day must be computed on the same clock. The UTC conversion
+    misfiled every 20:00–23:59 ET release as backfill (the measured
+    2026-08-01 case below), and a late UTC stamp is still the prior
+    Eastern day."""
+    assert report._claimed_day(
+        {"claimed_published_at": "Sat, 01 Aug 2026 20:30:00 -0400"}
+    ) == "2026-08-01"  # the exact case measured in the review
+    assert report._claimed_day(
+        {"claimed_published_at": "Sun, 02 Aug 2026 01:00:00 +0000"}
+    ) == "2026-08-01"  # 21:00 ET Aug 1 — UTC already rolled over
 
 
 def test_agency_section_empty_renders_none_line(digest):

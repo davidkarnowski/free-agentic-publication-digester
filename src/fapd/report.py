@@ -31,6 +31,7 @@ from pathlib import Path
 from PIL import Image
 
 from . import config
+from .sync import publication_date
 
 __all__ = ["RULE_DESCRIPTIONS", "ValidationError", "render", "validate"]
 
@@ -430,10 +431,18 @@ _ACRONYMS = {
 
 
 def _claimed_day(meta):
-    """Agency-claimed publication date as 'YYYY-MM-DD' (UTC), or None.
+    """Agency-claimed publication day as 'YYYY-MM-DD' (Eastern), or None.
     Feeds use RFC 822 pubDates; some sources emit ISO. The claimed date is
     the agency's assertion (GUIDE §7 T3/T4) — parsed, never trusted over
-    the separately stored observation date."""
+    the separately stored observation date.
+
+    Zone-aware claims resolve to the federal publication day (GUIDE §3:
+    the calendar date in Washington, D.C.) via the same helper that files
+    `date_issued` — a 20:30 -0400 pubDate belongs to that Eastern day,
+    not the UTC day that has already rolled over (review D1: the UTC
+    comparison misfiled evening releases as backfill). A zoneless claim
+    is taken at face value, matching agencies._issue_day's ISO branch:
+    with no zone stated there is nothing honest to convert."""
     raw = (meta.get("claimed_published_at") or "").strip()
     if not raw:
         return None
@@ -443,7 +452,7 @@ def _claimed_day(meta):
         parsed = None
     if parsed is not None:
         if parsed.tzinfo is not None:
-            parsed = parsed.astimezone(dt.UTC)
+            return publication_date(parsed)
         return parsed.strftime("%Y-%m-%d")
     if re.match(r"^\d{4}-\d{2}-\d{2}", raw):
         return raw[:10]
@@ -1252,17 +1261,15 @@ def _coverage_lines(conn, date, cov, embedded_total):
     rule_counts: dict = {}
     for coll in cov.values():
         rule_counts.update(coll["rules"])
+    # Derived from rule_counts, not a hand-kept tuple: the tuple omitted
+    # AGENCYPR-EX-01 while the Coverage Statement promised every exclusion
+    # names its rule (review D2), and the next collection added would have
+    # repeated the omission. Insertion order follows _coverage's collection
+    # order, so the render stays deterministic.
     fired = [
         f"- {rid}: {RULE_DESCRIPTIONS[rid]} — {n} item(s)"
-        for rid in (
-            "CREC-EX-01",
-            "CREC-EX-02",
-            "FR-EX-01",
-            "USCOURTS-EX-01",
-            "USCOURTS-EX-02",
-            "VOTES-EX-01",
-        )
-        if (n := rule_counts.get(rid, 0))
+        for rid, n in rule_counts.items()
+        if n
     ]
     if not fired:
         fired = ["- No exclusion rules fired today."]

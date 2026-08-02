@@ -89,8 +89,8 @@ docs/accessibility.md → this file.
 
 - Shared dating logic: anything answering "what day does this item
   belong to" calls the same helper the digest uses — never a local
-  reimplementation. (Currently `report._claimed_day`; review D1 fixes
-  its timezone, and the level-up plan may hoist it — follow wherever
+  reimplementation. (Currently `report._claimed_day`, Eastern since the
+  2026-08-02 D1 fix; the level-up plan may hoist it — follow wherever
   the single implementation lives.)
 - All interpolated text is `html.escape`d; URLs get `quote=True` in
   attributes. New-page checklist: `_render_page`, nav entry via
@@ -110,11 +110,18 @@ docs/accessibility.md → this file.
 
 ## Current backlog (2026-08-02 amended review)
 
-- **D1** — `_claimed_day` converts publisher dates to UTC while
-  `date_issued` is Eastern; evening releases misfile as backfill.
-  **Live in production; first priority.**
-- **D2** — the Coverage Statement's fired-rules tuple omits
-  `AGENCYPR-EX-01`; derive the list from `rule_counts`.
+- **D1** — **Done 2026-08-02** (`bug/r2-claimed-day-eastern`):
+  `_claimed_day` now resolves zone-aware claims via
+  `sync.publication_date`, the same clock as `date_issued`; zoneless
+  claims stay face-value, mirroring `agencies._issue_day`. On the real
+  corpus the defect had run *both* directions: it would have misfiled
+  same-Eastern-evening releases as backfill, and it actually *listed*
+  three 07-29-evening releases in the 07-30 digest as if dated that day.
+- **D2** — **Done 2026-08-02** (same branch): the fired-rules list is
+  derived from `rule_counts` (insertion order = `_coverage`'s collection
+  order, deterministic); the hand-kept tuple that omitted
+  `AGENCYPR-EX-01` is gone, and the next collection added cannot repeat
+  the omission.
 - **D21** — the lexicon gate's mask covers 3 of 8 collections' titles;
   "National Historic Preservation Act" or a litigant named Landmark
   blocks the digest. Mask positionally, and raise the statute/proper-

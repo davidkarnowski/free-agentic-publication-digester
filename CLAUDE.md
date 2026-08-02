@@ -150,7 +150,8 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   Never date a document with `now[:10]`/UTC again, and never convert a
   stored observation stamp to Eastern: what is Eastern is the day a
   document belongs to. When auditing this rule, enumerate ALL call
-  sites — `report._claimed_day()` is a known-wrong one (review D1).
+  sites — `report._claimed_day()` was the last known-wrong one, fixed
+  2026-08-02 (review D1).
 - **A worker's `cycle()` return value is durable state, not a status
   line** — `run_cycle` stores it wholesale as `collector_state
   .last_result`, and `EODWorker.eod_due` reads the `finalized` key from
