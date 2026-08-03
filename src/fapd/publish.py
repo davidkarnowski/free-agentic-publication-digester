@@ -931,6 +931,35 @@ def _collapse_sections(html_body):
     return "".join(out)
 
 
+def _inject_day_view_link(body, date, md_text, out_dir):
+    """Offer the frozen day view from EVERY digest page that has one
+    (operator, 2026-08-03). Digests rendered since the feature carry the
+    link in their canonical markdown (report._header_lines); the seven
+    digests frozen before it never will — their markdown is evidence and
+    is not re-rendered — so the derived page supplies the same paragraph
+    when day/<date>.html exists on disk. Injection skips markdown that
+    already links the day view, so a new digest never shows it twice,
+    and links only what was actually built (the site-wide rule). Neutral
+    wording — a backfilled day view discloses its own reconstructed
+    provenance; the digest page does not claim it was frozen live."""
+    href = f"day/{date}.html"
+    if href in md_text or not (out_dir / "day" / f"{date}.html").exists():
+        return body
+    para = (f'<p><a href="{href}">Full observed listing for this day</a>'
+            " &mdash; every item our collectors observed for this"
+            " publication day, mechanical rules applied. This digest is"
+            " the canonical record.</p>")
+    # The same position the markdown-emitted paragraph lands in: right
+    # after the compact header strip, or after the title when a digest
+    # has no metadata table.
+    marker = '<div class="digest-meta">'
+    if marker in body:
+        end = body.index("</div>", body.index(marker)) + len("</div>")
+        return body[:end] + para + body[end:]
+    head, sep, tail = body.partition("</h1>")
+    return head + sep + para + tail if sep else para + body
+
+
 def _style_digest_body(html_body):
     """Readability layer for digest pages (derived presentation only — the
     canonical Markdown is untouched, per GUIDE §5): plain-speak lines get
@@ -2512,6 +2541,7 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
         teasers[path.stem] = _teaser(md_text)
         _MD.reset()
         body = _style_digest_body(_MD.convert(md_text))
+        body = _inject_day_view_link(body, path.stem, md_text, out_dir)
         page = _render_page(
             f"Daily Digest {path.stem} — {SITE_TITLE}",
             body,

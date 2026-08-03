@@ -2532,3 +2532,42 @@ def test_build_day_empty_covered_day_renders_explicit_absence(
     page = (tmp_path / "day" / "2026-07-24.html").read_text()
     assert "No items were observed for this publication day" in page
     assert "not an omission" in page
+
+
+def test_digest_pages_offer_the_day_view_when_one_exists(digests, tmp_path):
+    """Digests frozen before the day-view feature carry no link in their
+    canonical markdown; the derived page supplies it when the day view
+    exists on disk (operator, 2026-08-03) — and only then."""
+    out = tmp_path / "site"
+    (out / "day").mkdir(parents=True)
+    (out / "day" / "2026-07-01.html").write_text("<p>day view</p>")
+    publish.build_site(digests, out)
+    page = (out / "2026-07-01.html").read_text()
+    assert page.count('href="day/2026-07-01.html"') == 1
+    assert "Full observed listing for this day" in page
+    # the injected paragraph never claims live freezing — a backfilled
+    # day view states its own reconstructed provenance
+    assert "frozen at end of day" not in page
+    # no day view on disk -> no link (a link is never emitted for a page
+    # that was not built)
+    other = (out / "2026-07-02.html").read_text()
+    assert "day/2026-07-02.html" not in other
+
+
+def test_digest_day_view_link_is_not_duplicated(digests, tmp_path):
+    """A digest whose canonical markdown already links its day view (every
+    digest rendered since the feature) gets exactly one link — the
+    injector recognizes the markdown's own and stands down."""
+    md = ("# Daily Digest — 2026-07-03\n\n"
+          "| | |\n|---|---|\n| **Digest date** | 2026-07-03 |\n\n"
+          "[Full observed listing for this day](day/2026-07-03.html) — every "
+          "item our collectors observed for this publication day, mechanical "
+          "rules applied, frozen at end of day. This digest is the canonical "
+          "record.\n\n## Day in Review\n\nQuiet day.\n")
+    (digests / "2026-07-03.md").write_text(md)
+    out = tmp_path / "site"
+    (out / "day").mkdir(parents=True)
+    (out / "day" / "2026-07-03.html").write_text("<p>day view</p>")
+    publish.build_site(digests, out)
+    page = (out / "2026-07-03.html").read_text()
+    assert page.count('href="day/2026-07-03.html"') == 1
