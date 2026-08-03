@@ -865,7 +865,7 @@ _FETCH_ALL_TIME_SQL = """
 WITH parsed AS (
     SELECT substr(url, instr(url, '//') + 2) AS rest, status, ts_utc
     FROM fetch_log
-    WHERE {probe}
+    WHERE {probe} AND {floor}
 )
 SELECT lower(CASE WHEN instr(rest, '/') > 0
                   THEN substr(rest, 1, instr(rest, '/') - 1)
@@ -879,15 +879,18 @@ GROUP BY 1
 """
 
 
-def fetch_stats_all_time(fetch_db=None):
+def fetch_stats_all_time(fetch_db=None, *, since=None):
     """{host: {requests, ok, failures, first_seen}} over the whole fetch
     log, probe traffic excluded — the lifetime figures for the
     per-source pages. Host-keyed like every fetch figure here; look a
     source up via `fetch_host(entry)`, and disclose sharing the same
     way the window figures do. One aggregate query over the ts index's
     table; `first_seen` is the stamp of our first request to that host.
-    Returns {} when the log is absent or unreadable (disclosed degrade:
-    callers render 'not available', never zero)."""
+    `since` (a 'YYYY-MM-DD' floor, operator 2026-08-03) excludes rows
+    stamped before that day — the caller's disclosure must state the
+    floor wherever the figures render. Returns {} when the log is
+    absent or unreadable (disclosed degrade: callers render 'not
+    available', never zero)."""
     path = Path(fetch_db or config.FETCH_LOG_DB)
     if not path.exists():
         return {}
@@ -895,8 +898,11 @@ def fetch_stats_all_time(fetch_db=None):
         conn = _ro(path)
         try:
             out = {}
-            sql = _FETCH_ALL_TIME_SQL.format(probe=_probe_filter(conn))
-            for row in conn.execute(sql):
+            floor = "ts_utc >= ?" if since else "1"
+            params = (f"{since}T00:00:00Z",) if since else ()
+            sql = _FETCH_ALL_TIME_SQL.format(probe=_probe_filter(conn),
+                                             floor=floor)
+            for row in conn.execute(sql, params):
                 ok = row["ok"] or 0
                 out[row["host"]] = {
                     "requests": row["requests"], "ok": ok,

@@ -1431,22 +1431,24 @@ def _source_card(entry, health_record=None):
             f"<dt>Notes</dt><dd>{html.escape(_redact_addresses(notes))}</dd>")
     chip = (f" {_health_chip(health_record['health'])}"
             if health_record and health_record.get("health") else "")
-    # Every entry links its own page — active, planned, and unavailable
-    # alike: a refusal's page shows its refusal history, and the 14-day
-    # statistics view lives there now (the card leads with the 24-hour
-    # figures).
-    detail = (f'<p class="src-links"><a href="sources/'
-              f'{html.escape(entry["id"], quote=True)}.html">Source page '
-              "&mdash; full statistics, method, and history</a></p>")
+    # The TITLE is the way into OUR page for the source (operator,
+    # 2026-08-03): every entry — active, planned, and unavailable alike —
+    # links its own sources/<id>.html, where the full statistics, method,
+    # and history live. The publisher's own site stays one small link
+    # below the title, so a reader is directed to the information page
+    # first and to the official site deliberately, not by accident.
+    official = (f'<p class="src-links"><a href='
+                f'"{html.escape(link, quote=True)}">Official site</a></p>')
     return (
         f'<article class="src-card" id="src-{html.escape(entry["id"])}">'
-        f'<h4 class="src-name"><a href="{html.escape(link, quote=True)}">'
+        f'<h4 class="src-name"><a href="sources/'
+        f'{html.escape(entry["id"], quote=True)}.html">'
         f"{html.escape(entry['name'])}</a></h4>"
         f'<p class="src-sub">{_status_chip(entry["status"])}{chip} {subtitle}</p>'
+        f"{official}"
         f'<p class="src-desc">{html.escape(entry["description"])}</p>'
         f"{signup}"
         f"{_card_stats_block(health_record)}"
-        f"{detail}"
         f'<details class="src-more"><summary>Registry record</summary>'
         f'<dl>{"".join(record)}</dl></details>'
         "</article>"
@@ -1696,10 +1698,21 @@ def _ro_conn(path):
 #: Daily-series window for the per-source charts.
 CHART_WINDOW_DAYS = 30
 
-#: The all-time figures' honest limit, stated wherever they render:
-#: source-probe traffic was unlabeled before the probe client existed.
+#: Where published request statistics begin (operator, 2026-08-03). The
+#: production cutover was 2026-07-30; fetch-log rows before it are the
+#: development machine's traffic, migrated with the databases, and are
+#: not observations of the production service. All-time figures and the
+#: per-source request charts start here; item counts are the corpus
+#: record and are not floored.
+ALL_TIME_STATS_SINCE = "2026-07-30"
+
+#: The all-time figures' honest limits, stated wherever they render:
+#: the floor above, and source-probe traffic unlabeled before the probe
+#: client existed.
 ALL_TIME_PROBE_NOTE = (
-    "All-time counts before 2026-08-03 include unmarked source-probe "
+    f"Request counts begin {ALL_TIME_STATS_SINCE}, the day this service "
+    "went into production; earlier development-machine traffic is "
+    "excluded. Counts before 2026-08-03 include unmarked source-probe "
     "traffic; probes are labeled and excluded thereafter."
 )
 
@@ -1888,10 +1901,19 @@ def _recent_sentence(record):
         return ""
     bits = []
     if recent.get("requests") is not None:
-        bits.append(f"{_n(recent['requests'])} request(s) "
-                    f"({_n(recent['ok'])} answered, {_n(recent['failed'])} "
-                    "returned no content)")
-    bits.append(f"{_n(recent.get('items', 0))} item(s) ingested")
+        # A zero is a true observation (a cold snapshot, a quiet host)
+        # and reads better as words than as "0 request(s) (0 answered,
+        # 0 returned no content)" — the parenthetical earns its place
+        # only when there were requests to classify.
+        if recent["requests"]:
+            bits.append(f"{_n(recent['requests'])} request(s) "
+                        f"({_n(recent['ok'])} answered, "
+                        f"{_n(recent['failed'])} returned no content)")
+        else:
+            bits.append("no requests made")
+    items = recent.get("items", 0)
+    bits.append(f"{_n(items)} item(s) ingested" if items
+                else "no items ingested")
     return (f'<p><span class="src-stat-label">Last {recent["hours"]} '
             f'hours:</span> {" · ".join(bits)}</p>')
 
@@ -2056,8 +2078,8 @@ def _all_time_block(entry, record, all_time, fetch_log_present):
 
 
 def _source_page_body(entry, record, *, description, assessment, state,
-                     all_time, fetch_log_present, days, items_by_day,
-                     fetch_by_day):
+                     all_time, fetch_log_present, days, fetch_days,
+                     items_by_day, fetch_by_day):
     """The whole per-source page body. Every section renders from what
     exists: absent model text, absent databases, and unmeasured registry
     statuses each degrade to a stated absence, never to a crash or an
@@ -2114,6 +2136,26 @@ def _source_page_body(entry, record, *, description, assessment, state,
     parts.extend(f"<dt>{html.escape(term)}</dt><dd>{html.escape(desc)}</dd>"
                  for term, desc in _methods_rows(entry))
     parts.append("</dl>")
+    # -- Health -----------------------------------------------------------
+    # Health leads the measured half of the page (operator, 2026-08-03):
+    # the label and its reason are the reader's summary; the statistics
+    # below are the numbers that back it.
+    parts.append("<h2>Ingestion health</h2>")
+    if record and record.get("health"):
+        parts.append(f'<p class="health-lead">{_health_chip(record["health"])} '
+                     f"{html.escape(record['health_reason'])}</p>")
+        st = state.get(sid)
+        if st:
+            parts.append(
+                f'<p class="health-note">This label has held since '
+                f"{html.escape(st['since'])} (UTC) and was last re-checked "
+                f"{html.escape(st['last_checked'])} (UTC).</p>")
+        parts.append(f'<p class="health-note">'
+                     f"{html.escape(health_mod.FETCH_DISCLAIMER)}</p>")
+    else:
+        reason = (record or {}).get("health_reason") or (
+            "No health label is computed in this build.")
+        parts.append(f'<p class="health-note">{html.escape(reason)}</p>')
     # -- Statistics -------------------------------------------------------
     parts.append("<h2>Ingestion statistics</h2>")
     parts.append(
@@ -2143,27 +2185,30 @@ def _source_page_body(entry, record, *, description, assessment, state,
     if days:
         host = health_mod.fetch_host(entry)
         host_days = fetch_by_day.get(host, {}) if host else {}
-        req_values = [host_days.get(d, {}).get("n", 0) for d in days]
-        ms_values = [host_days.get(d, {}).get("avg_ms") for d in days]
+        # Request-derived series run on the floored axis (see
+        # ALL_TIME_STATS_SINCE): pre-production days are absent from the
+        # chart, not drawn as observed zeroes.
+        req_values = [host_days.get(d, {}).get("n", 0) for d in fetch_days]
+        ms_values = [host_days.get(d, {}).get("avg_ms") for d in fetch_days]
         key = health_mod.source_key(entry)
         item_days = items_by_day.get(key, {})
         item_values = [item_days.get(d, 0) for d in days]
         charts = []
-        if host and entry["type"] != "email":
+        if host and entry["type"] != "email" and fetch_days:
             shared_note = ""
             fetch = (record or {}).get("fetch")
             if fetch and fetch.get("shared_with_sources", 1) > 1:
                 shared_note = " (host-wide)"
             charts.append(_svg_bar_chart(
-                days, req_values,
+                fetch_days, req_values,
                 title=f"Requests per day to {host}{shared_note}",
                 unit="requests"))
         charts.append(_svg_bar_chart(
             days, item_values, title="Items ingested per day",
             unit="items"))
-        if host and entry["type"] != "email":
+        if host and entry["type"] != "email" and fetch_days:
             charts.append(_svg_sparkline(
-                days, ms_values,
+                fetch_days, ms_values,
                 title=f"Daily mean response time of {host}"))
         charts = [c for c in charts if c]
         parts.append(f"<h3>Last {CHART_WINDOW_DAYS} days, day by day</h3>")
@@ -2173,23 +2218,6 @@ def _source_page_body(entry, record, *, description, assessment, state,
             parts.append('<p class="stat-note">No requests and no items '
                          f"were recorded in the last {CHART_WINDOW_DAYS} "
                          "days, so there is nothing to chart.</p>")
-    # -- Health -----------------------------------------------------------
-    parts.append("<h2>Ingestion health</h2>")
-    if record and record.get("health"):
-        parts.append(f'<p class="health-lead">{_health_chip(record["health"])} '
-                     f"{html.escape(record['health_reason'])}</p>")
-        st = state.get(sid)
-        if st:
-            parts.append(
-                f'<p class="health-note">This label has held since '
-                f"{html.escape(st['since'])} (UTC) and was last re-checked "
-                f"{html.escape(st['last_checked'])} (UTC).</p>")
-        parts.append(f'<p class="health-note">'
-                     f"{html.escape(health_mod.FETCH_DISCLAIMER)}</p>")
-    else:
-        reason = (record or {}).get("health_reason") or (
-            "No health label is computed in this build.")
-        parts.append(f'<p class="health-note">{html.escape(reason)}</p>')
     # -- Assessment (optional model block) --------------------------------
     if assessment:
         parts.append("<h2>Our ingestion assessment</h2>")
@@ -2229,15 +2257,22 @@ def _build_source_pages(out_dir, entries, health, doc_pages=(), *,
             items_by_day = _daily_items(pconn, days[0], days[-1])
         finally:
             pconn.close()
+    # Request-derived figures start at the production floor (see
+    # ALL_TIME_STATS_SINCE): the daily series' query starts at the later
+    # of the chart window and the floor, and the request/response charts
+    # clip their day axis to it so a pre-floor day renders as absent,
+    # never as an observed zero.
+    fetch_days = [d for d in days if d >= ALL_TIME_STATS_SINCE]
     fetch_by_day = {}
     fconn = _ro_conn(fetch_db or config.FETCH_LOG_DB)
-    if fconn is not None:
+    if fconn is not None and fetch_days:
         try:
-            fetch_by_day = _daily_fetches(fconn, f"{days[0]}T00:00:00Z")
+            fetch_by_day = _daily_fetches(fconn, f"{fetch_days[0]}T00:00:00Z")
         finally:
             fconn.close()
     all_time = health_mod.fetch_stats_all_time(
-        fetch_db=fetch_db or config.FETCH_LOG_DB)
+        fetch_db=fetch_db or config.FETCH_LOG_DB,
+        since=ALL_TIME_STATS_SINCE)
 
     for entry in entries:
         body = _source_page_body(
@@ -2246,7 +2281,8 @@ def _build_source_pages(out_dir, entries, health, doc_pages=(), *,
             assessment=assessments.get(entry["id"]),
             state=state, all_time=all_time,
             fetch_log_present=fetch_log_present,
-            days=days, items_by_day=items_by_day, fetch_by_day=fetch_by_day)
+            days=days, fetch_days=fetch_days, items_by_day=items_by_day,
+            fetch_by_day=fetch_by_day)
         page = _render_page(
             f"{entry['name']} — source page — {SITE_TITLE}",
             body,

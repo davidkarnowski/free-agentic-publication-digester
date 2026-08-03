@@ -354,10 +354,14 @@ def test_sources_page_grouped_sections_and_cards(digests, registry_root, tmp_pat
     assert '<h2 id="evaluated-and-excluded">Evaluated and excluded (1)</h2>' in page
     # status subgroups inside a channel group
     assert "<h3>Active (1)</h3>" in page and "<h3>Planned (1)</h3>" in page
-    # a card: linked name, chip + subtitle, description, folded registry record
+    # a card: the TITLE links our own information page for the source
+    # (operator, 2026-08-03); the publisher's site is the small
+    # "Official site" link below it.
     assert '<article class="src-card" id="src-gao-reports">' in page
+    assert ('<h4 class="src-name"><a href="sources/gao-reports.html">'
+            "GAO Reports</a></h4>") in page
     assert ('href="https://www.gao.gov/reports" target="_blank"'
-            ' rel="noopener noreferrer">GAO Reports'
+            ' rel="noopener noreferrer">Official site'
             '<span class="vh"> (opens in a new tab)</span></a>') in page
     assert '<span class="tag tag-status-active">active</span>' in page
     assert "Legislative · Tier 1 · RSS feed · Government Accountability Office" in page
@@ -2298,6 +2302,45 @@ def test_source_page_states_all_three_windows_and_probe_note(health_site):
     assert "Our requests to feeds.example.gov, all time" in page
     assert "unmarked source-probe traffic" in page
     assert "probes are labeled and excluded thereafter" in page
+    assert "Request counts begin 2026-07-30" in page
+
+
+def test_source_page_health_section_precedes_statistics(health_site):
+    """Operator, 2026-08-03: the health label is the reader's summary and
+    leads; the statistics that back it follow."""
+    page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+            / "sources" / "example-newsroom.html").read_text()
+    assert (page.index("<h2>Ingestion health</h2>")
+            < page.index("<h2>Ingestion statistics</h2>"))
+
+
+def test_all_time_floor_excludes_preproduction_traffic(health_site):
+    """Fetch-log rows from before the 2026-07-30 production cutover are
+    development-machine traffic and stay out of the all-time figures
+    (operator, 2026-08-03). The trailing windows are unaffected."""
+    fetches = CLEAN_FETCHES + tuple(
+        (f"2026-07-24T0{i}:00:00Z", "https://feeds.example.gov/press.xml", 200)
+        for i in range(5))
+    page = (health_site(DELIVERING_ITEMS, fetches)
+            / "sources" / "example-newsroom.html").read_text()
+    all_time = page[page.index("all time (since"):]
+    all_time = all_time[:all_time.index("</div>")]
+    assert "all time (since 2026-07-31)" in page   # first IN-floor stamp
+    assert "6 request(s)" in all_time              # not 11
+    # the 14-day window still counts what it observed in its window
+    assert "11 request(s)" in page
+
+
+def test_recent_zero_state_reads_as_words(health_site):
+    """A cold day renders 'no requests made · no items ingested', not a
+    row of zero-parentheticals (operator styling note, 2026-08-03)."""
+    page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+            / "sources.html").read_text()
+    card = page[page.index('id="src-example-newsroom"'):]
+    card = card[:card.index("</article>")]
+    assert "no requests made" in card
+    assert "no items ingested" in card
+    assert "0 request(s)" not in card
 
 
 def test_source_page_charts_have_accessible_fallbacks(health_site):
