@@ -183,3 +183,58 @@ def test_ledger_migrates_pre_backend_schema(tmp_path):
     rows = client._db.execute(
         "SELECT purpose, backend FROM llm_calls ORDER BY id").fetchall()
     assert rows == [("map:old", "cli"), ("map:new", "cli")]
+
+
+def test_throttle_unset_means_unlimited(tmp_path):
+    # The default: DAILY_TOKEN_THROTTLE is None and no start gate fires.
+    assert config.DAILY_TOKEN_THROTTLE is None
+    client, calls = make_client(tmp_path, [FakeProc(stdout=cli_json())])
+    client.complete("x", purpose="map:test")
+    assert len(calls) == 1
+
+
+def test_throttle_pauses_at_the_ledger_figure(tmp_path, monkeypatch):
+    """GUIDE §6 r8 (operator, 2026-08-02): the on-demand throttle. Counted
+    from the ledger — the fetch-log budget pattern — and it gates call
+    STARTS: the call that crosses the figure completes; the next refuses."""
+    monkeypatch.setattr(config, "DAILY_TOKEN_THROTTLE", 200)
+    client, calls = make_client(
+        tmp_path, [FakeProc(stdout=cli_json(inp=250)), FakeProc(stdout=cli_json())])
+    client.complete("first", purpose="map:test")   # 258 in-tokens logged
+    with pytest.raises(llm.TokenBudgetExceededError):
+        client.complete("second", purpose="map:test")
+    assert len(calls) == 1, "the backend must not be reached once throttled"
+
+
+def test_throttle_error_is_the_pause_kind(tmp_path):
+    """Worker.run_cycle records BudgetExceededError as paused-not-failed;
+    the throttle must ride that path, not the error streak."""
+    from fapd.client import BudgetExceededError
+
+    assert issubclass(llm.TokenBudgetExceededError, BudgetExceededError)
+
+
+def test_throttle_counts_across_clients_via_the_ledger(tmp_path, monkeypatch):
+    """Enforcement is cross-process by construction: a second client over
+    the same ledger sees the first client's spend."""
+    monkeypatch.setattr(config, "DAILY_TOKEN_THROTTLE", 100)
+    first, _ = make_client(tmp_path, [FakeProc(stdout=cli_json(inp=250))])
+    first.complete("x", purpose="map:test")
+    second, calls = make_client(tmp_path, [FakeProc(stdout=cli_json())])
+    with pytest.raises(llm.TokenBudgetExceededError):
+        second.complete("y", purpose="map:test")
+    assert not calls
+
+
+def test_prompt_size_guard_fails_loudly_and_is_ledgered(tmp_path, monkeypatch):
+    """Review R1/D3: one call must never carry an unbounded prompt. The
+    refusal is ledgered (nothing bypasses logging) and raises an LLMError
+    so the r14/R3 ceilings bound any retries."""
+    monkeypatch.setattr(config, "LLM_MAX_PROMPT_CHARS", 50)
+    client, calls = make_client(tmp_path, [FakeProc(stdout=cli_json())])
+    with pytest.raises(llm.PromptSizeError):
+        client.complete("y" * 51, purpose="compose:day")
+    assert not calls, "the backend must not see an oversized prompt"
+    row = client._db.execute("SELECT error, input_tokens FROM llm_calls").fetchone()
+    assert "prompt size guard" in row[0] and row[1] == 0
+    assert issubclass(llm.PromptSizeError, LLMError)

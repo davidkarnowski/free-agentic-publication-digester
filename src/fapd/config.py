@@ -121,6 +121,19 @@ LLM_MODELS = {
 # API-backend response cap. On models with extended thinking on by default
 # the cap covers thinking + text together, so it is deliberately generous.
 LLM_MAX_OUTPUT_TOKENS = 16000
+# GUIDE §6 r8 (operator ruling 2026-08-02): NO standing daily token cap —
+# this is an on-demand THROTTLE. Unset (the default) means unlimited; set
+# an input-token integer on the box to engage backpressure: a call that
+# would start past the day's ledger-counted figure pauses like an HTTP
+# budget stop (queued to the next day, disclosed, never silent). Counted
+# from the ledger so it holds across processes and nothing bypasses it.
+DAILY_TOKEN_THROTTLE = int(os.environ.get("FAPD_DAILY_TOKEN_THROTTLE", "0")) or None
+# Per-call prompt-size guard (review R1/D3, standing policy regardless of
+# the throttle): compose_day builds its prompt from every summary of the
+# day, so a runaway day must fail one call loudly rather than ship an
+# unbounded prompt. ~150K tokens' worth of characters — several times any
+# measured day, under the model context ceiling.
+LLM_MAX_PROMPT_CHARS = 600_000
 # GUIDE §2 opinion-agnostic lexicon — THE canonical banned-term list.
 # Single source of truth (review D8): every prose prompt restates it from
 # this constant and report's render-time gate compiles its scan regex

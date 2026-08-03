@@ -91,6 +91,17 @@ one.*
 - **Sketch:** cap constant + hard stop in `LLMClient`; overflow items
   queue to the next day and are named in the Coverage Statement's known
   gaps (a budget stop must never be a silent omission).
+- **Done 2026-08-02 (as redirected):** the operator ruled NO standing
+  cap ("don't token cap at this time, just allow us to throttle when
+  needed"). Built as an on-demand throttle instead:
+  `FAPD_DAILY_TOKEN_THROTTLE` (unset by default), ledger-counted in
+  `LLMClient.complete`, pause-type error the workers already treat as
+  our-own-budget backpressure. Engage by setting the variable in the
+  box's `.env` and restarting the backend; clear it the same way. The
+  per-call prompt-size guard (`LLM_MAX_PROMPT_CHARS`) landed as
+  standing policy. GUIDE §6 r8 amended in the same change. The
+  runaway-day defense-in-depth remains r14's per-item ceiling + this
+  throttle when engaged.
 
 **OB-5 — Wayback corroboration top-up**
 - **Gap:** ~180 captures from 2026-07-28 lack a Wayback second witness

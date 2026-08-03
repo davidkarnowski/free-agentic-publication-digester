@@ -25,6 +25,7 @@ import subprocess
 import time
 
 from . import config
+from .client import BudgetExceededError
 
 logger = logging.getLogger("fapd.llm")
 
@@ -48,6 +49,20 @@ CREATE INDEX IF NOT EXISTS idx_llm_calls_ts ON llm_calls (ts_utc);
 
 class LLMError(RuntimeError):
     pass
+
+
+class TokenBudgetExceededError(BudgetExceededError):
+    """The on-demand daily token throttle refused to start a call (GUIDE
+    §6 r8, operator ruling 2026-08-02). Subclasses the HTTP budget error
+    deliberately: Worker.run_cycle already records that as paused-not-
+    failed — our own budget refusing us is the policy working."""
+
+
+class PromptSizeError(LLMError):
+    """A single prompt exceeded config.LLM_MAX_PROMPT_CHARS (review
+    R1/D3). An LLMError so the existing retry/ceiling machinery bounds
+    it: per-item summaries hit the r14 attempt ceiling, and a compose
+    failure at EOD hits the R3 finalizer hard stop — loud either way."""
 
 
 class CLIBackend:
@@ -155,6 +170,25 @@ class LLMClient:
         resolved concrete model, not the tier alias."""
         tier = model or config.MAP_MODEL
         resolved = config.LLM_MODELS.get(self._backend.name, {}).get(tier, tier)
+        # Start gates, before any backend work. The throttle is counted
+        # from the ledger (the fetch-log budget pattern: nothing bypasses
+        # logging, enforcement holds across processes) and gates call
+        # STARTS — an in-flight call is never aborted mid-stream.
+        if config.DAILY_TOKEN_THROTTLE:
+            spent = self.tokens_today()[0]
+            if spent >= config.DAILY_TOKEN_THROTTLE:
+                raise TokenBudgetExceededError(
+                    f"daily token throttle engaged: {spent:,} input tokens"
+                    f" today >= FAPD_DAILY_TOKEN_THROTTLE"
+                    f" ({config.DAILY_TOKEN_THROTTLE:,}); paused until the"
+                    " next UTC day")
+        if len(prompt) > config.LLM_MAX_PROMPT_CHARS:
+            self._log(resolved, purpose, package_id, granule_id, 0, 0, 0,
+                      error=f"prompt size guard: {len(prompt):,} chars"[:500])
+            raise PromptSizeError(
+                f"prompt for {purpose!r} is {len(prompt):,} chars, past the"
+                f" {config.LLM_MAX_PROMPT_CHARS:,}-char guard — one call"
+                " must never carry an unbounded prompt (GUIDE §6 r8)")
         started = time.monotonic()
         try:
             result = self._backend.complete(

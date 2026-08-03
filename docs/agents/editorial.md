@@ -99,11 +99,15 @@ file.
 
 ## Current backlog (2026-08-02 amended review)
 
-- **R1 / D3** — the LLM spend ceiling: daily input-token cap in
-  `LLMClient.complete` derived from the ledger; a size guard on
-  `compose_day`'s unbounded prompt (the one opus-tier call); split the
-  ledger's `input_tokens` into its three billed components so cost is
-  measurable in dollars. **Top priority for this section.**
+- **R1 / D3** — **Done 2026-08-02, as redirected by the operator** (no
+  standing cap — "the value stays the operator's" includes none):
+  `FAPD_DAILY_TOKEN_THROTTLE` is an on-demand throttle in
+  `LLMClient.complete`, ledger-counted (cross-process, nothing bypasses
+  it), raising `TokenBudgetExceededError` — a `BudgetExceededError`
+  subclass, so workers record it paused-not-failed. The per-call
+  prompt-size guard (`LLM_MAX_PROMPT_CHARS`) is standing policy.
+  **Remaining, low priority:** split the ledger's `input_tokens` into
+  its three billed components so spend is measurable in dollars.
 - **D4** — the plain layer records attempts but never reads them; the
   per-item ceiling doesn't bind it. One predicate in `run_plain`'s
   pending query, mirroring `pending_map_items`.

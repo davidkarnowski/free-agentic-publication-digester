@@ -4405,3 +4405,39 @@ digest publishes.
 Also recorded in the decision log: the operator's R1 redirect — no
 daily token cap; the throttle-on-demand build (env knob, off by
 default) is queued instead. 529 tests.
+
+## 2026-08-02 — R1 as ruled: a throttle you can reach for, not a cap you live under
+
+The operator's ruling reshaped R1: "Don't token cap at this time, just
+allow us to throttle when needed." GUIDE §6 r8 carries the amendment —
+no standing daily cap; "the value stays the operator's" includes the
+value none — and the mechanism the review designed now exists behind
+an env knob instead of a policy constant.
+
+FAPD_DAILY_TOKEN_THROTTLE, unset by default, is read by
+LLMClient.complete as a start gate: before any backend work the client
+counts the UTC day's input tokens from its own ledger — the fetch-log
+budget pattern, so enforcement holds across processes and nothing can
+bypass logging — and refuses to start a call at or past the figure.
+The refusal is TokenBudgetExceededError, a deliberate subclass of the
+HTTP BudgetExceededError: Worker.run_cycle already records that as
+paused-not-failed, so an engaged throttle reads as backpressure on the
+health surface, not as a failing collector, and pending items queue to
+the next day exactly like an HTTP budget stop. Engaging it is an ops
+action — set the variable in the box's .env, restart the backend;
+clearing it is the same action in reverse.
+
+The per-call prompt-size guard landed as standing policy regardless of
+the throttle (R1's other half): LLM_MAX_PROMPT_CHARS (600K chars,
+several times any measured day) makes an unbounded compose_day prompt
+fail one call loudly, ledgered with the refusal reason, as an LLMError
+so the r14 per-item ceiling and the R3 finalizer hard stop bound any
+retry. A runaway day now has three independent walls: the per-item
+attempt ceiling, the size guard, and the throttle when engaged.
+
+Not built, recorded honestly: the ledger's input_tokens split into its
+three billed components (the in-dollars view) stays on the Editorial
+backlog at low priority — a throttle in tokens does not need it.
+Five new tests pin the default-off, the ledger-counted pause, the
+pause-not-fail error kind, cross-client enforcement, and the ledgered
+size-guard refusal. 534 tests.
