@@ -159,7 +159,22 @@ one.*
   headers, tags in digests.json + HTML meta + agent surfaces; GUIDE
   §2/§6 amendment precedes.
 
-**OB-10 — IMAP IDLE for email**
+**OB-12 — Stale-output cleanup in the site render**
+- **Gap:** `build_site` (and `refresh_sources`/`build_day`) write outputs
+  but never remove pages they no longer produce. Found live 2026-08-03:
+  the retired 2026-07-23/24 digest pages were still sitting in the VPS
+  site volume — and still being *served* — after the retirement removed
+  them from the repo, and the next `git add site/` (the backfill's
+  evidence commit) resurrected them into the record until a follow-up
+  guarded commit deleted them and the missed `site/assets/2026-07-23/`.
+- **Trigger:** the next content retirement, or any renderer change that
+  renames an output path.
+- **Sketch:** either a manifest-of-expected-outputs sweep at the end of
+  `build_site` (delete files under managed directories that this render
+  did not produce, with a printed list — loud, never silent), or a
+  documented retirement runbook step: remove from repo AND volume in the
+  same operation. The evidence-commit guard already caught the symptom;
+  the fix belongs at the source.
 - **Gap:** email collects on a 15-minute poll, not push.
 - **Trigger:** a real bulletin-latency need the poll cadence can't
   meet.
