@@ -34,8 +34,11 @@ OFFICIAL_SUMMARY_MAX_CHARS = 1200
 _OFFICIAL_TRUNCATION_NOTE = " [official summary truncated; see source]"
 _TEXT_TRUNCATION_NOTE = "\n[truncated for summarization; full text in source]"
 
-# GUIDE §2, restated verbatim in intent: opinion-agnostic output, no loaded
-# adjectives, no motive attribution, no predictions, no opinions.
+# GUIDE §2, restated verbatim: opinion-agnostic output, with the complete
+# banned-term list generated from the canonical constant (review D8) —
+# substituted via str.replace so runtime placeholders stay untouched.
+_BANNED_CLAUSE = ", ".join(f'"{t}"' for t in config.BANNED_TERMS)
+
 _PREAMBLE = """\
 You are writing summaries of official United States government documents
 for a citation-bound daily digest. For EACH document block below, write a
@@ -45,16 +48,20 @@ says or does.
 Editorial constraints (mandatory, non-negotiable):
 - Describe what was published, said, or enacted -- never whether it was
   good or bad.
-- NO loaded adjectives (such as "controversial", "landmark", "extreme").
-- NO motive attribution (such as "in an attempt to ...").
-- NO predictions of political outcomes.
+- NO banned terms -- the complete list, enforced verbatim by the
+  render-time gate: {banned}.
+- NO motive attribution, NO predictions of political outcomes.
 - NO opinions of any kind. Plain, neutral register.
+- EXCEPTION: a document's own official title or name may be quoted
+  verbatim even when it contains a banned word (a case caption, a statute
+  like the National Historic Preservation Act) -- quote it exactly; never
+  reuse such words in your own phrasing.
 
 Output format: reply with STRICT JSON and nothing else -- a single JSON
 object mapping each document's key (the exact string after "key=" in its
 header) to that document's summary string. No markdown fences, no
 commentary, no keys other than the document keys.
-"""
+""".replace("{banned}", _BANNED_CLAUSE)
 
 
 def _key(item):
@@ -193,16 +200,17 @@ Hard constraints (mandatory, non-negotiable):
   still accepted"; "cloture" -> "a vote to end debate").
 - Keep effective dates and comment deadlines when the summary states them.
 - Strictly factual and opinion-agnostic: never whether something is good
-  or bad. NO loaded adjectives (such as "controversial", "landmark",
-  "extreme"), NO evaluative framing (such as "cuts red tape",
-  "crackdown"), NO motive attribution (such as "in an attempt to ..."),
-  NO predictions, NO opinions.
+  or bad. NO banned terms -- the complete list, enforced verbatim by the
+  render-time gate: {banned}. NO motive attribution, NO predictions,
+  NO opinions. A document's own official name may be quoted verbatim even
+  when it contains a banned word; never reuse such words in your own
+  phrasing.
 
 Output format: reply with STRICT JSON and nothing else -- a single JSON
 object mapping each item's key (the exact string after "key=" in its
 header) to its one-sentence plain restatement. No markdown fences, no
 commentary, no other keys.
-"""
+""".replace("{banned}", _BANNED_CLAUSE)
 
 
 def _build_plain_prompt(entries):

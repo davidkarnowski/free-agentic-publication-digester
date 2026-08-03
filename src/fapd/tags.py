@@ -33,13 +33,15 @@ _TAG_PROMPT = """For EACH digest section below, produce up to three short tags
 (one to three words each, lowercase) that describe the section's subject
 matter for search and retrieval. Use ONLY facts present in the summaries.
 Plain descriptive nouns only — no loaded adjectives, no judgments, no
-predictions (banned examples: landmark, controversial, sweeping, historic).
+predictions. Banned terms (complete list, enforced verbatim by the
+render-time gate): {banned}.
 
 Output format: STRICT JSON, one object mapping each section key to an
 array of tag strings. No markdown fences, no other keys.
 
 {sections}
-"""
+""".replace(
+    "{banned}", ", ".join(f'"{t}"' for t in config.BANNED_TERMS))
 
 
 def mechanical_section_tags(conn, date):

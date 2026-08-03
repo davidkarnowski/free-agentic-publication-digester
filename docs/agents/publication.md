@@ -122,10 +122,16 @@ docs/accessibility.md → this file.
   order, deterministic); the hand-kept tuple that omitted
   `AGENCYPR-EX-01` is gone, and the next collection added cannot repeat
   the omission.
-- **D21** — the lexicon gate's mask covers 3 of 8 collections' titles;
-  "National Historic Preservation Act" or a litigant named Landmark
-  blocks the digest. Mask positionally, and raise the statute/proper-
-  noun question to the operator (GUIDE §2 touch).
+- **D21 / D8 gate-side** — **Done 2026-08-02**
+  (`bug/r5-lexicon-official-names`): titles from all eight collections
+  (extracted_texts + granules + packages, in raw/_one_line/
+  _display_title forms) exempt positionally via `_official_spans`; the
+  operator ruled the official-name exemption (GUIDE §2 amendment —
+  model prose may quote an official name verbatim, free use still
+  fails). The D8 drift test then exposed a latent bug: `re.escape`
+  escapes spaces, so every multi-word banned phrase had been
+  unmatchable since the gate's creation — fixed, the gate is stronger
+  now.
 - **D6 / D7** — make the coverage gate independently computed so it can
   actually fail; classes that fall through the rule registry
   (introduced bills, AGENCYPR/VOTES/BILLACTIONS) get named attribution.

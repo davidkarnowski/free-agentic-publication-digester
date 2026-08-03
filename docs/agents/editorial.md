@@ -107,8 +107,11 @@ file.
 - **D4** — the plain layer records attempts but never reads them; the
   per-item ceiling doesn't bind it. One predicate in `run_plain`'s
   pending query, mirroring `pending_map_items`.
-- **D8** — compose prompt omits 6 of 16 banned terms; generate from a
-  single source.
+- **D8** — **Done 2026-08-02**: `config.BANNED_TERMS` is the single
+  source; all five prose prompts restate it verbatim (str.replace
+  substitution, drift-tested in `test_prompt_lexicon.py`) and the gate
+  regex compiles from it. All five prompt versions bumped per §3a
+  (map 2, plain 2, compose 3, section 2, tag 2).
 - **D14** — `dates_with_pending` admits three publication days, its
   docstring promises two; make them agree (in Operations' file — write
   the diff in your exit report).

@@ -97,6 +97,22 @@ reporting component must comply.
   enacted — never whether it was good or bad. Banned in generated prose:
   loaded adjectives ("controversial", "landmark", "extreme"), motive
   attribution ("in an attempt to..."), and predictions of political outcomes.
+  The canonical banned-term list is `config.BANNED_TERMS`: every prompt
+  restates it from that constant and the render-time lexicon gate compiles
+  its scan from it — two independent layers that cannot drift.
+  - *Scope (amended 2026-08-02, operator).* The ban binds the digest's OWN
+    voice only. Official source text — titles, official summaries, captions,
+    quoted action sentences — renders verbatim and is never gated, altered,
+    or suppressed on lexicon grounds. The rule exists to keep what we write
+    unbiased, never to censor what the government published.
+  - *Official-name exemption (same amendment).* Generated prose may contain
+    a banned term only where it occurs inside an exact occurrence of an
+    official title or name stored in the corpus for that digest day — a
+    statute name ("National Historic Preservation Act"), a case caption
+    ("Landmark Legal Foundation v. EPA"), a document title. Naming the
+    record is stating a fact. The same term outside such a span remains a
+    violation, and the exemption is positional: it never blinds the gate to
+    the surrounding prose.
 - **Coverage symmetry.** Selection criteria for "what matters today" must be
   mechanical and party-blind: e.g., floor time consumed, number of cosponsors,
   regulatory economic-significance designation, stage of legislative process —

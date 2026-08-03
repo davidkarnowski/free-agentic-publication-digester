@@ -4356,3 +4356,52 @@ prod cannot quietly drift back to unbounded, the same textual-pin
 pattern the dev stack's guardrails use. The dev README's "here and not
 yet in prod" divergence note is closed out. Compose file only: nothing
 touches the box until the next authorized deploy. 523 tests.
+
+## 2026-08-02 — R5: the gate learns whose voice it polices
+
+The operator's ruling settled the question the review raised: "We
+aren't censoring, we are just trying to not be biased in what we
+publish and summarize." GUIDE §2 now says it in two amendments — the
+banned lexicon binds the digest's OWN voice only, official text is
+never gated, altered, or suppressed on lexicon grounds; and the
+official-name exemption (option a): generated prose may carry a banned
+term only inside an exact occurrence of an official title or name
+stored for that day. Naming the record is stating a fact.
+
+The enforcement rewrite implements both at once. Exemption is now
+positional (_official_spans): titles from all eight collections —
+extracted_texts, granules, packages, in raw, whitespace-normalized,
+and display-cased forms — plus official summaries mark exempt
+character ranges, and a banned match passes only inside one. That
+closes D21 (a case caption like "Landmark Legal Foundation v. EPA" or
+an FR title citing the National Historic Preservation Act no longer
+blocks the digest) and D8's blinding half (the old global str.replace
+deleted official strings from everywhere including our prose; now
+"a historic change under the National Historic Preservation Act..."
+fails on the free word while the Act's name passes beside it).
+
+D8's drift half: config.BANNED_TERMS is the canonical list; all five
+prose prompts restate it verbatim via module-level substitution and
+test_prompt_lexicon.py pins every term into every prompt. And that
+drift test earned its keep on day one — it exposed a latent bug older
+than the review: re.escape escapes SPACES (special under re.VERBOSE),
+so the old `.replace(" ", r"\s+")` operated on the escaped string and
+produced a literal backslash. Every multi-word banned phrase — "red
+tape", "in an attempt to", "aims to appease", "cracks down" — has been
+unmatchable since the gate was written. The phrases are now joined
+word-by-word; the gate is stronger today than it has ever actually
+been.
+
+§3a procedure: all five prompt versions bumped (map 2, plain 2,
+compose 3, section 2, tag 2). Regeneration scope, stated per the
+rule: at the next analyze cycle after deploy the map and plain layers
+regenerate for the r13 window (the current and previous publication
+day; officials re-store at zero tokens), and compose/section/tag
+surfaces regenerate at the next EOD — a bounded one-time cost the
+operator's no-cap ruling accepts. Per §3a step 5, the first
+regenerated day's output should be spot-audited against §2 before its
+digest publishes.
+
+Also recorded in the decision log: the operator's R1 redirect — no
+daily token cap; the throttle-on-demand build (env knob, off by
+default) is queued instead. 529 tests.

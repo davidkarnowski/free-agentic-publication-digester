@@ -303,3 +303,15 @@ live in `.claude/agents/fapd-*.md` (tracked).
   `.claude/agents/`), per the Spiralyst pattern: explicit edit
   surfaces, orchestrator-owned shared files, agents stage but never
   commit. Drift-tested against the repo.
+- **2026-08-02** — **No daily LLM token cap** (operator, superseding
+  the OB-4/R1 cap-value question): build throttle-on-demand instead —
+  the cap mechanism behind an env knob, unset by default; engaging it
+  is an ops action, not policy. GUIDE §6 r8's "the value stays the
+  operator's" includes the value "none".
+- **2026-08-02** — **Lexicon official-name exemption, option (a)**
+  (operator): the banned lexicon binds only the digest's own prose;
+  official text is never gated, altered, or suppressed ("we aren't
+  censoring, we are trying not to be biased in what we publish and
+  summarize"), and generated prose may carry a banned term only inside
+  an exact occurrence of an official title/name stored for that day.
+  GUIDE §2 amended; gate enforcement made positional.

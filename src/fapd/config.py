@@ -121,19 +121,51 @@ LLM_MODELS = {
 # API-backend response cap. On models with extended thinking on by default
 # the cap covers thinking + text together, so it is deliberately generous.
 LLM_MAX_OUTPUT_TOKENS = 16000
+# GUIDE §2 opinion-agnostic lexicon — THE canonical banned-term list.
+# Single source of truth (review D8): every prose prompt restates it from
+# this constant and report's render-time gate compiles its scan regex
+# from it, so the two enforcement layers cannot drift. It binds ONLY our
+# generated prose — official titles and summaries are quoted verbatim and
+# never gated (GUIDE §2 scope amendment, 2026-08-02). Phrases tolerate
+# any whitespace between words. Editing this list is a prompt change for
+# every surface at once: bump EVERY prompt version below (§3a).
+BANNED_TERMS = (
+    "landmark",
+    "controversial",
+    "historic",
+    "unprecedented",
+    "sweeping",
+    "radical",
+    "extreme",
+    "momentous",
+    "alarming",
+    "in an attempt to",
+    "aims to appease",
+    # Plain-register evaluative framing (the plain-speak layer's failure
+    # modes) — GUIDE §2 plain-language rules.
+    "red tape",
+    "crackdown",
+    "cracks down",
+    "slams",
+    "loophole",
+)
+
 # Bump when summarization prompts change; stored per summary row (§6 rule 5).
-PROMPT_VERSION = 1
+# v2: banned-term list generated verbatim from BANNED_TERMS (review D8).
+PROMPT_VERSION = 2
 # Plain-speak layer versions independently (§6 rule 9): phrasing iterations
-# never regenerate factual summaries.
-PLAIN_PROMPT_VERSION = 1
+# never regenerate factual summaries. v2: full banned list from BANNED_TERMS.
+PLAIN_PROMPT_VERSION = 2
 # Day-in-Review compose prompt versions independently for the same reason.
-# v2: adds the judicial paragraph (J1).
-COMPOSE_PROMPT_VERSION = 2
+# v2: adds the judicial paragraph (J1). v3: full banned list from
+# BANNED_TERMS — the compose model was told 10 of 16 terms (review D8).
+COMPOSE_PROMPT_VERSION = 3
 # Section quick-read synopses version independently (§3a).
-SECTION_PROMPT_VERSION = 1
+# v2: full banned list from BANNED_TERMS.
+SECTION_PROMPT_VERSION = 2
 # Section discovery-key tags (§6 rule 12a): independently versioned,
-# cheap tier, one batched call per digest day.
-TAG_PROMPT_VERSION = 1
+# cheap tier, one batched call per digest day. v2: full banned list.
+TAG_PROMPT_VERSION = 2
 # Developer-insight suggestions (§3a): dev-facing surface, one cheap-tier
 # call per EOD over the run's own metrics — never document content.
 INSIGHT_PROMPT_VERSION = 1

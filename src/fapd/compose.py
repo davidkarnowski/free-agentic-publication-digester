@@ -15,6 +15,13 @@ from .sync import utc_now_iso
 
 logger = logging.getLogger("fapd.compose")
 
+# The complete §2 lexicon, restated verbatim from the canonical constant
+# (review D8: this prompt hand-listed 10 of 16 terms — the strongest model
+# in the pipeline produced prose the gate then rejected, for a constraint
+# it was never given). Substituted with str.replace, not .format, because
+# the prompts carry runtime {placeholders} of their own.
+_BANNED_CLAUSE = ", ".join(f'"{t}"' for t in config.BANNED_TERMS)
+
 _PROMPT = """You are writing the "Day in Review" opening of a daily digest of official
 US government publications. Your ONLY inputs are the item summaries and
 mechanical counts below — do not add outside knowledge, do not speculate.
@@ -22,9 +29,9 @@ mechanical counts below — do not add outside knowledge, do not speculate.
 Hard rules (non-negotiable):
 - Strictly factual and opinion-agnostic: describe what was published, said,
   or enacted. Never whether it was good, bad, or significant.
-- Banned: loaded adjectives (landmark, controversial, historic,
-  unprecedented, sweeping, radical, extreme, momentous, alarming), motive
-  attribution ("in an attempt to"), predictions of outcomes.
+- Banned terms — the complete list, enforced verbatim by the render-time
+  gate (your prose is rejected if any appears): {banned}. Also banned:
+  motive attribution and predictions of outcomes.
 - Party-blind, neutral register, plain prose.
 - Up to 3 short paragraphs (~130-220 words total): first the congressional
   floor picture (both chambers, recorded votes); then the
@@ -42,7 +49,7 @@ Reply with the paragraphs only.
 
 === ITEM SUMMARIES ===
 {items}
-"""
+""".replace("{banned}", _BANNED_CLAUSE)
 
 
 def compose_day(conn, llm, date):
@@ -163,8 +170,9 @@ that section contains today, weaving in the count naturally.
 
 Hard rules (non-negotiable):
 - Use ONLY facts present in the item summaries given. Add nothing.
-- Strictly factual and opinion-agnostic; NO loaded adjectives, NO
-  evaluative framing, NO motive attribution, NO predictions.
+- Strictly factual and opinion-agnostic; NO evaluative framing, NO motive
+  attribution, NO predictions. Banned terms, enforced verbatim by the
+  render-time gate: {banned}.
 - Name the one or two most concrete specifics, then characterize the rest
   plainly (for example: "5 final rules, led by X; the rest are routine
   safety zones and aviation updates").
@@ -173,7 +181,7 @@ Output format: STRICT JSON, one object mapping each section key to its
 one-sentence synopsis. No markdown fences, no other keys.
 
 {sections}
-"""
+""".replace("{banned}", _BANNED_CLAUSE)
 
 
 def _section_items(conn, date):

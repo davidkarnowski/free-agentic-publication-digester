@@ -767,6 +767,54 @@ def test_banned_word_in_agency_title_is_masked(conn, tmp_path):
     assert "Historic Landmark Exercise Concludes" in path.read_text()
 
 
+def test_banned_word_in_govinfo_title_is_exempt(conn, tmp_path):
+    """Review D21: the old mask covered only three collections' titles —
+    an FR title or court case caption containing a banned word blocked
+    the entire digest. Official titles from EVERY collection are quoted,
+    not endorsed, and never gated (GUIDE §2 scope, 2026-08-02)."""
+    conn.execute(
+        "UPDATE extracted_texts SET title ="
+        " 'Landmark Legal Foundation v. EPA; Historic Preservation Notice'"
+        " WHERE package_id = ? AND granule_id = '2026-11111'", (FR_PKG,))
+    conn.commit()
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "Landmark Legal Foundation v. EPA" in md  # rendered, not hidden
+
+
+def test_official_name_in_model_prose_is_exempt(conn, tmp_path):
+    """GUIDE §2 official-name exemption (operator, 2026-08-02): model
+    prose may name a statute or case whose official name contains a
+    banned word — verbatim only. Naming the record is stating a fact."""
+    conn.execute(
+        "UPDATE extracted_texts SET title ="
+        " 'National Historic Preservation Act Compliance Rule'"
+        " WHERE package_id = ? AND granule_id = '2026-22222'", (FR_PKG,))
+    conn.execute(
+        "UPDATE summaries SET summary = 'The rule implements the National"
+        " Historic Preservation Act Compliance Rule review steps.'"
+        " WHERE package_id = ? AND granule_id = '2026-22222'", (FR_PKG,))
+    conn.commit()
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "National Historic Preservation Act Compliance Rule review" in md
+
+
+def test_free_banned_word_beside_official_name_still_fails(conn):
+    """The exemption is positional: quoting the official name does not
+    license the word elsewhere in the same sentence — the failure mode
+    the old global str.replace masking was blind to (review D8)."""
+    conn.execute(
+        "UPDATE extracted_texts SET title ="
+        " 'National Historic Preservation Act Compliance Rule'"
+        " WHERE package_id = ? AND granule_id = '2026-22222'", (FR_PKG,))
+    conn.execute(
+        "UPDATE summaries SET summary = 'A historic change under the National"
+        " Historic Preservation Act Compliance Rule.'"
+        " WHERE package_id = ? AND granule_id = '2026-22222'", (FR_PKG,))
+    conn.commit()
+    with pytest.raises(report.ValidationError, match="historic"):
+        report.render(conn, DATE)
+
+
 def test_banned_word_in_link_url_is_not_prose(conn, tmp_path):
     # Link slugs echo source headlines (found live 2026-07-28:
     # war.gov/.../historic-multinational-.../) — URLs are citations, never

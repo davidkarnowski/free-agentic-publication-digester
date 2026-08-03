@@ -81,29 +81,18 @@ _PDF_URL = "https://www.govinfo.gov/content/pkg/{pid}/pdf/{pid}.pdf"
 
 # Banned lexicon (GUIDE §2): loaded adjectives and motive attribution never
 # appear in generated prose. Word-boundary, case-insensitive; multi-word
-# phrases tolerate any whitespace between words.
-_BANNED_TERMS = (
-    "landmark",
-    "controversial",
-    "historic",
-    "unprecedented",
-    "sweeping",
-    "radical",
-    "extreme",
-    "momentous",
-    "alarming",
-    "in an attempt to",
-    "aims to appease",
-    # Plain-register evaluative framing (the plain-speak layer's failure
-    # modes) — GUIDE §2 plain-language rules.
-    "red tape",
-    "crackdown",
-    "cracks down",
-    "slams",
-    "loophole",
-)
+# Compiled from THE canonical list (config.BANNED_TERMS, review D8) so the
+# validator and every prompt enforce the identical lexicon. Phrases are
+# joined word-by-word: re.escape escapes SPACES too (they are special
+# under re.VERBOSE), so the old `.replace(" ", r"\s+")` ran on the
+# escaped string and produced a literal backslash — every multi-word
+# phrase ("red tape", "in an attempt to") was silently unmatchable from
+# the gate's creation until 2026-08-02, found by the D8 drift test.
 _BANNED_RE = re.compile(
-    r"\b(?:" + "|".join(re.escape(t).replace(" ", r"\s+") for t in _BANNED_TERMS) + r")\b",
+    r"\b(?:"
+    + "|".join(r"\s+".join(re.escape(w) for w in t.split())
+               for t in config.BANNED_TERMS)
+    + r")\b",
     re.IGNORECASE,
 )
 
@@ -1527,6 +1516,22 @@ def _validate_coverage(markdown, conn, date):
 
 
 def _validate_lexicon(markdown, conn, date):
+    """GUIDE §2: the banned lexicon binds OUR prose only — official source
+    text renders verbatim and is never gated (scope amendment 2026-08-02).
+
+    The exemption is POSITIONAL (reviews D21/D8): a banned term passes
+    only where it sits inside an exact occurrence of an official string —
+    a title from any collection ("Landmark Legal Foundation v. EPA", the
+    "National Historic Preservation Act"), an official summary, a quoted
+    action sentence. This closes both failure directions at once: an
+    official case caption can no longer block the digest (D21 — five
+    collections' titles were unmasked), and a short official title can no
+    longer blind the gate to a violation in surrounding prose the way the
+    old global str.replace masking did (D8). It also implements the §2
+    official-name exemption: model prose may name a statute or case whose
+    official name contains a banned word, verbatim; the same word outside
+    such a span still fails. Known honest boundary: a title that falls
+    back to the text head's first line is not collected here."""
     officials = [
         row[0]
         for row in conn.execute(
@@ -1535,19 +1540,32 @@ def _validate_lexicon(markdown, conn, date):
             (config.PROMPT_VERSION, date),
         )
     ]
-    # Agency release titles are attributed official speech, quoted verbatim
-    # in section 6, measure titles are the chambers' own text quoted in
-    # section 7, and bill titles in section 8 are the measure's own — many
-    # of them ("Historic Preservation…") carry words this gate bans in OUR
-    # prose (GUIDE §2: "Titles quoted verbatim are quoted, not endorsed").
-    # The gate polices our prose, not the government's.
+    # Titles are the publisher's own text in EVERY section — bill and law
+    # titles, FR document titles, case captions, agency release and
+    # measure titles, CREC granule headings. All eight collections, both
+    # title tables (GUIDE §2: "Titles quoted verbatim are quoted, not
+    # endorsed"). The gate polices our prose, not the government's.
     officials += [
         row[0]
         for row in conn.execute(
             "SELECT DISTINCT et.title FROM extracted_texts et"
             " JOIN packages p USING (package_id)"
-            " WHERE et.collection IN ('AGENCYPR', 'VOTES', 'BILLACTIONS')"
-            " AND p.date_issued = ?",
+            " WHERE p.date_issued = ?",
+            (date,),
+        )
+    ]
+    officials += [
+        row[0]
+        for row in conn.execute(
+            "SELECT DISTINCT g.title FROM granules g"
+            " JOIN packages p USING (package_id) WHERE p.date_issued = ?",
+            (date,),
+        )
+    ]
+    officials += [
+        row[0]
+        for row in conn.execute(
+            "SELECT DISTINCT title FROM packages WHERE date_issued = ?",
             (date,),
         )
     ]
@@ -1566,15 +1584,34 @@ def _validate_lexicon(markdown, conn, date):
     # (".../historic-multinational-medical-team...") and must not trip the
     # gate. Strip markdown link destinations before scanning.
     scan = re.sub(r"\]\(([^)\s]+)\)", "]( )", markdown)
+    exempt = _official_spans(scan, officials)
+    for match in _BANNED_RE.finditer(scan):
+        if not any(a <= match.start() and match.end() <= b for a, b in exempt):
+            raise ValidationError(
+                f"banned term {match.group(0)!r} in generated prose")
+
+
+def _official_spans(scan, officials):
+    """Character ranges of `scan` covered by an exact occurrence of an
+    official string, in any form it renders: raw, whitespace-normalized
+    (_one_line), or display-cased (_display_title re-cases ALL-CAPS
+    source titles). Only strings that themselves contain a banned term
+    can exempt anything, so the search stays cheap — a typical day has a
+    handful of such titles among thousands of official strings."""
+    spans = []
+    seen = set()
     for text in officials:
         if not text:
             continue
-        # Official summaries are quoted verbatim source text, not our prose:
-        # mask both the raw and the whitespace-normalized rendering.
-        scan = scan.replace(text, " ").replace(_one_line(text), " ")
-    match = _BANNED_RE.search(scan)
-    if match:
-        raise ValidationError(f"banned term {match.group(0)!r} in generated prose")
+        for form in {text, _one_line(text), _display_title(text)}:
+            if not form or form in seen or not _BANNED_RE.search(form):
+                continue
+            seen.add(form)
+            start = scan.find(form)
+            while start != -1:
+                spans.append((start, start + len(form)))
+                start = scan.find(form, start + 1)
+    return spans
 
 
 def _validate_inclusion_lines(markdown):
@@ -1599,9 +1636,10 @@ def validate(markdown, conn, date):
 
     Checks: (a) every govinfo details citation resolves to stored records;
     (b) the Coverage Statement reconciles and matches the database;
-    (c) generated prose contains no banned-lexicon terms (verbatim official
-    summaries are masked before scanning); (d) every rendered item states
-    its inclusion rule.
+    (c) generated prose contains no banned-lexicon terms (official text —
+    titles, official summaries — is exempted positionally: quoted, not
+    endorsed, and never gated); (d) every rendered item states its
+    inclusion rule.
     """
     _validate_citations(markdown, conn)
     _validate_coverage(markdown, conn, date)

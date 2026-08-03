@@ -1200,6 +1200,8 @@ def test_build_today_citation_metadata_and_item_tags(conn, tmp_path):
 def test_build_today_renders_section_tag_chips_when_stored(conn, tmp_path):
     from conftest import DATE
 
+    from fapd import config
+
     _seed_today(conn)
     conn.execute(
         "INSERT INTO section_tags (date, section_key, tag, method, created_at)"
@@ -1207,7 +1209,8 @@ def test_build_today_renders_section_tag_chips_when_stored(conn, tmp_path):
     conn.execute(
         "INSERT INTO section_tags (date, section_key, tag, method,"
         " prompt_version, created_at)"
-        " VALUES (?, 'senate', 'stock trading ban', 'llm', 1, 'x')", (DATE,))
+        " VALUES (?, 'senate', 'stock trading ban', 'llm', ?, 'x')",
+        (DATE, config.TAG_PROMPT_VERSION))
     conn.commit()
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
