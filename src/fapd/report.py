@@ -30,7 +30,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from . import config
+from . import config, fedcal
 from .sync import publication_date
 
 __all__ = ["RULE_DESCRIPTIONS", "ValidationError", "render", "validate"]
@@ -369,12 +369,26 @@ def _coverage(conn, date):
 # ---------------------------------------------------------------------------
 
 
+def _journal_first_day(conn):
+    """The earliest publication day the item journal covers, or None when
+    it has never recorded an ingestion. The single source for "does a
+    frozen day view exist for this date" — the digest's header link and
+    `publish.build_day`'s absent state both read it, so the two can never
+    disagree about which days have an observed listing (GUIDE §5,
+    amended 2026-08-03: days before the journal existed have no day
+    view; the gap is disclosed, not backfilled)."""
+    row = conn.execute(
+        "SELECT MIN(digest_date) FROM item_journal WHERE event = 'ingested'"
+    ).fetchone()
+    return row[0] if row else None
+
+
 def _header_lines(conn, date, git_short):
     marks = dict(
         conn.execute("SELECT collection, last_modified_watermark FROM sync_state")
     )
     watermark = " · ".join(f"{c}: {marks.get(c, '—')}" for c in config.COLLECTIONS)
-    return [
+    lines = [
         f"# Daily Digest — {date}",
         "",
         "| | |",
@@ -385,6 +399,31 @@ def _header_lines(conn, date, git_short):
         f"| **Pipeline version** | {git_short} |",
         f"| **Source watermarks** | {watermark} |",
         "",
+    ]
+    # Mechanical calendar context (GUIDE §5, amended 2026-08-03): a
+    # weekend or federal-holiday digest states so in its header — the
+    # SAME fedcal sentence the live page shows, through the same shared
+    # function, so the two surfaces can never explain a quiet day
+    # differently. Absent (not faked) on ordinary business days.
+    day_context = fedcal.reduced_publishing(date)
+    if day_context:
+        label = ("Weekend note" if day_context["kind"] == "weekend"
+                 else "Federal holiday note")
+        lines += [f"**{label}:** {day_context['note']}", ""]
+    # The frozen day view (GUIDE §5, amended 2026-08-03): the digest
+    # links its day's complete observed listing when one exists — only
+    # days the item journal covers have one, so the link is emitted
+    # exactly for those.
+    first = _journal_first_day(conn)
+    if first and date >= first:
+        lines += [
+            (f"[Full observed listing for this day](day/{date}.html) — "
+             "every item our collectors observed for this publication "
+             "day, mechanical rules applied, frozen at end of day. This "
+             "digest is the canonical record."),
+            "",
+        ]
+    lines += [
         "All items below cite the govinfo package (and granule, where applicable) they",
         "summarize. Selection is mechanical; each item states the rule that included",
         "it. See the Coverage Statement at the end for a full accounting of what was",
@@ -393,6 +432,7 @@ def _header_lines(conn, date, git_short):
         "---",
         "",
     ]
+    return lines
 
 
 def _plain_line(item):

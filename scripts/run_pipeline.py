@@ -25,11 +25,13 @@ from digest import default_date  # scripts/ sibling; newest COMPLETE day
 from fapd import (
     agencies,
     analyze,
+    assess,
     compose,
     config,
     db,
     email_sources,
     extract,
+    health,
     insight,
     llm,
     logging_setup,
@@ -37,7 +39,7 @@ from fapd import (
     tags,
 )
 from fapd.client import BudgetExceededError, GovinfoClient
-from fapd.publish import build_site
+from fapd.publish import build_day, build_site
 from fapd.sources import load_registry
 from fapd.sync import sync_collection
 
@@ -180,6 +182,57 @@ def stage_site():
     return site
 
 
+def stage_day_view(conn, date):
+    """Frozen day view (GUIDE §5 third artifact): the /today machinery
+    rendered once more for the closed day, committed with the evidence.
+    Failure never costs the finished digest — a missing day view is a
+    visible gap at its URL, not a lost record."""
+    try:
+        day = build_day(conn, date)
+        print(f"   day view: {day.get('items', 0)} item(s) -> "
+              f"site/day/{date}.html + .json", flush=True)
+    except Exception as exc:  # noqa: BLE001 — see docstring
+        print(f"   day view failed: {exc!r} — continuing", flush=True)
+
+
+def stage_source_text(conn, *, llm_client=None):
+    """Source-page model text (GUIDE §3a source surfaces): descriptions
+    for every registry entry (regenerated only when an entry changes),
+    assessments for measured sources (initial / 30-day / health-change
+    triggers). Runs BEFORE the site stage so this run's pages carry the
+    fresh text. Failure never fails the run — a missing block is a
+    visible gap on a source page, not a lost digest — and the throttle's
+    budget-pause lands here too: the next EOD simply tries again."""
+    try:
+        entries = load_registry(config.PROJECT_ROOT / "sources" / "registry.yaml")
+        payload = health.source_health(entries)
+        stats = payload.get("sources") or {}
+        labels = {sid: rec.get("health") for sid, rec in stats.items()}
+        # The health-change trigger compares this run's labels against
+        # the labels the layer saw at its LAST run — but the collector
+        # refreshes source_health_state every 15 minutes, so "previous"
+        # cannot be read from it at EOD. What IS durable: a transition
+        # stamped after the newest stored assessment (state.since >
+        # generated_at) is one the layer has not seen. Pass a sentinel
+        # prev no real label equals, so the trigger fires exactly for
+        # those; labels drive triggers only and never reach prose.
+        prev = dict(labels)
+        for sid, st in health.health_state(conn).items():
+            newest = assess.latest_assessment(conn, sid)
+            if newest and st.get("since") and st["since"] > newest["generated_at"]:
+                prev[sid] = "(changed-since-last-assessment)"
+        measured = [e for e in entries if stats.get(e["id"], {}).get("measured")]
+        d = assess.refresh_descriptions(conn, llm_client, entries)
+        a = assess.refresh_assessments(conn, llm_client, measured, stats,
+                                       labels, prev)
+        print(f"   descriptions: +{d['generated']} (skip {d['skipped']},"
+              f" reject {d['rejected']}, fail {d['failed']}) · assessments:"
+              f" +{a['generated']} (skip {a['skipped']}, reject"
+              f" {a['rejected']}, fail {a['failed']})", flush=True)
+    except Exception as exc:  # noqa: BLE001 — see docstring
+        print(f"   source text failed: {exc!r} — continuing", flush=True)
+
+
 def stage_insight(conn, date, *, llm_client=None):
     """Post-EOD developer-insight report (GUIDE §3a dev-facing surface).
     An insight failure never fails the run: the digest is already
@@ -270,6 +323,17 @@ def main(argv=None) -> int:
     t0 = stage(f"STAGE 4/5 — RENDER + VALIDATE digest for {date}")
     out_path, validation = stage_render(conn, date)
     timings["render"] = time.monotonic() - t0
+    done(t0)
+
+    t0 = stage(f"STAGE 4b — FROZEN DAY VIEW for {date}")
+    stage_day_view(conn, date)
+    timings["day_view"] = time.monotonic() - t0
+    done(t0)
+
+    t0 = stage("STAGE 4c — SOURCE-PAGE TEXT (descriptions + assessments)")
+    with llm.LLMClient() as lclient:
+        stage_source_text(conn, llm_client=lclient)
+    timings["source_text"] = time.monotonic() - t0
     done(t0)
 
     t0 = stage("STAGE 5/5 — SITE (canonical markdown -> styled HTML)")

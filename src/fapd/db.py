@@ -229,6 +229,42 @@ CREATE TABLE IF NOT EXISTS item_journal (
 CREATE INDEX IF NOT EXISTS idx_item_journal_day
     ON item_journal (digest_date, observed_at);
 
+-- Per-source model prose (GUIDE §3a source surfaces, 2026-08-03).
+-- Assessment text is lexicon-scanned BEFORE insert; a failing scan
+-- stores nothing (schema.md). Append-only; pages render the newest row.
+CREATE TABLE IF NOT EXISTS source_assessments (
+    source_id      TEXT NOT NULL,
+    prompt_version INTEGER NOT NULL,
+    generated_at   TEXT NOT NULL,
+    model          TEXT NOT NULL,
+    trigger_reason TEXT NOT NULL,   -- 'initial' | 'age-30d' | 'health-change'
+    assessment     TEXT NOT NULL,
+    PRIMARY KEY (source_id, prompt_version, generated_at)
+);
+
+-- What the source IS (summary + 250-500 word orientation). registry_hash
+-- is the sha256 of the registry entry: an edited entry regenerates, an
+-- untouched one never does — no timer (GUIDE §3a).
+CREATE TABLE IF NOT EXISTS source_descriptions (
+    source_id      TEXT NOT NULL,
+    prompt_version INTEGER NOT NULL,
+    registry_hash  TEXT NOT NULL,
+    generated_at   TEXT NOT NULL,
+    model          TEXT NOT NULL,
+    summary        TEXT NOT NULL,
+    description    TEXT NOT NULL,
+    PRIMARY KEY (source_id, prompt_version, registry_hash)
+);
+
+-- Persisted health label per source, so a label TRANSITION is
+-- detectable (the assessment layer's health-change trigger).
+CREATE TABLE IF NOT EXISTS source_health_state (
+    source_id    TEXT PRIMARY KEY,
+    label        TEXT NOT NULL,
+    since        TEXT NOT NULL,
+    last_checked TEXT NOT NULL
+);
+
 -- Collector liveness, read by OPS-GUIDE / the fapd-health skill.
 -- finalized_date is the EOD marker in its OWN column (review D5): every
 -- last_result writer replaces that blob wholesale — the no-op path erased

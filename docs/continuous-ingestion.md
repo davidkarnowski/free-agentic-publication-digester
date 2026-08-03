@@ -146,6 +146,12 @@ anyway: the supervisor pauses collector workers during finalization
   rebuilds when the journal watermark moved (or today.html is missing)
   and separately refreshes source health on a 15-minute clock —
   clock-driven on purpose, because a failing source journals nothing.
+  Each refresh also upserts every measured source's label into
+  `source_health_state` (`health.record_health_state`): `last_checked`
+  always moves, `label`+`since` only on a label change, so a
+  transition is a durable, detectable fact (its own table, not
+  `last_result` — the D5 rule) that downstream layers read via
+  `health.health_state`.
   Never committed; excluded from the Atom feed; `llms.txt`/`robots.txt`
   carry a `/today` pointer labeled preliminary. Section tags render as
   day-so-far chips.

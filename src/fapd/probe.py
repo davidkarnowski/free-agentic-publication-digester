@@ -8,6 +8,11 @@ inventory → one sample article fetched, captured, and text-extracted, so
 "retrieving and ingesting properly" is demonstrated end to end. Findings
 are structured JSON per source; nothing is ever guessed: a blocked or
 broken source records exactly what was observed.
+
+Fetches go through whatever client the caller supplies;
+scripts/check_sources.py supplies `client.ProbeClient`, so probe traffic
+logs client='probe' in the fetch log (identifiable to statistics) while
+still spending the agency-class request budget.
 """
 
 import json

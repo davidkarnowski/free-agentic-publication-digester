@@ -568,17 +568,49 @@ through these gates, each recorded in the registry entry:
 
 All LLM prompts are code, versioned, and change through procedure:
 
-- **Inventory** (amended 2026-07-30). Five prompt surfaces exist: the
-  map/summarization preamble (`analyze._PREAMBLE`, versioned by
-  `PROMPT_VERSION`), the plain-speak restatement preamble
-  (`analyze._PLAIN_PREAMBLE`, `PLAIN_PROMPT_VERSION`), the
-  Day-in-Review compose prompt (`compose._PROMPT`,
-  `COMPOSE_PROMPT_VERSION`), the section discovery-key prompt
-  (`tags._TAG_PROMPT`, `TAG_PROMPT_VERSION`, added with §6 rule 12a),
-  and the developer-insight suggestions prompt (`insight._PROMPT`,
-  `INSIGHT_PROMPT_VERSION`). Each layer versions independently — a
+- **Inventory** (amended 2026-07-30; source surfaces added 2026-08-03).
+  Seven prompt surfaces exist: the map/summarization preamble
+  (`analyze._PREAMBLE`, versioned by `PROMPT_VERSION`), the plain-speak
+  restatement preamble (`analyze._PLAIN_PREAMBLE`,
+  `PLAIN_PROMPT_VERSION`), the Day-in-Review compose prompt
+  (`compose._PROMPT`, `COMPOSE_PROMPT_VERSION`), the section quick-read
+  prompt (`compose._SECTION_PROMPT`, `SECTION_PROMPT_VERSION`), the
+  section discovery-key prompt (`tags._TAG_PROMPT`,
+  `TAG_PROMPT_VERSION`, added with §6 rule 12a), the developer-insight
+  suggestions prompt (`insight._PROMPT`, `INSIGHT_PROMPT_VERSION`), and
+  the source-page surfaces below (`SOURCE_ASSESS_PROMPT_VERSION`,
+  `SOURCE_DESC_PROMPT_VERSION`). Each layer versions independently — a
   deliberate design so iterating on one never regenerates the artifacts
   of another.
+- **Source-page model surfaces (added 2026-08-03, operator-approved
+  plan).** Two reader-facing prose layers on the per-source pages, both
+  cheap-tier, batched, ledgered, restating the §2 banned list from
+  `config.BANNED_TERMS` AND scanned by the same gate regex **before
+  storage** — a failed scan stores nothing and the page renders without
+  that block; the gates are never loosened for them. Both render
+  labeled model-derived with date, model, version, and trigger.
+  - **Source assessment** (`SOURCE_ASSESS_PROMPT_VERSION`): a prose
+    restatement of OUR measured ingestion relationship — formats seen,
+    cadence, delivery quirks, incident history from registry notes,
+    what changed since the last assessment. Input is the measured
+    stats, the registry entry, and the source's own previous stored
+    assessment ONLY — the prior text is our own derived artifact and is
+    what "what changed" is measured against; outside knowledge stays
+    excluded. It obeys the health-page law:
+    it reports our observation of our own ingestion, never an opinion
+    about the publisher — no quality judgments of an agency, ever.
+    Regenerated when none exists, at 30 days of age, or when the
+    source's health label changes.
+  - **Source description** (`SOURCE_DESC_PROMPT_VERSION`): what the
+    source IS — a short summary (1–2 sentences) and a 250–500 word
+    orientation for readers. This is the ONE surface licensed to draw
+    on the model's general knowledge of public institutions (a registry
+    entry cannot say what the FDA is), and it carries that license's
+    price: it is labeled a model-written orientation, never presented
+    as official-record content, and it must remain factual and
+    opinion-agnostic about the institution it describes. Regenerated
+    only when the registry entry changes or the version bumps — never
+    on a timer.
 - **The insight surface is developer-facing, never editorial.** Its
   output appears only in the daily operations report under
   `provenance/runs/` — never in a digest, the site's reader pages, or
@@ -788,6 +820,23 @@ without touching upstream:
   compose, rank, or apply any judgment that is not a named deterministic
   rule. The machine surface (today.json) always carries the same
   computed values as the human page, labeled.
+
+  **Amended 2026-08-03 — the frozen day view, and the digest's calendar
+  line (operator-approved plan).** A third artifact joins the model:
+  the **frozen day view** `/day/YYYY-MM-DD.html` + `.json` — the same
+  full-entry listing the live page shows, rendered by the *same*
+  `build_today` machinery (never a reimplementation) at end of day from
+  the frozen database state, committed with the evidence, and linked
+  from that day's digest. It is a standardized programmatic URL for
+  humans and agents; its disclosure block states what it is: the
+  complete observed listing for the day, mechanical rules applied — the
+  dated digest remains the canonical record. Days before the item
+  journal existed have no day view; the gap is disclosed, not
+  backfilled. And the canonical digest MAY carry the same mechanical
+  calendar context the live page carries (`fedcal.py`, the same shared
+  function): a weekend or federal-holiday digest states so in its
+  header — a quiet Sunday is the publishers resting, and saying so in
+  the record is disclosure, not editorializing.
 - **Storage:** filesystem for raw documents (`data/raw/<collection>/<date>/`),
   SQLite for metadata and extracted records. No cloud dependency to start.
 - **Language:** Python (mature XML tooling, easy scheduling). Decide at first

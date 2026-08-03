@@ -16,7 +16,7 @@ import random
 import threading
 import uuid
 
-from . import config
+from . import config, health
 from .client import BudgetExceededError
 from .sync import publication_date, utc_now_iso
 
@@ -445,7 +445,7 @@ class RenderWorker(Worker):
 
     name = "render"
 
-    def _refresh_health(self, prev, now):
+    def _refresh_health(self, conn, prev, now):
         """Source health on a clock, not on the journal watermark — a
         failing source produces no journal movement, so the watermark
         would never trigger for the case the page exists to show."""
@@ -455,12 +455,37 @@ class RenderWorker(Worker):
                    - dt.datetime.fromisoformat(last)).total_seconds() / 60
             if age < config.SOURCE_HEALTH_REFRESH_MIN:
                 return None
+        result = None
         try:
-            return self.sup.sources_builder()
+            result = self.sup.sources_builder()
         except Exception as exc:  # noqa: BLE001 — health reporting must
             # never cost the live page; the gap shows as a stale stamp.
             logger.warning("source health refresh failed: %r", exc)
-            return None
+        self._persist_health_state(conn, now,
+                                   payload=(result or {}).get("health"))
+        return result
+
+    def _persist_health_state(self, conn, now, payload=None):
+        """Labels into source_health_state on the refresh clock. A label
+        TRANSITION is durable state a downstream assessment layer
+        regenerates on ('health-change'), so it gets its own table — not
+        the page artifact, not last_result (the D5 lesson). The page
+        builder now hands its computed health payload back across the
+        seam (refresh_sources returns it under "health"), so the normal
+        path persists what was rendered — one computation, no drift; the
+        recompute remains as the fallback for seam-injected builders
+        that return only a status dict. Persistence must never cost the
+        live page."""
+        try:
+            if not payload or "sources" not in payload:
+                entries = self.sup.registry()
+                if not entries:
+                    return
+                payload = health.source_health(entries)
+            if payload.get("available"):
+                health.record_health_state(conn, payload["sources"], now=now)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("health state persist failed: %r", exc)
 
     def cycle(self, conn, cycle_id):
         date = publication_date()
@@ -472,16 +497,16 @@ class RenderWorker(Worker):
         ).fetchone()
         prev = json.loads(row["last_result"]) if row and row["last_result"] else {}
         now = utc_now_iso()
-        health = self._refresh_health(prev, now)
-        health_at = now if health else prev.get("health_at")
+        refreshed = self._refresh_health(conn, prev, now)
+        health_at = now if refreshed else prev.get("health_at")
         if (prev.get("date") == date and prev.get("through") == newest
                 and (config.SITE_DIR / "today.html").exists()):
             return {"date": date, "rebuilt": False, "through": newest,
-                    "health_refreshed": bool(health), "health_at": health_at}
+                    "health_refreshed": bool(refreshed), "health_at": health_at}
         stats = self.sup.today_builder(conn, date=date)
         return {"date": date, "rebuilt": True, "through": newest,
                 "items": stats["items"], "pending_llm": stats["pending_llm"],
-                "health_refreshed": bool(health), "health_at": health_at}
+                "health_refreshed": bool(refreshed), "health_at": health_at}
 
 
 class EODWorker(Worker):

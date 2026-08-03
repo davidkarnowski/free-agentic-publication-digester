@@ -948,3 +948,46 @@ def test_agency_claimed_date_renders_as_a_real_date(conn, tmp_path):
     md = report.render(conn, DATE, out_dir=tmp_path).read_text()
     assert "dated 2026-07-23 by the agency" in md
     assert "Jul 26 1" not in md
+
+
+# ---------------------------------------------- calendar note + day link --
+
+
+def test_weekend_digest_carries_the_fedcal_note(conn):
+    """GUIDE §5 (amended 2026-08-03): a weekend digest states the federal
+    calendar context in its header — the SAME fedcal sentence /today
+    shows, through the same shared function."""
+    md = report.render(conn, "2026-07-26").read_text()   # a Sunday
+    assert "**Weekend note:**" in md
+    assert "Sunday is not a federal business day." in md
+
+
+def test_weekday_digest_carries_no_calendar_note(digest):
+    _path, md = digest                                    # DATE is a Thursday
+    assert "**Weekend note:**" not in md
+    assert "**Federal holiday note:**" not in md
+
+
+def test_holiday_digest_carries_the_fedcal_note(conn):
+    md = report.render(conn, "2026-07-03").read_text()   # July 4 observed (Fri)
+    assert "**Federal holiday note:**" in md
+    assert "Independence Day (observed)" in md
+
+
+def test_digest_links_day_view_only_when_journal_covers(conn):
+    """The header's 'Full observed listing' link is emitted exactly for
+    days the item journal covers — never for days before it existed."""
+    md = report.render(conn, DATE).read_text()
+    assert "Full observed listing" not in md             # no journal rows yet
+    conn.execute(
+        "INSERT INTO item_journal (observed_at, source_class, package_id,"
+        " granule_id, collection, digest_date, event) VALUES"
+        " (?, 'govinfo', ?, ?, 'CREC', ?, 'ingested')",
+        (f"{DATE}T10:00:00Z", CREC_PKG, SENATE_GID, DATE))
+    conn.commit()
+    md = report.render(conn, DATE).read_text()
+    assert (f"[Full observed listing for this day](day/{DATE}.html)" in md)
+    assert "This digest is the canonical record." in md
+    # a date before journal coverage still gets no link
+    md_before = report.render(conn, "2026-07-22").read_text()
+    assert "Full observed listing" not in md_before

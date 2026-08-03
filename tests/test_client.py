@@ -370,6 +370,46 @@ def test_robots_cache_survives_a_new_client(tmp_path, monkeypatch):
     second.close()
 
 
+def test_probe_requests_log_probe_and_spend_the_agency_budget(tmp_path,
+                                                              monkeypatch):
+    """Source-pages T1 (2026-08-03): probe traffic must be identifiable
+    in the fetch log — client='probe', robots.txt fetches included — so
+    source statistics can exclude it, while still spending the
+    agency-class budget. The label changed; the accounting did not."""
+    from fapd.client import ProbeClient
+
+    monkeypatch.setattr(config, "EOD_BUDGET_RESERVE_FRACTION", 0.0)
+    monkeypatch.setattr(config, "MAX_AGENCY_REQUESTS_PER_DAY", 3)
+    probe = ProbeClient(
+        db_path=tmp_path / "fetch_log.db",
+        session=FakeSession([robots_resp("User-agent: *\nAllow: /"),
+                             FakeResponse()]),
+        sleep=lambda s: None)
+    probe.get("https://example.gov/feed.xml")
+    rows = probe._db.execute(
+        "SELECT url, client FROM fetch_log ORDER BY id").fetchall()
+    assert [c for _, c in rows] == ["probe", "probe"]
+    assert any("robots.txt" in u for u, _ in rows), \
+        "the robots fetch made on the probe's behalf must carry the label too"
+    assert probe.requests_today() == 2  # its own spend, seen as agency-class
+
+    # A real collection client over the same log still labels 'agency'
+    # AND counts the probe rows against the shared class budget: 2 probe
+    # + 1 robots = 3/3, so its page fetch must refuse.
+    agency = AgencyClient(
+        db_path=tmp_path / "fetch_log.db",
+        session=FakeSession([robots_resp("User-agent: *\nAllow: /"),
+                             FakeResponse()]),
+        sleep=lambda s: None)
+    with pytest.raises(BudgetExceededError):
+        agency.get("https://another.gov/news")
+    labels = {c for (c,) in agency._db.execute(
+        "SELECT client FROM fetch_log WHERE url LIKE '%another.gov%'")}
+    assert labels == {"agency"}
+    agency.close()
+    probe.close()
+
+
 def test_a_temporary_disallow_is_not_persisted(tmp_path, monkeypatch):
     """A 5xx is a statement about this moment, not about the host —
     caching it for 24 hours would outlive the outage and lock us out."""

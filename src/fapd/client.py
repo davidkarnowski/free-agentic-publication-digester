@@ -14,6 +14,10 @@ robots files are fetched through the client itself (paced, budgeted,
 logged), parsed with protego (RFC 9309), 4xx treated as allow and 5xx as
 temporary disallow; crawl-delay is honored when longer than our own
 pacing. No WAF evasion of any kind.
+
+`ProbeClient` is AgencyClient under the 'probe' fetch-log label, so
+source statistics can tell probe traffic from real collection; its spend
+is still agency-class spend (same budget, counted across both labels).
 """
 
 import datetime as dt
@@ -114,6 +118,16 @@ class HttpClient:
             return budget
         return int(budget * (1.0 - config.EOD_BUDGET_RESERVE_FRACTION))
 
+    def _budget_client_names(self):
+        """The fetch_log `client` labels whose rows spend THIS client's
+        budget. One label per client by default. AgencyClient widens it
+        to include 'probe': the probe path logs under its own label so
+        statistics can exclude it, but its spend is agency-class spend —
+        the label identifies traffic, it never re-buckets the accounting
+        (GUIDE §4: budgets are counted from the log by the client
+        itself, and nothing forks that count)."""
+        return (self.CLIENT_NAME,)
+
     def _redacted_params(self, params):
         """What the fetch log is allowed to record of a request's query.
 
@@ -194,12 +208,7 @@ class HttpClient:
         raise RuntimeError("unreachable: retry loop exited without return or raise")
 
     def requests_today(self):
-        (n,) = self._db.execute(
-            "SELECT COUNT(*) FROM fetch_log WHERE ts_utc >= ?"
-            " AND (client = ? OR (? = 'govinfo' AND client IS NULL))",
-            (self._utc_day_start(), self.CLIENT_NAME, self.CLIENT_NAME),
-        ).fetchone()
-        return n
+        return self._requests_since(self._utc_day_start())
 
     def close(self):
         self._db.close()
@@ -220,10 +229,18 @@ class HttpClient:
     def requests_last_hour(self):
         since = (dt.datetime.now(dt.UTC)
                  - dt.timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
+        return self._requests_since(since)
+
+    def _requests_since(self, since):
+        names = self._budget_client_names()
+        placeholders = ", ".join("?" for _ in names)
+        # Rows from before the client column existed belong to govinfo
+        # (see _migrate); only its budget counts them.
+        legacy = " OR client IS NULL" if "govinfo" in names else ""
         (n,) = self._db.execute(
-            "SELECT COUNT(*) FROM fetch_log WHERE ts_utc >= ?"
-            " AND (client = ? OR (? = 'govinfo' AND client IS NULL))",
-            (since, self.CLIENT_NAME, self.CLIENT_NAME),
+            f"SELECT COUNT(*) FROM fetch_log WHERE ts_utc >= ?"
+            f" AND (client IN ({placeholders}){legacy})",
+            (since, *names),
         ).fetchone()
         return n
 
@@ -365,6 +382,12 @@ class AgencyClient(HttpClient):
     def _daily_budget(self):
         return config.MAX_AGENCY_REQUESTS_PER_DAY
 
+    def _budget_client_names(self):
+        # ProbeClient's rows are agency-class spend under a different
+        # label (source-pages T1, 2026-08-03): both labels count against
+        # this one budget, from either client's point of view.
+        return (AgencyClient.CLIENT_NAME, ProbeClient.CLIENT_NAME)
+
     def _robots_from_db(self, host):
         """The cached parser, None for a known-absent robots.txt, or
         _MISS when we have nothing fresh enough to use."""
@@ -454,3 +477,17 @@ class AgencyClient(HttpClient):
         if resp.status_code == 304 or not resp.text:
             return None, None
         return Protego.parse(resp.text), resp.text
+
+
+class ProbeClient(AgencyClient):
+    """AgencyClient wearing the 'probe' fetch-log label (source-pages
+    plan T1, 2026-08-03). scripts/check_sources.py constructs this so
+    probe traffic — every request, robots.txt fetches included, since
+    they log through the same instance — is identifiable in fetch_log
+    and source statistics can exclude it. Nothing else differs: same
+    robots enforcement, same pacing, and the same agency-class budget,
+    because AgencyClient._budget_client_names() counts both labels — a
+    probe request spends the agency budget exactly as it did when it
+    logged 'agency'."""
+
+    CLIENT_NAME = "probe"

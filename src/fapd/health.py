@@ -15,7 +15,10 @@ do not guess.
 
 Everything is mechanical: SQL over the two databases the pipeline
 already keeps, read-only, zero LLM calls (docs/code-standards.md §2
-rule 5). Missing databases are not an error — a fresh clone or a CI run
+rule 5). Requests logged by the availability probe (``client =
+'probe'``) are excluded from every figure here — a probe measures
+reachability on its own cadence, not ingestion. Missing databases are
+not an error — a fresh clone or a CI run
 has no `data/`, and the site must still build. In that case
 ``source_health`` returns a record whose ``available`` is False and
 whose ``unavailable_reason`` says which file was missing.
@@ -45,6 +48,14 @@ logger = logging.getLogger("fapd.health")
 #: that only publishes on weekdays is measured over a whole number of its
 #: own publication cycles rather than over an arbitrary slice.
 HEALTH_WINDOW_DAYS = 14
+
+#: Trailing window for the `recent` block on every measured record: the
+#: last 24 hours by the clock (UTC observation stamps), not a
+#: publication-day boundary. The sources page leads with this figure.
+#: The health LABEL never reads it — below the statistical floor a
+#: percentage is noise, and a label that flaps daily is worse than a
+#: stable one — so classification stays on the 14-day window above.
+RECENT_WINDOW_HOURS = 24
 
 #: How far back "most recent item" and "last successful request" may look.
 #: Wider than the window so a quiet source shows its real last delivery
@@ -248,6 +259,17 @@ def _days_between(earlier, later):
         return None
 
 
+def _hours_before(now_iso, hours):
+    """An ISO stamp `hours` before `now_iso`, in the exact format the
+    pipeline's writers use (`sync.utc_now_iso`: ...Z suffix), because
+    the trailing-24-hour edges are compared as strings against stored
+    stamps (CLAUDE.md §10: never introduce a new timestamp format)."""
+    import datetime as _dt
+
+    t = _dt.datetime.fromisoformat(now_iso)  # 3.12: parses trailing 'Z'
+    return (t - _dt.timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 _WINDOW_ROWS_SQL = """
 SELECT p.collection AS collection,
        json_extract(e.metadata, '$.source_id') AS source_id,
@@ -297,6 +319,61 @@ def _collect_volume(conn, window_start, window_end, recency_start):
     return stats
 
 
+# "Ingested in the last 24 hours" is about when an item ARRIVED, so it
+# reads the UTC observation stamp (packages.first_seen_at), not the
+# publication day the item belongs to — a re-render that back-fills an
+# earlier publication day still counts as today's arrival, which is
+# what a "recent activity" figure should say.
+_RECENT_ITEMS_SQL = """
+SELECT p.collection AS collection,
+       json_extract(e.metadata, '$.source_id') AS source_id,
+       COUNT(*) AS items
+FROM extracted_texts e
+JOIN packages p USING (package_id)
+WHERE p.first_seen_at >= ? AND p.first_seen_at < ?
+GROUP BY 1, 2
+"""
+
+
+def _collect_recent_items(conn, start, end):
+    """{(kind, key): item count} over the trailing-24-hour window, keyed
+    like `_collect_volume`. A database from before first_seen_at existed
+    yields no facts, not a failure (same contract as
+    `_collect_collectors`)."""
+    try:
+        out = {}
+        for row in conn.execute(_RECENT_ITEMS_SQL, (start, end)):
+            key = (("source_id", row["source_id"]) if row["source_id"]
+                   else ("collection", row["collection"]))
+            out[key] = row["items"]
+        return out
+    except sqlite3.Error:
+        return {}
+
+
+# Requests logged by the availability probe (client = 'probe',
+# source-pages plan 2026-08-03) are excluded from EVERY fetch statistic
+# in this module: a probe measures reachability on its own cadence, so
+# its traffic would read as ingestion volume and its failures as
+# ingestion degradation. Every other label counts as ingestion —
+# 'govinfo', 'agency', 'wayback', and NULL (historical rows predate the
+# client column and were ingestion traffic; unmarked historical probe
+# rows are accepted as counted, no heuristics).
+_PROBE_EXCLUDED = "(client IS NULL OR client <> 'probe')"
+
+
+def _probe_filter(conn):
+    """The probe-exclusion predicate, or '1' (always true) against a
+    fetch log from before the client column existed — an old snapshot
+    degrades to counting everything rather than erroring the whole
+    fetch section away."""
+    try:
+        cols = {r[1] for r in conn.execute("PRAGMA table_info(fetch_log)")}
+    except sqlite3.Error:
+        return "1"
+    return _PROBE_EXCLUDED if "client" in cols else "1"
+
+
 # Host is parsed in SQL rather than in Python so the whole fetch log never
 # has to cross the process boundary: a busy fortnight is tens of thousands
 # of rows, and all we want from them is five counters per host.
@@ -304,7 +381,7 @@ _FETCH_SQL = """
 WITH parsed AS (
     SELECT substr(url, instr(url, '//') + 2) AS rest, status
     FROM fetch_log
-    WHERE ts_utc >= ? AND ts_utc < ?
+    WHERE ts_utc >= ? AND ts_utc < ? AND {probe}
 )
 SELECT lower(CASE WHEN instr(rest, '/') > 0
                   THEN substr(rest, 1, instr(rest, '/') - 1)
@@ -322,7 +399,7 @@ _FETCH_LAST_OK_SQL = """
 WITH parsed AS (
     SELECT substr(url, instr(url, '//') + 2) AS rest, ts_utc
     FROM fetch_log
-    WHERE ts_utc >= ? AND status IS NOT NULL AND status < 400
+    WHERE ts_utc >= ? AND status IS NOT NULL AND status < 400 AND {probe}
 )
 SELECT lower(CASE WHEN instr(rest, '/') > 0
                   THEN substr(rest, 1, instr(rest, '/') - 1)
@@ -337,16 +414,19 @@ _CLASSES = ("answered", "client_error", "server_error", "no_response")
 
 def _collect_fetch(conn, window_start, window_end_exclusive, recency_start):
     """{host: {attempts, answered, client_error, server_error, no_response,
-    error_rate, last_ok_at}} over the window. Timestamps in the fetch log
-    are UTC; the item window is in publication (Eastern) days, so the two
-    edges differ by a few hours. That is immaterial to a trailing count
-    and is stated rather than papered over."""
+    error_rate, last_ok_at}} over the window, probe traffic excluded.
+    Timestamps in the fetch log are UTC; the item window is in publication
+    (Eastern) days, so the two edges differ by a few hours. That is
+    immaterial to a trailing count and is stated rather than papered
+    over."""
+    probe = _probe_filter(conn)
     hosts = {}
-    for row in conn.execute(_FETCH_SQL,
+    for row in conn.execute(_FETCH_SQL.format(probe=probe),
                             (window_start, window_end_exclusive)):
         rec = hosts.setdefault(row["host"], dict.fromkeys(_CLASSES, 0))
         rec[row["class"]] = rec[row["class"]] + row["n"]
-    for row in conn.execute(_FETCH_LAST_OK_SQL, (recency_start,)):
+    for row in conn.execute(_FETCH_LAST_OK_SQL.format(probe=probe),
+                            (recency_start,)):
         if row["host"] in hosts:
             hosts[row["host"]]["last_ok_at"] = row["last_ok"]
     for rec in hosts.values():
@@ -358,6 +438,37 @@ def _collect_fetch(conn, window_start, window_end_exclusive, recency_start):
         rec["error_rate_pct"] = round(100 * rec["error_rate"], 1)
         rec.setdefault("last_ok_at", None)
     return hosts
+
+
+_FETCH_RECENT_SQL = """
+WITH parsed AS (
+    SELECT substr(url, instr(url, '//') + 2) AS rest, status
+    FROM fetch_log
+    WHERE ts_utc >= ? AND ts_utc < ? AND {probe}
+)
+SELECT lower(CASE WHEN instr(rest, '/') > 0
+                  THEN substr(rest, 1, instr(rest, '/') - 1)
+                  ELSE rest END) AS host,
+       COUNT(*) AS requests,
+       SUM(CASE WHEN status IS NOT NULL AND status < 400
+                THEN 1 ELSE 0 END) AS ok
+FROM parsed
+GROUP BY 1
+"""
+
+
+def _collect_fetch_recent(conn, start, end):
+    """{host: {requests, ok, failed}} over the trailing-24-hour window,
+    probe traffic excluded — the same three-way honesty as the window
+    counters, collapsed: `failed` is everything that returned no content
+    (4xx, 5xx, or no response at all)."""
+    out = {}
+    for row in conn.execute(_FETCH_RECENT_SQL.format(probe=_probe_filter(conn)),
+                            (start, end)):
+        ok = row["ok"] or 0
+        out[row["host"]] = {"requests": row["requests"], "ok": ok,
+                            "failed": row["requests"] - ok}
+    return out
 
 
 def _collect_collectors(conn):
@@ -451,6 +562,7 @@ def _unavailable(reason, today, window_days):
         "window_days": window_days,
         "window_start": _shift(today, window_days - 1),
         "window_end": today,
+        "recent_window_hours": RECENT_WINDOW_HOURS,
         "thresholds": thresholds(),
         "label_definitions": label_definitions(),
         "sources": {},
@@ -459,7 +571,7 @@ def _unavailable(reason, today, window_days):
 
 
 def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
-                  window_days=HEALTH_WINDOW_DAYS):
+                  window_days=HEALTH_WINDOW_DAYS, now=None):
     """Per-source ingestion statistics for every registry entry, plus a
     whole-directory summary.
 
@@ -474,12 +586,16 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
     ``sources`` map, and every caller renders "not available" rather than
     inventing a number."""
     today = today or publication_date()
+    now = now or utc_now_iso()
     window_days = max(1, int(window_days))
     window_start = _shift(today, window_days - 1)
     recency_start = _shift(today, RECENCY_LOOKBACK_DAYS)
     # The fetch log is stamped UTC and its window is half-open on the
     # right, so "today" is included whole however far the day has run.
     fetch_end = _shift(today, -1)
+    # The trailing-24-hour edges are UTC observation stamps by the
+    # clock, deliberately not aligned to the publication-day window.
+    recent_start = _hours_before(now, RECENT_WINDOW_HOURS)
 
     pipeline_path = Path(pipeline_db or config.PIPELINE_DB)
     fetch_path = Path(fetch_db or config.FETCH_LOG_DB)
@@ -496,6 +612,7 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
                             today, window_days)
     try:
         volume = _collect_volume(conn, window_start, today, recency_start)
+        recent_items = _collect_recent_items(conn, recent_start, now)
         collectors = _collect_collectors(conn)
     except sqlite3.Error as exc:
         logger.warning("health: pipeline query failed: %s", exc)
@@ -504,13 +621,14 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
     finally:
         conn.close()
 
-    hosts, fetch_available = {}, False
+    hosts, recent_hosts, fetch_available = {}, {}, False
     if fetch_path.exists():
         try:
             fconn = _ro(fetch_path)
             try:
                 hosts = _collect_fetch(fconn, window_start, fetch_end,
                                        recency_start)
+                recent_hosts = _collect_fetch_recent(fconn, recent_start, now)
                 fetch_available = True
             finally:
                 fconn.close()
@@ -529,6 +647,7 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
     for entry in entries:
         sources[entry["id"]] = _one_source(
             entry, volume, hosts, collectors, host_sources,
+            recent_hosts=recent_hosts, recent_items=recent_items,
             today=today, window_days=window_days,
             fetch_available=fetch_available)
 
@@ -538,6 +657,7 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
         "window_days": window_days,
         "window_start": window_start,
         "window_end": today,
+        "recent_window_hours": RECENT_WINDOW_HOURS,
         "recency_lookback_days": RECENCY_LOOKBACK_DAYS,
         "fetch_log_available": fetch_available,
         "thresholds": thresholds(),
@@ -548,8 +668,9 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
     }
 
 
-def _one_source(entry, volume, hosts, collectors, host_sources, *, today,
-                window_days, fetch_available):
+def _one_source(entry, volume, hosts, collectors, host_sources, *,
+                recent_hosts, recent_items, today, window_days,
+                fetch_available):
     key = source_key(entry)
     stats = volume.get(key, {})
     chars = stats.get("chars", [])
@@ -603,6 +724,7 @@ def _one_source(entry, volume, hosts, collectors, host_sources, *, today,
         "fetch": fetch,
         "fetch_note": EMAIL_FETCH_NOTE if is_email else None,
         "collector": collector,
+        "recent": None,
     }
     record["delivery_mode_note"] = DELIVERY_MODES.get(record["delivery_mode"])
 
@@ -620,6 +742,22 @@ def _one_source(entry, volume, hosts, collectors, host_sources, *, today,
         record["fetch_note"] = ("Request statistics are not available in "
                                 "this build.")
         fetch = None
+
+    # The trailing-24-hour view the sources page leads with. Same
+    # host-wide attribution and probe exclusion as the window figures.
+    # Request counts are None wherever `fetch` is None (email is
+    # delivered to us; a missing log must not read as zero traffic);
+    # the LABEL never reads any of these numbers (see
+    # RECENT_WINDOW_HOURS).
+    counters = recent_hosts.get(host) if fetch is not None else None
+    counters = counters or {"requests": 0, "ok": 0, "failed": 0}
+    record["recent"] = {
+        "hours": RECENT_WINDOW_HOURS,
+        "requests": counters["requests"] if fetch is not None else None,
+        "ok": counters["ok"] if fetch is not None else None,
+        "failed": counters["failed"] if fetch is not None else None,
+        "items": recent_items.get(key, 0),
+    }
 
     record["health"], record["health_reason"] = classify(
         items=record["items"], last_item_date=last_item_date,
@@ -657,3 +795,117 @@ def summarize(sources, window_days=HEALTH_WINDOW_DAYS):
         "hosts_measured": len(by_host),
         "requests_window": sum(by_host.values()),
     }
+
+
+# ---------------------------------------------------------------------------
+# Persisted label state (source_health_state — docs/schema.md)
+# ---------------------------------------------------------------------------
+# A label TRANSITION is durable state a downstream assessment layer
+# regenerates on ('health-change'), so it lives in its own table rather
+# than in a rendered page or in collector_state.last_result (the D5
+# lesson: anything a reader depends on across cycles gets its own
+# column). `since` is the transition edge; `last_checked` proves the
+# label was recently re-affirmed rather than merely old.
+
+def record_health_state(conn, sources, *, now=None):
+    """Upsert each measured source's label into `source_health_state`
+    on a WRITABLE pipeline connection. `last_checked` always moves;
+    `label` and `since` move only when the label CHANGED, so `since`
+    stays the edge of the last transition. A first observation counts
+    as a change. Rows for sources that later leave the registry or go
+    unmeasured are kept — their `last_checked` going stale is itself
+    the detectable fact. Returns the source ids whose label changed."""
+    now = now or utc_now_iso()
+    changed = []
+    for source_id in sorted(sources):
+        rec = sources[source_id]
+        label = rec.get("health")
+        if not rec.get("measured") or label is None:
+            continue
+        row = conn.execute(
+            "SELECT label FROM source_health_state WHERE source_id = ?",
+            (source_id,)).fetchone()
+        if row is not None and row[0] == label:
+            conn.execute(
+                "UPDATE source_health_state SET last_checked = ?"
+                " WHERE source_id = ?", (now, source_id))
+        else:
+            conn.execute(
+                "INSERT INTO source_health_state"
+                " (source_id, label, since, last_checked)"
+                " VALUES (?, ?, ?, ?)"
+                " ON CONFLICT(source_id) DO UPDATE SET"
+                " label = excluded.label, since = excluded.since,"
+                " last_checked = excluded.last_checked",
+                (source_id, label, now, now))
+            changed.append(source_id)
+    conn.commit()
+    return changed
+
+
+def health_state(conn):
+    """{source_id: {label, since, last_checked}} from the persisted
+    table, for layers that react to transitions. A database from before
+    the table existed yields no facts, not a failure."""
+    try:
+        return {row[0]: {"label": row[1], "since": row[2],
+                         "last_checked": row[3]}
+                for row in conn.execute(
+                    "SELECT source_id, label, since, last_checked"
+                    " FROM source_health_state")}
+    except sqlite3.Error:
+        return {}
+
+
+# ---------------------------------------------------------------------------
+# All-time fetch statistics (per-source pages)
+# ---------------------------------------------------------------------------
+
+_FETCH_ALL_TIME_SQL = """
+WITH parsed AS (
+    SELECT substr(url, instr(url, '//') + 2) AS rest, status, ts_utc
+    FROM fetch_log
+    WHERE {probe}
+)
+SELECT lower(CASE WHEN instr(rest, '/') > 0
+                  THEN substr(rest, 1, instr(rest, '/') - 1)
+                  ELSE rest END) AS host,
+       COUNT(*) AS requests,
+       SUM(CASE WHEN status IS NOT NULL AND status < 400
+                THEN 1 ELSE 0 END) AS ok,
+       MIN(ts_utc) AS first_seen
+FROM parsed
+GROUP BY 1
+"""
+
+
+def fetch_stats_all_time(fetch_db=None):
+    """{host: {requests, ok, failures, first_seen}} over the whole fetch
+    log, probe traffic excluded — the lifetime figures for the
+    per-source pages. Host-keyed like every fetch figure here; look a
+    source up via `fetch_host(entry)`, and disclose sharing the same
+    way the window figures do. One aggregate query over the ts index's
+    table; `first_seen` is the stamp of our first request to that host.
+    Returns {} when the log is absent or unreadable (disclosed degrade:
+    callers render 'not available', never zero)."""
+    path = Path(fetch_db or config.FETCH_LOG_DB)
+    if not path.exists():
+        return {}
+    try:
+        conn = _ro(path)
+        try:
+            out = {}
+            sql = _FETCH_ALL_TIME_SQL.format(probe=_probe_filter(conn))
+            for row in conn.execute(sql):
+                ok = row["ok"] or 0
+                out[row["host"]] = {
+                    "requests": row["requests"], "ok": ok,
+                    "failures": row["requests"] - ok,
+                    "first_seen": row["first_seen"],
+                }
+            return out
+        finally:
+            conn.close()
+    except sqlite3.Error as exc:
+        logger.warning("health: all-time fetch stats unavailable: %s", exc)
+        return {}

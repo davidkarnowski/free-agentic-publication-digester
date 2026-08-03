@@ -493,6 +493,28 @@ ladder; a success clears it. `consecutive_errors` cannot serve as this
 counter: the halt itself produces idle `ok=True` cycles, which reset
 it.
 
+`source_assessments` — per-source model prose, layer one of the
+2026-08-03 source-pages plan (GUIDE §3a source surfaces): append-only
+history keyed `(source_id, prompt_version, generated_at)` with `model`,
+`trigger_reason` (`initial` | `age-30d` | `health-change`), and the
+`assessment` text — which was banned-lexicon-scanned BEFORE the insert;
+a failing scan stores nothing. The page renders the newest row, labeled
+model-derived with its date, model, version, and trigger.
+
+`source_descriptions` — layer two: what the source IS. Keyed
+`(source_id, prompt_version, registry_hash)` — `registry_hash` is the
+sha256 of the source's registry entry, so an edited entry regenerates
+its description and an untouched one never does (no timer). Carries
+`summary` (1–2 sentences) and `description` (250–500 words), both
+lexicon-scanned before insert, both rendered as a labeled model-written
+orientation.
+
+`source_health_state` — the persisted health label per source
+(`source_id` PK, `label`, `since`, `last_checked`), maintained by the
+health refresh. Exists so a label TRANSITION is detectable — the
+assessment layer's `health-change` trigger — where the previous
+render-time-only computation left no history.
+
 `section_tags` — the LIVE tag table (2026-07-30, GUIDE §6 r12a): one
 row per `(date, section_key, tag)` with `method ∈ mechanical/llm`;
 mechanical branch/agency tags plus §3a-versioned model discovery keys

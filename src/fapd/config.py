@@ -182,6 +182,14 @@ TAG_PROMPT_VERSION = 2
 # Developer-insight suggestions (§3a): dev-facing surface, one cheap-tier
 # call per EOD over the run's own metrics — never document content.
 INSIGHT_PROMPT_VERSION = 1
+# Source-page surfaces (§3a, 2026-08-03): assessment = our measured
+# ingestion relationship, refreshed at 30 days or on a health-label
+# change; description = what the source is, regenerated only when its
+# registry entry changes. Both cheap tier, batched, lexicon-scanned
+# before storage.
+SOURCE_ASSESS_PROMPT_VERSION = 1
+SOURCE_DESC_PROMPT_VERSION = 1
+SOURCE_ASSESS_MAX_AGE_DAYS = 30
 PLAIN_MODEL = MAP_MODEL  # restatement is compression work — cheap tier
 MAX_PLAIN_BATCH_ITEMS = 25  # inputs are stored summaries (~170 tokens each)
 # Retries escalate isolation in groups before falling back to one call per

@@ -5,7 +5,7 @@ lists in two modules with no drift test was the root cause of the compose
 model producing prose the gate then rejected — for a constraint it was
 never given."""
 
-from fapd import analyze, compose, config, tags
+from fapd import analyze, assess, compose, config, tags
 from fapd.report import _BANNED_RE
 
 PROMPTS = {
@@ -14,6 +14,8 @@ PROMPTS = {
     "compose day-in-review": compose._PROMPT,
     "compose section synopses": compose._SECTION_PROMPT,
     "section tags": tags._TAG_PROMPT,
+    "source assessments": assess._ASSESS_PROMPT,
+    "source descriptions": assess._DESC_PROMPT,
 }
 
 

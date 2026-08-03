@@ -4441,3 +4441,63 @@ backlog at low priority — a throttle in tokens does not need it.
 Five new tests pin the default-off, the ledger-counted pause, the
 pause-not-fail error kind, cross-client enforcement, and the ledgered
 size-guard refusal. 534 tests.
+
+## 2026-08-03 — The sources get their own pages, and the record gets its day views
+
+The operator's brief grew into the largest orchestrated build since the
+segmentation: probe-clean statistics, a 24-hour recent view, an
+individual page for every source in the registry, two new model-text
+surfaces, the digest's federal-calendar note, and the frozen day view
+with its backfill. Executed as the orchestration doc prescribes — four
+section agents on their own files, waves sequenced by interface
+contract, only the orchestrator committing.
+
+The constitution first: GUIDE §5 gained the third artifact (the frozen
+day view — same build_today machinery, frozen at EOD, committed with
+the evidence, linked from the digest, reconstructed-on disclosure for
+backfilled dates) and the digest's license to carry the fedcal calendar
+line; §3a gained the two source-page surfaces — the assessment, bound
+by the health-page law (our observations of our own ingestion, never an
+opinion about the publisher), and the description, the ONE surface
+licensed to use general institutional knowledge, priced with a
+model-written-orientation label. Both lexicon-scanned before storage; a
+failing scan stores nothing.
+
+Wave 1, three agents in parallel. Acquisition: ProbeClient logs
+client='probe' while a budget-name hook keeps probe spend inside the
+shared agency budget — a label-only change would have silently forked
+the accounting. Operations: every stat query probe-excluded, the 24h
+recent block beside the stable 14-day label math, labels persisted to
+source_health_state so a transition is detectable, and an all-time
+helper. Editorial: assess.py, both layers batched on the cheap tier,
+the storage gate importing the render gate's compiled regex so the two
+cannot drift.
+
+Wave 2, Publication (resumed once after an API disconnection killed it
+mid-run — the transcript-resume path worked as designed): 127 source
+pages against the real registry, refusal history rendered for
+unavailable sources, three stat windows with the pre-2026-08-03
+unmarked-probe disclosure, model blocks labeled and optional,
+plain-Python inline-SVG charts (no dependency, no JS, vh-table
+fallbacks), the digest's weekend/holiday note through the same fedcal
+function /today uses, and build_day sharing one body with the live
+page.
+
+Integration: pipeline stages 4b (day view) and 4c (source text — with
+the sentinel-prev wiring that reconstructs "label changed since last
+assessment" from since > generated_at, because the 15-minute state
+refresh means EOD cannot read "previous" directly); the RenderWorker
+consuming refresh_sources' returned health payload instead of
+recomputing; and scripts/backfill_day_views.py, floored at the
+2026-07-27 record start — the local smoke test surfaced stray journal
+rows dated 2024 from early development, exactly the confusion the
+floor exists to prevent.
+
+Alongside, by operator decision: the 2026-07-23 and 2026-07-24
+development-era digests retired from the tree (separate evidence-path
+commit, full rationale in its message; history keeps the files, the
+manifests stay untouched).
+
+586 tests, ruff clean. Deploy — which runs the backfill and generates
+the first descriptions for all ~127 sources — waits on the operator's
+word.

@@ -11,7 +11,7 @@ import argparse
 import sys
 
 from fapd import db, logging_setup
-from fapd.client import AgencyClient
+from fapd.client import ProbeClient
 from fapd.probe import run
 from fapd.sources import load_registry
 
@@ -34,14 +34,16 @@ def main() -> int:
                    and e["type"] in ("rss", "html-index", "aggregator")]
 
     conn = db.connect()
-    with AgencyClient() as client:
+    # ProbeClient logs client='probe' so statistics can exclude probe
+    # traffic; the spend still counts against the agency-class budget.
+    with ProbeClient() as client:
         out_dir, summary = run(client, conn, entries)
         print(f"probed {len(summary)} source(s) -> {out_dir}")
         for verdict in sorted({s['verdict'] for s in summary}):
             ids = [s["id"] for s in summary if s["verdict"] == verdict]
             print(f"  {verdict:16} {len(ids):3}  {', '.join(ids[:8])}"
                   f"{' …' if len(ids) > 8 else ''}")
-        print(f"agency requests today: {client.requests_today()}")
+        print(f"agency-class requests today (incl. probe): {client.requests_today()}")
     conn.close()
     return 0
 

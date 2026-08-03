@@ -39,6 +39,22 @@
 | **Pipeline version** | {pipeline_version} ({git_commit_short}) |
 | **Source watermarks** | CREC: {crec_watermark} · BILLS: {bills_watermark} · FR: {fr_watermark} · USCOURTS: {uscourts_watermark} |
 
+<!-- Mechanical calendar context (GUIDE §5, amended 2026-08-03): on a
+     weekend or federal holiday the header carries the SAME fedcal
+     sentence the live page shows, through the same shared function
+     (src/fapd/fedcal.py). Absent — not faked — on ordinary federal
+     business days. The label is "Weekend note" or
+     "Federal holiday note". -->
+**{Weekend|Federal holiday} note:** {fedcal_day_context_note}
+
+<!-- The frozen day view (GUIDE §5, amended 2026-08-03): the digest links
+     its day's complete observed listing. Emitted exactly for days the
+     item journal covers; days before the journal existed have no day
+     view and no link. -->
+[Full observed listing for this day](day/{digest_date}.html) — every item
+our collectors observed for this publication day, mechanical rules
+applied, frozen at end of day. This digest is the canonical record.
+
 All items below cite the govinfo package (and granule, where applicable) they
 summarize. Selection is mechanical; each item states the rule that included
 it. See the Coverage Statement at the end for a full accounting of what was

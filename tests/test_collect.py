@@ -554,6 +554,69 @@ def test_health_refresh_failure_never_costs_the_live_page(tmp_path,
     assert out["health_refreshed"] is False
 
 
+def test_render_worker_persists_health_labels(tmp_path, monkeypatch):
+    """Each health refresh upserts the label into source_health_state —
+    the table a downstream assessment layer watches for transitions
+    ('health-change'). Wired through the render worker's own clock, on
+    the same writable connection the worker already holds."""
+    from fapd import health
+
+    reg_entry = {
+        "id": "justice-newsroom", "name": "DOJ newsroom", "status": "active",
+        "type": "rss", "branch": "executive", "tier": 1,
+        "parent_org": "Department of Justice",
+        "urls": {"feed": "https://feeds.example.gov/press.xml"},
+    }
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch,
+                                        registry=lambda: [reg_entry])
+    # health reads the pipeline/fetch DBs by path; point both inside the
+    # sandbox (meta.db is the very database the worker writes state to)
+    monkeypatch.setattr(config, "PIPELINE_DB", tmp_path / "meta.db")
+    monkeypatch.setattr(config, "FETCH_LOG_DB", tmp_path / "absent-fetch.db")
+    monkeypatch.setattr(sup, "sources_builder", lambda: {"built": True})
+    worker = next(w for w in sup.workers if w.name == "render")
+    out = worker.run_cycle()
+    assert out["health_refreshed"] is True
+
+    conn = conn_factory()
+    state = health.health_state(conn)
+    conn.close()
+    # nothing ingested and nothing requested in the sandbox: NO_DATA —
+    # a label like any other, and now a persisted, transition-detectable one
+    assert state["justice-newsroom"]["label"] == health.NO_DATA
+    assert (state["justice-newsroom"]["since"]
+            == state["justice-newsroom"]["last_checked"])
+
+
+def test_health_state_persistence_failure_never_costs_the_page(tmp_path,
+                                                               monkeypatch):
+    """Persisting labels is bookkeeping; it must never break the render
+    cycle or the page, exactly like the health refresh itself."""
+    from fapd import health
+
+    sup, conn_factory = make_supervisor(
+        tmp_path, monkeypatch,
+        registry=lambda: [{"id": "x", "status": "active", "type": "rss",
+                           "name": "X", "branch": "executive", "tier": 1,
+                           "parent_org": "X", "urls": {}}],
+        today_builder=lambda c, date=None: {"date": date, "items": 3,
+                                            "pending_llm": 0, "out_dir": None})
+    monkeypatch.setattr(sup, "sources_builder", lambda: {"built": True})
+
+    def boom(*a, **k):
+        raise RuntimeError("the databases are on fire")
+
+    monkeypatch.setattr(health, "source_health", boom)
+    worker = next(w for w in sup.workers if w.name == "render")
+    out = worker.run_cycle()
+    assert out["rebuilt"] is True and out["items"] == 3
+    assert out["health_refreshed"] is True   # the page refresh still counted
+
+    conn = conn_factory()
+    assert health.health_state(conn) == {}   # nothing persisted, no crash
+    conn.close()
+
+
 def test_an_item_we_keep_failing_stops_being_pending_work(conn):
     """GUIDE §6 r14's ceiling was per RUN, and the collector runs analyze
     every 15 minutes per pending date — so an unsummarizable item was

@@ -222,7 +222,11 @@ def test_real_digests_build(tmp_path):
     assert stats["pages"] >= 2
     assert stats["assets"] >= 7
     index = (tmp_path / "site" / "index.html").read_text()
-    assert "Daily Digest — 2026-07-23" in index
+    # Anchored on whatever digests actually exist — the record's start
+    # date is an operator decision (2026-07-27 official start; earlier
+    # trial days were removed), not a constant this test may assume.
+    dates = sorted(p.stem for p in config.DIGEST_DIR.glob("2026-*.md"))
+    assert f"Daily Digest — {dates[-1]}" in index
 
 
 _REGISTRY_YAML = """\
@@ -631,49 +635,51 @@ def test_health_is_never_signalled_by_colour_alone(health_site):
 
 
 def test_each_card_states_its_own_numbers(health_site):
-    """A label must be checkable from the card it sits on: volume, rate,
-    content length, delivery mode, and the request outcomes are all there
-    in words."""
-    page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
-            / "sources.html").read_text()
-    card = page[page.index('id="src-example-newsroom"'):]
+    """A label must be checkable from the numbers rendered beside it. The
+    14-day figures live on the per-source page now (source-pages plan,
+    2026-08-03); the sources.html card leads with the 24-hour block and
+    links the page."""
+    out = health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+    page = (out / "sources" / "example-newsroom.html").read_text()
+    assert "2 in 14 days (0.14 per day)" in page
+    assert "most recent 2026-07-31" in page
+    assert "320 characters average, 320 median" in page   # (340 + 300) / 2
+    assert "shortest 300, longest 340" in page
+    assert "<code>feed-only</code>" in page
+    assert "the source publishes no more than this through this channel" in page
+    assert "Our requests to feeds.example.gov:</span> 6 request(s) · 6 answered" in page
+    assert "0 declined (4xx) · 0 server declined (5xx) · 0 no response" in page
+    assert "0.0% returned no content" in page
+    assert "tag-health-delivering" in page
+    # The card keeps the health label, the reason sentence, the 24-hour
+    # block, and a link to the full page.
+    listing = (out / "sources.html").read_text()
+    card = listing[listing.index('id="src-example-newsroom"'):]
     card = card[:card.index("</article>")]
-    assert "2 in 14 days (0.14 per day)" in card
-    assert "most recent 2026-07-31" in card
-    assert "320 characters average, 320 median" in card   # (340 + 300) / 2
-    assert "shortest 300, longest 340" in card
-    assert "<code>feed-only</code>" in card
-    assert "the source publishes no more than this through this channel" in card
-    assert "Our requests to feeds.example.gov:</span> 6 request(s) · 6 answered" in card
-    assert "0 declined (4xx) · 0 server declined (5xx) · 0 no response" in card
-    assert "0.0% returned no content" in card
     assert "tag-health-delivering" in card
+    assert "Last 24 hours:" in card
+    assert 'href="sources/example-newsroom.html"' in card
 
 
 def test_content_length_exposes_a_teaser_source(health_site):
     """Content length is the signal the operator asked for: a source
     emitting 310-character stubs is giving a reader far less than one
     emitting full text, and both numbers sit on the page."""
-    page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
-            / "sources.html").read_text()
-    email_card = page[page.index('id="src-example-email"'):]
-    email_card = email_card[:email_card.index("</article>")]
-    assert "310 characters average" in email_card
-    assert "<code>email-teaser</code>" in email_card
-    assert "the bulletin carried a short teaser, not the full item" in email_card
-    govinfo = page[page.index('id="src-govinfo-test"'):]
-    govinfo = govinfo[:govinfo.index("</article>")]
+    out = health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+    email_page = (out / "sources" / "example-email.html").read_text()
+    assert "310 characters average" in email_page
+    assert "<code>email-teaser</code>" in email_page
+    assert "the bulletin carried a short teaser, not the full item" in email_page
+    govinfo = (out / "sources" / "govinfo-test.html").read_text()
     assert "14,000 characters average" in govinfo
 
 
 def test_email_cards_say_why_there_is_no_request_table(health_site):
     page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
-            / "sources.html").read_text()
-    card = page[page.index('id="src-example-email"'):]
-    card = card[:card.index("</article>")]
-    assert "Our requests to" not in card
-    assert "delivered to the project mailbox" in card
-    assert "read from delivery recency alone" in card
+            / "sources" / "example-email.html").read_text()
+    assert "Our requests to" not in page
+    assert "delivered to the project mailbox" in page
+    assert "read from delivery recency alone" in page
 
 
 def test_declined_requests_are_reported_with_their_mechanical_reason(health_site):
@@ -702,21 +708,22 @@ def test_declined_requests_are_reported_with_their_mechanical_reason(health_site
 
 def test_shared_host_figures_are_labelled_as_host_wide(health_site):
     page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
-            / "sources.html").read_text()
-    card = page[page.index('id="src-govinfo-test"'):]
-    card = card[:card.index("</article>")]
-    assert "Our requests to api.govinfo.gov:" in card
+            / "sources" / "govinfo-test.html").read_text()
+    assert "Our requests to api.govinfo.gov:" in page
     # one govinfo source in this registry, so no host-wide caveat
-    assert "registered sources, so these figures are host-wide" not in card
+    assert "registered sources, so these figures are host-wide" not in page
 
 
 def test_collector_errors_show_on_the_card(health_site):
-    page = (health_site(DELIVERING_ITEMS, CLEAN_FETCHES,
-                        collectors=[("host:feeds.example.gov", 4)])
-            / "sources.html").read_text()
-    card = page[page.index('id="src-example-newsroom"'):]
+    out = health_site(DELIVERING_ITEMS, CLEAN_FETCHES,
+                      collectors=[("host:feeds.example.gov", 4)])
+    page = (out / "sources" / "example-newsroom.html").read_text()
+    assert "4 consecutive cycle(s) ended in an error" in page
+    assert "tag-health-degraded" in page
+    # …and the label still shows on the listing card.
+    listing = (out / "sources.html").read_text()
+    card = listing[listing.index('id="src-example-newsroom"'):]
     card = card[:card.index("</article>")]
-    assert "4 consecutive cycle(s) ended in an error" in card
     assert "tag-health-degraded" in card
 
 
@@ -2199,3 +2206,274 @@ def test_today_meta_line_drops_internal_ids_and_raw_dates(conn, tmp_path):
     by_pkg = {i["package_id"]: i for i in data["items"]}
     assert by_pkg["AGENCYPR-x"]["claimed_published_at"] \
         == "Thu, 23 Jul 2026 08:30:00 -0400"             # raw value preserved
+
+
+# ------------------------------------------------ per-source pages (T3) --
+
+
+def test_source_page_for_every_registry_entry(digests, registry_root, tmp_path):
+    """Every registry entry gets sources/<id>.html — active, planned,
+    unavailable, and excluded alike — and the discovery surfaces carry
+    the URL patterns."""
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    for sid in ("govinfo-test", "gao-reports", "treasury-email-test",
+                "blocked-newsroom", "archive-api"):
+        assert (out / "sources" / f"{sid}.html").exists(), sid
+    assert "sources/blocked-newsroom.html" in (out / "sitemap.xml").read_text()
+    llms = (out / "llms.txt").read_text()
+    assert "/sources/<source-id>.html" in llms
+    assert "/day/YYYY-MM-DD.html" in llms
+
+
+def test_source_page_renders_without_model_text_or_databases(
+        digests, registry_root, tmp_path):
+    """The two model-derived blocks are OPTIONAL: with nothing stored (and
+    here, no databases at all) the page renders cleanly — identity,
+    methods, and a stated absence of statistics; no model block, no
+    invented zero."""
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "sources" / "govinfo-test.html").read_text()
+    assert "model-block" not in page
+    assert "<h1>Test Collection (TEST)</h1>" in page
+    assert "<h2>Identity and registry record</h2>" in page
+    assert "<h2>How we ingest it</h2>" in page
+    assert "govinfo collections API delta sync" in page
+    assert "Statistics are not available in this build" in page
+    assert "<script" not in page
+
+
+def test_source_page_subdir_urls_are_rebased(digests, registry_root, tmp_path):
+    """Pages one level below the site root reference shared assets and
+    root pages through ../ — and fragment-only hrefs (the skip link)
+    stay untouched, which is why <base> was not used."""
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "sources" / "govinfo-test.html").read_text()
+    assert 'href="../style.css"' in page
+    assert 'href="../index.html"' in page
+    assert 'href="../llms.txt"' in page
+    assert 'href="#main"' in page
+
+
+def test_rebase_page_prefixes_only_document_relative_urls():
+    page = ('<a href="style.css">a</a><a href="#main">b</a>'
+            '<a href="https://example.gov/x">c</a>'
+            '<a href="mailto:x@example.gov">d</a>'
+            '<a href="/abs.html">e</a><form action="day/x.html">')
+    out = publish._rebase_page(page)
+    assert 'href="../style.css"' in out
+    assert 'href="#main"' in out
+    assert 'href="https://example.gov/x"' in out
+    assert 'href="mailto:x@example.gov"' in out
+    assert 'href="/abs.html"' in out
+    assert 'action="../day/x.html"' in out
+
+
+def test_unavailable_source_page_shows_refusal_history(
+        digests, registry_root, tmp_path):
+    """A refusal is accountability data: the unavailable source's page
+    renders, wears its status, and shows the refusal notes from the
+    registry — visibly, not folded away."""
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "sources" / "blocked-newsroom.html").read_text()
+    assert "tag-status-unavailable" in page
+    assert "robots.txt disallows our identified client" in page
+    assert "<h2>Identity and registry record</h2>" in page
+    # and the sources listing links to it
+    listing = (out / "sources.html").read_text()
+    assert 'href="sources/blocked-newsroom.html"' in listing
+
+
+def test_source_page_states_all_three_windows_and_probe_note(health_site):
+    """24-hour, 14-day, and all-time blocks all render, and the all-time
+    figures carry the unmarked-probe disclosure."""
+    out = health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+    page = (out / "sources" / "example-newsroom.html").read_text()
+    assert "<h3>Last 24 hours</h3>" in page
+    assert "<h3>Last 14 days</h3>" in page
+    assert "<h3>All time</h3>" in page
+    assert "Our requests to feeds.example.gov, all time" in page
+    assert "unmarked source-probe traffic" in page
+    assert "probes are labeled and excluded thereafter" in page
+
+
+def test_source_page_charts_have_accessible_fallbacks(health_site):
+    """Every SVG chart is aria-hidden decoration beside a visually-hidden
+    data table and a visible figcaption (docs/accessibility.md §4a) —
+    and none of it is script."""
+    out = health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+    page = (out / "sources" / "example-newsroom.html").read_text()
+    assert "<svg" in page
+    assert 'aria-hidden="true" focusable="false"' in page
+    assert '<table class="vh">' in page
+    assert "<figcaption>" in page
+    assert "Requests per day to feeds.example.gov" in page
+    assert "Items ingested per day" in page
+    assert "<script" not in page
+    # the health-site fetch log has no elapsed_ms column: the sparkline
+    # is absent rather than fabricated
+    assert "response time" not in page
+
+
+def test_source_page_model_blocks_render_labeled_and_escaped(
+        health_site, tmp_path):
+    """Stored description + assessment render visually distinct, labeled
+    model-derived with date/model/version (assessment also its trigger),
+    and are HTML-escaped — a hostile stored text cannot become markup."""
+    import sqlite3
+
+    from fapd import config as _config
+
+    out = health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+    conn = sqlite3.connect(tmp_path / "fapd.db")
+    conn.execute(
+        "INSERT INTO source_descriptions (source_id, prompt_version,"
+        " registry_hash, generated_at, model, summary, description)"
+        " VALUES ('example-newsroom', ?, 'h1', '2026-07-30T10:00:00Z',"
+        " 'test-model', 'A department newsroom.',"
+        " 'The department publishes releases. <script>alert(1)</script>')",
+        (_config.SOURCE_DESC_PROMPT_VERSION,))
+    conn.execute(
+        "INSERT INTO source_assessments (source_id, prompt_version,"
+        " generated_at, model, trigger_reason, assessment)"
+        " VALUES ('example-newsroom', ?, '2026-07-31T10:00:00Z',"
+        " 'test-model', 'initial', 'Items arrive on a daily cadence.')",
+        (_config.SOURCE_ASSESS_PROMPT_VERSION,))
+    conn.commit()
+    conn.close()
+    publish.refresh_sources(out_dir=out, pipeline_db=tmp_path / "fapd.db",
+                            fetch_db=tmp_path / "fetch_log.db")
+    page = (out / "sources" / "example-newsroom.html").read_text()
+    assert "Model-written orientation" in page
+    assert "A department newsroom." in page
+    assert "generated 2026-07-30 by test-model, prompt version" in page
+    assert "Model-written ingestion assessment" in page
+    assert "Items arrive on a daily cadence." in page
+    assert "trigger: initial" in page
+    # escaping: the stored <script> renders as text, never as markup
+    assert "<script" not in page
+    assert "&lt;script&gt;alert(1)&lt;/script&gt;" in page
+
+
+def test_refresh_sources_returns_the_health_payload(health_site, tmp_path):
+    """The collector's RenderWorker persists health labels; returning the
+    computed payload lets it stop recomputing them (source-pages plan)."""
+    health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+    result = publish.refresh_sources(
+        out_dir=tmp_path / "site", pipeline_db=tmp_path / "fapd.db",
+        fetch_db=tmp_path / "fetch_log.db")
+    assert result["built"] is True
+    assert result["health"]["available"] is True
+    assert "example-newsroom" in result["health"]["sources"]
+
+
+# ------------------------------------------------- frozen day view (T7) --
+
+
+def test_build_day_freezes_listing_with_disclosure_and_digest_link(
+        conn, tmp_path, monkeypatch):
+    from conftest import DATE
+
+    from fapd import config as _config
+
+    _seed_today(conn)
+    digest_dir = tmp_path / "digests"
+    digest_dir.mkdir()
+    (digest_dir / f"{DATE}.md").write_text(f"# Daily Digest — {DATE}\n")
+    monkeypatch.setattr(_config, "DIGEST_DIR", digest_dir)
+    out = tmp_path / "site"
+    stats = publish.build_day(conn, DATE, out_dir=out)
+    assert stats["items"] == 2
+    page = (out / "day" / f"{DATE}.html").read_text()
+    assert f"Observed listing — {DATE}" in page
+    assert "complete observed listing" in page
+    assert "frozen at end of day" in page
+    assert "the dated digest is the canonical record" in page
+    assert f'href="../{DATE}.html"' in page       # digest link, rebased
+    assert "preliminary" not in page.lower()      # no live disclosure
+    assert "Last updated" not in page             # no live affordance
+    assert "<script" not in page                  # the one script stays on /today
+    assert 'href="../style.css"' in page
+    # the same machinery: items, hour groups, citation metadata
+    assert "CREC-2026-07-23 / PgS1" in page
+    assert "VA announces a claims program" in page
+
+
+def test_build_day_json_mirrors_today_json_shape(conn, tmp_path, monkeypatch):
+    import json
+
+    from conftest import DATE
+
+    from fapd import config as _config
+
+    monkeypatch.setattr(_config, "DIGEST_DIR", tmp_path / "no-digests")
+    _seed_today(conn)
+    out = tmp_path / "site"
+    publish.build_day(conn, DATE, out_dir=out)
+    publish.build_today(conn, out_dir=out, date=DATE)
+    day = json.loads((out / "day" / f"{DATE}.json").read_text())
+    today = json.loads((out / "today.json").read_text())
+    # every today.json key exists in the day view; additions are the
+    # frozen flag only
+    assert set(today) <= set(day)
+    assert set(day) - set(today) == {"frozen"}
+    assert day["frozen"] is True
+    assert day["labels"] == today["labels"]
+    assert len(day["items"]) == len(today["items"])
+    assert "complete observed listing" in day["disclosure"]
+    assert "preliminary" not in day["disclosure"].lower()
+
+
+def test_build_day_reconstructed_variant_discloses_render_date(
+        conn, tmp_path, monkeypatch):
+    import json
+
+    from conftest import DATE
+
+    from fapd import config as _config
+
+    monkeypatch.setattr(_config, "DIGEST_DIR", tmp_path / "no-digests")
+    _seed_today(conn)
+    publish.build_day(conn, DATE, out_dir=tmp_path,
+                      reconstructed_on="2026-08-03")
+    page = (tmp_path / "day" / f"{DATE}.html").read_text()
+    assert ("reconstructed from the stored observation journal on "
+            "2026-08-03") in page
+    assert "mechanical rules applied, frozen at end of day" not in page
+    data = json.loads((tmp_path / "day" / f"{DATE}.json").read_text())
+    assert data["reconstructed_on"] == "2026-08-03"
+    assert data["frozen"] is True
+
+
+def test_build_day_absent_before_journal_coverage(conn, tmp_path):
+    """Days before the item journal existed have no day view; the gap is
+    disclosed, not backfilled (GUIDE §5, amended 2026-08-03)."""
+    import json
+
+    from conftest import DATE
+
+    _seed_today(conn)                      # journal coverage begins DATE
+    result = publish.build_day(conn, "2020-01-01", out_dir=tmp_path)
+    assert result["available"] is False
+    page = (tmp_path / "day" / "2020-01-01.html").read_text()
+    assert "No day view exists for 2020-01-01" in page
+    assert f"began on {DATE}" in page
+    assert "not backfilled" in page
+    data = json.loads((tmp_path / "day" / "2020-01-01.json").read_text())
+    assert data["available"] is False
+    assert data["items"] == []
+
+
+def test_build_day_empty_covered_day_renders_explicit_absence(
+        conn, tmp_path, monkeypatch):
+    from fapd import config as _config
+
+    monkeypatch.setattr(_config, "DIGEST_DIR", tmp_path / "no-digests")
+    _seed_today(conn)                      # journal coverage begins 07-23
+    publish.build_day(conn, "2026-07-24", out_dir=tmp_path)
+    page = (tmp_path / "day" / "2026-07-24.html").read_text()
+    assert "No items were observed for this publication day" in page
+    assert "not an omission" in page

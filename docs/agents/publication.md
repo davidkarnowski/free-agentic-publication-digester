@@ -137,10 +137,12 @@ docs/accessibility.md → this file.
   (introduced bills, AGENCYPR/VOTES/BILLACTIONS) get named attribution.
 - **D20f** — no URL scheme allowlist at the render seam; cheap
   defence-in-depth.
-- **Follow-up assigned by the level-up plan:** the past-day raw view
-  (`/day/<date>.html`) — `build_today` is already parameterized by
-  date; freeze a raw stream at EOD beside the digest, same filter
-  machinery, linked from the digest header.
+- ~~Follow-up assigned by the level-up plan: the past-day raw view~~ —
+  **Done 2026-08-03** (source-pages wave 2): `publish.build_day` shares
+  `_build_day_page` with the live view, freezes at EOD (pipeline stage
+  4b), discloses reconstruction honestly for backfilled dates
+  (`scripts/backfill_day_views.py`), and the digest header links
+  `day/<date>.html` when the journal covers the date.
 
 ## Exit report
 

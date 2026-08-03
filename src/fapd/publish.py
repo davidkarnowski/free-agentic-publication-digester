@@ -664,6 +664,61 @@ h2.filter-lead {
   border-top: 1px solid var(--border);
   font-size: 0.9rem;
 }
+/* Per-source pages (sources/<id>.html). Model-derived prose renders in
+   its own visual register — dashed border, the same convention the
+   tag-model chip established — and each block leads with an explicit
+   in-words label (GUIDE §2/§3a: model text is labeled in place, never
+   presented as official-record content). */
+.model-block {
+  border: 1px dashed var(--control-border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  background: var(--accent-soft);
+  padding: 0.6rem 0.85rem;
+  margin: 0.8rem 0;
+}
+.model-block-label {
+  display: block;
+  font-size: 0.72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+.model-block p { margin: 0.4rem 0; }
+.model-provenance { font-size: 0.78rem; color: var(--muted); margin: 0.4rem 0 0; }
+.src-facts dt { font-weight: 600; margin-top: 0.5rem; }
+.src-facts dd { margin: 0 0 0.2rem; overflow-wrap: anywhere; }
+.stat-note { font-size: 0.82rem; color: var(--muted); }
+/* Inline SVG charts: one series per chart, drawn in the site accent so
+   both themes inherit the right ink from the shared tokens. The SVG is
+   decorative duplication — the visually-hidden table beside it is the
+   accessible representation — so it is aria-hidden and its container
+   scrolls rather than the page. */
+.chart { margin: 1rem 0; }
+.chart svg { width: 100%; height: auto; display: block; }
+.chart-bar { fill: var(--accent); }
+.chart-line { stroke: var(--accent); fill: none; stroke-width: 2; }
+.chart-baseline { stroke: var(--border); stroke-width: 1; }
+.chart-label { fill: var(--muted); font-size: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Arial, sans-serif; }
+.chart figcaption { font-size: 0.82rem; color: var(--muted); margin-top: 0.25rem; }
+@media (forced-colors: active) {
+  /* Author fills are replaced by the system palette elsewhere on the
+     page; SVG fills are not forced, so the data marks must opt in. */
+  .chart-bar { fill: CanvasText; }
+  .chart-line { stroke: CanvasText; }
+  .chart-baseline { stroke: CanvasText; }
+  .chart-label { fill: CanvasText; }
+  .model-block { border: 1px dashed CanvasText;
+    border-left: 3px solid Highlight; }
+}
+@media print {
+  /* The accent prints as a mid grey; keep marks legible on paper. */
+  .chart-bar { fill: #444; }
+  .chart-line { stroke: #444; }
+  .model-block { border: 1px dashed #444; }
+}
 """
 
 _DATE_MD_RE = re.compile(r"^\d{4}-\d{2}-\d{2}\.md$")
@@ -962,6 +1017,27 @@ def _render_page(title, body_html, nav_links, canonical, description=None,
         canonical=html.escape(canonical),
         repo_url=REPO_URL,
     ))
+
+
+# Pages that live one directory below the site root (sources/<id>.html,
+# day/<date>.html) are rendered exactly like root pages — same _PAGE
+# shell, same nav, same relative hrefs — and then rebased: every
+# document-relative URL reference gains a ../ prefix. One seam, applied
+# to the whole rendered page, so the shell's hardcoded style.css/llms.txt
+# links, the nav, and body links all obey the same rule. Fragment-only
+# hrefs (#main, the skip links), absolute URLs, schemes (mailto:), and
+# already-rebased ../ paths are untouched. Chosen over <base href="../">
+# because a <base> also rebases fragment-only links, which breaks
+# in-page anchors.
+_REL_URL_ATTR_RE = re.compile(
+    r'\b(href|src|action)="(?!(?:[a-z][a-z0-9+.-]*:|//|/|#|\.\./))([^"]*)"',
+    re.IGNORECASE)
+
+
+def _rebase_page(page_html, depth=1):
+    prefix = "../" * depth
+    return _REL_URL_ATTR_RE.sub(
+        lambda m: f'{m.group(1)}="{prefix}{m.group(2)}"', page_html)
 
 
 # Compact nav labels where a stem's .capitalize() reads badly.
@@ -1355,6 +1431,13 @@ def _source_card(entry, health_record=None):
             f"<dt>Notes</dt><dd>{html.escape(_redact_addresses(notes))}</dd>")
     chip = (f" {_health_chip(health_record['health'])}"
             if health_record and health_record.get("health") else "")
+    # Every entry links its own page — active, planned, and unavailable
+    # alike: a refusal's page shows its refusal history, and the 14-day
+    # statistics view lives there now (the card leads with the 24-hour
+    # figures).
+    detail = (f'<p class="src-links"><a href="sources/'
+              f'{html.escape(entry["id"], quote=True)}.html">Source page '
+              "&mdash; full statistics, method, and history</a></p>")
     return (
         f'<article class="src-card" id="src-{html.escape(entry["id"])}">'
         f'<h4 class="src-name"><a href="{html.escape(link, quote=True)}">'
@@ -1362,7 +1445,8 @@ def _source_card(entry, health_record=None):
         f'<p class="src-sub">{_status_chip(entry["status"])}{chip} {subtitle}</p>'
         f'<p class="src-desc">{html.escape(entry["description"])}</p>'
         f"{signup}"
-        f"{_health_block(health_record)}"
+        f"{_card_stats_block(health_record)}"
+        f"{detail}"
         f'<details class="src-more"><summary>Registry record</summary>'
         f'<dl>{"".join(record)}</dl></details>'
         "</article>"
@@ -1583,6 +1667,601 @@ def _build_sources_page(out_dir, doc_pages=(), entries=(), health=None):
 
 
 # ---------------------------------------------------------------------------
+# Per-source pages (sources/<source-id>.html)
+# ---------------------------------------------------------------------------
+# One page per registry entry — active, planned, unavailable, and excluded
+# alike: a refusal is accountability data, and an unavailable source's page
+# shows its refusal history from the registry notes. Everything mechanical
+# is rendered from the registry, config constants, and the health payload;
+# the two OPTIONAL model-derived blocks (description, assessment) come from
+# the database via fapd.assess and the page renders cleanly without them
+# (GUIDE §3a source surfaces, 2026-08-03).
+
+def _ro_conn(path):
+    """Read-only sqlite connection, or None when the file is absent or
+    unreadable — callers render 'not available', never a crash."""
+    import sqlite3
+
+    p = Path(path)
+    if not p.exists():
+        return None
+    try:
+        conn = sqlite3.connect(f"file:{p}?mode=ro", uri=True)
+        conn.row_factory = sqlite3.Row
+        return conn
+    except sqlite3.Error:
+        return None
+
+
+#: Daily-series window for the per-source charts.
+CHART_WINDOW_DAYS = 30
+
+#: The all-time figures' honest limit, stated wherever they render:
+#: source-probe traffic was unlabeled before the probe client existed.
+ALL_TIME_PROBE_NOTE = (
+    "All-time counts before 2026-08-03 include unmarked source-probe "
+    "traffic; probes are labeled and excluded thereafter."
+)
+
+_DAILY_ITEMS_SQL = """
+SELECT p.collection AS collection,
+       json_extract(e.metadata, '$.source_id') AS source_id,
+       p.date_issued AS day, COUNT(*) AS n
+FROM extracted_texts e
+JOIN packages p USING (package_id)
+WHERE p.date_issued >= ? AND p.date_issued <= ?
+GROUP BY 1, 2, 3
+"""
+
+
+def _daily_items(conn, start_day, end_day):
+    """{(kind, key): {day: items}} over the chart window, keyed like
+    health.source_key."""
+    import sqlite3
+
+    out = {}
+    try:
+        for row in conn.execute(_DAILY_ITEMS_SQL, (start_day, end_day)):
+            key = (("source_id", row["source_id"]) if row["source_id"]
+                   else ("collection", row["collection"]))
+            out.setdefault(key, {})[row["day"]] = row["n"]
+    except sqlite3.Error:
+        return {}
+    return out
+
+
+_DAILY_FETCH_SQL = """
+WITH parsed AS (
+    SELECT substr(url, instr(url, '//') + 2) AS rest,
+           substr(ts_utc, 1, 10) AS day, {elapsed} AS elapsed_ms
+    FROM fetch_log
+    WHERE ts_utc >= ? AND {probe}
+)
+SELECT lower(CASE WHEN instr(rest, '/') > 0
+                  THEN substr(rest, 1, instr(rest, '/') - 1)
+                  ELSE rest END) AS host,
+       day, COUNT(*) AS n, AVG(elapsed_ms) AS avg_ms
+FROM parsed
+GROUP BY 1, 2
+"""
+
+
+def _daily_fetches(conn, start_ts):
+    """{host: {day: {"n": requests, "avg_ms": mean elapsed or None}}} over
+    the chart window, probe traffic excluded (same predicate as every
+    fetch figure in fapd.health). Tolerates a log from before the
+    elapsed_ms column existed — the sparkline is then simply absent."""
+    import sqlite3
+
+    try:
+        cols = {r[1] for r in conn.execute("PRAGMA table_info(fetch_log)")}
+        elapsed = "elapsed_ms" if "elapsed_ms" in cols else "NULL"
+        sql = _DAILY_FETCH_SQL.format(
+            elapsed=elapsed, probe=health_mod._probe_filter(conn))
+        out = {}
+        for row in conn.execute(sql, (start_ts,)):
+            out.setdefault(row["host"], {})[row["day"]] = {
+                "n": row["n"],
+                "avg_ms": (round(row["avg_ms"]) if row["avg_ms"] is not None
+                           else None),
+            }
+        return out
+    except sqlite3.Error:
+        return {}
+
+
+def _chart_days(end_day, n=CHART_WINDOW_DAYS):
+    """The n calendar days ending at end_day, oldest first."""
+    import datetime as _dt
+
+    end = _dt.date.fromisoformat(end_day)
+    return [(end - _dt.timedelta(days=i)).isoformat()
+            for i in range(n - 1, -1, -1)]
+
+
+_CHART_W, _CHART_H = 600, 120
+
+
+def _vh_series_table(caption, days, values, unit):
+    """The accessible representation of a chart: a visually-hidden table
+    with one row per day (docs/accessibility.md — the SVG itself is
+    decorative duplication and is hidden from assistive technology)."""
+    rows = "".join(
+        f"<tr><td>{html.escape(d)}</td><td>{v if v is not None else '—'}</td></tr>"
+        for d, v in zip(days, values))
+    return (f'<table class="vh"><caption>{html.escape(caption)}</caption>'
+            f"<thead><tr><th scope=\"col\">Day</th>"
+            f"<th scope=\"col\">{html.escape(unit)}</th></tr></thead>"
+            f"<tbody>{rows}</tbody></table>")
+
+
+def _svg_bar_chart(days, values, *, title, unit):
+    """A 30-day daily bar chart as inline SVG — plain string building,
+    no dependency, no script. One series in the site accent (both themes
+    inherit the token); a visually-hidden table carries the data for
+    assistive technology; per-bar <title> gives a native hover value.
+    Returns '' when every value is zero — an all-zero chart would read
+    as an outage where the prose already states 'none recorded'."""
+    if not any(values):
+        return ""
+    vmax = max(values)
+    pad_l, pad_r, pad_t, pad_b = 34, 4, 8, 16
+    plot_w = _CHART_W - pad_l - pad_r
+    plot_h = _CHART_H - pad_t - pad_b
+    step = plot_w / len(days)
+    bar_w = max(1.0, step - 2)
+    bars = []
+    for i, (day, val) in enumerate(zip(days, values)):
+        h = round(plot_h * val / vmax, 1) if vmax else 0.0
+        x = round(pad_l + i * step, 1)
+        y = round(pad_t + plot_h - h, 1)
+        bars.append(
+            f'<rect class="chart-bar" x="{x}" y="{y}" width="{bar_w:.1f}"'
+            f' height="{h}" rx="1"><title>{html.escape(day)}: {val} '
+            f"{html.escape(unit)}</title></rect>")
+    base_y = pad_t + plot_h
+    axis = (
+        f'<line class="chart-baseline" x1="{pad_l}" y1="{base_y}"'
+        f' x2="{_CHART_W - pad_r}" y2="{base_y}"/>'
+        f'<text class="chart-label" x="{pad_l - 5}" y="{pad_t + 8}"'
+        f' text-anchor="end">{vmax}</text>'
+        f'<text class="chart-label" x="{pad_l}" y="{_CHART_H - 3}">'
+        f"{html.escape(days[0])}</text>"
+        f'<text class="chart-label" x="{_CHART_W - pad_r}" y="{_CHART_H - 3}"'
+        f' text-anchor="end">{html.escape(days[-1])}</text>')
+    total = sum(values)
+    peak_day = days[values.index(vmax)]
+    caption = (f"{title}: {total:,} {unit} over the last {len(days)} days "
+               f"(peak {vmax:,} on {peak_day}).")
+    svg = (f'<svg viewBox="0 0 {_CHART_W} {_CHART_H}" aria-hidden="true"'
+           f' focusable="false">{axis}{"".join(bars)}</svg>')
+    return (f'<figure class="chart">'
+            f"<figcaption>{html.escape(caption)}</figcaption>{svg}"
+            f'{_vh_series_table(caption, days, values, unit)}</figure>')
+
+
+def _svg_sparkline(days, values, *, title, unit="ms"):
+    """A response-time sparkline (daily mean) as inline SVG. Days with no
+    timed request are gaps in the line, not zeroes. Returns '' below two
+    measured days — a one-point line draws nothing honest."""
+    points = [(i, v) for i, v in enumerate(values) if v is not None]
+    if len(points) < 2:
+        return ""
+    vmax = max(v for _i, v in points)
+    vmin = min(v for _i, v in points)
+    span = (vmax - vmin) or 1
+    pad_l, pad_r, pad_t, pad_b = 34, 4, 8, 16
+    plot_w = _CHART_W - pad_l - pad_r
+    plot_h = _CHART_H - pad_t - pad_b
+    step = plot_w / max(1, len(days) - 1)
+    coords = " ".join(
+        f"{round(pad_l + i * step, 1)},"
+        f"{round(pad_t + plot_h - plot_h * (v - vmin) / span, 1)}"
+        for i, v in points)
+    axis = (
+        f'<text class="chart-label" x="{pad_l - 5}" y="{pad_t + 8}"'
+        f' text-anchor="end">{vmax}</text>'
+        f'<text class="chart-label" x="{pad_l - 5}" y="{pad_t + plot_h}"'
+        f' text-anchor="end">{vmin}</text>'
+        f'<text class="chart-label" x="{pad_l}" y="{_CHART_H - 3}">'
+        f"{html.escape(days[0])}</text>"
+        f'<text class="chart-label" x="{_CHART_W - pad_r}" y="{_CHART_H - 3}"'
+        f' text-anchor="end">{html.escape(days[-1])}</text>')
+    caption = (f"{title}: between {vmin:,} and {vmax:,} {unit} across the "
+               f"last {len(days)} days (days without a timed request are "
+               "gaps, not zeroes).")
+    svg = (f'<svg viewBox="0 0 {_CHART_W} {_CHART_H}" aria-hidden="true"'
+           f' focusable="false">{axis}'
+           f'<polyline class="chart-line" points="{coords}"/></svg>')
+    return (f'<figure class="chart">'
+            f"<figcaption>{html.escape(caption)}</figcaption>{svg}"
+            f'{_vh_series_table(caption, days, values, unit)}</figure>')
+
+
+def _recent_sentence(record):
+    """The trailing-24-hour figures as one sentence. Request counts are
+    host-wide (the same attribution as every fetch figure) and None where
+    no requests are made for the source — an absent number is omitted,
+    never shown as zero traffic."""
+    recent = (record or {}).get("recent")
+    if not recent:
+        return ""
+    bits = []
+    if recent.get("requests") is not None:
+        bits.append(f"{_n(recent['requests'])} request(s) "
+                    f"({_n(recent['ok'])} answered, {_n(recent['failed'])} "
+                    "returned no content)")
+    bits.append(f"{_n(recent.get('items', 0))} item(s) ingested")
+    return (f'<p><span class="src-stat-label">Last {recent["hours"]} '
+            f'hours:</span> {" · ".join(bits)}</p>')
+
+
+def _card_stats_block(record):
+    """The compact statistics panel on a sources.html card: the 24-hour
+    recent block plus the health-reason sentence. The 14-day view — and
+    everything else — lives on the per-source page now."""
+    if not record:
+        return ""
+    if not record["measured"]:
+        return (f'<p class="src-stats src-unmeasured">'
+                f"{html.escape(record['health_reason'])} Ingestion "
+                f"statistics are shown for active sources only.</p>")
+    parts = [_recent_sentence(record)]
+    fetch = record.get("fetch")
+    if fetch and fetch.get("shared_with_sources", 1) > 1:
+        parts.append(
+            f'<p class="src-stat-label">Request figures are host-wide: '
+            f"this host serves {fetch['shared_with_sources']} registered "
+            "sources.</p>")
+    parts.append(f'<p class="src-stat-label">'
+                 f"{html.escape(record['health_reason'])}</p>")
+    return f'<div class="src-stats">{"".join(parts)}</div>'
+
+
+def _model_text_block(label, paragraphs, provenance):
+    """A model-derived prose block, visually distinct and labeled in
+    words with its provenance (GUIDE §3a: date, model, version — and
+    trigger, for assessments). Everything is escaped; the block is never
+    presented as official-record content."""
+    body = "".join(f"<p>{html.escape(p)}</p>" for p in paragraphs if p)
+    return (f'<div class="model-block">'
+            f'<span class="model-block-label">{html.escape(label)}</span>'
+            f"{body}"
+            f'<p class="model-provenance">{html.escape(provenance)}</p>'
+            "</div>")
+
+
+def _description_block(desc):
+    if not desc:
+        return ""
+    prov = (f"Model-written orientation, generated {desc['generated_at'][:10]}"
+            f" by {desc.get('model') or 'unrecorded model'}, prompt version "
+            f"{desc['prompt_version']}. It may draw on general knowledge of "
+            "public institutions and is not official-record content.")
+    paragraphs = [desc["summary"]] + [
+        p.strip() for p in (desc["description"] or "").split("\n\n")]
+    return _model_text_block("Model-written orientation", paragraphs, prov)
+
+
+def _assessment_block(assessment):
+    if not assessment:
+        return ""
+    prov = (f"Model-written assessment of our own ingestion, generated "
+            f"{assessment['generated_at'][:10]} by "
+            f"{assessment.get('model') or 'unrecorded model'}, prompt version "
+            f"{assessment['prompt_version']}, trigger: "
+            f"{assessment.get('trigger_reason') or 'unrecorded'}. It restates "
+            "our measured figures and is not official-record content.")
+    return _model_text_block("Model-written ingestion assessment",
+                             [assessment["assessment"]], prov)
+
+
+def _methods_rows(entry):
+    """(term, description) rows for the 'How we ingest it' section —
+    assembled from registry and config facts, so the page can never
+    claim a politeness posture the constants do not implement."""
+    kind = entry["type"]
+    active = entry["status"] == "active"
+    rows = [("Channel", _TYPE_LABELS.get(kind, kind)),
+            ("Method", _redact_addresses(entry["method"]))]
+    if entry.get("adapter"):
+        rows.append(("Adapter", entry["adapter"]))
+    if kind == "govinfo-collection":
+        if active:
+            rows.append(("Poll cadence",
+                         (f"about every {config.GOVINFO_POLL_INTERVAL_MIN} "
+                          "minutes while the collector runs")))
+        rows.append((
+            "Request budget",
+            (f"the govinfo class: at most {config.MAX_REQUESTS_PER_DAY:,} "
+             f"requests per day and {config.MAX_GOVINFO_REQUESTS_PER_HOUR:,} "
+             "per hour, counted from the fetch log (failed requests count "
+             "too); collectors stop at "
+             f"{round((1 - config.EOD_BUDGET_RESERVE_FRACTION) * 100)}% so "
+             "the end-of-day finalizer always has headroom")))
+        rows.append(("Politeness",
+                     ("keyed govinfo API access; every request is logged "
+                      "before it is made and identified as "
+                      f"{config.USER_AGENT}")))
+    elif kind == "email":
+        if active:
+            rows.append(("Poll cadence",
+                         ("the project mailbox is read about every "
+                          f"{config.EMAIL_POLL_INTERVAL_MIN} minutes")))
+        rows.append(("Requests",
+                     ("none — bulletins are delivered to the project "
+                      "mailbox by the agency's own subscription service")))
+        rows.append(("Authenticity",
+                     ("every message's DKIM signature is checked on "
+                      "arrival and the result is disclosed on each item; "
+                      "a failing signature is labeled, never silently "
+                      "dropped")))
+    else:
+        if active:
+            rows.append(("Poll cadence",
+                         (f"about every {config.AGENCY_POLL_INTERVAL_MIN} "
+                          "minutes while the collector runs")))
+        rows.append((
+            "Request budget",
+            (f"the agency class: at most "
+             f"{config.MAX_AGENCY_REQUESTS_PER_DAY:,} requests per day "
+             "shared across every agency web source, counted from the "
+             "fetch log (failed requests count too)")))
+        rows.append(("Politeness",
+                     ("robots.txt is honored as observed — including each "
+                      "host's crawl-delay, exactly — and every request "
+                      f"identifies itself as {config.USER_AGENT}; a refusal "
+                      "is recorded, never evaded")))
+    rows.append(("Capture and hash",
+                 ("captured raw content is hashed (SHA-256) into the day's "
+                  "committed provenance manifest, hash-chained day to day "
+                  "(PROVENANCE.md)")))
+    return rows
+
+
+def _all_time_block(entry, record, all_time, fetch_log_present):
+    """Lifetime request figures for the source's host, with the
+    host-sharing and unmarked-probe disclosures. Host-keyed, so it can
+    exist even for a source that is not currently measured — a refusal's
+    request history is accountability data."""
+    if entry["type"] == "email":
+        return (f'<p class="stat-note">{html.escape(health_mod.EMAIL_FETCH_NOTE)}'
+                "</p>")
+    host = health_mod.fetch_host(entry)
+    if not host:
+        return ('<p class="stat-note">No request host is registered for '
+                "this source.</p>")
+    if not fetch_log_present:
+        return ('<p class="stat-note">The request log is not present in '
+                "this build, so all-time request statistics are omitted "
+                "rather than shown as zero.</p>")
+    rec = all_time.get(host)
+    if not rec:
+        return (f'<p class="stat-note">No requests to {html.escape(host)} '
+                "are recorded in the request log.</p>")
+    parts = [
+        (f'<p><span class="src-stat-label">Our requests to '
+         f"{html.escape(host)}, all time (since "
+         f"{html.escape((rec.get('first_seen') or '')[:10] or 'the log began')}"
+         f"):</span> {_n(rec['requests'])} request(s) · {_n(rec['ok'])} "
+         f"answered · {_n(rec['failures'])} returned no content</p>")]
+    fetch = (record or {}).get("fetch")
+    if fetch and fetch.get("shared_with_sources", 1) > 1:
+        parts.append(
+            f'<p class="src-stat-label">This host serves '
+            f"{fetch['shared_with_sources']} registered sources, so these "
+            "figures are host-wide.</p>")
+    parts.append(f'<p class="stat-note">{html.escape(ALL_TIME_PROBE_NOTE)}</p>')
+    return "".join(parts)
+
+
+def _source_page_body(entry, record, *, description, assessment, state,
+                     all_time, fetch_log_present, days, items_by_day,
+                     fetch_by_day):
+    """The whole per-source page body. Every section renders from what
+    exists: absent model text, absent databases, and unmeasured registry
+    statuses each degrade to a stated absence, never to a crash or an
+    invented zero."""
+    sid = entry["id"]
+    urls = entry["urls"]
+    link = urls.get("home") or next(iter(urls.values()))
+    subtitle = html.escape(
+        f"{entry['branch'].capitalize()} · Tier {entry['tier']} · "
+        f"{_TYPE_LABELS.get(entry['type'], entry['type'])} · "
+        f"{entry['parent_org']}")
+    chip = (f" {_health_chip(record['health'])}"
+            if record and record.get("health") else "")
+    parts = [
+        f"<h1>{html.escape(entry['name'])}</h1>",
+        f'<p class="src-sub">{_status_chip(entry["status"])}{chip} {subtitle}</p>',
+        (f'<p class="src-links"><a href="{html.escape(link, quote=True)}">'
+         "Official site</a> · "
+         '<a href="sources.html">All sources</a></p>'),
+        # -- What this source is ------------------------------------------
+        "<h2>What this source is</h2>",
+        f'<p class="src-desc">{html.escape(entry["description"])}</p>',
+        _description_block(description),
+        # -- Identity & registry record -----------------------------------
+        "<h2>Identity and registry record</h2>",
+        '<dl class="src-facts">',
+        f"<dt>Registry id</dt><dd><code>{html.escape(sid)}</code></dd>",
+        (f"<dt>Agency / parent organization</dt>"
+         f"<dd>{html.escape(entry['parent_org'])}</dd>"),
+        f"<dt>Branch</dt><dd>{html.escape(entry['branch'])}</dd>",
+        (f"<dt>Type</dt><dd>"
+         f"{html.escape(_TYPE_LABELS.get(entry['type'], entry['type']))}"
+         "</dd>"),
+        f"<dt>Status</dt><dd>{html.escape(entry['status'])}</dd>",
+        f"<dt>Tier</dt><dd>{entry['tier']}</dd>",
+    ]
+    for kind, url in sorted(entry["urls"].items()):
+        parts.append(
+            f"<dt>URL ({html.escape(kind)})</dt>"
+            f'<dd><a href="{html.escape(url, quote=True)}">'
+            f"{html.escape(url)}</a></dd>")
+    parts.append(f"<dt>Registered</dt><dd>{html.escape(entry['added'])}</dd>")
+    notes = entry["notes"].strip()
+    if notes:
+        # Visible on the page (not folded): for an unavailable source the
+        # notes ARE the refusal history, and a refusal is accountability
+        # data (GUIDE §3 — the registry keeps unavailable entries forever).
+        parts.append(f"<dt>Registry notes</dt>"
+                     f"<dd>{html.escape(_redact_addresses(notes))}</dd>")
+    parts.append("</dl>")
+    # -- Methods ----------------------------------------------------------
+    parts.append("<h2>How we ingest it</h2>")
+    parts.append('<dl class="src-facts">')
+    parts.extend(f"<dt>{html.escape(term)}</dt><dd>{html.escape(desc)}</dd>"
+                 for term, desc in _methods_rows(entry))
+    parts.append("</dl>")
+    # -- Statistics -------------------------------------------------------
+    parts.append("<h2>Ingestion statistics</h2>")
+    parts.append(
+        "<p>These figures describe <strong>this project's ingestion of "
+        "this source</strong> — items we recorded and requests we made — "
+        "and nothing else. They are not a measurement of the publisher.</p>")
+    if not record:
+        parts.append('<p class="stat-note">Statistics are not available '
+                     "in this build.</p>")
+    elif not record["measured"]:
+        parts.append(f'<p class="src-stats src-unmeasured">'
+                     f"{html.escape(record['health_reason'])} Ingestion "
+                     "statistics are measured for active sources only.</p>")
+    else:
+        parts.append(f"<h3>Last {health_mod.RECENT_WINDOW_HOURS} hours</h3>")
+        recent = _recent_sentence(record)
+        parts.append(f'<div class="src-stats">{recent}</div>' if recent else
+                     '<p class="stat-note">No trailing-24-hour figures are '
+                     "available in this build.</p>")
+        parts.append(f"<h3>Last {record['window_days']} days</h3>")
+        parts.append(_health_block(record))
+    parts.append("<h3>All time</h3>")
+    parts.append(f'<div class="src-stats">'
+                 f"{_all_time_block(entry, record, all_time, fetch_log_present)}"
+                 "</div>")
+    # -- Charts -----------------------------------------------------------
+    if days:
+        host = health_mod.fetch_host(entry)
+        host_days = fetch_by_day.get(host, {}) if host else {}
+        req_values = [host_days.get(d, {}).get("n", 0) for d in days]
+        ms_values = [host_days.get(d, {}).get("avg_ms") for d in days]
+        key = health_mod.source_key(entry)
+        item_days = items_by_day.get(key, {})
+        item_values = [item_days.get(d, 0) for d in days]
+        charts = []
+        if host and entry["type"] != "email":
+            shared_note = ""
+            fetch = (record or {}).get("fetch")
+            if fetch and fetch.get("shared_with_sources", 1) > 1:
+                shared_note = " (host-wide)"
+            charts.append(_svg_bar_chart(
+                days, req_values,
+                title=f"Requests per day to {host}{shared_note}",
+                unit="requests"))
+        charts.append(_svg_bar_chart(
+            days, item_values, title="Items ingested per day",
+            unit="items"))
+        if host and entry["type"] != "email":
+            charts.append(_svg_sparkline(
+                days, ms_values,
+                title=f"Daily mean response time of {host}"))
+        charts = [c for c in charts if c]
+        parts.append(f"<h3>Last {CHART_WINDOW_DAYS} days, day by day</h3>")
+        if charts:
+            parts.extend(charts)
+        else:
+            parts.append('<p class="stat-note">No requests and no items '
+                         f"were recorded in the last {CHART_WINDOW_DAYS} "
+                         "days, so there is nothing to chart.</p>")
+    # -- Health -----------------------------------------------------------
+    parts.append("<h2>Ingestion health</h2>")
+    if record and record.get("health"):
+        parts.append(f'<p class="health-lead">{_health_chip(record["health"])} '
+                     f"{html.escape(record['health_reason'])}</p>")
+        st = state.get(sid)
+        if st:
+            parts.append(
+                f'<p class="health-note">This label has held since '
+                f"{html.escape(st['since'])} (UTC) and was last re-checked "
+                f"{html.escape(st['last_checked'])} (UTC).</p>")
+        parts.append(f'<p class="health-note">'
+                     f"{html.escape(health_mod.FETCH_DISCLAIMER)}</p>")
+    else:
+        reason = (record or {}).get("health_reason") or (
+            "No health label is computed in this build.")
+        parts.append(f'<p class="health-note">{html.escape(reason)}</p>')
+    # -- Assessment (optional model block) --------------------------------
+    if assessment:
+        parts.append("<h2>Our ingestion assessment</h2>")
+        parts.append(_assessment_block(assessment))
+    return "".join(parts)
+
+
+def _build_source_pages(out_dir, entries, health, doc_pages=(), *,
+                        pipeline_db=None, fetch_db=None):
+    """Render sources/<source-id>.html for EVERY registry entry. Returns
+    the number of pages written (0 with no registry)."""
+    if not entries:
+        return 0
+    sub = out_dir / "sources"
+    sub.mkdir(parents=True, exist_ok=True)
+    records = (health or {}).get("sources") or {}
+    fetch_log_present = bool((health or {}).get("fetch_log_available"))
+
+    descriptions, assessments, state, items_by_day = {}, {}, {}, {}
+    pconn = _ro_conn(pipeline_db or config.PIPELINE_DB)
+    end_day = (health or {}).get("window_end")
+    if end_day is None:
+        from .sync import publication_date
+        end_day = publication_date()
+    days = _chart_days(end_day)
+    if pconn is not None:
+        try:
+            import sqlite3
+
+            from . import assess
+            try:
+                descriptions = assess.latest_descriptions(pconn)
+                assessments = assess.latest_assessments(pconn)
+            except sqlite3.Error:
+                descriptions, assessments = {}, {}
+            state = health_mod.health_state(pconn)
+            items_by_day = _daily_items(pconn, days[0], days[-1])
+        finally:
+            pconn.close()
+    fetch_by_day = {}
+    fconn = _ro_conn(fetch_db or config.FETCH_LOG_DB)
+    if fconn is not None:
+        try:
+            fetch_by_day = _daily_fetches(fconn, f"{days[0]}T00:00:00Z")
+        finally:
+            fconn.close()
+    all_time = health_mod.fetch_stats_all_time(
+        fetch_db=fetch_db or config.FETCH_LOG_DB)
+
+    for entry in entries:
+        body = _source_page_body(
+            entry, records.get(entry["id"]),
+            description=descriptions.get(entry["id"]),
+            assessment=assessments.get(entry["id"]),
+            state=state, all_time=all_time,
+            fetch_log_present=fetch_log_present,
+            days=days, items_by_day=items_by_day, fetch_by_day=fetch_by_day)
+        page = _render_page(
+            f"{entry['name']} — source page — {SITE_TITLE}",
+            body,
+            _site_nav(doc_pages, current="sources"),
+            f"sources/registry.yaml (id: {entry['id']})",
+            description=(f"How the Free Agentic Publication Digester ingests "
+                         f"{entry['name']}: method, status, measured "
+                         "statistics, and health history."),
+        )
+        (sub / f"{entry['id']}.html").write_text(
+            _rebase_page(page), encoding="utf-8")
+    return len(entries)
+
+
+# ---------------------------------------------------------------------------
 # Blog (blog.html + blog-<slug>.html)
 # ---------------------------------------------------------------------------
 # Commentary about the project — how it is built and why — deliberately
@@ -1743,11 +2422,17 @@ def refresh_sources(out_dir=None, *, pipeline_db=None, fetch_db=None,
     if doc_pages is None:
         doc_pages = _doc_page_index()
     _build_sources_page(out_dir, doc_pages, entries, hp)
+    _build_source_pages(out_dir, entries, hp, doc_pages,
+                        pipeline_db=pipeline_db, fetch_db=fetch_db)
     (out_dir / "sources.json").write_text(
         _json_mod.dumps(_sources_json(entries, hp, config.SITE_BASE_URL),
                         indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    # The computed payload travels with the result so the caller (the
+    # collector's RenderWorker persisting health labels) never has to
+    # recompute it — one computation per cycle, one truth.
     return {"built": True, "sources": len(entries),
-            "measured": bool(getattr(hp, "available", True))}
+            "measured": bool(getattr(hp, "available", True)),
+            "health": hp}
 
 
 def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
@@ -1809,6 +2494,9 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
         if registry_entries else None)
     sources_built = _build_sources_page(out_dir, doc_pages, registry_entries,
                                         source_stats)
+    source_pages = _build_source_pages(out_dir, registry_entries, source_stats,
+                                       doc_pages, pipeline_db=pipeline_db,
+                                       fetch_db=fetch_db)
     blog_posts = _build_blog(out_dir, doc_pages)
     _build_agent_surfaces(out_dir, dates, teasers, doc_pages,
                           base=config.SITE_BASE_URL, blog_posts=blog_posts,
@@ -1847,6 +2535,7 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
         "assets": assets_copied,
         "doc_pages": len(doc_pages),
         "blog_posts": len(blog_posts),
+        "source_pages": source_pages,
         "out_dir": out_dir,
     }
 
@@ -1863,6 +2552,24 @@ _TODAY_DISCLOSURE = (
     "record. The Day in Review and section synopses are composed at end "
     "of day and do not appear here."
 )
+
+
+def _day_disclosure(date, reconstructed_on=None):
+    """The frozen day view's disclosure (GUIDE §5, amended 2026-08-03):
+    what the page is, when it was frozen, and that the dated digest is
+    the canonical record. `reconstructed_on` is for the one-shot
+    backfill of past days from the stored observation journal — the
+    render date is disclosed so a reconstructed listing never presents
+    itself as having been frozen live at end of day."""
+    frozen = ("frozen at end of day" if not reconstructed_on else
+              "reconstructed from the stored observation journal on "
+              f"{reconstructed_on}")
+    return (
+        f"This is the complete observed listing for publication day {date}: "
+        "every item our collectors recorded for this day, with the "
+        "mechanical rules applied, " + frozen + ". It is not the digest — "
+        "the dated digest is the canonical record for this day."
+    )
 
 # Journal collection -> the label each stream entry leads with (the
 # stream is one chronological listing, so items self-describe).
@@ -2272,14 +2979,78 @@ def build_today(conn, out_dir=None, date=None):
     """Render site/today.html + today.json from collect.today_status —
     mechanical, zero LLM, derived-only (never committed; gitignored).
     Empty days render on purpose: disclosure, then 'no items yet'."""
+    from .sync import publication_date
+
+    return _build_day_page(conn, date or publication_date(),
+                           Path(out_dir or config.SITE_DIR), live=True)
+
+
+def build_day(conn, date, out_dir=None, *, reconstructed_on=None):
+    """Render the frozen day view — site/day/<date>.html + .json (GUIDE
+    §5, amended 2026-08-03): the same full-entry listing the live page
+    shows, rendered by the SAME machinery (this function and build_today
+    share _build_day_page — parameterized, never a reimplementation),
+    frozen from the database state at call time and committed with the
+    evidence. Differs from /today only in its disclosure (complete
+    observed listing, frozen at end of day, the dated digest is the
+    canonical record) and in carrying no live affordances.
+
+    A date the item journal does not cover renders a designed absent
+    state disclosing why — days before the journal existed have no day
+    view; the gap is disclosed, not backfilled. `reconstructed_on` is
+    for the one-shot journal-backfill of past days: it swaps the
+    disclosure's "frozen at end of day" for "reconstructed from the
+    stored observation journal on <date>"."""
+    return _build_day_page(conn, str(date), Path(out_dir or config.SITE_DIR),
+                           live=False, reconstructed_on=reconstructed_on)
+
+
+def _day_absent_page(date, first, out_dir):
+    """The designed absent state: a date before the observation journal
+    existed has no day view, and the page says exactly why instead of
+    rendering an empty listing that would read as a quiet day."""
+    reason = (
+        f"No day view exists for {date}. The observation journal that "
+        "records item arrivals "
+        + (f"began on {first}" if first else "has not recorded any items")
+        + ", and days before it have no observed listing to freeze — the "
+        "gap is disclosed, not backfilled. The dated digest, where one "
+        "exists, is the record for this day.")
+    body = (
+        f"<h1>Observed listing — {html.escape(date)}</h1>"
+        f'<p class="today-disclosure">{html.escape(reason)}</p>'
+        '<p><a href="index.html">All digests</a></p>')
+    page = _render_page(
+        f"Observed listing {date} — {SITE_TITLE}", body,
+        _site_nav(_doc_page_index()),
+        f"no day view exists for {date} (observation journal coverage)",
+        description=reason)
+    day_dir = out_dir / "day"
+    day_dir.mkdir(parents=True, exist_ok=True)
+    (day_dir / f"{date}.html").write_text(_rebase_page(page),
+                                          encoding="utf-8")
+    (day_dir / f"{date}.json").write_text(_json_mod.dumps({
+        "date": date,
+        "generated": utc_now_iso(),
+        "available": False,
+        "unavailable_reason": reason,
+        "canonical_record": f"the dated digest for {date}, where one exists",
+        "items": [],
+    }, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    return {"date": date, "items": 0, "available": False, "out_dir": out_dir}
+
+
+def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
     import json as _json
 
     from .collect import today_status
 
-    out_dir = Path(out_dir or config.SITE_DIR)
     out_dir.mkdir(parents=True, exist_ok=True)
-    from .sync import publication_date
-    date = date or publication_date()
+    if not live:
+        from .report import _journal_first_day
+        first = _journal_first_day(conn)
+        if first is None or date < first:
+            return _day_absent_page(date, first, out_dir)
     status = today_status(conn, date)
     # The live page must apply the SAME dating discipline the digest does.
     # It keys off the journal's digest_date, which for agency items is our
@@ -2325,6 +3096,7 @@ def build_today(conn, out_dir=None, date=None):
     recent = sorted(
         (p.stem for p in Path(config.DIGEST_DIR).glob("*.md")
          if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.stem)), reverse=True)[:3]
+    digest_exists = (Path(config.DIGEST_DIR) / f"{date}.md").exists()
     # Bare dates are unusable in a screen reader's link list (2.4.4).
     recent_links = " · ".join(
         f'<a href="{d}.html"><span class="vh">Digest for </span>{d}</a>'
@@ -2366,20 +3138,41 @@ def build_today(conn, out_dir=None, date=None):
     # One sentence stays visible; the full explanation collapses into a
     # native <details> (no JS). Three paragraphs of standing prose pushed
     # the stream below the fold on every load, forever.
-    intro = (
-        "<p>Official federal publications as our collectors observe them, "
-        "newest first — refreshed within minutes of arrival. Times are "
-        "Eastern (Washington's clock).</p>"
-        '<details class="today-about"><summary>How this live view works'
-        f"</summary>{about}</details>")
+    if live:
+        intro = (
+            "<p>Official federal publications as our collectors observe "
+            "them, newest first — refreshed within minutes of arrival. "
+            "Times are Eastern (Washington's clock).</p>"
+            '<details class="today-about"><summary>How this live view works'
+            f"</summary>{about}</details>")
+    else:
+        digest_link = (
+            f' Read the <a href="{date}.html"><span class="vh">Daily '
+            f"Digest for </span>{date} digest</a>."
+            if digest_exists else "")
+        intro = (
+            "<p>Official federal publications as our collectors observed "
+            "them through this day, newest first. Times are Eastern "
+            "(Washington's clock). This listing does not update."
+            f"{digest_link}</p>")
     # The federal working calendar explains a quiet stream before a
     # reader (or an agent reading today.json) wonders if the pipeline is
     # broken: a Sunday /today with one item is the publishers resting,
     # not us failing (observed live, 2026-08-02).
     from . import fedcal
     day_context = fedcal.reduced_publishing(date)
+    if live:
+        heading = f"Today — {date} (in progress)"
+        disclosure_text = _TODAY_DISCLOSURE
+    else:
+        heading = f"Observed listing — {date}"
+        disclosure_text = _day_disclosure(date, reconstructed_on)
+    disclosure_html = html.escape(disclosure_text)
+    if not live and digest_exists:
+        disclosure_html += (f' <a href="{date}.html">Daily Digest &mdash; '
+                            f"{date}</a>.")
     parts = [
-        f"<h1>Today — {date} (in progress)</h1>",
+        f"<h1>{html.escape(heading)}</h1>",
     ]
     if day_context:
         label = ("Weekend note" if day_context["kind"] == "weekend"
@@ -2387,14 +3180,23 @@ def build_today(conn, out_dir=None, date=None):
         parts.append(
             f'<div class="live-callout today-context"><strong>{label}:'
             f"</strong> {html.escape(day_context['note'])}</div>")
+    if live:
+        meta = (f'<p class="today-meta">Last updated <time class="utc"'
+                f' datetime="{html.escape(now)}">{html.escape(_et_clock(now))}'
+                f" ET</time> · {len(status['items'])} item(s) observed so far"
+                f" · {status['pending_llm']} item(s) awaiting model summary.")
+    else:
+        meta = (f'<p class="today-meta">Generated <time class="utc"'
+                f' datetime="{html.escape(now)}">{html.escape(_et_clock(now))}'
+                f" ET</time> · {len(status['items'])} item(s) observed for "
+                f"this day · {status['pending_llm']} item(s) without a "
+                "stored model summary (a disclosed gap, not pending work).")
+    arrived = "arrived today" if live else "arrived during this day"
     parts += [
-        f'<p class="today-disclosure">{html.escape(_TODAY_DISCLOSURE)}</p>',
+        f'<p class="today-disclosure">{disclosure_html}</p>',
         intro,
-        (f'<p class="today-meta">Last updated <time class="utc"'
-         f' datetime="{html.escape(now)}">{html.escape(_et_clock(now))} ET'
-         f"</time> · {len(status['items'])} item(s) observed so far · "
-         f"{status['pending_llm']} item(s) awaiting model summary."
-         + (f" A further {len(status['backfill'])} item(s) arrived today"
+        (meta
+         + (f" A further {len(status['backfill'])} item(s) {arrived}"
             " that their publishers date earlier; they are not this day's"
             " news and are listed in the dated digest's coverage"
             " accounting, not here."
@@ -2417,12 +3219,19 @@ def build_today(conn, out_dir=None, date=None):
     if not status["items"]:
         parts.append('<h2 id="today-stream" tabindex="-1">'
                      "Observed publications</h2>")
-        parts.append(
-            '<div class="live-callout">No items observed yet for this '
-            "publication day. Collectors poll continuously — govinfo "
-            "about every half hour, agency newsrooms about hourly, email "
-            "bulletins about every fifteen minutes — and this page "
-            "rebuilds within about five minutes of a new arrival.</div>")
+        if live:
+            parts.append(
+                '<div class="live-callout">No items observed yet for this '
+                "publication day. Collectors poll continuously — govinfo "
+                "about every half hour, agency newsrooms about hourly, email "
+                "bulletins about every fifteen minutes — and this page "
+                "rebuilds within about five minutes of a new arrival.</div>")
+        else:
+            parts.append(
+                '<div class="live-callout">No items were observed for this '
+                "publication day — an explicit empty record, not an "
+                "omission. Weekends and federal holidays are ordinary "
+                "reasons for a quiet day.</div>")
     else:
         # The form is what makes filtering work without script: the
         # checkboxes, the bar, and the stream are siblings inside it (so
@@ -2455,8 +3264,9 @@ def build_today(conn, out_dir=None, date=None):
                 current_hour = hour
             stream.append(_today_item_row(i, filterable))
         stream.append("</ul>")
+        form_action = "today.html" if live else f"day/{date}.html"
         parts.append(
-            '<form class="today-stream" action="today.html" method="get">'
+            f'<form class="today-stream" action="{form_action}" method="get">'
             + inputs + filter_bar
             # The stream gets its own heading (A11Y-13): the page had
             # exactly one heading for 400 KB of content, so there was no
@@ -2469,13 +3279,32 @@ def build_today(conn, out_dir=None, date=None):
             # script-free way to state how many survived the filter.
             + '<p class="filter-count"></p></form>')
 
-    nav = _site_nav(_doc_page_index(), current="today")
+    nav = _site_nav(_doc_page_index(), current="today" if live else None)
     head_extra = (f"<style>\n{filter_css}</style>\n" if filter_css else "")
-    head_extra += _LOCAL_TIME_JS
-    page = _render_page(f"Today (live) — {SITE_TITLE}", "".join(parts), nav,
-                        "derived-only: not part of the committed record",
-                        head_extra=head_extra)
-    (out_dir / "today.html").write_text(page, encoding="utf-8")
+    if live:
+        # The site's one script lives on /today.html only (docs/
+        # code-standards §2 r10); the frozen day view ships none — its
+        # server-rendered Eastern stamps stand alone.
+        head_extra += _LOCAL_TIME_JS
+    if live:
+        page = _render_page(f"Today (live) — {SITE_TITLE}", "".join(parts),
+                            nav,
+                            "derived-only: not part of the committed record",
+                            head_extra=head_extra)
+        html_path = out_dir / "today.html"
+        json_path = out_dir / "today.json"
+        html_path.write_text(page, encoding="utf-8")
+    else:
+        page = _render_page(f"Observed listing {date} — {SITE_TITLE}",
+                            "".join(parts), nav,
+                            f"site/day/{date}.html (frozen day view; the "
+                            f"canonical record is digests/{date}.md)",
+                            head_extra=head_extra)
+        day_dir = out_dir / "day"
+        day_dir.mkdir(parents=True, exist_ok=True)
+        html_path = day_dir / f"{date}.html"
+        json_path = day_dir / f"{date}.json"
+        html_path.write_text(_rebase_page(page), encoding="utf-8")
 
     json_items = []
     for i in list(status["items"]) + list(status.get("backfill") or []):
@@ -2487,10 +3316,10 @@ def build_today(conn, out_dir=None, date=None):
         row["claimed_day"] = i.get("claimed_day")
         row["is_backfill"] = bool(i.get("is_backfill"))
         json_items.append(row)
-    (out_dir / "today.json").write_text(_json.dumps({
+    payload = {
         "date": date,
         "generated": now,
-        "disclosure": _TODAY_DISCLOSURE,
+        "disclosure": disclosure_text,
         "canonical_record": "the dated digest, frozen at end of day",
         "labels": {"summary_method": "official = agency/GPO text;"
                                      " llm = model-generated, labeled",
@@ -2531,7 +3360,16 @@ def build_today(conn, out_dir=None, date=None):
         "pending_llm": status["pending_llm"],
         "last_observed_at": status["last_observed_at"],
         "items": json_items,
-    }, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    }
+    if not live:
+        # Mirrors today.json's shape and labels exactly; the frozen flag
+        # (and, for journal-backfilled renders, the reconstruction date)
+        # is additive, so an agent's today.json reader works unchanged.
+        payload["frozen"] = True
+        if reconstructed_on:
+            payload["reconstructed_on"] = reconstructed_on
+    json_path.write_text(_json.dumps(payload, indent=1, sort_keys=True) + "\n",
+                         encoding="utf-8")
     return {"date": date, "items": len(status["items"]),
             "pending_llm": status["pending_llm"], "out_dir": out_dir}
 
@@ -2647,6 +3485,8 @@ def _sources_json(entries, health, base=""):
         record["added"] = entry["added"]
         record["card"] = (f"{base}/sources.html#src-{entry['id']}" if base
                           else f"sources.html#src-{entry['id']}")
+        record["page"] = (f"{base}/sources/{entry['id']}.html" if base
+                          else f"sources/{entry['id']}.html")
         listed.append(record)
     payload = {
         "title": f"{SITE_TITLE} — source directory and ingestion statistics",
@@ -2731,6 +3571,23 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
          " object explains a quiet stream). Items may change until the"
          " end-of-day gates freeze the dated digest)"),
         f"- [Source guide — what we ingest and why]({base}/sources.html)",
+    ] + ([
+        (f"- Per-source pages: {base}/sources/<source-id>.html — one page"
+         " per registry entry (active, planned, and unavailable alike):"
+         " identity, ingestion method and politeness posture, measured"
+         " statistics at 24-hour / 14-day / all-time windows with"
+         " day-by-day charts, health label history, and — where stored —"
+         " model-written orientation and assessment blocks, labeled as"
+         " such. Source ids are listed in /sources.json."),
+    ] if entries else []) + [
+        (f"- Frozen day views: {base}/day/YYYY-MM-DD.html and"
+         f" {base}/day/YYYY-MM-DD.json — the complete observed listing"
+         " for a finished publication day, mechanical rules applied,"
+         " frozen at end of day (or reconstructed from the stored"
+         " observation journal, disclosed in place). The dated digest at"
+         " /<YYYY-MM-DD>.html remains the canonical record; days before"
+         " the observation journal began have no day view, and the JSON"
+         " mirrors today.json's shape and labels."),
     ] + ([
         (f"- [Source health and statistics, machine-readable]({base}/sources.json)"
          " (per source: items ingested over a trailing window and their"
@@ -2825,12 +3682,22 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
         f"User-agent: *\nAllow: /\n\nSitemap: {base}/sitemap.xml\n",
         encoding="utf-8",
     )
+    # Day views are enumerated from what actually exists on disk — the
+    # EOD wiring (and the one-shot journal backfill) writes them, so the
+    # site build cannot know the set any other way, and a link is never
+    # emitted for a page that was not built.
+    day_pages = sorted(
+        f"day/{p.stem}.html" for p in (out_dir / "day").glob("*.html")
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.stem)
+    ) if (out_dir / "day").is_dir() else []
     urls = (
         ["index.html", "today.html", "sources.html", "agents.html"]
         + [f"{stem}.html" for stem, _title in doc_pages]
+        + [f"sources/{e['id']}.html" for e in entries]
         + (["blog.html"] if blog_posts else [])
         + [f"blog-{slug}.html" for slug, _date, _title in blog_posts]
         + [f"{d}.html" for d in dates]
+        + day_pages
     )
     sitemap = (
         '<?xml version="1.0" encoding="utf-8"?>\n'
