@@ -165,7 +165,7 @@ and stage designations are the first drafting inputs, used verbatim and
 identified as official text. Model-written summaries exist only for
 selected items that lack an official summary.
 
-**Four model layers, independently versioned.** Where models are used,
+**Six model layers, independently versioned.** Where models are used,
 each layer carries its own prompt version so iterating on one never
 regenerates the artifacts of another:
 
@@ -190,6 +190,27 @@ regenerates the artifacts of another:
    navigational metadata, never judgments; model keys are labeled as
    such, and a section whose keys fail validation renders with
    mechanical tags only.
+5. **Source descriptions** (added 2026-08-03) — each per-source page's
+   short summary and reader orientation: what the institution is and
+   what it publishes. This is the one surface licensed to draw on the
+   model's general knowledge of public institutions (a registry entry
+   cannot say what an agency is), and it carries that license's price:
+   it is labeled a model-written orientation with its date, model, and
+   prompt version, never presented as official-record content, and it
+   must stay factual and opinion-agnostic about the institution.
+   Regenerated only when the registry entry changes — never on a timer.
+6. **Source assessments** (added 2026-08-03) — a prose restatement of
+   our measured ingestion relationship with a source: formats seen,
+   cadence, delivery quirks, incident history from the registry notes,
+   what changed since the last assessment. Input is our own measured
+   statistics and registry entry only; like every health figure, it
+   describes our ingestion, never the publisher, and no quality
+   judgment of an agency is ever permitted. Labeled with date, model,
+   version, and the trigger that regenerated it.
+
+Both source-page layers are scanned against the banned lexicon **before
+storage** — a failing text stores nothing and the page simply renders
+without that block; the gates are never loosened to accommodate them.
 
 **The banned-lexicon gate.** Generated prose is scanned against a coded
 banned lexicon (currently 16 terms and phrases: loaded adjectives such
@@ -223,6 +244,35 @@ a Terms Used Today glossary; the Coverage Statement; and a Methodology
 footer restating the selection and labeling rules. Every item carries
 its citation and an "Included because" line naming the mechanical rule
 that selected it.
+
+**Three views of a day** (the third added 2026-08-03). The **live page**
+(`/today.html`) shows publications as our collectors observe them and is
+preliminary by declaration — items may be re-dated, re-summarized, or
+excluded by the end-of-day gates. The **frozen day view**
+(`/day/YYYY-MM-DD.html`, with a JSON twin) is the complete observed
+listing for a finished day — every item, mechanical rules applied —
+frozen at end of day and committed with the evidence; day views for
+days before 2026-08-03 were reconstructed from the stored observation
+journal and say so on the page, because a reconstruction must never
+claim it was frozen live. The **dated digest** is the canonical record,
+and both other views say so. Each digest links its day's observed
+listing; on weekends and federal holidays the digest header carries the
+same mechanical calendar note the live page shows, computed by the same
+shared function. Days before the observation journal existed have no
+day view — the gap is disclosed, not backfilled.
+
+**Per-source pages** (added 2026-08-03). Every registry entry — active,
+planned, and unavailable alike, because a recorded refusal is
+accountability data — has a page at `/sources/<source-id>.html`:
+identity and registry record, ingestion method and politeness posture
+rendered from the same constants the code enforces, measured statistics
+at three windows (trailing 24 hours, 14 days, and all time), day-by-day
+charts as dependency-free inline SVG with visually-hidden data tables
+for assistive technology, the source's health label with its persisted
+history, and the two labeled model layers described under Inference.
+Published request statistics begin 2026-07-30, the day this service
+went into production — earlier development-machine traffic is excluded,
+and the pages say so where the numbers render.
 
 **Canonical Markdown, derived HTML.** The Markdown digest in the
 repository is the canonical artifact. The HTML site — including this

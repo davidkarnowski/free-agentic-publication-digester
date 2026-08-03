@@ -14,7 +14,7 @@ item carries a citation to the official record and names the mechanical
 rule that selected it. Everything not summarized is counted. Nothing is
 silently omitted.
 
-## Status (2026-08-02)
+## Status (2026-08-03)
 
 The authoritative numbers block — where any other figure in the
 repository disagrees, this dated snapshot is the current one. (For
@@ -26,10 +26,15 @@ is always current; it derives them from the registry at build time.)
 - **Source registry:** 127 sources — 42 active (16 web feeds, 15 email
   bulletins, 5 govinfo collections, 4 listing-page sources, 1 chamber
   XML index, 1 API source), 63 planned, 20 recorded unavailable,
-  2 evaluated and excluded.
-- **Latest digest:** [2026-08-01](digests/2026-08-01.md); digests
-  publish daily just after midnight Eastern.
-- **Test suite:** 516 tests (verified by collection 2026-08-02).
+  2 evaluated and excluded. Every entry now has its own page at
+  `/sources/<id>.html` — statistics, method, health history, and
+  labeled model-written orientation.
+- **Latest digest:** [2026-08-02](digests/2026-08-02.md); digests
+  publish daily just after midnight Eastern. The **official record
+  begins 2026-07-27** (two development-era digests were retired on
+  2026-08-03; they remain in git history). Each finished day also has
+  a frozen observed listing at `/day/<date>.html`.
+- **Test suite:** 592 tests (verified by collection 2026-08-03).
 
 ---
 
@@ -260,7 +265,7 @@ stages, court syllabi — used verbatim, identified as official text, at
 zero inference cost. Models write only what the record does not already
 summarize.
 
-**Four model layers, independently versioned** (iterating on one never
+**Six model layers, independently versioned** (iterating on one never
 regenerates another):
 
 1. **Item summaries** — for selected documents lacking an official
@@ -281,6 +286,18 @@ regenerates another):
    generated in one batched cheap-tier call per day from the stored
    synopses, labeled model-derived, and linted by the same
    banned-lexicon gate because they render in the digest.
+5. **Source descriptions** (2026-08-03) — each per-source page's
+   reader orientation: what the institution is and what it publishes.
+   The one surface licensed to draw on general knowledge of public
+   institutions, and it pays for the license: labeled model-written
+   with date/model/version, factual and opinion-agnostic, regenerated
+   only when the registry entry changes.
+6. **Source assessments** (2026-08-03) — our measured ingestion
+   relationship with a source, restated as prose from our own
+   statistics and registry notes only; it describes our ingestion,
+   never the publisher. Both source-page layers are lexicon-scanned
+   **before storage** — a failing text stores nothing and the page
+   renders without the block.
 
 **The banned-lexicon gate** scans all generated prose against a coded
 list of loaded adjectives ("landmark", "controversial", "sweeping"…) and

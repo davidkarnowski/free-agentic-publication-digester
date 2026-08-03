@@ -315,3 +315,27 @@ live in `.claude/agents/fapd-*.md` (tracked).
   summarize"), and generated prose may carry a banned term only inside
   an exact occurrence of an official title/name stored for that day.
   GUIDE §2 amended; gate enforcement made positional.
+- **2026-08-03** — **Source-pages plan shipped and deployed** (GUIDE
+  §3a source surfaces + §5 frozen-day-view amendments): per-source
+  pages for every registry entry with two new model layers
+  (descriptions/assessments, storage-time lexicon gate), probe-labeled
+  fetch statistics at 24h/14d/all-time windows, inline-SVG charts;
+  frozen day views `/day/<date>` built at EOD (pipeline stage 4b) and
+  backfilled once from the journal with disclosed reconstruction;
+  digest headers carry the fedcal calendar note and the day-view link.
+  Operator feedback same day: sources.html titles link OUR per-source
+  pages (official site demoted to a small link), health precedes
+  statistics on source pages.
+- **2026-08-03** — **The official record begins 2026-07-27** (operator):
+  the 2026-07-23/24 development-era digests retired from the tree —
+  history keeps them, manifests untouched. The day-view backfill floors
+  at the record start. Ops lesson the same evening: `build_site` never
+  deletes stale outputs, so a retirement must also clean the VPS site
+  volume or the next evidence commit's `git add site/` resurrects the
+  pages (happened, caught, cleaned; runbook item on the ops backlog).
+- **2026-08-03** — **Published request statistics begin 2026-07-30**
+  (operator; `publish.ALL_TIME_STATS_SINCE`): the production cutover.
+  Earlier fetch-log rows are the development machine's migrated
+  traffic, excluded from all-time figures and the per-source request
+  charts, with the floor disclosed beside the numbers. Item counts are
+  the corpus record and are not floored.

@@ -4501,3 +4501,49 @@ manifests stay untouched).
 586 tests, ruff clean. Deploy — which runs the backfill and generates
 the first descriptions for all ~127 sources — waits on the operator's
 word.
+
+## 2026-08-03 — feedback round, VPS deploy, backfill run, and the resurrection catch
+
+The deploy the previous entry left waiting happened today, preceded by
+an operator feedback round off the local dev preview (all on main,
+CI-green per commit): sources.html card titles now link OUR per-source
+pages with the publisher demoted to a small "Official site" link;
+"Ingestion health" moved above "Ingestion statistics"; the 24-hour
+zero state reads as words ("no requests made · no items ingested");
+request statistics floored at the 2026-07-30 production cutover
+(publish.ALL_TIME_STATS_SINCE — the VPS databases carry the dev
+machine's migrated fetch-log rows, which are not observations of the
+production service; charts clip their axis rather than draw pre-floor
+zeros); the per-source fact lists became a term/value grid after the
+operator's screenshots showed the "return -> tab" flow; and digest
+pages gained derived-layer injection of the day-view link for the
+seven digests frozen before the feature (their markdown is evidence
+and is not re-rendered; the injector stands down when markdown already
+carries the link).
+
+Deployed 1315517 via deploy.sh (18:39 UTC), ran
+scripts/backfill_day_views.py on the box — seven day views, 07-27
+through 08-02, the weekend days' small counts real — re-rendered the
+site, and pushed a dedicated operator-directed evidence commit
+narrating the backfill (4835387) rather than editing the standing
+nightly message, which would have claimed a backfill every night
+thereafter.
+
+That commit's staged-file listing caught a regression the guard could
+not: `git add site/` swept the retired 2026-07-23/24 pages back into
+the record from the stale VPS site volume — build_site writes but
+never deletes, and the volume predated the retirement. A follow-up
+evidence commit removed both pages plus site/assets/2026-07-23/ (which
+the retirement commit itself had missed) and the public URLs now 404.
+Retirement runbook implication recorded on the ops backlog: repo and
+volume in the same operation.
+
+Post-deploy health sweep clean: containers healthy, fapd-web on
+fapd_edge only, TLS 85 days, collectors cycling minutes after
+restart, newest extracted day 2026-08-03. Doc sweep to match:
+methods.md now states six model layers and the three views of a day,
+README status block refreshed (592 tests, record start, new
+surfaces), CLAUDE.md decision log gains the day's three operator
+decisions. Tonight's EOD is the first fully organic cycle:
+2026-08-03's digest with its born-in-markdown day-view link and a
+contemporaneously frozen /day/2026-08-03.
