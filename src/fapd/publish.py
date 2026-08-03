@@ -686,8 +686,26 @@ h2.filter-lead {
 }
 .model-block p { margin: 0.4rem 0; }
 .model-provenance { font-size: 0.78rem; color: var(--muted); margin: 0.4rem 0 0; }
-.src-facts dt { font-weight: 600; margin-top: 0.5rem; }
-.src-facts dd { margin: 0 0 0.2rem; overflow-wrap: anywhere; }
+/* Per-source fact lists (Identity, How we ingest it): a two-column
+   term/value grid — the same shape .status-key established — so a fact
+   reads across one visual row instead of a term line followed by an
+   indent-less value line ("return -> tab", operator, 2026-08-03).
+   max-content keeps the term column exactly as wide as its longest
+   label; values wrap in place beside their term. */
+.src-facts {
+  display: grid; grid-template-columns: max-content 1fr;
+  gap: 0.4rem 1.1rem;
+  margin: 0.8rem 0;
+}
+.src-facts dt { font-weight: 600; margin: 0; }
+.src-facts dd { margin: 0; overflow-wrap: anywhere; }
+/* On a phone the two columns would squeeze the value into a sliver;
+   stack instead, keeping term-over-value pairs visually grouped. */
+@media (max-width: 40rem) {
+  .src-facts { display: block; }
+  .src-facts dt { margin-top: 0.6rem; }
+  .src-facts dd { margin: 0.1rem 0 0; }
+}
 .stat-note { font-size: 0.82rem; color: var(--muted); }
 /* Inline SVG charts: one series per chart, drawn in the site accent so
    both themes inherit the right ink from the shared tokens. The SVG is

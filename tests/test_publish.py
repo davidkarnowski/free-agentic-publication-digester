@@ -1758,6 +1758,18 @@ def test_css_defects_found_by_the_audit_stay_fixed():
     assert "border: 1px solid var(--border);" in css
 
 
+def test_source_fact_lists_render_as_a_term_value_grid():
+    """Operator, 2026-08-03: the per-source fact lists read across one
+    visual row per fact (term | value), not as a term line followed by
+    an unindented value line. Pinned so the grid does not silently
+    regress to stacked flow."""
+    css = publish._STYLE
+    fact_rule = css[css.index(".src-facts {"):]
+    fact_rule = fact_rule[:fact_rule.index("}")]
+    assert "display: grid" in fact_rule
+    assert "grid-template-columns: max-content 1fr" in fact_rule
+
+
 _TABLE_DIGEST = """# Daily Digest — 2026-07-05
 
 | | |
