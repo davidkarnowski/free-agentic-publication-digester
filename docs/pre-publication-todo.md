@@ -142,12 +142,19 @@ close (check them off with dates).
 - [ ] **Blocked-source access program** (ranked plan in
   docs/access-alternatives-research-2026-07-29.md):
   1. Email-ingestion adapter over GovDelivery — ~~GUIDE amendment~~
-     **done 2026-07-29** (§3 "Email-distributed sources" + §7 DKIM
-     corroboration). Remaining: project mailbox under the public
-     identity (operator: create + put credentials in .env), then the
-     adapter build (type: email registry entries, IMAP poll, raw-message
-     captures, DKIM verify-and-archive, email-full/email-teaser modes),
-     then subscribe USTREAS/USSSA/USDOJDEA/USAFAA/HHS first.
+     **done 2026-07-29**; ~~mailbox + adapter build + first
+     subscriptions~~ **done and in production 2026-07-30** (stale
+     "Remaining:" line corrected 2026-08-02 — it described work that
+     had already shipped): the project mailbox is live, `email_sources
+     .py` implements the full contract (registry-driven allowlist,
+     raw-RFC-5322 captures, DKIM verify-and-archive, multi-item
+     GovDelivery parsing), and the collector's EmailWorker polls every
+     15 minutes. Registry today: 30 `type: email` sources, **15
+     active** (Treasury, IRS, SSA, DOJ/US Attorneys/DEA, USDA/FSIS,
+     USCIS, FDA, CMS, VA, Federal Reserve, FDIC, USPS OIG), 15 planned.
+     True remaining work: flip the 15 planned entries as subscription
+     evidence arrives (gate-3 notes, docs/email-sources.md), and
+     OB-10's IMAP IDLE if poll latency ever matters.
   2. M-23-22 template letters to the 11 WAF-blocked agencies (quote the
      "shall permit web scraping … unimpeded" language; offer
      Friendly-Bots/Web-Bot-Auth verification; cc GSA/TTS Digital.gov);
