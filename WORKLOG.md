@@ -4290,3 +4290,43 @@ conversion to UTC day") and now pins the Eastern day; new regressions
 cover the review's exact measured case (20:30 -0400 → that Eastern day),
 the rolled-over-UTC case, an evening release rendered as listed, and the
 AGENCYPR-EX-01 line in the fired-rules list. 517 tests.
+
+## 2026-08-02 — R3: the finalized marker gets a column, and the finalizer learns to stop
+
+Review D5 called the error path "the incident's remaining half," and it
+was: the three-clock fix taught `cycle()` to carry the finalized marker
+through every return, but `run_cycle`'s exception handler never goes
+through `cycle()` at all — `record_state(ok=False)` replaces
+`last_result` wholesale, exactly the overwrite the no-op path was cured
+of. Worse, a digest that persistently fails validation would re-run the
+entire pipeline — sync, analyze, compose on the strong tier — every
+backoff interval, forever; the backoff caps at 8×, not at stop.
+
+The durable fix is structural, per the review: the marker moved out of
+the JSON blob into `collector_state.finalized_date`, a column no
+`last_result` writer touches. `eod_due` reads the column first and
+falls back to the JSON keys only for pre-migration rows. `db.connect`
+gained the additive micro-migration this required (`_ensure_columns`,
+the `LLMClient._ensure_backend_column` pattern generalized): the DDL's
+`IF NOT EXISTS` never alters an existing table, so the columns are
+added by `ALTER` on every connect that finds them missing.
+
+The hard stop is a per-target ladder in `finalize_target`/
+`finalize_attempts`, the same shape as r14's per-item ceiling — and for
+the same reason: a per-run counter resets, so only a durable count can
+end a retry loop. `consecutive_errors` specifically cannot serve as
+this counter, because a halt produces idle `ok=True` cycles that reset
+it — the halt would un-halt itself. At `EOD_MAX_FINALIZE_ATTEMPTS`
+(3) the day halts as a loudly disclosed gap: one ERROR log naming the
+day, the count, and the recovery command. A new day gets a fresh
+ladder — a stuck Tuesday never blocks Wednesday's fair try — and a
+success clears everything.
+
+`last_result` is now demoted, in schema.md and both instruction
+surfaces, to what it always should have been: a status line for
+humans, with nothing load-bearing reading it. The Operations rule
+flipped from "carry the keys through every return path" to the
+stronger form the incident actually taught: durable state gets its own
+column. Six new regression tests pin the error-path survival, the
+halt, its per-day scope, the ladder reset, the pre-migration JSON
+fallback, and the migration itself. 522 tests.

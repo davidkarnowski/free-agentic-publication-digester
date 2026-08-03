@@ -230,12 +230,20 @@ CREATE INDEX IF NOT EXISTS idx_item_journal_day
     ON item_journal (digest_date, observed_at);
 
 -- Collector liveness, read by OPS-GUIDE / the fapd-health skill.
+-- finalized_date is the EOD marker in its OWN column (review D5): every
+-- last_result writer replaces that blob wholesale — the no-op path erased
+-- the JSON marker on 2026-08-01 (35 duplicate pipeline runs) and the
+-- error path had the identical hole. finalize_target/attempts are the
+-- finalizer's per-day hard-stop ladder (schema.md).
 CREATE TABLE IF NOT EXISTS collector_state (
     worker             TEXT PRIMARY KEY,       -- 'govinfo' | 'email' | 'analyze' | 'host:<netloc>'
     last_cycle_at      TEXT,
     last_ok_at         TEXT,
-    last_result        TEXT,                   -- JSON stats of the last cycle
-    consecutive_errors INTEGER NOT NULL DEFAULT 0
+    last_result        TEXT,                   -- JSON stats of the last cycle (status line)
+    consecutive_errors INTEGER NOT NULL DEFAULT 0,
+    finalized_date     TEXT,                   -- 'eod' row only: newest finalized day
+    finalize_target    TEXT,                   -- 'eod' row only: day the attempt ladder counts
+    finalize_attempts  INTEGER NOT NULL DEFAULT 0
 );
 
 -- Summarization attempts per item (GUIDE §6 rule 14). The retry ceiling
@@ -295,4 +303,22 @@ def connect(db_path=None):
     conn.execute("PRAGMA foreign_keys = ON")     # needs an exclusive lock, and
     conn.execute("PRAGMA journal_mode = WAL")    # concurrent host workers (GUIDE §4) race on it
     conn.executescript(_DDL)
+    _ensure_columns(conn, "collector_state", {
+        "finalized_date": "TEXT",
+        "finalize_target": "TEXT",
+        "finalize_attempts": "INTEGER NOT NULL DEFAULT 0",
+    })
     return conn
+
+
+def _ensure_columns(conn, table, columns):
+    """Additive micro-migration (the LLMClient._ensure_backend_column
+    pattern): _DDL's IF NOT EXISTS never alters an existing table, so a
+    column added to the CREATE above must also be added here or every
+    pre-existing database silently misses it. Destructive changes stay
+    deliberate one-shot scripts, never startup DDL."""
+    have = {r["name"] for r in conn.execute(f"PRAGMA table_info({table})")}
+    for name, decl in columns.items():
+        if name not in have:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}")
+    conn.commit()

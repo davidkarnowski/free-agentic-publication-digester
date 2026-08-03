@@ -634,3 +634,143 @@ def test_eod_is_not_due_again_after_a_no_op_cycle(tmp_path, monkeypatch):
     worker2.run_cycle()                       # an idle cycle in between
     assert worker2.eod_due(conn, at) is None, "the day re-fired after idling"
     conn.close()
+
+
+def test_eod_marker_survives_the_error_path(tmp_path, monkeypatch):
+    """Review D5, the incident's remaining half: record_state(ok=False)
+    replaces last_result wholesale, exactly as the no-op return used to.
+    The finalized marker now lives in its own column, so a later FAILING
+    cycle must not erase the proof that an earlier day was finalized."""
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    sup.finalizer_runner = lambda date=None: 0
+    sup.evidence_runner = lambda: 0
+    worker = collect.EODWorker(sup, 10)
+    conn = conn_factory()
+
+    monkeypatch.setattr(worker, "eod_due", lambda c, now=None: "2026-07-31")
+    worker.run_cycle()                                  # 07-31 finalized
+    monkeypatch.undo()
+
+    sup.finalizer_runner = lambda date=None: 1          # now everything fails
+    monkeypatch.setattr(worker, "eod_due", lambda c, now=None: "2026-08-01")
+    assert worker.run_cycle() is None                   # error path taken
+    monkeypatch.undo()
+
+    at = dt.datetime(2026, 8, 1, 4, 5, tzinfo=dt.UTC)   # 00:05 ET Aug 1
+    assert worker.eod_due(conn, at) is None, \
+        "the error write erased the finalized marker for 07-31"
+    row = conn.execute("SELECT finalized_date FROM collector_state"
+                       " WHERE worker = 'eod'").fetchone()
+    assert row["finalized_date"] == "2026-07-31"
+    # and the failing day is still retried — one failure is not a halt
+    at2 = dt.datetime(2026, 8, 2, 4, 5, tzinfo=dt.UTC)  # 00:05 ET Aug 2
+    assert worker.eod_due(conn, at2) == "2026-08-01"
+    conn.close()
+
+
+def test_eod_hard_stop_after_repeated_finalizer_failures(
+        tmp_path, monkeypatch, caplog):
+    """Review D5: a digest that persistently fails must not buy a full
+    pipeline run every backoff interval forever. At the attempt ceiling
+    the day halts as a loudly disclosed gap."""
+    import logging as _logging
+
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    sup.finalizer_runner = lambda date=None: 1
+    sup.evidence_runner = lambda: 0
+    worker = collect.EODWorker(sup, 10)
+    conn = conn_factory()
+    at = dt.datetime(2026, 8, 2, 4, 5, tzinfo=dt.UTC)   # 00:05 ET Aug 2
+
+    with caplog.at_level(_logging.ERROR, logger="fapd.collect"):
+        for _ in range(config.EOD_MAX_FINALIZE_ATTEMPTS):
+            assert worker.eod_due(conn, at) == "2026-08-01", \
+                "still due before the ceiling"
+            monkeypatch.setattr(worker, "eod_due",
+                                lambda c, now=None: "2026-08-01")
+            worker.run_cycle()
+            monkeypatch.undo()
+
+    assert worker.eod_due(conn, at) is None, "the ceiling did not halt the day"
+    assert "HALTED" in caplog.text, "the halt must be loudly disclosed"
+    row = conn.execute(
+        "SELECT finalize_target, finalize_attempts, finalized_date"
+        " FROM collector_state WHERE worker = 'eod'").fetchone()
+    assert row["finalize_target"] == "2026-08-01"
+    assert row["finalize_attempts"] == config.EOD_MAX_FINALIZE_ATTEMPTS
+    assert row["finalized_date"] is None, "a halted day is not a finalized day"
+
+    # The halt is per target day: the next day still gets its fair try.
+    at3 = dt.datetime(2026, 8, 3, 4, 5, tzinfo=dt.UTC)  # 00:05 ET Aug 3
+    assert worker.eod_due(conn, at3) == "2026-08-02"
+    conn.close()
+
+
+def test_eod_success_clears_the_attempt_ladder(tmp_path, monkeypatch):
+    """A failure followed by a success resets the ladder and writes the
+    durable marker — a transient outage must not creep toward the halt."""
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    sup.evidence_runner = lambda: 0
+    worker = collect.EODWorker(sup, 10)
+    conn = conn_factory()
+
+    sup.finalizer_runner = lambda date=None: 1
+    monkeypatch.setattr(worker, "eod_due", lambda c, now=None: "2026-08-01")
+    worker.run_cycle()                                  # one failure
+    sup.finalizer_runner = lambda date=None: 0
+    worker.run_cycle()                                  # then success
+    monkeypatch.undo()
+
+    row = conn.execute(
+        "SELECT finalized_date, finalize_target, finalize_attempts"
+        " FROM collector_state WHERE worker = 'eod'").fetchone()
+    assert row["finalized_date"] == "2026-08-01"
+    assert row["finalize_target"] is None
+    assert row["finalize_attempts"] == 0
+    conn.close()
+
+
+def test_eod_reads_pre_migration_json_marker(tmp_path, monkeypatch):
+    """A row written before the column migration carries the marker only
+    in last_result JSON; it must still count as finalized."""
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    worker = collect.EODWorker(sup, 10)
+    conn = conn_factory()
+    conn.execute(
+        "INSERT INTO collector_state (worker, last_result) VALUES ('eod', ?)",
+        (json.dumps({"ran": True, "date": "2026-07-31"}),))
+    conn.commit()
+    at = dt.datetime(2026, 8, 1, 4, 5, tzinfo=dt.UTC)   # 00:05 ET Aug 1
+    assert worker.eod_due(conn, at) is None
+    conn.close()
+
+
+def test_connect_migrates_pre_column_collector_state(tmp_path):
+    """db.connect's additive micro-migration: a database created before
+    the finalized_date columns gains them on connect, with existing rows
+    intact (the IF NOT EXISTS DDL alone never alters an existing table)."""
+    import sqlite3
+
+    from fapd import db
+
+    path = tmp_path / "old.db"
+    raw = sqlite3.connect(path)
+    raw.execute(
+        "CREATE TABLE collector_state ("
+        " worker TEXT PRIMARY KEY, last_cycle_at TEXT, last_ok_at TEXT,"
+        " last_result TEXT, consecutive_errors INTEGER NOT NULL DEFAULT 0)")
+    raw.execute(
+        "INSERT INTO collector_state (worker, last_result)"
+        " VALUES ('eod', '{\"finalized\": \"2026-07-31\"}')")
+    raw.commit()
+    raw.close()
+
+    conn = db.connect(path)
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(collector_state)")}
+    assert {"finalized_date", "finalize_target", "finalize_attempts"} <= cols
+    row = conn.execute("SELECT last_result, finalized_date, finalize_attempts"
+                       " FROM collector_state WHERE worker = 'eod'").fetchone()
+    assert json.loads(row["last_result"])["finalized"] == "2026-07-31"
+    assert row["finalized_date"] is None
+    assert row["finalize_attempts"] == 0
+    conn.close()

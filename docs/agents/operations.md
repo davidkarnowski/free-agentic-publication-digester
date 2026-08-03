@@ -20,14 +20,15 @@ budgets are policy; propose changes as diffs).
    session. Local edits to `deploy/vps/*` are ungated; *executing*
    anything against the VPS is not. When authorized, follow
    docs/ops/ and the servicing guides; default read-only.
-2. **A worker's `cycle()` return value is durable state, not a status
-   line.** `run_cycle` stores it wholesale as
-   `collector_state.last_result`, and `EODWorker.eod_due` reads the
-   `finalized` key to decide whether a day is done. Every return path —
-   including error paths — must preserve the keys a reader depends on.
-   The 2026-08-01 incident: a bare `{"ran": False}` erased the
-   finalized marker and the full pipeline re-ran every ~20 minutes, 35
-   duplicate evidence commits in a day.
+2. **Durable state gets its own column; `last_result` is a status
+   line.** `run_cycle` (and its error path) replace
+   `collector_state.last_result` wholesale — anything a reader depends
+   on across cycles must live in a column no wholesale writer touches,
+   the way the EOD `finalized_date` now does (D5, closed 2026-08-02).
+   The 2026-08-01 incident: when the finalized marker lived in that
+   JSON, a bare `{"ran": False}` erased it and the full pipeline re-ran
+   every ~20 minutes, 35 duplicate evidence commits in a day. Never
+   route a new durable fact through `last_result`.
 
 ## Governing docs, in precedence order
 
@@ -108,11 +109,15 @@ gates → docs/code-standards.md → this file.
 
 ## Current backlog (2026-08-02 amended review)
 
-- **D5** — the EOD `finalized` marker still dies on the *error* path
-  (`record_state(ok=False)` replaces the row); move it to its own
-  `collector_state` column and give a repeatedly failing finalizer a
-  hard stop with loud disclosure. **First priority — it is the
-  incident's remaining half.**
+- **D5** — **Done 2026-08-02** (`bug/r3-eod-finalized-column`): the
+  marker lives in `collector_state.finalized_date`, a column no
+  `last_result` writer touches (additive micro-migration in
+  `db.connect`); `eod_due` reads it first with a JSON fallback for
+  pre-migration rows. A repeatedly failing finalizer halts per target
+  day at `EOD_MAX_FINALIZE_ATTEMPTS` (ladder in
+  `finalize_target`/`finalize_attempts` — `consecutive_errors` can't
+  serve: the halt's own idle cycles reset it) with a loud `HALTED`
+  log naming the recovery command; the next day still gets its try.
 - **D12** — a govinfo budget halt aborts the free stages (extract,
   journal) and always starves the same tail collections; per-collection
   isolation + a rotating start offset.

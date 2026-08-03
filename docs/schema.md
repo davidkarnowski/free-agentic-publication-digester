@@ -464,21 +464,34 @@ GUIDE §3 dating rules. Indexed by `(digest_date, observed_at)`.
 
 `collector_state` — one row per collector worker (`govinfo`, `email`,
 `analyze`, `render`, `eod`, `host:<netloc>`): last cycle/ok timestamps,
-`last_result` JSON, `consecutive_errors`. The read surface for
-OPS-GUIDE.md and the `/fapd-health` skill; a worker whose
-`consecutive_errors` grows or whose `last_ok_at` goes stale is a
-finding.
+`last_result` JSON, `consecutive_errors`, and three columns only the
+EOD finalizer writes — `finalized_date`, `finalize_target`,
+`finalize_attempts`. The read surface for OPS-GUIDE.md and the
+`/fapd-health` skill; a worker whose `consecutive_errors` grows or
+whose `last_ok_at` goes stale is a finding.
 
-**`last_result` is durable state, not a status line** (the contract the
-2026-08-02 three-clock incident was made of): `run_cycle` stores
-whatever `cycle()` returns, wholesale, and `EODWorker.eod_due` reads
-the `finalized` key (falling back to `date` for rows written before
-2026-08-02) to decide whether a publication day is already done. Every
-return path of a `cycle()` must therefore carry the keys its readers
-depend on — a bare `{"ran": false}` erased the finalized marker and
-re-ran the full pipeline every ~20 minutes. Known remaining gap
-(review D5): the error path in `run_cycle` still replaces the row;
-the durable fix is a dedicated column.
+**The finalized marker lives in `finalized_date`, its own column**
+(2026-08-02, closing review D5 — the second half of the three-clock
+incident). The first half was the no-op path: `run_cycle` stores
+whatever `cycle()` returns, wholesale, as `last_result`, and a bare
+`{"ran": false}` erased the JSON `finalized` key the reader depended
+on — the full pipeline re-ran every ~20 minutes. The error path had
+the identical hole (`record_state(ok=False)` also replaces the row),
+so the marker moved to a column no `last_result` writer can touch.
+`EODWorker.eod_due` reads the column first and falls back to the
+JSON `finalized`/`date` keys only for rows written before the
+migration. `last_result` remains a status line for humans; nothing
+load-bearing reads it anymore.
+
+`finalize_target` + `finalize_attempts` are the finalizer's hard-stop
+ladder (same shape as `summary_attempts` / GUIDE §6 r14): failed
+finalize attempts for one target day are counted, and at
+`config.EOD_MAX_FINALIZE_ATTEMPTS` the day is loudly disclosed as
+halted and not retried — a persistently failing day must not buy ~18
+full pipeline runs per day forever. A new target day gets a fresh
+ladder; a success clears it. `consecutive_errors` cannot serve as this
+counter: the halt itself produces idle `ok=True` cycles, which reset
+it.
 
 `section_tags` — the LIVE tag table (2026-07-30, GUIDE §6 r12a): one
 row per `(date, section_key, tag)` with `method ∈ mechanical/llm`;

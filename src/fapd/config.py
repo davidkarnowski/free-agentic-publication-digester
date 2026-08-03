@@ -210,6 +210,15 @@ PUBLICATION_TZ_LABEL = "Eastern time (Washington, D.C.)"
 EOD_ET_HOUR = 0
 EVIDENCE_PUSH = os.environ.get("FAPD_EVIDENCE_PUSH", "") == "1"
 
+# Hard stop for a repeatedly failing finalizer (review D5/R3, same shape
+# as MAX_ITEM_SUMMARY_ATTEMPTS): after this many failed finalize attempts
+# for ONE target day, that day is loudly disclosed as halted and not
+# retried — without it, a digest that persistently fails validation buys
+# a full pipeline run (sync, analyze, compose on the strong tier) every
+# backoff interval, forever (~18 runs/day). A new day gets a fresh
+# ladder; operator intervention (fix, then re-run with --date) clears it.
+EOD_MAX_FINALIZE_ATTEMPTS = 3
+
 # Rule USCOURTS-FETCH-01 (GUIDE §3 judicial): USCOURTS delta listings carry
 # heavy lastModified churn on years-old cases (measured 7,178 of 9,401 in a
 # 3-day window). Only packages whose date_issued falls within this window

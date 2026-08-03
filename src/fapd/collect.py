@@ -496,43 +496,94 @@ class EODWorker(Worker):
 
     def eod_due(self, conn, now=None):
         """The publication day to finalize, or None. Due once that day
-        has closed in Washington and has not been finalized yet — the
-        hour gate is read on Eastern, so it means the same clock time
-        year-round (config.EOD_ET_HOUR = 0: run when the day ends)."""
+        has closed in Washington, has not been finalized yet, and has not
+        hit the failed-attempt hard stop — the hour gate is read on
+        Eastern, so it means the same clock time year-round
+        (config.EOD_ET_HOUR = 0: run when the day ends)."""
         now = now or dt.datetime.now(dt.UTC)
         if now.astimezone(config.PUBLICATION_TZ).hour < config.EOD_ET_HOUR:
             return None
         # The publication day that just closed in Washington — computed
         # from Eastern so a DST shift can never target the wrong day.
         target = publication_date(now - dt.timedelta(days=1))
+        done_date = self._last_finalized(conn)
+        if done_date and done_date >= target:
+            return None
         row = conn.execute(
-            "SELECT last_result FROM collector_state WHERE worker = 'eod'"
-        ).fetchone()
-        if row and row["last_result"]:
-            prev = json.loads(row["last_result"])
-            # `finalized` is the durable marker; `date` is read too so rows
-            # written before 2026-08-02 still count as finalized.
-            done_date = prev.get("finalized") or prev.get("date")
-            if done_date and done_date >= target:
-                return None
+            "SELECT finalize_target, finalize_attempts FROM collector_state"
+            " WHERE worker = 'eod'").fetchone()
+        if (row and row["finalize_target"] == target
+                and row["finalize_attempts"] >= config.EOD_MAX_FINALIZE_ATTEMPTS):
+            # Halted (review D5): the day stays unfinalized as a disclosed
+            # gap. The loud logging happened when the ladder topped out;
+            # repeating it every idle check would bury the signal.
+            return None
         return target
 
     def _last_finalized(self, conn):
+        """Newest finalized day: the dedicated column (review D5 — no
+        last_result writer can touch it), falling back to the JSON
+        `finalized`/`date` keys only for rows written before the column
+        existed."""
         row = conn.execute(
-            "SELECT last_result FROM collector_state WHERE worker = 'eod'"
-        ).fetchone()
-        if not row or not row["last_result"]:
+            "SELECT finalized_date, last_result FROM collector_state"
+            " WHERE worker = 'eod'").fetchone()
+        if not row:
             return None
-        prev = json.loads(row["last_result"])
-        return prev.get("finalized") or prev.get("date")
+        if row["finalized_date"]:
+            return row["finalized_date"]
+        if row["last_result"]:
+            prev = json.loads(row["last_result"])
+            return prev.get("finalized") or prev.get("date")
+        return None
+
+    def _record_finalized(self, conn, target):
+        """Durable success marker + ladder reset, in the columns
+        record_state never writes — an error or idle cycle replacing
+        last_result cannot erase this."""
+        conn.execute(
+            """
+            INSERT INTO collector_state (worker, finalized_date,
+                finalize_target, finalize_attempts)
+            VALUES ('eod', ?, NULL, 0)
+            ON CONFLICT (worker) DO UPDATE SET
+                finalized_date = excluded.finalized_date,
+                finalize_target = NULL,
+                finalize_attempts = 0
+            """,
+            (target,),
+        )
+        conn.commit()
+
+    def _record_finalize_failure(self, conn, target):
+        """Advance the per-target attempt ladder; returns the new count.
+        A different target starts a fresh ladder — the hard stop is per
+        day, so a stuck Tuesday never blocks Wednesday's one fair try."""
+        conn.execute(
+            """
+            INSERT INTO collector_state (worker, finalize_target,
+                finalize_attempts)
+            VALUES ('eod', ?, 1)
+            ON CONFLICT (worker) DO UPDATE SET
+                finalize_attempts = CASE WHEN finalize_target = excluded.finalize_target
+                                         THEN finalize_attempts + 1 ELSE 1 END,
+                finalize_target = excluded.finalize_target
+            """,
+            (target,),
+        )
+        conn.commit()
+        return conn.execute(
+            "SELECT finalize_attempts FROM collector_state WHERE worker = 'eod'"
+        ).fetchone()["finalize_attempts"]
 
     def cycle(self, conn, cycle_id):
-        # Carry the finalized marker through EVERY return. run_cycle records
-        # whatever cycle() returns as last_result, so a bare {"ran": False}
-        # erased the proof that the day had been finalized — eod_due then
-        # saw no date, re-fired, and re-ran the whole pipeline. Measured
-        # 2026-08-02: four full runs and four duplicate evidence commits in
-        # under three hours.
+        # The durable finalized marker lives in its own column
+        # (_record_finalized); the `finalized` key returned here is a
+        # status line for the health surface. History: when the marker
+        # lived in last_result, a bare {"ran": False} erased it and the
+        # pipeline re-ran every ~20 minutes (2026-08-01, 35 duplicate
+        # evidence commits) — and the error path had the same hole, which
+        # is why nothing load-bearing reads last_result anymore.
         finalized = self._last_finalized(conn)
         target = self.eod_due(conn)
         if not target:
@@ -545,7 +596,19 @@ class EODWorker(Worker):
             if exit_code == 0 and config.EVIDENCE_PUSH:
                 pushed = self.sup.evidence_runner() == 0
             if exit_code != 0:
+                attempts = self._record_finalize_failure(conn, target)
+                if attempts >= config.EOD_MAX_FINALIZE_ATTEMPTS:
+                    # The loud disclosure the hard stop owes (GUIDE §2
+                    # no-silent-omission, applied to operations): the day
+                    # is now a named gap, not a silent retry loop.
+                    logger.error(
+                        "EOD finalizer HALTED for %s after %d failed"
+                        " attempts — the day remains unfinalized and will"
+                        " NOT be retried; fix the cause, then run"
+                        " scripts/run_pipeline.py --date %s and the next"
+                        " success clears the ladder", target, attempts, target)
                 raise RuntimeError(f"finalizer exited {exit_code} for {target}")
+            self._record_finalized(conn, target)
             journal_new(conn, "govinfo", cycle_id)  # late finalizer items
             journal_model_events(conn, cycle_id)
             return {"ran": True, "date": target, "finalized": target,

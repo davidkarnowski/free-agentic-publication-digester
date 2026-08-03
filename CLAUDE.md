@@ -152,15 +152,15 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   document belongs to. When auditing this rule, enumerate ALL call
   sites — `report._claimed_day()` was the last known-wrong one, fixed
   2026-08-02 (review D1).
-- **A worker's `cycle()` return value is durable state, not a status
-  line** — `run_cycle` stores it wholesale as `collector_state
-  .last_result`, and `EODWorker.eod_due` reads the `finalized` key from
-  it to decide whether a day is done. Every return path must carry the
-  keys a reader depends on: a bare `{"ran": False}` erased the
-  finalized marker and re-ran the full pipeline every ~20 minutes on
-  2026-08-01 (35 duplicate evidence commits). The error path in
-  `run_cycle` still replaces the row (review D5) — bear it in mind
-  until the marker moves to its own column.
+- **`collector_state.last_result` is a status line; durable facts get
+  their own column** — `run_cycle` and its error path replace the JSON
+  blob wholesale. When the EOD finalized marker lived there, a bare
+  `{"ran": False}` erased it and the full pipeline re-ran every ~20
+  minutes on 2026-08-01 (35 duplicate evidence commits); since
+  2026-08-02 (review D5) the marker is the `finalized_date` column, the
+  failing-finalizer hard stop is the `finalize_target`/`finalize_attempts`
+  ladder, and nothing load-bearing reads `last_result`. Never route a
+  new durable fact through it.
 - **`scripts/digest.py` imports the analysis layer lazily** — report-only
   runs must work even if analysis modules break.
 - **`LLMClient._ensure_backend_column`** does an in-place ALTER — the
