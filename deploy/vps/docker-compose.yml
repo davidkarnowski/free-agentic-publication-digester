@@ -27,6 +27,15 @@ services:
       # containers share no network. Docker seeds an empty volume from the
       # backend image's baked site/ on first mount.
       - fapd-site:/usr/share/nginx/html:ro
+    # Bounds + rotation (review D18/D19/R4): this is a shared VPS — a
+    # runaway container must be contained, and an unrotated log must not
+    # fill the disk. Values copied from the dev stack, where the block
+    # ran first by design.
+    mem_limit: 128m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "3" }
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
       interval: 10s
@@ -53,6 +62,25 @@ services:
       - fapd-data:/app/data
       - fapd-site:/app/site
       - ./secrets:/app/secrets:ro # deploy key for evidence pushes (0600, root-owned dir)
+    # Bounds + rotation (review D18/D19/R4), values from the dev stack's
+    # tested block. The 1g ceiling is also D18's blast-radius limit: this
+    # container parses network XML with the stdlib parser.
+    mem_limit: 1g
+    cpus: 1.0
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "3" }
+    # Liveness = the supervisor's own heartbeat: some worker recorded a
+    # cycle within 2h (the fastest worker cycles every ~10–20 min even
+    # fully backed off, so 2h of silence means the loop is wedged — the
+    # one state a process-alive check cannot see, because PID 1 dying
+    # already exits the container). Base-image python; stdlib only.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sqlite3, datetime as dt, sys; r = sqlite3.connect('file:/app/data/fapd.db?mode=ro', uri=True).execute('SELECT MAX(last_cycle_at) FROM collector_state').fetchone(); sys.exit(0 if r and r[0] and (dt.datetime.now(dt.UTC) - dt.datetime.fromisoformat(r[0].replace('Z', '+00:00'))).total_seconds() < 7200 else 1)"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 10m
 
 networks:
   fapd_edge:

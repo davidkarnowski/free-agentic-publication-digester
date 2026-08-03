@@ -81,6 +81,19 @@ def test_dev_env_example_defuses_the_prod_defaults():
     assert "GOVINFO_API_KEY=\n" in env         # no inherited prod key
 
 
+def test_prod_compose_carries_the_container_bounds():
+    """Review D18/D19/R4: the shared VPS's containers are bounded and
+    their logs rotate; the backend has a liveness heartbeat. The dev
+    stack modeled this block first — prod must not drift back to
+    unbounded."""
+    compose = (DEV / ".." / "vps" / "docker-compose.yml").read_text(
+        encoding="utf-8")
+    assert compose.count("mem_limit:") == 2      # web and backend
+    assert compose.count("max-size:") == 2       # log rotation on both
+    assert compose.count("healthcheck:") == 2    # web wget + backend heartbeat
+    assert "collector_state" in compose          # the heartbeat reads the DB
+
+
 def test_dev_compose_builds_the_production_dockerfile():
     compose = (DEV / "docker-compose.yml").read_text(encoding="utf-8")
     assert "dockerfile: ../vps/Dockerfile.backend" in compose

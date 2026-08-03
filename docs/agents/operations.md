@@ -123,9 +123,13 @@ gates → docs/code-standards.md → this file.
   isolation + a rotating start offset.
 - **D15** — `stage_analyze` is the only unwrapped stage; a flaky model
   call kills a renderable day.
-- **D19 / R4** — the backend container has no `mem_limit`, no `cpus`,
-  no log rotation, no healthcheck, on a shared VPS. Compose-file
-  change; deploy remains operator-gated.
+- **D19 / R4** — **Done 2026-08-02** (`arch/r4-container-bounds`,
+  compose file only — takes effect on the next authorized deploy):
+  both prod services carry the dev stack's tested
+  `mem_limit`/`cpus`/log-rotation block, and the backend gained a
+  DB-heartbeat healthcheck (any worker cycled within 2h, read-only,
+  stdlib python) — the wedged-loop state a process check can't see.
+  Pinned by `test_prod_compose_carries_the_container_bounds`.
 - **D20a** — evidence commits are titled with the UTC run date, one day
   after the digest they carry; pass the finalized date through.
 - **D20b** — a diverged remote silently stops evidence pushes.

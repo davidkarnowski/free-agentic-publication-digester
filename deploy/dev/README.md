@@ -83,8 +83,10 @@ believe they are under the publisher's limit while jointly exceeding it.
   links).
 - **`web` has egress here** — dev cannot prove production's zero-egress
   property (`fapd_edge` is `--internal` on the box).
-- **Resource limits and log rotation exist here and not yet in prod** —
-  deliberately modeling review D19/R4 so the production compose change
-  (deploy-gated) copies a tested block. Temporary divergence by intent.
+- ~~Resource limits and log rotation exist here and not yet in prod~~ —
+  the divergence closed 2026-08-02: the production compose copied this
+  stack's tested block (review D19/R4), plus a backend DB-heartbeat
+  healthcheck prod alone carries. The dev stack ran the block first by
+  design.
 - Data is as fresh as the last `dev-seed.sh`; the `SEEDED` stamp in the
   data volume records the vintage, and `dev-up.sh` prints it.

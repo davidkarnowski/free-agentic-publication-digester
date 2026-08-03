@@ -4330,3 +4330,29 @@ stronger form the incident actually taught: durable state gets its own
 column. Six new regression tests pin the error-path survival, the
 halt, its per-day scope, the ladder reset, the pre-migration JSON
 fallback, and the migration itself. 522 tests.
+
+## 2026-08-02 — R4: the containers get walls, and the backend gets a pulse
+
+The production compose change the dev stack existed to rehearse: both
+services now carry the tested bounds block — web at 128m/0.5 CPU,
+backend at 1g/1.0 — with json-file log rotation (5m × 3) on each. The
+1g backend ceiling doubles as D18's blast-radius limit: that container
+parses network XML with the stdlib parser, and a memory bomb should
+cost a container restart, not the shared box.
+
+New in prod (dev deliberately doesn't have it): a backend healthcheck
+that reads the supervisor's own heartbeat — stdlib python, read-only
+URI open of fapd.db, healthy iff any worker recorded a cycle within
+two hours. A process-alive check is useless here (PID 1 dying already
+exits the container); the state worth detecting is the loop wedged
+while the process lives, and only collector_state shows that. The
+fastest worker cycles every ~10–20 minutes even fully backed off, so
+two hours of silence is a real finding, and the 10-minute start_period
+covers the first cycle on a fresh volume.
+
+test_prod_compose_carries_the_container_bounds pins all of it — counts
+of mem_limit/max-size/healthcheck and the collector_state read — so
+prod cannot quietly drift back to unbounded, the same textual-pin
+pattern the dev stack's guardrails use. The dev README's "here and not
+yet in prod" divergence note is closed out. Compose file only: nothing
+touches the box until the next authorized deploy. 523 tests.
