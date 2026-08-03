@@ -472,7 +472,7 @@ h2.filter-lead {
   font-variant-numeric: tabular-nums;
 }
 /* Which keywords are active, in words. Pre-rendered and revealed by CSS
-   so the page stays script-free; on an engine without :has() the readout
+   without any second script; on an engine without :has() the readout
    is simply absent, which shows the day unfiltered. */
 .filter-status { margin: 0.4rem 0 0; font-size: 0.8rem; color: var(--muted); }
 .filter-status > span { display: none; }

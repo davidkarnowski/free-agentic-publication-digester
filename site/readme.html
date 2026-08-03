@@ -33,17 +33,21 @@ the federal government actually did on a given day.</p>
 item carries a citation to the official record and names the mechanical
 rule that selected it. Everything not summarized is counted. Nothing is
 silently omitted.</p>
-<h2 id="status-2026-07-30">Status (2026-07-30)</h2>
+<h2 id="status-2026-08-02">Status (2026-08-02)</h2>
 <p>The authoritative numbers block — where any other figure in the
-repository disagrees, this dated snapshot is the current one.</p>
+repository disagrees, this dated snapshot is the current one. (For
+source counts the live <a href="https://fapd.info/sources.html">Sources page</a>
+is always current; it derives them from the registry at build time.)</p>
 <ul>
 <li><strong>Live site:</strong> https://fapd.info — served from a Docker stack on a
   VPS; GitHub holds the repository, CI, and the integrity record.</li>
-<li><strong>Source registry:</strong> 127 sources — 30 active (14 web feeds and
-  newsrooms, 11 email bulletins, 5 govinfo collections), 76 planned,
-  19 recorded unavailable, 2 evaluated and excluded.</li>
-<li><strong>Latest digest:</strong> <a href="2026-07-29.html">2026-07-29</a>.</li>
-<li><strong>Test suite:</strong> 377 tests (verified by collection 2026-07-30).</li>
+<li><strong>Source registry:</strong> 127 sources — 42 active (16 web feeds, 15 email
+  bulletins, 5 govinfo collections, 4 listing-page sources, 1 chamber
+  XML index, 1 API source), 63 planned, 20 recorded unavailable,
+  2 evaluated and excluded.</li>
+<li><strong>Latest digest:</strong> <a href="2026-08-01.html">2026-08-01</a>; digests
+  publish daily just after midnight Eastern.</li>
+<li><strong>Test suite:</strong> 516 tests (verified by collection 2026-08-02).</li>
 </ul>
 <hr />
 <h2 id="philosophy">Philosophy</h2>
@@ -133,7 +137,8 @@ candidates); verdicts are re-probed as sites change; and we engage
 agency web and API teams directly to advocate for safe, sane automated
 access to what they already publish for the public. Coverage grows by
 doors opening — never by evasion.</p>
-<p>That effort produced its first result in July 2026: <strong>11 agencies whose
+<p>That effort produced its first result in July 2026, and the channel has
+grown since: <strong>15 agencies now deliver by email — among them agencies whose
 web channels refuse us now have a working input path through their own
 email bulletins</strong> — Treasury, USDA, EPA, SSA, DOT, FAA, NHTSA, DEA,
 ATF, the Coast Guard, and HUD's Inspector General. The blocked web
@@ -157,7 +162,9 @@ autodiscovery misses; APIs on hosts a newsroom WAF never touches).</p>
 <p>Real publication interfaces are irregular — feeds without stable IDs,
 article pages that challenge sustained automated access, content behind
 script-only redirects. That irregularity is absorbed at one seam: a
-<strong>source adapter</strong> owns exactly four decisions (what makes two sightings
+<strong>source adapter</strong> owns exactly six decisions (how the source's index or
+feed is enumerated into items; what query parameters the poll itself
+sends; what makes two sightings
 the same document; whether to fetch full articles or feed metadata only;
 how served bytes become text; what to store when no article is
 available), while the shared loop owns everything that must never vary —
@@ -201,7 +208,8 @@ conditional requests, robots enforcement, budgets, capture, storage.</p>
   source class on its own clock through the day — govinfo about every
   30 minutes, agency feeds about every 60, the project mailbox about
   every 15 — always as watermark deltas with conditional requests. Past
-  70% of a class's daily budget its interval doubles for the rest of
+  70% of the agency class's daily budget its collectors' intervals
+  double for the rest of
   the day, reserving headroom for the end-of-day finalizer.</li>
 <li><strong>Budgeted:</strong> hard daily request caps per source class, enforced by
   the client itself, which refuses to exceed them mid-run.</li>
@@ -219,8 +227,12 @@ without notice. So every capture is preserved under a two-hash strategy —
 stored content-addressed) and <code>text_sha256</code> over normalized text (the
 change signal) — and every fetch <em>attempt</em>, including errors and robots
 refusals, is exported to a daily manifest committed to this repository.
-Each manifest chains to the previous day's by hash, so deletion or
-reordering of days is detectable from the files alone. New captures are
+Each manifest's header carries the hash of the previous manifest on
+file. Honest limit, stated because provenance claims deserve scrutiny:
+the chain binds content, not dates, so it proves a retained middle day
+was not altered — it cannot by itself prove the newest day was not
+truncated or that no day was skipped. Strengthening the header with the
+predecessor's date is on the published backlog. New captures are
 additionally submitted to the Internet Archive's Wayback Machine as an
 independent second witness, within a budget, best-effort. A source's
 claimed publication date and the time we first observed it are always
@@ -321,6 +333,8 @@ provenance/       committed daily manifests (hash-chained)
 digests/          generated daily digests (committed, canonical)
 site/             derived static site (human pages + agent surfaces)
 deploy/vps/       the Docker stack serving fapd.info (source of truth)
+deploy/dev/       local dev stack: the production image against a VPS data
+                  snapshot, for pre-deploy render testing (see its README)
 docs/             schema, research reports, dev notes, how to add sources
 data/             raw archive + SQLite (local, git-ignored)
 tests/</code></p>
@@ -362,7 +376,7 @@ is at <code>docs/site/ai-development.md</code>
 </ul>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-08-02T17:02:36Z (UTC). Canonical source:
+  <p>Generated 2026-08-03T04:21:38Z (UTC). Canonical source:
   <code>README.md</code> in the
   <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in

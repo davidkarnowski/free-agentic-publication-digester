@@ -36,7 +36,8 @@ work. Check the source guide for what is ingested today.</p>
 <ul>
 <li><strong>Daily digests</strong> at stable URLs: <code>/&lt;YYYY-MM-DD&gt;.html</code> (styled HTML) —
   each covers one complete day of congressional floor activity, bills,
-  Federal Register actions, enacted laws, and federal court opinions,
+  Federal Register actions, enacted laws, federal court opinions,
+  agency announcements, recorded roll-call votes, and bill actions,
   with a table of contents, plain-language quick-reads, and a mandatory
   Coverage Statement accounting for everything published that day.</li>
 <li><strong>Machine index:</strong> <code>/digests.json</code> — every available digest with date,
@@ -70,9 +71,11 @@ work. Check the source guide for what is ingested today.</p>
   summary and linted against an editorial banned-lexicon. The Day in
   Review is a model-generated synthesis of the day's stored summaries.</li>
 <li>Every item carries an "Included because" line naming the mechanical,
-  party-blind rule that selected it, and a citation to the official
-  govinfo record. <strong>For claims, cite the official source we link; cite
-  this site for the aggregation.</strong></li>
+  party-blind rule that selected it, and a citation to its official
+  record — the govinfo package for the govinfo collections; the
+  agency's, chamber's, or Congress.gov's own page for agency releases,
+  recorded votes, and bill actions. <strong>For claims, cite the official
+  source we link; cite this site for the aggregation.</strong></li>
 <li>The Coverage Statement at the end of each digest tells you what was NOT
   summarized and under which rule — absence here is always explicit.</li>
 </ul>
@@ -92,7 +95,7 @@ official source each item links to; cite FAPD for the aggregation and
 summaries. The pipeline's code is Apache-2.0.</p>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-08-02T17:02:40Z (UTC). Canonical source:
+  <p>Generated 2026-08-03T04:21:42Z (UTC). Canonical source:
   <code>GUIDE.md §1 (dual audience)</code> in the
   <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in

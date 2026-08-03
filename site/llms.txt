@@ -4,11 +4,11 @@
 > ingestion as well as human reading: see /agents.html.
 
 ## Core
-- [Latest digest](https://fapd.info/2026-08-01.html)
+- [Latest digest](https://fapd.info/2026-08-02.html)
 - [All digests (index)](https://fapd.info/index.html)
 - [Machine-readable digest index](https://fapd.info/digests.json)
 - [Atom feed of digests](https://fapd.info/feed.xml)
-- [Today — live in-progress day, PRELIMINARY](https://fapd.info/today.html) (also /today.json, whose `facets.tags` gives keyword counts and whose items carry the same tags for client-side filtering. Items may change until the end-of-day gates freeze the dated digest)
+- [Today — live in-progress day, PRELIMINARY](https://fapd.info/today.html) (also /today.json, whose `facets.tags` gives keyword counts and whose items carry the same tags for client-side filtering. READ THE FLAGS: items[] includes entries the human page excludes — filter on is_backfill=false for the day's own news (backfill_count states how many are excluded), and check day_context (null on federal business days; a weekend/holiday object explains a quiet stream). Items may change until the end-of-day gates freeze the dated digest)
 - [Source guide — what we ingest and why](https://fapd.info/sources.html)
 - [Source health and statistics, machine-readable](https://fapd.info/sources.json) (per source: items ingested over a trailing window and their per-day rate, average/median content length, delivery mode, our request outcomes by HTTP status class, and a health label with the thresholds that produced it, so any label can be recomputed from the numbers in the same file. These describe OUR INGESTION — items we recorded and requests we made — and are not a measurement of any agency or publisher. Not part of the official record; do not cite as government publication.)
 - [Blog — notes on how this project is built](https://fapd.info/blog.html) (commentary ABOUT the project: not digest content, not part of the official record, and not government publication. Cite it as commentary, never as a source for what the government did.)
@@ -24,7 +24,9 @@
 ## Notes
 - Digest URLs are stable: /<YYYY-MM-DD>.html
 - Official text vs model-generated text is labeled in place;
-  every item cites the official govinfo record.
+  every item cites its official record (govinfo for the govinfo
+  collections; the publisher's own page for agency releases,
+  recorded votes, and bill actions).
 - Canonical Markdown + provenance manifests live in the public repository: https://github.com/davidkarnowski/free-agentic-publication-digester
 - Reuse: content is CC BY 4.0 (credit 'FAPD — Free Agentic
   Publication Digester'); quoted official government text is public
