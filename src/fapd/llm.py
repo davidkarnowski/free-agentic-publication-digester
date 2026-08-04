@@ -58,11 +58,30 @@ class TokenBudgetExceededError(BudgetExceededError):
     failed — our own budget refusing us is the policy working."""
 
 
+class TransientLLMError(LLMError):
+    """A backend failure whose failed attempt verifiably consumed ZERO
+    tokens — the CLI's error envelope reports no usage, no per-model
+    billing, and no API time. Retrying such a failure once is free, and
+    it is the class that cost the 2026-08-03 insight report (is_error
+    envelope, duration_api_ms=0, empty modelUsage; the manual re-run
+    succeeded first try). Anything that MAY have billed tokens stays a
+    plain LLMError and is never re-sent automatically — retries are the
+    expensive path by design (GUIDE §6), and the per-item attempt
+    ceilings above this layer stay the authority for those."""
+
+
 class PromptSizeError(LLMError):
     """A single prompt exceeded config.LLM_MAX_PROMPT_CHARS (review
     R1/D3). An LLMError so the existing retry/ceiling machinery bounds
     it: per-item summaries hit the r14 attempt ceiling, and a compose
     failure at EOD hits the R3 finalizer hard stop — loud either way."""
+
+
+#: Client-level retries for zero-billed transient failures ONLY (see
+#: TransientLLMError). Exactly one: a second consecutive envelope
+#: failure is a real outage the caller's own failure posture should
+#: see, not something to hammer.
+_TRANSIENT_RETRIES = 1
 
 
 class CLIBackend:
@@ -87,13 +106,20 @@ class CLIBackend:
                 timeout=timeout, env=env,
             )
         except subprocess.TimeoutExpired as exc:
+            # A timeout may have consumed tokens server-side before the
+            # clock ran out: never classified transient, never retried.
             raise LLMError(repr(exc)) from exc
         if proc.returncode != 0:
-            raise LLMError((proc.stderr or proc.stdout or "").strip()[:500])
+            raise self._cli_error(proc)
         try:
             data = json.loads(proc.stdout)
         except json.JSONDecodeError as exc:
             raise LLMError(f"unparseable CLI output: {exc}") from exc
+        if isinstance(data, dict) and data.get("is_error"):
+            # The CLI can exit 0 while reporting failure in the envelope;
+            # returning its empty `result` as a completion would hand the
+            # caller silent garbage (found diagnosing 2026-08-03).
+            raise self._envelope_error(data)
         usage = data.get("usage") or {}
         return {
             "text": (data.get("result") or "").strip(),
@@ -104,6 +130,36 @@ class CLIBackend:
             ),
             "output_tokens": usage.get("output_tokens", 0),
         }
+
+    def _cli_error(self, proc):
+        """The LLMError for a non-zero CLI exit. When stdout carries the
+        CLI's JSON error envelope, classify it (transient when zero
+        tokens were billed); otherwise the raw stderr/stdout, as ever."""
+        raw = (proc.stderr or proc.stdout or "").strip()
+        try:
+            data = json.loads(proc.stdout or "")
+        except (TypeError, json.JSONDecodeError):
+            return LLMError(raw[:500])
+        if isinstance(data, dict) and data.get("is_error"):
+            return self._envelope_error(data)
+        return LLMError(raw[:500])
+
+    @staticmethod
+    def _envelope_error(data):
+        """A compact, readable error from the CLI's envelope — the
+        2026-08-03 failure logged 500 chars of raw JSON that still had
+        to be diagnosed by eye. Transient iff verifiably zero-billed."""
+        usage = data.get("usage") or {}
+        billed = (usage.get("input_tokens", 0)
+                  + usage.get("output_tokens", 0)
+                  + usage.get("cache_read_input_tokens", 0)
+                  + usage.get("cache_creation_input_tokens", 0))
+        msg = (f"CLI error envelope: stop_reason={data.get('stop_reason')!r},"
+               f" api_ms={data.get('duration_api_ms')},"
+               f" result={str(data.get('result') or '')[:200]!r}")
+        if billed == 0 and not data.get("modelUsage"):
+            return TransientLLMError(msg + " — zero tokens billed")
+        return LLMError(msg + f" — {billed} token(s) billed, not retried")
 
 
 class AnthropicBackend:
@@ -189,18 +245,42 @@ class LLMClient:
                 f"prompt for {purpose!r} is {len(prompt):,} chars, past the"
                 f" {config.LLM_MAX_PROMPT_CHARS:,}-char guard — one call"
                 " must never carry an unbounded prompt (GUIDE §6 r8)")
-        started = time.monotonic()
-        try:
-            result = self._backend.complete(
-                prompt, model=resolved, timeout=timeout or config.LLM_TIMEOUT,
-            )
-        except LLMError as exc:
-            self._log(resolved, purpose, package_id, granule_id, 0, 0,
-                      int((time.monotonic() - started) * 1000),
-                      error=str(exc)[:500])
-            raise LLMError(
-                f"{self._backend.name} backend failed ({purpose}): {exc}"
-            ) from exc
+        # One free retry for verifiably zero-billed transient failures
+        # (TransientLLMError): the failed attempt cost nothing, so the
+        # retry cannot double-spend, and a single CLI hiccup stops
+        # costing a surface its whole day (the 2026-08-03 insight
+        # report). Every attempt is ledgered — nothing bypasses logging
+        # — and anything that may have billed tokens raises immediately,
+        # leaving the per-item attempt ceilings above this layer as the
+        # only retry authority for expensive failures.
+        attempts_left = 1 + _TRANSIENT_RETRIES
+        while True:
+            attempts_left -= 1
+            started = time.monotonic()
+            try:
+                result = self._backend.complete(
+                    prompt, model=resolved,
+                    timeout=timeout or config.LLM_TIMEOUT,
+                )
+                break
+            except TransientLLMError as exc:
+                self._log(resolved, purpose, package_id, granule_id, 0, 0,
+                          int((time.monotonic() - started) * 1000),
+                          error=str(exc)[:500])
+                if not attempts_left:
+                    raise LLMError(
+                        f"{self._backend.name} backend failed ({purpose})"
+                        f" after a zero-billed retry: {exc}") from exc
+                logger.warning(
+                    "LLM %s [%s]: transient zero-billed failure, retrying"
+                    " once: %s", self._backend.name, purpose, exc)
+            except LLMError as exc:
+                self._log(resolved, purpose, package_id, granule_id, 0, 0,
+                          int((time.monotonic() - started) * 1000),
+                          error=str(exc)[:500])
+                raise LLMError(
+                    f"{self._backend.name} backend failed ({purpose}): {exc}"
+                ) from exc
         duration_ms = int((time.monotonic() - started) * 1000)
         self._log(resolved, purpose, package_id, granule_id,
                   result["input_tokens"], result["output_tokens"], duration_ms)

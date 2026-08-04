@@ -238,3 +238,80 @@ def test_prompt_size_guard_fails_loudly_and_is_ledgered(tmp_path, monkeypatch):
     row = client._db.execute("SELECT error, input_tokens FROM llm_calls").fetchone()
     assert "prompt size guard" in row[0] and row[1] == 0
     assert issubclass(llm.PromptSizeError, LLMError)
+
+
+# ------------------------------------------- transient zero-billed retry --
+
+
+def _error_envelope(billed=0):
+    """The 2026-08-03 failure shape: is_error, no API time, no billing."""
+    usage = {"input_tokens": billed, "output_tokens": 0,
+             "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+    return json.dumps({"is_error": True, "duration_api_ms": 0,
+                       "num_turns": 1, "stop_reason": "stop_sequence",
+                       "usage": usage, "modelUsage": {}, "result": ""})
+
+
+def test_zero_billed_cli_failure_retries_once_and_succeeds(tmp_path):
+    """The 2026-08-03 insight failure, replayed: the envelope reports
+    zero tokens billed, so one free retry runs — and both attempts are
+    in the ledger, because nothing bypasses logging."""
+    client, calls = make_client(tmp_path, [
+        FakeProc(stdout=_error_envelope(), returncode=1),
+        FakeProc(stdout=cli_json("recovered")),
+    ])
+    r = client.complete("x", purpose="insight:suggestions")
+    assert r["text"] == "recovered"
+    assert len(calls) == 2
+    rows = client._db.execute(
+        "SELECT error, input_tokens FROM llm_calls ORDER BY id").fetchall()
+    assert len(rows) == 2
+    assert "zero tokens billed" in rows[0][0]
+    assert rows[1][0] is None and rows[1][1] == 108
+
+
+def test_second_transient_failure_raises_and_is_bounded(tmp_path):
+    client, calls = make_client(tmp_path, [
+        FakeProc(stdout=_error_envelope(), returncode=1),
+        FakeProc(stdout=_error_envelope(), returncode=1),
+    ])
+    with pytest.raises(LLMError, match="after a zero-billed retry"):
+        client.complete("x", purpose="insight:suggestions")
+    assert len(calls) == 2                      # exactly one retry, never more
+    n = client._db.execute("SELECT COUNT(*) FROM llm_calls").fetchone()[0]
+    assert n == 2                               # both attempts ledgered
+
+
+def test_billed_envelope_failure_is_never_retried(tmp_path):
+    """An is_error envelope that DID bill tokens may have done real work
+    server-side; re-sending it automatically is the expensive path the
+    project forbids (GUIDE §6) — one call, immediate raise."""
+    client, calls = make_client(tmp_path, [
+        FakeProc(stdout=_error_envelope(billed=5000), returncode=1),
+    ])
+    with pytest.raises(LLMError, match="not retried"):
+        client.complete("x", purpose="map:test")
+    assert len(calls) == 1
+
+
+def test_plain_cli_failure_is_never_retried(tmp_path):
+    """A non-envelope failure (no usage report) cannot prove it was
+    unbilled: no retry — the pre-existing behavior, pinned."""
+    client, calls = make_client(tmp_path, [
+        FakeProc(stderr="boom", returncode=1)])
+    with pytest.raises(LLMError):
+        client.complete("x", purpose="map:test")
+    assert len(calls) == 1
+
+
+def test_zero_exit_error_envelope_is_not_silent_garbage(tmp_path):
+    """The CLI can exit 0 while reporting is_error in the envelope; that
+    must raise (and retry, when unbilled), never return empty text as a
+    completion."""
+    client, calls = make_client(tmp_path, [
+        FakeProc(stdout=_error_envelope(), returncode=0),
+        FakeProc(stdout=cli_json("recovered")),
+    ])
+    r = client.complete("x", purpose="map:test")
+    assert r["text"] == "recovered"
+    assert len(calls) == 2
