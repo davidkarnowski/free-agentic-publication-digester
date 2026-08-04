@@ -168,6 +168,29 @@ close (check them off with dates).
 
 ## Feature backlog (post-launch, operator-requested)
 
+- [ ] **Agent-surface optimization package** (filed 2026-08-04 from an
+  external-agent review + our own agentic test of 2026-08-03; set aside
+  by the operator pending prioritization). Accepted, in build order:
+  (a) **`primary_agency_id`** — a deterministic department/branch slug
+  on every item in today.json/day.json (registry `parent_org` for
+  agency/email classes, an FR agency-name→slug map, collection defaults
+  `congress`/`judiciary`; unmapped = null, never guessed; mapping table
+  published). (b) **JSON Feed** at `/feed.json` (jsonfeed.org 1.1, 20
+  newest digests, record-surface rules apply). (c) **Published JSON
+  Schemas** under `/schema/` for day/today/sources/digests JSON, with a
+  drift test validating real rendered output against the published
+  schema. (d) **`Cache-Control: immutable`** on `/day/*` (nginx block,
+  deploy bundle) + llms.txt documenting that frozen day files never
+  change — the honest answer to "trailing window" requests. (e) Revive
+  **docs/agent-api-design.md** (`/api/v1/` sharded indexes +
+  latest.json) as the umbrella for per-agency rollups and year-scale
+  listing — now evidenced twice (3.7 MB day file measured 2026-08-03).
+  Rejected on constitutional grounds, recorded so it stays decided:
+  query-parameter filtering and any server-side compute (static flat
+  files only; filesystem-clone complete), and a rolling multi-day item
+  blob (re-ships unchanged history daily; immutable per-day files +
+  caching strictly dominate).
+
 - [x] ~~Section auto-tagging~~ **tracked in exactly one place: ops-backlog OB-9** (section layer done; item-level remainder lives there). Struck here per the one-file rule. Original item: **Section auto-tagging** (requested 2026-07-30). *2026-07-30: the
   section layer shipped — GUIDE §6 r12a, `src/fapd/tags.py`, `Tags:`
   lines in the digest and tag chips on the site; item-level tags and
