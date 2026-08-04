@@ -173,7 +173,7 @@ the Congressional Record's own Daily Digest, and official bill titles
 and stage designations are the first drafting inputs, used verbatim and
 identified as official text. Model-written summaries exist only for
 selected items that lack an official summary.</p>
-<p><strong>Four model layers, independently versioned.</strong> Where models are used,
+<p><strong>Six model layers, independently versioned.</strong> Where models are used,
 each layer carries its own prompt version so iterating on one never
 regenerates the artifacts of another:</p>
 <ol>
@@ -198,7 +198,27 @@ regenerates the artifacts of another:</p>
    navigational metadata, never judgments; model keys are labeled as
    such, and a section whose keys fail validation renders with
    mechanical tags only.</li>
+<li><strong>Source descriptions</strong> (added 2026-08-03) — each per-source page's
+   short summary and reader orientation: what the institution is and
+   what it publishes. This is the one surface licensed to draw on the
+   model's general knowledge of public institutions (a registry entry
+   cannot say what an agency is), and it carries that license's price:
+   it is labeled a model-written orientation with its date, model, and
+   prompt version, never presented as official-record content, and it
+   must stay factual and opinion-agnostic about the institution.
+   Regenerated only when the registry entry changes — never on a timer.</li>
+<li><strong>Source assessments</strong> (added 2026-08-03) — a prose restatement of
+   our measured ingestion relationship with a source: formats seen,
+   cadence, delivery quirks, incident history from the registry notes,
+   what changed since the last assessment. Input is our own measured
+   statistics and registry entry only; like every health figure, it
+   describes our ingestion, never the publisher, and no quality
+   judgment of an agency is ever permitted. Labeled with date, model,
+   version, and the trigger that regenerated it.</li>
 </ol>
+<p>Both source-page layers are scanned against the banned lexicon <strong>before
+storage</strong> — a failing text stores nothing and the page simply renders
+without that block; the gates are never loosened to accommodate them.</p>
 <p><strong>The banned-lexicon gate.</strong> Generated prose is scanned against a coded
 banned lexicon (currently 16 terms and phrases: loaded adjectives such
 as "landmark" and "controversial", motive attribution such as "in an
@@ -228,6 +248,33 @@ a Terms Used Today glossary; the Coverage Statement; and a Methodology
 footer restating the selection and labeling rules. Every item carries
 its citation and an "Included because" line naming the mechanical rule
 that selected it.</p>
+<p><strong>Three views of a day</strong> (the third added 2026-08-03). The <strong>live page</strong>
+(<code>/today.html</code>) shows publications as our collectors observe them and is
+preliminary by declaration — items may be re-dated, re-summarized, or
+excluded by the end-of-day gates. The <strong>frozen day view</strong>
+(<code>/day/YYYY-MM-DD.html</code>, with a JSON twin) is the complete observed
+listing for a finished day — every item, mechanical rules applied —
+frozen at end of day and committed with the evidence; day views for
+days before 2026-08-03 were reconstructed from the stored observation
+journal and say so on the page, because a reconstruction must never
+claim it was frozen live. The <strong>dated digest</strong> is the canonical record,
+and both other views say so. Each digest links its day's observed
+listing; on weekends and federal holidays the digest header carries the
+same mechanical calendar note the live page shows, computed by the same
+shared function. Days before the observation journal existed have no
+day view — the gap is disclosed, not backfilled.</p>
+<p><strong>Per-source pages</strong> (added 2026-08-03). Every registry entry — active,
+planned, and unavailable alike, because a recorded refusal is
+accountability data — has a page at <code>/sources/&lt;source-id&gt;.html</code>:
+identity and registry record, ingestion method and politeness posture
+rendered from the same constants the code enforces, measured statistics
+at three windows (trailing 24 hours, 14 days, and all time), day-by-day
+charts as dependency-free inline SVG with visually-hidden data tables
+for assistive technology, the source's health label with its persisted
+history, and the two labeled model layers described under Inference.
+Published request statistics begin 2026-07-30, the day this service
+went into production — earlier development-machine traffic is excluded,
+and the pages say so where the numbers render.</p>
 <p><strong>Canonical Markdown, derived HTML.</strong> The Markdown digest in the
 repository is the canonical artifact. The HTML site — including this
 page — is a derived, zero-model presentation layer, regenerable at any
@@ -264,7 +311,7 @@ accounting independently — both strengthenings are on the published
 development backlog.</p>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-08-03T18:46:08Z (UTC). Canonical source:
+  <p>Generated 2026-08-04T04:21:56Z (UTC). Canonical source:
   <code>docs/site/methods.md</code> in the
   <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in
