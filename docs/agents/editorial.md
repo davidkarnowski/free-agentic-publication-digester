@@ -99,6 +99,20 @@ file.
 
 ## Current backlog (2026-08-02 amended review)
 
+- **CLI-backend zero-token failures (filed 2026-08-04, first organic
+  EOD): a PATTERN, not a one-off.** Fifteen calls died with the same
+  signature — `cli backend failed … stop_reason: stop_sequence`, zero
+  tokens in/out: insight 1/1, source-assess **6/6** (zero assessments
+  stored), source-desc 8/16 (63 of ~127 descriptions stored). Every
+  failure was in a never-fails-the-run stage, so the digest was never
+  at risk, and the refresh triggers retry nightly at zero cost on
+  failure — but the assessment layer is currently 100% dark. Chase the
+  common cause in `llm.py`'s CLIBackend (what maps to `stop_sequence`?
+  does batch content trip it? why do half the desc batches survive?);
+  reproduce with one failing batch before changing anything. The
+  partial-success split (desc 8/16 vs assess 0/6) is the best clue —
+  diff what the two prompts/batches feed the CLI.
+
 - **R1 / D3** — **Done 2026-08-02, as redirected by the operator** (no
   standing cap — "the value stays the operator's" includes none):
   `FAPD_DAILY_TOKEN_THROTTLE` is an on-demand throttle in
