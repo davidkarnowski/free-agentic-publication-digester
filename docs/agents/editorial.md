@@ -99,8 +99,19 @@ file.
 
 ## Current backlog (2026-08-02 amended review)
 
-- **CLI-backend zero-token failures (filed 2026-08-04, first organic
-  EOD): a PATTERN, not a one-off.** Fifteen calls died with the same
+- **CLI-backend zero-token failures** — **Investigated and hardened
+  same day** (`cdcfa77`): the signature is the CLI's transport hiccup
+  (zero-duration error envelope, zero billed tokens), plus a second
+  hole found during diagnosis — the CLI can exit 0 while reporting
+  `is_error`, which the old code returned as a legitimate empty
+  completion. `LLMClient` now classifies the envelope
+  (`TransientLLMError` iff provably zero-billed), retries exactly once
+  for free with both attempts ledgered, and raises on the
+  silent-garbage path; replay-tested against the actual 08-03
+  envelope. §6 retry economics untouched — billed or unprovable
+  failures never auto-retry. Original filing kept below for the
+  record.
+  *Filed 2026-08-04, first organic EOD: a PATTERN, not a one-off.* Fifteen calls died with the same
   signature — `cli backend failed … stop_reason: stop_sequence`, zero
   tokens in/out: insight 1/1, source-assess **6/6** (zero assessments
   stored), source-desc 8/16 (63 of ~127 descriptions stored). Every
