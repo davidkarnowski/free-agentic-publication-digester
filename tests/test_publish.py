@@ -2571,3 +2571,77 @@ def test_digest_day_view_link_is_not_duplicated(digests, tmp_path):
     publish.build_site(digests, out)
     page = (out / "2026-07-03.html").read_text()
     assert page.count('href="day/2026-07-03.html"') == 1
+
+
+def _seed_corroborated_pair(conn):
+    """The live DOJ shape of 2026-08-03: one release, two channels."""
+    from conftest import DATE
+
+    url = "https://www.justice.gov/opa/pr/settlement-announced"
+    for pid, channel, obs in (
+            ("PR-doj-web", None, f"{DATE}T20:46:47Z"),
+            ("PR-doj-eml", "email", f"{DATE}T19:27:14Z")):
+        conn.execute(
+            "INSERT INTO packages (package_id, collection, date_issued,"
+            " last_modified, title, first_seen_at) VALUES"
+            " (?, 'AGENCYPR', ?, 'x', 'Settlement Announced', 'x')",
+            (pid, DATE))
+        import json as _j
+        meta = _j.dumps({"url": url,
+                         "channel": "email" if channel else None,
+                         "source_id": ("justice-email" if channel
+                                       else "justice-newsroom")})
+        conn.execute(
+            "INSERT INTO extracted_texts (package_id, granule_id, collection,"
+            " doc_type, title, text, char_count, metadata, extracted_at,"
+            " extractor_version) VALUES (?, '', 'AGENCYPR', 'PRESS',"
+            " 'Settlement Announced', 'The department announced.', 25, ?,"
+            " 'x', 1)", (pid, meta))
+        conn.execute(
+            "INSERT INTO item_journal (observed_at, source_class, package_id,"
+            " granule_id, collection, source_id, digest_date, event) VALUES"
+            " (?, ?, ?, '', 'AGENCYPR', ?, ?, 'ingested')",
+            (obs, "email" if channel else "agency", pid,
+             "justice-email" if channel else "justice-newsroom", DATE))
+    conn.commit()
+
+
+def test_today_merges_corroborated_pair_and_flags_machine_surface(
+        conn, tmp_path):
+    import json
+
+    from conftest import DATE
+
+    _seed_today(conn)
+    _seed_corroborated_pair(conn)
+    stats = publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+    # listed once, on the web (non-email) primary, marked in place
+    assert page.count("Settlement Announced") == 1
+    assert "corroborated: also received via email bulletin" in page
+    assert "arrived through a second ingestion channel" in page
+    assert stats["items"] == 3          # 2 seeded + 1 merged pair
+    data = json.loads((tmp_path / "today.json").read_text())
+    assert data["corroborated_count"] == 1
+    by_pkg = {i["package_id"]: i for i in data["items"]}
+    # EVERY observation is in the machine surface, flagged both ways
+    assert by_pkg["PR-doj-eml"]["duplicate_of"] == "PR-doj-web"
+    corr = by_pkg["PR-doj-web"]["corroborated_by"]
+    assert corr[0]["package_id"] == "PR-doj-eml"
+    assert corr[0]["observed_at"] == f"{DATE}T19:27:14Z"
+    assert "duplicate_of" in data["labels"] and "corroborated_by" in data["labels"]
+
+
+def test_day_view_applies_the_same_corroboration_merge(conn, tmp_path,
+                                                       monkeypatch):
+    from conftest import DATE
+
+    from fapd import config as _config
+
+    monkeypatch.setattr(_config, "DIGEST_DIR", tmp_path / "no-digests")
+    _seed_today(conn)
+    _seed_corroborated_pair(conn)
+    publish.build_day(conn, DATE, out_dir=tmp_path)
+    page = (tmp_path / "day" / f"{DATE}.html").read_text()
+    assert page.count("Settlement Announced") == 1
+    assert "corroborated: also received via email bulletin" in page

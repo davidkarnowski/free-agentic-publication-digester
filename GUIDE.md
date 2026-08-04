@@ -381,6 +381,25 @@ direct HTML index pages where no feed exists). Governing rules:
   observed dates remain separately
   stored, always (§7 T3/T4: a claimed date is the agency's assertion, not
   our finding).
+- **Multi-channel corroboration (added 2026-08-03, operator decision).**
+  Several channels can deliver the same document — a DOJ release
+  arrives through the newsroom feed AND the subscription email
+  (observed 2026-08-03: three such pairs in one day, the email first
+  each time). Same-day items sharing a **normalized canonical URL** are
+  one document observed through more than one ingestion channel:
+  presentation lists it **once**, marked corroborated with the other
+  channels named in place — independent receipt is evidence worth
+  stating, never a judgment about the content — while EVERY observation
+  stays captured, hashed, counted in the coverage accounting, and
+  present in the machine surfaces flagged `duplicate_of` (the
+  `is_backfill` precedent: agents get the full observation record).
+  The merge key is the URL and only the URL, one shared normalization
+  used by every surface; **title similarity never merges** (measured
+  the same day: three distinct DOJ job postings shared one title), and
+  an item without a URL never merges. The merge is presentation, not
+  identity: the two package records, their captures, and their
+  manifests remain distinct — de-duplicating at ingest would erase the
+  corroborating observation, which is the opposite of its value.
 - Ingestion obeys §4 unchanged: paced, budgeted (its own daily bucket),
   fully logged, conditional requests wherever the server supports them,
   robots.txt honored via an RFC 9309 parser with crawl-delay respected.

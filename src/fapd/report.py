@@ -488,6 +488,71 @@ def _claimed_day(meta):
     return None
 
 
+def _normalize_official_url(url):
+    """One document's identity across ingestion channels (GUIDE §3
+    corroboration amendment, 2026-08-03): scheme dropped (http/https
+    collapse), host lowercased with a leading www. removed, fragment
+    dropped, utm_* tracking parameters dropped, trailing slash
+    stripped. Deliberately conservative: two URLs normalize together
+    only when the publisher's own host, path, and substantive query are
+    identical — title similarity NEVER merges anything (measured
+    2026-08-03: three DOJ job postings shared one title across three
+    distinct URLs). Returns None for absent or non-HTTP URLs, which
+    therefore never merge."""
+    from urllib.parse import parse_qsl, urlencode, urlsplit
+
+    if not url:
+        return None
+    parts = urlsplit(str(url).strip())
+    if parts.scheme.lower() not in ("http", "https"):
+        return None
+    host = parts.netloc.lower().removeprefix("www.")
+    if not host:
+        return None
+    path = parts.path.rstrip("/")
+    query = urlencode([(k, v)
+                       for k, v in parse_qsl(parts.query,
+                                             keep_blank_values=True)
+                       if not k.lower().startswith("utm_")])
+    return f"{host}{path}" + (f"?{query}" if query else "")
+
+
+def corroborate(entries, *, url_of, is_email):
+    """Group same-day entries that share a normalized official URL: one
+    document observed through more than one ingestion channel (GUIDE §3
+    amendment, 2026-08-03 — operator: de-duplicate the presentation, and
+    mark the document as corroborated by multiple ingestion sources).
+
+    Returns ``[(primary, [corroborating entries])]`` preserving the
+    input order at each group's first appearance. The primary is the
+    first non-email entry (the publisher's own page carries the
+    canonical full text; a bulletin may carry a teaser), falling back to
+    the first entry seen. Entries without a normalizable URL pass
+    through untouched — absence of a URL never merges. The SAME helper
+    serves the digest, the live page, and the day view, so the three
+    surfaces can never answer "is this one document?" differently."""
+    keys = [_normalize_official_url(url_of(e)) for e in entries]
+    groups, order = {}, []
+    for entry, key in zip(entries, keys):
+        if key is None:
+            order.append(entry)
+        elif key in groups:
+            groups[key].append(entry)
+        else:
+            groups[key] = [entry]
+            order.append(key)
+    out = []
+    for slot in order:
+        if isinstance(slot, str) and slot in groups:
+            group = groups[slot]
+            primaries = [e for e in group if not is_email(e)] or group
+            primary = primaries[0]
+            out.append((primary, [e for e in group if e is not primary]))
+        else:
+            out.append((slot, []))
+    return out
+
+
 def _agency_rows(conn, date):
     """(listed, backfill) for digest day `date` (GUIDE §3 dating rule):
     listed = claimed publication day == date, or no parseable claimed date
@@ -516,6 +581,20 @@ def _agency_lines(conn, date):
     speech; §3 mutable-source disclosure + dating rule). Zero LLM in the
     pilot."""
     rows, backfill = _agency_rows(conn, date)
+    # One document, several channels (GUIDE §3 corroboration amendment,
+    # 2026-08-03): a release whose canonical URL arrived through more
+    # than one ingestion channel is listed once and marked corroborated;
+    # every capture stays preserved and counted.
+    merged = corroborate(rows,
+                         url_of=lambda r: r["_meta"].get("url"),
+                         is_email=lambda r: r["_meta"].get("channel") == "email")
+    rows = []
+    corroborated_total = 0
+    for primary, dups in merged:
+        primary["_corroborators"] = dups
+        if dups:
+            corroborated_total += 1
+        rows.append(primary)
     lines = [
         "## 6. Agency Announcements",
         "",
@@ -570,7 +649,32 @@ def _agency_lines(conn, date):
                     f"  - Source: agency newsroom (above) · "
                     f"[independent archive]({meta['wayback_url']})"
                 )
+            for dup in r.get("_corroborators") or ():
+                dmeta = dup["_meta"]
+                if dmeta.get("channel") == "email":
+                    dkim = (dmeta.get("dkim") or {}).get("result")
+                    via = ("the agency's email bulletin to this project's"
+                           " subscription"
+                           + (", DKIM-verified" if dkim == "pass"
+                              else f", DKIM {dkim}" if dkim else ""))
+                else:
+                    via = "the agency's newsroom feed"
+                lines.append(
+                    "  - Corroborated: the same release (same canonical"
+                    f" URL) also arrived via {via} — one document"
+                    " received through two ingestion channels; listed"
+                    " once, both captures preserved."
+                )
         lines.append("")
+    if corroborated_total:
+        lines += [
+            (f"{corroborated_total} release(s) above arrived through more"
+             " than one ingestion channel and are each listed once, marked"
+             " \"Corroborated\" in place. Every arrival is captured,"
+             " hashed, and counted in the Coverage Statement — the merge"
+             " is presentation, not omission."),
+            "",
+        ]
     if backfill:
         lines += [
             (f"Also observed this day, not listed above: {len(backfill)}"

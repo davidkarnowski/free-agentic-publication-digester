@@ -991,3 +991,59 @@ def test_digest_links_day_view_only_when_journal_covers(conn):
     # a date before journal coverage still gets no link
     md_before = report.render(conn, "2026-07-22").read_text()
     assert "Full observed listing" not in md_before
+
+
+# ---------------------------------------------- multi-channel corroboration --
+
+
+def test_normalize_official_url_is_conservative():
+    n = report._normalize_official_url
+    a = n("https://www.justice.gov/opa/pr/x-settles/")
+    assert a == n("http://justice.gov/opa/pr/x-settles")
+    assert a == n("https://JUSTICE.gov/opa/pr/x-settles#top")
+    assert a == n("https://justice.gov/opa/pr/x-settles?utm_source=feed")
+    # distinct paths never merge (the DOJ job-posting lesson)
+    assert n("https://justice.gov/job/ausa-338") != n("https://justice.gov/job/ausa-339")
+    # substantive query params are identity
+    assert n("https://a.gov/p?id=1") != n("https://a.gov/p?id=2")
+    assert n(None) is None and n("") is None and n("mailto:x@a.gov") is None
+
+
+def _add_agency_release(conn, pid, title, url, channel, dkim=None):
+    add_package(conn, pid, "AGENCYPR")
+    meta = {"url": url, "channel": channel}
+    if dkim:
+        meta["dkim"] = {"result": dkim}
+    add_text(conn, pid, "", "AGENCYPR", "PRESS", title=title,
+             agency="Department of Justice", metadata=meta)
+
+
+def test_agency_section_merges_same_url_and_marks_corroborated(conn):
+    """GUIDE §3 corroboration (2026-08-03): one canonical URL through two
+    channels lists once, marked; every capture stays counted."""
+    url = "https://www.justice.gov/opa/pr/settlement-announced"
+    _add_agency_release(conn, "PR-web-1", "Settlement Announced", url, None)
+    _add_agency_release(conn, "PR-eml-1", "Settlement Announced",
+                        "https://justice.gov/opa/pr/settlement-announced/",
+                        "email", dkim="pass")
+    md = report.render(conn, DATE).read_text()
+    assert md.count("[Settlement Announced]") == 1          # listed once
+    assert "Corroborated: the same release (same canonical URL)" in md
+    assert "email bulletin to this project's subscription, DKIM-verified" in md
+    assert "1 release(s) above arrived through more than one ingestion channel" in md
+    assert "the merge is presentation, not omission" in md
+    # the web page is the primary listing (canonical full text)
+    assert f"[Settlement Announced]({url})" in md
+
+
+def test_agency_section_never_merges_on_title_or_missing_url(conn):
+    _add_agency_release(conn, "PR-job-1", "Assistant United States Attorney",
+                        "https://justice.gov/job/ausa-338", None)
+    _add_agency_release(conn, "PR-job-2", "Assistant United States Attorney",
+                        "https://justice.gov/job/ausa-339", None)
+    _add_agency_release(conn, "PR-nul-1", "EOIR Decision", None, "email")
+    _add_agency_release(conn, "PR-nul-2", "EOIR Decision", None, "email")
+    md = report.render(conn, DATE).read_text()
+    assert md.count("[Assistant United States Attorney]") == 2
+    assert md.count("**EOIR Decision**") == 2
+    assert "Corroborated:" not in md

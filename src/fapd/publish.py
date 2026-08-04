@@ -2833,6 +2833,12 @@ def _today_item_row(item, filterable=()):
     # preserved verbatim in today.json.
     if item.get("claimed_day"):
         meta_bits.append(f"publisher-dated {item['claimed_day']}")
+    # Multi-channel corroboration (GUIDE §3, 2026-08-03): the mark is a
+    # reader-facing fact — this document was received independently
+    # through another channel — never a judgment about the content.
+    for c in item.get("corroborated_by") or ():
+        meta_bits.append(f"corroborated: also received via "
+                         f"{c['channel_label']}")
     meta = html.escape(" · ".join(meta_bits))
 
     if item["summary"]:
@@ -3157,8 +3163,30 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
         _i["claimed_day"] = claimed
         _i["is_backfill"] = bool(claimed and claimed != date)
         (backfill if _i["is_backfill"] else todays).append(_i)
+    # One document, several channels (GUIDE §3 corroboration amendment,
+    # 2026-08-03): items sharing a canonical URL merge to one listing,
+    # marked corroborated; the machine surface keeps EVERY observation,
+    # flagged — the is_backfill precedent. Same shared helper as the
+    # digest's section 6, so the surfaces cannot disagree.
+    from .report import corroborate
+    merged = corroborate(todays,
+                         url_of=lambda i: i.get("url"),
+                         is_email=lambda i: i.get("channel") == "email")
+    todays, duplicates = [], []
+    for primary, dups in merged:
+        if dups:
+            primary["corroborated_by"] = [
+                {"package_id": d["package_id"],
+                 "channel_label": _today_channel_label(d),
+                 "observed_at": d["observed_at"],
+                 "dkim_result": d.get("dkim_result")} for d in dups]
+            for d in dups:
+                d["duplicate_of"] = primary["package_id"]
+            duplicates.extend(dups)
+        todays.append(primary)
     status["items"] = todays
     status["backfill"] = backfill
+    status["duplicates"] = duplicates
 
     now = utc_now_iso()
 
@@ -3285,6 +3313,11 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
             " news and are listed in the dated digest's coverage"
             " accounting, not here."
             if status.get("backfill") else "")
+         + (f" {len(status['duplicates'])} item(s) arrived through a"
+            " second ingestion channel (the same canonical URL twice);"
+            " each is listed once below, marked corroborated, with every"
+            " observation kept in the machine surface."
+            if status.get("duplicates") else "")
          + "</p>"),
     ]
     if day_chips:
@@ -3391,7 +3424,8 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
         html_path.write_text(_rebase_page(page), encoding="utf-8")
 
     json_items = []
-    for i in list(status["items"]) + list(status.get("backfill") or []):
+    for i in (list(status["items"]) + list(status.get("duplicates") or [])
+              + list(status.get("backfill") or [])):
         row = {k: v for k, v in i.items() if k != "opening"}
         row["opening_verbatim"] = i["opening"]  # official text, unedited
         row["official_url"] = _today_official_url(i)
@@ -3417,6 +3451,16 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
                    "is_backfill": "true = the publisher dates this item"
                                   " on another day (claimed_day); not"
                                   " part of this day's news",
+                   "corroborated_by": "on a listed item: the OTHER"
+                                      " ingestion channels the same"
+                                      " document (same canonical URL)"
+                                      " arrived through — independent"
+                                      " receipt, not a content judgment",
+                   "duplicate_of": "on a non-listed item: the package_id"
+                                   " of the listed twin; the human pages"
+                                   " show that one entry, marked"
+                                   " corroborated — filter these out to"
+                                   " match the human listing",
                    "counts": "whole-day observation counts by"
                              " collection/doc_type, backfill included",
                    "day_context": "null on federal business days; on"
@@ -3429,6 +3473,7 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
         # broken?" ambiguity the banner resolves. null on business days.
         "day_context": day_context,
         "backfill_count": len(status.get("backfill") or []),
+        "corroborated_count": len(status.get("duplicates") or []),
         "backfill_note": ("items observed today that their publisher dates"
                           " earlier; the human page excludes them from the"
                           " day's listing under the GUIDE §3 dating rule."
