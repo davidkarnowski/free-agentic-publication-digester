@@ -233,6 +233,41 @@ close (check them off with dates).
   citation needs are already served by the canonical Markdown and the
   styled HTML, and agents were never the audience for a fixed-layout
   format.
+- [ ] **Deep Digester — a second reading depth** (filed 2026-08-05,
+  operator; **major site component**, not a feature). Extended,
+  context-aware analysis of individual publications, with its own
+  pipeline, its own site documentation page, and its own economics —
+  announced publicly in the 2026-08-05 blog post, which commits us to
+  the guardrail that reader funding changes analysis **depth only,
+  never selection and never conclusions**, and that the end goal is
+  covering every observed publication rather than only funded ones.
+  Test documents chosen by the operator: GAO `gao-26-108403` and the
+  USPS OIG white paper on postal applications of artificial
+  intelligence — two different document classes on sources already in
+  the registry. Deliverables: the pipeline; a worked demonstration on
+  both documents publishing real token and wall-clock cost; a blog post
+  carrying the demonstration; and a method page on the site carrying it
+  too, so the documentation does not depend on the announcement.
+  **Research first — this is not yet a plan.** The working document is
+  in the operator's gitignored `research/` tree
+  (`deep-digester-research-task.md`) and graduates to a plan-task doc
+  per [docs/ops/plan-task-template.md](ops/plan-task-template.md) once
+  the constitutional question is answered. That question, stated plainly
+  because it gates everything else: GUIDE §2 bans motive attribution and
+  predictions of political outcomes in generated prose, and "a reading
+  of likely implications" is close to both. Three resolutions are
+  drafted for the operator (implications confined to the document's own
+  stated effects; permitted inside a labeled separate block; or a new
+  register that is explicitly not the digest's voice). Also unresolved:
+  GUIDE §6 rule 1 forbids whole PDFs reaching a model, which is in
+  direct tension with "spares no token expense"; and the *mechanical*
+  selection rule for unfunded deep runs, since "as many as the budget
+  allows" is not yet party-blind or stateable. One practical constraint
+  is already settled — gao.gov's 420-second crawl-delay prices each
+  document fetch at seven minutes of wall clock, and the registry's
+  2026-07-28 posture note already sanctions exactly this case
+  ("targeted single fetches remain possible within the delay"), so no
+  posture change is needed. GUIDE amendments precede implementation.
 - [ ] **Redundant, provider-segmented inference** (filed 2026-08-05,
   operator). Stand up additional LLM providers beside Anthropic (Google
   and Cerebras named) so no single vendor's outage, rate limit, or
