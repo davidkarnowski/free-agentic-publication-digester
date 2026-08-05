@@ -191,19 +191,38 @@ not reusable.)*
 - **Gap:** the jail's journal match is `_SYSTEMD_UNIT=sshd.service`, but
   the unit on this box is `ssh.service` — 1,145 journal entries under
   `ssh.service` over 7 days versus 1 under `sshd.service`. The jail
-  reports `Total failed: 0` / `Total banned: 0` while scanning continues
-  (183 attempts from a single IP in the window). Found 2026-08-05.
+  reports `Total failed: 0` / `Total banned: 0`. Found 2026-08-05.
   Severity is bounded by key-only auth (`PasswordAuthentication no`,
-  `PermitRootLogin no`, `MaxAuthTries 3`): this is lost defense-in-depth
-  and lost visibility, not an open door — and the observed traffic is
-  banner/kex scanning, not password guessing.
-- **Trigger:** immediate on the next authorized VPS write window; it is
-  a one-line jail config change plus a `fail2ban-client reload`.
-- **Sketch:** point the jail at `ssh.service` (or drop the journal match
-  and read the log path), reload, then verify by confirming the failed
-  counter moves against live scan traffic. Staged script per servicing
-  guide §2. Note the box is shared: the jail config is cohabitant-owned
-  territory, so coordinate rather than assume ownership.
+  `PermitRootLogin no`, `MaxAuthTries 3`): lost defense-in-depth and
+  lost visibility, not an open door.
+  **Traffic correction (same day):** the first pass of this entry cited
+  "183 attempts from a single IP" as evidence of ongoing scanning. That
+  was a bad grep — it pulled `from <ip>` out of every sshd line,
+  including successful ones. `98.97.136.86` is 183 *accepted publickey*
+  and 0 invalid-user; `185.230.126.195` is 90 accepted and 0 invalid.
+  Both are the operator's own sessions. The only genuine attack traffic
+  in 14 days is one 84-second burst from `161.35.210.58` (DigitalOcean)
+  on 2026-07-30 trying `sol`, `alertmanager`, `alertuser`, `apache`,
+  `app` — a crypto-scanner wordlist. The box is quiet; the jail was
+  still broken, which is why this stayed a finding.
+- **Trigger:** ~~immediate on the next authorized VPS write window~~
+  **Done 2026-08-05.**
+- **Done 2026-08-05:** `journalmatch = _SYSTEMD_UNIT=ssh.service +
+  _COMM=sshd` added to jail.local's `[sshd]` block (the filter file is
+  package-owned and would revert on upgrade; jail.local already
+  overrides `port` there). Applied by
+  `scripts/staged/2026-08-05-fail2ban-sshd-journalmatch.sh`; rollback
+  artifact `/etc/fail2ban/jail.local.bak.20260805T144738Z` on the box.
+  Verified by replaying the journal through the filter with
+  `fail2ban-regex`: **1,445 lines, 5 matched** where it matched 0
+  before — counters alone prove nothing right after a reload, since
+  `findtime` is 10m. Those 5 are exactly the 07-30 burst, which at
+  `maxretry=5`/`findtime=10m` would now earn a ban.
+- **Deliberately not changed:** `mode = normal`. Aggressive mode would
+  also catch banner/kex probing, but it matches `Connection closed by
+  ... [preauth]`, which the operator's own multiplexed SSH generates
+  constantly — it would ban us. Revisit only with an `ignoreip` for
+  operator egress, and note those addresses are dynamic.
 
 **OB-14 — Container hardening (`fapd-web`, `fapd-backend`)**
 - **Gap:** both containers run as **root** with no `cap_drop`, no
