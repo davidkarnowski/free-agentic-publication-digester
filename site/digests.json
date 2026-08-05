@@ -2,6 +2,12 @@
  "agent_guide": "agents.html",
  "digests": [
   {
+   "canonical_markdown": "digests/2026-08-04.md",
+   "date": "2026-08-04",
+   "html": "https://fapd.info/2026-08-04.html",
+   "teaser": "The Federal Register carried 98 documents, including two presidential documents."
+  },
+  {
    "canonical_markdown": "digests/2026-08-03.md",
    "date": "2026-08-03",
    "html": "https://fapd.info/2026-08-03.html",
@@ -50,6 +56,6 @@
    "teaser": "The House introduced 44 bills, 7 with published texts, on topics including offshore oil and gas whistleblower protections, youth mental health and social media, infant formula contaminants, school nutrition, education, trade and manufacturing, occupational safety, and fishing practices, each referred to committee."
   }
  ],
- "generated": "2026-08-04T04:22:03Z",
+ "generated": "2026-08-05T05:03:38Z",
  "title": "Free Agentic Publication Digester \u2014 Daily Federal Digest"
 }
