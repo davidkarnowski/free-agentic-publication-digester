@@ -1666,7 +1666,10 @@ def test_blog_renders_the_real_launch_article(digests, tmp_path):
         pytest.skip("no launch article on disk")
     out = tmp_path / "site"
     stats = publish.build_site(digests, out)
-    assert stats["blog_posts"] == 1
+    # Tied to the allowlist, not to a hardcoded count: the rule under test
+    # is "publication is by allowlist, never by glob", and a literal count
+    # made every new post look like a regression.
+    assert stats["blog_posts"] == len(publish._BLOG_POSTS)
     post = (out / "blog-launch.html").read_text()
     assert "one polite reader for the official record" in post
     assert "The record was always yours" in post

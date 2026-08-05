@@ -664,6 +664,84 @@ h2.filter-lead {
   border-top: 1px solid var(--border);
   font-size: 0.9rem;
 }
+/* ---- Long-form post typography -------------------------------------
+   Everything here is scoped to .post so none of it can reach a digest
+   page, whose layout is dense reference material with its own rules
+   (_style_digest_body). All colour comes from the theme variables, so
+   light and dark follow the viewer with no second rule set.
+
+   Measure: `main` is 46rem, which suits the digest's tables and citation
+   lines but runs near 90 characters for continuous prose. A post narrows
+   its text and sets it slightly larger, landing close to the 65-75
+   character line that sustained reading wants. It stays centred inside
+   main rather than flush left, so the header and footer still frame it. */
+.post {
+  max-width: 34rem;
+  margin: 0 auto;
+  font-size: 1.06rem;
+  line-height: 1.7;
+}
+.post p { margin: 0 0 1.15rem; }
+/* Section heads read as parts of an article, not as the digest's labelled
+   data sections: a rule ABOVE the head separates what came before, where
+   the digest's rule sits below to bind a heading to its table. The base
+   h2's bottom border is therefore reset, not inherited. */
+.post h2 {
+  margin: 2.6rem 0 0.8rem;
+  padding: 1.3rem 0 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 0;
+  font-size: 1.3rem;
+  line-height: 1.3;
+  color: var(--accent);
+}
+.post h3 {
+  margin: 1.9rem 0 0.5rem;
+  font-size: 1.08rem;
+  line-height: 1.35;
+  color: var(--fg);
+}
+/* The dateline: the post's own italic standfirst, which Markdown emits as
+   the paragraph immediately after the inserted .post-meta line. Coupled
+   to that construction in _blog_post_body on purpose — there is no class
+   to hang it on without putting HTML in the author's Markdown. */
+.post > .post-meta + p {
+  margin-top: -0.4rem;
+  font-size: 1.02rem;
+  color: var(--muted);
+}
+.post > .post-meta + p em { font-style: normal; }
+/* Pull quote. An accent rule rather than italics or quotation marks:
+   these are quotations of our OWN prose — a statement being given weight,
+   not an aside and not someone else's words. Left border only, so the
+   quote stays in the reading column instead of becoming a card. */
+.post blockquote {
+  margin: 1.9rem 0;
+  padding: 0.1rem 0 0.1rem 1.2rem;
+  border-left: 3px solid var(--accent);
+  font-size: 1.16rem;
+  line-height: 1.55;
+  color: var(--fg);
+}
+.post blockquote p { margin: 0.5rem 0; }
+.post blockquote em { color: var(--muted); }
+.post blockquote strong { color: var(--accent); }
+.post ul, .post ol { margin: 0 0 1.15rem; padding-left: 1.4rem; }
+.post li { margin: 0.4rem 0; }
+/* In-prose links are underlined. In the digest, citations sit in
+   predictable positions and colour alone is enough; in running prose a
+   link has no such position, and colour alone is not an accessible
+   distinction (WCAG 1.4.1). */
+.post p a, .post li a, .post blockquote a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.post hr { margin: 2.4rem 0; }
+.post .post-meta { margin-bottom: 1.6rem; }
+@media (max-width: 40rem) {
+  .post { max-width: 100%; font-size: 1.02rem; }
+  .post blockquote { font-size: 1.08rem; }
+}
 /* Per-source pages (sources/<id>.html). Model-derived prose renders in
    its own visual register — dashed border, the same convention the
    tag-model chip established — and each block leads with an explicit
@@ -2371,6 +2449,7 @@ _BLOG_DIR = ("docs", "devnotes")
 
 # (source filename in docs/devnotes/, url slug, publication date)
 _BLOG_POSTS = (
+    ("2026-08-05-human-side-of-the-team.md", "human-side", "2026-08-05"),
     ("2026-07-30-launch-article.md", "launch", "2026-07-30"),
 )
 
@@ -2447,8 +2526,12 @@ def _blog_post_body(date, md_text):
             "the official record</p>")
     head, sep, tail = body.partition("</h1>")
     body = head + sep + meta + tail if sep else meta + body
-    return (body + '<p class="post-back"><a href="blog.html">'
-                   "&larr; All posts</a></p>")
+    # Wrapped so long-form typography (section headings, pull quotes) is
+    # scoped to posts. The digest body is dense reference layout styled by
+    # _style_digest_body; neither register should leak into the other.
+    return ('<article class="post">' + body
+            + '<p class="post-back"><a href="blog.html">'
+              "&larr; All posts</a></p></article>")
 
 
 def _build_blog(out_dir, doc_pages=()):
