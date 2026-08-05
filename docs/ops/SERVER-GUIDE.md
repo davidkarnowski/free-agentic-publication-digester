@@ -1,6 +1,8 @@
 # FAPD server dossier (pointer + public-safe facts)
 
-*Last reviewed: 2026-08-02.*
+*Last reviewed: 2026-08-05 (read-only health check: containers, networks,
+certs, evidence push, firewall, and public surface all re-verified on the
+box — see the review table).*
 
 > **The full dossier is private.** This repository is headed for public
 > release, so access details (host, port, user, key path, box quirks)
@@ -25,14 +27,26 @@
 
 ## Held items / quirks
 
-(none recorded yet — add rows as they arise, dated)
+- **2026-08-05 — fail2ban's `sshd` jail is inert on this box.** Its
+  journal match is `_SYSTEMD_UNIT=sshd.service`; the unit is
+  `ssh.service`. Bounded by key-only auth. Tracked as OB-13 / F-017;
+  the jail config is cohabitant-owned, so coordinate before changing it.
+- **2026-08-05 — banned IPs in the `nginx-noscript` jail are Cloudflare
+  edge ranges.** Both `fapd.info` and `spiralyst.com` resolve directly
+  to the box, so these are someone else's CF-fronted domain still
+  pointing here, not our own visitors. Harmless; noted so a future
+  reader does not "fix" it by unbanning Cloudflare.
 
 ## Review-date table
 
 | Item | Last verified |
 |---|---|
-| Backend deployed; segmentation re-verified; real site serving | 2026-07-30 |
-| Evidence push inert by HTTPS remote (deliberate, OB-11) | 2026-07-30 |
-| Placeholder serving over HTTPS, both hostnames | 2026-07-30 |
+| Backend deployed; segmentation re-verified; real site serving | 2026-08-05 |
+| Evidence push **live over the SSH deploy key** (OB-11 landed; the earlier "inert by HTTPS remote" row described a state that ended 2026-07-30 — corrected 2026-08-05 after observing `1459dd6` reach origin) | 2026-08-05 |
+| Full digest site serving over HTTPS, both hostnames | 2026-08-05 |
+| `fapd.info` cert valid (expires 2026-10-28) | 2026-08-05 |
 | Renewal dry-run green (both cohabiting certs) | 2026-07-30 |
-| `fapd-web` networks == exactly `fapd_edge` | 2026-07-30 |
+| `fapd-web` networks == exactly `fapd_edge` | 2026-08-05 |
+| `fapd-backend` egress-only, no published ports | 2026-08-05 |
+| ufw open ports == exactly 2222 / 80 / 443 | 2026-08-05 |
+| Secrets bind-mounted read-only, `0600` root-owned | 2026-08-05 |

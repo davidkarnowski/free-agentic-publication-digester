@@ -175,8 +175,114 @@ one.*
   documented retirement runbook step: remove from repo AND volume in the
   same operation. The evidence-commit guard already caught the symptom;
   the fix belongs at the source.
+**OB-10 — Email IMAP IDLE (push instead of poll)**
+*(Header restored 2026-08-05: this entry had lost its `**OB-10 — …**`
+line and was dangling after OB-12's Sketch, making it read as part of
+that item. It is referenced by ID from
+[docs/pre-publication-todo.md](../pre-publication-todo.md); the ID is
+not reusable.)*
 - **Gap:** email collects on a 15-minute poll, not push.
 - **Trigger:** a real bulletin-latency need the poll cadence can't
   meet.
 - **Sketch:** IDLE loop with reconnect/backoff inside EmailWorker;
   keep the poll as fallback.
+
+**OB-13 — fail2ban `sshd` jail is inert**
+- **Gap:** the jail's journal match is `_SYSTEMD_UNIT=sshd.service`, but
+  the unit on this box is `ssh.service` — 1,145 journal entries under
+  `ssh.service` over 7 days versus 1 under `sshd.service`. The jail
+  reports `Total failed: 0` / `Total banned: 0` while scanning continues
+  (183 attempts from a single IP in the window). Found 2026-08-05.
+  Severity is bounded by key-only auth (`PasswordAuthentication no`,
+  `PermitRootLogin no`, `MaxAuthTries 3`): this is lost defense-in-depth
+  and lost visibility, not an open door — and the observed traffic is
+  banner/kex scanning, not password guessing.
+- **Trigger:** immediate on the next authorized VPS write window; it is
+  a one-line jail config change plus a `fail2ban-client reload`.
+- **Sketch:** point the jail at `ssh.service` (or drop the journal match
+  and read the log path), reload, then verify by confirming the failed
+  counter moves against live scan traffic. Staged script per servicing
+  guide §2. Note the box is shared: the jail config is cohabitant-owned
+  territory, so coordinate rather than assume ownership.
+
+**OB-14 — Container hardening (`fapd-web`, `fapd-backend`)**
+- **Gap:** both containers run as **root** with no `cap_drop`, no
+  `read_only` root filesystem, and no `no-new-privileges`. The one that
+  matters is `fapd-backend`, which parses untrusted fetched content
+  (XML, HTML, PDF, RFC-5322 email) as root — the CVE guide itself calls
+  that the largest exposure in the system. Measured 2026-08-05.
+- **Trigger:** the next `deploy/vps/` change that already requires a
+  container recreate, so the hardening rides along instead of buying its
+  own outage window.
+- **Sketch:** `security_opt: [no-new-privileges:true]` on both;
+  `cap_drop: [ALL]` with the minimum re-added (nginx needs
+  `NET_BIND_SERVICE`, `CHOWN`, `SETUID`, `SETGID`); `read_only: true`
+  plus explicit `tmpfs` where the volume layout allows. Author in
+  `deploy/vps/`, never on the box. Needs a plan-task document — a
+  wrong `cap_drop` takes the site down, and the backend writes to
+  volumes the read-only flag would otherwise block.
+
+**OB-15 — Edge nginx access log is unrotated and mostly healthcheck**
+- **Gap:** `/opt/spiralyst/logs/nginx/access.log` is 68 MB and has no
+  logrotate entry — unrotated since 2026-05-23. Separately, 631,522 of
+  its 655,769 lines (96%) are the `GET /healthz` probe, which makes real
+  traffic hard to read during an incident. Docker's own container logs
+  *are* capped (`json-file`, 5 MB × 3), so this is the edge log only.
+  Disk is at 39%, so this is hygiene, not urgency.
+- **Trigger:** disk above ~70%, or the first incident where log volume
+  slows the investigation.
+- **Sketch:** a logrotate entry (daily, compress, keep 14) with a
+  `postrotate` reopen; optionally exclude the healthcheck from the
+  access log with a dedicated `location /healthz { access_log off; }`.
+  Shared-box file: coordinate with the cohabitant's stack.
+
+**OB-16 — govinfo USCOURTS `/zip` 503 retry cost**
+- **Gap:** 4,745 `503`s since 2026-08-01, every one of them a
+  `USCOURTS-*/zip` request, ~370/day and ~17% of the daily request
+  budget. They are transient by design on govinfo's side — the zip is
+  built on demand — and they do resolve: of 400 distinct 503 URLs
+  sampled, **400** later returned 200. So the work completes and the
+  cost is real. This is the mechanism behind the 2026-08-01 budget
+  breach (119.6% of cap).
+- **Trigger:** daily budget use back above ~80%, or any day the cap is
+  breached again.
+- **Sketch:** honor `Retry-After` by deferring the package to a later
+  cycle instead of retrying inside the current one, so a 503 costs one
+  request per cycle rather than a burst. Per GUIDE §4 the answer is
+  fewer requests, never faster ones, and failed requests keep counting
+  against the budget — that is deliberate and stays.
+
+**OB-17 — CVE sweep refactor to deterministic sources**
+- **Gap:** `AGENT-CVE-GUIDE.md` §2 prescribes open-ended web research,
+  which is slow, approval-heavy, and less accurate than machine-readable
+  sources. Demonstrated 2026-08-05 (first real sweep): one OSV batch
+  call cleared all 19 Python dependencies, and two throwaway-container
+  commands gave distro ground truth for the images.
+- **Trigger:** the next weekly sweep.
+- **Sketch:** deterministic layers — OSV batch API from `uv.lock` (with
+  a known-vulnerable control row so a silent API failure cannot read as
+  "clean"), `apt list --upgradable` / `apk version -l '<'` in
+  **throwaway** containers, CISA KEV JSON for exploitation status —
+  plus a *narrow* researched layer for the runtime/toolchain only
+  (CPython, nginx, Node, OpenSSL, Docker, the CLI). Keep that layer:
+  OSV does not index CPython, and the scanner-only path would have
+  scored two real things clean — CVE-2026-15308, and the fact that
+  `fapd-backend` uses a bundled expat 2.7.4 while the patched system
+  `libexpat1` 2.8.2 sits unused beside it. Candidate implementation:
+  `scripts/cve_scan.py`, zero-LLM and deterministic.
+
+**OB-18 — No Content-Security-Policy or Permissions-Policy**
+- **Gap:** the site sends HSTS, `X-Content-Type-Options: nosniff`,
+  `X-Frame-Options: SAMEORIGIN`, and `Referrer-Policy:
+  strict-origin-when-cross-origin`, but no CSP and no Permissions-Policy
+  (verified 2026-08-05). Low exposure — the site is static with no
+  user input and no third-party assets — so this is defense-in-depth.
+- **Trigger:** any change that introduces a second script, an embed, or
+  externally-hosted assets. The multi-media workstream's embed posture
+  is exactly such a change and should not land before this does.
+- **Sketch:** the site has exactly one inline script (the live page's
+  local-time snippet, code-standards §2 r10), so a hash-based CSP is
+  achievable without a nonce pipeline: `default-src 'self'`,
+  `script-src 'sha256-…'`, `frame-ancestors 'self'`. Set in the nginx
+  config in `deploy/vps/`, and add a render-time test asserting the
+  inline script's hash matches the header so the two cannot drift.
