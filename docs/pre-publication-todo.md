@@ -119,9 +119,13 @@ close (check them off with dates).
 
 ### Source work that continues regardless (the standing pillar)
 - [ ] Probe shortlist Tier A: federal-register-api (public inspection),
-  congress-gov-api, DVIDS (needs key signup + media-policy GUIDE
+  congress-gov-api, DVIDS (needs key signup + ~~media-policy GUIDE
   amendments: byte budget, video posture, caption/credit rules,
-  asset_posture), FCC api2 re-probe (504 was possibly transient),
+  asset_posture~~ **amendments landed 2026-08-05**: GUIDE §3
+  "Multi-media publications" states the byte posture, the
+  embed-don't-rehost rule, asset hashing, and the mechanical-selection
+  requirement that DVIDS volume specifically motivated), FCC api2
+  re-probe (504 was possibly transient),
   BLS/ODNI feed-URL reads, USSC activation when its feed populates,
   GovDelivery-pattern probe (FDIC topic feed).
 - [ ] **Official-video transcripts** (research complete 2026-07-29:
@@ -130,7 +134,12 @@ close (check them off with dates).
   fails the consent test, finally; the transcripts' authoritative homes
   are .gov pages): adopt the four GUIDE amendments (commercial-platform
   mirrors rule, Digital Registry verification, signal-class sources,
-  ASR ≠ official text), then probe/register the GovTranscript pages
+  ~~ASR ≠ official text~~ **landed 2026-08-05** — §2's derived-media
+  bullet and §3's "Media transformation specifically" say it in the
+  general form this item asked for: an official transcript always beats
+  speech-to-text, and STT output is derived text that is marked, never
+  quoted as the record; three amendments remain), then probe/register
+  the GovTranscript pages
   (state.gov briefings feed, whitehouse.gov, war.gov transcripts).
   Digital-Registry verifier CORRECTED 2026-07-29 after hands-on check:
   the Touchpoints API requires a federal-affiliated account
@@ -224,6 +233,78 @@ close (check them off with dates).
   citation needs are already served by the canonical Markdown and the
   styled HTML, and agents were never the audience for a fixed-layout
   format.
+- [ ] **Redundant, provider-segmented inference** (filed 2026-08-05,
+  operator). Stand up additional LLM providers beside Anthropic (Google
+  and Cerebras named) so no single vendor's outage, rate limit, or
+  refusal can stop a digest. GUIDE §6 rule 7's 2026-08-05 amendment
+  governs: `backend` stays the provenance of who produced each output,
+  failover is explicit and logged, and the §2 gates are provider-blind.
+  The seam already exists and is cheap to extend — `LLMClient.__init__`
+  takes a duck-typed `backend=` object (`.name` + `.complete`), tier
+  resolution keys `config.LLM_MODELS` by backend name, and the ledger
+  already writes `backend` on every row; a third provider needs a class,
+  a `LLM_MODELS` sub-dict, and a branch. Two defects to fix while there,
+  both of which get worse with three providers: the backend contract is
+  informal (no Protocol/ABC, so a new implementation has nothing to
+  check itself against), and the backend selection's `else` is a
+  fallthrough, so an unrecognized `LLM_BACKEND` silently gets the CLI.
+  Open policy question for the operator, not a code question: when
+  failover fires, whether the digest discloses which provider answered,
+  and how per-provider spend is bounded.
+- [ ] **Blog post: "From the Human Side of the Dev Team"** (filed
+  2026-08-05, operator — **hand-written by the operator, not
+  model-generated**; the AI-development transparency policy in GUIDE §9
+  makes the authorship of this particular post load-bearing). The blog
+  surface already exists (`publish._build_blog`, `blog.html`), so this
+  is content, not build. Four beats as specified: (a) the project as
+  live AI-partnered development, with the GitHub repo as the visible
+  evidence — the work log, the branches, the mistakes kept in place;
+  (b) a personal message on public access to government publications —
+  we watch; (c) the democratizing effect of open source: a forkable
+  digester any citizenry can point at its own government's official
+  record; (d) what "official" means here — these publications are the
+  record the government chose to publish, nothing more and nothing
+  other, and the project's whole discipline follows from taking that
+  literally.
+- [ ] **Research push: federal publications we do not yet ingest**
+  (filed 2026-08-05, operator). A systematic sweep for official
+  publication series outside the current registry, distinct from the
+  Tier A probe shortlist above, which is a list of *known* candidates.
+  Method is the established one: `docs/adding-sources.md` +
+  `scripts/check_sources.py`, evidence before activation, gate-3
+  content evaluation answering what fraction of a source we would
+  actually see. Under-coverage is disclosed, not discovered later.
+- [ ] **Research push: multi-media publications** (filed 2026-08-05,
+  operator; GUIDE §3 "Multi-media publications" and the §2 derived-media
+  bullet landed the same day and govern all three children). The class
+  is admitted; this item is the build. Related work lives above and is
+  not duplicated here: DVIDS sits in the Tier A probe shortlist, and
+  official-transcript sourcing is the "Official-video transcripts" item.
+  (a) **Audio bulletins** (USDA's radio service and peers). First
+  question per source is whether an official transcript exists; where it
+  does, this is ordinary text ingestion. Where it does not, STT is the
+  fallback rung and its output is derived text under §2 — marked, never
+  quoted as the agency's words, rendered with the transcription model
+  and version. The operator's offline audio podcast downloader is the
+  candidate STT path; evaluate it as a component rather than assuming
+  it. (b) **Image feeds** (NASA image of the day the worked example).
+  Ingest published caption and alt text first — that text is the record;
+  generated captioning is a separate, labeled model surface for
+  extended summarization. Display is by direct link or embed at the
+  publisher's URL, never scrape-and-serve. Assets are hashed like
+  extracted document text so a silently replaced image is detectable
+  (§7). (c) **Video.** Capture any published transcript or caption file;
+  model summarization runs over that transcript and, where justified,
+  sampled frames — never a full media scrape. Embedding is
+  source-dependent and gets decided per source, not globally. DVIDS is
+  the major source and needs mechanical filtering *before* any model
+  sees a transcript (§6 rule 4), or it is a token drain; GUIDE §3 states
+  the bar: a media source that can only be filtered by asking a model
+  what matters is not ready to ingest.
+  Each child needs a plan-task document per `docs/ops/plan-task-template
+  .md` before implementation — the work crosses Acquisition (adapter,
+  registry, probe), Corpus (asset capture, hashing, schema), and
+  Editorial (any ASR or vision surface).
 
 ## Done (for the record)
 - [x] 2026-07-29 — Sensitive-content audit of full history: PASS.

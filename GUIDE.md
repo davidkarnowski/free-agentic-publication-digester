@@ -156,6 +156,21 @@ reporting component must comply.
   gate; an item whose plain rendering fails simply renders without one —
   plain language is a presentation aid, never a substitute for the cited
   summary.
+- **Machine-transcribed and machine-described media are derived text, never
+  the record (added 2026-08-05).** Audio, video, and images an agency
+  publishes are official publications; a machine's transcription or
+  description of them is not. Where the publisher supplies an official
+  transcript or a caption file, that text *is* the record and is treated
+  like any other official text. Where it does not, speech-to-text and
+  vision output may enter the corpus to drive selection and summarization,
+  under three constraints: it is stored in fields that mark it derived and
+  never in fields that read as source-provided (§3, transformation
+  ownership); it is never quoted as what the government said, and no digest
+  prose may attribute its wording to the agency; and it always renders with
+  the producing model and prompt version beside it, like every other model
+  surface (§3a). An item whose only text is machine-derived is disclosed as
+  such in the coverage accounting. The reader must never have to work out
+  whether they are reading the record or a machine's rendering of it.
 
 ## 3. Data Sources
 
@@ -486,6 +501,41 @@ channels refuse identified clients (see
   advocacy: §2's attributed-speech rule applies exactly as it does to
   newsroom releases.
 
+### Multi-media publications (added 2026-08-05)
+
+A growing share of what agencies publish is not text: audio news
+bulletins (USDA's radio service and its peers), image feeds (NASA's
+image of the day), and video (DVIDS is the dominant federal source).
+These are official publications and belong in scope. The class is
+admitted here so the work can begin; each medium still passes the §3
+onboarding gates like any other source, and nothing below is a
+commitment to ingest a specific site.
+
+- **Text first, always.** The ingest question for every media item is
+  what *published* text accompanies it: an official transcript, a
+  caption or subtitle file, a supplied caption, alt text, a description
+  field in the feed. That text is the record. Machine transcription and
+  machine description are the fallback rung only (§3, media
+  transformation), and what they produce is derived text under §2 —
+  marked, never quoted as the agency's words.
+- **We link, we do not rehost.** The digest embeds or links media at the
+  publisher's own URL. We do not mirror audio or video, and the point of
+  ingesting them is inference and summarization, not redistribution. The
+  §4 budgets bind media fetches like any other request, and media is
+  heavy: a source whose items cost megabytes each is a source that needs
+  a stated byte posture in its registry entry before activation.
+- **Integrity applies to bytes, not just text.** A media asset we rely
+  on is hashed and recorded like extracted document text (§7), so that a
+  file replaced at a stable URL is detectable rather than silent. An
+  agency swapping an image or re-cutting a video is exactly the kind of
+  change the provenance chain exists to catch.
+- **Volume is an editorial problem before it is a token problem.** A
+  source like DVIDS publishes far more than a daily digest can carry;
+  selection must be mechanical and party-blind (§2) and must happen
+  *before* any model sees a transcript or a frame (§6 rule 4). A media
+  source that can only be filtered by asking a model what matters is a
+  source we are not yet ready to ingest.
+
 ### Source adapters (amended 2026-07-28)
 
 Real publication interfaces are irregular: feeds without GUIDs, article
@@ -548,6 +598,16 @@ repairing text order from a hostile layout) — and when used, it is
 budgeted, ledgered, versioned like every other prompt surface (§3a), and
 its output is marked model-derived in metadata, never laundered into
 fields that read as source-provided.
+
+**Media transformation specifically (added 2026-08-05).** The same order
+applies with a sharper edge, because the gap between the record and our
+rendering of it is widest here. An official transcript or caption file,
+where the publisher offers one, always beats speech-to-text; published
+alt text or a supplied caption always beats a generated description.
+Machine transcription and machine description are the fallback rung,
+never the first reach, and a source is probed for the official artifact
+before any model is pointed at the media. What they produce is derived
+text under §2 — marked, never quoted as the record.
 
 General guidance (see `docs/adding-sources.md` for the how-to): prefer
 configuration (registry fields) over code; write an adapter only when
@@ -630,6 +690,17 @@ All LLM prompts are code, versioned, and change through procedure:
     opinion-agnostic about the institution it describes. Regenerated
     only when the registry entry changes or the version bumps — never
     on a timer.
+- **Media model surfaces (admitted 2026-08-05, not yet built).** The
+  multi-media class (§3) will need up to three further surfaces:
+  transcription of audio and video that arrives without an official
+  transcript, description of images that arrive without published alt text
+  or a caption, and summarization over a transcript or sampled frames.
+  They are named here so the governance lands before the code rather than
+  after it. Each arrives with its own version constant, its own ledger
+  rows, the §2 banned list restated in-prompt, the same storage-time gate
+  the source-page surfaces use, and the derived-text marking §2 requires.
+  Until they exist the Inventory above stays at seven — this bullet is a
+  commitment, not a claim.
 - **The insight surface is developer-facing, never editorial.** Its
   output appears only in the daily operations report under
   `provenance/runs/` — never in a digest, the site's reader pages, or
@@ -856,6 +927,36 @@ without touching upstream:
   function): a weekend or federal-holiday digest states so in its
   header — a quiet Sunday is the publishers resting, and saying so in
   the record is disclosure, not editorializing.
+
+  **Amended 2026-08-05 — supersession of a frozen day (operator).** The
+  freeze is correct and the freeze is early. A publisher-dated collection
+  can be published by its source *after* our end-of-day boundary has
+  passed, and when that happens the frozen digest reports the day as
+  empty when it was not. The measured case is the Congressional Record:
+  govinfo posts a day's issue 8–22 hours after that day ends
+  (CREC-2026-08-04, 62 granules, first seen 2026-08-05T11:42Z against an
+  04:47Z freeze; CREC-2026-08-03, 154 granules, first seen
+  2026-08-04T12:27Z against an 04:06Z freeze), so since automatic
+  midnight-Eastern finalization began on 2026-08-02 every session-day
+  digest has published an empty §1 while the Record for that day existed.
+  A digest MAY therefore be re-rendered and republished when a
+  publisher-dated collection for its day arrives late. The superseding
+  digest carries a dated amendment notice saying what changed and why,
+  and the superseded revision is preserved and stays addressable — the
+  record of what we published at the time is itself part of the record.
+
+  **What this amendment does not do.** It does not reopen a day for
+  *observation-dated* sources: an agency release that arrives late is
+  dated by §3's rule and belongs to the day it arrived, not to an
+  amendment — the two dating regimes stay separate for the reason §3
+  gives. It does not make the freeze advisory; the first publication
+  still passes every validation gate on its own and stands as published.
+  And it does not license a silent re-render: changing a published
+  digest without saying so is precisely the failure this rule exists to
+  prevent. Until the mechanism ships, the obligation is disclosure —
+  a section with no data because its source had not published yet must
+  say that, and must never render as a count of zero that reads as
+  "nothing happened."
 - **Storage:** filesystem for raw documents (`data/raw/<collection>/<date>/`),
   SQLite for metadata and extracted records. No cloud dependency to start.
 - **Language:** Python (mature XML tooling, easy scheduling). Decide at first
@@ -925,6 +1026,20 @@ of the code, not of operator discipline.
    concrete model per backend, and the ledger records both the backend and
    the resolved model for every call — budget rules apply identically to
    both.
+
+   *Provider redundancy and segmentation (amended 2026-08-05, operator).*
+   The pluggability exists to be used: additional providers beyond
+   Anthropic are permitted and wanted, so that a single vendor's outage or
+   refusal cannot stop the digest. Three conditions bind them. The
+   ledger's `backend` column is the provenance of which provider produced
+   a given output and stays populated for every call, including failures.
+   Failover between providers is explicit and logged — a run that silently
+   changed providers would make the ledger's cost history unreadable and
+   the digest's model attribution false. And the §2 gates are
+   provider-blind: banned-lexicon enforcement, labeling of model-derived
+   prose, and the storage-time scans apply identically whoever answered,
+   because a gate that trusted one vendor more than another would be a
+   gate we could not describe honestly.
 8. **Measure first, then cap.** The token ledger (rule 7) runs from the
    analysis layer's very first call, but **no hard cap is enforced until
    real test runs establish a measured baseline** — capping against

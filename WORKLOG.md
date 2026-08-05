@@ -4547,3 +4547,115 @@ surfaces), CLAUDE.md decision log gains the day's three operator
 decisions. Tonight's EOD is the first fully organic cycle:
 2026-08-03's digest with its born-in-markdown day-view link and a
 contemporaneously frozen /day/2026-08-03.
+
+## 2026-08-05 — The health check that found the missing Congress
+
+A routine VPS health check, an evaluation of the insight loop, and the
+project's first real CVE sweep. The box came back green on every
+structural check — both containers healthy, `fapd-web` on `fapd_edge`
+and nothing else, backend egress-only, ufw open on exactly 2222/80/443,
+TLS 84 days, all 27 collector workers at zero consecutive errors,
+request budget at 31–37% of cap after the 119.6% breach on 08-01. The
+interesting findings were all in what the system was failing to say.
+
+The largest: **the Congressional Record has never appeared in an
+automatically-frozen digest.** govinfo publishes a day's issue 8–22
+hours after that day ends, and the midnight-Eastern freeze arrives
+first. CREC-2026-08-04 carries 62 granules and was first seen at
+2026-08-05T11:42Z against an 04:47Z freeze; CREC-2026-08-03 carries 154
+and was first seen at 2026-08-04T12:27Z against 04:06Z. So since
+automatic finalization began on 08-02, every session-day digest has
+published "Total issue size: 0 granule(s)" and a coverage row of zeroes
+for the flagship section — which reads to any reader as *Congress did
+nothing today*. The only digest with a populated §1 is 2026-07-30, and
+that one was rendered twenty-two hours late by hand. The three-clock
+fix in August moved the freeze to the right boundary for the
+publication day; it did not ask whether the publishers had finished
+publishing. Operator's ruling: publish on time and supersede the day
+when the Record lands, with the amendment dated and the superseded
+revision preserved. GUIDE §5 amended accordingly, with the bound
+stated — supersession never reopens a day for observation-dated
+sources, never makes the freeze advisory, and never licenses a silent
+re-render.
+
+The insight loop turned out to be reporting on a day it mostly could
+not see, and lost a day entirely. Its window is `time.gmtime()` today,
+but EOD runs at ~04:00–05:00 UTC, so it measures about five hours of a
+twenty-four hour operational day: for digest 08-04 it reported 1,117
+requests and 956,741 input tokens against a true 2,564 and 1,977,620 —
+44% and 48%. Its error section filters `error IS NOT NULL`, so it said
+"No LLM call errors recorded on the run day" while fifteen zero-billed
+CLI failures sat in the ledger from that morning. And `run()` calls
+`suggest()` before it writes the report, catching only `ValueError`, so
+when one of those fifteen failures hit `insight:suggestions` the
+exception took the entire mechanical report with it — `insight-2026-08-
+03.md` was never written, and nothing noticed. The docstring three
+lines above already promises that "the report's mechanical sections
+never depend on this call succeeding." The code simply did not honor
+its own contract. Filed as F-014; the fixes are small and land next.
+
+Two things the loop flagged resolved on inspection rather than
+becoming work. Its "investigate govinfo's 25% error rate" is real but
+benign in kind: every one of 4,745 503s since 08-01 is a
+`USCOURTS-*/zip` request, govinfo builds those on demand, and of 400
+distinct 503 URLs sampled, 400 later returned 200. The cost is real —
+~17% of the daily budget, and the mechanism behind the 08-01 breach —
+so it is filed as OB-16 with the §4-consistent fix (defer, don't
+re-hammer), not as a bug. Its "source-description cost is 29% of the
+budget" was a false alarm caused by the very failure it could not see:
+descriptions are `registry_hash`-keyed and converge; the 08-05 re-run
+existed only because 08-04's batches died zero-billed. And its question
+about the 319-vs-1608 ingestion drop has an answer it had no way to
+reach — USCOURTS opinions arrive for four to five days after issue
+(opinions issued 08-03 gained 331 further first-sightings on 08-05),
+so a Tuesday looks empty next to a Monday that absorbed the prior
+week's backlog.
+
+The CVE sweep ran for the first time, and the interesting result is
+methodological. One OSV batch call cleared all nineteen Python
+dependencies in about a second — with a deliberately-vulnerable control
+row included, so a silent API failure could not read as "clean" — and
+two throwaway-container commands gave distro ground truth for the
+images. That is strictly better than the open-ended web research the
+guide currently prescribes, and the operator's complaint about approval
+churn was well founded. But the scanner-only path would have scored two
+real things clean: CVE-2026-15308, the unfixed `HTMLParser` CPU DoS
+that OSV does not index because it is CPython, and the fact that
+`fapd-backend` loads a **bundled** expat 2.7.4 while the patched system
+`libexpat1` 2.8.2 sits unused beside it. So the refactor filed as OB-17
+is hybrid, not pure-deterministic: machine-readable sources for
+packages, a narrow researched layer for the six runtime components
+where distro version strings lie. Real remediation items are the host
+kernel (6.8.0-136 → -137, security), and on the dev machine uv and
+CPython; the edge proxy was verified at nginx 1.30.4, which is exactly
+the release that fixes the CVSS 9.2 pre-auth bug with a public PoC.
+
+Security review of the nginx and Docker logs found the public surface
+boring in the way it should be — every WordPress installer, luci probe,
+PHP shell path and stray MongoDB handshake answered 404/444/400 — and
+one genuine defect: fail2ban's `sshd` jail matches
+`_SYSTEMD_UNIT=sshd.service` while the unit is `ssh.service`, 1,145
+journal entries against 1, so the jail has never fired. Key-only auth
+bounds it to lost defense-in-depth rather than an open door, but it is
+filed (OB-13/F-017) and the box is shared, so it needs coordination
+rather than a unilateral edit.
+
+Forward notes from the operator ingested the same day rather than left
+in a conversation: redundant provider-segmented inference (GUIDE §6
+rule 7 amended — `backend` is the provenance of who answered, failover
+is explicit and logged, gates are provider-blind), a hand-written blog
+post whose human authorship is itself load-bearing under §9, a research
+push on federal publications we don't yet ingest, and the multi-media
+class. That last one got the most governance because it needed it:
+GUIDE §2 now says machine transcription and machine description are
+derived text, never the record, and §3 gains a "Multi-media
+publications" subsection covering text-first sourcing, embed-don't-
+rehost, asset hashing, and the rule that a media source filterable only
+by asking a model what matters is not ready to ingest. Two existing
+todo items turned out to have been waiting on exactly these amendments
+— the 2026-07-29 "ASR ≠ official text" dependency and DVIDS's
+media-policy block — so both were struck in place rather than
+duplicated. §3a registers the three media model surfaces as committed
+but not built, and says so explicitly: the Inventory stays at seven
+until they exist.
+
