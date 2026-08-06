@@ -202,6 +202,34 @@ reporting component must comply.
   406. Prefer bulk data over the API for large backfills.
   Docs: `github.com/usgpo/api`, `github.com/usgpo/bulk-data`.
 
+**Amended 2026-08-06 — observation-day filing (operator).** A govinfo
+package is filed under the Eastern publication day of its FIRST
+OBSERVATION by our collector
+(`sync.publication_date_of(first_seen_at)`), written once and never
+re-derived — a later revision re-fetch never re-files a document.
+FAPD's three clocks, in disclosure order: *Date of Action* (as
+described in the text — proceedings date, opinion issue date; may be
+unavailable), *Date of Publication* (publisher metadata; may be
+unavailable), *Date of Observation* (ours — the only timestamp defined
+precisely from our own worker metadata, and the source of truth for
+filing and sequencing). Why observation and not publisher metadata: a
+source outage under metadata filing files a document into a day whose
+digest is already frozen — dropped from the record; under observation
+filing nothing observed can ever miss its digest. Per-collection
+policy: CREC, BILLS, USCOURTS, PLAW file by observation day; FR files
+by its cover date (the FR is legally published on its cover date, and
+govinfo posts it early — the 2026-08-03 issue was observed
+2026-08-01); AGENCYPR keeps the §3 agency dating rule unchanged
+(filing agency feeds by observation is the 721-item backfill failure
+of 2026-07-31). Every observation-filed item or section states the
+document's own date, and the publisher stamp where available, beside
+the digest day. Cutover: filing changed with digest 2026-08-06; rows
+first seen earlier keep cover-date filing so every frozen digest
+re-renders identically (§5 reproducibility). The two Record issues
+observed 2026-08-04/05 (proceedings of 08-03/08-04) predate the
+cutover and appear in no digest — their summaries remain in the corpus
+and day views; disclosed, not backfilled.
+
 ### Collections of interest (initial scope)
 
 | Code | Collection | Why |
@@ -956,7 +984,9 @@ without touching upstream:
   prevent. Until the mechanism ships, the obligation is disclosure —
   a section with no data because its source had not published yet must
   say that, and must never render as a count of zero that reads as
-  "nothing happened."
+  "nothing happened." *(2026-08-06: observation-day filing — the §3
+  amendment — removes the CREC case that motivated this amendment; it
+  remains for genuine corrections.)*
 - **Storage:** filesystem for raw documents (`data/raw/<collection>/<date>/`),
   SQLite for metadata and extracted records. No cloud dependency to start.
 - **Language:** Python (mature XML tooling, easy scheduling). Decide at first

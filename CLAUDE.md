@@ -192,6 +192,17 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   which is why a re-render of an earlier day gains items. Dating them by
   observation, the way the §3 agency dating rule dates newsroom
   releases, makes section 8 permanently empty. Do not "unify" the two.
+  *(2026-08-06: BILLS-the-collection now files by observation day — the
+  §3 amendment; BILLACTIONS section 8, fed by the Congress.gov API's
+  own actionDate record, is unchanged.)*
+- **Digest filing for govinfo collections is by observation day**
+  (`packages.digest_day`, GUIDE §3 amended 2026-08-06): CREC, BILLS,
+  USCOURTS, PLAW file under the Eastern day our collector first
+  observed them; FR and AGENCYPR file by their own date
+  (`config.FILING_POLICY`). `date_issued` remains the document's own
+  date for display and the USCOURTS fetch window — do not "simplify"
+  filing queries back onto it, and never update `digest_day` after
+  first sight (write-once; a revision re-fetch must not re-file).
 - **The registry keeps `unavailable` entries forever** — a refusal is
   accountability data; a success elsewhere never erases it.
 - **Empty-state digest sections render on purpose** (e.g. PLAW's "No
@@ -339,3 +350,20 @@ live in `.claude/agents/fapd-*.md` (tracked).
   traffic, excluded from all-time figures and the per-source request
   charts, with the floor disclosed beside the numbers. Item counts are
   the corpus record and are not floored.
+- **2026-08-05/06** — GUIDE amendments: §5 frozen-day supersession
+  (operator; superseded for the CREC case one day later, retained for
+  genuine corrections), §2/§3 derived-media-is-never-the-record + the
+  multi-media class, §6 r7 provider redundancy (backend column is
+  provenance, failover explicit, gates provider-blind).
+- **2026-08-06** — **Observation-day filing** (operator): govinfo
+  collections file under the Eastern day of FIRST OBSERVATION
+  (`packages.digest_day`, write-once) — the three clocks doctrine
+  (Action / Publication / Observation; observation is the only
+  timestamp we define precisely and is the filing source of truth; a
+  source outage cannot drop a document under it). FR keeps cover-date
+  (posts early — measured); AGENCYPR keeps the agency dating rule.
+  Forward-only cutover with digest 2026-08-06; the two pre-cutover
+  Record issues stay out of the canonical digests, disclosed. Root
+  cause this resolves, data-verified: every auto-frozen digest had an
+  empty §1 while fully-paid-for CREC summaries sat unpublished
+  (F-013).
