@@ -77,7 +77,20 @@ SOURCES_REGISTRY = PROJECT_ROOT / "sources" / "registry.yaml"
 # separately (gao.gov 420s, fda.gov 30s, fema.gov 15s, justice.gov and
 # odni.gov 10s, ftc.gov 5s). The raise was made only after removing the
 # waste it would otherwise have paid for — see F-007, the robots cache.
-MAX_AGENCY_REQUESTS_PER_DAY = 1500
+#
+# Raised 1500 -> 3000 on 2026-08-06 (operator-authorised, GUIDE §4
+# amended with the evidence). Production reached 1,287 agency requests
+# that day against a collector ceiling of 1,275 (85% of 1,500; the rest
+# is the EOD reserve) and refused to poll three newly activated sources.
+# Re-measured before raising: no host declares Request-rate or
+# Visit-time — there is no publisher cap to approach — and across seven
+# days each host received ~42-46 requests a day, about one every 33
+# minutes. Zero 429s from any government host in the project's history
+# (the 178 on record are all web.archive.org, its own budget). At ~29
+# requests per source per day this carries ~88 sources against 27 still
+# planned. Per-host pacing is unaffected: crawl-delay is enforced by the
+# client per host, so a bigger daily number buys breadth, never speed.
+MAX_AGENCY_REQUESTS_PER_DAY = 3000
 
 # Hourly ceiling (GUIDE §4, added 2026-07-31). api.data.gov — the shared GSA
 # service govinfo runs on — documents 1,000 requests per hour per key and

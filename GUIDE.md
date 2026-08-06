@@ -814,6 +814,41 @@ discipline:
   granted (F-007). Fixing that first is the §4 principle applied to
   ourselves — fewer requests before more allowance.
 
+  **Agency class raised 1,500 -> 3,000/day (amended 2026-08-06,
+  operator-authorised).** Same condition, same evidence discipline,
+  re-measured on production rather than assumed. What the publishers
+  declare is unchanged: across the 18 hosts whose robots.txt we hold,
+  **none declares `Request-rate` and none declares `Visit-time`** — no
+  daily cap exists to be near. Eight declare crawl-delay (gao.gov 420s
+  down to nasa.gov 1s), which is spacing and is enforced per host by the
+  client independently of this number: raising the daily allowance
+  cannot make a single host receive requests any faster.
+
+  What we do, measured over the seven days to 2026-08-06: **~42-46
+  requests per host per day, about 1.8 an hour** — roughly one request
+  every 33 minutes to a federal web server. Refusals over the project's
+  whole history: **zero 429 responses from any government host** (all
+  178 recorded 429s are web.archive.org, a separate corroboration budget
+  with its own cap), and 17 real content refusals across 25 hosts — the
+  other 103 4xx responses are robots.txt fetches, which under RFC 9309
+  mean *allow*.
+
+  The trigger was arithmetic, not appetite. Production reached 1,287
+  agency requests on 2026-08-06 against a collector ceiling of 1,275
+  (85% of 1,500; the remainder is the §4 EOD reserve), and refused to
+  poll three newly activated sources. At roughly 29 requests per source
+  per day, 1,500 supports about 44 sources and the registry had already
+  passed that. 3,000 supports about 88, against 27 planned entries still
+  waiting — and leaves the per-host rate exactly where it is, because
+  budget buys *breadth*, never speed.
+
+  **What this amendment does not do.** It does not touch crawl-delay,
+  the per-host pacing clock, the govinfo budget, the hourly govinfo
+  ceiling, or the EOD reserve fraction. It does not license article
+  fetches a source's posture excludes. And it does not change the
+  standing rule that a refusal is honored, never evaded and never
+  retried into submission.
+
   **Finalizer reserve (added 2026-07-31).** Continuous collectors may spend
   only **85%** of a daily budget; the remainder is reserved for the
   end-of-day finalizer. On 2026-07-30 the collectors spent all 2,000
