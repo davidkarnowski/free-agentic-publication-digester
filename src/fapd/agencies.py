@@ -14,6 +14,7 @@ import hashlib
 import json
 import logging
 import re
+import types
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from urllib.parse import parse_qs, urljoin, urlsplit, urlunsplit
@@ -104,6 +105,17 @@ class SourceAdapter:
     COLLECTION = "AGENCYPR"
     DOC_TYPE = "PRESS"
     DATED_BY_PUBLISHER = False
+
+    def doc_type_for(self, item):
+        """This item's document type. Defaults to the class constant.
+
+        The seam exists (added 2026-08-06) for sources whose publisher
+        declares a per-item class the digest renders on — whitehouse.gov
+        tags each presidential action "Executive Orders", "Proclamations"
+        or "Presidential Memoranda". A per-ITEM answer is the adapter's
+        to give for the same reason COLLECTION and DOC_TYPE are: the
+        registry describes a source, the adapter reads its documents."""
+        return self.DOC_TYPE
 
     def request_params(self):
         """Query parameters for the index/feed fetch; empty by default.
@@ -1144,6 +1156,52 @@ class _AncestryIndex:
         return anchor_counts, dates_by_node
 
 
+class PresidentialActionsAdapter(SourceAdapter):
+    """whitehouse.gov's presidential-action feeds (GUIDE §3; activated
+    2026-08-06). An ordinary RSS source in every mechanical respect —
+    the feed is well-formed, every item carries pubDate and guid, and
+    the article page is fetched because the feed's <description> is a
+    400-700 character teaser, not the document.
+
+    Two things differ, both of them the publisher's doing rather than
+    ours. It gets its OWN collection because its documents are the
+    President's instruments, not agency announcements, and a digest that
+    filed an executive order under "Agency Announcements" would
+    misdescribe it. And its document type is per item, read from the
+    <category> element the feed already states: we never infer whether
+    something is an order or a proclamation when whitehouse.gov declares
+    it.
+
+    Editorial register is unchanged from every other agency source: the
+    §2 attributed-speech rule applies in full (operator, 2026-08-06), so
+    the digest's own prose about these documents attributes. What is
+    never altered is the source's words — titles and any quoted text are
+    published verbatim, as GUIDE §2's scope amendment requires."""
+
+    COLLECTION = "PRESACT"
+    DOC_TYPE = "PRESACTION"          # fallback when the feed states no class
+    DATED_BY_PUBLISHER = False        # the §3 dating rule, as for every feed
+
+    # The publisher's taxonomy -> our document type. Deliberately an
+    # explicit table and not a slug transform: an unrecognized category
+    # falls back to PRESACTION and still renders, rather than inventing a
+    # type the rules and the coverage statement have never heard of.
+    CATEGORY_DOC_TYPES = types.MappingProxyType({
+        "executive orders": "EO",
+        "proclamations": "PROCLAMATION",
+        "presidential memoranda": "MEMORANDUM",
+        "nominations & appointments": "NOMINATION",
+        "nominations and appointments": "NOMINATION",
+    })
+
+    def doc_type_for(self, item):
+        for category in item.get("categories") or ():
+            mapped = self.CATEGORY_DOC_TYPES.get(category.strip().lower())
+            if mapped:
+                return mapped
+        return self.DOC_TYPE
+
+
 ADAPTERS = {
     "rss": SourceAdapter,
     "rss-feed-only": FeedOnlyAdapter,
@@ -1151,6 +1209,7 @@ ADAPTERS = {
     "senate-votes": SenateVotesAdapter,
     "congress-bill-actions": CongressBillActionsAdapter,
     "html-index": HtmlIndexAdapter,
+    "presidential-actions": PresidentialActionsAdapter,
 }
 
 
@@ -1395,7 +1454,8 @@ def poll_source(client, wayback, conn, entry):
             mode_used = "feed-only"
         _store_item(conn, entry, item, package_id, text, mode_used,
                     capture_id, wayback_url,
-                    collection=adapter.COLLECTION, doc_type=adapter.DOC_TYPE,
+                    collection=adapter.COLLECTION,
+                    doc_type=adapter.doc_type_for(item),
                     dated_by_publisher=adapter.DATED_BY_PUBLISHER)
         stats["new_items"] += 1
         logger.info("%s: [%d/%d] ingested %r (%s)", entry["id"], position,

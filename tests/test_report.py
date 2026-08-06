@@ -1100,3 +1100,77 @@ def test_empty_crec_day_states_the_absence_in_words(conn, tmp_path):
     md = report.render(conn, "2026-07-25", out_dir=tmp_path).read_text()
     assert "No Congressional Record issue was observed on this day." in md
     assert "Total issue size: 0 granule(s)" not in md
+
+
+# ------------------------------------------------ §9 presidential actions --
+# whitehouse.gov feeds, activated 2026-08-06. The publisher states each
+# action's class; the digest never infers it.
+
+
+def _add_presact(conn, pkg, title, doc_type, claimed, url=None, source="whitehouse-presidential-actions"):
+    now = "2026-07-23T12:00:00Z"
+    conn.execute(
+        "INSERT INTO packages (package_id, collection, date_issued,"
+        " last_modified, first_seen_at, fetch_status, digest_day)"
+        " VALUES (?, 'PRESACT', ?, ?, ?, 'fetched', ?)",
+        (pkg, DATE, now, now, DATE))
+    conn.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection,"
+        " doc_type, title, agency, metadata, text, char_count, extracted_at,"
+        " extractor_version) VALUES (?, '', 'PRESACT', ?, ?, 'The White House',"
+        " ?, 'body', 4, ?, 1)",
+        (pkg, doc_type, title,
+         json.dumps({"source_id": source,
+                     "url": url or f"https://www.whitehouse.gov/{pkg}",
+                     "claimed_published_at": claimed, "wayback_url": None}),
+         now))
+    conn.commit()
+
+
+def test_presidential_actions_render_by_publisher_class(conn, tmp_path):
+    _add_presact(conn, "PA-eo-1", "Ending Birth Tourism", "EO",
+                 "Thu, 23 Jul 2026 21:07:00 +0000")
+    _add_presact(conn, "PA-pr-1", "National Purple Heart Day, 2026",
+                 "PROCLAMATION", "Thu, 23 Jul 2026 20:54:00 +0000")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "## 9. Presidential Actions" in md
+    assert "### 9.1 Executive Orders" in md
+    assert "### 9.2 Proclamations" in md
+    # The title is the publisher's words, verbatim — never reworded.
+    assert "Ending Birth Tourism" in md
+    assert "PRESACT-SEL-01" in md and "PRESACT-SEL-02" in md
+
+
+def test_presidential_action_dated_earlier_is_counted_not_listed(conn, tmp_path):
+    """GUIDE §3 dating rule, as for agency releases: the feeds carry months
+    of history, and first activation must not list it all as today's news."""
+    _add_presact(conn, "PA-old-1", "An Older Order", "EO",
+                 "Mon, 30 Mar 2026 12:00:00 +0000")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "An Older Order" not in md
+    assert "PRESACT-EX-01" in md
+    assert "| PRESACT | 1 | 1 | 0 | 0 | 1 |" in md   # coverage identity holds
+
+
+def test_same_order_in_both_feeds_lists_once_marked(conn, tmp_path):
+    """Both whitehouse.gov feeds carry executive orders; an order in both
+    shares its canonical URL and merges under the standing corroboration
+    rule rather than listing twice."""
+    url = "https://www.whitehouse.gov/presidential-actions/2026/07/x/"
+    _add_presact(conn, "PA-dup-1", "Ending Birth Tourism", "EO",
+                 "Thu, 23 Jul 2026 21:07:00 +0000", url=url)
+    _add_presact(conn, "PA-dup-2", "Ending Birth Tourism", "EO",
+                 "Thu, 23 Jul 2026 21:07:00 +0000", url=url,
+                 source="whitehouse-executive-orders")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert md.count("**[Ending Birth Tourism]") == 1
+    assert "Corroborated:" in md
+
+
+def test_presidential_action_titles_bypass_the_lexicon_gate(conn, tmp_path):
+    """An order the President titles with a banned term is still titled
+    that: GUIDE §2's gate binds our prose, never the publisher's."""
+    _add_presact(conn, "PA-lex-1", "A Historic and Unprecedented Order", "EO",
+                 "Thu, 23 Jul 2026 21:07:00 +0000")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "A Historic and Unprecedented Order" in md

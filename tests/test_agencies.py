@@ -6,7 +6,7 @@ import pathlib
 
 import pytest
 
-from fapd import agencies, config, db
+from fapd import agencies, config, db, probe
 
 RSS = b"""<?xml version="1.0"?><rss version="2.0"><channel>
 <item><title>Release A</title><link>https://x.gov/a</link><guid>g-a</guid>
@@ -939,3 +939,46 @@ def test_html_index_ingest_stores_agency_releases_feed_only(env, index_today):
 
     # a second poll ingests nothing: identity is the normalized URL
     assert agencies.poll_source(client, FakeWayback(), env, entry)["new_items"] == 0
+
+
+def test_presidential_actions_adapter_reads_the_publishers_class():
+    """whitehouse.gov states each action's class in <category>; the
+    adapter looks it up rather than inferring from the title."""
+    a = agencies.PresidentialActionsAdapter()
+    assert a.COLLECTION == "PRESACT"
+    assert a.doc_type_for({"categories": ["Presidential Actions", "Executive Orders"]}) == "EO"
+    assert a.doc_type_for({"categories": ["Presidential Actions", "Proclamations"]}) == "PROCLAMATION"
+    assert a.doc_type_for({"categories": ["Presidential Memoranda"]}) == "MEMORANDUM"
+    assert a.doc_type_for({"categories": ["Nominations & Appointments"]}) == "NOMINATION"
+    # An unrecognized class still renders, under the catch-all rule.
+    assert a.doc_type_for({"categories": ["Something New"]}) == "PRESACTION"
+    assert a.doc_type_for({}) == "PRESACTION"
+
+
+def test_default_adapter_doc_type_is_unchanged():
+    """The per-item seam must not move any existing source."""
+    assert agencies.SourceAdapter().doc_type_for({"categories": ["x"]}) == "PRESS"
+
+
+def test_parse_feed_captures_categories_without_disturbing_other_fields():
+    body = b"""<rss><channel><item>
+      <title>Ending Birth Tourism</title>
+      <link>https://www.whitehouse.gov/x/</link>
+      <guid>https://www.whitehouse.gov/?p=1</guid>
+      <pubDate>Thu, 06 Aug 2026 21:07:11 +0000</pubDate>
+      <description>teaser</description>
+      <category>Presidential Actions</category>
+      <category>Executive Orders</category>
+    </item></channel></rss>"""
+    fmt, items = probe.parse_feed(body)
+    assert fmt == "rss"
+    assert items[0]["categories"] == ["Presidential Actions", "Executive Orders"]
+    assert items[0]["title"] == "Ending Birth Tourism"
+    assert items[0]["claimed_date"] == "Thu, 06 Aug 2026 21:07:11 +0000"
+
+
+def test_parse_feed_categories_default_empty():
+    body = b"""<rss><channel><item><title>t</title><link>u</link>
+      <description>d</description></item></channel></rss>"""
+    _fmt, items = probe.parse_feed(body)
+    assert items[0]["categories"] == []

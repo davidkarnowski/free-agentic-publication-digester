@@ -71,6 +71,15 @@ def parse_feed(body: bytes):
                 "claimed_date": (it.findtext("pubDate") or "").strip() or None,
                 "description_chars": len((it.findtext("description") or "").strip()),
                 "description": (it.findtext("description") or "").strip(),
+                # The publisher's own taxonomy, where it states one. Added
+                # 2026-08-06 for whitehouse.gov, whose feed tags every item
+                # with its class ("Executive Orders", "Proclamations", …) —
+                # a classification we must never infer when the publisher
+                # already declares it. Empty list when absent, so every
+                # existing caller sees the same shape it always did.
+                "categories": [(c.text or "").strip()
+                               for c in it.findall("category")
+                               if (c.text or "").strip()],
             })
         return "rss", items
     if root.tag == f"{_ATOM_NS}feed":

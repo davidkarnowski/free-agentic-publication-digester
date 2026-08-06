@@ -584,6 +584,7 @@
   urls:
     home: https://www.whitehouse.gov/presidential-actions/
     feed: https://www.whitehouse.gov/presidential-actions/feed/
+  adapter: presidential-actions
   method: Polls the presidential-actions RSS feed via AgencyClient, then fetches each new item's page for the full instrument text (mode full).
   status: active
   added: "2026-08-06"
@@ -599,6 +600,7 @@
   urls:
     home: https://www.whitehouse.gov/presidential-actions/executive-orders/
     feed: https://www.whitehouse.gov/presidential-actions/executive-orders/feed/
+  adapter: presidential-actions
   method: Polls the executive-orders RSS feed via AgencyClient, then fetches each new item's page for the full order text (mode full); overlaps whitehouse-presidential-actions by design — shared items carry identical link URLs and merge through the standing corroboration rule.
   status: active
   added: "2026-08-06"

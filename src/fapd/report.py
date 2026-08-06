@@ -68,6 +68,16 @@ RULE_DESCRIPTIONS = {
                       " backfill / newly activated source) — counted, not listed",
     "VOTES-EX-01": "recorded vote the chamber dates on another day (inside the"
                    " index lookback window) — counted, not listed",
+    "PRESACT-SEL-01": "executive order published by the White House (all listed)",
+    "PRESACT-SEL-02": "presidential proclamation published by the White House"
+                      " (all listed)",
+    "PRESACT-SEL-03": "presidential memorandum or determination published by the"
+                      " White House (all listed)",
+    "PRESACT-SEL-04": "other presidential action published by the White House"
+                      " (all listed)",
+    "PRESACT-EX-01": "presidential action the White House dated outside this day"
+                     " (feed backfill / newly activated source) — counted, not"
+                     " listed",
 }
 
 # GUIDE §6 rule 9: at most this many graphics embedded per summarized item;
@@ -260,7 +270,7 @@ def _coverage(conn, date):
     pv = config.PROMPT_VERSION
     cov = {}
     for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR", "VOTES",
-                 "BILLACTIONS"):
+                 "BILLACTIONS", "PRESACT"):
         cov[coll] = {
             "packages": _scalar(
                 conn,
@@ -330,6 +340,13 @@ def _coverage(conn, date):
     votes["excluded"] = len(votes_backfill)  # VOTES-EX-01 (dating rule)
     votes["counted"] = votes["units"] - votes["summarized"] - votes["excluded"]
     votes["rules"] = {"VOTES-EX-01": len(votes_backfill)}
+
+    presact = cov["PRESACT"]
+    _, presact_backfill = _presact_rows(conn, date)
+    presact["excluded"] = len(presact_backfill)  # PRESACT-EX-01 (dating rule)
+    presact["counted"] = (presact["units"] - presact["summarized"]
+                          - presact["excluded"])
+    presact["rules"] = {"PRESACT-EX-01": len(presact_backfill)}
 
     # Bill actions carry no exclusion rule at all. Every action inside the
     # lookback window is listed, and the collection is dated by the
@@ -861,6 +878,144 @@ def _billaction_item_lines(row):
     if row["_meta"].get("wayback_url"):
         source += f" · [independent archive]({row['_meta']['wayback_url']})"
     lines.append(source)
+    return lines
+
+
+def _presact_rows(conn, date):
+    """(listed, backfill) presidential actions for the digest day.
+
+    The same GUIDE §3 dating split section 6 applies to agency releases:
+    an action the White House dated on another day is counted under
+    PRESACT-EX-01, never listed as today's news. That matters most on
+    first activation, when the feeds carry months of history."""
+    rows = [dict(r) for r in conn.execute(
+        """
+        SELECT e.title, e.doc_type, e.metadata
+        FROM extracted_texts e JOIN packages p USING (package_id)
+        WHERE e.collection = 'PRESACT' AND p.digest_day = ?
+        ORDER BY e.doc_type, e.title
+        """,
+        (date,),
+    )]
+    listed, backfill = [], []
+    for r in rows:
+        meta = json.loads(r["metadata"] or "{}")
+        claimed = _claimed_day(meta)
+        r["_meta"], r["_claimed_day"] = meta, claimed
+        (listed if claimed == date or claimed is None else backfill).append(r)
+    return listed, backfill
+
+
+# The publisher's classes, in the order section 9 renders them. Kept here
+# rather than derived from the rules so the section's reading order is a
+# presentation decision, not an accident of registry order.
+_PRESACT_SUBSECTIONS = (
+    ("9.1", "EO", "Executive Orders", "executive order"),
+    ("9.2", "PROCLAMATION", "Proclamations", "proclamation"),
+    ("9.3", "MEMORANDUM", "Presidential Memoranda", "presidential memorandum"),
+    ("9.4", "PRESACTION", "Other Presidential Actions", "presidential action"),
+    ("9.5", "NOMINATION", "Nominations and Appointments", "nomination"),
+)
+
+
+def _presact_lines(conn, date):
+    """Section 9: presidential actions as the White House itself
+    published them (GUIDE §3; activated 2026-08-06). Appended as section
+    9 under the §2 append-only numbering rule; sections 1-8 keep their
+    numbers.
+
+    Register: GUIDE §2's attributed-speech rule applies here in full
+    (operator, 2026-08-06) — the digest's own prose attributes. Titles
+    are the publisher's words and render verbatim, never reworded, per
+    §2's scope amendment."""
+    rows, backfill = _presact_rows(conn, date)
+    # One document through two channels: both whitehouse.gov feeds carry
+    # executive orders, and an order in both arrives twice with the same
+    # canonical URL. The standing corroboration rule (GUIDE §3, 2026-08-03)
+    # lists it once and marks it — the same helper the other sections use,
+    # so no surface can answer "is this one document?" differently.
+    merged = corroborate(rows,
+                         url_of=lambda r: r["_meta"].get("url"),
+                         is_email=lambda r: r["_meta"].get("channel") == "email")
+    rows, corroborated_total = [], 0
+    for primary, dups in merged:
+        primary["_corroborators"] = dups
+        if dups:
+            corroborated_total += 1
+        rows.append(primary)
+
+    lines = [
+        "## 9. Presidential Actions",
+        "",
+        "Source: the Executive Office of the President, as published on",
+        f"whitehouse.gov and observed {date}. These are the President's own",
+        "instruments — executive orders, proclamations, memoranda — carried",
+        "here as the White House published them, days before the Federal",
+        "Register compiles them into section 3.",
+        "",
+        ("Register (GUIDE §2): titles are the publisher's words and appear"
+         " verbatim; any prose of ours about them is attributed, exactly as"
+         " it is for agency releases. This section states what the White"
+         " House published, never whether it was significant."),
+        "",
+    ]
+    if corroborated_total:
+        lines += [
+            (f"{corroborated_total} action(s) below arrived through both"
+             " whitehouse.gov feeds; each is listed once and marked"
+             " corroborated, with every observation preserved."),
+            "",
+        ]
+    if not rows:
+        lines += [
+            ("No presidential actions dated this day were observed. The White"
+             " House publishes on its own schedule; an action taken today may"
+             " appear in a later digest, and one dated earlier is counted"
+             " under PRESACT-EX-01 rather than listed as today's news."),
+            "",
+        ]
+    for number, doc_type, heading, _word in _PRESACT_SUBSECTIONS:
+        group = [r for r in rows if r["doc_type"] == doc_type]
+        if not group and not rows:
+            continue          # an empty day says so once, above
+        lines += [f"### {number} {heading}", ""]
+        if not group:
+            lines += [f"No {heading.lower()} were observed this day.", ""]
+            continue
+        for row in group:
+            lines += _presact_item_lines(row)
+        lines.append("")
+    if backfill:
+        lines += [
+            (f"{len(backfill)} presidential action(s) the White House dates on"
+             " another day were observed today and are counted under"
+             " PRESACT-EX-01 in the Coverage Statement, not listed above."),
+            "",
+        ]
+    lines += ["---", ""]
+    return lines
+
+
+def _presact_item_lines(row):
+    """One presidential action. The title is the publisher's, verbatim."""
+    meta, url = row["_meta"], (row["_meta"].get("url") or "")
+    title = row["title"] or "(untitled)"
+    head = f"- **{title}**" if not url else f"- **[{title}]({url})**"
+    lines = [head]
+    rule = {
+        "EO": "PRESACT-SEL-01",
+        "PROCLAMATION": "PRESACT-SEL-02",
+        "MEMORANDUM": "PRESACT-SEL-03",
+    }.get(row["doc_type"], "PRESACT-SEL-04")
+    claimed = row.get("_claimed_day")
+    if claimed:
+        lines.append(f"  - Published by the White House {claimed}")
+    lines.append(f"  - Included because: {rule} — {RULE_DESCRIPTIONS[rule]}")
+    if row.get("_corroborators"):
+        lines.append(f"  - Corroborated: also observed through"
+                     f" {len(row['_corroborators'])} other White House feed(s)")
+    if meta.get("wayback_url"):
+        lines.append(f"  - [independent archive]({meta['wayback_url']})")
     return lines
 
 
@@ -1418,7 +1573,7 @@ def _coverage_lines(conn, date, cov, embedded_total):
 
     rows = []
     for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR", "VOTES",
-                 "BILLACTIONS"):
+                 "BILLACTIONS", "PRESACT"):
         d = cov[coll]
         units = "—" if coll == "BILLS" else str(d["units"])
         rows.append(
@@ -1672,7 +1827,7 @@ def _validate_coverage(markdown, conn, date):
     section = markdown.split("## Coverage Statement", 1)[1]
     cov = _coverage(conn, date)
     for coll in ("CREC", "BILLS", "FR", "USCOURTS", "PLAW", "AGENCYPR", "VOTES",
-                 "BILLACTIONS"):
+                 "BILLACTIONS", "PRESACT"):
         match = re.search(rf"^\| {coll} \| (.+) \|$", section, re.MULTILINE)
         if match is None:
             raise ValidationError(f"coverage row for {coll} is missing")
@@ -1755,6 +1910,19 @@ def _validate_lexicon(markdown, conn, date):
         row[0]
         for row in conn.execute(
             "SELECT DISTINCT title FROM packages WHERE digest_day = ?",
+            (date,),
+        )
+    ]
+    # Presidential-action titles are the White House's own words, rendered
+    # verbatim (GUIDE §2 scope amendment): an order titled with a banned
+    # term is still titled that, and the gate binds our prose, not the
+    # publisher's.
+    officials += [
+        row[0]
+        for row in conn.execute(
+            "SELECT DISTINCT et.title FROM extracted_texts et"
+            " JOIN packages p USING (package_id)"
+            " WHERE et.collection = 'PRESACT' AND p.digest_day = ?",
             (date,),
         )
     ]
@@ -1950,6 +2118,7 @@ def render(conn, date, out_dir=None):
     lines += _agency_lines(conn, date)
     lines += _votes_lines(conn, date)
     lines += _billactions_lines(conn, date)
+    lines += _presact_lines(conn, date)
     lines += _glossary_lines("\n".join(lines))
     lines += _coverage_lines(conn, date, _coverage(conn, date), embedded_total)
     lines += _methodology_lines(date, git_short)

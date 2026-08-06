@@ -85,9 +85,42 @@ RULES = {
             "national court opinion (doc_type NATIONAL — e.g. Court of "
             "International Trade, Court of Federal Claims); all listed."
         ),
+    },    "PRESACT-SEL-01": {
+        "description": (
+            "Executive order published by the White House (doc_type EO); "
+            "all are listed."
+        ),
     },
+    "PRESACT-SEL-02": {
+        "description": (
+            "Presidential proclamation published by the White House "
+            "(doc_type PROCLAMATION); all are listed."
+        ),
+    },
+    "PRESACT-SEL-03": {
+        "description": (
+            "Presidential memorandum or determination published by the "
+            "White House (doc_type MEMORANDUM); all are listed."
+        ),
+    },
+    "PRESACT-SEL-04": {
+        "description": (
+            "Other presidential action published by the White House "
+            "(nominations, and any class the feed does not name); all are "
+            "listed."
+        ),
+    },
+
 }
 
+# NOTE: the dating-rule exclusions — AGENCYPR-EX-01, VOTES-EX-01 and
+# PRESACT-EX-01 — are deliberately ABSENT here. exclusion_counts()
+# attributes an exclusion by "matched no selection rule", but those three
+# collections list every document that matches a rule and exclude on the
+# document's own DATE instead, which only report.py can compute (it needs
+# the claimed-day split). They are defined reader-side in
+# report.RULE_DESCRIPTIONS. That split is finding F-015; unifying the two
+# registries is its own change, not a rider on a new section.
 EXCLUSIONS = {
     "FR-EX-01": {
         "description": (
@@ -153,6 +186,14 @@ def _match_uscourts(doc_type):
     return lambda row: row["collection"] == "USCOURTS" and row["doc_type"] == doc_type
 
 
+def _match_presact(doc_type):
+    """A presidential action of one class. The White House feed states
+    the class itself (<category>), so this is a lookup of the
+    publisher's own answer, never our inference."""
+    return lambda item: (item["collection"] == "PRESACT"
+                         and item["doc_type"] == doc_type)
+
+
 # Same keys, same order as RULES — precedence is registry order.
 _MATCHERS = {
     "CREC-SEL-01": _match_crec_sel_01,
@@ -164,6 +205,12 @@ _MATCHERS = {
     "FR-SEL-03": _match_fr("PRESDOCU"),
     "USCOURTS-SEL-01": _match_uscourts("APPELLATE"),
     "USCOURTS-SEL-02": _match_uscourts("NATIONAL"),
+    "PRESACT-SEL-01": _match_presact("EO"),
+    "PRESACT-SEL-02": _match_presact("PROCLAMATION"),
+    "PRESACT-SEL-03": _match_presact("MEMORANDUM"),
+    # The catch-all sits last so a named class always wins: an item the
+    # feed did not classify still lists rather than vanishing.
+    "PRESACT-SEL-04": lambda item: item["collection"] == "PRESACT",
 }
 
 assert list(_MATCHERS) == list(RULES)
