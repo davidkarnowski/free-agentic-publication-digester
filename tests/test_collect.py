@@ -837,3 +837,28 @@ def test_connect_migrates_pre_column_collector_state(tmp_path):
     assert row["finalized_date"] is None
     assert row["finalize_attempts"] == 0
     conn.close()
+
+
+def test_journal_files_items_under_digest_day(tmp_path):
+    """journal_new writes item_journal.digest_date from the package's
+    digest_day (observation filing), so /today and the day views agree
+    with the digest about what a day carries."""
+    from fapd import db
+
+    conn = install_digest_day_default(db.connect(tmp_path / "j.db"))
+    conn.execute(
+        "INSERT INTO packages (package_id, collection, date_issued,"
+        " last_modified, first_seen_at, digest_day) VALUES"
+        " ('CREC-2026-08-04', 'CREC', '2026-08-04', 'x',"
+        "  '2026-08-05T11:42:42Z', '2026-08-05')")
+    conn.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection,"
+        " doc_type, metadata, text, char_count, extracted_at,"
+        " extractor_version) VALUES ('CREC-2026-08-04', 'g1', 'CREC',"
+        " 'SENATE', '{}', 'body', 4, '2026-08-05T12:00:00Z', 1)")
+    conn.commit()
+    collect.journal_new(conn, "govinfo", "cycle-t")
+    row = conn.execute(
+        "SELECT digest_date FROM item_journal WHERE package_id="
+        "'CREC-2026-08-04' AND event='ingested'").fetchone()
+    assert row["digest_date"] == "2026-08-05"   # observation day, not 08-04

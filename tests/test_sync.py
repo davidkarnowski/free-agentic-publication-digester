@@ -342,3 +342,55 @@ def test_download_order_is_newest_first(conn, raw_dir):
         "SELECT package_id FROM packages WHERE fetch_status='fetched'"
     ).fetchall()
     assert [r[0] for r in fetched] == ["BILLS-119s2is"]  # newest date first
+
+
+# ---------------------------------------------------------------- filing --
+# Observation-day filing (GUIDE §3, amended 2026-08-06): the three-clocks
+# doctrine. digest_day is OUR clock, set at first sight, write-once.
+
+
+def test_observation_filing_uses_our_clock_not_the_cover_date(conn):
+    """A CREC issue observed today files under today, whatever its own
+    proceedings date says — the exact CREC-2026-08-04 case (observed
+    08-05, proceedings 08-04) that left every frozen digest's section 1
+    empty."""
+    sync._upsert_package(conn, "CREC", {
+        "packageId": "CREC-2026-08-04", "dateIssued": "2026-08-04",
+        "lastModified": "2026-08-05T11:34:54Z"})
+    row = conn.execute(
+        "SELECT date_issued, digest_day FROM packages"
+        " WHERE package_id='CREC-2026-08-04'").fetchone()
+    assert row["date_issued"] == "2026-08-04"
+    assert row["digest_day"] == sync.publication_date()  # today, Eastern
+
+
+def test_cover_filing_for_fr_keeps_the_legal_publication_date(conn):
+    """FR is legally published on its cover date and govinfo posts it
+    early (FR-2026-08-03 was observed 08-01) — observation filing would
+    misfile it, so config.FILING_POLICY pins it to cover."""
+    sync._upsert_package(conn, "FR", {
+        "packageId": "FR-2099-01-05", "dateIssued": "2099-01-05",
+        "lastModified": "2098-12-30T05:00:00Z"})
+    row = conn.execute(
+        "SELECT digest_day FROM packages WHERE package_id='FR-2099-01-05'"
+    ).fetchone()
+    assert row["digest_day"] == "2099-01-05"
+
+
+def test_digest_day_is_write_once_across_revision_resyncs(conn):
+    """A revision re-fetch advances last_modified and re-pends the fetch,
+    but must never re-file the document into a later digest — the upsert
+    omits digest_day from its ON CONFLICT clause on purpose."""
+    pkg = {"packageId": "BILLS-119hr1ih", "dateIssued": "2026-08-01",
+           "lastModified": "2026-08-02T00:00:00Z"}
+    sync._upsert_package(conn, "BILLS", pkg)
+    first = conn.execute(
+        "SELECT digest_day FROM packages WHERE package_id='BILLS-119hr1ih'"
+    ).fetchone()["digest_day"]
+    sync._upsert_package(conn, "BILLS", {**pkg, "lastModified": "2099-01-01T00:00:00Z"})
+    row = conn.execute(
+        "SELECT digest_day, fetch_status, last_modified FROM packages"
+        " WHERE package_id='BILLS-119hr1ih'").fetchone()
+    assert row["digest_day"] == first          # never re-filed
+    assert row["fetch_status"] == "pending"    # but the revision re-pends
+    assert row["last_modified"] == "2099-01-01T00:00:00Z"

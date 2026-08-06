@@ -1049,3 +1049,54 @@ def test_agency_section_never_merges_on_title_or_missing_url(conn):
     assert md.count("[Assistant United States Attorney]") == 2
     assert md.count("**EOIR Decision**") == 2
     assert "Corroborated:" not in md
+
+
+# ---------------------------------------------------------------- filing --
+# Observation-day filing (GUIDE §3, amended 2026-08-06): section 1 keys on
+# digest_day; each issue names its proceedings date; an empty day says so
+# in words, never as a zero that reads as "Congress was idle".
+
+
+def _add_late_crec_issue(conn, proceedings_date="2026-07-22"):
+    """A Record issue observed on DATE covering an earlier day's
+    proceedings — the CREC-2026-08-04 shape that exposed the gap."""
+    pkg = f"CREC-{proceedings_date}"
+    gid = f"CREC-{proceedings_date}-pt1-PgS9001"
+    conn.execute(
+        "INSERT INTO packages (package_id, collection, date_issued,"
+        " last_modified, first_seen_at, fetch_status, digest_day)"
+        " VALUES (?, 'CREC', ?, '2026-07-23T11:34:54Z',"
+        " '2026-07-23T11:42:42Z', 'fetched', ?)",
+        (pkg, proceedings_date, DATE))
+    add_text(conn, pkg, gid, "CREC", "SENATE", chars=16000,
+             text=("floor debate " * 1200)[:16000])
+    add_summary(conn, pkg, gid, "CREC-SEL-01", "A floor debate occurred.")
+    conn.commit()
+    return pkg, gid
+
+
+def test_late_observed_crec_renders_with_all_three_clocks(conn, tmp_path):
+    _add_late_crec_issue(conn)
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert f"issue observed {DATE}" in md
+    assert "covering proceedings of 2026-07-22" in md
+    assert "Published by govinfo 2026-07-23T11:34:54Z" in md
+    assert "(document dated 2026-07-22)" in md          # the item clause
+    assert "A floor debate occurred." in md
+
+
+def test_crec_issue_does_not_render_on_its_proceedings_day(conn, tmp_path):
+    """The same issue must NOT appear when rendering the proceedings
+    date — filing is by observation, once."""
+    _add_late_crec_issue(conn)
+    md = report.render(conn, "2026-07-22", out_dir=tmp_path).read_text()
+    assert "A floor debate occurred." not in md
+    assert "No Congressional Record issue was observed" in md
+
+
+def test_empty_crec_day_states_the_absence_in_words(conn, tmp_path):
+    # A day with no observed CREC issue at all (the fixture seeds DATE,
+    # so render a different, empty day).
+    md = report.render(conn, "2026-07-25", out_dir=tmp_path).read_text()
+    assert "No Congressional Record issue was observed on this day." in md
+    assert "Total issue size: 0 granule(s)" not in md

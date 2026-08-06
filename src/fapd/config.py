@@ -172,7 +172,7 @@ PLAIN_PROMPT_VERSION = 2
 # Day-in-Review compose prompt versions independently for the same reason.
 # v2: adds the judicial paragraph (J1). v3: full banned list from
 # BANNED_TERMS — the compose model was told 10 of 16 terms (review D8).
-COMPOSE_PROMPT_VERSION = 3
+COMPOSE_PROMPT_VERSION = 4  # v4 2026-08-06: observation framing — counts are observations, never "issued today"
 # Section quick-read synopses version independently (§3a).
 # v2: full banned list from BANNED_TERMS.
 SECTION_PROMPT_VERSION = 2

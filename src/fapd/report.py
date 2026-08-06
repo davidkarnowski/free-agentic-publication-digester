@@ -180,6 +180,13 @@ def _included_line(item):
     line = f"  - Included because: {rule_id} — {desc}"
     if rule_id == "CREC-SEL-01":
         line += f" ({(item.get('char_count') or 0):,} characters)"
+    # Observation-day filing (GUIDE §3, amended 2026-08-06): when the
+    # document's own date differs from the digest day it filed under,
+    # say so mechanically, in place — the reader never has to infer
+    # which clock a section is keeping.
+    issued = item.get("date_issued")
+    if issued and item.get("digest_day") and issued != item["digest_day"]:
+        line += f" (document dated {issued})"
     return line
 
 
@@ -194,6 +201,7 @@ def _load_items(conn, date):
         """
         SELECT s.package_id, s.granule_id, s.method, s.inclusion_rule, s.summary,
                COALESCE(e.collection, p.collection) AS collection,
+               p.date_issued, p.digest_day,
                e.doc_type, e.title, e.agency, e.metadata, e.char_count,
                substr(e.text, 1, 400) AS text_head,
                g.title AS granule_title,
@@ -959,15 +967,40 @@ def _crec_lines(conn, date, items):
     ]
     votes = [i for i in crec_items if i["inclusion_rule"] == "CREC-SEL-02"]
 
-    lines = [
-        "## 1. Congressional Floor Activity",
-        "",
-        (
-            f"Source: Congressional Record (CREC), daily edition for {date}. "
-            f"Total issue size: {total} granule(s)."
-        ),
-        "",
-    ]
+    # Observation-day filing (GUIDE §3, amended 2026-08-06): the issues
+    # in this section are the ones OBSERVED on the digest day; each
+    # names its own proceedings date and, where available, the
+    # publisher's stamp — the three clocks, disclosed in place.
+    issues = conn.execute(
+        "SELECT package_id, date_issued, last_modified, first_seen_at"
+        " FROM packages WHERE collection = 'CREC' AND digest_day = ?"
+        " ORDER BY date_issued",
+        (date,),
+    ).fetchall()
+
+    lines = ["## 1. Congressional Floor Activity", ""]
+    if issues:
+        for iss in issues:
+            pub = (f" Published by govinfo {iss['last_modified']};"
+                   if iss["last_modified"] else "")
+            lines.append(
+                f"Source: Congressional Record (CREC), issue observed {date}, "
+                f"covering proceedings of {iss['date_issued']}.{pub} "
+                f"observed by our collector {iss['first_seen_at']}. "
+                f"Total issue size: {total} granule(s)."
+            )
+        lines.append("")
+    else:
+        lines += [
+            (
+                "No Congressional Record issue was observed on this day. "
+                "The Record for a day's proceedings is typically published "
+                "by govinfo the following morning; it appears in the digest "
+                "for the day it is observed "
+                "([how our clocks work](faq.html#fapds-three-clocks))."
+            ),
+            "",
+        ]
     for number, doc_type, heading, word in (
         ("1.1", "SENATE", "Senate", "Senate"),
         ("1.2", "HOUSE", "House of Representatives", "House"),
@@ -1311,16 +1344,18 @@ def _uscourts_lines(conn, date, items):
     lines = [
         "## 5. Judicial Activity",
         "",
-        f"Source: United States Courts Opinions (USCOURTS): opinions issued {date}",
-        "by participating federal courts.",
+        f"Source: United States Courts Opinions (USCOURTS): opinions observed {date}",
+        "by our collector; each opinion states its own issue date beside its",
+        "listing ([how our clocks work](faq.html#fapds-three-clocks)).",
         "",
         "Completeness disclosure (standing): USCOURTS carries opinions from",
         "approximately 140 participating appellate, district, bankruptcy, and",
         "national federal courts. Unlike the Congressional Record and the Federal",
         "Register, which are the complete official record of their branches,",
         "USCOURTS is participation-based and is NOT the complete federal judicial",
-        "record. Courts post opinions with delay; opinions filed on this date may",
-        "appear in later digests.",
+        "record. Courts post opinions with delay — typically over several days —",
+        "so a day's digest carries the opinions that became available that day,",
+        "whatever date each was issued.",
         "",
         "### 5.1 Appellate and National Court Opinions",
         "",
@@ -1480,14 +1515,15 @@ def _coverage_lines(conn, date, cov, embedded_total):
         "## Coverage Statement",
         "",
         "*This section is mandatory and appears in every digest, including days with",
-        "no publications. It accounts for every package the sync observed in the data",
-        'date range. "Excluded" always names the mechanical rule; there are no',
-        "unexplained omissions.*",
+        "no publications. It accounts for every package observed on this digest day",
+        "(GUIDE \u00a73, observation-day filing); each package's own date may differ",
+        'and is stated where it does. "Excluded" always names the mechanical rule;',
+        "there are no unexplained omissions.*",
         "",
         sync_line,
         "",
         (
-            "| Collection | Packages published | Granules/documents | Summarized |"
+            "| Collection | Packages observed | Granules/documents | Summarized |"
             " Counted only | Excluded by rule |"
         ),
         "|---|---|---|---|---|---|",
@@ -1586,6 +1622,15 @@ def _methodology_lines(date, git_short):
         ),
         f"report stage against the extracted records for {date}; no upstream re-fetch",
         "is required (GUIDE.md §5).",
+        "",
+        "*Filing note (2026-08-06, standing): digests from 2026-08-06 file",
+        "govinfo packages under their day of first observation — FAPD's three",
+        "clocks are explained in the [FAQ](faq.html#fapds-three-clocks). The",
+        "Federal Register files under its cover date, on which it is legally",
+        "published. Digests before 2026-08-06 filed by each document's own",
+        "date; the two Congressional Record issues observed 2026-08-04/05",
+        "(proceedings of 08-03/08-04) fell between the freeze and this change",
+        "and appear in no digest — disclosed here, not backfilled.*",
         "",
         '*"In plain terms" lines are model-generated restatements of the stored',
         "summaries, derived only from the summary text shown beside them; items",

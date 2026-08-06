@@ -33,6 +33,11 @@ Hard rules (non-negotiable):
   gate (your prose is rejected if any appears): {banned}. Also banned:
   motive attribution and predictions of outcomes.
 - Party-blind, neutral register, plain prose.
+- The counts and items are what was OBSERVED on this digest day; a
+  document may carry an earlier date of its own (stated per item).
+  State counts as observations ("the digest carries N district court
+  opinions"), never as totals of what was issued or published that day
+  ("N opinions were issued today" overclaims and is wrong).
 - Up to 3 short paragraphs (~130-220 words total): first the congressional
   floor picture (both chambers, recorded votes); then the
   executive/regulatory picture (rules, proposed rules, presidential
