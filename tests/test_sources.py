@@ -97,7 +97,13 @@ def test_registry_seeds_expected_active_sources():
         # crowd orders out of the parent — 24 of the EO feed's 30 are absent
         # from it. Overlapping items share a link URL and merge under the
         # standing corroboration rule.
-        "whitehouse-presidential-actions", "whitehouse-executive-orders"}
+        "whitehouse-presidential-actions", "whitehouse-executive-orders",
+        # activated 2026-08-06 from the planned-source feed sweep: the feed
+        # was found by mining NIH's own captured page (autodiscovery misses
+        # it — NIH links RSS from the body, not <head>), and was blocked
+        # until the same day by its Drupal date format, which fell to
+        # LISTED and would have published a seven-week window as today.
+        "nih-news"}
 
 
 # ------------------------------------------------------------ coverage_stats --
