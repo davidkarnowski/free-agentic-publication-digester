@@ -245,15 +245,30 @@ not reusable.)*
 - **Gap:** `/opt/spiralyst/logs/nginx/access.log` is 68 MB and has no
   logrotate entry — unrotated since 2026-05-23. Separately, 631,522 of
   its 655,769 lines (96%) are the `GET /healthz` probe, which makes real
-  traffic hard to read during an incident. Docker's own container logs
-  *are* capped (`json-file`, 5 MB × 3), so this is the edge log only.
-  Disk is at 39%, so this is hygiene, not urgency.
-- **Trigger:** disk above ~70%, or the first incident where log volume
-  slows the investigation.
-- **Sketch:** a logrotate entry (daily, compress, keep 14) with a
-  `postrotate` reopen; optionally exclude the healthcheck from the
-  access log with a dedicated `location /healthz { access_log off; }`.
-  Shared-box file: coordinate with the cohabitant's stack.
+  traffic hard to read during an incident. Disk is at 39%, so this is
+  hygiene, not urgency. *(Correction 2026-08-06: the original entry
+  also flagged the spiralyst containers' uncapped docker json logs —
+  `/etc/logrotate.d/docker-containers` already rotates ALL container
+  logs at host level, daily/50M/keep-3; that half of the gap never
+  existed.)*
+- **Trigger:** ~~disk above ~70%~~ **Done 2026-08-06** (operator
+  approved "both" the same morning).
+- **Done 2026-08-06:** both halves live. (1) `/etc/logrotate.d/
+  spiralyst-nginx` — daily, keep 14, compressed, `nginx -s reopen`
+  postrotate — applied by `scripts/staged/2026-08-06-edge-log-
+  rotation.sh`; first forced rotation archived the 69.9MB file and the
+  fresh file took the very next request (reopen proven). Two lessons
+  are in the script as comments: the log directory is group-writable
+  dkarnowski-owned, which logrotate refuses without an explicit
+  `su dkarnowski dkarnowski`; and the self-check must NOT probe
+  /healthz, because (2) `access_log off` now covers the healthz
+  location — authored in the Spiralyst tree (all four mode confs),
+  applied to the live `full.conf` with an inode-preserving in-place
+  write (F-002: a bind-mounted single file must keep its inode),
+  `nginx -t` + reload, verified by the healthz line-count freezing
+  across two healthcheck cycles while both public sites stayed 200.
+  Rollback artifacts: `access.log.1`/`error.log.1` on the box; the
+  logrotate entry is one `rm` to revert.
 
 **OB-16 — govinfo USCOURTS `/zip` 503 retry cost**
 - **Gap:** 4,745 `503`s since 2026-08-01, every one of them a
