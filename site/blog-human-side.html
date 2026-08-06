@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Note from the &quot;Human&quot; Side of the Free Agentic Publication Digester</title>
+<meta name="description" content="An automated, citation-bound, opinion-agnostic daily digest of official United States government publications — congressional, executive, and judicial — built only from primary sources. Built for human readers and AI agents; agents start at /llms.txt.">
+<meta name="robots" content="index, follow">
+<link rel="alternate" type="text/plain" href="llms.txt"
+      title="LLM guide — this is an AI-first digest of official US federal publications">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+  <nav aria-label="Site">
+    <a class="brand" href="index.html"
+       aria-label="Free Agentic Publication Digester (FAPD)">FAPD<span
+       class="brand-full"> &mdash; Free Agentic Publication Digester</span></a>
+    <span class="nav-links"><a href="today.html"><span class="live-dot" aria-hidden="true"></span>Today (live)</a><a href="index.html">All digests</a><a href="sources.html">Sources</a><a href="blog.html">Blog</a><a href="about.html">About</a><a href="agents.html">For agents</a><details class="nav-more"><summary>More</summary><a href="accessibility.html">Accessibility</a><a href="ai-development.html">AI development</a><a href="bot.html">Bot</a><a href="methods.html">Methods</a><a href="privacy.html">Privacy</a><a href="readme.html">Readme</a></details></span>
+  </nav>
+</header>
+<main id="main" tabindex="-1">
+<article class="post"><h1 id="a-note-from-the-human-side-of-the-free-agentic-publication-digester">A Note from the "Human" Side of the Free Agentic Publication Digester</h1><p class="post-meta">Published 2026-08-05 · commentary about the project, not part of the daily digest or the official record</p>
+<p><em>Dev notes, 2026-08-05. Written by a person — on AI-paired development,
+on why the official record matters, and on what comes next.</em></p>
+<p>Yes, this post was actually written by a human. Hi.</p>
+<p>My name is David D. Karnowski, and the Free Agentic Publication
+Digester is a living example of GenAI-paired programming and
+development — visible to the public and demonstrably transparent in
+approach, philosophy, and implementation.</p>
+<p>As the industry shifts and the revolution of token-smash coding envelops
+engineering teams across the world, it matters that we make public
+examples for others to see the benefits and the disadvantages of using
+generative artificial intelligence for software development.</p>
+<p>Over the past several years I've watched prominent engineering voices
+come to terms with an uncomfortable fact: mastery of syntax is no
+longer sacred ground, now that a working engineer can describe a system
+in natural language and get one.</p>
+<p>Embracing agentic development myself over the last twelve months has
+rapidly expanded and expedited my own personal and professional
+projects. Being able to iterate quickly against benchmarks and CI means
+experimental work reaches production-ready code far sooner than it used
+to.</p>
+<p>In this repository's commits and code you will find the documented work
+of Claude coding agents alongside my own input, direction, and review. I
+invite you to witness this open and public display of generative and
+agentic development live on the Free Agentic Publication Digester
+GitHub repository:
+<a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">https://github.com/davidkarnowski/free-agentic-publication-digester<span class="vh"> (opens in a new tab)</span></a></p>
+<p>One of the unique constructs guiding this development is a set of
+sub-agent instructions that allow specialization across parts of the
+system — the collectors, the corpus, the editorial rules, the published
+site, the operations stack. Each agent is briefed on its own surface and
+nothing else. Beyond making better use of limited context windows, it
+means threaded work: several agents addressing separate concerns at the
+same time.</p>
+<p>It also means the mistakes are on the record. When we got something
+wrong — and we have — the fix and the reasoning sit in the commit log
+next to the error. That is the part of "transparent" that actually costs
+something, and it is the part worth reading.</p>
+<h2 id="what-the-government-says">What the government says</h2>
+<p>A note about the Free Agentic Publication Digester and the philosophy of
+public access to what the government says.</p>
+<p>Observing and ingesting federal publications isn't just a handy tool
+that might give you insight into something happening in your life. For a
+modern citizen it is closer to a responsibility. Reading your
+government's own words and recorded actions directly — unmediated,
+before anyone has decided which parts deserve your attention — is
+something worth doing for yourself.</p>
+<p>This is also, precisely, why the machine is here. We use AI to read and
+restate at a volume no person could sustain, and we constrain it hard in
+the direction of <em>less</em> judgment, not more. Selection is mechanical and
+party-blind — floor time, document type, stage of process — never
+subject matter. Generated prose is checked against a banned-language
+list that rules out loaded adjectives, motive attribution, and
+predictions. Every item links to its official source so you can check us
+in a single click. The AI is here to remove the editorial hand, not to
+add one.</p>
+<p>And there is a hard limit here that we take seriously:</p>
+<blockquote>
+<p>These publications are what the government <strong>chose</strong> to publish.
+Nothing more, and nothing other.</p>
+</blockquote>
+<p>We do not add sources that aren't official. We do not infer what an
+agency meant. We do not treat a press release as a fact about the world
+— only as an accurate record that the agency said it. The official
+record is the whole scope of this project, and its boundary is a
+feature, not a limitation we are working around.</p>
+<h2 id="an-open-tool-not-just-an-open-site">An open tool, not just an open site</h2>
+<p>The code is open source, and that is deliberate beyond transparency.</p>
+<p>Nothing in this project's design is specific to the United States. The
+architecture is a polite collector, an extraction layer, mechanical
+selection rules, and a citation-bound renderer. Point that at another
+country's official gazette, parliamentary record, or regulatory
+publisher, and you have a digester for that government's record instead.</p>
+<p>If you want that for your own country, fork it. The rules that decide
+what appears in a digest live in readable files, not in a model's
+judgment, which means you can inspect them, disagree with them, and
+change them. A digest nobody can audit isn't worth much — and that
+applies to ours as much as anyone's.</p>
+<h2 id="continued-progress">Continued progress</h2>
+<p>One of the most important components of the Free Agentic Publication
+Digester is the sourcing of publications. Beyond the federal
+government's own publishing system, govinfo, we've found that sourcing
+directly from agencies, departments, and sub-office-level operations
+meaningfully increases the visibility of government action.</p>
+<p>Our efforts are continuous in sourcing additional publication outlets
+that represent the official word and record of the U.S. Government. If
+you find a gap in our coverage, and know of a publishing source we are
+not ingesting, let us know. You can see every source we ingest, plan to
+ingest, or have evaluated and rejected — along with what we actually
+recorded from each — at <a href="https://fapd.info/sources.html">https://fapd.info/sources.html</a>.</p>
+<h2 id="future-plans">Future plans</h2>
+<blockquote>
+<p><em>Reader-funded deep digestion and summarization of complex government
+publications.</em></p>
+</blockquote>
+<p>Since we began publishing on July 27, our daily digests have paired each
+selected document with a summary and a labeled one-sentence
+plain-language restatement. That combination makes the whole of a
+publication day approachable, but it is not a deep-understanding
+process.</p>
+<p>It is the intention of this project to provide deeper analysis on
+published documents — context-aware associations, and a reading of
+likely implications. That analysis carries a significant AI-token cost.
+In the coming weeks we will deploy a feature offering this deeper
+summarization for as many documents per day as our budget allows.</p>
+<p>Beyond that budget, reader-funded deep analysis will be available by
+per-document donation, letting visitors fund the cost of analyzing a
+particular publication. Estimated at between $2 and $5 for a typical
+document, this means publications that matter to our readers can be
+examined at greater depth through a dedicated pipeline. If you find a
+publication that deserves another look, you will be able to fund that
+document's deep analysis directly.</p>
+<p>Two commitments about that, because it would be easy to get wrong.</p>
+<p><strong>Funding will change analysis depth only — never selection, and never
+conclusions.</strong> What appears in a daily digest is decided by mechanical,
+party-blind rules, and no donation will alter that. Deep analysis is an
+addition on top of the digest, not a way to buy a document into it or to
+influence what the analysis says. Funded and unfunded documents will be
+labeled so you can always tell which is which.</p>
+<p><strong>And per-document funding is a stepping stone, not the destination.</strong>
+The goal is deep digestion of <em>every</em> publication we observe, not only
+the ones a reader thought to pay for. Reader funding is how we cross the
+gap from a budget that cannot cover the whole record yet to one that
+can. The target is a day when the donate button is unnecessary, because
+every document already gets the deeper read.</p>
+<p>Thank you for your interest in the Free Agentic Publication Digester.
+We hope you read what your government did today.</p>
+<p>Sincerely,</p>
+<p><strong>David D. Karnowski</strong><br>
+Free Agentic Publication Digester — Human Founder</p><p class="post-back"><a href="blog.html">&larr; All posts</a></p></article>
+</main>
+<footer class="site-footer">
+  <p>Generated 2026-08-06T04:35:54Z (UTC). Canonical source:
+  <code>docs/devnotes/2026-08-05-human-side-of-the-team.md</code> in the
+  <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
+  every item cites its official source; methodology in
+  <code>GUIDE.md</code> §2.</p>
+  <p>Content licensed
+  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0<span class="vh"> (opens in a new tab)</span></a> —
+  reuse with attribution to FAPD (Free Agentic Publication Digester);
+  quoted official government text is
+  public domain (17 U.S.C. § 105). Code licensed Apache-2.0.</p>
+</footer>
+</body>
+</html>
