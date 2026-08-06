@@ -268,6 +268,17 @@ close (check them off with dates).
   2026-07-28 posture note already sanctions exactly this case
   ("targeted single fetches remain possible within the delay"), so no
   posture change is needed. GUIDE amendments precede implementation.
+- [ ] **Develop the FAQ page** (filed 2026-08-06, operator). The page
+  shipped 2026-08-06 with its first entries — the three clocks
+  (Action / Publication / Observation), the third-grade collector
+  explainer, the per-source observation-window table, and the
+  slow-source question. Grow it: selection rules in reader terms, the
+  deep-digestion funding guardrails once that ships, forking for other
+  governments' records. Standing rule, stated here because the operator
+  set it: site prose pages are ALWAYS authored as `docs/site/*.md` and
+  rendered by the deterministic doc-page pipeline (`publish.
+  _doc_sources`) — the markdown is the versioned backend file; HTML is
+  never hand-written.
 - [ ] **Redundant, provider-segmented inference** (filed 2026-08-05,
   operator). Stand up additional LLM providers beside Anthropic (Google
   and Cerebras named) so no single vendor's outage, rate limit, or
