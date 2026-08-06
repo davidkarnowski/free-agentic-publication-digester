@@ -4659,3 +4659,74 @@ duplicated. §3a registers the three media model surfaces as committed
 but not built, and says so explicitly: the Inventory stays at seven
 until they exist.
 
+
+## 2026-08-06 — The day the digest learned whose clock it keeps
+
+The morning check found tonight's flagship section about to be empty
+for the fifth night running, and the operator asked the right question:
+are we sure why? The data answered before any code did. CREC-2026-08-04
+sat in production fully processed — 62 of 62 granules extracted, five
+past the floor-time threshold, all five summarized — published nowhere,
+because the digest for its proceedings day froze seven hours before
+govinfo released the issue. The threshold-weighting hypothesis died on
+the same query: light August Senate days pass five or six granules
+against nine on a full July session day. The pipeline was paying for
+work the freeze then threw away.
+
+The ruling that fixed it is philosophical before it is technical:
+**filing keys on the Date of Observation** — the only timestamp this
+project can define precisely, from its own worker metadata, for every
+document without exception. The three clocks are now doctrine in GUIDE
+§3: Date of Action (the text's own day; may be absent), Date of
+Publication (publisher metadata; may be absent), Date of Observation
+(ours; absolute). The deciding argument was the outage case the
+operator raised against my first design, which filed on publisher
+metadata: a document stamped Monday but unreachable until Wednesday
+would file into a frozen digest and vanish. Observation filing cannot
+lose anything it sees. FR keeps cover-date filing — it is legally
+published on its cover date, and govinfo posts it early enough that
+observation would misfile it. AGENCYPR keeps the agency dating rule
+that the 721-item backfill bug made law.
+
+Implementation ran as eight phase plans committed under docs/ops/ so
+any agent could execute one standalone. packages.digest_day, write-once
+by the shape of the upsert itself; a 33-site query-seam switch the plan
+had anchored at eight (sections, coverage, compose staleness, tags,
+analyze, charts — the sweep found the rest); renderings that name all
+three clocks per issue and per divergent item; an empty section 1 that
+now says "No Congressional Record issue was observed on this day"
+instead of a zero that read as Congress being idle; compose prompt v4
+stating counts as observations. Tests model a migrated database via a
+TEMP trigger in the fixtures; 614 green.
+
+Two catches earned their keep. The migration's first draft would have
+orphaned a THIRD Record issue on the night the fix shipped:
+CREC-2026-08-05 (87 granules) arrived at 14:24Z, before the deploy, so
+its row predated the new insert and the naive backfill filed it to its
+frozen cover day. The cutover is a digest, not a deploy — rows observed
+on the cutover day get the live policy, and that issue is verified
+filed under 2026-08-06 in production. And post-deploy its granules
+showed zero extracted; one manual extract pass ran clean (87 records,
+none failed) rather than betting midnight on the next cycle.
+
+Deploy shipped against a GitHub partial outage — two CI runs died
+before the suite started ("runner not acquired", "failed to resolve
+action download info") and the final head never got a run created at
+all. Deployed on six local full-suite greens with the outage
+documented; a persistent monitor waits to confirm CI retroactively.
+The FAQ page shipped in the same deploy (docs/site/faq.md through the
+existing doc-page pipeline — the operator's backend-file rule now
+recorded in the todo), because section 1 links its three-clocks
+anchor. OB-15 closed the same day: edge logs rotating (the 69.9MB
+access.log archived), healthz silenced across both projects' configs,
+with the logrotate su-directive and the probe-your-own-sibling-fix
+lessons kept as comments in the staged script.
+
+Also answered from the morning list: the sources page needed nothing —
+RenderWorker refreshes health and rebuilds every source page on a
+15-minute gate all night, prose layers regenerate at EOD by design.
+F-013 and F-016 are marked resolved pending tonight's proof; F-014's
+insight fixes were confirmed by their first production report this
+morning. Tonight's digest is the arbiter: section 1 either carries the
+Record observed today — one floor item past threshold, 86 accounted —
+or the coverage gate has something to tell us.
