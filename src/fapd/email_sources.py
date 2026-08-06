@@ -476,10 +476,12 @@ def _store_item(conn, entry, item, package_id, text, mode, capture_id, dkim):
     issued = publication_date()
     conn.execute(
         "INSERT INTO packages (package_id, collection, date_issued, last_modified,"
-        " title, package_link, first_seen_at, fetch_status, fetched_at)"
-        " VALUES (?, ?, ?, ?, ?, ?, ?, 'fetched', ?)",
+        " title, package_link, first_seen_at, fetch_status, fetched_at, digest_day)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?, 'fetched', ?, ?)",
+        # digest_day = issued: the email class files under the mailbox
+        # publication day (GUIDE §3 email class; cover policy).
         (package_id, COLLECTION, issued, now, item["title"], item.get("url"),
-         now, now))
+         now, now, issued))
     metadata = json.dumps({
         "source_id": entry["id"],
         "url": item.get("url"),

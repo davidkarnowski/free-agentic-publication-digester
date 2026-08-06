@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS packages (
     fetch_status          TEXT NOT NULL DEFAULT 'pending'
                           CHECK (fetch_status IN ('pending', 'fetched', 'failed', 'skipped')),
     first_seen_at         TEXT NOT NULL,
+    digest_day            TEXT,
     fetched_at            TEXT,
     fetched_last_modified TEXT,
     last_error            TEXT
@@ -344,6 +345,10 @@ def connect(db_path=None):
         "finalize_target": "TEXT",
         "finalize_attempts": "INTEGER NOT NULL DEFAULT 0",
     })
+    # Filing axis (GUIDE §3, amended 2026-08-06). Backfill of existing
+    # rows is the deliberate one-shot scripts/migrate_digest_day.py,
+    # never startup DDL.
+    _ensure_columns(conn, "packages", {"digest_day": "TEXT"})
     return conn
 
 

@@ -58,6 +58,7 @@ CREATE TABLE packages (
     fetch_status          TEXT NOT NULL DEFAULT 'pending'
                           CHECK (fetch_status IN ('pending', 'fetched', 'failed', 'skipped')),
     first_seen_at         TEXT NOT NULL,                 -- when a sync first recorded this package
+    digest_day            TEXT,                          -- the digest day this package files under (GUIDE §3, amended 2026-08-06)
     fetched_at            TEXT,                          -- when the raw file was last downloaded
     fetched_last_modified TEXT,                          -- server lastModified at the time of that download
     last_error            TEXT                           -- most recent download error, NULL when healthy
@@ -72,9 +73,22 @@ CREATE TABLE packages (
 - **`collection`** — denormalized from the packageId prefix on purpose: it is
   the left column of the delta-sync index and of most filters. A seven-row
   `collections` lookup table would add a join and buy nothing.
-- **`date_issued`** — the official publication date; this is the axis the
-  daily digest is built on ("what was published on day D"). Nullable because
-  it comes from the API and we do not want a listing quirk to abort a sync.
+- **`date_issued`** — the document's own official date (proceedings day,
+  opinion issue date, FR cover date). Nullable because it comes from the API
+  and we do not want a listing quirk to abort a sync. *Until 2026-08-06 this
+  was also the digest-filing axis; filing now keys on `digest_day` below,
+  and `date_issued` remains the display date and the USCOURTS fetch-window
+  key.*
+- **`digest_day`** — the digest day this package files under (GUIDE §3,
+  amended 2026-08-06: observation-day filing). **Write-once at first
+  sight, never updated** — a revision re-fetch must not re-file a
+  document. Per `config.FILING_POLICY`: observation-filed collections
+  (CREC, BILLS, USCOURTS, PLAW) get the Eastern publication day of
+  `first_seen_at`; cover-filed collections (FR, AGENCYPR) get
+  `date_issued`. Pre-cutover rows are backfilled `= date_issued` by the
+  one-shot `scripts/migrate_digest_day.py`, so every frozen digest
+  re-renders identically. Nullable only for the instant between an old
+  database attaching and the migration running.
 - **`last_modified`** — the server's change signal, updated every time a sync
   sees the package. Together with `fetched_last_modified` it implements
   GUIDE §4's "never re-download unchanged content, keyed by package ID +

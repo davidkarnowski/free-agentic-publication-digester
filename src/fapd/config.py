@@ -278,6 +278,17 @@ EOD_MAX_FINALIZE_ATTEMPTS = 3
 # are archived; older ones are listed, marked 'skipped', and disclosed.
 USCOURTS_FETCH_WINDOW_DAYS = 7
 
+# GUIDE §3 (amended 2026-08-06): per-collection digest-filing policy.
+# "observation" files a package under the Eastern day our collector
+# first observed it (the only timestamp we define precisely — the three
+# clocks doctrine); "cover" files under the document's own date_issued.
+# FR publishes on its cover date and govinfo posts it early (measured:
+# the 2026-08-03 issue was observed 08-01), so observation would misfile
+# it; AGENCYPR keeps the §3 agency dating rule. digest_day is write-once
+# at first sight — a revision re-fetch never re-files a document.
+FILING_POLICY = {"FR": "cover", "AGENCYPR": "cover"}
+FILING_DEFAULT = "observation"
+
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")
 
 # Project mailbox for email-distributed sources (GUIDE §3 email class;

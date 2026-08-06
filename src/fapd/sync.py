@@ -144,11 +144,22 @@ def _watermark_or_bounded_start(conn, collection):
 
 
 def _upsert_package(conn, collection, pkg):
+    now = utc_now_iso()
+    # GUIDE §3 (amended 2026-08-06): the digest-filing day. Observation
+    # policy files under the Eastern day of THIS first sight; cover
+    # policy files under the document's own date. digest_day is absent
+    # from the DO UPDATE clause on purpose — write-once, so a revision
+    # re-fetch never re-files a document into a later digest.
+    policy = config.FILING_POLICY.get(collection, config.FILING_DEFAULT)
+    if policy == "cover":
+        digest_day = pkg.get("dateIssued") or publication_date_of(now)
+    else:
+        digest_day = publication_date_of(now)
     conn.execute(
         """
         INSERT INTO packages (package_id, collection, last_modified, title, package_link,
-                              date_issued, first_seen_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+                              date_issued, first_seen_at, digest_day)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(package_id) DO UPDATE SET
             fetch_status  = CASE WHEN excluded.last_modified > packages.last_modified
                                  THEN 'pending' ELSE packages.fetch_status END,
@@ -164,7 +175,8 @@ def _upsert_package(conn, collection, pkg):
             pkg.get("title"),
             pkg.get("packageLink"),
             pkg.get("dateIssued"),
-            utc_now_iso(),
+            now,
+            digest_day,
         ),
     )
 

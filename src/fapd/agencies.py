@@ -1241,9 +1241,12 @@ def _store_item(conn, entry, item, package_id, text, mode, capture_id, wayback_u
     issued = _issue_day(item, dated_by_publisher)
     conn.execute(
         "INSERT INTO packages (package_id, collection, date_issued, last_modified,"
-        " title, package_link, first_seen_at, fetch_status, fetched_at)"
-        " VALUES (?, ?, ?, ?, ?, ?, ?, 'fetched', ?)",
-        (package_id, collection, issued, now, item["title"], item["link"], now, now),
+        " title, package_link, first_seen_at, fetch_status, fetched_at, digest_day)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?, 'fetched', ?, ?)",
+        # digest_day = issued: AGENCYPR is cover-filed (GUIDE §3 agency
+        # dating rule, unchanged by the 2026-08-06 filing amendment).
+        (package_id, collection, issued, now, item["title"], item["link"], now, now,
+         issued),
     )
     conn.execute(
         "INSERT INTO extracted_texts (package_id, granule_id, collection, doc_type,"
