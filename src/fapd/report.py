@@ -510,7 +510,14 @@ def _claimed_day(meta):
         return parsed.strftime("%Y-%m-%d")
     if re.match(r"^\d{4}-\d{2}-\d{2}", raw):
         return raw[:10]
-    return None
+    # Third tier (GUIDE §3, added 2026-08-06): publisher formats neither
+    # reader handles — Drupal sites emit their site date format in
+    # <pubDate> ("Wed, 08/05/2026 - 08:00", "July 17, 2026"). Imported
+    # inside the function on purpose: agencies pulls the HTTP stack, and
+    # a report-only render must keep working even when the fetch layer
+    # cannot import (the same reason scripts/digest.py defers analysis).
+    from .agencies import claimed_day_from_text
+    return claimed_day_from_text(raw)
 
 
 def _normalize_official_url(url):

@@ -729,6 +729,36 @@ def _iso_day(value):
         return None
 
 
+def claimed_day_from_text(raw):
+    """'YYYY-MM-DD' for a publisher date string the RFC 822 and ISO
+    readers cannot parse, or None.
+
+    The third tier of the dating rule (GUIDE §3, added 2026-08-06). RSS
+    specifies RFC 822 pubDates and most publishers comply, but Drupal
+    sites — 16 of the registry's planned sources — emit their site date
+    format instead: NIH sends 'Wed, 08/05/2026 - 08:00', TSA sends
+    'July 17, 2026'. Both look plausible and both defeat
+    email.utils.parsedate_to_datetime.
+
+    Why that mattered enough to fix: an unreadable claimed date falls
+    back to the observed day, which the dating split treats as TODAY.
+    NIH's feed spans seven weeks, so activating it unparsed would have
+    published seven weeks of releases as today's news — the 2026-07-31
+    failure in a new form. Found by probe, 2026-08-06.
+
+    Deliberately reuses _find_dates: the patterns, the locale-safe month
+    table, and the audited US-ordering assumption for m/d/Y already exist
+    and are exercised by the html-index adapter. A second date parser
+    would be a second place for that assumption to drift.
+
+    Ambiguity is resolved, not guessed: _DATE_PATTERNS is ordered, so an
+    ISO or month-name form wins over the slash form when a string states
+    both. A string stating no valid calendar date returns None, and None
+    keeps its existing meaning — we could not read it."""
+    dates = _find_dates((raw or "").strip())
+    return dates[0][0].isoformat() if dates else None
+
+
 def _find_dates(text):
     """[(date, kind, matched text)] for every calendar date the string
     states, in the order the patterns are declared. Never raises."""
@@ -1291,6 +1321,14 @@ def _issue_day(item, dated_by_publisher):
         raw = (item.get("claimed_date") or "").strip()
         if re.match(r"^\d{4}-\d{2}-\d{2}$", raw[:10]):
             return raw[:10]
+        # Same third tier report._claimed_day gained 2026-08-06, kept in
+        # step here because this docstring promises the two mirror each
+        # other — a publisher-dated source emitting a Drupal date must
+        # not silently fall through to observation while the digest's
+        # own split reads it fine.
+        readable = claimed_day_from_text(raw)
+        if readable:
+            return readable
     return publication_date()
 
 

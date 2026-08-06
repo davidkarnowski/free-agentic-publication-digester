@@ -1174,3 +1174,64 @@ def test_presidential_action_titles_bypass_the_lexicon_gate(conn, tmp_path):
                  "Thu, 23 Jul 2026 21:07:00 +0000")
     md = report.render(conn, DATE, out_dir=tmp_path).read_text()
     assert "A Historic and Unprecedented Order" in md
+
+
+# ------------------------------------------------- the third dating tier --
+# GUIDE §3, added 2026-08-06. Drupal sites emit their site date format in
+# <pubDate>; an unreadable date falls back to observation, which the
+# dating split treats as TODAY — so a feed spanning weeks would publish
+# all of it as today's news.
+
+
+def test_claimed_day_reads_drupal_slash_dates():
+    """NIH's feed: 'Wed, 08/05/2026 - 08:00'. Looks like RFC 822 and is
+    not; email.utils rejects it."""
+    assert report._claimed_day(
+        {"claimed_published_at": "Wed, 08/05/2026 - 08:00"}) == "2026-08-05"
+    assert report._claimed_day(
+        {"claimed_published_at": "Fri, 07/31/2026 - 09:00"}) == "2026-07-31"
+
+
+def test_claimed_day_reads_long_month_dates():
+    """TSA's feed: 'July 17, 2026'."""
+    assert report._claimed_day(
+        {"claimed_published_at": "July 17, 2026"}) == "2026-07-17"
+
+
+def test_claimed_day_slash_dates_are_us_ordered():
+    """Every publisher in this registry is a US federal body writing for
+    a US audience. The assumption is auditable, not incidental: 08/05 is
+    5 August, never 8 May."""
+    assert report._claimed_day(
+        {"claimed_published_at": "08/05/2026"}) == "2026-08-05"
+
+
+def test_claimed_day_rejects_impossible_dates():
+    """A string that states no valid calendar date keeps returning None,
+    and None keeps its meaning — we could not read it."""
+    for raw in ("13/45/2026", "not a date at all", "", "Month 99, 2026"):
+        assert report._claimed_day({"claimed_published_at": raw}) is None
+
+
+def test_existing_date_formats_are_unchanged():
+    """The new tier runs only after RFC 822 and ISO both fail, so no
+    currently-parsing source can move."""
+    assert report._claimed_day(
+        {"claimed_published_at": "Thu, 06 Aug 2026 21:07:11 +0000"}) == "2026-08-06"
+    assert report._claimed_day({"claimed_published_at": "2026-08-05"}) == "2026-08-05"
+    # Zone-aware evening release stays on its Eastern day (review D1).
+    assert report._claimed_day(
+        {"claimed_published_at": "Thu, 23 Jul 2026 21:30:00 -0400"}) == "2026-07-23"
+
+
+def test_drupal_dated_backfill_is_counted_not_listed(conn, tmp_path):
+    """The whole point: with the date readable, an older release sorts
+    into backfill instead of being published as today's news."""
+    _insert_agency_item(conn, "PR-dr-today", "Todays NIH Release",
+                        "Thu, 07/23/2026 - 08:00")     # DATE is 2026-07-23
+    _insert_agency_item(conn, "PR-dr-old", "Six Weeks Old",
+                        "Mon, 06/15/2026 - 09:15")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "Todays NIH Release" in md
+    assert "Six Weeks Old" not in md
+    assert "AGENCYPR-EX-01" in md
