@@ -3,6 +3,7 @@ metadata DB is real SQLite at a tmp path."""
 
 
 import pytest
+from conftest import install_digest_day_default
 
 from fapd import config, db, sync
 from fapd.client import BudgetExceededError
@@ -48,7 +49,7 @@ class FakeClient:
 
 @pytest.fixture
 def conn(tmp_path):
-    c = db.connect(tmp_path / "meta.db")
+    c = install_digest_day_default(db.connect(tmp_path / "meta.db"))
     yield c
     c.close()
 

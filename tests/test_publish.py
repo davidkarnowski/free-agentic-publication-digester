@@ -3,6 +3,7 @@
 import re
 
 import pytest
+from conftest import install_digest_day_default
 
 from fapd import publish
 
@@ -529,7 +530,7 @@ def health_site(digests, tmp_path, monkeypatch):
         fetch = tmp_path / "fetch_log.db"
         for stale in (pipeline, fetch):   # a test may build more than once
             stale.unlink(missing_ok=True)
-        conn = db.connect(pipeline)
+        conn = install_digest_day_default(db.connect(pipeline))
         for i, (collection, date, chars, metadata) in enumerate(items):
             pid = f"P{i}"
             conn.execute(

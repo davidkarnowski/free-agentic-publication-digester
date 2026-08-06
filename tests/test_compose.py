@@ -5,6 +5,7 @@ quick-read synopses (compose_sections)."""
 import json
 
 import pytest
+from conftest import install_digest_day_default
 
 from fapd import compose, config, db
 
@@ -22,7 +23,7 @@ class FakeLLM:
 
 @pytest.fixture
 def conn(tmp_path):
-    c = db.connect(tmp_path / "meta.db")
+    c = install_digest_day_default(db.connect(tmp_path / "meta.db"))
     c.execute(
         "INSERT INTO packages (package_id, collection, last_modified, first_seen_at,"
         " date_issued, fetch_status) VALUES ('FR-2026-07-23','FR','x','x','2026-07-23','fetched')"

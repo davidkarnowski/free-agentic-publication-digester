@@ -5,7 +5,7 @@ no network, no threads, no LLM."""
 import datetime as dt
 import json
 
-from conftest import DATE, LONG_TEXT, seed_corpus, seed_item
+from conftest import DATE, LONG_TEXT, install_digest_day_default, seed_corpus, seed_item
 
 from fapd import collect, config
 from fapd.sync import publication_date
@@ -178,7 +178,7 @@ def make_supervisor(tmp_path, monkeypatch, *, llm_enabled=False, poll=None,
     db_path = tmp_path / "meta.db"
 
     def conn_factory():
-        return db.connect(db_path)
+        return install_digest_day_default(db.connect(db_path))
 
     # /today writes must never leave the test sandbox.
     monkeypatch.setattr(config, "SITE_DIR", tmp_path / "site")

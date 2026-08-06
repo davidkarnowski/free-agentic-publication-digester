@@ -68,7 +68,7 @@ def compose_day(conn, llm, date):
         newer = conn.execute(
             """
             SELECT 1 FROM summaries s JOIN packages p ON p.package_id = s.package_id
-            WHERE p.date_issued = ? AND s.prompt_version = ?
+            WHERE p.digest_day = ? AND s.prompt_version = ?
               AND substr(s.created_at, 1, 19) > substr(?, 1, 19)
             LIMIT 1
             """,
@@ -91,7 +91,7 @@ def compose_day(conn, llm, date):
         FROM summaries s
         JOIN extracted_texts e USING (package_id, granule_id)
         JOIN packages p ON p.package_id = s.package_id
-        WHERE p.date_issued = ? AND s.prompt_version = ?
+        WHERE p.digest_day = ? AND s.prompt_version = ?
         ORDER BY e.collection, e.doc_type, s.package_id, s.granule_id
         """,
         (date, config.PROMPT_VERSION),
@@ -132,7 +132,7 @@ def _mechanical_counts(conn, date):
         """
         SELECT e.collection, COALESCE(e.doc_type, '?') AS doc_type, COUNT(*) AS n
         FROM extracted_texts e JOIN packages p USING (package_id)
-        WHERE p.date_issued = ? GROUP BY 1, 2 ORDER BY 1, 2
+        WHERE p.digest_day = ? GROUP BY 1, 2 ORDER BY 1, 2
         """,
         (date,),
     ).fetchall()
@@ -191,7 +191,7 @@ def _section_items(conn, date):
         FROM summaries s
         JOIN packages p ON p.package_id = s.package_id
         LEFT JOIN extracted_texts e USING (package_id, granule_id)
-        WHERE p.date_issued = ? AND s.prompt_version = ?
+        WHERE p.digest_day = ? AND s.prompt_version = ?
         ORDER BY s.package_id, s.granule_id
         """,
         (date, config.PROMPT_VERSION),
@@ -222,7 +222,7 @@ def compose_sections(conn, llm, date):
         newer = conn.execute(
             """
             SELECT 1 FROM summaries s JOIN packages p ON p.package_id = s.package_id
-            WHERE p.date_issued = ? AND s.prompt_version = ?
+            WHERE p.digest_day = ? AND s.prompt_version = ?
               AND substr(s.created_at, 1, 19) > substr(?, 1, 19) LIMIT 1
             """,
             (date, config.PROMPT_VERSION, existing["oldest"]),

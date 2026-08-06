@@ -1844,10 +1844,10 @@ ALL_TIME_PROBE_NOTE = (
 _DAILY_ITEMS_SQL = """
 SELECT p.collection AS collection,
        json_extract(e.metadata, '$.source_id') AS source_id,
-       p.date_issued AS day, COUNT(*) AS n
+       p.digest_day AS day, COUNT(*) AS n
 FROM extracted_texts e
 JOIN packages p USING (package_id)
-WHERE p.date_issued >= ? AND p.date_issued <= ?
+WHERE p.digest_day >= ? AND p.digest_day <= ?
 GROUP BY 1, 2, 3
 """
 

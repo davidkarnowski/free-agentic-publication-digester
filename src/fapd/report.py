@@ -31,6 +31,7 @@ from pathlib import Path
 from PIL import Image
 
 from . import config, fedcal
+from .rules import CREC_FLOOR_CHAR_THRESHOLD
 from .sync import publication_date
 
 __all__ = ["RULE_DESCRIPTIONS", "ValidationError", "render", "validate"]
@@ -68,9 +69,6 @@ RULE_DESCRIPTIONS = {
     "VOTES-EX-01": "recorded vote the chamber dates on another day (inside the"
                    " index lookback window) — counted, not listed",
 }
-
-# CREC-EX-01 mechanical evidence threshold (characters of extracted floor text).
-CREC_FLOOR_THRESHOLD_CHARS = 15000
 
 # GUIDE §6 rule 9: at most this many graphics embedded per summarized item;
 # the rest are disclosed with a source-PDF link.
@@ -112,7 +110,7 @@ FROM (
     SELECT lower(COALESCE(e.doc_type, '')) AS dt
     FROM extracted_texts e
     JOIN packages p USING (package_id)
-    WHERE e.collection = 'BILLS' AND p.date_issued = ?
+    WHERE e.collection = 'BILLS' AND p.digest_day = ?
 )
 GROUP BY stage
 """
@@ -209,7 +207,7 @@ def _load_items(conn, date):
         LEFT JOIN plain_summaries ps
                ON ps.package_id = s.package_id AND ps.granule_id = s.granule_id
               AND ps.plain_version = ? AND ps.source_prompt_version = s.prompt_version
-        WHERE s.prompt_version = ? AND p.date_issued = ?
+        WHERE s.prompt_version = ? AND p.digest_day = ?
         ORDER BY s.package_id, s.granule_id
         """,
         (config.PLAIN_PROMPT_VERSION, config.PROMPT_VERSION, date),
@@ -231,7 +229,7 @@ def _graphics_by_package(conn, date):
         SELECT ga.package_id, ga.granule_id, ga.gid, ga.page, ga.asset_path
         FROM graphic_assets ga
         JOIN packages p USING (package_id)
-        WHERE p.date_issued = ? AND ga.status = 'extracted'
+        WHERE p.digest_day = ? AND ga.status = 'extracted'
         ORDER BY ga.id
         """,
         (date,),
@@ -258,19 +256,19 @@ def _coverage(conn, date):
         cov[coll] = {
             "packages": _scalar(
                 conn,
-                "SELECT COUNT(*) FROM packages WHERE collection = ? AND date_issued = ?",
+                "SELECT COUNT(*) FROM packages WHERE collection = ? AND digest_day = ?",
                 (coll, date),
             ),
             "units": _scalar(
                 conn,
                 "SELECT COUNT(*) FROM extracted_texts e JOIN packages p USING (package_id)"
-                " WHERE e.collection = ? AND p.date_issued = ?",
+                " WHERE e.collection = ? AND p.digest_day = ?",
                 (coll, date),
             ),
             "summarized": _scalar(
                 conn,
                 "SELECT COUNT(*) FROM summaries s JOIN packages p USING (package_id)"
-                " WHERE p.collection = ? AND p.date_issued = ? AND s.prompt_version = ?",
+                " WHERE p.collection = ? AND p.digest_day = ? AND s.prompt_version = ?",
                 (coll, date, pv),
             ),
         }
@@ -279,19 +277,21 @@ def _coverage(conn, date):
         conn,
         """
         SELECT COUNT(*) FROM extracted_texts e JOIN packages p USING (package_id)
-        WHERE e.collection = 'CREC' AND p.date_issued = ?
+        WHERE e.collection = 'CREC' AND p.digest_day = ?
           AND e.doc_type IN ('HOUSE', 'SENATE') AND e.char_count < ?
           AND NOT EXISTS (SELECT 1 FROM summaries s
                           WHERE s.package_id = e.package_id
                             AND s.granule_id = e.granule_id
                             AND s.prompt_version = ?)
         """,
-        (date, CREC_FLOOR_THRESHOLD_CHARS, pv),
+        # Threshold imported from rules.py — the ruleset is the single source
+        # (the render-time copy drifted-by-luck-only until 2026-08-06).
+        (date, CREC_FLOOR_CHAR_THRESHOLD, pv),
     )
     ex02 = _scalar(
         conn,
         "SELECT COUNT(*) FROM extracted_texts e JOIN packages p USING (package_id)"
-        " WHERE e.collection = 'CREC' AND p.date_issued = ?"
+        " WHERE e.collection = 'CREC' AND p.digest_day = ?"
         " AND e.doc_type IN ('EXTENSIONS', 'DAILYDIGEST')",
         (date,),
     )
@@ -338,7 +338,7 @@ def _coverage(conn, date):
     notices = _scalar(
         conn,
         "SELECT COUNT(*) FROM extracted_texts e JOIN packages p USING (package_id)"
-        " WHERE e.collection = 'FR' AND p.date_issued = ? AND e.doc_type = 'NOTICE'",
+        " WHERE e.collection = 'FR' AND p.digest_day = ? AND e.doc_type = 'NOTICE'",
         (date,),
     )
     fr = cov["FR"]
@@ -350,7 +350,7 @@ def _coverage(conn, date):
         conn.execute(
             "SELECT e.doc_type, COUNT(*) FROM extracted_texts e"
             " JOIN packages p USING (package_id)"
-            " WHERE e.collection = 'USCOURTS' AND p.date_issued = ?"
+            " WHERE e.collection = 'USCOURTS' AND p.digest_day = ?"
             " GROUP BY e.doc_type",
             (date,),
         )
@@ -562,7 +562,7 @@ def _agency_rows(conn, date):
         """
         SELECT e.title, e.agency, e.metadata
         FROM extracted_texts e JOIN packages p USING (package_id)
-        WHERE e.collection = 'AGENCYPR' AND p.date_issued = ?
+        WHERE e.collection = 'AGENCYPR' AND p.digest_day = ?
         ORDER BY e.agency, e.title
         """,
         (date,),
@@ -697,7 +697,7 @@ def _votes_rows(conn, date):
         """
         SELECT e.title, e.agency, e.metadata
         FROM extracted_texts e JOIN packages p USING (package_id)
-        WHERE e.collection = 'VOTES' AND p.date_issued = ?
+        WHERE e.collection = 'VOTES' AND p.digest_day = ?
         """,
         (date,),
     )]
@@ -865,7 +865,7 @@ def _billactions_lines(conn, date):
         """
         SELECT e.title, e.agency, e.metadata
         FROM extracted_texts e JOIN packages p USING (package_id)
-        WHERE e.collection = 'BILLACTIONS' AND p.date_issued = ?
+        WHERE e.collection = 'BILLACTIONS' AND p.digest_day = ?
         """,
         (date,),
     )]
@@ -933,7 +933,7 @@ def _crec_lines(conn, date, items):
     total = _scalar(
         conn,
         "SELECT COUNT(*) FROM extracted_texts e JOIN packages p USING (package_id)"
-        " WHERE e.collection = 'CREC' AND p.date_issued = ?",
+        " WHERE e.collection = 'CREC' AND p.digest_day = ?",
         (date,),
     )
     unselected = dict(
@@ -941,7 +941,7 @@ def _crec_lines(conn, date, items):
             """
             SELECT e.doc_type, COUNT(*)
             FROM extracted_texts e JOIN packages p USING (package_id)
-            WHERE e.collection = 'CREC' AND p.date_issued = ?
+            WHERE e.collection = 'CREC' AND p.digest_day = ?
               AND NOT EXISTS (SELECT 1 FROM summaries s
                               WHERE s.package_id = e.package_id
                                 AND s.granule_id = e.granule_id
@@ -1154,7 +1154,7 @@ def _fr_lines(conn, date, items, out_dir):
         conn.execute(
             "SELECT e.doc_type, COUNT(*) FROM extracted_texts e"
             " JOIN packages p USING (package_id)"
-            " WHERE e.collection = 'FR' AND p.date_issued = ? GROUP BY e.doc_type",
+            " WHERE e.collection = 'FR' AND p.digest_day = ? GROUP BY e.doc_type",
             (date,),
         )
     )
@@ -1291,7 +1291,7 @@ def _uscourts_lines(conn, date, items):
         conn.execute(
             "SELECT e.doc_type, COUNT(*) FROM extracted_texts e"
             " JOIN packages p USING (package_id)"
-            " WHERE e.collection = 'USCOURTS' AND p.date_issued = ?"
+            " WHERE e.collection = 'USCOURTS' AND p.digest_day = ?"
             " GROUP BY e.doc_type",
             (date,),
         )
@@ -1410,7 +1410,7 @@ def _coverage_lines(conn, date, cov, embedded_total):
     graphic_counts = dict(
         conn.execute(
             "SELECT ga.classification, COUNT(*) FROM graphic_assets ga"
-            " JOIN packages p USING (package_id) WHERE p.date_issued = ?"
+            " JOIN packages p USING (package_id) WHERE p.digest_day = ?"
             " GROUP BY ga.classification",
             (date,),
         )
@@ -1421,14 +1421,14 @@ def _coverage_lines(conn, date, cov, embedded_total):
     gaps = []
     unfetched = _scalar(
         conn,
-        "SELECT COUNT(*) FROM packages WHERE date_issued = ? AND fetch_status != 'fetched'",
+        "SELECT COUNT(*) FROM packages WHERE digest_day = ? AND fetch_status != 'fetched'",
         (date,),
     )
     if unfetched:
         gaps.append(f"{unfetched} package(s) were not fetched and are not covered above")
     unextracted = _scalar(
         conn,
-        "SELECT COUNT(*) FROM packages p WHERE p.date_issued = ?"
+        "SELECT COUNT(*) FROM packages p WHERE p.digest_day = ?"
         " AND p.fetch_status = 'fetched'"
         " AND NOT EXISTS (SELECT 1 FROM extracted_texts e"
         "                 WHERE e.package_id = p.package_id)",
@@ -1442,7 +1442,7 @@ def _coverage_lines(conn, date, cov, embedded_total):
     graphics_failed = _scalar(
         conn,
         "SELECT COUNT(*) FROM graphic_assets ga JOIN packages p USING (package_id)"
-        " WHERE p.date_issued = ? AND ga.status = 'failed'",
+        " WHERE p.digest_day = ? AND ga.status = 'failed'",
         (date,),
     )
     if graphics_failed:
@@ -1680,7 +1680,7 @@ def _validate_lexicon(markdown, conn, date):
         row[0]
         for row in conn.execute(
             "SELECT DISTINCT s.summary FROM summaries s JOIN packages p USING (package_id)"
-            " WHERE s.method = 'official' AND s.prompt_version = ? AND p.date_issued = ?",
+            " WHERE s.method = 'official' AND s.prompt_version = ? AND p.digest_day = ?",
             (config.PROMPT_VERSION, date),
         )
     ]
@@ -1694,7 +1694,7 @@ def _validate_lexicon(markdown, conn, date):
         for row in conn.execute(
             "SELECT DISTINCT et.title FROM extracted_texts et"
             " JOIN packages p USING (package_id)"
-            " WHERE p.date_issued = ?",
+            " WHERE p.digest_day = ?",
             (date,),
         )
     ]
@@ -1702,14 +1702,14 @@ def _validate_lexicon(markdown, conn, date):
         row[0]
         for row in conn.execute(
             "SELECT DISTINCT g.title FROM granules g"
-            " JOIN packages p USING (package_id) WHERE p.date_issued = ?",
+            " JOIN packages p USING (package_id) WHERE p.digest_day = ?",
             (date,),
         )
     ]
     officials += [
         row[0]
         for row in conn.execute(
-            "SELECT DISTINCT title FROM packages WHERE date_issued = ?",
+            "SELECT DISTINCT title FROM packages WHERE digest_day = ?",
             (date,),
         )
     ]
@@ -1720,7 +1720,7 @@ def _validate_lexicon(markdown, conn, date):
         for row in conn.execute(
             "SELECT DISTINCT json_extract(et.metadata, '$.details.action_text')"
             " FROM extracted_texts et JOIN packages p USING (package_id)"
-            " WHERE et.collection = 'BILLACTIONS' AND p.date_issued = ?",
+            " WHERE et.collection = 'BILLACTIONS' AND p.digest_day = ?",
             (date,),
         )
     ]

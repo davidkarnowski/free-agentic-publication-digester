@@ -53,7 +53,7 @@ def journal_new(conn, source_class, cycle_id):
             granule_id, collection, source_id, digest_date, event, cycle_id)
         SELECT COALESCE(e.extracted_at, ?), ?, e.package_id, e.granule_id,
                e.collection, json_extract(e.metadata, '$.source_id'),
-               p.date_issued, 'ingested', ?
+               COALESCE(p.digest_day, p.date_issued), 'ingested', ?
         FROM extracted_texts e JOIN packages p USING (package_id)
         WHERE {where}
           AND NOT EXISTS (SELECT 1 FROM item_journal j
@@ -164,7 +164,7 @@ def trigger_fires(conn, date, *, now=None):
     oldest = conn.execute(
         """
         SELECT MIN(e.extracted_at) AS oldest FROM extracted_texts e
-        JOIN packages p USING (package_id) WHERE p.date_issued = ?
+        JOIN packages p USING (package_id) WHERE p.digest_day = ?
         """,
         (date,),
     ).fetchone()

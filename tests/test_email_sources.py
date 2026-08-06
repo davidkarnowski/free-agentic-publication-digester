@@ -10,6 +10,7 @@ import email
 import email.policy
 
 import pytest
+from conftest import install_digest_day_default
 
 from fapd import config, db, email_sources
 
@@ -129,7 +130,7 @@ def no_dkim(raw):
 def conn(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "CAPTURE_DIR", tmp_path / "captures")
     monkeypatch.setattr(config, "MANIFEST_DIR", tmp_path / "manifests")
-    connection = db.connect(tmp_path / "meta.db")
+    connection = install_digest_day_default(db.connect(tmp_path / "meta.db"))
     yield connection
     connection.close()
 

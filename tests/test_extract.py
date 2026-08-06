@@ -4,6 +4,7 @@ isolation. Parsers are faked via the module registry; no real archive needed."""
 import json
 
 import pytest
+from conftest import install_digest_day_default
 
 from fapd import db, extract
 
@@ -41,7 +42,7 @@ def rec(granule_id="", **over):
 
 @pytest.fixture
 def conn(tmp_path):
-    c = db.connect(tmp_path / "meta.db")
+    c = install_digest_day_default(db.connect(tmp_path / "meta.db"))
     yield c
     c.close()
 

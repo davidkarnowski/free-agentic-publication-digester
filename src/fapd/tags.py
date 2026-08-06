@@ -60,7 +60,7 @@ def mechanical_section_tags(conn, date):
         """
         SELECT e.agency, COUNT(*) AS n FROM extracted_texts e
         JOIN packages p USING (package_id)
-        WHERE p.date_issued = ? AND e.collection = 'FR' AND e.agency IS NOT NULL
+        WHERE p.digest_day = ? AND e.collection = 'FR' AND e.agency IS NOT NULL
         GROUP BY 1 ORDER BY n DESC LIMIT 3
         """,
         (date,),

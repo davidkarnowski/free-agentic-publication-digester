@@ -277,17 +277,17 @@ SELECT p.collection AS collection,
        json_extract(e.metadata, '$.mode') AS mode
 FROM extracted_texts e
 JOIN packages p USING (package_id)
-WHERE p.date_issued >= ? AND p.date_issued <= ?
+WHERE p.digest_day >= ? AND p.digest_day <= ?
 """
 
 _RECENCY_SQL = """
 SELECT p.collection AS collection,
        json_extract(e.metadata, '$.source_id') AS source_id,
-       MAX(p.date_issued) AS last_date,
+       MAX(p.digest_day) AS last_date,
        COUNT(*) AS items
 FROM extracted_texts e
 JOIN packages p USING (package_id)
-WHERE p.date_issued >= ? AND p.date_issued <= ?
+WHERE p.digest_day >= ? AND p.digest_day <= ?
 GROUP BY 1, 2
 """
 

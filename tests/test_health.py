@@ -14,6 +14,7 @@ contract gets exercised honestly.
 import sqlite3
 
 import pytest
+from conftest import install_digest_day_default
 
 from fapd import db, health
 
@@ -54,7 +55,7 @@ def make_pipeline_db(tmp_path, rows=(), collectors=()):
     [, first_seen_at]) — the observation stamp defaults to midnight of
     TODAY, inside every recent window the suite uses."""
     path = tmp_path / "fapd.db"
-    conn = db.connect(path)
+    conn = install_digest_day_default(db.connect(path))
     for row in rows:
         package_id, collection, date_issued, chars, metadata = row[:5]
         first_seen = row[5] if len(row) > 5 else "2026-07-31T00:00:00Z"
@@ -593,10 +594,11 @@ def test_pipeline_db_without_collector_state_still_reports(tmp_path):
     path = tmp_path / "bare.db"
     conn = sqlite3.connect(path)
     conn.execute("CREATE TABLE packages (package_id TEXT PRIMARY KEY,"
-                 " collection TEXT, date_issued TEXT)")
+                 " collection TEXT, date_issued TEXT, digest_day TEXT)")
     conn.execute("CREATE TABLE extracted_texts (package_id TEXT,"
                  " metadata TEXT, char_count INTEGER)")
-    conn.execute("INSERT INTO packages VALUES ('A', 'AGENCYPR', ?)", (TODAY,))
+    conn.execute("INSERT INTO packages VALUES ('A', 'AGENCYPR', ?, ?)",
+                 (TODAY, TODAY))
     conn.execute("INSERT INTO extracted_texts VALUES ('A', ?, 250)",
                  (meta("justice-newsroom"),))
     conn.commit()

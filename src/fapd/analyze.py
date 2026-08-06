@@ -359,7 +359,7 @@ def run_plain(conn, llm, date):
             FROM summaries s
             JOIN packages p ON p.package_id = s.package_id
             LEFT JOIN extracted_texts e USING (package_id, granule_id)
-            WHERE p.date_issued = ? AND s.prompt_version = ?
+            WHERE p.digest_day = ? AND s.prompt_version = ?
               AND NOT EXISTS (
                   SELECT 1 FROM plain_summaries ps
                   WHERE ps.package_id = s.package_id

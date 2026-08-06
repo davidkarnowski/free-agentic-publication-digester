@@ -41,9 +41,34 @@ POSTPONED_VOTE_TEXT = (
 LONG_OFFICIAL = "The Commission adopts rule amendments. " * 40  # ~1559 chars normalized
 
 
+def install_digest_day_default(c):
+    """Emulate a MIGRATED database — the only kind production ever runs
+    (scripts/migrate_digest_day.py backfills digest_day = date_issued at
+    the 2026-08-06 cutover). A TEMP trigger applies the same default so
+    fixture inserts stay valid, while any test may set digest_day
+    explicitly to exercise observation filing (the trigger only fires
+    when the insert leaves it NULL). Every test connection fixture —
+    including the module-local ones that shadow conftest's `conn` —
+    must call this."""
+    c.execute(
+        """
+        CREATE TEMP TRIGGER IF NOT EXISTS test_digest_day_default
+        AFTER INSERT ON packages FOR EACH ROW
+        WHEN NEW.digest_day IS NULL
+        BEGIN
+            UPDATE packages
+               SET digest_day = COALESCE(NEW.date_issued,
+                                         substr(NEW.first_seen_at, 1, 10))
+             WHERE package_id = NEW.package_id;
+        END
+        """
+    )
+    return c
+
+
 @pytest.fixture
 def conn(tmp_path):
-    c = db.connect(tmp_path / "meta.db")
+    c = install_digest_day_default(db.connect(tmp_path / "meta.db"))
     yield c
     c.close()
 

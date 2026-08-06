@@ -173,7 +173,7 @@ SELECT et.package_id, et.granule_id, et.collection, et.doc_type, et.title,
        et.char_count, et.text
 FROM extracted_texts AS et
 JOIN packages AS p ON p.package_id = et.package_id
-WHERE p.date_issued = ?
+WHERE p.digest_day = ?
 ORDER BY et.collection, et.package_id, et.granule_id
 """
 

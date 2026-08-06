@@ -90,7 +90,7 @@ def main() -> int:
     method_counts = dict(
         conn.execute(
             "SELECT s.method, COUNT(*) FROM summaries s JOIN packages p USING (package_id)"
-            " WHERE p.date_issued = ? AND s.prompt_version = ? GROUP BY s.method",
+            " WHERE p.digest_day = ? AND s.prompt_version = ? GROUP BY s.method",
             (date, config.PROMPT_VERSION),
         )
     )

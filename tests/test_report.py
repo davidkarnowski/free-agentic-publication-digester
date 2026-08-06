@@ -9,6 +9,7 @@ import json
 import re
 
 import pytest
+from conftest import install_digest_day_default
 from PIL import Image
 
 from fapd import config, db, report
@@ -194,7 +195,8 @@ def project(tmp_path, monkeypatch):
 
 @pytest.fixture
 def conn(project):
-    connection = db.connect(project / "data" / "fapd.db")
+    connection = install_digest_day_default(
+        db.connect(project / "data" / "fapd.db"))
     seed(connection, project)
     yield connection
     connection.close()
