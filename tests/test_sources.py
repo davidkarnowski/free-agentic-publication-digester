@@ -86,7 +86,18 @@ def test_registry_seeds_expected_active_sources():
         # thirty-three: each was read off its captured bytes and verified
         # to yield real releases carrying the publisher's own dates, and
         # the class request budget makes cadence the operator's call:
-        "dhs-newsroom", "fema-news", "cftc-press", "eeoc-newsroom"}
+        "dhs-newsroom", "fema-news", "cftc-press", "eeoc-newsroom",
+        # activated 2026-08-06: the White House's own presidential-action
+        # feeds. Registered the day the operator noticed an executive order
+        # live on whitehouse.gov and absent from our digest — it reaches us
+        # otherwise only through the Federal Register, measured at a
+        # five-day lag. robots.txt permits everything and advertises a
+        # sitemap; both feeds probed feed-ok with 30/30 dates and guids.
+        # TWO entries, not one: each feed caps at 30 items, so proclamations
+        # crowd orders out of the parent — 24 of the EO feed's 30 are absent
+        # from it. Overlapping items share a link URL and merge under the
+        # standing corroboration rule.
+        "whitehouse-presidential-actions", "whitehouse-executive-orders"}
 
 
 # ------------------------------------------------------------ coverage_stats --
@@ -124,7 +135,8 @@ def test_coverage_stats_per_tier_on_real_registry():
     # + senate-xml roll-call votes (07-31, first xml-index source)
     # + congress-gov-api bill actions (07-31, first api source)
     # + dhs-newsroom (07-31, first tier-1 html-index source)
-    assert by_tier[1].get("active", 0) == 21
+    # + the two whitehouse.gov presidential-action feeds (08-06)
+    assert by_tier[1].get("active", 0) == 23
 
 
 def test_coverage_stats_empty():

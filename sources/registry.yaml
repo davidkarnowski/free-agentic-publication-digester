@@ -574,6 +574,36 @@
 
 # ------------------------------------------ planned: White House (tier 1) ----
 
+- id: whitehouse-presidential-actions
+  name: White House Presidential Actions
+  branch: executive
+  parent_org: Executive Office of the President
+  description: "The Executive Office of the President publishes the President's instruments — executive orders, proclamations, presidential memoranda, and nominations — on whitehouse.gov as they are signed. This RSS feed carries them with full document text, days ahead of their compilation in the Federal Register."
+  type: rss
+  tier: 1
+  urls:
+    home: https://www.whitehouse.gov/presidential-actions/
+    feed: https://www.whitehouse.gov/presidential-actions/feed/
+  method: Polls the presidential-actions RSS feed via AgencyClient, then fetches each new item's page for the full instrument text (mode full).
+  status: active
+  added: "2026-08-06"
+  notes: "Registered 2026-08-06 after the operator asked why the 'Ending Birth Tourism' executive order was not in the day's digest. It was not, and could not be: presidential actions reach us only through the Federal Register compilation, measured on our own record at a five-day lag (the quartz proclamation was published by the White House 2026-07-31 and appeared in the 2026-08-05 digest); the other compilation path, govinfo CPD, probed at a ~5-week lag and cannot reach a digest day at all under the §3 dating rule. Access: robots.txt is 'User-agent: * / Disallow:' — everything permitted, no crawl-delay declared — and it advertises a sitemap, so this is rung-1 directed programmatic access, not scraping. Probed 2026-08-06: HTTP 200, application/rss+xml, 619,343 bytes, verdict feed-ok, 30 items, 30/30 with pubDate, 30/30 with guid. Gate-3 content evaluation: the feed's <description> is a 400-700 character TEASER ending in an ellipsis (avg 691 chars), so the substance is NOT in the feed — full mode is required and the sample article page extracted cleanly at 8,940 characters, which is more than the feed's own <content:encoded> yields normalized (5,252 for the same document). Coverage: the feed holds 30 items spanning 2026-06-25 to 08-06 (~6 weeks) against a publication rate of roughly 2-4 presidential actions per week, so nothing published while we are polling can fall out of the window unseen. Cost: one poll plus one fetch per new item, no crawl-delay to pay. Items are tagged with the publisher's own taxonomy (Presidential Actions plus one of Executive Orders, Proclamations, Presidential Memoranda, Nominations &amp; Appointments), which drives the digest's section-9 subsections mechanically. Overlaps whitehouse-executive-orders by design; shared items carry identical link URLs and merge under the standing corroboration rule. Editorial register: GUIDE §2's attributed-speech rule applies here in full (operator, 2026-08-06) — presidential actions render attributed, exactly as agency releases do."
+
+- id: whitehouse-executive-orders
+  name: White House Executive Orders
+  branch: executive
+  parent_org: Executive Office of the President
+  description: "The executive-orders category of whitehouse.gov's presidential actions. A narrower feed than the parent, and a deeper one: because each feed is capped at 30 items, proclamations crowd executive orders out of the combined feed, so this one reaches substantially further back in time."
+  type: rss
+  tier: 1
+  urls:
+    home: https://www.whitehouse.gov/presidential-actions/executive-orders/
+    feed: https://www.whitehouse.gov/presidential-actions/executive-orders/feed/
+  method: Polls the executive-orders RSS feed via AgencyClient, then fetches each new item's page for the full order text (mode full); overlaps whitehouse-presidential-actions by design — shared items carry identical link URLs and merge through the standing corroboration rule.
+  status: active
+  added: "2026-08-06"
+  notes: "Registered 2026-08-06 alongside whitehouse-presidential-actions (operator decision: two entries). NOT a subset of the parent feed, which is why both are registered: each caps at 30 items, and the parent's slots are consumed by proclamations and memoranda, so executive orders fall out of its window far sooner. Measured 2026-08-06 — parent feed spans 2026-06-25 to 08-06 (~6 weeks); this one spans 2026-03-06 to 08-06 (~5 months), and 24 of its 30 orders are absent from the parent. Probed 2026-08-06: HTTP 200, application/rss+xml, 668,654 bytes, verdict feed-ok, 30 items, 30/30 with pubDate and guid. Gate-3 content evaluation: identical shape to the parent feed — <description> is a teaser, so full mode is required; the sample article extracted at 8,940 characters. Duplication is real and intended: where the two feeds carry the same order the link URL is identical (verified 6/6 on the overlap), so report.corroborate merges them into one listing marked corroborated, and no new dedup code was needed. Editorial register: attributed, per GUIDE §2 (operator, 2026-08-06)."
+
 - id: whitehouse-briefing-room
   name: White House Briefing Room
   branch: executive
