@@ -61,6 +61,27 @@ services:
     volumes:
       - fapd-data:/app/data
       - fapd-site:/app/site
+      # Evidence durability (F-021, 2026-08-07). /app is the image, not a
+      # volume, so digests/, provenance/ and .git lived in the container's
+      # writable layer: on 2026-08-07 an evidence commit sat unpushed all
+      # day and any rebuild would have destroyed the digest, the manifest,
+      # and an insight report no re-render could reproduce. With the files
+      # durable a lost .git no longer matters — the next evidence-commit
+      # re-stages the survivors and re-commits, so the fix self-heals.
+      #
+      # The cost, stated rather than discovered later: this is the F-009
+      # class. Docker seeds a named volume from the image only when the
+      # volume is EMPTY, so a rebuild never refreshes a populated one. A
+      # RETIRED digest (as on 2026-08-03) will not leave the box by
+      # deploying; it must be deleted from the volume explicitly, exactly
+      # as the site volume already requires. Tracked as OB-19.
+      #
+      # SOURCES.md is an evidence path too but sits at the repo root, so it
+      # stays ephemeral. That asymmetry is deliberate, not an oversight:
+      # it regenerates deterministically from the registry via
+      # scripts/sources_doc.py.
+      - fapd-digests:/app/digests
+      - fapd-provenance:/app/provenance
       - ./secrets:/app/secrets:ro # deploy key for evidence pushes (0600, root-owned dir)
     # Bounds + rotation (review D18/D19/R4), values from the dev stack's
     # tested block. The 1g ceiling is also D18's blast-radius limit: this
@@ -92,3 +113,5 @@ networks:
 volumes:
   fapd-site:
   fapd-data:
+  fapd-digests:
+  fapd-provenance:

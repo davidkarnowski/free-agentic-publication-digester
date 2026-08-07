@@ -320,3 +320,28 @@ not reusable.)*
   `script-src 'sha256-…'`, `frame-ancestors 'self'`. Set in the nginx
   config in `deploy/vps/`, and add a render-time test asserting the
   inline script's hash matches the header so the two cannot drift.
+
+**OB-19 — Retiring an evidence file now needs a volume cleanup step**
+- **Gap:** `digests/` and `provenance/` became named volumes on
+  2026-08-07 (P3, F-021) so an unpushed evidence commit can survive a
+  container rebuild. Docker seeds a named volume from the image only
+  when the volume is **empty**, so a rebuild never refreshes a populated
+  one. Deleting a digest, manifest or day view from the repository
+  therefore does **not** remove it from the box: the file persists in
+  the volume, and the next `git add digests/ provenance/` re-commits it.
+  This is the F-009 class, now covering three paths instead of one.
+- **Precedent:** exactly this happened on 2026-08-03 with the site
+  volume. The two development-era digests were retired from the tree,
+  `build_site` never deleted stale outputs, and the next evidence commit
+  resurrected the pages — caught and cleaned by hand the same evening.
+- **Trigger:** the next retirement of a digest, manifest or day view —
+  or any deliberate deletion under `digests/` or `provenance/`.
+- **Sketch:** a short staged script in the servicing-guide §2 shape that
+  deletes the named paths from `fapd-digests` / `fapd-provenance` inside
+  the container and re-runs `build_site`, with the retired paths as
+  preconditions (abort if they are absent — nothing to do) and a
+  self-verification that they are gone from the volume, the site volume,
+  and the next `git status`. Alternatively fold the cleanup into the
+  retirement runbook so the deletion and the volume are one action; the
+  hazard is that they are currently two, and only one of them is
+  obvious.

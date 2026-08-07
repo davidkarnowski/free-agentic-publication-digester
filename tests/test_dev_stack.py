@@ -111,3 +111,28 @@ def test_no_wayback_flag_installs_a_null_context_manager():
     stub_factory = collect_script._NullWayback
     with stub_factory() as wayback:
         assert wayback.save("https://example.gov/x") is None
+
+
+def test_prod_compose_keeps_the_evidence_paths_durable():
+    """F-021: /app is the image, not a volume, so digests/ and provenance/
+    lived in the container's writable layer — a rebuild after a failed
+    push destroys a day of the record, including an insight report no
+    re-render reproduces. Removing these mounts restores that hazard."""
+    compose = (VPS / "docker-compose.yml").read_text(encoding="utf-8")
+    live = "\n".join(ln for ln in compose.splitlines()
+                     if not ln.lstrip().startswith("#"))
+    assert "fapd-digests:/app/digests" in live
+    assert "fapd-provenance:/app/provenance" in live
+    # declared, not just mounted
+    assert "  fapd-digests:" in live and "  fapd-provenance:" in live
+
+
+def test_dev_stack_does_not_mount_the_evidence_volumes():
+    """The dev stack cannot push (test_dev_stack_cannot_push_evidence), so
+    durable evidence paths would only accumulate stale local output that
+    looks like the record and is not."""
+    live = "\n".join(
+        ln for ln in (DEV / "docker-compose.yml").read_text(
+            encoding="utf-8").splitlines()
+        if not ln.lstrip().startswith("#"))
+    assert "/app/digests" not in live and "/app/provenance" not in live
