@@ -1140,7 +1140,7 @@ def test_build_today_renders_disclosure_sections_and_labels(conn, tmp_path):
     # one chronological stream: no section headings, items self-describe
     assert "<h2>" not in page.split("</h1>")[1]
     assert "Congressional Record" in page and "Agency announcement" in page
-    assert "model summary:" in page            # §2 labeling for llm method
+    assert "FAPD-AI:" in page                  # §2 labeling for llm method
     # newest first — anchored on titles: the synthetic PR-/AGENCYPR ids
     # no longer print in a reader's meta line (they stay in today.json)
     assert (page.index("VA announces a claims program")
@@ -2722,3 +2722,21 @@ def test_today_title_falls_back_to_the_opening_line_then_granule_id(conn,
     # whole-package documents (BILLS) legitimately end at the package id
     item["granule_id"] = ""
     assert _publish._today_display_title(item) == "CREC-2026-07-23"
+
+
+def test_today_labels_ai_prose_as_ours_not_the_governments(conn, tmp_path):
+    """GUIDE §2: machine-generated prose does not hide its own authorship.
+    The label was renamed from "model summary" to "FAPD-AI" (operator,
+    2026-08-07), so the page must still say in words what that label
+    means — a brand name alone is not a disclosure."""
+    from conftest import DATE
+
+    _seed_today(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+
+    assert "FAPD-AI:" in page
+    assert "model summary" not in page
+    # the label is explained, not just displayed
+    assert "FAPD-AI</strong> was written by this project" in page
+    assert "official summary</strong> is the publisher" in page

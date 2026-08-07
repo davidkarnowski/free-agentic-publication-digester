@@ -2955,8 +2955,14 @@ def _today_item_row(item, filterable=()):
     meta = html.escape(" · ".join(meta_bits))
 
     if item["summary"]:
+        # "FAPD-AI" names the writer rather than describing the method
+        # (operator, 2026-08-07). GUIDE §2's obligation is that
+        # machine-generated prose does not hide its own authorship, not
+        # that it use a particular wording — and "AI" is in the name. The
+        # "How this live view works" prose names both labels explicitly
+        # so a first-time reader does not have to infer it from branding.
         label = ("official summary" if item["summary_method"] == "official"
-                 else "model summary")
+                 else "FAPD-AI")
         rule = (f' <span class="rule-note">{html.escape(item["inclusion_rule"])}'
                 "</span>" if item["inclusion_rule"] else "")
         body = (f'<p class="today-summary"><span class="plain-label">'
@@ -3337,7 +3343,10 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
         "official record, the channel it arrived through, mechanical tags "
         "(branch of government, document type, agency), and either a "
         "labeled summary or the unedited opening words of the official "
-        "text. Those tags are clickable: selecting one here or in the "
+        "text. A summary labeled <strong>official summary</strong> is the "
+        "publisher\u2019s own; one labeled <strong>FAPD-AI</strong> was "
+        "written by this project\u2019s AI from the official text and is "
+        "ours, not the government\u2019s. Those tags are clickable: selecting one here or in the "
         "filter bar narrows the stream to matching entries, and picking "
         "several narrows to entries carrying all of them.</p>"
         "<p><strong>About the dates and times on this page.</strong> A "
@@ -3409,13 +3418,13 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
         meta = (f'<p class="today-meta">Last updated <time class="utc"'
                 f' datetime="{html.escape(now)}">{html.escape(_et_clock(now))}'
                 f" ET</time> · {len(status['items'])} item(s) observed so far"
-                f" · {status['pending_llm']} item(s) awaiting model summary.")
+                f" · {status['pending_llm']} item(s) awaiting an FAPD-AI summary.")
     else:
         meta = (f'<p class="today-meta">Generated <time class="utc"'
                 f' datetime="{html.escape(now)}">{html.escape(_et_clock(now))}'
                 f" ET</time> · {len(status['items'])} item(s) observed for "
                 f"this day · {status['pending_llm']} item(s) without a "
-                "stored model summary (a disclosed gap, not pending work).")
+                "stored FAPD-AI summary (a disclosed gap, not pending work).")
     arrived = "arrived today" if live else "arrived during this day"
     parts += [
         f'<p class="today-disclosure">{disclosure_html}</p>',
