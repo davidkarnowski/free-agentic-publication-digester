@@ -57,10 +57,12 @@ ssh "${SSH_OPTS[@]}" "$VPS" \
   "sudo docker exec fapd-backend uv run python -c \
    'from fapd import db, publish; publish.build_today(db.connect())' || true"
 
-# OB-11: evidence pushes authenticate over the deploy key, so the baked
-# repo's origin must be the SSH URL — the laptop tree bakes in HTTPS
-# (findings F-008), and every rebuild would silently regress it. Re-flip
-# on every deploy.
+# Belt-and-braces since 2026-08-07: Dockerfile.backend now bakes the SSH
+# remote into the IMAGE, which is what makes it survive a container
+# recreate (F-020 — this exec writes only to the running container's
+# layer, so a recreate outside a deploy silently reverted it to the
+# laptop tree's HTTPS remote, F-008). Kept because it costs one command
+# and covers an image built before that change.
 ssh "${SSH_OPTS[@]}" "$VPS" \
   "sudo docker exec fapd-backend git -C /app remote set-url origin \
    git@github.com:davidkarnowski/free-agentic-publication-digester.git"

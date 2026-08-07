@@ -54,8 +54,18 @@ def test_dev_stack_cannot_push_evidence():
 
 
 def test_dev_stack_never_reflips_the_origin():
-    """The origin re-flip (F-008) points a repo at the production SSH
-    remote for evidence pushes — VPS-only, never mirrored in dev."""
+    """No dev-stack FILE re-flips the origin.
+
+    Scope note (2026-08-07, F-020): the dev compose builds the production
+    Dockerfile, which now BAKES the SSH remote — so a dev container does
+    carry it, and this test no longer means "dev never sees the SSH
+    remote". It means no dev file performs the flip itself.
+
+    That is fine, and arguably safer than the HTTPS remote it replaced: a
+    dev container has no secrets mount, so no deploy key, and an SSH
+    remote without a key cannot push at all. The real guarantee lives in
+    test_dev_stack_cannot_push_evidence — no secrets, no
+    FAPD_EVIDENCE_PUSH, no --eod — and that is the one to keep green."""
     for path in _dev_files():
         assert "remote set-url" not in path.read_text(encoding="utf-8"), path
 

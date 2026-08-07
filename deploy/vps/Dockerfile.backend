@@ -24,9 +24,36 @@ WORKDIR /app
 COPY repo/ /app
 RUN uv sync --frozen --no-dev
 
-# Evidence commits are authored by the pipeline's bot identity.
+# Evidence commits are authored by the pipeline's bot identity and push
+# over the mounted deploy key, which requires an SSH remote.
+#
+# The origin re-flip is BAKED HERE, not left to deploy.sh (F-020). The
+# laptop tree carries an HTTPS remote (F-008), and deploy.sh's post-up
+# `docker exec ... git remote set-url` writes to the RUNNING CONTAINER's
+# writable layer — not the image. Any recreate outside a deploy therefore
+# reverted it and silently broke evidence pushes: demonstrated 2026-08-05,
+# when an OAuth-token rotation recreated the backend at 00:51 and the next
+# `git push --dry-run` failed with `could not read Username for
+# 'https://github.com'`. Nothing looked wrong until the push was actually
+# tested, because fetch still worked — the repository is public, so
+# anonymous HTTPS fetch succeeds.
+#
+# safe.directory is set in the same layer and BEFORE the remote command:
+# a later `git config` would not help a `git -C /app` that runs first.
+# The `||` fallback covers a build context whose .git somehow has no
+# origin at all — `set-url` errors on a missing remote, and a build that
+# dies there is harder to diagnose than one that just adds it.
+#
+# deploy.sh keeps its re-flip as belt-and-braces. The URL is duplicated
+# across the two files and pinned by tests/test_evidence_commit.py so
+# they cannot drift.
 RUN git config --global user.name "fapd-pipeline" \
     && git config --global user.email "fapd-pipeline@users.noreply.github.com" \
-    && git config --global --add safe.directory /app
+    && git config --global --add safe.directory /app \
+    && (git -C /app remote set-url origin \
+          git@github.com:davidkarnowski/free-agentic-publication-digester.git \
+        || git -C /app remote add origin \
+          git@github.com:davidkarnowski/free-agentic-publication-digester.git) \
+    && git -C /app remote -v
 
 ENTRYPOINT ["uv", "run", "python", "scripts/collect.py"]
