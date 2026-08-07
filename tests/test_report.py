@@ -1235,3 +1235,25 @@ def test_drupal_dated_backfill_is_counted_not_listed(conn, tmp_path):
     assert "Todays NIH Release" in md
     assert "Six Weeks Old" not in md
     assert "AGENCYPR-EX-01" in md
+
+
+def test_display_title_preserves_nicknames_and_apostrophised_surnames():
+    """F-022 follow-on: the naive first-character upper() mangled the two
+    shapes Extensions of Remarks are made of. Latent until the live page
+    began titling every CREC granule — floor-debate headings carry
+    neither."""
+    assert report._display_title(
+        'HONORING THE SERVICE OF SAMUEL "SAM" DOUGHERTY') == (
+        'Honoring the Service of Samuel "Sam" Dougherty')
+    assert report._display_title(
+        'RECOGNIZING MARTIN JOSEPH "JOE" O\'ROURKE') == (
+        'Recognizing Martin Joseph "Joe" O\'Rourke')
+    # a trailing possessive s is not a new word
+    assert report._display_title("HONORING SAMUEL'S SERVICE") == (
+        "Honoring Samuel's Service")
+    # hyphenated surnames capitalize on both sides
+    assert report._display_title("HONORING JANE SMITH-JONES") == (
+        "Honoring Jane Smith-Jones")
+    # the typographic apostrophe behaves like the ASCII one
+    assert report._display_title("RECOGNIZING PAT O’BRIEN") == (
+        "Recognizing Pat O’Brien")

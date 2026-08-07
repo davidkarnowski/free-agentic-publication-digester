@@ -1072,6 +1072,37 @@ def _billactions_lines(conn, date):
     return lines
 
 
+def _recase_word(word):
+    """Title-case one ALL-CAPS word, respecting internal punctuation.
+
+    The naive ``word[:1].upper() + word[1:].lower()`` mangles the two
+    shapes the Congressional Record's Extensions of Remarks are full of:
+    quoted nicknames — '"SAM"' became '"sam"', because the first
+    character is the quote mark, not a letter — and apostrophised
+    surnames, where "O'ROURKE" became "O'rourke". Both were latent until
+    the live page started titling every CREC granule (F-022): the digest
+    only ever fed this function floor-debate headings, which carry
+    neither shape.
+
+    Capitalize the first LETTER, and any letter following an apostrophe
+    or hyphen — except a trailing possessive s, so "SAMUEL'S" stays
+    "Samuel's" and does not become "Samuel'S".
+    """
+    out, seen_letter = [], False
+    for i, ch in enumerate(word):
+        if not ch.isalpha():
+            out.append(ch)
+            continue
+        prev = word[i - 1] if i else ""
+        # a letter after an apostrophe/hyphen starts a new name part —
+        # but a trailing "'s" is a possessive, not a part
+        after_break = prev in "'\u2019-" and not (
+            prev in "'\u2019" and i == len(word) - 1)
+        out.append(ch.upper() if not seen_letter or after_break else ch.lower())
+        seen_letter = True
+    return "".join(out)
+
+
 def _display_title(raw):
     text = _one_line(raw)
     letters = [c for c in text if c.isalpha()]
@@ -1084,7 +1115,7 @@ def _display_title(raw):
         elif word.lower() in _SMALL_WORDS and i != 0:
             words.append(word.lower())
         else:
-            words.append(word[:1].upper() + word[1:].lower())
+            words.append(_recase_word(word))
     return " ".join(words)
 
 
