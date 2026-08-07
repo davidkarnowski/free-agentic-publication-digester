@@ -4,7 +4,7 @@
 > ingestion as well as human reading: see /agents.html.
 
 ## Core
-- [Latest digest](https://fapd.info/2026-08-05.html)
+- [Latest digest](https://fapd.info/2026-08-06.html)
 - [All digests (index)](https://fapd.info/index.html)
 - [Machine-readable digest index](https://fapd.info/digests.json)
 - [Atom feed of digests](https://fapd.info/feed.xml)
@@ -18,6 +18,7 @@
 - [Accessibility](https://fapd.info/accessibility.html)
 - [How AI Built This](https://fapd.info/ai-development.html)
 - [Our crawler](https://fapd.info/bot.html)
+- [Frequently Asked Questions](https://fapd.info/faq.html)
 - [Methods](https://fapd.info/methods.html)
 - [Privacy & licensing](https://fapd.info/privacy.html)
 - [Free Agentic Publication Digester (FAPD)](https://fapd.info/readme.html)

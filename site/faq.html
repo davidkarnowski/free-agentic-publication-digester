@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frequently Asked Questions — Free Agentic Publication Digester — Daily Federal Digest</title>
+<meta name="description" content="An automated, citation-bound, opinion-agnostic daily digest of official United States government publications — congressional, executive, and judicial — built only from primary sources. Built for human readers and AI agents; agents start at /llms.txt.">
+<meta name="robots" content="index, follow">
+<link rel="alternate" type="text/plain" href="llms.txt"
+      title="LLM guide — this is an AI-first digest of official US federal publications">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+  <nav aria-label="Site">
+    <a class="brand" href="index.html"
+       aria-label="Free Agentic Publication Digester (FAPD)">FAPD<span
+       class="brand-full"> &mdash; Free Agentic Publication Digester</span></a>
+    <span class="nav-links"><a href="today.html"><span class="live-dot" aria-hidden="true"></span>Today (live)</a><a href="index.html">All digests</a><a href="sources.html">Sources</a><a href="blog.html">Blog</a><a href="about.html">About</a><a href="agents.html">For agents</a><details class="nav-more"><summary>More</summary><a href="accessibility.html">Accessibility</a><a href="ai-development.html">AI development</a><a href="bot.html">Bot</a><a href="faq.html" aria-current="page">Faq</a><a href="methods.html">Methods</a><a href="privacy.html">Privacy</a><a href="readme.html">Readme</a></details></span>
+  </nav>
+</header>
+<main id="main" tabindex="-1">
+<h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
+<p><em>How the Free Agentic Publication Digester keeps time, how its
+collectors behave, and how to read what it publishes. This page grows
+as questions do; the <a href="methods.html">methods page</a> carries the fuller
+technical story.</em></p>
+<h2 id="fapds-three-clocks">FAPD's three clocks</h2>
+<p>Every document in this record has up to three dates, and they are not
+the same thing. We name them precisely because confusing them is how
+aggregation quietly misleads.</p>
+<ul>
+<li><strong>Date of Action</strong> — the day something happened, as described in the
+  document's own text: the day the Senate debated, the day a judge
+  issued an opinion, the day printed on the Federal Register's cover.
+  This date may not be available to us directly; it depends on the
+  metadata and text the source provides.</li>
+<li><strong>Date of Publication</strong> — the day the publisher made the document
+  available, as stated in the publisher's own metadata. Also not always
+  available, and not always reliable: publishing systems post late,
+  backfill, and revise.</li>
+<li><strong>Date of Observation</strong> — the day our own collector first saw the
+  document. This is the one timestamp we can define precisely, from our
+  own worker records, for every document without exception.</li>
+</ul>
+<p><strong>Observation is our source of truth for filing.</strong> A daily digest
+carries what our collectors observed that day (Eastern time, the
+publishers' own clock), and each item states its own document date
+beside it when the two differ. One exception: the Federal Register
+files under its cover date, because that is the date on which it is
+legally published — and it is the case where all three clocks agree by
+design.</p>
+<p>Why observation rather than the publisher's stamp? Because the
+publisher's stamp can lie about availability. If a publishing system
+goes down and a document stamped Monday only becomes reachable
+Wednesday, filing by the stamp would assign it to a digest that was
+already frozen — and it would vanish from the record. Filing by
+observation, nothing we see can ever miss its digest. Congress's
+official Record, for example, is typically published the morning
+<em>after</em> the day it covers: you will find it in the digest for the day
+it became available, labeled with the day of proceedings it describes.</p>
+<h2 id="how-do-fapds-collectors-actually-work">How do FAPD's collectors actually work?</h2>
+<p>At the simplest level: our collectors are polite readers.</p>
+<p>Each one visits an official government publishing site on a fixed
+schedule, the way you might check a library's new-arrivals shelf. It
+asks "what's new since I last looked?", writes down exactly what it saw
+and exactly when it saw it, and saves a copy of the official text. It
+never guesses, never rewrites what it found, and never knocks faster
+than a site says visitors may knock. If a site publishes rules for
+robots, we follow them exactly — including one site that asks for seven
+minutes between visits, and gets it.</p>
+<p>Everything else on this site — the digests, the summaries, the
+statistics — is built from those notebooks.</p>
+<h2 id="how-often-do-you-look-observation-windows">How often do you look? (observation windows)</h2>
+<p>Each collector runs on its own clock, so "observed on day D" has a
+known precision per source type. If a document appeared on a
+publisher's site at moment T, we typically observed it within one cycle
+of T:</p>
+<table>
+<thead>
+<tr>
+<th>Source type</th>
+<th>Check cycle</th>
+<th>Observation window</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>govinfo collections (Congressional Record, bills, court opinions, laws)</td>
+<td>every ~30 minutes</td>
+<td>within ~30 minutes of govinfo posting it</td>
+</tr>
+<tr>
+<td>Agency newsrooms and press feeds</td>
+<td>every ~60 minutes per site</td>
+<td>within ~1 hour</td>
+</tr>
+<tr>
+<td>Email bulletins (agency subscription lists)</td>
+<td>every ~15 minutes</td>
+<td>within ~15 minutes of delivery</td>
+</tr>
+<tr>
+<td>gao.gov</td>
+<td>feed checks honoring its requested 420-second spacing</td>
+<td>within ~1 hour</td>
+</tr>
+<tr>
+<td>The live "today" page</td>
+<td>rebuilt within ~5 minutes of new observations</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Source health on the <a href="sources.html">sources page</a></td>
+<td>refreshed every ~15 minutes</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>The daily digest freezes at midnight Eastern — Washington's own clock —
+and is then the canonical record for that day. Collectors keep working
+around the clock; anything they observe after midnight belongs to the
+next day's digest.</p>
+<h2 id="does-a-slow-source-mean-missing-coverage">Does a slow source mean missing coverage?</h2>
+<p>No — it means labeled timing. A court that posts an opinion four days
+after issuing it appears in the digest for the day we observed it,
+carrying its own issue date in the listing. The Coverage Statement in
+every digest accounts for everything observed that day, and anything
+deliberately not summarized is counted under a named mechanical rule.
+Silent omission is the failure mode this project is built to prevent.</p>
+</main>
+<footer class="site-footer">
+  <p>Generated 2026-08-07T04:25:01Z (UTC). Canonical source:
+  <code>docs/site/faq.md</code> in the
+  <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
+  every item cites its official source; methodology in
+  <code>GUIDE.md</code> §2.</p>
+  <p>Content licensed
+  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0<span class="vh"> (opens in a new tab)</span></a> —
+  reuse with attribution to FAPD (Free Agentic Publication Digester);
+  quoted official government text is
+  public domain (17 U.S.C. § 105). Code licensed Apache-2.0.</p>
+</footer>
+</body>
+</html>
