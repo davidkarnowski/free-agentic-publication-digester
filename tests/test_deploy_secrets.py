@@ -64,11 +64,17 @@ def test_the_example_carries_placeholders_only():
 
 
 def test_no_tracked_file_carries_an_ssh_target():
-    """`user@1.2.3.4` is unambiguous — an email address never has a bare
-    IPv4 for a domain. Deliberately narrower than "no public IP": tracked
-    files legitimately carry third-party addresses (fail2ban records in
-    the ops backlog, and IPs quoted inside official document text in the
-    published day views)."""
+    """A name, an @, and a bare dotted quad is unambiguous — an email
+    address never has a raw IPv4 for a domain. Deliberately narrower than
+    "no public IP": tracked files legitimately carry third-party
+    addresses (fail2ban records in the ops backlog, and IPs quoted inside
+    official document text in the published day views).
+
+    This scan covers THIS FILE too, which is why the shape is described
+    in words above instead of written out — the first version spelled the
+    example literally and tripped its own guard the moment it was
+    committed. That is the guard working; exempting the file would have
+    been the wrong repair."""
     pattern = re.compile(r"\b[\w.-]+@\d{1,3}(?:\.\d{1,3}){3}\b")
     offenders = []
     for path in _tracked_files():

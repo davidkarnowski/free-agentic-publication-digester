@@ -4730,3 +4730,74 @@ insight fixes were confirmed by their first production report this
 morning. Tonight's digest is the arbiter: section 1 either carries the
 Record observed today — one floor item past threshold, 86 accounted —
 or the coverage gate has something to tell us.
+
+## 2026-08-07 — the evidence push, and what it was hiding
+
+Started as a routine health check. The overnight EOD had succeeded:
+digest 2026-08-06 rendered, validated, composed, frozen, live on
+fapd.info since 04:20Z, collectors clean, budgets at 45% (govinfo) and
+38% (agency). One thing was wrong — the evidence commit was not on
+GitHub.
+
+It was on the box. `36ae3b9`, 168 files, rejected with `! [rejected]
+main -> main (fetch first)`. The backend's `.git` is an rsynced snapshot
+baked into the image, so it never fetches; HEAD sat at `50095fc` while
+origin had moved to `f9dd68c` after the evening's deploy. Every push
+since had been a non-fast-forward.
+
+F-019 had already written this down on 2026-08-05. It was hand-fixed and
+left open, and it recurred. That is the lesson worth keeping: **a
+known-open high finding with a hand-fix and no durable alarm is a
+scheduled recurrence.**
+
+Three things made it worse than a failed push. It was silent — the
+result went to `last_result`, the field CLAUDE.md §9 already names as
+the wrong home for a durable fact, so the `eod` row read
+`finalize_attempts=0`, a clean success by every measure the system kept.
+It could not self-heal — `eod_due()` returns None once `finalized_date`
+is set, so the next attempt was the *next day's* EOD, which would fail
+identically, forever. And `/app` is the image, not a volume: `digests/`,
+`provenance/` and `.git` were in the container's writable layer, so any
+rebuild would have destroyed the day — including
+`insight-2026-08-06.md`, which is LLM-written and would not come back
+the same. Four independent safeguards would each have caught this alone.
+None existed.
+
+Plan written as six phase docs, then executed. P0 recovered the commit
+in-container (backup branch + host copy, fetch, rebase, push) —
+deliberately in-container so it kept the `fapd-pipeline` authorship and
+rehearsed the permanent fix. P1 made `evidence-commit.sh` fetch and
+rebase before pushing, and verify HEAD == origin/main before claiming
+success. P2 gave the push three durable columns beside the finalize
+ladder, a loud error naming the real consequence, and a bounded retry.
+P3 made `digests/` and `provenance/` volumes. P4 brought box coordinates
+into the project behind a gitignore and a guard test. P5 is this and the
+runbooks.
+
+Two mistakes of mine, both instructive. The P0 script wrote its host
+backup to `/opt/fapd/backup/` — inside the rsync `--delete` target — and
+aborted the next deploy on a permission error. No damage, but a backup
+must not live where something else is authoritative. And
+`_record_evidence_push` was written as an UPDATE when the `eod` row does
+not exist yet on the first finalize, so the first failure recorded
+nowhere: the exact silence the change exists to remove, reintroduced
+inside its own fix. The tests caught it.
+
+Separately, the operator noticed the live listing showing dozens of rows
+titled `CREC-2026-08-06`. `parsers/crec.py::_clean_title` returns None
+for every CREC granule — each `<title>` in the GPO ZIP is byte-identical
+issue boilerplate — and `_today_item_row` then fell through to
+`package_id`, which for CREC is the whole day's issue. 155 items, one
+label. The headings were never missing: `granules.title` had all 458,
+and `report.py` section 1 has read them since the beginning, so the two
+surfaces had quietly disagreed about what a document is called.
+Deploying the fix immediately exposed a latent bug beneath it —
+`_display_title` uppercases the first *character*, so `"SAM"` became
+`"sam"` and `O'ROURKE` became `O'rourke`. Extensions of Remarks are
+almost entirely tributes to named people. Fixed in `report.py`, where
+both surfaces get it.
+
+Also today: `/today`'s model summaries are signed **FAPD-AI** rather
+than "model summary", with both labels explained in the page's own prose
+— a brand name alone is not a disclosure, and GUIDE §2's obligation is
+that machine-generated prose does not hide its authorship.

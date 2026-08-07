@@ -3,9 +3,17 @@
 *Never writes anything. Anything that would — restarts, deploys, config
 flips — lives behind the authorization gate in
 [AGENT-VPS-SERVICING-GUIDE.md](AGENT-VPS-SERVICING-GUIDE.md) §4.
-Last reviewed: 2026-08-02.*
+Last reviewed: 2026-08-07.*
 
-## Local checks (work today, on the operator machine)
+## Local checks (the operator machine)
+
+**Read this first: on a machine that does not run the pipeline, this
+block describes a development database, not production.** Checked
+2026-08-07: the operator machine's `fapd.db` had no collector activity
+since 2026-07-30 and `llm_ledger.db` had not been written since
+2026-07-30, while production ran normally on the box. Token spend by
+purpose and backend is currently auditable **only** on the VPS. Treat a
+green local block as evidence about your laptop.
 
 ```sh
 # Digest freshness — newest rendered day and newest complete day
@@ -35,21 +43,62 @@ sqlite3 -readonly data/fapd.db "SELECT worker, last_ok_at, consecutive_errors
   FROM collector_state ORDER BY worker"
 ```
 
-## VPS checks (read-only; access facts in the private dossier)
+## VPS checks (read-only)
+
+Coordinates come from `deploy/vps/deploy.env` (gitignored — copy
+`deploy.env.example`, `chmod 0600`). `vps-ssh.sh` resolves them, so no
+command below carries a host. Network egress may need the tool sandbox
+disabled.
 
 ```sh
 curl -sI https://fapd.info | head -1                 # HTTP/2 200
-ssh <box> 'sudo docker ps --format "{{.Names}}\t{{.Status}}" | grep fapd'
-ssh <box> 'sudo docker inspect fapd-web --format "{{json .NetworkSettings.Networks}}"'
+
+deploy/vps/scripts/vps-ssh.sh 'sudo docker ps --format "{{.Names}}\t{{.Status}}" | grep fapd'
+deploy/vps/scripts/vps-ssh.sh 'sudo docker inspect fapd-web --format "{{json .NetworkSettings.Networks}}"'
 #   ^ exactly fapd_edge, nothing else
-ssh <box> 'sudo certbot certificates 2>/dev/null | grep -A3 fapd.info'
+deploy/vps/scripts/vps-ssh.sh 'sudo certbot certificates 2>/dev/null | grep -A3 fapd.info'
 ```
+
+### Did the evidence reach the repository?
+
+**A digest that is live on the site but absent from `origin/main` is a
+finding, not a pass.** Those are two separate gates and they fail
+separately: on 2026-08-07 the digest rendered, validated and served for
+thirteen hours while its evidence commit sat rejected in the container,
+and the `eod` row read a clean success throughout (F-021).
+
+```sh
+# 0 = everything published. >0 = a commit is stranded in the container.
+deploy/vps/scripts/vps-ssh.sh 'sudo docker exec fapd-backend sh -lc \
+  "cd /app && export GIT_SSH_COMMAND=\"ssh -i /app/secrets/deploy_key \
+   -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new\" \
+   && git fetch -q origin main && git rev-list --count origin/main..HEAD"'
+
+# The durable state: pushed_at recent, error NULL, attempts 0.
+deploy/vps/scripts/vps-ssh.sh 'sudo docker exec fapd-backend python -c "
+import sqlite3
+c = sqlite3.connect(\"file:/app/data/fapd.db?mode=ro\", uri=True)
+c.row_factory = sqlite3.Row
+r = c.execute(\"SELECT * FROM collector_state WHERE worker=%s\" % repr(\"eod\")).fetchone()
+print({k: r[k] for k in (\"finalized_date\", \"evidence_pushed_at\",
+                         \"evidence_push_error\", \"evidence_push_attempts\")})"'
+```
+
+`accept-new` is not optional in that first command: a freshly recreated
+container has an empty `known_hosts`, and a bare fetch fails `Host key
+verification failed`, which reads like a credential fault and is not.
+
+A non-NULL `evidence_push_error` with `evidence_push_attempts` at
+`config.EVIDENCE_PUSH_MAX_ATTEMPTS` means the ladder has halted: the day
+is a disclosed gap and will not retry. Fix the cause, then run
+`deploy/vps/scripts/evidence-commit.sh` in the container.
 
 ## Cadence
 
 | When | What | Why |
 |---|---|---|
 | Daily / casual | local checks block | freshness, budget, spend anomalies |
+| Daily | the evidence-push check | a stranded commit is invisible from the public site |
 | **After every deploy** | VPS block, immediately **and again ~5 min later** | containers came back clean, no error surge |
 | Weekly | CVE sweep ([AGENT-CVE-GUIDE.md](AGENT-CVE-GUIDE.md)) | dependency/base-image drift |
 | TLS <30 days to expiry | `certbot renew --dry-run` (on box) | catch hook breakage before the real renewal |

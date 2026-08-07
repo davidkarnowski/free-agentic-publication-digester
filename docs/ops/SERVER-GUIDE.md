@@ -1,17 +1,28 @@
 # FAPD server dossier (pointer + public-safe facts)
 
-*Last reviewed: 2026-08-05 (read-only health check: containers, networks,
-certs, evidence push, firewall, and public surface all re-verified on the
-box — see the review table).*
+*Last reviewed: 2026-08-07 (evidence-push incident F-021: the stranded
+commit recovered, the cause fixed, connection facts brought into the
+project. Containers, networks and the public surface re-verified the same
+day; certs and firewall last checked 2026-08-05 — see the review table).*
 
-> **The full dossier is private.** This repository is headed for public
-> release, so access details (host, port, user, key path, box quirks)
-> live in the operator's **private** server guide in the Spiralyst tree
-> — the FAPD stack cohabits that project's VPS. Agents: read that guide
-> for connection facts; follow
-> [AGENT-VPS-SERVICING-GUIDE.md](AGENT-VPS-SERVICING-GUIDE.md) §0–§1
-> for conduct. Nothing in this file is sufficient to reach the box, by
-> design.
+> **Connection facts live in the project, uncommitted (2026-08-07).**
+> Copy `deploy/vps/deploy.env.example` to `deploy/vps/deploy.env`, fill
+> it in, `chmod 0600`. It is gitignored, excluded from both rsync lists
+> so it cannot bake into a container image, and pinned by
+> `tests/test_deploy_secrets.py`. Every read-only check in
+> [OPS-GUIDE.md](OPS-GUIDE.md) then runs through
+> `deploy/vps/scripts/vps-ssh.sh '<cmd>'`, which carries no host — so an
+> agent never handles coordinates and never needs to leave this
+> repository. Before 2026-08-07 the only source was the operator's
+> private guide in a sibling project tree, which meant the VPS half of
+> `/fapd-health` could not run from here at all.
+>
+> **Box *quirks* remain private** — the cohabitation dossier, fail2ban
+> specifics, and anything about the other project on the box stay in the
+> operator's private tree. This file carries only what is safe to
+> publish. Follow
+> [AGENT-VPS-SERVICING-GUIDE.md](AGENT-VPS-SERVICING-GUIDE.md) §0–§1 for
+> conduct: convenient access does not loosen the authorization gate.
 
 ## Public-safe facts
 
@@ -41,6 +52,9 @@ box — see the review table).*
 
 | Item | Last verified |
 |---|---|
+| **Evidence push repaired** — silently failing since the 2026-08-06 deploy; the stranded commit recovered and the cause fixed (F-021, plan P0–P3) | 2026-08-07 |
+| Connection facts reachable from this repo (`deploy.env` + `vps-ssh.sh`) | 2026-08-07 |
+| Containers healthy, `fapd-web` on exactly `fapd_edge`, site serving | 2026-08-07 |
 | Backend deployed; segmentation re-verified; real site serving | 2026-08-05 |
 | Evidence push **live over the SSH deploy key** (OB-11 landed; the earlier "inert by HTTPS remote" row described a state that ended 2026-07-30 — corrected 2026-08-05 after observing `1459dd6` reach origin) | 2026-08-05 |
 | Full digest site serving over HTTPS, both hostnames | 2026-08-05 |

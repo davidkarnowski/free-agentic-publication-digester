@@ -161,6 +161,28 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   failing-finalizer hard stop is the `finalize_target`/`finalize_attempts`
   ladder, and nothing load-bearing reads `last_result`. Never route a
   new durable fact through it.
+- **`evidence-commit.sh` fetches and rebases before it pushes, on
+  purpose** — the backend's `.git` is an rsynced snapshot baked by
+  `Dockerfile.backend`, so its `origin/main` ref freezes at deploy time
+  and never moves. Every operator commit made *after* a deploy turns the
+  nightly push into a non-fast-forward: F-019 recorded this on
+  2026-08-05, was hand-fixed and left open, and it duly ate the
+  2026-08-06 evidence commit. `--autostash` is equally load-bearing —
+  `RenderWorker._refresh_health` rewrites `site/sources*.html` on a
+  clock, so the tree is reliably dirty. Do not "simplify" either away.
+- **A failed evidence push is durable, loud, and retried on a bounded
+  ladder** (`evidence_pushed_at` / `evidence_push_error` /
+  `evidence_push_attempts`). **The digest being live is NOT evidence
+  that it was published to the repository** — two gates, failing
+  separately. `_record_finalized` is deliberately unconditional on push
+  success: the day IS finalized, and re-finalizing would re-render and
+  re-spend tokens for a day already paid for.
+- **`/app/digests` and `/app/provenance` are volumes; `/app/.git` is
+  not** — the asymmetry is the design. Once the files are durable a lost
+  `.git` is survivable: the next evidence commit re-stages the
+  survivors. Disclosed cost (OB-19): a volume seeds from the image only
+  when empty, so a *retired* digest must be deleted from the volume
+  explicitly — the F-009 class.
 - **`scripts/digest.py` imports the analysis layer lazily** — report-only
   runs must work even if analysis modules break.
 - **`LLMClient._ensure_backend_column`** does an in-place ALTER — the
@@ -257,6 +279,7 @@ live in `.claude/agents/fapd-*.md` (tracked).
 | Continuous ingestion | `src/fapd/collect.py`, `docs/continuous-ingestion.md` |
 | VPS / deploy | `deploy/vps/README.md`, `docs/ops/` |
 | Local pre-deploy testing | `deploy/dev/README.md` (prod image + VPS data seed) |
+| VPS access (read-only checks) | `deploy/vps/scripts/vps-ssh.sh` + gitignored `deploy/vps/deploy.env` |
 | Section-agent instructions | `docs/agents/` (§11) |
 
 ## 13. Posture
@@ -367,3 +390,21 @@ live in `.claude/agents/fapd-*.md` (tracked).
   cause this resolves, data-verified: every auto-frozen digest had an
   empty §1 while fully-paid-for CREC summaries sat unpublished
   (F-013).
+- **2026-08-07** — **The evidence push is a gate of its own** (F-019
+  recurrence + F-021). A digest that renders, validates and serves is not
+  thereby published: the 2026-08-06 commit was rejected as a
+  non-fast-forward and the only trace was `last_result`, so the `eod` row
+  read a clean success while the repository sat a day behind the live
+  site — thirteen hours, unnoticed. Fixed in four parts: fetch-and-rebase
+  in `evidence-commit.sh`, durable state with a bounded retry, `digests/`
+  + `provenance/` as volumes (the writable layer was one
+  `docker compose build` away from destroying the day), and the check
+  written into OPS-GUIDE and `/fapd-health`. Standing lesson: **a
+  known-open high finding with a hand-fix and no durable alarm is a
+  scheduled recurrence.** Same day: box coordinates moved into the
+  project as a gitignored `deploy/vps/deploy.env` behind
+  `tests/test_deploy_secrets.py`, so the VPS half of the health check
+  runs from this repo instead of a sibling tree; `/today`'s model
+  summaries are signed **FAPD-AI** (operator), with both labels explained
+  in the page's own prose so the label stays a disclosure and not just
+  branding; and CREC listings got their titles back (F-022).

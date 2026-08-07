@@ -56,12 +56,21 @@ g show --stat --format="" HEAD | grep -q 'digests/2026-08-06.md' \
 [ ${#FAILURES[@]} -eq 0 ] || { echo "FAILURE: ${FAILURES[*]}"; exit 1; }
 echo "  ok — HEAD $HEAD_SHA, 1 commit ahead, remote reachable"
 
+# CORRECTED 2026-08-07, after the fact: the script as run wrote to
+# /opt/fapd/backup/, which is INSIDE $REMOTE_DIR — the target of
+# deploy.sh's `rsync --delete`. The next deploy tried to delete the
+# root-owned backup, failed on permissions, and aborted under
+# `set -euo pipefail` before the build. No damage (containers up,
+# .env/secrets/repo intact, site serving), but a backup must never live
+# in a directory something else is authoritative over. The staged script
+# is a permanent record and was NOT edited; the directory was moved to
+# /opt/fapd-backups/ by hand. This sketch carries the corrected path.
 echo "== 2. Rollback artifacts =="
 g branch -f evidence-backup-2026-08-07 HEAD
-sudo mkdir -p /opt/fapd/backup/2026-08-07-evidence
-sudo docker cp "$C:/app/digests"          /opt/fapd/backup/2026-08-07-evidence/
-sudo docker cp "$C:/app/provenance"       /opt/fapd/backup/2026-08-07-evidence/
-echo "  ok — branch evidence-backup-2026-08-07 + host copy under /opt/fapd/backup/"
+sudo mkdir -p /opt/fapd-backups/2026-08-07-evidence
+sudo docker cp "$C:/app/digests"          /opt/fapd-backups/2026-08-07-evidence/
+sudo docker cp "$C:/app/provenance"       /opt/fapd-backups/2026-08-07-evidence/
+echo "  ok — branch evidence-backup-2026-08-07 + host copy under /opt/fapd-backups/"
 
 echo "== 3. Fetch, rebase, push =="
 g fetch origin main                     || { echo "FAILURE: fetch"; exit 1; }
