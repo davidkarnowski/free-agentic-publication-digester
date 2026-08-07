@@ -630,6 +630,93 @@ class EODWorker(Worker):
             "SELECT finalize_attempts FROM collector_state WHERE worker = 'eod'"
         ).fetchone()["finalize_attempts"]
 
+    def _record_evidence_push(self, conn, ok, error=None):
+        """Durable evidence-push state, in columns record_state never
+        writes — the finalize-marker lesson (review D5) applied one step
+        later. Success clears the ladder; failure advances it and keeps
+        the reason visible until a push succeeds."""
+        # Upsert, not UPDATE: on the very first finalize of a fresh
+        # database this runs BEFORE _record_finalized creates the row, so
+        # a bare UPDATE silently matched nothing — the exact silence this
+        # whole change exists to remove.
+        if ok:
+            conn.execute(
+                """
+                INSERT INTO collector_state (worker, evidence_pushed_at,
+                    evidence_push_error, evidence_push_attempts)
+                VALUES ('eod', ?, NULL, 0)
+                ON CONFLICT (worker) DO UPDATE SET
+                    evidence_pushed_at = excluded.evidence_pushed_at,
+                    evidence_push_error = NULL,
+                    evidence_push_attempts = 0
+                """, (utc_now_iso(),))
+        else:
+            conn.execute(
+                """
+                INSERT INTO collector_state (worker, evidence_push_error,
+                    evidence_push_attempts)
+                VALUES ('eod', ?, 1)
+                ON CONFLICT (worker) DO UPDATE SET
+                    evidence_push_error = excluded.evidence_push_error,
+                    evidence_push_attempts =
+                        collector_state.evidence_push_attempts + 1
+                """, (error,))
+        conn.commit()
+
+    def _push_evidence(self, conn, target):
+        """Run the evidence commit and record what happened. Returns True
+        on a push that reached the remote."""
+        rc = self.sup.evidence_runner()
+        pushed = rc == 0
+        self._record_evidence_push(conn, pushed,
+                                   None if pushed else f"exit {rc}")
+        if not pushed:
+            logger.error(
+                "EVIDENCE PUSH FAILED for %s (exit %s) — the digest is LIVE"
+                " on the site but the repository does not have it. The"
+                " commit is in the container's writable layer; .git is not"
+                " a volume, so a rebuild DESTROYS it. Fix the cause, then"
+                " run deploy/vps/scripts/evidence-commit.sh.", target, rc)
+        return pushed
+
+    def _retry_pending_push(self, conn, finalized):
+        """A finalized day whose evidence never reached the repository.
+
+        eod_due() returns None once finalized_date is set, so before this
+        existed the next attempt was the NEXT DAY's EOD — which failed
+        identically, forever, until a deploy (F-021). The retry is the
+        push alone: never a finalizer run, which would re-render and
+        re-spend tokens for a day already paid for."""
+        idle = {"ran": False, "finalized": finalized}
+        if not config.EVIDENCE_PUSH:
+            return idle
+        row = conn.execute(
+            "SELECT evidence_push_error, evidence_push_attempts"
+            " FROM collector_state WHERE worker = 'eod'").fetchone()
+        if not row or not row["evidence_push_error"]:
+            return idle
+        if row["evidence_push_attempts"] >= config.EVIDENCE_PUSH_MAX_ATTEMPTS:
+            # Disclosed gap, not a silent retry loop (GUIDE §2 applied to
+            # operations). Logged once at exhaustion — repeating it every
+            # idle check would bury the signal, the same reasoning
+            # eod_due uses for the finalizer halt.
+            return idle
+        logger.warning("evidence push pending for %s (attempt %d) — retrying",
+                       finalized, row["evidence_push_attempts"] + 1)
+        pushed = self._push_evidence(conn, finalized)
+        if not pushed:
+            attempts = conn.execute(
+                "SELECT evidence_push_attempts FROM collector_state"
+                " WHERE worker = 'eod'").fetchone()["evidence_push_attempts"]
+            if attempts >= config.EVIDENCE_PUSH_MAX_ATTEMPTS:
+                logger.error(
+                    "EVIDENCE PUSH HALTED for %s after %d attempts — the"
+                    " day is published on the site but NOT in the"
+                    " repository, and will not be retried. Fix the cause,"
+                    " then run deploy/vps/scripts/evidence-commit.sh.",
+                    finalized, attempts)
+        return {**idle, "pushed": pushed}
+
     def cycle(self, conn, cycle_id):
         # The durable finalized marker lives in its own column
         # (_record_finalized); the `finalized` key returned here is a
@@ -641,14 +728,14 @@ class EODWorker(Worker):
         finalized = self._last_finalized(conn)
         target = self.eod_due(conn)
         if not target:
-            return {"ran": False, "finalized": finalized}
+            return self._retry_pending_push(conn, finalized)
         logger.info("EOD finalizer firing for %s — pausing collectors", target)
         self.sup.pause_event.set()
         try:
             exit_code = self.sup.finalizer_runner(target)
             pushed = None
             if exit_code == 0 and config.EVIDENCE_PUSH:
-                pushed = self.sup.evidence_runner() == 0
+                pushed = self._push_evidence(conn, target)
             if exit_code != 0:
                 attempts = self._record_finalize_failure(conn, target)
                 if attempts >= config.EOD_MAX_FINALIZE_ATTEMPTS:

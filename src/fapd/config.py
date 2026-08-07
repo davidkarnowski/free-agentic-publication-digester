@@ -285,6 +285,17 @@ EVIDENCE_PUSH = os.environ.get("FAPD_EVIDENCE_PUSH", "") == "1"
 # ladder; operator intervention (fix, then re-run with --date) clears it.
 EOD_MAX_FINALIZE_ATTEMPTS = 3
 
+# Bounded retry for a failing evidence push (F-021, 2026-08-07), same
+# shape as the ladder above. A push failure is either transient (GitHub
+# unreachable) or structural (the box diverged from origin) — retrying on
+# the next EOD cycle heals the first in minutes, while the second needs a
+# human, so the ladder ends and says so instead of hammering the remote
+# nightly. Cheap where the finalizer ladder is expensive: this buys one
+# git push, not a full pipeline run. The digest is already rendered,
+# validated and live either way; this governs publication to the
+# repository, never the record itself.
+EVIDENCE_PUSH_MAX_ATTEMPTS = 3
+
 # Rule USCOURTS-FETCH-01 (GUIDE §3 judicial): USCOURTS delta listings carry
 # heavy lastModified churn on years-old cases (measured 7,178 of 9,401 in a
 # 3-day window). Only packages whose date_issued falls within this window

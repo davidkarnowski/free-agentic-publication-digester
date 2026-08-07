@@ -280,7 +280,15 @@ CREATE TABLE IF NOT EXISTS collector_state (
     consecutive_errors INTEGER NOT NULL DEFAULT 0,
     finalized_date     TEXT,                   -- 'eod' row only: newest finalized day
     finalize_target    TEXT,                   -- 'eod' row only: day the attempt ladder counts
-    finalize_attempts  INTEGER NOT NULL DEFAULT 0
+    finalize_attempts  INTEGER NOT NULL DEFAULT 0,
+    -- 'eod' row only: did the finalized day reach the REPOSITORY?
+    -- Finalizing and publishing to git fail separately (F-021): on
+    -- 2026-08-07 the digest served all day while the evidence commit sat
+    -- rejected, and last_result was the only trace, so the row read a
+    -- clean success. These are the durable measure.
+    evidence_pushed_at     TEXT,
+    evidence_push_error    TEXT,
+    evidence_push_attempts INTEGER NOT NULL DEFAULT 0
 );
 
 -- Summarization attempts per item (GUIDE §6 rule 14). The retry ceiling
@@ -344,6 +352,9 @@ def connect(db_path=None):
         "finalized_date": "TEXT",
         "finalize_target": "TEXT",
         "finalize_attempts": "INTEGER NOT NULL DEFAULT 0",
+        "evidence_pushed_at": "TEXT",
+        "evidence_push_error": "TEXT",
+        "evidence_push_attempts": "INTEGER NOT NULL DEFAULT 0",
     })
     # Filing axis (GUIDE §3, amended 2026-08-06). Backfill of existing
     # rows is the deliberate one-shot scripts/migrate_digest_day.py,

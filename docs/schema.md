@@ -478,9 +478,10 @@ GUIDE §3 dating rules. Indexed by `(digest_date, observed_at)`.
 
 `collector_state` — one row per collector worker (`govinfo`, `email`,
 `analyze`, `render`, `eod`, `host:<netloc>`): last cycle/ok timestamps,
-`last_result` JSON, `consecutive_errors`, and three columns only the
+`last_result` JSON, `consecutive_errors`, and six columns only the
 EOD finalizer writes — `finalized_date`, `finalize_target`,
-`finalize_attempts`. The read surface for OPS-GUIDE.md and the
+`finalize_attempts`, `evidence_pushed_at`, `evidence_push_error`,
+`evidence_push_attempts`. The read surface for OPS-GUIDE.md and the
 `/fapd-health` skill; a worker whose `consecutive_errors` grows or
 whose `last_ok_at` goes stale is a finding.
 
@@ -506,6 +507,23 @@ full pipeline runs per day forever. A new target day gets a fresh
 ladder; a success clears it. `consecutive_errors` cannot serve as this
 counter: the halt itself produces idle `ok=True` cycles, which reset
 it.
+
+`evidence_pushed_at` + `evidence_push_error` +
+`evidence_push_attempts` are the same shape one step later: whether the
+finalized day actually reached the repository. Finalizing and publishing
+to git are separate gates and fail separately — on 2026-08-07 the digest
+rendered, validated, and served all day while the evidence commit sat
+rejected in the container (F-021). The failure was recorded only in
+`last_result`, so the `eod` row read `finalize_attempts = 0`: a clean
+success by every durable measure the system kept. These columns are the
+durable measure. `evidence_pushed_at` stamps the last success;
+`evidence_push_error` holds the failing exit reason and stays non-NULL
+until a push succeeds; `evidence_push_attempts` bounds the retry at
+`config.EVIDENCE_PUSH_MAX_ATTEMPTS`, after which the gap is loudly
+disclosed rather than retried nightly against a fault that needs a
+human. `finalized_date` is deliberately written even when the push
+fails — the day IS finalized, and re-finalizing would re-render and
+re-spend tokens for a day already paid for.
 
 `source_assessments` — per-source model prose, layer one of the
 2026-08-03 source-pages plan (GUIDE §3a source surfaces): append-only

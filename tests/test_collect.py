@@ -988,3 +988,116 @@ def test_today_status_title_is_none_when_no_record_carries_one(conn):
     item = next(i for i in collect.today_status(conn, DATE)["items"]
                 if i["granule_id"] == "PgE8")
     assert item["title"] is None
+
+
+# ------------------------------------------- evidence-push durable state --
+# F-021 (2026-08-07): the push failed and nothing recorded it. The eod row
+# read finalize_attempts=0 — a clean success by every durable measure —
+# while the digest served all day and the repository never received it.
+
+
+def _eod_row(conn):
+    return conn.execute(
+        "SELECT * FROM collector_state WHERE worker = 'eod'").fetchone()
+
+
+def _push_worker(tmp_path, monkeypatch, *, push_rc):
+    """A worker whose finalizer succeeds and whose evidence push returns
+    push_rc, with FAPD_EVIDENCE_PUSH on."""
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    sup.finalizer_runner = lambda date=None: 0
+    sup.evidence_runner = lambda: push_rc
+    monkeypatch.setattr(config, "EVIDENCE_PUSH", True)
+    return collect.EODWorker(sup, 10), conn_factory()
+
+
+def test_a_failed_evidence_push_is_recorded_durably(tmp_path, monkeypatch):
+    worker, conn = _push_worker(tmp_path, monkeypatch, push_rc=4)
+    worker.cycle(conn, "c1")
+
+    row = _eod_row(conn)
+    assert row["evidence_push_error"] == "exit 4"   # the rebase-conflict code
+    assert row["evidence_push_attempts"] == 1
+    assert row["evidence_pushed_at"] is None
+    conn.close()
+
+
+def test_the_day_is_still_finalized_when_the_push_fails(tmp_path, monkeypatch):
+    """Finalizing and publishing to the repository are separate gates. The
+    digest is rendered, validated and live — re-finalizing would re-render
+    and re-spend tokens for a day already paid for."""
+    worker, conn = _push_worker(tmp_path, monkeypatch, push_rc=5)
+    worker.cycle(conn, "c1")
+
+    row = _eod_row(conn)
+    assert row["finalized_date"] is not None
+    assert row["finalize_attempts"] == 0
+    assert row["evidence_push_error"] == "exit 5"
+    conn.close()
+
+
+def test_a_pending_push_retries_on_the_next_cycle(tmp_path, monkeypatch):
+    """eod_due returns None once the day is finalized, so before this the
+    next attempt was the NEXT DAY's EOD — which failed identically."""
+    worker, conn = _push_worker(tmp_path, monkeypatch, push_rc=5)
+    worker.cycle(conn, "c1")
+    assert _eod_row(conn)["evidence_push_attempts"] == 1
+
+    calls = []
+    worker.sup.evidence_runner = lambda: calls.append("push") or 0
+
+    def _must_not_finalize(date=None):
+        raise AssertionError("the retry must push, never re-run the finalizer")
+
+    worker.sup.finalizer_runner = _must_not_finalize
+    result = worker.cycle(conn, "c2")
+
+    assert calls == ["push"]
+    assert result["pushed"] is True
+    row = _eod_row(conn)
+    assert row["evidence_push_error"] is None
+    assert row["evidence_push_attempts"] == 0
+    assert row["evidence_pushed_at"] is not None
+    conn.close()
+
+
+def test_the_evidence_retry_ladder_stops_and_stays_disclosed(tmp_path,
+                                                             monkeypatch):
+    worker, conn = _push_worker(tmp_path, monkeypatch, push_rc=5)
+    worker.cycle(conn, "c1")                    # attempt 1, on the finalize
+    for i in range(6):
+        worker.cycle(conn, f"r{i}")
+
+    row = _eod_row(conn)
+    assert row["evidence_push_attempts"] == config.EVIDENCE_PUSH_MAX_ATTEMPTS
+    # a halt discloses; it does not clear the reason
+    assert row["evidence_push_error"] == "exit 5"
+    conn.close()
+
+
+def test_a_clean_push_leaves_no_error_behind(tmp_path, monkeypatch):
+    worker, conn = _push_worker(tmp_path, monkeypatch, push_rc=0)
+    worker.cycle(conn, "c1")
+
+    row = _eod_row(conn)
+    assert row["evidence_pushed_at"] is not None
+    assert row["evidence_push_error"] is None
+    assert row["evidence_push_attempts"] == 0
+    conn.close()
+
+
+def test_the_retry_is_not_a_back_door_when_pushes_are_disabled(tmp_path,
+                                                               monkeypatch):
+    """The dev stack runs with FAPD_EVIDENCE_PUSH unset."""
+    worker, conn = _push_worker(tmp_path, monkeypatch, push_rc=5)
+    worker.cycle(conn, "c1")
+
+    monkeypatch.setattr(config, "EVIDENCE_PUSH", False)
+
+    def _must_not_push():
+        raise AssertionError("must not push with evidence pushes disabled")
+
+    worker.sup.evidence_runner = _must_not_push
+    assert worker.cycle(conn, "c2") == {
+        "ran": False, "finalized": _eod_row(conn)["finalized_date"]}
+    conn.close()
