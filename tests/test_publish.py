@@ -2649,3 +2649,76 @@ def test_day_view_applies_the_same_corroboration_merge(conn, tmp_path,
     page = (tmp_path / "day" / f"{DATE}.html").read_text()
     assert page.count("Settlement Announced") == 1
     assert "corroborated: also received via email bulletin" in page
+
+
+# ------------------------------------------ CREC titles on the live page --
+
+
+def _seed_crec_titleless(conn, granule_id, granule_title):
+    """The production shape (F-022): extracted_texts.title NULL for the
+    whole CREC collection, the real heading only in granules.title."""
+    from conftest import seed_item
+
+    seed_item(conn, "CREC-2026-07-23", granule_id, "CREC", "EXTENSIONS",
+              "Mr. Speaker, I rise today to honor a remarkable public servant.")
+    conn.execute("UPDATE extracted_texts SET title = NULL"
+                 " WHERE package_id = 'CREC-2026-07-23' AND granule_id = ?",
+                 (granule_id,))
+    conn.execute(
+        "INSERT OR REPLACE INTO granules"
+        " (package_id, granule_id, granule_class, title, first_seen_at)"
+        " VALUES ('CREC-2026-07-23', ?, 'EXTENSIONS', ?, 'x')",
+        (granule_id, granule_title))
+    conn.commit()
+
+
+def test_today_never_labels_a_granule_with_its_package_id(conn, tmp_path):
+    """The bug this fixes: package_id for CREC is the whole day's issue,
+    so every granule collapsed to one label — 155 rows all reading
+    "CREC-2026-08-06" on 2026-08-07."""
+    from conftest import DATE
+
+    from fapd import collect
+
+    _seed_today(conn)
+    _seed_crec_titleless(conn, "PgE9",
+                         "HONORING THE SERVICE OF SAMUEL DOUGHERTY")
+    collect.journal_new(conn, "govinfo", "c1")
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+
+    # the heading is shown, re-cased out of the source's ALL CAPS
+    assert "Honoring the Service of Samuel Dougherty" in page
+    # and the raw shouting form never reaches the reader
+    assert "HONORING THE SERVICE OF SAMUEL DOUGHERTY" not in page
+    # the package_id still appears as a citation, but never as a title
+    assert 'CREC-2026-07-23</a>' not in page
+
+
+def test_today_title_falls_back_to_the_opening_line_then_granule_id(conn,
+                                                                    tmp_path):
+    """No stored title anywhere: the first line of the official text is a
+    better label than an identifier, and the identifier of last resort is
+    the granule, not the issue."""
+    from conftest import DATE, seed_item
+
+    from fapd import collect
+    from fapd import publish as _publish
+
+    seed_item(conn, "CREC-2026-07-23", "PgE7", "CREC", "EXTENSIONS",
+              "RECOGNIZING A CENTENARIAN\nMr. Speaker, I rise today.")
+    conn.execute("UPDATE extracted_texts SET title = NULL"
+                 " WHERE granule_id = 'PgE7'")
+    conn.commit()
+    collect.journal_new(conn, "govinfo", "c1")
+    item = next(i for i in collect.today_status(conn, DATE)["items"]
+                if i["granule_id"] == "PgE7")
+
+    assert _publish._today_display_title(item) == "Recognizing a Centenarian"
+
+    item["opening"] = None
+    assert _publish._today_display_title(item) == "PgE7"
+
+    # whole-package documents (BILLS) legitimately end at the package id
+    item["granule_id"] = ""
+    assert _publish._today_display_title(item) == "CREC-2026-07-23"

@@ -234,7 +234,21 @@ def today_status(conn, date):
     items = [dict(r) for r in conn.execute(
         """
         SELECT j.observed_at, j.source_class, j.package_id, j.granule_id,
-               j.collection, j.source_id, e.doc_type, e.title, e.agency,
+               j.collection, j.source_id, e.doc_type,
+               -- The document's official title, from whichever record
+               -- carries it. CREC needs the second arm: every granule's
+               -- <title> in the GPO ZIP is the ISSUE's boilerplate
+               -- ("Congressional Record, Volume 172 Issue 124 (...)"),
+               -- identical across the whole issue, so
+               -- parsers.crec._clean_title strips it to nothing and
+               -- returns None for the entire collection — 1,836 rows on
+               -- 2026-08-07, the only collection with any missing. The
+               -- real heading comes from the govinfo granules API and
+               -- has been stored in granules.title all along; report.py
+               -- section 1 has read it since the beginning. This is the
+               -- live page catching up (F-022).
+               COALESCE(NULLIF(e.title, ''), NULLIF(g.title, '')) AS title,
+               e.agency,
                substr(e.text, 1, 240) AS opening,
                json_extract(e.metadata, '$.url') AS url,
                json_extract(e.metadata, '$.channel') AS channel,
@@ -245,6 +259,7 @@ def today_status(conn, date):
                s.inclusion_rule
         FROM item_journal j
         LEFT JOIN extracted_texts e USING (package_id, granule_id)
+        LEFT JOIN granules g USING (package_id, granule_id)
         LEFT JOIN summaries s ON s.package_id = j.package_id
              AND s.granule_id = j.granule_id AND s.prompt_version = ?
         WHERE j.digest_date = ? AND j.event = 'ingested'

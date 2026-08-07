@@ -2879,8 +2879,36 @@ def _et_hour_label(utc_stamp):
     return f"{hour} {'AM' if when.hour < 12 else 'PM'} Eastern"
 
 
+def _today_display_title(item):
+    """The reader-facing label for one listing row.
+
+    Deliberately the digest's chain and the digest's helpers
+    (report._crec_item_lines): the live page and the dated digest must
+    never disagree about what a document is called. _display_title
+    re-cases ALL-CAPS source headings — the Congressional Record's
+    Extensions titles arrive shouting ("HONORING THE SERVICE OF ...") —
+    and is the same normalization the lexicon gate reasons about
+    (report.py, banned-term forms).
+
+    package_id is the LAST resort and only honest for whole-package
+    documents, where the journal's granule_id is '' and the package
+    genuinely is the document (BILLS). For a granule-level collection it
+    is the whole day's issue, identical on every row: until 2026-08-07
+    this function's predecessor fell straight to it, and a day's entire
+    Congressional Record listed as 155 rows all titled "CREC-2026-08-06"
+    (F-022).
+    """
+    from .report import _display_title, _first_nonempty_line, _truncate
+
+    raw = ((item["title"] or "").strip()
+           or _first_nonempty_line(item.get("opening"))
+           or item["granule_id"]
+           or item["package_id"])
+    return _truncate(_display_title(raw))
+
+
 def _today_item_row(item, filterable=()):
-    title = (item["title"] or "").strip() or item["package_id"]
+    title = _today_display_title(item)
     gran = item["granule_id"]
     cite = item["package_id"] + (f" / {gran}" if gran else "")
     stamp = item["observed_at"] or ""

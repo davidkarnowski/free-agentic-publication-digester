@@ -922,3 +922,69 @@ def test_presact_items_are_journaled_as_agency_class(tmp_path):
     assert row["digest_date"] == "2026-08-06"
     # And the govinfo pass must NOT claim it a second time.
     assert collect.journal_new(conn, "govinfo", "cycle-t2") == 0
+
+
+# ------------------------------------------- CREC titles on the live page --
+# F-022 (2026-08-07): every CREC granule's <title> in the GPO ZIP is the
+# ISSUE's own boilerplate, so parsers.crec._clean_title returns None for
+# the whole collection and extracted_texts.title is NULL for every row.
+# today_status selected only e.title and never joined granules, so the
+# live page fell through to package_id — which for CREC is the issue,
+# identical across the day: 155 items all reading "CREC-2026-08-06".
+
+
+def _seed_crec_without_extracted_title(conn, granule_id, granule_title):
+    """Reproduce the production shape: extracted title NULL, granules
+    row carrying the real heading from the govinfo granules API."""
+    seed_item(conn, "CREC-2026-07-23", granule_id, "CREC", "EXTENSIONS")
+    conn.execute(
+        "UPDATE extracted_texts SET title = NULL"
+        " WHERE package_id = 'CREC-2026-07-23' AND granule_id = ?",
+        (granule_id,))
+    conn.execute(
+        "INSERT OR REPLACE INTO granules"
+        " (package_id, granule_id, granule_class, title, first_seen_at)"
+        " VALUES ('CREC-2026-07-23', ?, 'EXTENSIONS', ?, '2026-07-24T00:00:00Z')",
+        (granule_id, granule_title))
+    conn.commit()
+
+
+def test_today_status_falls_back_to_the_granule_title(conn):
+    _seed_crec_without_extracted_title(
+        conn, "PgE9", "HONORING THE SERVICE OF SAMUEL DOUGHERTY")
+    collect.journal_new(conn, "govinfo", "c1")
+
+    item = next(i for i in collect.today_status(conn, DATE)["items"]
+                if i["granule_id"] == "PgE9")
+    assert item["title"] == "HONORING THE SERVICE OF SAMUEL DOUGHERTY"
+
+
+def test_today_status_prefers_the_extracted_title_when_there_is_one(conn):
+    """granules.title is the fallback, not an override — collections that
+    parse a title keep theirs."""
+    seed_item(conn, "FR-2026-07-23", "2026-10001", "FR", "RULE")
+    conn.execute(
+        "INSERT OR REPLACE INTO granules"
+        " (package_id, granule_id, granule_class, title, first_seen_at)"
+        " VALUES ('FR-2026-07-23', '2026-10001', 'RULE', 'granule side',"
+        " '2026-07-24T00:00:00Z')")
+    conn.commit()
+    collect.journal_new(conn, "govinfo", "c1")
+
+    item = next(i for i in collect.today_status(conn, DATE)["items"]
+                if i["granule_id"] == "2026-10001")
+    assert item["title"] == "title of 2026-10001"
+
+
+def test_today_status_title_is_none_when_no_record_carries_one(conn):
+    """Honest null rather than a fabricated label — the presentation
+    layer decides what to show, and today.json stays truthful."""
+    seed_item(conn, "CREC-2026-07-23", "PgE8", "CREC", "EXTENSIONS")
+    conn.execute("UPDATE extracted_texts SET title = NULL"
+                 " WHERE granule_id = 'PgE8'")
+    conn.commit()
+    collect.journal_new(conn, "govinfo", "c1")
+
+    item = next(i for i in collect.today_status(conn, DATE)["items"]
+                if i["granule_id"] == "PgE8")
+    assert item["title"] is None
