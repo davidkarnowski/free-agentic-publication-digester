@@ -23,9 +23,9 @@ is always current; it derives them from the registry at build time.)
 
 - **Live site:** https://fapd.info — served from a Docker stack on a
   VPS; GitHub holds the repository, CI, and the integrity record.
-- **Source registry:** 127 sources — 42 active (16 web feeds, 15 email
+- **Source registry:** 129 sources — 45 active (19 web feeds, 15 email
   bulletins, 5 govinfo collections, 4 listing-page sources, 1 chamber
-  XML index, 1 API source), 63 planned, 20 recorded unavailable,
+  XML index, 1 API source), 62 planned, 20 recorded unavailable,
   2 evaluated and excluded. Every entry now has its own page at
   `/sources/<id>.html` — statistics, method, health history, and
   labeled model-written orientation.
@@ -34,7 +34,7 @@ is always current; it derives them from the registry at build time.)
   begins 2026-07-27** (two development-era digests were retired on
   2026-08-03; they remain in git history). Each finished day also has
   a frozen observed listing at `/day/<date>.html`.
-- **Test suite:** 592 tests (verified by collection 2026-08-03).
+- **Test suite:** 665 tests (verified by collection 2026-08-07).
 
 ---
 
@@ -123,7 +123,7 @@ below is enforced in code, not by operator discipline.
 
 [`sources/registry.yaml`](sources/registry.yaml) (rendered as
 [SOURCES.md](SOURCES.md)) records every federal source ingested, planned,
-evaluated-and-excluded, or found unavailable — currently 127 sources
+evaluated-and-excluded, or found unavailable — currently 129 sources
 across a tiered universe, so "how comprehensive is coverage?" is a
 measurement, not a claim. Honest statuses matter: a source that blocks
 our honestly-identified client is recorded `unavailable` with the

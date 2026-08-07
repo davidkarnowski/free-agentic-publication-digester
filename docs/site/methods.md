@@ -234,11 +234,11 @@ Everything model-derived in a digest is labeled in place.
 consistent skeleton: a metadata header (digest date, data date range,
 pipeline version, per-collection sync watermarks); a table of contents;
 the Day in Review (present when the end-of-day composition ran; omitted,
-never fabricated, when it did not); numbered sections 1–8
+never fabricated, when it did not); numbered sections 1–9
 (Congressional Floor Activity; Legislation; Federal Register; Enacted
 Laws; Judicial Activity; Agency Announcements; Recorded Votes; Bill
-Actions — section numbers are append-only, so a section keeps its
-number forever); an
+Actions; Presidential Actions — section numbers are append-only, so a
+section keeps its number forever); an
 italicized quick-read and a `Tags:` line at the top of major sections;
 a Terms Used Today glossary; the Coverage Statement; and a Methodology
 footer restating the selection and labeling rules. Every item carries

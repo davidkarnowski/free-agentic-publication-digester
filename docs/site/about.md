@@ -119,7 +119,7 @@ code, not by operator discipline:
   than 500 govinfo requests in any hour — half of what the publisher's
   own documentation permits per key.
 - **Budgeted:** hard daily request caps per source class (6,000 for
-  govinfo, bounded by the hourly ceiling above; 1,500 for agency sites;
+  govinfo, bounded by the hourly ceiling above; 3,000 for agency sites;
   100 for archive corroboration); the client refuses to exceed them,
   and the caps are counted from the request log itself so a restart
   cannot reset them.

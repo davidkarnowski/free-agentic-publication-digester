@@ -132,7 +132,8 @@ reporting component must comply.
   order sections were added, not a hierarchy of importance; nothing in the
   digest ranks its own contents. **Recorded Votes** is the first section
   added under this rule; **Bill Actions** (§8, added the same day) is the
-  second.
+  second; **Presidential Actions** (§9, added 2026-08-06, ratified
+  2026-08-07) is the third.
 - **Separate the layers.** Raw data → extracted facts → summaries are stored
   as distinct artifacts. The summary layer can be regenerated or audited
   without re-fetching anything.
@@ -252,6 +253,12 @@ below this table — `VOTES` and `BILLACTIONS`. `CHRG`, `CRPT`, and
 `DCPD` remain unstarted. The code constant is the inventory; this
 table records why each collection is in scope.)*
 
+*(Amended 2026-08-07: `AGENCYPR` (§3 agency newsrooms) and `PRESACT`
+(below) are also running collections. Neither is a govinfo sync — they
+arrive through the agency poll loop — which is why neither appears in
+`config.COLLECTIONS`, and it is why both were missing from this status
+note until a doc audit found the gap.)*
+
 ### Recorded votes (added 2026-07-31)
 
 | Code | Collection | Why |
@@ -320,6 +327,39 @@ in update-date order. Ingestion reads one page of the most recently
 updated records per poll and bounds itself to
 `config.INDEX_LOOKBACK_DAYS` by action date; anything older is outside
 the window, not excluded by judgement.
+
+### Presidential actions (added 2026-08-06, ratified 2026-08-07)
+
+| Code | Collection | Why |
+|------|-----------|-----|
+| `PRESACT` | Executive orders, proclamations, memoranda, determinations and other presidential actions as the White House publishes them | What the President actually signed, on the day it was issued rather than weeks later |
+
+The executive branch's own instruments were reaching the digest only by
+the slow road. `FR` carries presidential documents once the Office of the
+Federal Register has compiled them, and `DCPD` — still unstarted — is a
+compilation published on a lag behind the events themselves. Neither is
+same-day. The White House publishes its own actions as feeds, so the
+instrument is available on the day it is signed, and a digest that claims
+to cover all three branches should not report the executive's most
+consequential acts weeks after the fact.
+
+`PRESACT` is stored under its own collection code rather than folded into
+`AGENCYPR` for the same reason `VOTES` is: a signed executive order is
+not agency communication. It is an instrument, and it must not enter the
+`AGENCYPR` accounting or carry that class's tagging.
+
+**Dating follows the agency rule, not the publisher rule.** These arrive
+through the agency poll loop from the White House's own feeds, so a
+release the White House dates outside the digest day is counted and not
+listed (`PRESACT-EX-01`), exactly as `AGENCYPR-EX-01` does. On the first
+day the collection ran, 54 of 60 observed actions were feed backfill —
+which is the rule working, not a gap.
+
+Selection is by existence, like recorded votes: every presidential action
+published on the day is listed, typed by instrument
+(`PRESACT-SEL-01`–`04` for executive orders, proclamations, memoranda and
+determinations, and other actions). No rule can prefer one instrument
+over another.
 
 ### Judicial branch coverage (amended 2026-07-25)
 

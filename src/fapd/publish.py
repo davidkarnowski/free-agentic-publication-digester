@@ -3685,7 +3685,7 @@ work. Check the source guide for what is ingested today.
   party-blind rule that selected it, and a citation to its official
   record — the govinfo package for the govinfo collections; the
   agency's, chamber's, or Congress.gov's own page for agency releases,
-  recorded votes, and bill actions. **For claims, cite the official
+  recorded votes, bill actions, and presidential actions. **For claims, cite the official
   source we link; cite this site for the aggregation.**
 - The Coverage Statement at the end of each digest tells you what was NOT
   summarized and under which rule — absence here is always explicit.
@@ -3864,7 +3864,7 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
         "- Official text vs model-generated text is labeled in place;",
         "  every item cites its official record (govinfo for the govinfo",
         "  collections; the publisher's own page for agency releases,",
-        "  recorded votes, and bill actions).",
+        "  recorded votes, bill actions, and presidential actions).",
         ("- Canonical Markdown + provenance manifests live in the public"
          f" repository: {REPO_URL}"),
         "- Reuse: content is CC BY 4.0 (credit 'FAPD — Free Agentic",

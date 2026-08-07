@@ -40,7 +40,7 @@ GUIDE.md §1–§2.
 | Deps | deliberately few: requests, python-dotenv, pyyaml, pypdf, pillow, markdown, protego, dkimpy, anthropic |
 | Storage | SQLite ×3: `data/fapd.db` (pipeline), `data/fetch_log.db` (every HTTP attempt), `data/llm_ledger.db` (every LLM call) |
 | Site | static HTML, no framework — `publish.py` renders it; exactly one script (the live page's local-time snippet, code-standards §2 r10) |
-| Lint/tests | ruff (line 100), pytest (500+ tests; bare `pytest` collects `tests/` only via pyproject `testpaths` — the dev stack's staged repo copy would otherwise double-collect), CI on push/PR |
+| Lint/tests | ruff (line 100), pytest (650+ tests; bare `pytest` collects `tests/` only via pyproject `testpaths` — the dev stack's staged repo copy would otherwise double-collect), CI on push/PR |
 | LLM | pluggable backends: `claude` CLI (local default) / Anthropic API (`LLM_BACKEND=api`); tier aliases resolved per backend via `config.LLM_MODELS` |
 
 ## 4. Repository layout

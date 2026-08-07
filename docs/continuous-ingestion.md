@@ -3,7 +3,8 @@
 *Adopted 2026-07-30 (GUIDE §3/§4/§5/§6 amendments of the same date).
 This document is the authority for the collector architecture; the
 next-push designs (§8–§10) are complete here so those builds need no
-re-design. Last reviewed: 2026-08-02 (doc audit; §3/§5/§8/§9 corrected to code truth).*
+re-design. Last reviewed: 2026-08-07 (doc audit; §9 evidence-commit corrected to
+code truth after the F-021 repair, live-page label renamed).*
 
 ## §1 Why
 
@@ -129,9 +130,11 @@ anyway: the supervisor pauses collector workers during finalization
 `collect.today_status(conn, date)` → `site/today.html` + `today.json`:
 
 - Data contract: mechanical counts + per-item rows (title, source,
-  citation, official/model summary if present, `observed_at`), one
+  citation, official/FAPD-AI summary if present, `observed_at`), one
   chronological stream with ET hour headings (2026-08-02) — not digest
-  sections; `pending_llm` shown as "N items awaiting model summary."
+  sections; `pending_llm` shown as "N item(s) awaiting an FAPD-AI
+  summary." (label renamed from "model summary" 2026-08-07, operator;
+  the page names both labels in prose so the rename stays a disclosure)
 - The §3 dating rule applied live: items the publisher dates on another
   day split out as backfill (shared helper with report.py), counted and
   disclosed, never listed as today's news (2026-07-31 incident).
@@ -180,11 +183,18 @@ anyway: the supervisor pauses collector workers during finalization
   a bare status once erased the marker and re-fired the pipeline every
   ~20 minutes), then — only on exit 0 and only when
   `FAPD_EVIDENCE_PUSH=1` — runs the evidence commit
-  (`deploy/vps/scripts/evidence-commit.sh`: repo-root guard, stage the
-  evidence paths, ABORT unless the staged set is a SUBSET of the
-  allowlist, commit with the `fapd-pipeline` identity named on the
-  commit itself, push over the deploy key), and clears the pause in a
-  `finally`. Host needs only Docker.
+  (`deploy/vps/scripts/evidence-commit.sh`: repo-root guard, FETCH
+  origin first, stage the evidence paths, ABORT unless the staged set is
+  a SUBSET of the allowlist, commit with the `fapd-pipeline` identity
+  named on the commit itself, REBASE `--autostash` onto origin/main, push
+  over the deploy key, then VERIFY `HEAD == origin/main` before reporting
+  success), and clears the pause in a `finally`. Host needs only Docker.
+  The fetch/rebase/verify steps were added 2026-08-07 (F-019 recurrence,
+  F-021): the container's `.git` is a deploy-time snapshot that never
+  fetches, so any operator commit made after a deploy turned the nightly
+  push into a silent non-fast-forward. The push outcome is now durable in
+  `collector_state.evidence_push_*` with a bounded retry — a failure is a
+  disclosed gap, not a lost day.
 - `fapd-web` serves `fapd-site:...:ro`. `deploy.sh` carries the test
   gate, the two rsyncs (bundle + repo export via
   `deploy/common/repo-excludes.txt`), the image build, and three

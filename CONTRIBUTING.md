@@ -26,7 +26,7 @@ These are the project's identity, not tuning knobs.
   (Pipeline evidence — `digests/`, `provenance/`, `site/`, `SOURCES.md`
   — commits direct to main by design; never mix evidence and code in
   one commit.)
-- **Tests:** `uv run pytest -q` (the suite is 350+ tests and runs in
+- **Tests:** `uv run pytest -q` (the suite is 650+ tests and runs in
   seconds; no test touches the network). New behavior needs tests;
   contracts others rely on get pinned by them.
 - **Lint:** `uv run ruff check src/ scripts/ tests/` (line length 100).

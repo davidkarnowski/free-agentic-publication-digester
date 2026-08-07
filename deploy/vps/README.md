@@ -27,12 +27,25 @@ operator's private server guide — not in this public-bound repo.
   NOT on `fapd_edge`; no published ports; unreachable from the proxy,
   the web container, or the public internet. Hands the built site to
   `fapd-web` through the `fapd-site` named volume, read-only on the web
-  side — a volume, never a socket.
+  side — a volume, never a socket. Four volumes in all: `fapd-data`
+  (`/app/data`), `fapd-site` (`/app/site`), and — added 2026-08-07 —
+  `fapd-digests` (`/app/digests`) and `fapd-provenance`
+  (`/app/provenance`). The last two exist because `/app` is the IMAGE:
+  before they were mounted, a rendered digest and its manifest lived in
+  the container's writable layer, and a rebuild after a failed evidence
+  push would have destroyed a day of the record (F-021). Their cost is
+  disclosed as OB-19 — a named volume seeds from the image only when
+  empty, so a *retired* digest must be deleted from the volume by hand.
 
 ## The deploy path — `scripts/deploy.sh`, always
 
-Every deploy runs `deploy/vps/scripts/deploy.sh` (coordinates from
-`~/.fapd-deploy.env`; see `deploy.env.example`). Do not hand-roll the
+Every deploy runs `deploy/vps/scripts/deploy.sh`. Coordinates resolve
+through `scripts/_env.sh` — `$FAPD_DEPLOY_ENV`, then the in-project
+`deploy/vps/deploy.env` (gitignored, `chmod 0600`, excluded from BOTH
+rsync lists so it cannot bake into an image, pinned by
+`tests/test_deploy_secrets.py`), then `~/.fapd-deploy.env`. See
+`deploy.env.example`. Read-only box checks go through
+`scripts/vps-ssh.sh '<cmd>'`, which carries no host. Do not hand-roll the
 rsync + `up -d` — a bare `docker compose up -d` silently skips the
 backend (it sits behind `profiles: ["backend"]`), and the backend
 image cannot even build without the staged `repo/` the script creates.
@@ -54,8 +67,13 @@ What the script does, in order:
    first mount ONLY; a rebuild does not refresh it), in-container
    `publish.build_today` (the RenderWorker watches data, not code — a
    renderer change otherwise waits for the next journaled item), and
-   the origin re-flip to the SSH remote (F-008 — the laptop tree bakes
-   HTTPS; evidence pushes authenticate over the deploy key).
+   the origin re-flip to the SSH remote. That last one is now
+   belt-and-braces only: since 2026-08-07 `Dockerfile.backend` bakes the
+   SSH remote into the IMAGE (F-020). The exec writes to the running
+   container's layer, so a recreate outside a deploy silently reverted it
+   to the laptop tree's HTTPS remote (F-008) and broke evidence pushes —
+   invisibly, because the repo is public and anonymous HTTPS *fetch* keeps
+   working, so only an actual push discovers it.
 
 The EOD finalizer's automated pushes run
 `deploy/vps/scripts/evidence-commit.sh` (guard-shell: repo-root check,
