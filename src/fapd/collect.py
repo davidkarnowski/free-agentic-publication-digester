@@ -32,11 +32,25 @@ logger = logging.getLogger("fapd.collect")
 # GUIDE §3 recorded votes / bill actions) but under their own collection
 # codes, so they are agency-CLASS work — the worker and the budget — while
 # never being agency CONTENT.
+# Collections produced by the agency-class web pollers (AgencyHostWorker),
+# as opposed to the govinfo sync. Derived from the adapters themselves so
+# a new collection cannot be forgotten here: agencies.ADAPTERS is the one
+# place a COLLECTION is declared, and tests/test_collect.py asserts this
+# set matches it. Before 2026-08-06 the govinfo clause was a DENYLIST
+# ("NOT IN (...)"), which meant a newly added collection silently fell
+# into whichever class polled first — PRESACT was ingested 60 times and
+# journaled zero times, so the White House's executive orders reached
+# the corpus and never reached /today, the day views, or the journal
+# accounting. A denylist cannot fail loudly; this set can.
+_AGENCY_CLASS_COLLECTIONS = ("AGENCYPR", "VOTES", "BILLACTIONS", "PRESACT")
+_AGENCY_IN = ", ".join(f"'{c}'" for c in _AGENCY_CLASS_COLLECTIONS)
+# Only AGENCYPR carries an email channel; every other agency-class
+# collection is web-polled, so the channel test applies to it alone.
 _CLASS_WHERE = {
-    "govinfo": "e.collection NOT IN ('AGENCYPR', 'VOTES', 'BILLACTIONS')",
-    "agency": ("(e.collection IN ('VOTES', 'BILLACTIONS')"
-               " OR (e.collection = 'AGENCYPR' AND COALESCE("
-               "json_extract(e.metadata, '$.channel'), '') != 'email'))"),
+    "govinfo": f"e.collection NOT IN ({_AGENCY_IN})",
+    "agency": (f"(e.collection IN ({_AGENCY_IN})"
+               " AND COALESCE(json_extract(e.metadata, '$.channel'), '')"
+               " != 'email')"),
     "email": ("e.collection = 'AGENCYPR' AND "
               "json_extract(e.metadata, '$.channel') = 'email'"),
 }

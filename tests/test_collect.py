@@ -862,3 +862,63 @@ def test_journal_files_items_under_digest_day(tmp_path):
         "SELECT digest_date FROM item_journal WHERE package_id="
         "'CREC-2026-08-04' AND event='ingested'").fetchone()
     assert row["digest_date"] == "2026-08-05"   # observation day, not 08-04
+
+
+def test_every_adapter_collection_is_journaled_by_some_class():
+    """A collection an adapter can produce must be classified in
+    _CLASS_WHERE, or its items are ingested and never journaled — and
+    /today, the day views and the journal accounting all read the
+    journal. That is exactly what happened to PRESACT on 2026-08-06: 60
+    rows stored, 0 journaled, the White House's executive orders
+    invisible on the live page while sitting in the corpus.
+
+    The old govinfo clause was a denylist, so a new collection silently
+    fell into whichever class polled first and nothing failed. This test
+    is the guard that was missing."""
+    from fapd import agencies
+
+    declared = {a.COLLECTION for a in agencies.ADAPTERS.values()}
+    agency_class = set(collect._AGENCY_CLASS_COLLECTIONS)
+    missing = declared - agency_class
+    assert not missing, (
+        f"adapter collections not classified as agency-class: {missing} — "
+        "add them to _AGENCY_CLASS_COLLECTIONS or their items will never "
+        "be journaled")
+
+
+def test_agency_class_collections_are_not_also_govinfo():
+    """The two classes must partition, not overlap: an item journaled
+    twice would double-count in the coverage statement."""
+    import re
+
+    gov = collect._CLASS_WHERE["govinfo"]
+    for coll in collect._AGENCY_CLASS_COLLECTIONS:
+        assert re.search(rf"'{coll}'", gov), (
+            f"{coll} is agency-class but the govinfo clause does not "
+            "exclude it — it would be journaled by both workers")
+
+
+def test_presact_items_are_journaled_as_agency_class(tmp_path):
+    """The regression itself, pinned end to end."""
+    from fapd import db
+
+    conn = install_digest_day_default(db.connect(tmp_path / "p.db"))
+    conn.execute(
+        "INSERT INTO packages (package_id, collection, date_issued,"
+        " last_modified, first_seen_at, digest_day) VALUES"
+        " ('PA-1','PRESACT','2026-08-06','x','2026-08-06T21:07:00Z','2026-08-06')")
+    conn.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection,"
+        " doc_type, title, metadata, text, char_count, extracted_at,"
+        " extractor_version) VALUES ('PA-1','','PRESACT','EO',"
+        " 'Ending Birth Tourism', '{\"source_id\":\"whitehouse-presidential-actions\"}',"
+        " 'body', 4, '2026-08-06T21:10:00Z', 1)")
+    conn.commit()
+    assert collect.journal_new(conn, "agency", "cycle-t") == 1
+    row = conn.execute(
+        "SELECT collection, digest_date FROM item_journal"
+        " WHERE package_id='PA-1' AND event='ingested'").fetchone()
+    assert row["collection"] == "PRESACT"
+    assert row["digest_date"] == "2026-08-06"
+    # And the govinfo pass must NOT claim it a second time.
+    assert collect.journal_new(conn, "govinfo", "cycle-t2") == 0

@@ -2757,7 +2757,9 @@ _TODAY_COLLECTION_LABELS = {
 _TODAY_BRANCH = {"CREC": "legislative", "BILLS": "legislative",
                  "PLAW": "legislative", "FR": "executive",
                  "USCOURTS": "judicial", "AGENCYPR": "executive",
-                 "VOTES": "legislative", "BILLACTIONS": "legislative"}
+                 "VOTES": "legislative", "BILLACTIONS": "legislative",
+                 # The President's own instruments (GUIDE §3, 2026-08-06).
+                 "PRESACT": "executive"}
 _TODAY_DOC_TYPES = {
     "RULE": "final rule", "PRORULE": "proposed rule", "NOTICE": "notice",
     "PRESDOCU": "presidential document", "SENATE": "senate floor",
