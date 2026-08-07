@@ -1,5 +1,8 @@
 # Secrets — never commit
 .env
+# Box coordinates for deploy.sh / vps-ssh.sh — local only, never committed
+# (CLAUDE.md §13). The bare `.env` rule above does not match this filename.
+deploy/vps/deploy.env
 
 # Fetched government documents & local database (regenerable; can get large)
 data/

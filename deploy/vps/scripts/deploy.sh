@@ -5,15 +5,12 @@
 set -euo pipefail
 cd "$(dirname "$0")/../../.."  # repo root (scripts -> vps -> deploy -> root)
 
-# Box coordinates come from the environment or ~/.fapd-deploy.env — the
-# public repo carries no server dossier facts (CLAUDE.md §13). Copy
-# deploy/vps/deploy.env.example and fill it in.
-[ -f "$HOME/.fapd-deploy.env" ] && . "$HOME/.fapd-deploy.env"
-: "${SSH_KEY:?set SSH_KEY - path to the box SSH key}"
-: "${VPS:?set VPS - user@host}"
-PORT="${PORT:-22}"
-REMOTE_DIR="${REMOTE_DIR:-/opt/fapd}"
-SSH_OPTS=(-i "$SSH_KEY" -p "$PORT" -o BatchMode=yes -o StrictHostKeyChecking=accept-new)
+# Box coordinates: one resolver, shared with vps-ssh.sh so the two cannot
+# drift (this file carried its own inline lookup until 2026-08-07). The
+# public repo carries no server dossier facts (CLAUDE.md §13).
+REPO_ROOT="$PWD"
+# shellcheck source=/dev/null
+. "$REPO_ROOT/deploy/vps/scripts/_env.sh"
 
 echo "==> [1/4] test gate"
 uv run ruff check src/ scripts/ tests/
@@ -25,6 +22,7 @@ echo "==> [2/4] rsync bundle (deploy/vps/) and repo export (backend build contex
 # (it did, once — findings F-004).
 rsync -az --delete --exclude '.DS_Store' \
   --exclude '.env' --exclude 'secrets/' --exclude 'repo/' \
+  --exclude 'deploy.env' \
   -e "ssh ${SSH_OPTS[*]}" \
   deploy/vps/ "${VPS}:${REMOTE_DIR}/"
 # The backend image bakes the tested working tree INCLUDING .git — the

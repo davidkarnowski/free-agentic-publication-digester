@@ -22,3 +22,7 @@ research/
 # has run dev-up.sh would bake a recursive copy of the repo into the
 # production image on the next deploy.
 deploy/dev/repo/
+# Box coordinates (2026-08-07). Without this the repo export copies it to
+# $REMOTE_DIR/repo/ and `COPY repo/ /app` bakes host, port, user and key
+# path into a container image — a leak into an artifact, not just a file.
+deploy/vps/deploy.env
