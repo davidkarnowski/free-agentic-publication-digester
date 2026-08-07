@@ -29,7 +29,7 @@
 - Official text vs model-generated text is labeled in place;
   every item cites its official record (govinfo for the govinfo
   collections; the publisher's own page for agency releases,
-  recorded votes, and bill actions).
+  recorded votes, bill actions, and presidential actions).
 - Canonical Markdown + provenance manifests live in the public repository: https://github.com/davidkarnowski/free-agentic-publication-digester
 - Reuse: content is CC BY 4.0 (credit 'FAPD — Free Agentic
   Publication Digester'); quoted official government text is public

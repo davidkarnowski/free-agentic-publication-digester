@@ -41,9 +41,9 @@ is always current; it derives them from the registry at build time.)</p>
 <ul>
 <li><strong>Live site:</strong> https://fapd.info — served from a Docker stack on a
   VPS; GitHub holds the repository, CI, and the integrity record.</li>
-<li><strong>Source registry:</strong> 127 sources — 42 active (16 web feeds, 15 email
+<li><strong>Source registry:</strong> 129 sources — 45 active (19 web feeds, 15 email
   bulletins, 5 govinfo collections, 4 listing-page sources, 1 chamber
-  XML index, 1 API source), 63 planned, 20 recorded unavailable,
+  XML index, 1 API source), 62 planned, 20 recorded unavailable,
   2 evaluated and excluded. Every entry now has its own page at
   <code>/sources/&lt;id&gt;.html</code> — statistics, method, health history, and
   labeled model-written orientation.</li>
@@ -52,7 +52,7 @@ is always current; it derives them from the registry at build time.)</p>
   begins 2026-07-27</strong> (two development-era digests were retired on
   2026-08-03; they remain in git history). Each finished day also has
   a frozen observed listing at <code>/day/&lt;date&gt;.html</code>.</li>
-<li><strong>Test suite:</strong> 592 tests (verified by collection 2026-08-03).</li>
+<li><strong>Test suite:</strong> 665 tests (verified by collection 2026-08-07).</li>
 </ul>
 <hr />
 <h2 id="philosophy">Philosophy</h2>
@@ -126,7 +126,7 @@ below is enforced in code, not by operator discipline.</p>
 <h3 id="the-source-registry-is-the-scope-authority">The source registry is the scope authority</h3>
 <p><code>sources/registry.yaml</code> (rendered as
 <a href="sources.html">SOURCES.md</a>) records every federal source ingested, planned,
-evaluated-and-excluded, or found unavailable — currently 127 sources
+evaluated-and-excluded, or found unavailable — currently 129 sources
 across a tiered universe, so "how comprehensive is coverage?" is a
 measurement, not a claim. Honest statuses matter: a source that blocks
 our honestly-identified client is recorded <code>unavailable</code> with the
@@ -393,7 +393,7 @@ is at <code>docs/site/ai-development.md</code>
 </ul>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-08-07T18:29:42Z (UTC). Canonical source:
+  <p>Generated 2026-08-07T19:19:00Z (UTC). Canonical source:
   <code>README.md</code> in the
   <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in
