@@ -2,6 +2,12 @@
  "agent_guide": "agents.html",
  "digests": [
   {
+   "canonical_markdown": "digests/2026-08-07.md",
+   "date": "2026-08-07",
+   "html": "https://fapd.info/2026-08-07.html",
+   "teaser": "The Senate's floor day is the largest congressional record in the digest, which carries 95 Senate proceedings, 41 House proceedings, 13 extensions of remarks, and six daily digest entries alongside four recorded roll call votes."
+  },
+  {
    "canonical_markdown": "digests/2026-08-06.md",
    "date": "2026-08-06",
    "html": "https://fapd.info/2026-08-06.html",
@@ -68,6 +74,6 @@
    "teaser": "The House introduced 44 bills, 7 with published texts, on topics including offshore oil and gas whistleblower protections, youth mental health and social media, infant formula contaminants, school nutrition, education, trade and manufacturing, occupational safety, and fishing practices, each referred to committee."
   }
  ],
- "generated": "2026-08-07T19:19:02Z",
+ "generated": "2026-08-08T04:15:51Z",
  "title": "Free Agentic Publication Digester \u2014 Daily Federal Digest"
 }
