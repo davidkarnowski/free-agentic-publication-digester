@@ -2449,6 +2449,7 @@ _BLOG_DIR = ("docs", "devnotes")
 
 # (source filename in docs/devnotes/, url slug, publication date)
 _BLOG_POSTS = (
+    ("2026-08-08-a-note-from-the-machine-side.md", "machine-side", "2026-08-08"),
     ("2026-08-05-human-side-of-the-team.md", "human-side", "2026-08-05"),
     ("2026-07-30-launch-article.md", "launch", "2026-07-30"),
 )
@@ -2543,6 +2544,19 @@ def _build_blog(out_dir, doc_pages=()):
         return []
     brand = SITE_TITLE.split(" — ")[0]
     for slug, date, title, _teaser, md_text, canonical in posts:
+        # A post's own images, if any, live beside it in
+        # docs/devnotes/assets/<slug>/ (tracked, so they also render on
+        # GitHub's own view of the source file) and are mirrored here under
+        # the same slug so the relative markdown path resolves once flattened
+        # into the site root — the same copy shape build_site already uses
+        # for digests/assets/<date>/ (never digest dates, so no collision).
+        post_assets = config.PROJECT_ROOT.joinpath(*_BLOG_DIR, "assets", slug)
+        if post_assets.is_dir():
+            asset_dst = out_dir / "assets" / slug
+            asset_dst.mkdir(parents=True, exist_ok=True)
+            for f in post_assets.iterdir():
+                if f.is_file():
+                    shutil.copy2(f, asset_dst / f.name)
         page = _render_page(
             # No brand suffix when the post's own title already carries it.
             title if brand in title else f"{title} — {SITE_TITLE}",
