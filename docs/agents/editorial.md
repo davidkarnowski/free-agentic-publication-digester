@@ -57,6 +57,16 @@ file.
 - **Never fabricate.** A failed item gets no summary row, no plain line,
   no synopsis. The Coverage Statement disclosing the gap IS the
   handling. This is pinned by tests; keep it pinned.
+- **A lexicon-gate failure is a third way an item ends up here (GUIDE §6
+  rule 14a, added 2026-08-09).** A stored summary that trips the
+  render-time gate gets `MAX_LEXICON_CORRECTION_ATTEMPTS` (2)
+  error-informed corrective rewrites — never a blind identical retry,
+  since rule 5 makes a stored summary permanent and an identical rerun
+  would fail identically forever. Past the ceiling the row is withdrawn
+  (`analyze.correct_lexicon_violation`), landing in exactly this same
+  never-fabricate bucket. `analyze.run()`/`run_plain()` must keep
+  skipping an item whose correction ceiling is exhausted — otherwise the
+  withdrawn row just looks like fresh pending work again next cycle.
 - **Prompts state the whole contract.** The banned lexicon lives in
   `report._BANNED_TERMS` (Publication's gate); a prompt that omits terms
   the gate enforces produces expensive rejected prose (review D8). When

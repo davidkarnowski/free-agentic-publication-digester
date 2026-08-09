@@ -225,6 +225,17 @@ MAX_SINGLE_RETRIES_PER_RUN = 12
 # day. After this many attempts an item is left unsummarized and
 # disclosed by the coverage accounting, which is what rule 14 intends.
 MAX_ITEM_SUMMARY_ATTEMPTS = 3
+
+# GUIDE §6 rule 14a (incident 2026-08-08, CREC-2026-07-13-pt1-PgH4403,
+# "extreme"): ceiling on corrective rewrites for an item whose STORED
+# summary tripped the render-time lexicon gate — a different failure
+# class and a different ceiling than MAX_ITEM_SUMMARY_ATTEMPTS above
+# (that one is for a call that never returned a usable summary at all).
+# Kept low deliberately: a corrective call carries the full source text
+# plus error context, a materially more expensive intervention per
+# attempt than an ordinary retry.
+MAX_LEXICON_CORRECTION_ATTEMPTS = 2
+
 LLM_TIMEOUT = 300  # seconds per call
 
 # GUIDE.md §3: scope. Order is sync order. USCOURTS added 2026-07-25 (J1).

@@ -4801,3 +4801,63 @@ Also today: `/today`'s model summaries are signed **FAPD-AI** rather
 than "model summary", with both labels explained in the page's own prose
 — a brand name alone is not a disclosure, and GUIDE §2's obligation is
 that machine-generated prose does not hide its authorship.
+
+## 2026-08-09 — a lexicon rejection is a rewrite, not a wall to bang into
+
+The 2026-08-08 EOD finalizer halted after three identical failures
+(`finalize_target=2026-08-08, finalize_attempts=3`). Root cause: a CREC
+summary for H.R. 3106 ("...critical infrastructure during extreme cold
+weather") tripped `_validate_lexicon` on the banned word "extreme" —
+correctly, GUIDE §2 has no override. But the ladder could never have
+recovered on its own: `analyze._summary_exists()` treats a stored
+`summaries` row as permanent (rule 5, "summarize once, store forever"),
+so all three reruns hit the identical cached bad summary and failed the
+identical way, spending three full pipeline cycles to prove nothing.
+
+Built a targeted-regeneration path (GUIDE §6 rule 5 amended, new rule
+14a). `report.find_lexicon_violation()` re-scans `_load_items()`'s rows
+item by item — same official-title exemption `_validate_lexicon` already
+applies, just moved earlier so a hit can be attributed to a
+package/granule/layer instead of just a matched string. When
+`stage_render` catches a `ValidationError` and the violation is
+attributable, `analyze.correct_lexicon_violation()` gets up to
+`MAX_LEXICON_CORRECTION_ATTEMPTS` (2) tries: a corrective prompt naming
+the specific violated word(s), the source text so the model writes a
+real replacement rather than swaps a word, self-gated against the same
+lexicon regex — exempting only *that item's own* title, so a legitimate
+verbatim title quote passes and the model's own word choice does not —
+before it overwrites the row in place. Past the ceiling: withdrawn
+(deleted), landing in editorial.md's existing "never fabricate" bucket
+rather than blocking the day forever. Closure guard was the part easy to
+miss: `run()`/`run_plain()` had to start skipping an item whose
+correction ceiling is exhausted, or the withdrawn row just looks like
+fresh pending work next cycle and reproduces the same violation with the
+uncorrected prompt — silently defeating the whole feature in steady
+state.
+
+Same change, bundled at the operator's call: PRESACT (presidential
+actions) items were being fully LLM-summarized — real token spend, every
+run — and section 9 rendered titles only, the summary never shown
+anywhere. Fixed by rendering it (`_presact_rows`/`_presact_item_lines`
+now carry and display the stored summary/plain line, the same shape FR
+and CREC already use), which is also what brings PRESACT into the
+lexicon-correction surface for the first time, since its summary can now
+actually reach a rendered page.
+
+Scope, stated once so it doesn't need restating per file: correction
+covers CREC/BILLS/FR/PLAW/USCOURTS/PRESACT map+plain layers only.
+AGENCYPR/VOTES/BILLACTIONS are zero-LLM and cannot trip the gate from
+their own prose. Compose-level prose (Day in Review, section synopses)
+has no package/granule identity to correct against and falls through to
+the pre-existing whole-day ladder, unchanged — disclosed, not silently
+different.
+
+14 new tests (report.py: `find_lexicon_violation` map/plain/none/
+exempted + PRESACT rendering; analyze.py: fix-in-place, withdraw-after-
+ceiling, the closure-guard regression itself, the title-quote self-gate,
+the plain-layer path; run_pipeline.py: the orchestration's four branches
+stubbed at the boundary; the prompt drift check extended to the
+*composed* correction prompt, not just the fragment). Full suite green
+(679), ruff clean. Not yet done: actually clearing the real stranded
+2026-08-08 day on production — that's a VPS action and stays gated on
+the operator saying so explicitly, same as any deploy.

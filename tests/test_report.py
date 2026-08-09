@@ -426,6 +426,83 @@ def test_banned_word_in_official_summary_is_masked(conn):
     assert "landmark provision" in path.read_text(encoding="utf-8")
 
 
+# ------------------------------- find_lexicon_violation (GUIDE §6 r14a) --
+
+
+def test_find_lexicon_violation_identifies_map_summary(conn):
+    conn.execute(
+        "UPDATE summaries SET summary = 'A sweeping change to test procedures.'"
+        " WHERE package_id = ? AND granule_id = '2026-22222'",
+        (FR_PKG,),
+    )
+    conn.commit()
+    assert report.find_lexicon_violation(conn, DATE) == {
+        "package_id": FR_PKG, "granule_id": "2026-22222",
+        "layer": "map", "term": "sweeping",
+    }
+
+
+def test_find_lexicon_violation_identifies_plain_line(conn):
+    # The map summary itself is clean; only the plain restatement fails.
+    seed_plain(conn, FR_PKG, "2026-22222", "A controversial update to test procedures.")
+    assert report.find_lexicon_violation(conn, DATE) == {
+        "package_id": FR_PKG, "granule_id": "2026-22222",
+        "layer": "plain", "term": "controversial",
+    }
+
+
+def test_find_lexicon_violation_returns_none_for_compose_prose(conn):
+    """Compose-level prose (Day in Review) has no package/granule identity
+    to correct against — rule 14a scopes it out on purpose; every seeded
+    item summary/plain is clean, so the only violation on the day lives
+    where find_lexicon_violation deliberately never looks."""
+    conn.execute(
+        "INSERT INTO day_summaries (date, prompt_version, model, summary, created_at)"
+        " VALUES (?, ?, 'haiku', 'A sweeping day in review.', 'x')",
+        (DATE, config.PROMPT_VERSION),
+    )
+    conn.commit()
+    assert report.find_lexicon_violation(conn, DATE) is None
+
+
+def test_find_lexicon_violation_exempts_official_title_quote(conn):
+    """The same positional exemption _validate_lexicon applies at whole-
+    markdown scan time must hold at the per-item scan too, or a
+    legitimate title quote would be misdiagnosed as a correctable
+    violation."""
+    add_package(conn, "USCOURTS-ca5-26-05555", "USCOURTS")
+    add_text(conn, "USCOURTS-ca5-26-05555", "USCOURTS-ca5-26-05555-0",
+             "USCOURTS", "APPELLATE", title="Landmark Legal Foundation v. EPA",
+             metadata={"court_code": "ca5",
+                       "court_name": "United States Court of Appeals"
+                                     " for the Fifth Circuit",
+                       "case_number": "26-05555", "date_filed": DATE},
+             chars=9000)
+    add_summary(conn, "USCOURTS-ca5-26-05555", "USCOURTS-ca5-26-05555-0",
+                "USCOURTS-SEL-01",
+                "The court ruled in Landmark Legal Foundation v. EPA,"
+                " affirming the lower court.")
+    assert report.find_lexicon_violation(conn, DATE) is None
+
+
+def test_presact_item_renders_stored_summary_and_plain(conn, tmp_path):
+    """Added 2026-08-09: PRESACT items are selected and LLM-summarized
+    like any other collection (PRESACT-SEL-01..04 are ordinary
+    rules.py matchers); this section now renders that stored summary
+    and plain restatement the way FR/CREC already do. Previously the
+    summary was generated and paid for on every run and never shown."""
+    _add_presact(conn, "PA-summ-1", "Securing Rural Broadband Access", "EO",
+                 "Thu, 23 Jul 2026 21:07:00 +0000")
+    add_summary(conn, "PA-summ-1", "", "PRESACT-SEL-01",
+                "The order directs agencies to expand rural broadband access.")
+    seed_plain(conn, "PA-summ-1", "",
+              "The order tells agencies to expand internet access in rural areas.")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "directs agencies to expand rural broadband access" in md
+    assert ("*In plain terms:* The order tells agencies to expand internet"
+            " access in rural areas.") in md
+
+
 def test_empty_day_still_renders_mandatory_sections(project):
     connection = db.connect(project / "data" / "empty.db")
     try:

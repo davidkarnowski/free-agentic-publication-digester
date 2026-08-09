@@ -11,6 +11,18 @@ from fapd.report import _BANNED_RE
 PROMPTS = {
     "map preamble": analyze._PREAMBLE,
     "plain preamble": analyze._PLAIN_PREAMBLE,
+    # GUIDE §6 r14a: _CORRECTION_NOTICE itself deliberately does NOT
+    # restate the full banned list (it names only the specific term(s) a
+    # prior attempt used) — it is always prepended to _PREAMBLE/
+    # _PLAIN_PREAMBLE, which already do. Checking the COMPOSED prompt
+    # here, not the fragment alone, is what actually pins the guarantee;
+    # since it's built from the same two constants above, an edit that
+    # drifts one drifts both entries at once, the same protection D8
+    # exists for everywhere else.
+    "map correction (composed)": (
+        analyze._CORRECTION_NOTICE.format(terms="extreme") + analyze._PREAMBLE),
+    "plain correction (composed)": (
+        analyze._CORRECTION_NOTICE.format(terms="extreme") + analyze._PLAIN_PREAMBLE),
     "compose day-in-review": compose._PROMPT,
     "compose section synopses": compose._SECTION_PROMPT,
     "section tags": tags._TAG_PROMPT,

@@ -164,15 +164,44 @@ def stage_analyze(conn, date):
             "before": before, "after": after}
 
 
-def stage_render(conn, date):
-    """Render + validate. Returns (out_path | None, validation string)."""
+def stage_render(conn, date, *, llm_client=None):
+    """Render + validate, with one bounded corrective retry for a lexicon
+    failure attributable to a specific item's stored summary (GUIDE §6
+    rule 14a). Returns (out_path | None, validation string).
+
+    report.render()/validate() stay deterministic and zero-LLM
+    throughout — the correction call lives entirely in analyze.py; this
+    function only orchestrates a second render() attempt after it. A
+    violation this can't attribute to an item (compose-level prose) or a
+    non-lexicon validation failure falls straight through to today's
+    unchanged behavior. Deliberately not a loop: a *different* violation
+    surfacing after one correction is left for the next finalizer
+    attempt (which will only see what's left, since the first is already
+    corrected/withdrawn and durably remembered) rather than retried here
+    — an orchestration-level loop would reopen exactly the unbounded
+    retry surface rule 14 exists to prevent."""
     try:
         out_path = report.render(conn, date)
         print(f"   digest written: {out_path}", flush=True)
         return out_path, "PASSED"
     except report.ValidationError as exc:
-        print(f"   VALIDATION FAILED — nothing written: {exc}", flush=True)
-        return None, f"FAILED: {exc}"
+        violation = report.find_lexicon_violation(conn, date)
+        if violation is None or llm_client is None:
+            print(f"   VALIDATION FAILED — nothing written: {exc}", flush=True)
+            return None, f"FAILED: {exc}"
+        print(f"   lexicon gate: {violation['term']!r} in {violation['layer']}"
+              f" summary for {violation['package_id']}/{violation['granule_id']}"
+              " — attempting a corrective rewrite", flush=True)
+        result = analyze.correct_lexicon_violation(conn, llm_client, **violation)
+        print(f"   correction outcome: {result['outcome']}", flush=True)
+        try:
+            out_path = report.render(conn, date)
+            print(f"   digest written: {out_path}", flush=True)
+            return out_path, "PASSED"
+        except report.ValidationError as exc2:
+            print(f"   VALIDATION FAILED after correction — nothing written: {exc2}",
+                  flush=True)
+            return None, f"FAILED: {exc2}"
 
 
 def stage_site():
@@ -321,7 +350,8 @@ def main(argv=None) -> int:
     done(t0)
 
     t0 = stage(f"STAGE 4/5 — RENDER + VALIDATE digest for {date}")
-    out_path, validation = stage_render(conn, date)
+    with llm.LLMClient() as lclient:
+        out_path, validation = stage_render(conn, date, llm_client=lclient)
     timings["render"] = time.monotonic() - t0
     done(t0)
 

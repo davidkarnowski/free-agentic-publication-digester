@@ -316,6 +316,174 @@ def seed_keys(conn):
         "SELECT package_id, granule_id FROM extracted_texts ORDER BY granule_id")]
 
 
+# ---------------------------------------------------------------------------
+# Lexicon-correction (GUIDE §6 rule 14a)
+# ---------------------------------------------------------------------------
+
+
+def _seed_bad_summary(conn, package_id, granule_id, *,
+                      summary="A sweeping change to floor procedures."):
+    seed_item(conn, package_id, granule_id, "CREC", "SENATE", LONG_TEXT)
+    conn.execute(
+        "INSERT INTO summaries (package_id, granule_id, prompt_version, method,"
+        " model, inclusion_rule, summary, created_at)"
+        " VALUES (?, ?, ?, 'llm', 'fake-haiku', 'CREC-SEL-01', ?, 'x')",
+        (package_id, granule_id, config.PROMPT_VERSION, summary),
+    )
+    conn.commit()
+
+
+def test_correct_lexicon_violation_fixes_and_updates_row(conn):
+    _seed_bad_summary(conn, "CREC-2026-07-23", "G1")
+    fake = FakeLLM(scripted=[json.dumps(
+        {"CREC-2026-07-23|G1": "A change to floor procedures."})])
+    result = analyze.correct_lexicon_violation(
+        conn, fake, package_id="CREC-2026-07-23", granule_id="G1",
+        layer="map", term="sweeping")
+    assert result == {"outcome": "corrected"}
+    assert fake.purposes == ["map:lexicon-correction"]
+    row = conn.execute(
+        "SELECT summary, model FROM summaries WHERE package_id=? AND granule_id=?"
+        " AND prompt_version=?",
+        ("CREC-2026-07-23", "G1", config.PROMPT_VERSION)).fetchone()
+    assert row["summary"] == "A change to floor procedures."  # same row, in place
+    assert row["model"] == "fake-haiku"
+    corr = conn.execute(
+        "SELECT layer, term, outcome FROM lexicon_corrections").fetchone()
+    assert (corr["layer"], corr["term"], corr["outcome"]) == ("map", "sweeping", "corrected")
+    attempts = conn.execute(
+        "SELECT attempts FROM summary_attempts WHERE package_id=? AND granule_id=?"
+        " AND prompt_version=? AND layer='map-correction'",
+        ("CREC-2026-07-23", "G1", config.PROMPT_VERSION)).fetchone()
+    assert attempts["attempts"] == 1
+
+
+def test_correct_lexicon_violation_withdraws_after_ceiling(conn):
+    _seed_bad_summary(conn, "CREC-2026-07-23", "G1")
+    conn.execute(
+        "INSERT INTO plain_summaries (package_id, granule_id, plain_version,"
+        " source_prompt_version, plain, created_at) VALUES (?, ?, ?, ?, ?, 'x')",
+        ("CREC-2026-07-23", "G1", config.PLAIN_PROMPT_VERSION, config.PROMPT_VERSION,
+         "A sweeping plain line."))
+    conn.commit()
+    # Every corrective attempt still contains the banned word.
+    fake = FakeLLM(scripted=[
+        json.dumps({"CREC-2026-07-23|G1": "Another sweeping change."}),
+        json.dumps({"CREC-2026-07-23|G1": "Still a sweeping change."}),
+    ])
+    result = analyze.correct_lexicon_violation(
+        conn, fake, package_id="CREC-2026-07-23", granule_id="G1",
+        layer="map", term="sweeping")
+    assert result == {"outcome": "withdrawn"}
+    assert fake.purposes == ["map:lexicon-correction", "map:lexicon-correction"]
+    assert config.MAX_LEXICON_CORRECTION_ATTEMPTS == 2  # pins the test's attempt count
+    assert conn.execute(
+        "SELECT COUNT(*) FROM summaries WHERE package_id=? AND granule_id=?",
+        ("CREC-2026-07-23", "G1")).fetchone()[0] == 0
+    # Withdrawing a MAP row deletes the dependent plain row too — nothing
+    # orphaned lingers behind a summary that no longer exists.
+    assert conn.execute(
+        "SELECT COUNT(*) FROM plain_summaries WHERE package_id=? AND granule_id=?",
+        ("CREC-2026-07-23", "G1")).fetchone()[0] == 0
+    corr = conn.execute("SELECT outcome FROM lexicon_corrections").fetchone()
+    assert corr["outcome"] == "withdrawn"
+    attempts = conn.execute(
+        "SELECT attempts FROM summary_attempts WHERE package_id=? AND granule_id=?"
+        " AND prompt_version=? AND layer='map-correction'",
+        ("CREC-2026-07-23", "G1", config.PROMPT_VERSION)).fetchone()
+    assert attempts["attempts"] == config.MAX_LEXICON_CORRECTION_ATTEMPTS
+
+
+def test_withdrawn_item_never_reenters_ordinary_pending(conn):
+    """The closure-guard pin: without it, a withdrawn item's absent row
+    looks like fresh pending work again and the very next run() would
+    re-summarize it with the uncorrected prompt, reproducing the
+    violation and defeating the whole feature."""
+    seed_item(conn, "CREC-2026-07-23", "G1", "CREC", "SENATE", LONG_TEXT)
+    bad = FakeLLM(scripted=[json.dumps(
+        {"CREC-2026-07-23|G1": "A sweeping change to floor procedures."})])
+    analyze.run(conn, bad, DATE)
+    assert conn.execute("SELECT COUNT(*) FROM summaries").fetchone()[0] == 1
+
+    still_bad = FakeLLM(scripted=[
+        json.dumps({"CREC-2026-07-23|G1": "Another sweeping change."}),
+        json.dumps({"CREC-2026-07-23|G1": "Still sweeping."}),
+    ])
+    result = analyze.correct_lexicon_violation(
+        conn, still_bad, package_id="CREC-2026-07-23", granule_id="G1",
+        layer="map", term="sweeping")
+    assert result == {"outcome": "withdrawn"}
+    assert conn.execute("SELECT COUNT(*) FROM summaries").fetchone()[0] == 0
+
+    fresh = FakeLLM()
+    stats = analyze.run(conn, fresh, DATE)
+    assert fresh.prompts == []  # zero LLM calls -- the closure guard
+    assert stats["skipped_lexicon_withdrawn"] == 1
+    assert conn.execute("SELECT COUNT(*) FROM summaries").fetchone()[0] == 0
+
+
+def test_correction_self_gate_exempts_the_item_own_title_quote(conn):
+    """The 'context aware' edge case: a corrective reply that legitimately
+    quotes the item's own official title verbatim -- and that title
+    itself contains a banned word -- must be accepted, not rejected."""
+    seed_item(conn, "CREC-2026-07-23", "G1", "CREC", "SENATE", LONG_TEXT)
+    conn.execute(
+        "UPDATE extracted_texts SET title = 'Landmark Legal Foundation v. EPA'"
+        " WHERE package_id='CREC-2026-07-23' AND granule_id='G1'")
+    conn.execute(
+        "INSERT INTO summaries (package_id, granule_id, prompt_version, method,"
+        " model, inclusion_rule, summary, created_at)"
+        " VALUES ('CREC-2026-07-23', 'G1', ?, 'llm', 'fake-haiku', 'CREC-SEL-01',"
+        " 'A sweeping change to floor procedures.', 'x')",
+        (config.PROMPT_VERSION,))
+    conn.commit()
+    fake = FakeLLM(scripted=[json.dumps({
+        "CREC-2026-07-23|G1": "The Senate cited Landmark Legal Foundation v. EPA"
+                              " while debating floor procedures.",
+    })])
+    result = analyze.correct_lexicon_violation(
+        conn, fake, package_id="CREC-2026-07-23", granule_id="G1",
+        layer="map", term="sweeping")
+    assert result == {"outcome": "corrected"}
+    row = conn.execute(
+        "SELECT summary FROM summaries WHERE package_id='CREC-2026-07-23'"
+        " AND granule_id='G1'").fetchone()
+    assert "Landmark Legal Foundation v. EPA" in row["summary"]
+
+
+def test_correct_lexicon_violation_plain_layer(conn):
+    seed_item(conn, "CREC-2026-07-23", "G1", "CREC", "SENATE", LONG_TEXT)
+    conn.execute(
+        "INSERT INTO summaries (package_id, granule_id, prompt_version, method,"
+        " model, inclusion_rule, summary, created_at)"
+        " VALUES ('CREC-2026-07-23', 'G1', ?, 'llm', 'fake-haiku', 'CREC-SEL-01',"
+        " 'A clean summary of floor procedures.', 'x')",
+        (config.PROMPT_VERSION,))
+    conn.execute(
+        "INSERT INTO plain_summaries (package_id, granule_id, plain_version,"
+        " source_prompt_version, plain, created_at) VALUES (?, ?, ?, ?, ?, 'x')",
+        ("CREC-2026-07-23", "G1", config.PLAIN_PROMPT_VERSION, config.PROMPT_VERSION,
+         "A sweeping plain-language line."))
+    conn.commit()
+    fake = FakeLLM(scripted=[json.dumps({
+        "CREC-2026-07-23|G1": "A plain-language line about floor procedures.",
+    })])
+    result = analyze.correct_lexicon_violation(
+        conn, fake, package_id="CREC-2026-07-23", granule_id="G1",
+        layer="plain", term="sweeping")
+    assert result == {"outcome": "corrected"}
+    assert fake.purposes == ["plain:lexicon-correction"]
+    row = conn.execute(
+        "SELECT plain FROM plain_summaries WHERE package_id='CREC-2026-07-23'"
+        " AND granule_id='G1'").fetchone()
+    assert row["plain"] == "A plain-language line about floor procedures."
+    # A plain-layer correction must never touch the (clean) map summary.
+    map_row = conn.execute(
+        "SELECT summary FROM summaries WHERE package_id='CREC-2026-07-23'"
+        " AND granule_id='G1'").fetchone()
+    assert map_row["summary"] == "A clean summary of floor procedures."
+
+
 def test_plain_retries_batch_before_isolating(conn):
     """Plain-speak retries escalate the same way. Measured 2026-07-29:
     single-item retries burned 645,778 input tokens (42% of the day) to

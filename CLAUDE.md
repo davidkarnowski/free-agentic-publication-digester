@@ -408,3 +408,22 @@ live in `.claude/agents/fapd-*.md` (tracked).
   summaries are signed **FAPD-AI** (operator), with both labels explained
   in the page's own prose so the label stays a disclosure and not just
   branding; and CREC listings got their titles back (F-022).
+- **2026-08-09** — **Lexicon-gate failures get a corrective rewrite, not
+  a blind rerun** (GUIDE §6 rule 5 amended, new rule 14a; operator).
+  Incident: the 2026-08-08 EOD finalizer halted after three identical
+  failures — a CREC summary's "extreme cold weather" tripped
+  `_validate_lexicon`, and because rule 5 makes a stored summary
+  permanent, every rerun hit the same cached row and failed the same
+  way every time; the ladder could never have succeeded on its own. Fix:
+  an attributable per-item lexicon failure now gets up to
+  `MAX_LEXICON_CORRECTION_ATTEMPTS` (2) error-informed, self-gated
+  corrective regenerations before falling back to today's behavior; past
+  the ceiling the row is withdrawn (never left blocking the day), same
+  disclosed-gap bucket editorial.md's "never fabricate" rule already
+  uses. Scoped to CREC/BILLS/FR/PLAW/USCOURTS/PRESACT map+plain layers
+  only — compose-level prose (Day in Review, section synopses) has no
+  item identity to correct against and is unaffected. Same change:
+  PRESACT's section 9 now renders the stored summary and plain-language
+  line (previously title-only despite paying full LLM cost to generate
+  them — a pre-existing waste bug, fixed alongside since it's what
+  brought PRESACT into the correction surface in the first place).

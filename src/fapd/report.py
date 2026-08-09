@@ -34,7 +34,8 @@ from . import config, fedcal
 from .rules import CREC_FLOOR_CHAR_THRESHOLD
 from .sync import publication_date
 
-__all__ = ["RULE_DESCRIPTIONS", "ValidationError", "render", "validate"]
+__all__ = ["RULE_DESCRIPTIONS", "ValidationError", "find_lexicon_violation",
+           "render", "validate"]
 
 # Human descriptions of the mechanical selection/exclusion rules recorded in
 # summaries.inclusion_rule (ruleset lives in rules.py; these are the digest's
@@ -897,7 +898,7 @@ def _presact_rows(conn, date):
     first activation, when the feeds carry months of history."""
     rows = [dict(r) for r in conn.execute(
         """
-        SELECT e.title, e.doc_type, e.metadata
+        SELECT e.package_id, e.granule_id, e.title, e.doc_type, e.metadata
         FROM extracted_texts e JOIN packages p USING (package_id)
         WHERE e.collection = 'PRESACT' AND p.digest_day = ?
         ORDER BY e.doc_type, e.title
@@ -925,7 +926,7 @@ _PRESACT_SUBSECTIONS = (
 )
 
 
-def _presact_lines(conn, date):
+def _presact_lines(conn, date, items):
     """Section 9: presidential actions as the White House itself
     published them (GUIDE §3; activated 2026-08-06). Appended as section
     9 under the §2 append-only numbering rule; sections 1-8 keep their
@@ -934,7 +935,18 @@ def _presact_lines(conn, date):
     Register: GUIDE §2's attributed-speech rule applies here in full
     (operator, 2026-08-06) — the digest's own prose attributes. Titles
     are the publisher's words and render verbatim, never reworded, per
-    §2's scope amendment."""
+    §2's scope amendment.
+
+    Summaries (added 2026-08-09): PRESACT items are selected and
+    LLM-summarized like any other collection (PRESACT-SEL-01..04 are
+    ordinary rules.py matchers) — this section renders that stored
+    summary/plain restatement the same way FR and CREC do, looked up
+    from the already-loaded `items` rather than re-querying. Before this
+    the summary was generated and paid for on every run and never shown
+    anywhere (a pre-existing waste bug, fixed alongside the lexicon-
+    correction work that brought PRESACT into that surface)."""
+    presact_by_key = {(i["package_id"], i["granule_id"]): i
+                       for i in items if i["collection"] == "PRESACT"}
     rows, backfill = _presact_rows(conn, date)
     # One document through two channels: both whitehouse.gov feeds carry
     # executive orders, and an order in both arrives twice with the same
@@ -990,7 +1002,8 @@ def _presact_lines(conn, date):
             lines += [f"No {heading.lower()} were observed this day.", ""]
             continue
         for row in group:
-            lines += _presact_item_lines(row)
+            matched = presact_by_key.get((row.get("package_id"), row.get("granule_id")))
+            lines += _presact_item_lines(row, matched)
         lines.append("")
     if backfill:
         lines += [
@@ -1003,12 +1016,20 @@ def _presact_lines(conn, date):
     return lines
 
 
-def _presact_item_lines(row):
-    """One presidential action. The title is the publisher's, verbatim."""
+def _presact_item_lines(row, item=None):
+    """One presidential action. The title is the publisher's, verbatim.
+
+    `item` is the matching row from `_load_items` (summary/plain), when
+    one exists — a pending/withdrawn action renders title-only, exactly
+    as every section already handles an item with no stored summary."""
     meta, url = row["_meta"], (row["_meta"].get("url") or "")
     title = row["title"] or "(untitled)"
     head = f"- **{title}**" if not url else f"- **[{title}]({url})**"
+    if item and item.get("summary"):
+        head += f" — {_one_line(item['summary'])}"
     lines = [head]
+    if item:
+        lines += _plain_line(item)
     rule = {
         "EO": "PRESACT-SEL-01",
         "PROCLAMATION": "PRESACT-SEL-02",
@@ -1914,6 +1935,26 @@ def _validate_lexicon(markdown, conn, date):
     official name contains a banned word, verbatim; the same word outside
     such a span still fails. Known honest boundary: a title that falls
     back to the text head's first line is not collected here."""
+    officials = _lexicon_officials(conn, date)
+    # URLs are citations, not prose — link slugs echo source headlines
+    # (".../historic-multinational-medical-team...") and must not trip the
+    # gate. Strip markdown link destinations before scanning.
+    scan = re.sub(r"\]\(([^)\s]+)\)", "]( )", markdown)
+    exempt = _official_spans(scan, officials)
+    for match in _BANNED_RE.finditer(scan):
+        if not any(a <= match.start() and match.end() <= b for a, b in exempt):
+            raise ValidationError(
+                f"banned term {match.group(0)!r} in generated prose")
+
+
+def _lexicon_officials(conn, date):
+    """Every verbatim official string for this digest day that the §2
+    positional exemption may match against — titles, official summaries,
+    quoted action sentences, across every collection. Extracted out of
+    `_validate_lexicon` so `find_lexicon_violation` can reuse the exact
+    same exemption corpus without re-deriving it (no drift possible
+    between what render() exempts and what a corrective call is told is
+    exempt)."""
     officials = [
         row[0]
         for row in conn.execute(
@@ -1975,15 +2016,7 @@ def _validate_lexicon(markdown, conn, date):
             (date,),
         )
     ]
-    # URLs are citations, not prose — link slugs echo source headlines
-    # (".../historic-multinational-medical-team...") and must not trip the
-    # gate. Strip markdown link destinations before scanning.
-    scan = re.sub(r"\]\(([^)\s]+)\)", "]( )", markdown)
-    exempt = _official_spans(scan, officials)
-    for match in _BANNED_RE.finditer(scan):
-        if not any(a <= match.start() and match.end() <= b for a, b in exempt):
-            raise ValidationError(
-                f"banned term {match.group(0)!r} in generated prose")
+    return officials
 
 
 def _official_spans(scan, officials):
@@ -2007,6 +2040,42 @@ def _official_spans(scan, officials):
                 spans.append((start, start + len(form)))
                 start = scan.find(form, start + 1)
     return spans
+
+
+def find_lexicon_violation(conn, date):
+    """After render() raises ValidationError for a lexicon hit, identify
+    which stored map summary or plain line (if any) is responsible, so a
+    caller can attempt one bounded, targeted correction (GUIDE §6 rule
+    14a).
+
+    Scans `_load_items()`'s rows — every collection with a stored
+    summary at the current prompt version, PRESACT included, since that
+    query carries no collection filter — item by item, applying the
+    identical official-span exemption `_validate_lexicon` uses, so a hit
+    found here reproduces exactly what render() rejected. Zero LLM
+    calls; report.py's determinism invariant is unaffected.
+
+    Returns {"package_id", "granule_id", "layer": "map" | "plain",
+    "term"} for the first unexempted hit, or None when the violation is
+    not attributable to a per-item row — compose-level prose (Day in
+    Review, section synopses/tags) is explicitly out of scope (rule
+    14a); the caller falls back to the pre-existing whole-day retry."""
+    officials = _lexicon_officials(conn, date)
+    for item in _load_items(conn, date):
+        for field, layer in (("summary", "map"), ("plain", "plain")):
+            text = item.get(field)
+            if not text:
+                continue
+            exempt = _official_spans(text, officials)
+            for match in _BANNED_RE.finditer(text):
+                if not any(a <= match.start() and match.end() <= b for a, b in exempt):
+                    return {
+                        "package_id": item["package_id"],
+                        "granule_id": item["granule_id"],
+                        "layer": layer,
+                        "term": match.group(0),
+                    }
+    return None
 
 
 def _validate_inclusion_lines(markdown):
@@ -2156,7 +2225,7 @@ def render(conn, date, out_dir=None):
     lines += _agency_lines(conn, date)
     lines += _votes_lines(conn, date)
     lines += _billactions_lines(conn, date)
-    lines += _presact_lines(conn, date)
+    lines += _presact_lines(conn, date, items)
     lines += _glossary_lines("\n".join(lines))
     lines += _coverage_lines(conn, date, _coverage(conn, date), embedded_total)
     lines += _methodology_lines(date, git_short)

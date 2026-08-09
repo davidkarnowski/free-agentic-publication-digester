@@ -414,6 +414,31 @@ past the ceiling an item is a disclosed gap, not pending work. (Known
 gap, review D4: the plain layer records attempts here but does not yet
 consult them.)
 
+**The `*-correction` layer convention (GUIDE §6 r14a, added 2026-08-09):**
+`layer` values `'map-correction'`/`'plain-correction'` track a
+*different* ceiling than ordinary `'map'`/`'plain'` retries — the bounded
+number of error-informed rewrites attempted on a summary that already
+exists but tripped the render-time lexicon gate, per
+`config.MAX_LEXICON_CORRECTION_ATTEMPTS`. `analyze.run()`/`run_plain()`
+consult this layer explicitly in their pending-selection loops (unlike
+D4's gap above, this one is closed for the correction layer from the
+start) — an item whose correction ceiling is exhausted must never
+re-enter ordinary summarization with the uncorrected prompt, or the
+withdrawn row would simply be regenerated with the same violation on the
+next cycle.
+
+### `lexicon_corrections` (GUIDE §6 r14a — the correction audit trail)
+
+One row per corrective call attempt, success or failure. `package_id`,
+`granule_id`, `layer` (`'map'` | `'plain'`), `term` (the violated word
+that triggered the attempt), `outcome` (`'corrected'` | `'withdrawn'`),
+`corrected_at`. This is an ops/audit surface — `scripts/audit.py` and
+the insight report can count corrections and withdrawals the same way
+`llm_calls` explains ordinary token spend — not a reader-facing table;
+a withdrawn item's absence from the digest is disclosed through the
+ordinary Coverage Statement "counted, not summarized" accounting, same
+bucket as any other disclosed gap (editorial.md, "never fabricate").
+
 ### `plain_summaries` (plain-speak layer)
 
 One row per plain-language restatement of a `summaries` row. Keyed by

@@ -134,19 +134,132 @@ def test_main_exit_1_when_validation_fails(monkeypatch):
         def close(self):
             pass
 
+    class FakeLLMClient:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
     monkeypatch.setattr(run_pipeline.db, "connect", lambda: FakeConn())
     monkeypatch.setattr(run_pipeline.logging_setup, "setup", lambda **kw: None)
+    monkeypatch.setattr(run_pipeline.llm, "LLMClient", lambda *a, **kw: FakeLLMClient())
     for name in ("stage_sync", "stage_agencies", "stage_email", "stage_extract"):
         monkeypatch.setattr(run_pipeline, name, lambda *a, **kw: {})
     monkeypatch.setattr(
         run_pipeline, "stage_analyze",
         lambda *a: {"before": (0, 0, 0), "after": (0, 0, 0)})
     monkeypatch.setattr(
-        run_pipeline, "stage_render", lambda *a: (None, "FAILED: bad citation"))
+        run_pipeline, "stage_render", lambda *a, **kw: (None, "FAILED: bad citation"))
     monkeypatch.setattr(run_pipeline, "stage_site", lambda: {"out_dir": Path(".")})
     monkeypatch.setattr(run_pipeline, "detail_report", lambda **kw: None)
 
     assert run_pipeline.main(["--date", "2026-07-28"]) == 1
+
+
+# --------------------------------- stage_render / lexicon correction (r14a) --
+# report.render()/find_lexicon_violation and analyze.correct_lexicon_violation
+# are exercised directly in test_report.py / test_analyze.py; these pin
+# stage_render's OWN orchestration — which of the two render() attempts and
+# the correction call fire, in what order, and the fallback shape when a
+# violation isn't attributable to an item. Everything is stubbed so this
+# tests control flow only, not the underlying mechanics.
+
+
+def test_stage_render_recovers_via_correction(conn, monkeypatch):
+    calls = {"render": 0}
+
+    def fake_render(c, date):
+        calls["render"] += 1
+        if calls["render"] == 1:
+            raise run_pipeline.report.ValidationError(
+                "banned term 'extreme' in generated prose")
+        return Path("digests/2026-07-23.md")
+
+    violation = {"package_id": "CREC-X", "granule_id": "G1",
+                 "layer": "map", "term": "extreme"}
+    corrected_with = {}
+    monkeypatch.setattr(run_pipeline.report, "render", fake_render)
+    monkeypatch.setattr(run_pipeline.report, "find_lexicon_violation",
+                        lambda c, date: violation)
+    monkeypatch.setattr(
+        run_pipeline.analyze, "correct_lexicon_violation",
+        lambda c, llm_client, **kw: corrected_with.update(kw) or {"outcome": "corrected"})
+
+    out_path, validation = run_pipeline.stage_render(conn, "2026-07-23", llm_client=object())
+    assert validation == "PASSED"
+    assert out_path == Path("digests/2026-07-23.md")
+    assert calls["render"] == 2  # the retry after correction
+    assert corrected_with == violation
+
+
+def test_stage_render_falls_back_when_violation_not_attributable(conn, monkeypatch):
+    """A validation failure find_lexicon_violation can't pin to an item —
+    compose-level prose, or a non-lexicon failure entirely — behaves
+    exactly as before: no correction attempted, single render() call."""
+    def fake_render(c, date):
+        raise run_pipeline.report.ValidationError("bad citation")
+
+    called = []
+    monkeypatch.setattr(run_pipeline.report, "render", fake_render)
+    monkeypatch.setattr(run_pipeline.report, "find_lexicon_violation",
+                        lambda c, date: None)
+    monkeypatch.setattr(run_pipeline.analyze, "correct_lexicon_violation",
+                        lambda *a, **kw: called.append(1))
+
+    out_path, validation = run_pipeline.stage_render(conn, "2026-07-23", llm_client=object())
+    assert out_path is None
+    assert validation == "FAILED: bad citation"
+    assert called == []
+
+
+def test_stage_render_no_correction_without_llm_client(conn, monkeypatch):
+    """digest.py's standalone render path calls stage_render with no
+    llm_client — correction must never fire there (analysis stays an
+    optional, lazily-imported dependency of a report-only run)."""
+    def fake_render(c, date):
+        raise run_pipeline.report.ValidationError(
+            "banned term 'extreme' in generated prose")
+
+    called = []
+    monkeypatch.setattr(run_pipeline.report, "render", fake_render)
+    monkeypatch.setattr(
+        run_pipeline.report, "find_lexicon_violation",
+        lambda c, date: {"package_id": "X", "granule_id": "Y",
+                         "layer": "map", "term": "extreme"})
+    monkeypatch.setattr(run_pipeline.analyze, "correct_lexicon_violation",
+                        lambda *a, **kw: called.append(1))
+
+    out_path, _validation = run_pipeline.stage_render(conn, "2026-07-23")
+    assert out_path is None
+    assert called == []
+
+
+def test_stage_render_reports_failure_when_correction_does_not_resolve_it(conn, monkeypatch):
+    """A withdrawn (or still-corrected-elsewhere) item can leave the
+    render failing for a different reason on the second attempt — this
+    is reported exactly as an ordinary failure, not looped further (only
+    ONE retry: no third render() call)."""
+    calls = {"render": 0}
+
+    def fake_render(c, date):
+        calls["render"] += 1
+        raise run_pipeline.report.ValidationError(
+            "banned term 'extreme' in generated prose")
+
+    monkeypatch.setattr(run_pipeline.report, "render", fake_render)
+    monkeypatch.setattr(
+        run_pipeline.report, "find_lexicon_violation",
+        lambda c, date: {"package_id": "X", "granule_id": "Y",
+                         "layer": "map", "term": "extreme"})
+    monkeypatch.setattr(run_pipeline.analyze, "correct_lexicon_violation",
+                        lambda *a, **kw: {"outcome": "withdrawn"})
+
+    out_path, validation = run_pipeline.stage_render(conn, "2026-07-23", llm_client=object())
+    assert out_path is None
+    assert validation == "FAILED: banned term 'extreme' in generated prose"
+    assert calls["render"] == 2  # the one bounded retry, then stop — no loop
+
 
 # ---------------------------------------------------------- collect.py CLI --
 

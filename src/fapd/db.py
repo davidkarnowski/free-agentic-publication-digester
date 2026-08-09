@@ -307,6 +307,23 @@ CREATE TABLE IF NOT EXISTS summary_attempts (
     PRIMARY KEY (package_id, granule_id, prompt_version, layer)
 );
 
+-- Lexicon-correction attempts (GUIDE §6 r14a, incident 2026-08-08:
+-- CREC-2026-07-13-pt1-PgH4403, "extreme"). One row per corrective call,
+-- success or failure — an ops/audit trail, not a reader-facing surface.
+-- The durable per-item ceiling itself lives in summary_attempts above,
+-- under layer 'map-correction'/'plain-correction'; this table is what
+-- lets scripts/audit.py and the insight report count and explain what
+-- happened, the same way llm_calls explains ordinary spend.
+CREATE TABLE IF NOT EXISTS lexicon_corrections (
+    id           INTEGER PRIMARY KEY,
+    package_id   TEXT NOT NULL,
+    granule_id   TEXT NOT NULL DEFAULT '',
+    layer        TEXT NOT NULL,   -- 'map' | 'plain'
+    term         TEXT NOT NULL,
+    outcome      TEXT NOT NULL CHECK (outcome IN ('corrected', 'withdrawn')),
+    corrected_at TEXT NOT NULL
+);
+
 -- Section-level tags (GUIDE §6 r12a): mechanical branch/agency tags plus
 -- model discovery keys, one row per (date, section, tag).
 CREATE TABLE IF NOT EXISTS section_tags (

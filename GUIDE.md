@@ -1116,8 +1116,10 @@ of the code, not of operator discipline.
    token spend; loosening a rule is a GUIDE change, not a tweak.
 5. **Summarize once, store forever.** Summaries are durable artifacts keyed
    by package/granule ID + content version. Regeneration happens only when
-   the source's lastModified changes or the prompt version bumps —
-   never as a side effect of re-running the digest.
+   the source's lastModified changes, the prompt version bumps, or a
+   stored summary trips the render-time lexicon gate (§2) — a bounded,
+   error-informed correction, never a side effect of re-running the
+   digest (rule 14a) — never any other way.
 6. **Tier the models.** Cheap/fast models for per-item map work
    (classification, per-item compression); the strongest model only for the
    final digest composition pass, which sees already-compressed input.
@@ -1235,6 +1237,33 @@ of the code, not of operator discipline.
   input tokens — 62% of the day — to buy summaries of ~800 tokens each.
   Disclosure is cheaper than completeness bought at that price, and the
   coverage statement is where it is disclosed.
+- **Rule 14a — a lexicon-gate failure gets two corrective rewrites, then
+  withdrawal (added 2026-08-09; incident: CREC-2026-07-13-pt1-PgH4403,
+  "extreme").** A stored map or plain-speak summary that trips
+  `_validate_lexicon` at render time is never retried blindly — rule 5's
+  durability guarantee means an identical rerun hits the identical
+  cached text and fails identically, as it did three times overnight on
+  digest day 2026-08-08, halting the finalizer ladder with the day
+  unpublished. Instead the offending item gets up to
+  `config.MAX_LEXICON_CORRECTION_ATTEMPTS` (2) corrective regenerations,
+  each naming the specific violated term(s), restating the full §2 list
+  and the official-title verbatim-quote exception, and supplying the
+  source text so the model writes a genuine replacement rather than
+  patches a word. Each corrective reply is self-gated against the same
+  lexicon regex — exempting only that item's own official title/name,
+  the same positional rule §2 already applies — before it overwrites the
+  stored row; a failed self-gate counts as a used attempt, not a stored
+  one. Attempts are remembered durably in `summary_attempts` (layer
+  `map-correction`/`plain-correction`) so the ceiling holds across every
+  future run. **Past the ceiling the row is withdrawn (deleted), not
+  left in place**: the item becomes exactly what editorial.md's "never
+  fabricate" rule already handles — no summary row, no plain line,
+  counted but not summarized, same bucket as any other disclosed gap.
+  This is what lets a single stubborn word choice stop blocking that
+  day's digest forever. Compose-level prose (Day in Review, section
+  synopses/tags) has no package/granule identity to correct against and
+  is explicitly OUT of this rule's scope — a lexicon failure there falls
+  through to the pre-existing whole-day finalizer ladder, unchanged.
 
 ## 7. Provenance & Tamper-Evidence
 

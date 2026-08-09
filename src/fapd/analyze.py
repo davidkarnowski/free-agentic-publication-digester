@@ -21,6 +21,7 @@ import json
 import logging
 
 from . import config, rules
+from .report import _BANNED_RE, _official_spans
 from .sync import utc_now_iso
 
 logger = logging.getLogger("fapd.analyze")
@@ -62,6 +63,24 @@ object mapping each document's key (the exact string after "key=" in its
 header) to that document's summary string. No markdown fences, no
 commentary, no keys other than the document keys.
 """.replace("{banned}", _BANNED_CLAUSE)
+
+# GUIDE §6 rule 14a: prepended to _PREAMBLE/_PLAIN_PREAMBLE (never sent
+# standalone) for a corrective rewrite of a summary that already exists
+# but tripped the render-time lexicon gate. Names the SPECIFIC term(s)
+# a prior attempt used, on top of the full list the base preamble
+# already restates -- error-informed, not a blind identical retry.
+_CORRECTION_NOTICE = """\
+CORRECTION NOTICE: your previous summary of this document used at least
+one word this digest never uses in its own voice: {terms}. Write a full
+replacement from scratch using the source text below -- do not simply
+delete or swap the flagged word. Avoid the ENTIRE banned list restated
+below, not just the term(s) named here. If the flagged word appears only
+because it is part of the document's own official title, case caption,
+or the name of a law, you may still quote that exact title/name verbatim
+per the exception below -- but if it appeared in your own descriptive
+sentence, it must not reappear in the new text, in any form.
+
+"""
 
 
 def _key(item):
@@ -371,6 +390,16 @@ def run_plain(conn, llm, date):
             (date, config.PROMPT_VERSION, config.PLAIN_PROMPT_VERSION),
         ).fetchall()
     ]
+    # GUIDE §6 rule 14a: same guard as run()'s map loop -- an item
+    # withdrawn after exhausting its plain-correction ceiling has no
+    # summaries row for a 'map' withdrawal (so it's already absent from
+    # this query via the JOIN), but a 'plain'-only withdrawal leaves the
+    # map summary in place and would otherwise look pending again here.
+    before_guard = len(pending)
+    pending = [r for r in pending
+               if not _lexicon_correction_exhausted(
+                   conn, r["package_id"], r["granule_id"], "plain")]
+    stats["skipped_lexicon_withdrawn"] = before_guard - len(pending)
     stats["plain_pending"] = len(pending)
 
     retry_queue = []
@@ -399,6 +428,179 @@ def run_plain(conn, llm, date):
     return stats
 
 
+def _lexicon_clean(text, *titles):
+    """Whether `text` clears the lexicon gate on its own, exempting only
+    occurrences of THIS item's own official title(s) (GUIDE §6 rule 14a
+    "context aware" self-gate) -- narrower and more permissive than the
+    whole-day exemption corpus `_validate_lexicon` uses, since a single
+    item's correction has no business being exempted by a DIFFERENT
+    item's title. A legitimate verbatim title/name quote passes; the
+    model's own word choice does not."""
+    officials = [t for t in titles if t]
+    exempt = _official_spans(text, officials)
+    for match in _BANNED_RE.finditer(text):
+        if not any(a <= match.start() and match.end() <= b for a, b in exempt):
+            return False
+    return True
+
+
+def _lexicon_correction_exhausted(conn, package_id, granule_id, layer):
+    """Whether this item's correction ceiling (GUIDE §6 rule 14a,
+    config.MAX_LEXICON_CORRECTION_ATTEMPTS) is already spent -- checked
+    by both correct_lexicon_violation and the pending-selection loops in
+    run()/run_plain(), so a withdrawn item never re-enters ordinary
+    summarization with the uncorrected prompt at the same prompt
+    version."""
+    row = conn.execute(
+        "SELECT attempts FROM summary_attempts WHERE package_id = ?"
+        " AND granule_id = ? AND prompt_version = ? AND layer = ?",
+        (package_id, granule_id, config.PROMPT_VERSION, f"{layer}-correction"),
+    ).fetchone()
+    return bool(row) and row[0] >= config.MAX_LEXICON_CORRECTION_ATTEMPTS
+
+
+def _apply_lexicon_correction(conn, package_id, granule_id, layer, text, *,
+                              model, input_tokens, output_tokens):
+    now = dt.datetime.now(dt.UTC).isoformat(timespec="seconds")
+    if layer == "map":
+        conn.execute(
+            "UPDATE summaries SET summary = ?, model = ?, input_tokens = ?,"
+            " output_tokens = ?, created_at = ?"
+            " WHERE package_id = ? AND granule_id = ? AND prompt_version = ?",
+            (text, model, input_tokens, output_tokens, now,
+             package_id, granule_id, config.PROMPT_VERSION),
+        )
+    else:
+        conn.execute(
+            "UPDATE plain_summaries SET plain = ?, model = ?, input_tokens = ?,"
+            " output_tokens = ?, created_at = ?"
+            " WHERE package_id = ? AND granule_id = ? AND plain_version = ?"
+            " AND source_prompt_version = ?",
+            (text, model, input_tokens, output_tokens, now,
+             package_id, granule_id, config.PLAIN_PROMPT_VERSION, config.PROMPT_VERSION),
+        )
+    conn.commit()
+
+
+def _withdraw_lexicon_violation(conn, package_id, granule_id, layer):
+    """Past the correction ceiling: delete rather than leave a row that
+    will keep failing validate() forever (GUIDE §6 rule 14a). A 'map'
+    withdrawal also deletes the dependent plain row so nothing orphaned
+    lingers; a 'plain' withdrawal leaves the (clean) map summary alone."""
+    if layer == "map":
+        conn.execute(
+            "DELETE FROM summaries WHERE package_id = ? AND granule_id = ?"
+            " AND prompt_version = ?",
+            (package_id, granule_id, config.PROMPT_VERSION),
+        )
+        conn.execute(
+            "DELETE FROM plain_summaries WHERE package_id = ? AND granule_id = ?"
+            " AND source_prompt_version = ?",
+            (package_id, granule_id, config.PROMPT_VERSION),
+        )
+    else:
+        conn.execute(
+            "DELETE FROM plain_summaries WHERE package_id = ? AND granule_id = ?"
+            " AND plain_version = ? AND source_prompt_version = ?",
+            (package_id, granule_id, config.PLAIN_PROMPT_VERSION, config.PROMPT_VERSION),
+        )
+    conn.commit()
+
+
+def _log_lexicon_correction(conn, package_id, granule_id, layer, term, outcome):
+    conn.execute(
+        "INSERT INTO lexicon_corrections (package_id, granule_id, layer, term,"
+        " outcome, corrected_at) VALUES (?, ?, ?, ?, ?, ?)",
+        (package_id, granule_id, layer, term, outcome, utc_now_iso()),
+    )
+    conn.commit()
+
+
+def correct_lexicon_violation(conn, llm, *, package_id, granule_id, layer, term):
+    """One bounded, error-informed rewrite of a map summary or plain line
+    that tripped the render-time lexicon gate (GUIDE §6 rule 14a).
+
+    `layer` is the ORIGINAL failing layer ('map' or 'plain'); attempts
+    are tracked durably under f'{layer}-correction' in summary_attempts
+    (via the existing _record_attempts), so the ceiling
+    (config.MAX_LEXICON_CORRECTION_ATTEMPTS) holds across every future
+    run, not just the current one -- a rerun that finds the ceiling
+    already spent withdraws immediately rather than spending another
+    call. Exhausting it withdraws the row (DELETE) rather than leaving a
+    stubborn word blocking the day forever -- editorial.md's "never
+    fabricate" pattern, entered through a new trigger.
+
+    Returns {"outcome": "corrected" | "withdrawn"}.
+    """
+    correction_layer = f"{layer}-correction"
+    row = conn.execute(
+        "SELECT attempts FROM summary_attempts WHERE package_id = ?"
+        " AND granule_id = ? AND prompt_version = ? AND layer = ?",
+        (package_id, granule_id, config.PROMPT_VERSION, correction_layer),
+    ).fetchone()
+    attempts_so_far = row[0] if row else 0
+
+    item = conn.execute(
+        "SELECT s.package_id, s.granule_id, s.summary, s.inclusion_rule,"
+        " e.doc_type, e.title, e.collection, e.text,"
+        " g.title AS granule_title, p.title AS package_title"
+        " FROM summaries s"
+        " LEFT JOIN extracted_texts e"
+        "   ON e.package_id = s.package_id AND e.granule_id = s.granule_id"
+        " LEFT JOIN granules g"
+        "   ON g.package_id = s.package_id AND g.granule_id = s.granule_id"
+        " LEFT JOIN packages p ON p.package_id = s.package_id"
+        " WHERE s.package_id = ? AND s.granule_id = ? AND s.prompt_version = ?",
+        (package_id, granule_id, config.PROMPT_VERSION),
+    ).fetchone()
+    if item is None:
+        # Already gone -- nothing left to correct or withdraw.
+        return {"outcome": "withdrawn"}
+    item = dict(item)
+    titles = (item.get("title"), item.get("granule_title"), item.get("package_title"))
+
+    while attempts_so_far < config.MAX_LEXICON_CORRECTION_ATTEMPTS:
+        if layer == "map":
+            text = item["text"] or ""
+            if len(text) > ITEM_TEXT_LIMIT:
+                text = text[:ITEM_TEXT_LIMIT] + _TEXT_TRUNCATION_NOTE
+            prompt = _CORRECTION_NOTICE.format(terms=term) + _build_prompt([(item, text)])
+            purpose = "map:lexicon-correction"
+        else:
+            prompt = _CORRECTION_NOTICE.format(terms=term) + _build_plain_prompt([item])
+            purpose = "plain:lexicon-correction"
+
+        result = llm.complete(prompt, purpose=purpose,
+                              package_id=package_id, granule_id=granule_id or None)
+        mapping = _parse_reply(result["text"])
+        candidate = mapping.get(_key(item))
+        attempts_so_far += 1
+        _record_attempts(conn, correction_layer, [(package_id, granule_id)])
+
+        if isinstance(candidate, str) and candidate.strip():
+            candidate = (candidate.strip() if layer == "map"
+                        else " ".join(candidate.split()))
+            if _lexicon_clean(candidate, *titles):
+                _apply_lexicon_correction(
+                    conn, package_id, granule_id, layer, candidate,
+                    model=result["model"], input_tokens=result["input_tokens"],
+                    output_tokens=result["output_tokens"],
+                )
+                _log_lexicon_correction(conn, package_id, granule_id, layer, term,
+                                        "corrected")
+                return {"outcome": "corrected"}
+            logger.warning("%s: correction attempt for %s/%s still fails the"
+                           " lexicon gate — self-gated, not stored",
+                           correction_layer, package_id, granule_id)
+        else:
+            logger.warning("%s: correction attempt for %s/%s returned no usable"
+                           " text", correction_layer, package_id, granule_id)
+
+    _withdraw_lexicon_violation(conn, package_id, granule_id, layer)
+    _log_lexicon_correction(conn, package_id, granule_id, layer, term, "withdrawn")
+    return {"outcome": "withdrawn"}
+
+
 def run(conn, llm, date):
     """Summarize every rule-selected document for the date. Idempotent:
     items already summarized under config.PROMPT_VERSION are skipped before
@@ -420,6 +622,14 @@ def run(conn, llm, date):
     for item in items:
         if _summary_exists(conn, item):
             stats["skipped_existing"] += 1
+            continue
+        # GUIDE §6 rule 14a: an item withdrawn after exhausting its
+        # lexicon-correction ceiling must never re-enter ordinary
+        # summarization at the same prompt version -- its absent row
+        # would otherwise look like fresh pending work and reproduce the
+        # identical violation with the uncorrected prompt.
+        if _lexicon_correction_exhausted(conn, item["package_id"], item["granule_id"], "map"):
+            stats["skipped_lexicon_withdrawn"] = stats.get("skipped_lexicon_withdrawn", 0) + 1
             continue
         row = conn.execute(
             "SELECT text, metadata FROM extracted_texts"
