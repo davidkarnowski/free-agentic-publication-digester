@@ -41,6 +41,19 @@ this file.
 - **Failed requests count against the budget on purpose.** A 503 cost
   the server a request (882 of 4,868 govinfo requests over three July
   days were 503s). Do not "fix" a budget shortfall by excluding them.
+- **A retry ceiling per package, not just per call (GUIDE §4, amended
+  2026-08-10).** `sync.py` had none for years: a permanently-failing
+  package (distinct from govinfo's normal on-demand ZIP/MODS generation
+  delay) re-entered the same `pending`/`failed` query every ~30-minute
+  cycle forever, inflating the accepted 18.1% govinfo error baseline to
+  a measured 22-26% across six consecutive days before anyone traced it
+  to `_download_pending`'s missing cross-cycle memory — the identical bug
+  shape rule 14/`MAX_ITEM_SUMMARY_ATTEMPTS` already fixed for the LLM
+  layer, never generalized here. `config.MAX_PACKAGE_FETCH_ATTEMPTS` (48
+  cycles, ~24h) now bounds it; past it a package is `fetch_status =
+  'exhausted'`, not re-queued. This is the pattern to reach for the next
+  time a source shows a chronic-but-mysterious error rate — check for a
+  missing cross-cycle ceiling before assuming the server is just slow.
 - **Cache permission, don't re-ask it.** F-007 (2026-07-31): the robots
   cache lived on the instance, the collector rebuilt the client every
   cycle, and 528 robots fetches/day were spent asking a question already
@@ -89,6 +102,10 @@ this file.
 - Bill actions are dated by the publisher; agency releases are not
   (`DATED_BY_PUBLISHER`, GUIDE §3). Do not unify the two.
 - Temporary robots disallows (5xx) are not persisted.
+- `MAX_PACKAGE_FETCH_ATTEMPTS = 48` and the `'exhausted'` terminal status
+  are deliberate (GUIDE §4, 2026-08-10) — not the same concept as
+  `'skipped'` (chose not to fetch) or `sources.STATUSES`'s `'unavailable'`
+  (a publisher refuses us entirely). Don't collapse the three.
 
 ## Code expectations
 

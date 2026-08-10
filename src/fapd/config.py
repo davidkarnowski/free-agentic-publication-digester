@@ -236,6 +236,15 @@ MAX_ITEM_SUMMARY_ATTEMPTS = 3
 # attempt than an ordinary retry.
 MAX_LEXICON_CORRECTION_ATTEMPTS = 2
 
+# GUIDE §4 amendment 2026-08-10: sync.py had no cross-cycle retry ceiling
+# for package downloads, so a permanently-stuck package (distinct from
+# govinfo's normal on-demand ZIP/MODS generation delay) was re-attempted
+# every ~30-minute cycle forever, inflating the accepted 18.1% baseline
+# govinfo error rate (2026-07-31) to a measured 22-26% (2026-08-04..09).
+# ~24 hours of cycles is a generous grace period before calling a package
+# a disclosed gap rather than still-generating.
+MAX_PACKAGE_FETCH_ATTEMPTS = 48
+
 LLM_TIMEOUT = 300  # seconds per call
 
 # GUIDE.md §3: scope. Order is sync order. USCOURTS added 2026-07-25 (J1).

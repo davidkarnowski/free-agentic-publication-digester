@@ -836,6 +836,33 @@ discipline:
   unavailability; the response to that is fewer requests, never faster
   retries.
 
+  **Amended 2026-08-10 (operator-authorized, on evidence) — a per-package
+  retry ceiling for downloads.** The amendment above established that
+  failed govinfo requests count against the budget on purpose and that
+  "the response to that is fewer requests, never faster retries" — but
+  `sync.py`'s download queue had no mechanism to act on that principle
+  across cycles: a package that failed once re-entered the exact same
+  `pending`/`failed` query every ~30 minutes, indefinitely, with no
+  ceiling. The 2026-07-31 ruling accepted an 18.1% govinfo error rate
+  (882/4,868, one-time 503s from on-demand ZIP/MODS generation); daily
+  insight reports from 2026-08-04 through 2026-08-09 measured a chronic
+  22-26% rate instead — the gap is attributable to packages that are not
+  merely slow to generate but persistently stuck, re-attempted forever
+  and resurfaced first every cycle by the `date_issued DESC` sort. After
+  `config.MAX_PACKAGE_FETCH_ATTEMPTS` (48, ~24 hours of cycles)
+  consecutive cycle-level failures, a package is marked
+  `fetch_status='exhausted'` — a disclosed gap distinct from `'skipped'`
+  (a deliberate non-fetch) — and stops re-entering the download queue; a
+  later content revision (`last_modified` advancing) resets the ceiling,
+  since a revision is a new problem, not a continuation of the old one.
+  This is the same shape as §6 rule 14 (`MAX_ITEM_SUMMARY_ATTEMPTS`) and
+  the EOD finalizer's ladder, generalized to the sync layer, which never
+  had it. This does not touch the daily cap, the hourly ceiling, the
+  per-call attempt count, or per-call backoff — the fix reduces total
+  request volume over time by ending a request source that should never
+  have been unbounded, in the same direction as the standing rule, not
+  against it.
+
   **Agency class raised 500 -> 1,500/day (amended 2026-07-31,
   operator-authorised).** The condition set was "as long as we aren't
   violating any bot/server restraints set by source servers", so the

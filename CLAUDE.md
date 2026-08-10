@@ -427,3 +427,29 @@ live in `.claude/agents/fapd-*.md` (tracked).
   line (previously title-only despite paying full LLM cost to generate
   them — a pre-existing waste bug, fixed alongside since it's what
   brought PRESACT into the correction surface in the first place).
+- **2026-08-10** — **`sync.py` gets the retry ceiling the LLM and
+  finalizer layers already had** (GUIDE §4 amended; operator). Six
+  consecutive daily insight reports (2026-08-04 through 2026-08-09)
+  flagged a chronic 22-26% govinfo error rate — well above the 18.1%
+  baseline the 2026-07-31 amendment already accepted and ruled on — and
+  none of them got acted on. Root cause, found by reading `sync.py`
+  directly rather than the reports: `_download_pending()` had no
+  cross-cycle retry ceiling at all. A failed package re-entered the same
+  `pending`/`failed` query every ~30-minute cycle forever, and the
+  `date_issued DESC` sort put a permanently-stuck recent package at the
+  front of the queue every time — the identical bug shape already fixed
+  twice elsewhere (`MAX_ITEM_SUMMARY_ATTEMPTS`, the EOD finalizer
+  ladder), never generalized to sync. Fix:
+  `config.MAX_PACKAGE_FETCH_ATTEMPTS` (48, ~24h of cycles) before a package is
+  marked `fetch_status='exhausted'` — a new terminal status, distinct
+  from `'skipped'` (deliberate non-fetch) and `'unavailable'` (a
+  different, source-registry-level concept) — and stops re-entering the
+  queue; a later content revision resets the ceiling. Required this
+  project's first CHECK-constraint-widening migration
+  (`scripts/migrate_widen_fetch_status.py`) since `_ensure_columns` is
+  additive-only. Does not touch the daily cap, hourly ceiling, per-call
+  attempt count, or backoff — reduces total request volume over time,
+  same direction as the standing "fewer requests, never faster retries"
+  rule. `scripts/audit.py` gained a repeat-failure report so the fix's
+  effect is actually measurable, which is what the tooling was missing
+  the whole six days this sat unactioned.

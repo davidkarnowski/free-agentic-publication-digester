@@ -163,6 +163,14 @@ def _upsert_package(conn, collection, pkg):
         ON CONFLICT(package_id) DO UPDATE SET
             fetch_status  = CASE WHEN excluded.last_modified > packages.last_modified
                                  THEN 'pending' ELSE packages.fetch_status END,
+            -- A content revision is a new problem, not a continuation of an
+            -- old retry ceiling (GUIDE §4, amended 2026-08-10) -- reset in
+            -- lockstep with the fetch_status flip above, never unconditionally
+            -- (this runs on every listing pass, not just on revisions).
+            fetch_attempts  = CASE WHEN excluded.last_modified > packages.last_modified
+                                   THEN 0 ELSE packages.fetch_attempts END,
+            last_attempt_at = CASE WHEN excluded.last_modified > packages.last_modified
+                                   THEN NULL ELSE packages.last_attempt_at END,
             last_modified = MAX(packages.last_modified, excluded.last_modified),
             title         = COALESCE(excluded.title, packages.title),
             package_link  = COALESCE(excluded.package_link, packages.package_link),
@@ -235,14 +243,32 @@ def _download_pending(client, conn, collection, stats, max_downloads):
             )
             raise
         except Exception as exc:  # noqa: BLE001 — one bad package must not kill the run
+            # GUIDE §4, amended 2026-08-10: a per-package retry ceiling.
+            # Without this, a permanently-failing package re-entered this
+            # same query every cycle forever (the identical bug shape rule
+            # 14/MAX_ITEM_SUMMARY_ATTEMPTS already fixes for the LLM
+            # layer) -- distinct from govinfo's per-call retry/backoff
+            # (client.py), which already ran to exhaustion before this
+            # exception was ever raised.
+            row = conn.execute(
+                "SELECT fetch_attempts FROM packages WHERE package_id = ?", (pid,)
+            ).fetchone()
+            attempts = (row["fetch_attempts"] or 0) + 1
+            status = ("exhausted" if attempts >= config.MAX_PACKAGE_FETCH_ATTEMPTS
+                     else "failed")
             conn.execute(
-                "UPDATE packages SET fetch_status = 'failed', last_error = ?"
-                " WHERE package_id = ?",
-                (repr(exc)[:500], pid),
+                "UPDATE packages SET fetch_status = ?, last_error = ?,"
+                " fetch_attempts = ?, last_attempt_at = ? WHERE package_id = ?",
+                (status, repr(exc)[:500], attempts, utc_now_iso(), pid),
             )
             conn.commit()
             stats["failed"] += 1
-            logger.warning("%s: download failed, marked 'failed' for retry: %r", pid, exc)
+            if status == "exhausted":
+                stats["exhausted"] = stats.get("exhausted", 0) + 1
+            logger.warning(
+                "%s: download failed (%d/%d attempts), marked %r: %r",
+                pid, attempts, config.MAX_PACKAGE_FETCH_ATTEMPTS, status, exc,
+            )
 
 
 def _download_package(client, conn, collection, package_id):
@@ -280,7 +306,8 @@ def _download_package(client, conn, collection, package_id):
         "UPDATE packages SET date_issued = COALESCE(?, date_issued),"
         " title = COALESCE(?, title), download_url = ?, download_format = ?,"
         " raw_path = ?, fetch_status = 'fetched', fetched_at = ?,"
-        " fetched_last_modified = last_modified, last_error = NULL"
+        " fetched_last_modified = last_modified, last_error = NULL,"
+        " fetch_attempts = 0, last_attempt_at = NULL"
         " WHERE package_id = ?",
         (
             date_issued,

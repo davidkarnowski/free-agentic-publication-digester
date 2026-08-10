@@ -4861,3 +4861,57 @@ stubbed at the boundary; the prompt drift check extended to the
 (679), ruff clean. Not yet done: actually clearing the real stranded
 2026-08-08 day on production — that's a VPS action and stays gated on
 the operator saying so explicitly, same as any deploy.
+
+## 2026-08-10 — the govinfo error rate had a name, six days late
+
+Six consecutive daily insight reports (2026-08-04 through 09) flagged a
+chronic 22-26% govinfo error rate. Every one of them got the same
+non-answer: the 2026-07-31 amendment already ruled 18.1% (882/4,868)
+acceptable — one-time 503s from govinfo generating ZIP/MODS artifacts
+on-demand — so a rate meaningfully above that baseline needed a real
+explanation, not another restatement of the percentage. Nobody read
+`sync.py` to find one until today.
+
+The bug was structural, not statistical: `_download_pending()` had no
+cross-cycle retry ceiling at all. Its entire failure handling was one
+UPDATE — `fetch_status='failed', last_error=?` — and the next cycle's
+query (`WHERE fetch_status IN ('pending','failed') ORDER BY date_issued
+DESC`) couldn't tell a package that failed once from one that had been
+failing for a week. Worse, the recency sort put a permanently-stuck
+recent package at the *front* of the queue every single cycle. This is
+the identical shape of bug `MAX_ITEM_SUMMARY_ATTEMPTS` and the EOD
+finalizer's ladder were both built to fix — and both of those existed
+already, from incidents worklogged the same week in July as the first
+govinfo 503 storm — but the pattern never crossed over to the sync
+layer. Two fixes sitting in the same file history, on the same class of
+bug, three weeks apart.
+
+Fix: `config.MAX_PACKAGE_FETCH_ATTEMPTS` (48 cycles, ~24h — a package
+generating on-demand deserves real patience before being called stuck)
+before a package becomes `fetch_status='exhausted'` and stops
+re-entering the queue. Content revisions reset the ceiling — a new
+`last_modified` is a new problem. This needed this repo's first
+CHECK-constraint-widening migration (`scripts/migrate_widen_fetch_status.py`
+— `_ensure_columns` is additive-only, can't touch a CHECK on a live
+table); ran it against a copy of the real 20,125-row local database
+first, confirmed row-for-row preservation, then against the actual
+local db.
+
+Deliberately did NOT reuse `'skipped'` for the terminal state — that
+column means "chose not to fetch" (USCOURTS' 7-day window), and an
+exhausted package genuinely *couldn't*, not *wouldn't*. Also didn't
+reuse `'unavailable'`, already spoken for at the source-registry level
+(`sources.STATUSES`) for a publisher refusing us entirely — a different
+failure at a different layer. `scripts/audit.py` gained a
+repeat-failures report so this is actually measurable going forward;
+before today, confirming or refuting the retry-storm hypothesis
+required reading `sync.py` directly, which is exactly what six days of
+generated reports couldn't do for themselves.
+
+GUIDE §4 amended (appended under the 2026-07-31 "failed requests count
+on purpose" bullet it directly extends), `docs/agents/acquisition.md`
+updated with the pattern to watch for next time a source's error rate
+looks chronic rather than incidental. 10 new tests
+(`test_sync.py` ×5, `test_audit.py` ×3, `test_migrate_widen_fetch_status.py`
+×2 — the last one establishing this repo's first migration-script test
+pattern, since none existed). Full suite green, ruff clean.

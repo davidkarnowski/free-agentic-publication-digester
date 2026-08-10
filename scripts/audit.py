@@ -14,6 +14,23 @@ import sys
 from fapd import config
 
 
+def repeat_failures_report(pipeline_db_path, limit=10):
+    """Packages currently mid-ceiling or exhausted (GUIDE §4, amended
+    2026-08-10) — the retry-storm view fetch_log's per-attempt rows can't
+    answer on their own, since a single stuck package writes one row per
+    HTTP attempt with no package identity to group by."""
+    db = sqlite3.connect(f"file:{pipeline_db_path}?mode=ro", uri=True)
+    db.row_factory = sqlite3.Row
+    rows = db.execute(
+        "SELECT package_id, collection, fetch_status, fetch_attempts,"
+        " last_attempt_at, last_error FROM packages WHERE fetch_attempts > 0"
+        " ORDER BY fetch_attempts DESC, last_attempt_at DESC LIMIT ?",
+        (limit,),
+    ).fetchall()
+    db.close()
+    return rows
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--days", type=int, default=7, help="how many UTC days back to report")
@@ -77,6 +94,27 @@ def main() -> int:
     ):
         print(f"  {n:>6}  {path}")
     db.close()
+
+    if config.PIPELINE_DB.exists():
+        repeats = repeat_failures_report(config.PIPELINE_DB)
+        print("\nRepeat-failure packages (fetch_attempts > 0, top 10 by attempts):")
+        if repeats:
+            for r in repeats:
+                print(f"  {r['fetch_attempts']:>3}/{config.MAX_PACKAGE_FETCH_ATTEMPTS}"
+                      f"  {r['fetch_status']:<9}  {r['package_id']}"
+                      f"  (last: {r['last_attempt_at'] or '—'})")
+            pdb = sqlite3.connect(f"file:{config.PIPELINE_DB}?mode=ro", uri=True)
+            exhausted = pdb.execute(
+                "SELECT collection, COUNT(*) FROM packages"
+                " WHERE fetch_status = 'exhausted' GROUP BY collection ORDER BY 2 DESC"
+            ).fetchall()
+            pdb.close()
+            if exhausted:
+                print("  exhausted, by collection: "
+                      + ", ".join(f"{c}={n}" for c, n in exhausted))
+        else:
+            print("  (none)")
+
     return 0
 
 

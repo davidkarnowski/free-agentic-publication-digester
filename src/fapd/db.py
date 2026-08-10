@@ -20,12 +20,15 @@ CREATE TABLE IF NOT EXISTS packages (
     raw_path              TEXT,
 
     fetch_status          TEXT NOT NULL DEFAULT 'pending'
-                          CHECK (fetch_status IN ('pending', 'fetched', 'failed', 'skipped')),
+                          CHECK (fetch_status IN ('pending', 'fetched', 'failed',
+                                                   'skipped', 'exhausted')),
     first_seen_at         TEXT NOT NULL,
     digest_day            TEXT,
     fetched_at            TEXT,
     fetched_last_modified TEXT,
-    last_error            TEXT
+    last_error            TEXT,
+    fetch_attempts        INTEGER NOT NULL DEFAULT 0,
+    last_attempt_at       TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_packages_collection_lastmod

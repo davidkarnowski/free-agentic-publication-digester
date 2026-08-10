@@ -394,3 +394,110 @@ def test_digest_day_is_write_once_across_revision_resyncs(conn):
     assert row["digest_day"] == first          # never re-filed
     assert row["fetch_status"] == "pending"    # but the revision re-pends
     assert row["last_modified"] == "2099-01-01T00:00:00Z"
+
+
+# ------------------------------------------------- retry ceiling (GUIDE §4) --
+# A permanently-failing package must not be re-attempted forever across
+# collector cycles (amended 2026-08-10, the sync-layer analogue of rule 14's
+# MAX_ITEM_SUMMARY_ATTEMPTS). Each test below simulates one or more separate
+# sync_collection calls as separate collector cycles.
+
+
+def test_ceiling_marks_package_exhausted_after_max_attempts(conn, raw_dir, monkeypatch):
+    monkeypatch.setattr(config, "MAX_PACKAGE_FETCH_ATTEMPTS", 2)
+    client = FakeClient()
+    client.pages["collections/BILLS/"] = listing([bill("BILLS-119hr1ih", "2026-07-23T10:00:00Z")])
+    with_summary(client, "BILLS-119hr1ih")
+    client.raise_on["https://x/BILLS-119hr1ih/xml"] = RuntimeError("HTTP 503")
+
+    sync.sync_collection(client, conn, "BILLS")  # cycle 1: 1/2 -> failed
+    row = conn.execute("SELECT fetch_status, fetch_attempts FROM packages").fetchone()
+    assert (row["fetch_status"], row["fetch_attempts"]) == ("failed", 1)
+
+    sync.sync_collection(client, conn, "BILLS")  # cycle 2: 2/2 -> exhausted
+    row = conn.execute("SELECT fetch_status, fetch_attempts FROM packages").fetchone()
+    assert (row["fetch_status"], row["fetch_attempts"]) == ("exhausted", 2)
+
+    def download_attempts():
+        return sum(1 for c in client.calls if c[1] == "https://x/BILLS-119hr1ih/xml")
+
+    before = download_attempts()
+    sync.sync_collection(client, conn, "BILLS")  # cycle 3: must not re-attempt
+    assert download_attempts() == before  # dropped out of the query entirely
+
+
+def test_package_succeeding_before_ceiling_is_unaffected(conn, raw_dir):
+    client = FakeClient()
+    client.pages["collections/BILLS/"] = listing([bill("BILLS-119hr1ih", "2026-07-23T10:00:00Z")])
+    with_summary(client, "BILLS-119hr1ih")
+    client.raise_on["https://x/BILLS-119hr1ih/xml"] = RuntimeError("HTTP 503")
+    client.content_by_url["https://x/BILLS-119hr1ih/xml"] = b"<bill>text</bill>"
+
+    sync.sync_collection(client, conn, "BILLS")
+    row = conn.execute("SELECT fetch_status, fetch_attempts FROM packages").fetchone()
+    assert (row["fetch_status"], row["fetch_attempts"]) == ("failed", 1)
+
+    del client.raise_on["https://x/BILLS-119hr1ih/xml"]
+    sync.sync_collection(client, conn, "BILLS")
+    row = conn.execute("SELECT fetch_status, fetch_attempts FROM packages").fetchone()
+    assert (row["fetch_status"], row["fetch_attempts"]) == ("fetched", 0)  # reset, not just unset
+
+
+def test_fresh_pending_packages_unaffected_by_ceiling(conn, raw_dir):
+    client = FakeClient()
+    client.pages["collections/BILLS/"] = listing([bill("BILLS-119hr1ih", "2026-07-23T10:00:00Z")])
+    with_summary(client, "BILLS-119hr1ih")
+    client.content_by_url["https://x/BILLS-119hr1ih/xml"] = b"<bill>text</bill>"
+
+    stats = sync.sync_collection(client, conn, "BILLS")
+    assert stats["downloaded"] == 1
+    row = conn.execute("SELECT fetch_status, fetch_attempts FROM packages").fetchone()
+    assert (row["fetch_status"], row["fetch_attempts"]) == ("fetched", 0)
+
+
+def test_max_downloads_excludes_exhausted_packages_from_cap(conn, raw_dir):
+    # Directly seeded exhausted package (bypassing the ceremony of getting
+    # there) alongside one fresh pending package under a 1-slot cap.
+    conn.execute(
+        "INSERT INTO packages (package_id, collection, last_modified, fetch_status,"
+        " first_seen_at, digest_day, fetch_attempts, date_issued)"
+        " VALUES ('BILLS-stuck', 'BILLS', '2026-07-23T23:00:00Z', 'exhausted',"
+        " '2026-07-23T00:00:00Z', '2026-07-23', ?, '2026-07-23')",
+        (config.MAX_PACKAGE_FETCH_ATTEMPTS,),
+    )
+    conn.commit()
+
+    client = FakeClient()
+    client.pages["collections/BILLS/"] = listing([bill("BILLS-119hr1ih", "2026-07-23T10:00:00Z")])
+    with_summary(client, "BILLS-119hr1ih")
+    client.content_by_url["https://x/BILLS-119hr1ih/xml"] = b"<bill>text</bill>"
+
+    stats = sync.sync_collection(client, conn, "BILLS", max_downloads=1)
+    assert stats["downloaded"] == 1
+    fetched = conn.execute(
+        "SELECT package_id FROM packages WHERE fetch_status='fetched'").fetchall()
+    assert [r[0] for r in fetched] == ["BILLS-119hr1ih"]  # got the only slot
+    stuck = conn.execute(
+        "SELECT fetch_status FROM packages WHERE package_id='BILLS-stuck'").fetchone()
+    assert stuck["fetch_status"] == "exhausted"  # never competed for it
+
+
+def test_revision_after_exhaustion_gets_a_fresh_ceiling(conn):
+    conn.execute(
+        "INSERT INTO packages (package_id, collection, last_modified, fetch_status,"
+        " first_seen_at, digest_day, fetch_attempts, last_attempt_at, date_issued)"
+        " VALUES ('BILLS-119hr1ih', 'BILLS', '2026-07-23T10:00:00Z', 'exhausted',"
+        " '2026-07-23T00:00:00Z', '2026-07-23', ?, '2026-07-23T10:00:00Z', '2026-07-23')",
+        (config.MAX_PACKAGE_FETCH_ATTEMPTS,),
+    )
+    conn.commit()
+
+    sync._upsert_package(conn, "BILLS", {
+        "packageId": "BILLS-119hr1ih", "dateIssued": "2026-07-23",
+        "lastModified": "2026-08-01T00:00:00Z"})
+    row = conn.execute(
+        "SELECT fetch_status, fetch_attempts, last_attempt_at FROM packages"
+        " WHERE package_id='BILLS-119hr1ih'").fetchone()
+    assert row["fetch_status"] == "pending"      # a revision is a new problem
+    assert row["fetch_attempts"] == 0
+    assert row["last_attempt_at"] is None

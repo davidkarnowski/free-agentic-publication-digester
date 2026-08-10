@@ -56,12 +56,15 @@ CREATE TABLE packages (
                                                          -- e.g. 'data/raw/CREC/2026-07-23/CREC-2026-07-23.xml'
 
     fetch_status          TEXT NOT NULL DEFAULT 'pending'
-                          CHECK (fetch_status IN ('pending', 'fetched', 'failed', 'skipped')),
+                          CHECK (fetch_status IN ('pending', 'fetched', 'failed',
+                                                   'skipped', 'exhausted')),
     first_seen_at         TEXT NOT NULL,                 -- when a sync first recorded this package
     digest_day            TEXT,                          -- the digest day this package files under (GUIDE §3, amended 2026-08-06)
     fetched_at            TEXT,                          -- when the raw file was last downloaded
     fetched_last_modified TEXT,                          -- server lastModified at the time of that download
-    last_error            TEXT                           -- most recent download error, NULL when healthy
+    last_error            TEXT,                          -- most recent download error, NULL when healthy
+    fetch_attempts        INTEGER NOT NULL DEFAULT 0,     -- consecutive cycle-level download failures (GUIDE §4, amended 2026-08-10)
+    last_attempt_at       TEXT                           -- ISO-8601 UTC of the most recent attempt, NULL until first
 );
 ```
 
@@ -105,11 +108,44 @@ CREATE TABLE packages (
     `last_modified` moved past `fetched_last_modified`).
   - `fetched` — current raw file on disk at `raw_path`.
   - `failed` — download attempted, gave up after retries; `last_error` says
-    why. Re-tried on a later run.
+    why. Re-tried on a later run, up to `config.MAX_PACKAGE_FETCH_ATTEMPTS`
+    (GUIDE §4, amended 2026-08-10).
   - `skipped` — deliberately not downloaded (e.g., a package class we list
     for the coverage statement but chose not to archive). Distinct from
     `failed` so the GUIDE §2 completeness accounting can tell "couldn't"
     from "chose not to".
+  - `exhausted` — retried `config.MAX_PACKAGE_FETCH_ATTEMPTS` (48, ~24h of
+    cycles) times across collector cycles and never succeeded; a disclosed
+    gap, distinct from `skipped` (this one genuinely *couldn't*, not
+    *chose not to*) and from `sources.STATUSES`'s `unavailable` (a
+    different, source-registry-level concept — a publisher refusing us
+    entirely, not one package's download). Stops re-entering the download
+    queue (`idx_packages_unfetched` only covers `pending`/`failed`). A
+    later content revision (`last_modified` advancing) resets
+    `fetch_attempts` to 0 and flips the row back to `pending` — a revision
+    is a new problem, not a continuation of the old one. Added because
+    `sync.py` had no cross-cycle retry ceiling at all before this: a
+    permanently-failing package was re-attempted every ~30-minute cycle
+    forever, inflating the 2026-07-31-accepted 18.1% govinfo error
+    baseline to a measured 22-26% (2026-08-04 through 09). Adding this
+    value required widening the `CHECK` constraint on an existing
+    database, which `_ensure_columns`'s additive-only pattern cannot do
+    (see `digest_day` above for that pattern's usual shape) — the
+    one-shot `scripts/migrate_widen_fetch_status.py` rebuilds the table
+    instead, this repo's first migration of that kind.
+- **`fetch_attempts`** — consecutive cycle-level failures since the last
+  success (GUIDE §4, amended 2026-08-10). Reset to 0 on a successful
+  download (`_download_package`) and on a content revision
+  (`_upsert_package`'s `last_modified`-advanced branch) — both are "start
+  over," not "keep counting." This is a *cycle*-level counter, not a
+  per-HTTP-attempt one: each cycle's own `client.py`-level retry (up to 5
+  attempts with backoff) already happens before a cycle counts as one
+  failure here — the two ceilings operate at different layers on purpose,
+  the same relationship `MAX_ITEM_SUMMARY_ATTEMPTS` has to a single LLM
+  call's own retry behavior.
+- **`last_attempt_at`** — ISO-8601 UTC of the most recent attempt, NULL
+  until the first one. Diagnostic only (surfaced by
+  `scripts/audit.py`'s repeat-failures report); nothing keys off it.
 - **`first_seen_at` / `fetched_at`** — audit trail: when we learned of it
   vs. when we archived it. `fetched_at` NULL until first successful download.
 - **`fetched_last_modified`** — the change-detection anchor (see
