@@ -24,6 +24,8 @@ import sqlite3
 import subprocess
 import time
 
+import requests
+
 from . import config
 from .client import BudgetExceededError
 
@@ -202,6 +204,95 @@ class AnthropicBackend:
         }
 
 
+class GeminiBackend:
+    """Google AI Studio / Gemini REST API backend.
+    
+    Uses standard requests HTTP API (https://generativelanguage.googleapis.com).
+    The requester is injectable for tests.
+    """
+
+    name = "gemini"
+
+    def __init__(self, api_key=None, requester=None):
+        self._api_key = (
+            api_key
+            or os.environ.get("GOOGLE_GEMINI_API_KEY")
+            or os.environ.get("GEMINI_API_KEY")
+            or os.environ.get("GOOGLE_API_KEY")
+        )
+        self._requester = requester or requests.post
+
+    def complete(self, prompt, *, model, timeout):
+        if not self._api_key:
+            raise LLMError(
+                "Gemini API key not found. Set GOOGLE_GEMINI_API_KEY or"
+                " GEMINI_API_KEY in environment."
+            )
+
+        model_name = model.removeprefix("models/")
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
+            f"?key={self._api_key}"
+        )
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "maxOutputTokens": config.LLM_MAX_OUTPUT_TOKENS,
+            },
+        }
+        headers = {"Content-Type": "application/json"}
+
+        try:
+            resp = self._requester(
+                url,
+                json=payload,
+                headers=headers,
+                timeout=timeout,
+            )
+        except Exception as exc:
+            raise LLMError(f"Gemini API HTTP request failed: {str(exc)[:500]}") from exc
+
+        status_code = getattr(resp, "status_code", 200)
+        if status_code != 200:
+            err_text = getattr(resp, "text", str(resp))[:500]
+            if status_code == 429:
+                raise TransientLLMError(
+                    f"Gemini API rate limit 429: {err_text} — zero tokens billed"
+                )
+            raise LLMError(f"Gemini API error (HTTP {status_code}): {err_text}")
+
+        try:
+            data = resp.json() if callable(getattr(resp, "json", None)) else json.loads(resp.text)
+        except Exception as exc:
+            raise LLMError(f"unparseable Gemini API output: {exc}") from exc
+
+        candidates = data.get("candidates") or []
+        if not candidates:
+            prompt_feedback = data.get("promptFeedback")
+            raise LLMError(f"Gemini returned no candidates. Feedback: {prompt_feedback}")
+
+        candidate = candidates[0]
+        finish_reason = candidate.get("finishReason")
+        if finish_reason in ("SAFETY", "RECITATION", "BLOCKLIST", "PROHIBITED_CONTENT", "SPII"):
+            raise LLMError(
+                f"refusal: Gemini model output blocked due to finishReason={finish_reason}"
+            )
+
+        content = candidate.get("content") or {}
+        parts = content.get("parts") or []
+        text = "".join(part.get("text", "") for part in parts).strip()
+
+        usage = data.get("usageMetadata") or {}
+        input_tokens = usage.get("promptTokenCount", 0)
+        output_tokens = usage.get("candidatesTokenCount", 0)
+
+        return {
+            "text": text,
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+        }
+
+
 class LLMClient:
     def __init__(self, db_path=None, runner=None, backend=None):
         self._db_path = db_path or config.LLM_LEDGER_DB
@@ -213,6 +304,8 @@ class LLMClient:
             self._backend = backend
         elif runner is not None:
             self._backend = CLIBackend(runner)  # existing test seam
+        elif config.LLM_BACKEND in ("gemini", "google"):
+            self._backend = GeminiBackend()
         elif config.LLM_BACKEND == "api":
             self._backend = AnthropicBackend()
         else:

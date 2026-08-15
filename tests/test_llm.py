@@ -315,3 +315,113 @@ def test_zero_exit_error_envelope_is_not_silent_garbage(tmp_path):
     r = client.complete("x", purpose="map:test")
     assert r["text"] == "recovered"
     assert len(calls) == 2
+
+
+# ---- Gemini / Google AI Studio backend tests
+
+
+class FakeGeminiResponse:
+    def __init__(self, status_code=200, json_data=None, text=""):
+        self.status_code = status_code
+        self._json_data = json_data or {}
+        self.text = text or json.dumps(self._json_data)
+
+    def json(self):
+        return self._json_data
+
+
+def gemini_json(text="gemini summary", inp=120, out=30, finish_reason="STOP"):
+    return {
+        "candidates": [
+            {
+                "content": {"parts": [{"text": text}], "role": "model"},
+                "finishReason": finish_reason,
+            }
+        ],
+        "usageMetadata": {
+            "promptTokenCount": inp,
+            "candidatesTokenCount": out,
+            "totalTokenCount": inp + out,
+        },
+    }
+
+
+class FakeGeminiRequester:
+    def __init__(self, responses=None, error=None):
+        self.calls = []
+        self._responses = responses or []
+        self._error = error
+
+    def __call__(self, url, json=None, headers=None, timeout=None):
+        self.calls.append({"url": url, "json": json, "headers": headers, "timeout": timeout})
+        if self._error is not None:
+            raise self._error
+        return self._responses.pop(0)
+
+
+def make_gemini_client(tmp_path, **fake_kwargs):
+    fake = FakeGeminiRequester(**fake_kwargs)
+    backend = llm.GeminiBackend(api_key="fake-gemini-key", requester=fake)
+    client = LLMClient(db_path=tmp_path / "ledger.db", backend=backend)
+    return client, fake
+
+
+def test_gemini_backend_resolves_tier_and_ledgers_backend(tmp_path):
+    client, fake = make_gemini_client(
+        tmp_path, responses=[FakeGeminiResponse(json_data=gemini_json())]
+    )
+    r = client.complete("summarize", purpose="map:test", model=config.MAP_MODEL)
+    assert "gemini-2.5-flash" in fake.calls[0]["url"]
+    assert fake.calls[0]["json"]["contents"][0]["parts"][0]["text"] == "summarize"
+    assert r["text"] == "gemini summary"
+    assert r["input_tokens"] == 120
+    assert r["output_tokens"] == 30
+    assert r["model"] == config.LLM_MODELS["gemini"]["haiku"]
+    row = client._db.execute("SELECT backend, model FROM llm_calls").fetchone()
+    assert row == ("gemini", config.LLM_MODELS["gemini"]["haiku"])
+
+
+def test_gemini_failure_is_ledgered_and_raises(tmp_path):
+    client, _ = make_gemini_client(
+        tmp_path,
+        responses=[FakeGeminiResponse(status_code=500, text="Internal Server Error")],
+    )
+    with pytest.raises(LLMError, match="HTTP 500"):
+        client.complete("x", purpose="map:test")
+    row = client._db.execute("SELECT backend, error, input_tokens FROM llm_calls").fetchone()
+    assert row[0] == "gemini" and "HTTP 500" in row[1] and row[2] == 0
+
+
+def test_gemini_429_is_transient_error_and_retries(tmp_path):
+    client, fake = make_gemini_client(
+        tmp_path,
+        responses=[
+            FakeGeminiResponse(status_code=429, text="Rate limit exceeded"),
+            FakeGeminiResponse(json_data=gemini_json("recovered")),
+        ],
+    )
+    r = client.complete("x", purpose="map:test")
+    assert r["text"] == "recovered"
+    assert len(fake.calls) == 2
+    rows = client._db.execute("SELECT error, input_tokens FROM llm_calls ORDER BY id").fetchall()
+    assert len(rows) == 2
+    assert "rate limit 429" in rows[0][0]
+
+
+def test_gemini_refusal_is_ledgered_and_raises(tmp_path):
+    client, _ = make_gemini_client(
+        tmp_path,
+        responses=[FakeGeminiResponse(json_data=gemini_json(finish_reason="SAFETY"))],
+    )
+    with pytest.raises(LLMError, match="refusal"):
+        client.complete("x", purpose="map:test")
+    row = client._db.execute("SELECT error FROM llm_calls").fetchone()
+    assert "refusal" in row[0]
+
+
+def test_gemini_backend_selected_from_config(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "LLM_BACKEND", "gemini")
+    monkeypatch.setenv("GOOGLE_GEMINI_API_KEY", "dummy-key")
+    client = LLMClient(db_path=tmp_path / "g.db")
+    assert isinstance(client._backend, llm.GeminiBackend)
+

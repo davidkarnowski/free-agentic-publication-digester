@@ -114,7 +114,8 @@ LLM_LEDGER_DB = DATA_DIR / "llm_ledger.db"
 # GUIDE §6 rule 6: tiered models — cheap map tier, strong compose tier.
 # The LLM layer is backend-pluggable (§6 rule 7, amended 2026-07-30):
 #   "cli" — the `claude` CLI (headless), billed to the operator's plan;
-#   "api" — the Anthropic API (ANTHROPIC_API_KEY), for hosted/VPS runs.
+#   "api" — the Anthropic API (ANTHROPIC_API_KEY), for hosted/VPS runs;
+#   "gemini" / "google" — Google AI Studio (GOOGLE_GEMINI_API_KEY).
 LLM_BACKEND = os.environ.get("LLM_BACKEND", "cli").strip().lower()
 MAP_MODEL = "haiku"
 COMPOSE_MODEL = "opus"
@@ -129,6 +130,14 @@ LLM_MODELS = {
     "api": {
         "haiku": os.environ.get("FAPD_MAP_MODEL_API", "claude-haiku-4-5-20251001"),
         "opus": os.environ.get("FAPD_COMPOSE_MODEL_API", "claude-opus-5"),
+    },
+    "gemini": {
+        "haiku": os.environ.get("FAPD_MAP_MODEL_GEMINI", "gemini-2.5-flash"),
+        "opus": os.environ.get("FAPD_COMPOSE_MODEL_GEMINI", "gemini-2.5-flash"),
+    },
+    "google": {
+        "haiku": os.environ.get("FAPD_MAP_MODEL_GEMINI", "gemini-2.5-flash"),
+        "opus": os.environ.get("FAPD_COMPOSE_MODEL_GEMINI", "gemini-2.5-flash"),
     },
 }
 # API-backend response cap. On models with extended thinking on by default
