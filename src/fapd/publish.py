@@ -2806,6 +2806,7 @@ def refresh_sources(out_dir=None, *, pipeline_db=None, fetch_db=None,
     (out_dir / "sources.json").write_text(
         _json_mod.dumps(_sources_json(entries, hp, config.SITE_BASE_URL),
                         indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    (out_dir / "style.css").write_text(_STYLE, encoding="utf-8")
     # The computed payload travels with the result so the caller (the
     # collector's RenderWorker persisting health labels) never has to
     # recompute it — one computation per cycle, one truth.
