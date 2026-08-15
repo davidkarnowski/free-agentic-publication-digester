@@ -474,18 +474,19 @@ li.source-note a { color: var(--muted); }
 .src-stat-label { color: var(--muted); }
 .src-unmeasured { color: var(--muted); }
 
-/* 7-Day Activity Heatmap Graph */
-.src-activity-graph {
+/* 7-Day Activity Heatmap Timeline */
+.src-timeline {
   margin: 0.5rem 0 0;
   padding: 0.5rem 0.7rem;
   background: var(--stripe);
   border: 1px solid var(--border);
   border-radius: 6px;
+  box-sizing: border-box;
 }
-.activity-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.timeline-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
   margin-bottom: 0.35rem;
   font-size: 0.76rem;
   font-weight: 600;
@@ -493,90 +494,101 @@ li.source-note a { color: var(--muted); }
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
-.activity-dates {
+.timeline-dates {
   font-weight: normal;
   text-transform: none;
   letter-spacing: normal;
 }
-.activity-blocks {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.35rem;
-  width: 100%;
+.timeline-days {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0.35rem !important;
+  width: 100% !important;
+  box-sizing: border-box;
 }
-.act-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem 0.15rem;
+.day-card {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.25rem 0.15rem !important;
   border-radius: 4px;
   border: 1px solid transparent;
   cursor: pointer;
+  box-sizing: border-box;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-.act-block:hover, .act-block:focus {
+.day-card:hover, .day-card:focus {
   transform: translateY(-2px);
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   outline: none;
 }
-.act-day {
+.day-label {
   font-size: 0.68rem;
   font-weight: 600;
   margin-bottom: 0.2rem;
   color: var(--fg);
   opacity: 0.85;
 }
-.act-bar-segments {
-  display: grid;
-  grid-template-columns: repeat(24, 1fr);
-  gap: 1px;
-  width: 100%;
-  height: 9px;
+.day-bars {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 1px !important;
+  width: 100% !important;
+  height: 9px !important;
   background: var(--border);
   border-radius: 3px;
   overflow: hidden;
   padding: 1px;
   box-sizing: border-box;
 }
-.act-seg {
-  display: block;
-  height: 100%;
+.bar-seg {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  height: 100% !important;
   border-radius: 1px;
   background: currentColor;
   transition: opacity 0.1s ease;
 }
-.act-seg:hover {
+.bar-seg:hover {
   filter: brightness(1.3);
 }
 
 /* Hourly Segment Palette */
-.seg-high { background: #10b981; color: #10b981; }
-.seg-ok { background: #2e7d32; color: #2e7d32; }
-.seg-err { background: #ef4444; color: #ef4444; }
-.seg-quiet { background: rgba(0, 0, 0, 0.12); color: transparent; }
-.seg-unmeasured { background: transparent; color: transparent; }
+.seg-high { background: #10b981 !important; color: #10b981; }
+.seg-ok { background: #2e7d32 !important; color: #2e7d32; }
+.seg-err { background: #ef4444 !important; color: #ef4444; }
+.seg-quiet { background: rgba(0, 0, 0, 0.12) !important; color: transparent; }
+.seg-unmeasured { background: transparent !important; color: transparent; }
 
-/* Heatmap Day Card Temperature Palette */
-.act-high-active {
+/* Day Card Palette */
+.day-high-active {
   background: rgba(16, 185, 129, 0.18);
   border-color: #10b981;
   color: #059669;
 }
-.act-delivering {
+.day-delivering {
   background: rgba(46, 125, 50, 0.14);
   border-color: #2e7d32;
   color: #1a6b3c;
 }
-.act-quiet {
+.day-quiet {
   background: var(--card);
   border-color: var(--border);
   color: var(--muted);
 }
-.act-degraded {
+.day-degraded {
   background: rgba(245, 158, 11, 0.18);
   border-color: #f59e0b;
   color: #d97706;
+}
+.day-unmeasured {
+  background: var(--card);
+  border: 1px dashed var(--border);
+  color: var(--muted);
 }
 .act-unmeasured {
   background: var(--card);
@@ -2231,11 +2243,11 @@ def _card_stats_block(record):
 
 
 _DAY_STATUS_CLASSES = {
-    "high-active": "act-high-active",
-    "delivering": "act-delivering",
-    "quiet": "act-quiet",
-    "degraded": "act-degraded",
-    "unmeasured": "act-unmeasured",
+    "high-active": "day-high-active",
+    "delivering": "day-delivering",
+    "quiet": "day-quiet",
+    "degraded": "day-degraded",
+    "unmeasured": "day-unmeasured",
 }
 
 
@@ -2251,7 +2263,7 @@ def _card_activity_graph(record):
     day_cards = []
     for day in activity:
         st = day["status"]
-        css_class = _DAY_STATUS_CLASSES.get(st, "act-quiet")
+        css_class = _DAY_STATUS_CLASSES.get(st, "day-quiet")
 
         date_str = day["date"]
         is_today = (date_str == end_date)
@@ -2292,24 +2304,24 @@ def _card_activity_graph(record):
 
             h_tip = f"{day_tag} {h_time}: {h_desc}"
             segments.append(
-                f'<span class="act-seg {seg_class}" title="{html.escape(h_tip)}"></span>'
+                f'<span class="bar-seg {seg_class}" title="{html.escape(h_tip)}"></span>'
             )
 
         day_cards.append(
-            f'<div class="act-block {css_class}" title="{html.escape(day_tooltip)}" '
+            f'<div class="day-card {css_class}" title="{html.escape(day_tooltip)}" '
             f'role="img" aria-label="{html.escape(day_tooltip)}" tabindex="0">'
-            f'<span class="act-day">{html.escape(day["day_label"])}</span>'
-            f'<div class="act-bar-segments">{"".join(segments)}</div>'
+            f'<span class="day-label">{html.escape(day["day_label"])}</span>'
+            f'<div class="day-bars">{"".join(segments)}</div>'
             f'</div>'
         )
 
     return (
-        f'<div class="src-activity-graph">'
-        f'<div class="activity-header">'
-        f'<span class="activity-title">7-Day Activity</span>'
-        f'<span class="activity-dates">{html.escape(start_date)} &ndash; {html.escape(end_date)}</span>'
+        f'<div class="src-timeline">'
+        f'<div class="timeline-header">'
+        f'<span class="timeline-title">7-Day Activity</span>'
+        f'<span class="timeline-dates">{html.escape(start_date)} &ndash; {html.escape(end_date)}</span>'
         f'</div>'
-        f'<div class="activity-blocks">{"".join(day_cards)}</div>'
+        f'<div class="timeline-days">{"".join(day_cards)}</div>'
         f'</div>'
     )
 
