@@ -456,17 +456,6 @@ FROM parsed
 GROUP BY 1
 """
 
-_DAILY_ITEMS_SQL = """
-SELECT p.collection AS collection,
-       json_extract(e.metadata, '$.source_id') AS source_id,
-       p.digest_day AS digest_day,
-       COUNT(*) AS items
-FROM extracted_texts e
-JOIN packages p USING (package_id)
-WHERE p.digest_day >= ? AND p.digest_day <= ?
-GROUP BY 1, 2, 3
-"""
-
 _HOURLY_ITEMS_SQL = """
 SELECT p.collection AS collection,
        json_extract(e.metadata, '$.source_id') AS source_id,
@@ -477,25 +466,6 @@ FROM extracted_texts e
 JOIN packages p USING (package_id)
 WHERE p.digest_day >= ? AND p.digest_day <= ? AND p.first_seen_at IS NOT NULL
 GROUP BY 1, 2, 3, 4
-"""
-
-_DAILY_FETCH_SQL = """
-WITH parsed AS (
-    SELECT substr(url, instr(url, '//') + 2) AS rest,
-           substr(ts_utc, 1, 10) AS fetch_day,
-           status
-    FROM fetch_log
-    WHERE ts_utc >= ? AND {probe}
-)
-SELECT lower(CASE WHEN instr(rest, '/') > 0
-                  THEN substr(rest, 1, instr(rest, '/') - 1)
-                  ELSE rest END) AS host,
-       fetch_day,
-       COUNT(*) AS requests,
-       SUM(CASE WHEN status IS NOT NULL AND status < 400
-                THEN 1 ELSE 0 END) AS ok
-FROM parsed
-GROUP BY 1, 2
 """
 
 _HOURLY_FETCH_SQL = """
@@ -527,12 +497,18 @@ def _collect_daily_activity(conn, fconn, today, days=7):
     hourly_items = {}
     if conn:
         try:
-            for row in conn.execute(_DAILY_ITEMS_SQL, (start_date, today)):
-                key = ("source_id", row["source_id"]) if row["source_id"] else ("collection", row["collection"])
-                daily_items.setdefault(key, {})[row["digest_day"]] = row["items"]
             for row in conn.execute(_HOURLY_ITEMS_SQL, (start_date, today)):
                 key = ("source_id", row["source_id"]) if row["source_id"] else ("collection", row["collection"])
-                hourly_items.setdefault(key, {}).setdefault(row["digest_day"], {})[row["hour"]] = row["items"]
+                d_day = row["digest_day"]
+                hr = row["hour"]
+                n_items = row["items"]
+
+                # Accumulate both hourly and daily totals in a single pass
+                d_dict = daily_items.setdefault(key, {})
+                d_dict[d_day] = d_dict.get(d_day, 0) + n_items
+
+                h_dict = hourly_items.setdefault(key, {}).setdefault(d_day, {})
+                h_dict[hr] = h_dict.get(hr, 0) + n_items
         except sqlite3.Error:
             pass
 
@@ -541,20 +517,25 @@ def _collect_daily_activity(conn, fconn, today, days=7):
     if fconn:
         try:
             p_filter = _probe_filter(fconn)
-            for row in fconn.execute(_DAILY_FETCH_SQL.format(probe=p_filter), (start_date,)):
-                ok = row["ok"] or 0
-                daily_fetch.setdefault(row["host"], {})[row["fetch_day"]] = {
-                    "requests": row["requests"],
-                    "ok": ok,
-                    "failed": row["requests"] - ok,
-                }
             for row in fconn.execute(_HOURLY_FETCH_SQL.format(probe=p_filter), (start_date,)):
+                host = row["host"]
+                f_day = row["fetch_day"]
+                hr = row["hour"]
+                reqs = row["requests"]
                 ok = row["ok"] or 0
-                hourly_fetch.setdefault(row["host"], {}).setdefault(row["fetch_day"], {})[row["hour"]] = {
-                    "requests": row["requests"],
-                    "ok": ok,
-                    "failed": row["requests"] - ok,
-                }
+                failed = reqs - ok
+
+                # Accumulate daily total
+                df = daily_fetch.setdefault(host, {}).setdefault(f_day, {"requests": 0, "ok": 0, "failed": 0})
+                df["requests"] += reqs
+                df["ok"] += ok
+                df["failed"] += failed
+
+                # Accumulate hourly total
+                hf = hourly_fetch.setdefault(host, {}).setdefault(f_day, {}).setdefault(hr, {"requests": 0, "ok": 0, "failed": 0})
+                hf["requests"] += reqs
+                hf["ok"] += ok
+                hf["failed"] += failed
         except sqlite3.Error:
             pass
 
