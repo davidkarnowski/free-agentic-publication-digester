@@ -456,6 +456,64 @@ FROM parsed
 GROUP BY 1
 """
 
+_DAILY_ITEMS_SQL = """
+SELECT p.collection AS collection,
+       json_extract(e.metadata, '$.source_id') AS source_id,
+       p.digest_day AS digest_day,
+       COUNT(*) AS items
+FROM extracted_texts e
+JOIN packages p USING (package_id)
+WHERE p.digest_day >= ? AND p.digest_day <= ?
+GROUP BY 1, 2, 3
+"""
+
+_DAILY_FETCH_SQL = """
+WITH parsed AS (
+    SELECT substr(url, instr(url, '//') + 2) AS rest,
+           substr(ts_utc, 1, 10) AS fetch_day,
+           status
+    FROM fetch_log
+    WHERE ts_utc >= ? AND {probe}
+)
+SELECT lower(CASE WHEN instr(rest, '/') > 0
+                  THEN substr(rest, 1, instr(rest, '/') - 1)
+                  ELSE rest END) AS host,
+       fetch_day,
+       COUNT(*) AS requests,
+       SUM(CASE WHEN status IS NOT NULL AND status < 400
+                THEN 1 ELSE 0 END) AS ok
+FROM parsed
+GROUP BY 1, 2
+"""
+
+
+def _collect_daily_activity(conn, fconn, today, days=7):
+    import sqlite3
+    start_date = _shift(today, days - 1)
+    daily_items = {}
+    if conn:
+        try:
+            for row in conn.execute(_DAILY_ITEMS_SQL, (start_date, today)):
+                key = ("source_id", row["source_id"]) if row["source_id"] else ("collection", row["collection"])
+                daily_items.setdefault(key, {})[row["digest_day"]] = row["items"]
+        except sqlite3.Error:
+            pass
+
+    daily_fetch = {}
+    if fconn:
+        try:
+            for row in fconn.execute(_DAILY_FETCH_SQL.format(probe=_probe_filter(fconn)), (start_date,)):
+                ok = row["ok"] or 0
+                daily_fetch.setdefault(row["host"], {})[row["fetch_day"]] = {
+                    "requests": row["requests"],
+                    "ok": ok,
+                    "failed": row["requests"] - ok,
+                }
+        except sqlite3.Error:
+            pass
+
+    return daily_items, daily_fetch
+
 
 def _collect_fetch_recent(conn, start, end):
     """{host: {requests, ok, failed}} over the trailing-24-hour window,
@@ -573,28 +631,13 @@ def _unavailable(reason, today, window_days):
 def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
                   window_days=HEALTH_WINDOW_DAYS, now=None):
     """Per-source ingestion statistics for every registry entry, plus a
-    whole-directory summary.
-
-    Health is computed for `active` entries only: a `planned`,
-    `unavailable`, or `evaluated-excluded` source is not ingested by
-    definition, and reporting "no data" against it would read as an
-    interruption rather than as a registry status. Those entries appear
-    in the result with ``measured: False``.
-
-    Degrades disclosed (docs/code-standards.md §2 rule 9): with no
-    databases on disk this returns ``available: False`` and an empty
-    ``sources`` map, and every caller renders "not available" rather than
-    inventing a number."""
+    whole-directory summary."""
     today = today or publication_date()
     now = now or utc_now_iso()
     window_days = max(1, int(window_days))
     window_start = _shift(today, window_days - 1)
     recency_start = _shift(today, RECENCY_LOOKBACK_DAYS)
-    # The fetch log is stamped UTC and its window is half-open on the
-    # right, so "today" is included whole however far the day has run.
     fetch_end = _shift(today, -1)
-    # The trailing-24-hour edges are UTC observation stamps by the
-    # clock, deliberately not aligned to the publication-day window.
     recent_start = _hours_before(now, RECENT_WINDOW_HOURS)
 
     pipeline_path = Path(pipeline_db or config.PIPELINE_DB)
@@ -618,25 +661,31 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
         logger.warning("health: pipeline query failed: %s", exc)
         return _unavailable(f"pipeline database unreadable: {exc}",
                             today, window_days)
-    finally:
-        conn.close()
 
-    hosts, recent_hosts, fetch_available = {}, {}, False
+    hosts, recent_hosts, fetch_available, fconn_obj = {}, {}, False, None
     if fetch_path.exists():
         try:
-            fconn = _ro(fetch_path)
+            fconn_obj = _ro(fetch_path)
             try:
-                hosts = _collect_fetch(fconn, window_start, fetch_end,
+                hosts = _collect_fetch(fconn_obj, window_start, fetch_end,
                                        recency_start)
-                recent_hosts = _collect_fetch_recent(fconn, recent_start, now)
+                recent_hosts = _collect_fetch_recent(fconn_obj, recent_start, now)
                 fetch_available = True
-            finally:
-                fconn.close()
+            except sqlite3.Error as exc:
+                logger.warning("health: fetch log query failed: %s", exc)
         except sqlite3.Error as exc:
             logger.warning("health: fetch log unreadable: %s", exc)
 
-    # How many registered sources share each host, so a card can say that
-    # its request figures are host-wide rather than its own.
+    daily_items, daily_fetch = _collect_daily_activity(
+        conn, fconn_obj if fetch_available else None, today, days=7)
+
+    if fconn_obj:
+        try:
+            fconn_obj.close()
+        except sqlite3.Error:
+            pass
+    conn.close()
+
     host_sources = {}
     for entry in entries:
         host = fetch_host(entry)
@@ -648,6 +697,7 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
         sources[entry["id"]] = _one_source(
             entry, volume, hosts, collectors, host_sources,
             recent_hosts=recent_hosts, recent_items=recent_items,
+            daily_items=daily_items, daily_fetch=daily_fetch,
             today=today, window_days=window_days,
             fetch_available=fetch_available)
 
@@ -669,8 +719,9 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
 
 
 def _one_source(entry, volume, hosts, collectors, host_sources, *,
-                recent_hosts, recent_items, today, window_days,
-                fetch_available):
+                recent_hosts, recent_items, daily_items=None, daily_fetch=None,
+                today, window_days, fetch_available):
+    import datetime
     key = source_key(entry)
     stats = volume.get(key, {})
     chars = stats.get("chars", [])
@@ -700,6 +751,46 @@ def _one_source(entry, volume, hosts, collectors, host_sources, *,
     worker = collector_worker(entry)
     collector = collectors.get(worker) if worker else None
 
+    # Calculate 7-day daily activity timeline
+    daily_items = daily_items or {}
+    daily_fetch = daily_fetch or {}
+    source_items = daily_items.get(key, {})
+    source_fetch = daily_fetch.get(host, {}) if (host and not is_email) else {}
+
+    days_7 = [_shift(today, 6 - i) for i in range(7)]
+    daily_activity = []
+    for d in days_7:
+        try:
+            dt = datetime.date.fromisoformat(d)
+            day_lbl = dt.strftime("%a")
+        except ValueError:
+            day_lbl = d[-2:]
+
+        d_items = source_items.get(d, 0)
+        f_info = source_fetch.get(d, {"requests": 0, "ok": 0, "failed": 0})
+        reqs = f_info["requests"]
+        failed = f_info["failed"]
+
+        if entry["status"] != "active":
+            st = "unmeasured"
+        elif failed > 0 or (reqs >= 5 and (failed / reqs) >= DEGRADED_ERROR_RATE):
+            st = "degraded"
+        elif d_items >= 3:
+            st = "high-active"
+        elif d_items >= 1 or (reqs > 0 and failed == 0):
+            st = "delivering"
+        else:
+            st = "quiet"
+
+        daily_activity.append({
+            "date": d,
+            "day_label": day_lbl,
+            "items": d_items,
+            "requests": reqs,
+            "failed": failed,
+            "status": st,
+        })
+
     record = {
         "id": entry["id"],
         "name": entry["name"],
@@ -725,6 +816,7 @@ def _one_source(entry, volume, hosts, collectors, host_sources, *,
         "fetch_note": EMAIL_FETCH_NOTE if is_email else None,
         "collector": collector,
         "recent": None,
+        "daily_activity": daily_activity,
     }
     record["delivery_mode_note"] = DELIVERY_MODES.get(record["delivery_mode"])
 

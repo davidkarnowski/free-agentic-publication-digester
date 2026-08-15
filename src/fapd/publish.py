@@ -473,6 +473,126 @@ li.source-note a { color: var(--muted); }
 .src-stats p { margin: 0.12rem 0; }
 .src-stat-label { color: var(--muted); }
 .src-unmeasured { color: var(--muted); }
+
+/* 7-Day Activity Heatmap Graph */
+.src-activity-graph {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.7rem;
+  background: var(--stripe);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.activity-dates {
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.activity-blocks {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.35rem;
+  width: 100%;
+}
+.act-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.15rem;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.act-block:hover, .act-block:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  outline: none;
+}
+.act-day {
+  font-size: 0.68rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+  color: var(--fg);
+  opacity: 0.85;
+}
+.act-cell {
+  width: 100%;
+  height: 8px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.85;
+}
+
+/* Heatmap Temperature Palette */
+.act-high-active {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: #10b981;
+  color: #059669;
+}
+.act-delivering {
+  background: rgba(46, 125, 50, 0.14);
+  border-color: #2e7d32;
+  color: #1a6b3c;
+}
+.act-quiet {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--muted);
+}
+.act-degraded {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: #f59e0b;
+  color: #d97706;
+}
+.act-unmeasured {
+  background: var(--card);
+  border: 1px dashed var(--border);
+  color: var(--muted);
+}
+
+@media (prefers-color-scheme: dark) {
+  .act-high-active { background: rgba(52, 211, 153, 0.2); border-color: #34d399; color: #34d399; }
+  .act-delivering { background: rgba(34, 197, 94, 0.18); border-color: #22c55e; color: #4ade80; }
+  .act-degraded { background: rgba(251, 191, 36, 0.2); border-color: #fbbf24; color: #fbbf24; }
+}
+
+/* Activity Legend Section */
+.activity-legend-card {
+  margin: 0.8rem 0 1.2rem;
+  padding: 0.75rem 1rem;
+  background: var(--stripe);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.legend-header { font-size: 0.92rem; margin-bottom: 0.3rem; }
+.legend-intro { font-size: 0.84rem; color: var(--muted); margin: 0 0 0.6rem; }
+.legend-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem 1rem;
+  font-size: 0.82rem;
+}
+.legend-item { display: flex; align-items: center; gap: 0.4rem; }
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
 .health-lead { margin: 0.6rem 0; }
 .health-note { font-size: 0.82rem; color: var(--muted); }
 .today-disclosure {
@@ -1574,6 +1694,7 @@ def _source_card(entry, health_record=None):
         f'<p class="src-desc">{html.escape(entry["description"])}</p>'
         f"{signup}"
         f"{_card_stats_block(health_record)}"
+        f"{_card_activity_graph(health_record)}"
         f'<details class="src-more"><summary>Registry record</summary>'
         f'<dl>{"".join(record)}</dl></details>'
         "</article>"
@@ -1592,6 +1713,23 @@ def _source_section(anchor, title, intro_html, group_entries, health=None):
         parts.extend(_source_card(e, (health or {}).get(e["id"]))
                      for e in subset)
     return "".join(parts)
+
+
+def _activity_legend():
+    """Legend explaining the 7-day activity heatmap timeline."""
+    return (
+        '<div class="activity-legend-card">'
+        '<div class="legend-header"><strong>7-Day Activity Heatmap Legend</strong></div>'
+        '<p class="legend-intro">Each source card features a 7-day activity graph showing daily ingestion volume and request health for the trailing week:</p>'
+        '<div class="legend-items">'
+        '<div class="legend-item"><span class="legend-swatch act-high-active"></span><span><strong>High Volume</strong> &ndash; 3+ items ingested cleanly</span></div>'
+        '<div class="legend-item"><span class="legend-swatch act-delivering"></span><span><strong>Delivering</strong> &ndash; 1&ndash;2 items ingested or requests answered</span></div>'
+        '<div class="legend-item"><span class="legend-swatch act-quiet"></span><span><strong>Quiet</strong> &ndash; No items observed (e.g. weekend / non-publishing day)</span></div>'
+        '<div class="legend-item"><span class="legend-swatch act-degraded"></span><span><strong>Degraded</strong> &ndash; Request errors (4xx/5xx) or failures recorded</span></div>'
+        '<div class="legend-item"><span class="legend-swatch act-unmeasured"></span><span><strong>Unmeasured</strong> &ndash; Source is planned, unavailable, or excluded</span></div>'
+        '</div>'
+        '</div>'
+    )
 
 
 def _health_section(health):
@@ -1645,6 +1783,7 @@ def _health_section(health):
         "<table><thead><tr><th>Indicator</th><th>What we observed</th>"
         "<th>Active sources</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>")
+    parts.append(_activity_legend())
 
     parts.append(
         f'<p class="health-note">Thresholds, so any label can be checked '
@@ -2063,6 +2202,66 @@ def _card_stats_block(record):
     parts.append(f'<p class="src-stat-label">'
                  f"{html.escape(record['health_reason'])}</p>")
     return f'<div class="src-stats">{"".join(parts)}</div>'
+
+
+_DAY_STATUS_CLASSES = {
+    "high-active": "act-high-active",
+    "delivering": "act-delivering",
+    "quiet": "act-quiet",
+    "degraded": "act-degraded",
+    "unmeasured": "act-unmeasured",
+}
+
+
+def _card_activity_graph(record):
+    """The 7-day timeline block heatmap for a source card."""
+    if not record or not record.get("daily_activity"):
+        return ""
+
+    activity = record["daily_activity"]
+    start_date = activity[0]["date"]
+    end_date = activity[-1]["date"]
+
+    blocks = []
+    for day in activity:
+        st = day["status"]
+        css_class = _DAY_STATUS_CLASSES.get(st, "act-quiet")
+
+        date_str = day["date"]
+        is_today = (date_str == end_date)
+        day_tag = f"{day['day_label']} ({date_str}{' - Today' if is_today else ''})"
+
+        if st == "unmeasured":
+            detail = "Source not active (unmeasured)"
+        elif st == "degraded":
+            detail = f"{day['items']} item(s), {day['failed']} failed request(s)"
+        elif st == "high-active":
+            detail = f"{day['items']} item(s) ingested (high volume)"
+        elif st == "delivering":
+            detail = f"{day['items']} item(s) ingested" if day['items'] else "Requests answered cleanly"
+        else:
+            detail = "No items observed (quiet)"
+
+        tooltip = f"{day_tag}: {detail}"
+        aria_lbl = f"{day['day_label']} {date_str}: {detail}"
+
+        blocks.append(
+            f'<div class="act-block {css_class}" title="{html.escape(tooltip)}" '
+            f'role="img" aria-label="{html.escape(aria_lbl)}" tabindex="0">'
+            f'<span class="act-day">{html.escape(day["day_label"])}</span>'
+            f'<span class="act-cell"></span>'
+            f'</div>'
+        )
+
+    return (
+        f'<div class="src-activity-graph">'
+        f'<div class="activity-header">'
+        f'<span class="activity-title">7-Day Activity</span>'
+        f'<span class="activity-dates">{html.escape(start_date)} &ndash; {html.escape(end_date)}</span>'
+        f'</div>'
+        f'<div class="activity-blocks">{"".join(blocks)}</div>'
+        f'</div>'
+    )
 
 
 def _model_text_block(label, paragraphs, provenance):
