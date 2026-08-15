@@ -523,19 +523,41 @@ li.source-note a { color: var(--muted); }
 .act-day {
   font-size: 0.68rem;
   font-weight: 600;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.2rem;
   color: var(--fg);
   opacity: 0.85;
 }
-.act-cell {
+.act-bar-segments {
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  gap: 1px;
   width: 100%;
-  height: 8px;
-  border-radius: 2px;
+  height: 9px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  padding: 1px;
+  box-sizing: border-box;
+}
+.act-seg {
+  display: block;
+  height: 100%;
+  border-radius: 1px;
   background: currentColor;
-  opacity: 0.85;
+  transition: opacity 0.1s ease;
+}
+.act-seg:hover {
+  filter: brightness(1.3);
 }
 
-/* Heatmap Temperature Palette */
+/* Hourly Segment Palette */
+.seg-high { background: #10b981; color: #10b981; }
+.seg-ok { background: #2e7d32; color: #2e7d32; }
+.seg-err { background: #ef4444; color: #ef4444; }
+.seg-quiet { background: rgba(0, 0, 0, 0.12); color: transparent; }
+.seg-unmeasured { background: transparent; color: transparent; }
+
+/* Heatmap Day Card Temperature Palette */
 .act-high-active {
   background: rgba(16, 185, 129, 0.18);
   border-color: #10b981;
@@ -566,6 +588,10 @@ li.source-note a { color: var(--muted); }
   .act-high-active { background: rgba(52, 211, 153, 0.2); border-color: #34d399; color: #34d399; }
   .act-delivering { background: rgba(34, 197, 94, 0.18); border-color: #22c55e; color: #4ade80; }
   .act-degraded { background: rgba(251, 191, 36, 0.2); border-color: #fbbf24; color: #fbbf24; }
+  .seg-high { background: #34d399; color: #34d399; }
+  .seg-ok { background: #22c55e; color: #22c55e; }
+  .seg-err { background: #f87171; color: #f87171; }
+  .seg-quiet { background: rgba(255, 255, 255, 0.08); color: transparent; }
 }
 
 /* Activity Legend Section */
@@ -2214,7 +2240,7 @@ _DAY_STATUS_CLASSES = {
 
 
 def _card_activity_graph(record):
-    """The 7-day timeline block heatmap for a source card."""
+    """The 7-day timeline block heatmap with 24-hour polling interval micro-bars."""
     if not record or not record.get("daily_activity"):
         return ""
 
@@ -2222,7 +2248,7 @@ def _card_activity_graph(record):
     start_date = activity[0]["date"]
     end_date = activity[-1]["date"]
 
-    blocks = []
+    day_cards = []
     for day in activity:
         st = day["status"]
         css_class = _DAY_STATUS_CLASSES.get(st, "act-quiet")
@@ -2232,24 +2258,48 @@ def _card_activity_graph(record):
         day_tag = f"{day['day_label']} ({date_str}{' - Today' if is_today else ''})"
 
         if st == "unmeasured":
-            detail = "Source not active (unmeasured)"
+            day_detail = "Source not active (unmeasured)"
         elif st == "degraded":
-            detail = f"{day['items']} item(s), {day['failed']} failed request(s)"
+            day_detail = f"{day['items']} item(s), {day['failed']} failed request(s)"
         elif st == "high-active":
-            detail = f"{day['items']} item(s) ingested (high volume)"
+            day_detail = f"{day['items']} item(s) ingested (high volume)"
         elif st == "delivering":
-            detail = f"{day['items']} item(s) ingested" if day['items'] else "Requests answered cleanly"
+            day_detail = f"{day['items']} item(s) ingested" if day['items'] else "Requests answered cleanly"
         else:
-            detail = "No items observed (quiet)"
+            day_detail = "No items observed (quiet)"
 
-        tooltip = f"{day_tag}: {detail}"
-        aria_lbl = f"{day['day_label']} {date_str}: {detail}"
+        day_tooltip = f"{day_tag}: {day_detail}"
 
-        blocks.append(
-            f'<div class="act-block {css_class}" title="{html.escape(tooltip)}" '
-            f'role="img" aria-label="{html.escape(aria_lbl)}" tabindex="0">'
+        # 24-hour polling sub-bar micro-segments
+        segments = []
+        hourly = day.get("hourly") or []
+        for h in range(24):
+            h_info = hourly[h] if h < len(hourly) else {"hour": h, "items": 0, "requests": 0, "failed": 0, "status": "quiet"}
+            h_st = h_info["status"]
+            seg_class = f"seg-{h_st}"
+            h_time = f"{h:02d}:00 UTC"
+
+            if h_st == "unmeasured":
+                h_desc = "Unmeasured"
+            elif h_st == "err":
+                h_desc = f"{h_info['failed']} failed request(s)"
+            elif h_st == "high":
+                h_desc = f"{h_info['items']} item(s) ingested"
+            elif h_st == "ok":
+                h_desc = f"{h_info['requests']} request(s) answered cleanly"
+            else:
+                h_desc = "No activity (quiet)"
+
+            h_tip = f"{day_tag} {h_time}: {h_desc}"
+            segments.append(
+                f'<span class="act-seg {seg_class}" title="{html.escape(h_tip)}"></span>'
+            )
+
+        day_cards.append(
+            f'<div class="act-block {css_class}" title="{html.escape(day_tooltip)}" '
+            f'role="img" aria-label="{html.escape(day_tooltip)}" tabindex="0">'
             f'<span class="act-day">{html.escape(day["day_label"])}</span>'
-            f'<span class="act-cell"></span>'
+            f'<div class="act-bar-segments">{"".join(segments)}</div>'
             f'</div>'
         )
 
@@ -2259,7 +2309,7 @@ def _card_activity_graph(record):
         f'<span class="activity-title">7-Day Activity</span>'
         f'<span class="activity-dates">{html.escape(start_date)} &ndash; {html.escape(end_date)}</span>'
         f'</div>'
-        f'<div class="activity-blocks">{"".join(blocks)}</div>'
+        f'<div class="activity-blocks">{"".join(day_cards)}</div>'
         f'</div>'
     )
 

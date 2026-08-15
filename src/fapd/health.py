@@ -467,6 +467,18 @@ WHERE p.digest_day >= ? AND p.digest_day <= ?
 GROUP BY 1, 2, 3
 """
 
+_HOURLY_ITEMS_SQL = """
+SELECT p.collection AS collection,
+       json_extract(e.metadata, '$.source_id') AS source_id,
+       p.digest_day AS digest_day,
+       CAST(substr(p.first_seen_at, 12, 2) AS INTEGER) AS hour,
+       COUNT(*) AS items
+FROM extracted_texts e
+JOIN packages p USING (package_id)
+WHERE p.digest_day >= ? AND p.digest_day <= ? AND p.first_seen_at IS NOT NULL
+GROUP BY 1, 2, 3, 4
+"""
+
 _DAILY_FETCH_SQL = """
 WITH parsed AS (
     SELECT substr(url, instr(url, '//') + 2) AS rest,
@@ -486,25 +498,59 @@ FROM parsed
 GROUP BY 1, 2
 """
 
+_HOURLY_FETCH_SQL = """
+WITH parsed AS (
+    SELECT substr(url, instr(url, '//') + 2) AS rest,
+           substr(ts_utc, 1, 10) AS fetch_day,
+           CAST(substr(ts_utc, 12, 2) AS INTEGER) AS hour,
+           status
+    FROM fetch_log
+    WHERE ts_utc >= ? AND {probe}
+)
+SELECT lower(CASE WHEN instr(rest, '/') > 0
+                  THEN substr(rest, 1, instr(rest, '/') - 1)
+                  ELSE rest END) AS host,
+       fetch_day,
+       hour,
+       COUNT(*) AS requests,
+       SUM(CASE WHEN status IS NOT NULL AND status < 400
+                THEN 1 ELSE 0 END) AS ok
+FROM parsed
+GROUP BY 1, 2, 3
+"""
+
 
 def _collect_daily_activity(conn, fconn, today, days=7):
     import sqlite3
     start_date = _shift(today, days - 1)
     daily_items = {}
+    hourly_items = {}
     if conn:
         try:
             for row in conn.execute(_DAILY_ITEMS_SQL, (start_date, today)):
                 key = ("source_id", row["source_id"]) if row["source_id"] else ("collection", row["collection"])
                 daily_items.setdefault(key, {})[row["digest_day"]] = row["items"]
+            for row in conn.execute(_HOURLY_ITEMS_SQL, (start_date, today)):
+                key = ("source_id", row["source_id"]) if row["source_id"] else ("collection", row["collection"])
+                hourly_items.setdefault(key, {}).setdefault(row["digest_day"], {})[row["hour"]] = row["items"]
         except sqlite3.Error:
             pass
 
     daily_fetch = {}
+    hourly_fetch = {}
     if fconn:
         try:
-            for row in fconn.execute(_DAILY_FETCH_SQL.format(probe=_probe_filter(fconn)), (start_date,)):
+            p_filter = _probe_filter(fconn)
+            for row in fconn.execute(_DAILY_FETCH_SQL.format(probe=p_filter), (start_date,)):
                 ok = row["ok"] or 0
                 daily_fetch.setdefault(row["host"], {})[row["fetch_day"]] = {
+                    "requests": row["requests"],
+                    "ok": ok,
+                    "failed": row["requests"] - ok,
+                }
+            for row in fconn.execute(_HOURLY_FETCH_SQL.format(probe=p_filter), (start_date,)):
+                ok = row["ok"] or 0
+                hourly_fetch.setdefault(row["host"], {}).setdefault(row["fetch_day"], {})[row["hour"]] = {
                     "requests": row["requests"],
                     "ok": ok,
                     "failed": row["requests"] - ok,
@@ -512,7 +558,7 @@ def _collect_daily_activity(conn, fconn, today, days=7):
         except sqlite3.Error:
             pass
 
-    return daily_items, daily_fetch
+    return daily_items, daily_fetch, hourly_items, hourly_fetch
 
 
 def _collect_fetch_recent(conn, start, end):
@@ -676,7 +722,7 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
         except sqlite3.Error as exc:
             logger.warning("health: fetch log unreadable: %s", exc)
 
-    daily_items, daily_fetch = _collect_daily_activity(
+    daily_items, daily_fetch, hourly_items, hourly_fetch = _collect_daily_activity(
         conn, fconn_obj if fetch_available else None, today, days=7)
 
     if fconn_obj:
@@ -698,6 +744,7 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
             entry, volume, hosts, collectors, host_sources,
             recent_hosts=recent_hosts, recent_items=recent_items,
             daily_items=daily_items, daily_fetch=daily_fetch,
+            hourly_items=hourly_items, hourly_fetch=hourly_fetch,
             today=today, window_days=window_days,
             fetch_available=fetch_available)
 
@@ -720,6 +767,7 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
 
 def _one_source(entry, volume, hosts, collectors, host_sources, *,
                 recent_hosts, recent_items, daily_items=None, daily_fetch=None,
+                hourly_items=None, hourly_fetch=None,
                 today, window_days, fetch_available):
     import datetime
     key = source_key(entry)
@@ -754,8 +802,13 @@ def _one_source(entry, volume, hosts, collectors, host_sources, *,
     # Calculate 7-day daily activity timeline
     daily_items = daily_items or {}
     daily_fetch = daily_fetch or {}
+    hourly_items = hourly_items or {}
+    hourly_fetch = hourly_fetch or {}
+
     source_items = daily_items.get(key, {})
     source_fetch = daily_fetch.get(host, {}) if (host and not is_email) else {}
+    src_h_items = hourly_items.get(key, {})
+    src_h_fetch = hourly_fetch.get(host, {}) if (host and not is_email) else {}
 
     days_7 = [_shift(today, 6 - i) for i in range(7)]
     daily_activity = []
@@ -782,6 +835,35 @@ def _one_source(entry, volume, hosts, collectors, host_sources, *,
         else:
             st = "quiet"
 
+        # Calculate 24-hour polling interval micro-segments for this day
+        d_h_items = src_h_items.get(d, {})
+        d_h_fetch = src_h_fetch.get(d, {})
+        hourly = []
+        for h in range(24):
+            h_itm = d_h_items.get(h, 0)
+            h_f = d_h_fetch.get(h, {"requests": 0, "ok": 0, "failed": 0})
+            h_reqs = h_f["requests"]
+            h_failed = h_f["failed"]
+
+            if entry["status"] != "active":
+                h_st = "unmeasured"
+            elif h_failed > 0:
+                h_st = "err"
+            elif h_itm >= 1:
+                h_st = "high"
+            elif h_reqs > 0 and h_failed == 0:
+                h_st = "ok"
+            else:
+                h_st = "quiet"
+
+            hourly.append({
+                "hour": h,
+                "items": h_itm,
+                "requests": h_reqs,
+                "failed": h_failed,
+                "status": h_st,
+            })
+
         daily_activity.append({
             "date": d,
             "day_label": day_lbl,
@@ -789,6 +871,7 @@ def _one_source(entry, volume, hosts, collectors, host_sources, *,
             "requests": reqs,
             "failed": failed,
             "status": st,
+            "hourly": hourly,
         })
 
     record = {
