@@ -242,55 +242,68 @@ class GeminiBackend:
         }
         headers = {"Content-Type": "application/json"}
 
-        try:
-            resp = self._requester(
-                url,
-                json=payload,
-                headers=headers,
-                timeout=timeout,
-            )
-        except Exception as exc:
-            raise LLMError(f"Gemini API HTTP request failed: {str(exc)[:500]}") from exc
-
-        status_code = getattr(resp, "status_code", 200)
-        if status_code != 200:
-            err_text = getattr(resp, "text", str(resp))[:500]
-            if status_code == 429:
-                raise TransientLLMError(
-                    f"Gemini API rate limit 429: {err_text} — zero tokens billed"
+        max_attempts = 3
+        last_exc = None
+        for attempt in range(1, max_attempts + 1):
+            try:
+                resp = self._requester(
+                    url,
+                    json=payload,
+                    headers=headers,
+                    timeout=timeout,
                 )
-            raise LLMError(f"Gemini API error (HTTP {status_code}): {err_text}")
+                status_code = getattr(resp, "status_code", 200)
+                if status_code != 200:
+                    err_text = getattr(resp, "text", str(resp))[:500]
+                    if status_code in (429, 500, 502, 503, 504):
+                        raise TransientLLMError(
+                            f"Gemini API transient error (HTTP {status_code}): {err_text} — zero tokens billed"
+                        )
+                    raise LLMError(f"Gemini API error (HTTP {status_code}): {err_text}")
 
-        try:
-            data = resp.json() if callable(getattr(resp, "json", None)) else json.loads(resp.text)
-        except Exception as exc:
-            raise LLMError(f"unparseable Gemini API output: {exc}") from exc
+                data = resp.json() if callable(getattr(resp, "json", None)) else json.loads(resp.text)
+                candidates = data.get("candidates") or []
+                if not candidates:
+                    prompt_feedback = data.get("promptFeedback")
+                    raise LLMError(f"Gemini returned no candidates. Feedback: {prompt_feedback}")
 
-        candidates = data.get("candidates") or []
-        if not candidates:
-            prompt_feedback = data.get("promptFeedback")
-            raise LLMError(f"Gemini returned no candidates. Feedback: {prompt_feedback}")
+                candidate = candidates[0]
+                finish_reason = candidate.get("finishReason")
+                if finish_reason in ("SAFETY", "RECITATION", "BLOCKLIST", "PROHIBITED_CONTENT", "SPII"):
+                    raise LLMError(
+                        f"refusal: Gemini model output blocked due to finishReason={finish_reason}"
+                    )
 
-        candidate = candidates[0]
-        finish_reason = candidate.get("finishReason")
-        if finish_reason in ("SAFETY", "RECITATION", "BLOCKLIST", "PROHIBITED_CONTENT", "SPII"):
-            raise LLMError(
-                f"refusal: Gemini model output blocked due to finishReason={finish_reason}"
-            )
+                content = candidate.get("content") or {}
+                parts = content.get("parts") or []
+                text = "".join(part.get("text", "") for part in parts).strip()
 
-        content = candidate.get("content") or {}
-        parts = content.get("parts") or []
-        text = "".join(part.get("text", "") for part in parts).strip()
+                usage = data.get("usageMetadata") or {}
+                input_tokens = usage.get("promptTokenCount", 0)
+                output_tokens = usage.get("candidatesTokenCount", 0)
 
-        usage = data.get("usageMetadata") or {}
-        input_tokens = usage.get("promptTokenCount", 0)
-        output_tokens = usage.get("candidatesTokenCount", 0)
+                return {
+                    "text": text,
+                    "input_tokens": input_tokens,
+                    "output_tokens": output_tokens,
+                }
+            except TransientLLMError as exc:
+                last_exc = exc
+                if attempt < max_attempts:
+                    time.sleep(2 * attempt)
+                else:
+                    raise
+            except Exception as exc:
+                if isinstance(exc, LLMError):
+                    raise
+                last_exc = LLMError(f"Gemini API HTTP request failed: {str(exc)[:500]}")
+                if attempt < max_attempts:
+                    time.sleep(2 * attempt)
+                else:
+                    raise last_exc from exc
 
-        return {
-            "text": text,
-            "input_tokens": input_tokens,
-            "output_tokens": output_tokens,
-        }
+        if last_exc:
+            raise last_exc
 
 
 class LLMClient:
