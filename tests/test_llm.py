@@ -384,7 +384,10 @@ def test_gemini_backend_resolves_tier_and_ledgers_backend(tmp_path):
 def test_gemini_failure_is_ledgered_and_raises(tmp_path):
     client, _ = make_gemini_client(
         tmp_path,
-        responses=[FakeGeminiResponse(status_code=500, text="Internal Server Error")],
+        responses=[
+            FakeGeminiResponse(status_code=500, text="Internal Server Error"),
+            FakeGeminiResponse(status_code=500, text="Internal Server Error"),
+        ],
     )
     with pytest.raises(LLMError, match="HTTP 500"):
         client.complete("x", purpose="map:test")
@@ -405,7 +408,7 @@ def test_gemini_429_is_transient_error_and_retries(tmp_path):
     assert len(fake.calls) == 2
     rows = client._db.execute("SELECT error, input_tokens FROM llm_calls ORDER BY id").fetchall()
     assert len(rows) == 2
-    assert "rate limit 429" in rows[0][0]
+    assert "429" in rows[0][0]
 
 
 def test_gemini_refusal_is_ledgered_and_raises(tmp_path):
