@@ -679,6 +679,74 @@ li.source-note a { color: var(--muted); }
 .today-about summary {
   cursor: pointer; color: var(--accent); font-size: 0.9rem;
 }
+/* Multi-modal click-to-expand speaker icon + full-width audio player component */
+.audio-disclosure {
+  display: block;
+  margin: 0.5rem 0 1rem;
+}
+.audio-speaker-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--stripe);
+  cursor: pointer;
+  list-style: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.audio-speaker-btn::-webkit-details-marker {
+  display: none;
+}
+.audio-speaker-btn:hover, .audio-speaker-btn:focus {
+  border-color: var(--accent);
+  background: var(--border);
+}
+.audio-player-expanded {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.5rem;
+  margin-bottom: 0.4rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--stripe);
+}
+.audio-player-expanded audio {
+  width: 100%;
+  height: 38px;
+  border-radius: 4px;
+}
+.audio-player-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.4rem;
+}
+.audio-download-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.audio-download-link:hover {
+  text-decoration: underline;
+}
+
+
+
+
+
+
+
+
+
 .today-context { margin: 0.6rem 0; }
 /* Keyword filter (pure CSS :target — the site stays JavaScript-free).
    The per-keyword rules are generated into today.html's own <style>. */
@@ -1327,6 +1395,71 @@ def _rebase_page(page_html, depth=1):
 _NAV_LABELS = {"ai-development": "AI development"}
 
 
+def render_audio_heading(heading_html: str, audio_url: str, title: str = "Listen to section narration", aria_label: str = "Audio player") -> str:
+    """Render an accessible section heading with inline speaker button and below-line expanded audio player."""
+    return (
+        f'<div class="heading-audio-wrapper">\n'
+        f'  {heading_html}\n'
+        f'  <details class="audio-disclosure">\n'
+        f'    <summary class="audio-speaker-btn" title="Listen to audio narration" aria-label="{html.escape(aria_label)}"'
+        f' onclick="const a=this.parentElement.querySelector(\'audio\'); if(a){{if(a.paused){{a.play();}}else{{a.pause();}}}}">\n'
+        f'      <svg class="speaker-icon" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">\n'
+        f'        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>\n'
+        f'        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>\n'
+        f'        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>\n'
+        f'      </svg>\n'
+        f'      <span class="audio-speaker-text">Listen</span>\n'
+        f'    </summary>\n'
+        f'    <div class="audio-player-expanded">\n'
+        f'      <audio controls preload="none" aria-label="{html.escape(aria_label)}">\n'
+        f'        <source src="{html.escape(audio_url)}" type="audio/mpeg">\n'
+        f'        Your browser does not support HTML5 audio. You can <a href="{html.escape(audio_url)}">download the MP3 audio file directly</a>.\n'
+        f'      </audio>\n'
+        f'      <div class="audio-player-footer">\n'
+        f'        <a class="audio-download-link" href="{html.escape(audio_url)}" download aria-label="Download MP3 audio narration">\n'
+        f'          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>\n'
+        f'          Download MP3\n'
+        f'        </a>\n'
+        f'      </div>\n'
+        f'    </div>\n'
+        f'  </details>\n'
+        f'</div>'
+    )
+
+
+
+def render_audio_player(audio_url: str, title: str = "Listen to section narration", aria_label: str = "Audio player") -> str:
+    """Render an accessible inline click-to-expand speaker icon + audio player component."""
+    return (
+        f'<details class="audio-disclosure">\n'
+        f'  <summary class="audio-speaker-btn" title="Listen to audio narration" aria-label="{html.escape(aria_label)}"'
+        f' onclick="const a=this.parentElement.querySelector(\'audio\'); if(a){{if(a.paused){{a.play();}}else{{a.pause();}}}}">\n'
+        f'    <svg class="speaker-icon" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">\n'
+        f'      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>\n'
+        f'      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>\n'
+        f'      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>\n'
+        f'    </svg>\n'
+        f'    <span class="audio-speaker-text">Listen</span>\n'
+        f'  </summary>\n'
+        f'  <div class="audio-player-expanded">\n'
+        f'    <audio controls preload="none" aria-label="{html.escape(aria_label)}">\n'
+        f'      <source src="{html.escape(audio_url)}" type="audio/mpeg">\n'
+        f'      Your browser does not support HTML5 audio. You can <a href="{html.escape(audio_url)}">download the MP3 audio file directly</a>.\n'
+        f'    </audio>\n'
+        f'    <div class="audio-player-footer">\n'
+        f'      <a class="audio-download-link" href="{html.escape(audio_url)}" download aria-label="Download MP3 audio narration">\n'
+        f'        <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>\n'
+        f'        Download MP3\n'
+        f'      </a>\n'
+        f'    </div>\n'
+        f'  </div>\n'
+        f'</details>'
+    )
+
+
+
+
+
 def _nav_link(href, label, here=None):
     """One nav anchor, marked `aria-current="page"` when it is the page
     being rendered. Every page emits every link, in the same order — a
@@ -1486,6 +1619,33 @@ def _build_doc_pages(out_dir):
     for md_text, stem, title, canonical in docs:
         _MD.reset()
         body = _MD.convert(md_text)
+        if stem == "about":
+            about_audio_map = {
+                r'(<h1 id="about-this-project">About this project</h1>)': ("assets/audio/about-intro.mp3", "About this project"),
+                r'(<h2 id="built-on-the-official-record">Built on the official record</h2>)': ("assets/audio/about-built-on-record.mp3", "Built on the official record"),
+                r'(<h2 id="two-commitments-in-tension">Two commitments, in tension</h2>)': ("assets/audio/about-two-commitments.mp3", "Two commitments, in tension"),
+                r'(<h2 id="for-ai-agents">For AI agents</h2>)': ("assets/audio/about-for-ai-agents.mp3", "For AI agents"),
+                r'(<h2 id="who-runs-it">Who runs it</h2>)': ("assets/audio/about-who-runs-it.mp3", "Who runs it"),
+            }
+            for pattern, (rel_url, section_title) in about_audio_map.items():
+                if (out_dir / rel_url).exists():
+                    player_html = render_audio_player(
+                        rel_url,
+                        title=f"Listen to {section_title}",
+                        aria_label=f"Audio narration for {section_title}",
+                    )
+                    body = re.sub(
+                        pattern,
+                        lambda m, p=player_html: f"{m.group(1)}\n{p}",
+                        body,
+                        count=1,
+                    )
+
+
+
+
+
+
         page = _render_page(
             # No brand suffix when the page title already carries it (README)
             title if brand in title else f"{title} — {SITE_TITLE}",
@@ -1495,6 +1655,7 @@ def _build_doc_pages(out_dir):
         )
         (out_dir / f"{stem}.html").write_text(page, encoding="utf-8")
     return doc_pages
+
 
 
 # ---------------------------------------------------------------------------
@@ -2902,6 +3063,19 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
         _MD.reset()
         body = _style_digest_body(_MD.convert(md_text))
         body = _inject_day_view_link(body, path.stem, md_text, out_dir)
+        audio_asset = out_dir / "assets" / "audio" / f"digest-{path.stem}.mp3"
+        if audio_asset.exists():
+            player_html = render_audio_player(
+                f"assets/audio/digest-{path.stem}.mp3",
+                title=f"Listen to {path.stem} Day in Review",
+                aria_label=f"Audio narration of Day in Review for {path.stem}",
+            )
+            body = re.sub(
+                r'(<h2 id="day-in-review"[^>]*>.*?</h2>)',
+                r'\1\n' + player_html,
+                body,
+                count=1,
+            )
         page = _render_page(
             f"Daily Digest {path.stem} — {SITE_TITLE}",
             body,
@@ -2909,6 +3083,7 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
             f"digests/{path.name}",
         )
         (out_dir / f"{path.stem}.html").write_text(page, encoding="utf-8")
+
 
         asset_src = digest_dir / "assets" / path.stem
         if asset_src.is_dir():

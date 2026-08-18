@@ -344,6 +344,12 @@ FILING_DEFAULT = "observation"
 
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")
 
+# Multi-modal Text-to-Speech (TTS) configuration (GUIDE §6 multi-modal accessibility)
+TTS_PROVIDER = os.environ.get("TTS_PROVIDER", "openai").lower()
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "").strip()
+TTS_MODEL = os.environ.get("TTS_MODEL", "tts-1")
+TTS_VOICE = os.environ.get("TTS_VOICE", "nova")
+
 # Project mailbox for email-distributed sources (GUIDE §3 email class;
 # docs/email-sources.md). Credentials live only in .env.
 IMAP_HOST = os.environ.get("IMAP_HOST", "")
@@ -364,3 +370,4 @@ def api_key() -> str:
             "key from https://api.data.gov/signup/"
         )
     return key
+

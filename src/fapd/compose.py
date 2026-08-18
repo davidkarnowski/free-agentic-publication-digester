@@ -127,9 +127,18 @@ def compose_day(conn, llm, date):
     conn.commit()
     logger.info("%s: Day in Review composed (%d in / %d out tokens)",
                 date, result["input_tokens"], result["output_tokens"])
+
+    try:
+        from fapd.tts import get_tts_service
+        audio_path = config.SITE_DIR / "assets" / "audio" / f"digest-{date}.mp3"
+        get_tts_service().generate_audio(result["text"], audio_path)
+    except Exception as e:
+        logger.warning("%s: Day in Review TTS narration failed: %s", date, e)
+
     return {"composed": 1, "skipped_existing": 0,
             "input_tokens": result["input_tokens"],
             "output_tokens": result["output_tokens"]}
+
 
 
 def _mechanical_counts(conn, date):

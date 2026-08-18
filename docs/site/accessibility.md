@@ -50,3 +50,12 @@ fixed.
 Every digest is also published as plain Markdown in the repository, and
 the machine surfaces (`/llms.txt`, `/digests.json`, the Atom feed) carry
 the same content in formats that do not depend on our styling.
+
+## Multi-modal audio modality & assistive access
+
+As part of our commitment to universal access, daily digests and primary explanatory pages feature synthesized audio narrations in addition to canonical text.
+
+- **Verbatim Content Parity**: The audio narration provides an exact spoken reading of the synthesized prose. Text and audio present identical factual information — neither modality receives exclusive content.
+- **Screen Reader & Assisted Technology First**: Audio is presented using HTML5 native `<audio>` elements with explicit `controls`, `preload="none"`, and descriptive `aria-label` attributes.
+- **Direct Audio Download**: Every player includes a direct, visible, keyboard-navigable download link (`Download MP3`) to retrieve raw `.mp3` files for offline listening, screen readers, braille displays, and custom assistive software.
+
