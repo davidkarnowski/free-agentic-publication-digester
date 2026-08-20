@@ -1628,7 +1628,7 @@ def _build_doc_pages(out_dir):
                 r'(<h2 id="who-runs-it">Who runs it</h2>)': ("assets/audio/about-who-runs-it.mp3", "Who runs it"),
             }
             for pattern, (rel_url, section_title) in about_audio_map.items():
-                if (out_dir / rel_url).exists() or (config.PROJECT_ROOT / "site" / rel_url).exists():
+                if (out_dir / rel_url).exists() or (config.PROJECT_ROOT / "site" / rel_url).exists() or (config.PROJECT_ROOT / "static_assets" / rel_url).exists():
                     player_html = render_audio_player(
                         rel_url,
                         title=f"Listen to {section_title}",
@@ -3056,17 +3056,18 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
     teasers = {}
     assets_copied = 0
 
-    # Copy repo static assets (site/assets/) into out_dir/assets/ if present
-    src_assets = config.PROJECT_ROOT / "site" / "assets"
-    if src_assets.is_dir():
-        dst_assets = out_dir / "assets"
-        if src_assets.resolve() != dst_assets.resolve():
-            dst_assets.mkdir(parents=True, exist_ok=True)
+    # Copy repo static assets (site/assets/ or static_assets/) into out_dir/assets/ if present
+    for src_assets in [
+        config.PROJECT_ROOT / "static_assets",
+        config.PROJECT_ROOT / "site" / "assets",
+    ]:
+        if src_assets.is_dir():
+            dst_assets = out_dir / "assets"
             for path in src_assets.rglob("*"):
                 if path.is_file():
                     rel = path.relative_to(src_assets)
                     target = dst_assets / rel
-                    if path.resolve() != target.resolve():
+                    if path.resolve() != target.resolve() and (not target.exists() or path.stat().st_size != target.stat().st_size):
                         target.parent.mkdir(parents=True, exist_ok=True)
                         shutil.copy2(path, target)
 

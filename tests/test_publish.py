@@ -861,6 +861,27 @@ def test_doc_pages_built_from_docs_site(digests, tmp_path, monkeypatch):
     assert "<title>Zzz" in zzz  # stem fallback when no h1
 
 
+def test_static_assets_copied_and_about_audio_rendered(digests, tmp_path, monkeypatch):
+    """Assets from static_assets/ copy to out_dir/assets and render in about.html."""
+    from fapd import config
+
+    root = tmp_path / "root"
+    (root / "docs" / "site").mkdir(parents=True)
+    (root / "docs" / "site" / "about.md").write_text("# About this project\n\nIntroduction prose.\n")
+    (root / "static_assets" / "audio").mkdir(parents=True)
+    (root / "static_assets" / "audio" / "about-intro.mp3").write_bytes(b"ID3_test_audio")
+    monkeypatch.setattr(config, "PROJECT_ROOT", root)
+
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+
+    assert (out / "assets" / "audio" / "about-intro.mp3").exists()
+    assert (out / "assets" / "audio" / "about-intro.mp3").read_bytes() == b"ID3_test_audio"
+    about_html = (out / "about.html").read_text()
+    assert '<audio controls' in about_html
+    assert 'src="assets/audio/about-intro.mp3"' in about_html
+
+
 def test_doc_nav_links_on_digest_pages_and_index(digests, tmp_path):
     out = tmp_path / "site"
     publish.build_site(digests, out)

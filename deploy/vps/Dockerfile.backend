@@ -22,6 +22,7 @@ WORKDIR /app
 # commits push from here) to ./repo in the bundle; data/ and site/ are
 # volumes, .env arrives via env_file at run time, never at build time.
 COPY repo/ /app
+RUN mkdir -p /app/static_assets && cp -r /app/site/assets/* /app/static_assets/ 2>/dev/null || true
 RUN uv sync --frozen --no-dev
 
 # Evidence commits are authored by the pipeline's bot identity and push
