@@ -3060,13 +3060,15 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
     src_assets = config.PROJECT_ROOT / "site" / "assets"
     if src_assets.is_dir():
         dst_assets = out_dir / "assets"
-        dst_assets.mkdir(parents=True, exist_ok=True)
-        for path in src_assets.rglob("*"):
-            if path.is_file():
-                rel = path.relative_to(src_assets)
-                target = dst_assets / rel
-                target.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(path, target)
+        if src_assets.resolve() != dst_assets.resolve():
+            dst_assets.mkdir(parents=True, exist_ok=True)
+            for path in src_assets.rglob("*"):
+                if path.is_file():
+                    rel = path.relative_to(src_assets)
+                    target = dst_assets / rel
+                    if path.resolve() != target.resolve():
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(path, target)
 
     doc_pages = _build_doc_pages(out_dir)
 
