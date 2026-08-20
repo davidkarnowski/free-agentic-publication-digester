@@ -1628,7 +1628,7 @@ def _build_doc_pages(out_dir):
                 r'(<h2 id="who-runs-it">Who runs it</h2>)': ("assets/audio/about-who-runs-it.mp3", "Who runs it"),
             }
             for pattern, (rel_url, section_title) in about_audio_map.items():
-                if (out_dir / rel_url).exists():
+                if (out_dir / rel_url).exists() or (config.PROJECT_ROOT / "site" / rel_url).exists():
                     player_html = render_audio_player(
                         rel_url,
                         title=f"Listen to {section_title}",
@@ -3055,6 +3055,19 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
     dates = [p.stem for p in files]
     teasers = {}
     assets_copied = 0
+
+    # Copy repo static assets (site/assets/) into out_dir/assets/ if present
+    src_assets = config.PROJECT_ROOT / "site" / "assets"
+    if src_assets.is_dir():
+        dst_assets = out_dir / "assets"
+        dst_assets.mkdir(parents=True, exist_ok=True)
+        for path in src_assets.rglob("*"):
+            if path.is_file():
+                rel = path.relative_to(src_assets)
+                target = dst_assets / rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(path, target)
+
     doc_pages = _build_doc_pages(out_dir)
 
     for i, path in enumerate(files):
