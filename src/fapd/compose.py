@@ -132,7 +132,7 @@ def compose_day(conn, llm, date):
         from fapd.tts import get_tts_service
         audio_path = config.SITE_DIR / "assets" / "audio" / f"digest-{date}.mp3"
         get_tts_service().generate_audio(result["text"], audio_path)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.warning("%s: Day in Review TTS narration failed: %s", date, e)
 
     return {"composed": 1, "skipped_existing": 0,

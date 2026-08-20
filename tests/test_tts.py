@@ -1,14 +1,10 @@
 """Unit tests for src/fapd/tts.py (Text-to-Speech audio synthesis layer)."""
 
 import json
-from pathlib import Path
-from unittest.mock import MagicMock, patch
 import urllib.error
-
-import pytest
+from unittest.mock import MagicMock, patch
 
 from fapd.tts import (
-    BaseTTSService,
     NullTTSService,
     OpenAITTSService,
     get_tts_service,

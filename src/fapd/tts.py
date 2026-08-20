@@ -7,10 +7,9 @@ adapters for additional providers (ElevenLabs, Google, local Kokoro, etc.).
 import abc
 import json
 import logging
-from pathlib import Path
-import urllib.request
 import urllib.error
-from typing import Optional
+import urllib.request
+from pathlib import Path
 
 from fapd import config
 
@@ -25,15 +24,14 @@ class BaseTTSService(abc.ABC):
         self,
         text: str,
         output_path: Path,
-        voice: Optional[str] = None,
-        model: Optional[str] = None,
+        voice: str | None = None,
+        model: str | None = None,
         speed: float = 1.0,
     ) -> bool:
         """Synthesize prose text to audio and write binary file to output_path.
         
         Returns True if audio file was successfully written, False otherwise.
         """
-        pass
 
 
 class OpenAITTSService(BaseTTSService):
@@ -41,7 +39,7 @@ class OpenAITTSService(BaseTTSService):
 
     ENDPOINT = "https://api.openai.com/v1/audio/speech"
 
-    def __init__(self, api_key: Optional[str] = None, default_model: Optional[str] = None, default_voice: Optional[str] = None):
+    def __init__(self, api_key: str | None = None, default_model: str | None = None, default_voice: str | None = None):
         self.api_key = (api_key or config.OPENAI_API_KEY).strip()
         self.default_model = default_model or config.TTS_MODEL or "tts-1"
         self.default_voice = default_voice or config.TTS_VOICE or "nova"
@@ -50,8 +48,8 @@ class OpenAITTSService(BaseTTSService):
         self,
         text: str,
         output_path: Path,
-        voice: Optional[str] = None,
-        model: Optional[str] = None,
+        voice: str | None = None,
+        model: str | None = None,
         speed: float = 1.0,
     ) -> bool:
         if not text or not text.strip():
@@ -109,7 +107,7 @@ class OpenAITTSService(BaseTTSService):
             err_body = e.read().decode("utf-8", errors="replace")
             logger.error("OpenAI TTS HTTP %d error: %s", e.code, err_body[:300])
             return False
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("OpenAI TTS synthesis failed: %s", e)
             return False
 
@@ -121,15 +119,15 @@ class NullTTSService(BaseTTSService):
         self,
         text: str,
         output_path: Path,
-        voice: Optional[str] = None,
-        model: Optional[str] = None,
+        voice: str | None = None,
+        model: str | None = None,
         speed: float = 1.0,
     ) -> bool:
         logger.debug("NullTTSService: TTS is disabled or no provider configured")
         return False
 
 
-def get_tts_service(provider: Optional[str] = None) -> BaseTTSService:
+def get_tts_service(provider: str | None = None) -> BaseTTSService:
     """Factory function returning the configured TTSService implementation."""
     selected_provider = (provider or config.TTS_PROVIDER or "none").lower()
 
