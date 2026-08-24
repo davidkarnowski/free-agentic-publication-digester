@@ -86,8 +86,11 @@ change.
 uv run pytest -q                              # full suite
 uv run ruff check src/ scripts/ tests/        # lint
 uv run python scripts/run_pipeline.py         # full daily run (EOD finalizer)
-uv run python scripts/digest.py --date D      # (re)render one digest
+uv run python scripts/run_pipeline.py --no-llm # same, mechanical only (GUIDE §6 r15)
+uv run python scripts/digest.py --date D      # (re)render one digest (--no-llm: stored rows only)
 uv run python scripts/collect.py --once       # one collector cycle (after B-workstream)
+uv run python scripts/collect.py --finalize D # finalize day D now: marker + evidence push
+                                              # (a bare run_pipeline.py records and pushes nothing)
 uv run python scripts/audit.py                # our server footprint
 uv run python scripts/sources_doc.py          # regenerate SOURCES.md after registry edits
 deploy/dev/scripts/dev-seed.sh                # (operator-gated) pull VPS snapshots
@@ -229,6 +232,18 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   accountability data; a success elsewhere never erases it.
 - **Empty-state digest sections render on purpose** (e.g. PLAW's "No
   laws were published") — disclosure, not a bug.
+- **A day finalizes without any inference provider** (GUIDE §6 r15,
+  2026-08-24). `LLM_BACKEND=none` is a configuration, not an error; a
+  provider that is disabled, unauthenticated, or out of quota trips the
+  client's per-run breaker and every model layer records `skipped`/
+  `failed` in `day_inference`; the render proceeds on stored rows and
+  the gates decide. The digest's **Inference** row says only that no
+  inference was available and that content is source-derived or
+  mechanically constructed — **never the cause** (operator ruling):
+  causes go to the manifest, the insight report, and the logs. Do not
+  "improve" the disclosure with error text, and do not make an
+  `LLMError` fatal to the finalizer again — that is what left ten days
+  unpushed in August 2026.
 
 ## 10. Things that look intentional but are bugs
 
@@ -453,3 +468,18 @@ live in `.claude/agents/fapd-*.md` (tracked).
   rule. `scripts/audit.py` gained a repeat-failure report so the fix's
   effect is actually measurable, which is what the tooling was missing
   the whole six days this sat unactioned.
+- **2026-08-15** — *(recorded 2026-08-24)* Production LLM backend moved
+  from the `claude` CLI to **Google Gemini** (`LLM_BACKEND=gemini`, free
+  tier) after the vendor disabled subscription access for the CLI on
+  2026-08-14 23:08 UTC. The switch was made by staged script with no
+  GUIDE/CLAUDE.md trace; the free tier's ~20-request daily quota then
+  starved the 04:00 UTC finalizer on eight of ten nights.
+- **2026-08-24** — **The mechanical digest is the floor** (operator;
+  GUIDE §6 r15): every day finalizes with or without inference; the
+  published digest states only that no inference was available and
+  that content is source-derived or mechanically constructed — no
+  causes; no prose backfill into frozen days; the continuous analyze
+  layer stops touching a finalized day. Same day: production returned
+  to the CLI backend at 22:28 UTC after the block lifted
+  (`scripts/staged/2026-08-24-restore-cli-backend.sh`); the Gemini key
+  stays configured for a future explicit failover (parked).
