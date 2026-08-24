@@ -143,6 +143,15 @@ LLM_MODELS = {
 # API-backend response cap. On models with extended thinking on by default
 # the cap covers thinking + text together, so it is deliberately generous.
 LLM_MAX_OUTPUT_TOKENS = 16000
+# Transient-retry ladder for verifiably ZERO-BILLED failures only (plan
+# 2026-08-24, BUG-1; GUIDE §6 r14's "retries are the expensive path" is
+# untouched because these attempts cost nothing). Total calls per
+# completion, and the cap on how long one wait may be — the provider's
+# own hint ("Please retry in 37s", Retry-After) is honored up to the cap,
+# else 2**attempt seconds. 2026-08-16..24 the ladder was two calls ~1 s
+# apart against a quota asking for 3-40 s: eight halted finalizers.
+LLM_TRANSIENT_ATTEMPTS = int(os.environ.get("FAPD_LLM_TRANSIENT_ATTEMPTS", "3"))
+LLM_RETRY_MAX_WAIT_S = int(os.environ.get("FAPD_LLM_RETRY_MAX_WAIT_S", "60"))
 # GUIDE §6 r8 (operator ruling 2026-08-02): NO standing daily token cap —
 # this is an on-demand THROTTLE. Unset (the default) means unlimited; set
 # an input-token integer on the box to engage backpressure: a call that
@@ -311,8 +320,19 @@ EVIDENCE_PUSH = os.environ.get("FAPD_EVIDENCE_PUSH", "") == "1"
 # retried — without it, a digest that persistently fails validation buys
 # a full pipeline run (sync, analyze, compose on the strong tier) every
 # backoff interval, forever (~18 runs/day). A new day gets a fresh
-# ladder; operator intervention (fix, then re-run with --date) clears it.
-EOD_MAX_FINALIZE_ATTEMPTS = 3
+# ladder; operator intervention (fix, then `scripts/collect.py
+# --finalize D`) clears it.
+#
+# Spacing (2026-08-24, GUIDE §6 r15): minutes to wait after the 1st,
+# 2nd, 3rd... failed attempt. Before this the EOD worker used the
+# generic error-doubling (10/20/40 min), which spent all three attempts
+# by 06:12Z on 2026-08-22 and -23 — before the provider's quota reset at
+# 07:00Z. A provider outage no longer fails the run at all (r15), so the
+# ladder now exists for validation failures and crashes; its later rungs
+# are hours apart so a transient cause has time to clear. With four
+# attempts: ≈04:00, 04:15, 05:15, 08:35 UTC.
+EOD_MAX_FINALIZE_ATTEMPTS = 4
+EOD_FINALIZE_RETRY_MINUTES = (15, 60, 200)
 
 # Bounded retry for a failing evidence push (F-021, 2026-08-07), same
 # shape as the ladder above. A push failure is either transient (GitHub

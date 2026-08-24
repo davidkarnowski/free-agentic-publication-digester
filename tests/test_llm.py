@@ -270,16 +270,25 @@ def test_zero_billed_cli_failure_retries_once_and_succeeds(tmp_path):
     assert rows[1][0] is None and rows[1][1] == 108
 
 
-def test_second_transient_failure_raises_and_is_bounded(tmp_path):
+def test_transient_failures_raise_after_the_bounded_ladder(tmp_path, monkeypatch):
+    """Updated 2026-08-24 (BUG-1): the ladder is config.LLM_TRANSIENT_ATTEMPTS
+    calls with a wait between them, not exactly one immediate retry —
+    still zero-billed only, still every attempt ledgered."""
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 3)
     client, calls = make_client(tmp_path, [
         FakeProc(stdout=_error_envelope(), returncode=1),
         FakeProc(stdout=_error_envelope(), returncode=1),
+        FakeProc(stdout=_error_envelope(), returncode=1),
     ])
-    with pytest.raises(LLMError, match="after a zero-billed retry"):
+    waits = []
+    client._sleep = waits.append
+    with pytest.raises(LLMError, match="after 3 zero-billed attempt"):
         client.complete("x", purpose="insight:suggestions")
-    assert len(calls) == 2                      # exactly one retry, never more
+    assert len(calls) == 3                      # the ladder, never more
+    assert waits == [2.0, 4.0]                  # 2**attempt, no provider hint
     n = client._db.execute("SELECT COUNT(*) FROM llm_calls").fetchone()[0]
-    assert n == 2                               # both attempts ledgered
+    assert n == 3                               # every attempt ledgered
+    assert client.unavailable is None           # an outage, not a refusal
 
 
 def test_billed_envelope_failure_is_never_retried(tmp_path):
@@ -384,15 +393,230 @@ def test_gemini_backend_resolves_tier_and_ledgers_backend(tmp_path):
 def test_gemini_failure_is_ledgered_and_raises(tmp_path):
     client, _ = make_gemini_client(
         tmp_path,
-        responses=[
-            FakeGeminiResponse(status_code=500, text="Internal Server Error"),
-            FakeGeminiResponse(status_code=500, text="Internal Server Error"),
-        ],
+        responses=[FakeGeminiResponse(status_code=500, text="Internal Server Error")
+                   for _ in range(config.LLM_TRANSIENT_ATTEMPTS)],
     )
+    client._sleep = lambda s: None
     with pytest.raises(LLMError, match="HTTP 500"):
         client.complete("x", purpose="map:test")
     row = client._db.execute("SELECT backend, error, input_tokens FROM llm_calls").fetchone()
     assert row[0] == "gemini" and "HTTP 500" in row[1] and row[2] == 0
+    assert client.unavailable is None           # a 5xx outage never trips the breaker
+
+
+def test_gemini_5xx_outage_does_not_trip_the_breaker_but_quota_429_does(tmp_path):
+    client, fake = make_gemini_client(
+        tmp_path,
+        responses=[FakeGeminiResponse(status_code=503, text="overloaded"),
+                   FakeGeminiResponse(json_data=gemini_json("back"))],
+    )
+    client._sleep = lambda s: None
+    assert client.complete("x", purpose="map:test")["text"] == "back"
+    assert client.unavailable is None
+
+    quota = FakeGeminiResponse(status_code=429, text=_GEMINI_QUOTA_BODY)
+    client, fake = make_gemini_client(
+        tmp_path, responses=[quota] * config.LLM_TRANSIENT_ATTEMPTS)
+    waits = []
+    client._sleep = waits.append
+    with pytest.raises(llm.ProviderUnavailableError) as info:
+        client.complete("x", purpose="map:batch1")
+    assert info.value.reason == "quota exhausted"
+    assert client.unavailable == "quota exhausted"
+    assert len(fake.calls) == config.LLM_TRANSIENT_ATTEMPTS
+    assert waits == [37.0] * (config.LLM_TRANSIENT_ATTEMPTS - 1)  # the provider's hint
+    # …and the next call never reaches the provider: ledgered, zero, raised.
+    with pytest.raises(llm.ProviderUnavailableError):
+        client.complete("y", purpose="map:batch2")
+    assert len(fake.calls) == config.LLM_TRANSIENT_ATTEMPTS
+    rows = client._db.execute(
+        "SELECT error, input_tokens FROM llm_calls ORDER BY id").fetchall()
+    assert rows[-1][0] == "provider unavailable: quota exhausted (short-circuit)"
+    assert all(r[1] == 0 for r in rows if r[0])   # every failed attempt, zero-billed
+    assert client.status() == {"backend": "gemini",
+                               "unavailable": "quota exhausted",
+                               "models_used": []}
+
+
+_GEMINI_QUOTA_BODY = json.dumps({"error": {
+    "code": 429,
+    "message": ("You exceeded your current quota, please check your plan and"
+                " billing details.\n* Quota exceeded for metric:"
+                " generativelanguage.googleapis.com/generate_content_free_tier_requests,"
+                " limit: 20, model: gemini-2.5-flash\nPlease retry in 36.962849995s."),
+    "status": "RESOURCE_EXHAUSTED",
+    "details": [{"@type": "type.googleapis.com/google.rpc.RetryInfo",
+                 "retryDelay": "37s"}],
+}})
+
+
+def test_retry_hint_parsing():
+    assert llm.parse_retry_hint(_GEMINI_QUOTA_BODY) == 37.0        # retryDelay wins
+    assert llm.parse_retry_hint('{"error": {"message": "Please retry in 36.96s."}}') == 36.96
+    assert llm.parse_retry_hint("plain text, retry in 5s please") == 5.0
+    assert llm.parse_retry_hint("nothing here") is None
+    assert llm.parse_retry_hint(None, {"Retry-After": "12"}) == 12.0
+    assert llm.parse_retry_hint(None, {"retry-after": "Wed, 21 Oct 2026 07:28:00 GMT"}) is None
+
+
+def test_gemini_retry_after_header_is_honored_and_capped(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "LLM_RETRY_MAX_WAIT_S", 10)
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 2)
+    hinted = FakeGeminiResponse(status_code=503, text="busy")
+    hinted.headers = {"Retry-After": "600"}
+    client, _ = make_gemini_client(
+        tmp_path, responses=[hinted, FakeGeminiResponse(json_data=gemini_json("ok"))])
+    waits = []
+    client._sleep = waits.append
+    assert client.complete("x", purpose="map:test")["text"] == "ok"
+    assert waits == [10.0]                      # header 600 s, capped at the policy max
+    assert client.status()["models_used"] == [config.LLM_MODELS["gemini"]["haiku"]]
+
+
+def test_gemini_auth_failure_trips_immediately(tmp_path):
+    client, fake = make_gemini_client(
+        tmp_path, responses=[FakeGeminiResponse(status_code=403, text="PERMISSION_DENIED")])
+    with pytest.raises(llm.ProviderUnavailableError) as info:
+        client.complete("x", purpose="map:test")
+    assert info.value.reason == "not authenticated"
+    assert len(fake.calls) == 1                 # not a transient: no ladder
+
+
+def test_gemini_missing_key_is_unavailable_at_construction(tmp_path, monkeypatch):
+    for var in ("GOOGLE_GEMINI_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"):
+        monkeypatch.delenv(var, raising=False)
+    fake = FakeGeminiRequester(responses=[])
+    client = LLMClient(db_path=tmp_path / "g.db",
+                       backend=llm.GeminiBackend(requester=fake))
+    assert client.unavailable == "not authenticated"
+    with pytest.raises(llm.ProviderUnavailableError):
+        client.complete("x", purpose="map:test")
+    assert fake.calls == []
+    row = client._db.execute("SELECT backend, error FROM llm_calls").fetchone()
+    assert row == ("gemini", "provider unavailable: not authenticated (short-circuit)")
+
+
+# ---------------------------------------- the CLI refusal and the breaker --
+
+
+def _refusal_envelope():
+    """The 2026-08-14 envelope: zero-billed, and it would have said the
+    same thing 35 more times (it did)."""
+    data = json.loads(_error_envelope())
+    data["result"] = ("Your organization has disabled Claude subscription access"
+                      " for Claude Code · Use an Anthropic API key instead")
+    return json.dumps(data)
+
+
+def test_cli_subscription_refusal_trips_the_breaker(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 2)
+    client, calls = make_client(tmp_path, [
+        FakeProc(stdout=_refusal_envelope(), returncode=1),
+        FakeProc(stdout=_refusal_envelope(), returncode=1),
+        FakeProc(stdout=cli_json("never asked")),
+    ])
+    client._sleep = lambda s: None
+    with pytest.raises(llm.ProviderUnavailableError) as info:
+        client.complete("x", purpose="map:batch1")
+    assert info.value.reason == "provider refused"
+    with pytest.raises(llm.ProviderUnavailableError):
+        client.complete("y", purpose="map:batch2")
+    assert len(calls) == 2                      # the third proc was never run
+    assert client.status()["unavailable"] == "provider refused"
+
+
+def test_classify_unavailable_table():
+    f = llm.classify_unavailable
+    assert f("Your organization has disabled Claude subscription access") == "provider refused"
+    assert f("Not logged in · run claude login") == "not authenticated"
+    assert f("Invalid API key") == "not authenticated"
+    assert f("anything", 401) == "not authenticated"
+    assert f("Your credit balance is too low") == "quota exhausted"
+    assert f(_GEMINI_QUOTA_BODY, 429) == "quota exhausted"
+    assert f("Rate limit exceeded", 429) == "quota exhausted"
+    assert f("Rate limit exceeded", None) is None   # bare text, no status: not decisive
+    assert f("Internal Server Error", 500) is None
+    assert f("refusal: the model declined") is None
+
+
+# ------------------------------------------------ NullBackend / selection --
+
+
+def test_null_backend_ledgers_and_raises(tmp_path):
+    client = LLMClient(db_path=tmp_path / "n.db", backend=llm.NullBackend())
+    assert client.unavailable == "disabled"
+    with pytest.raises(llm.ProviderUnavailableError) as info:
+        client.complete("x", purpose="map:batch1", package_id="P1")
+    assert info.value.reason == "disabled"
+    row = client._db.execute(
+        "SELECT backend, model, error, input_tokens, package_id FROM llm_calls").fetchone()
+    assert row == ("none", config.LLM_MODELS.get("none", {}).get("haiku", "haiku"),
+                   "provider unavailable: disabled (short-circuit)", 0, "P1")
+    assert client.status() == {"backend": "none", "unavailable": "disabled",
+                               "models_used": []}
+
+
+def test_null_backend_reason_is_free_text_for_the_ledger(tmp_path):
+    client = LLMClient(db_path=tmp_path / "n.db",
+                       backend=llm.NullBackend("disabled by operator"))
+    with pytest.raises(llm.ProviderUnavailableError):
+        client.complete("x", purpose="compose:day-in-review")
+    row = client._db.execute("SELECT error FROM llm_calls").fetchone()
+    assert "disabled by operator" in row[0]
+
+
+def test_none_selects_the_null_backend(tmp_path, monkeypatch):
+    for value in ("none", "off", "disabled", "NONE "):
+        monkeypatch.setattr(config, "LLM_BACKEND", value.strip().lower())
+        client = LLMClient(db_path=tmp_path / "n.db")
+        assert isinstance(client._backend, llm.NullBackend)
+        assert client.unavailable == "disabled"
+
+
+def test_unknown_backend_is_a_configuration_error(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "LLM_BACKEND", "gemni")   # the typo that used to bill the CLI
+    with pytest.raises(ValueError, match="not a backend; accepted: api, cli"):
+        LLMClient(db_path=tmp_path / "x.db")
+    monkeypatch.setattr(config, "LLM_BACKEND", "")
+    assert isinstance(LLMClient(db_path=tmp_path / "y.db")._backend, CLIBackend)
+
+
+def test_api_backend_missing_key_is_unavailable_at_construction(tmp_path, monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    backend = AnthropicBackend()
+    assert backend.unavailable == "not authenticated"
+    client = LLMClient(db_path=tmp_path / "a.db", backend=backend)
+    with pytest.raises(llm.ProviderUnavailableError):
+        client.complete("x", purpose="map:test")
+
+
+def test_api_rate_limit_and_auth_errors_trip_the_breaker(tmp_path):
+    class RateLimited(RuntimeError):
+        status_code = 429
+
+    client, fake = make_api_client(tmp_path, error=RateLimited("rate_limit_error"))
+    with pytest.raises(llm.ProviderUnavailableError) as info:
+        client.complete("x", purpose="map:test")
+    assert info.value.reason == "quota exhausted"
+    assert len(fake.calls) == 1                 # the SDK already retried; we do not
+    assert client.unavailable == "quota exhausted"
+
+
+def test_status_tracks_models_used(tmp_path):
+    client, _ = make_client(tmp_path, [FakeProc(stdout=cli_json()),
+                                       FakeProc(stdout=cli_json())])
+    assert client.status()["models_used"] == []
+    client.complete("a", purpose="map:test", model="haiku")
+    client.complete("b", purpose="compose:day-in-review", model="opus")
+    assert client.status() == {"backend": "cli", "unavailable": None,
+                               "models_used": ["haiku", "opus"]}
+
+
+def test_provider_unavailable_is_an_llm_error():
+    exc = llm.ProviderUnavailableError("quota exhausted")
+    assert isinstance(exc, LLMError)
+    assert exc.reason == "quota exhausted" and exc.unavailable == "quota exhausted"
+    assert exc.reason in llm.UNAVAILABLE_REASONS
 
 
 def test_gemini_429_is_transient_error_and_retries(tmp_path):
