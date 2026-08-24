@@ -1,0 +1,98 @@
+{
+ "backfill_count": 0,
+ "backfill_note": "items observed today that their publisher dates earlier; the human page excludes them from the day's listing under the GUIDE \u00a73 dating rule. THIS FILE'S items[] includes them, flagged is_backfill=true, because an agent may legitimately want the full observation record; they are reported in the dated digest's coverage accounting, never as the day's news",
+ "canonical_record": "the dated digest, frozen at end of day",
+ "corroborated_count": 0,
+ "counts": {
+  "AGENCYPR/PRESS": 2
+ },
+ "date": "2026-08-16",
+ "day_context": {
+  "kind": "weekend",
+  "name": "Sunday",
+  "note": "Sunday is not a federal business day. Most federal publishers issue few or no documents on weekends and federal holidays; this stream may stay short until the next business day."
+ },
+ "disclosure": "This is the complete observed listing for publication day 2026-08-16: every item our collectors recorded for this day, with the mechanical rules applied, frozen at end of day. It is not the digest \u2014 the dated digest is the canonical record for this day.",
+ "facets": {
+  "note": "filter items client-side on items[].tags; the human page offers the same keywords as toggles",
+  "tags": {
+   "executive": 2,
+   "nasa news releases": 1,
+   "press release": 2,
+   "va news releases": 1
+  }
+ },
+ "frozen": true,
+ "generated": "2026-08-17T14:59:42Z",
+ "items": [
+  {
+   "agency": "VA News Releases",
+   "channel": null,
+   "channel_label": "web feed",
+   "claimed_day": "2026-08-16",
+   "claimed_published_at": "Sun, 16 Aug 2026 20:30:00 +0000",
+   "collection": "AGENCYPR",
+   "dkim_result": null,
+   "doc_type": "PRESS",
+   "granule_id": "",
+   "inclusion_rule": null,
+   "is_backfill": false,
+   "observed_at": "2026-08-16T21:20:49Z",
+   "official_url": "https://news.va.gov/148718/baby-shower-teaches-parents-life-saving-skills/",
+   "opening_verbatim": "More than a baby shower: VA event teaches parents life-saving skills - VA News Skip to content An official website of the United States government Here\u2019s how you know Here\u2019s how you know Talk to the Veterans Crisis Line now Official website",
+   "package_id": "PR-va-newsroom-39cfae72",
+   "source_class": "agency",
+   "source_id": "va-newsroom",
+   "summary": null,
+   "summary_method": null,
+   "tags": [
+    "executive",
+    "press release",
+    "va news releases"
+   ],
+   "title": "More than a baby shower: VA event teaches parents life-saving skills",
+   "url": "https://news.va.gov/148718/baby-shower-teaches-parents-life-saving-skills/"
+  },
+  {
+   "agency": "NASA News Releases",
+   "channel": null,
+   "channel_label": "web feed",
+   "claimed_day": "2026-08-16",
+   "claimed_published_at": "Sun, 16 Aug 2026 04:05:00 +0000",
+   "collection": "AGENCYPR",
+   "dkim_result": null,
+   "doc_type": "PRESS",
+   "granule_id": "",
+   "inclusion_rule": null,
+   "is_backfill": false,
+   "observed_at": "2026-08-16T05:09:24Z",
+   "official_url": "https://science.nasa.gov/image-article/apod/apod-2026-august-16-milky-way-over-yellowstone/",
+   "opening_verbatim": "APOD: 2026 August 16 - Milky Way over Yellowstone - NASA Science Explore Search News & Events News & Events Recently Published Video Series on NASA+ Podcasts & Audio Blogs Newsletters Social Media Media Resources Multimedia Multimedia NASA+",
+   "package_id": "PR-nasa-newsroom-21b1456d",
+   "source_class": "agency",
+   "source_id": "nasa-newsroom",
+   "summary": null,
+   "summary_method": null,
+   "tags": [
+    "executive",
+    "press release",
+    "nasa news releases"
+   ],
+   "title": "APOD: 2026 August 16 \u2013 Milky Way over Yellowstone",
+   "url": "https://science.nasa.gov/image-article/apod/apod-2026-august-16-milky-way-over-yellowstone/"
+  }
+ ],
+ "labels": {
+  "corroborated_by": "on a listed item: the OTHER ingestion channels the same document (same canonical URL) arrived through \u2014 independent receipt, not a content judgment",
+  "counts": "whole-day observation counts by collection/doc_type, backfill included",
+  "day_context": "null on federal business days; on weekends/federal holidays an object {kind, name, note} explaining why the stream may be short",
+  "duplicate_of": "on a non-listed item: the package_id of the listed twin; the human pages show that one entry, marked corroborated \u2014 filter these out to match the human listing",
+  "is_backfill": "true = the publisher dates this item on another day (claimed_day); not part of this day's news",
+  "items": "ALL observed items including backfill \u2014 filter on is_backfill=false to match the human page's listing",
+  "opening_verbatim": "first ~240 chars of the official text, unedited",
+  "summary_method": "official = agency/GPO text; llm = model-generated, labeled",
+  "tags": "mechanical (branch, document type, agency); no model-generated item tags yet"
+ },
+ "last_observed_at": "2026-08-16T21:20:49Z",
+ "pending_llm": 0
+}

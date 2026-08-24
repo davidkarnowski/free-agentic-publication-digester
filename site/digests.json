@@ -2,6 +2,66 @@
  "agent_guide": "agents.html",
  "digests": [
   {
+   "canonical_markdown": "digests/2026-08-23.md",
+   "date": "2026-08-23",
+   "html": "https://fapd.info/2026-08-23.html",
+   "teaser": null
+  },
+  {
+   "canonical_markdown": "digests/2026-08-22.md",
+   "date": "2026-08-22",
+   "html": "https://fapd.info/2026-08-22.html",
+   "teaser": "The digest carries 12 bills introduced in the House of Representatives."
+  },
+  {
+   "canonical_markdown": "digests/2026-08-21.md",
+   "date": "2026-08-21",
+   "html": "https://fapd.info/2026-08-21.html",
+   "teaser": "The digest carries eight bills reported in the House, covering topics such as amendments to the National Defense Authorization Act for Fiscal Year 2017, specific land claims and exchanges, environmental conservation, and educational policy."
+  },
+  {
+   "canonical_markdown": "digests/2026-08-20.md",
+   "date": "2026-08-20",
+   "html": "https://fapd.info/2026-08-20.html",
+   "teaser": "The digest carries four public laws."
+  },
+  {
+   "canonical_markdown": "digests/2026-08-19.md",
+   "date": "2026-08-19",
+   "html": "https://fapd.info/2026-08-19.html",
+   "teaser": null
+  },
+  {
+   "canonical_markdown": "digests/2026-08-18.md",
+   "date": "2026-08-18",
+   "html": "https://fapd.info/2026-08-18.html",
+   "teaser": null
+  },
+  {
+   "canonical_markdown": "digests/2026-08-17.md",
+   "date": "2026-08-17",
+   "html": "https://fapd.info/2026-08-17.html",
+   "teaser": "The digest carries one presidential document, Proclamation 11054, issued by President Donald J."
+  },
+  {
+   "canonical_markdown": "digests/2026-08-16.md",
+   "date": "2026-08-16",
+   "html": "https://fapd.info/2026-08-16.html",
+   "teaser": null
+  },
+  {
+   "canonical_markdown": "digests/2026-08-15.md",
+   "date": "2026-08-15",
+   "html": "https://fapd.info/2026-08-15.html",
+   "teaser": "The digest carries one public law, Public Law 119\u20131, which amends the Immigration and Nationality Act."
+  },
+  {
+   "canonical_markdown": "digests/2026-08-14.md",
+   "date": "2026-08-14",
+   "html": "https://fapd.info/2026-08-14.html",
+   "teaser": "The digest carries eighteen bills introduced in the House of Representatives and five in the Senate."
+  },
+  {
    "canonical_markdown": "digests/2026-08-13.md",
    "date": "2026-08-13",
    "html": "https://fapd.info/2026-08-13.html",
@@ -110,6 +170,6 @@
    "teaser": "The House introduced 44 bills, 7 with published texts, on topics including offshore oil and gas whistleblower protections, youth mental health and social media, infant formula contaminants, school nutrition, education, trade and manufacturing, occupational safety, and fishing practices, each referred to committee."
   }
  ],
- "generated": "2026-08-18T21:27:57Z",
+ "generated": "2026-08-24T04:08:57Z",
  "title": "Free Agentic Publication Digester \u2014 Daily Federal Digest"
 }
