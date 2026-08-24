@@ -64,7 +64,10 @@ CREATE TABLE packages (
     fetched_last_modified TEXT,                          -- server lastModified at the time of that download
     last_error            TEXT,                          -- most recent download error, NULL when healthy
     fetch_attempts        INTEGER NOT NULL DEFAULT 0,     -- consecutive cycle-level download failures (GUIDE §4, amended 2026-08-10)
-    last_attempt_at       TEXT                           -- ISO-8601 UTC of the most recent attempt, NULL until first
+    last_attempt_at       TEXT,                          -- ISO-8601 UTC of the most recent attempt, NULL until first
+    extract_attempts      INTEGER NOT NULL DEFAULT 0,     -- consecutive extraction failures since the last success (2026-08-24)
+    extract_error         TEXT,                          -- most recent extraction error, NULL when healthy
+    last_extract_attempt_at TEXT                         -- ISO-8601 UTC of the most recent extraction attempt
 );
 ```
 
@@ -146,6 +149,31 @@ CREATE TABLE packages (
 - **`last_attempt_at`** — ISO-8601 UTC of the most recent attempt, NULL
   until the first one. Diagnostic only (surfaced by
   `scripts/audit.py`'s repeat-failures report); nothing keys off it.
+- **`extract_attempts` / `extract_error` / `last_extract_attempt_at`**
+  (added 2026-08-24) — the extraction layer's copy of the fetch ceiling
+  above, one layer over. `extract.run` used to catch a parser exception,
+  roll back, log, and write nothing, so `pending_packages` reselected
+  the package every govinfo cycle forever: `FR-1995-01-04` (a 1995 issue
+  re-listed by a govinfo `lastModified` churn on 2026-08-06, a ZIP whose
+  first byte is not XML) was retried every ~30 minutes for eighteen
+  days. Now each failed extraction increments `extract_attempts`, stores
+  the error (500 chars) and the time in a short transaction of its own
+  (the rollback of the failed extraction must not undo the
+  bookkeeping), and `pending_packages` excludes rows at
+  `config.MAX_PACKAGE_EXTRACT_ATTEMPTS` (5). No new `fetch_status` value:
+  the row stays `fetched` — the raw file is on disk and correct — and the
+  package is simply not pending extraction; the Coverage Statement's
+  existing "fetched but not extracted" gap line already discloses it.
+  Reset to 0 / NULL on a successful extraction, on a successful
+  re-download (`_download_package`), and on a content revision
+  (`_upsert_package`'s `last_modified`-advanced branch) — a revision or a
+  re-fetch is a new problem, the same rule `fetch_attempts` follows. An
+  `EXTRACTOR_VERSION` bump does NOT reset it on its own: the counter
+  clears the moment the new extractor succeeds, and a package five
+  parsers could not read is not made readable by a version number.
+  Additive columns, self-migrating through `_ensure_columns` (the
+  2026-08-10 ceiling needed a table rebuild only because it widened a
+  CHECK; this one does not).
 - **`first_seen_at` / `fetched_at`** — audit trail: when we learned of it
   vs. when we archived it. `fetched_at` NULL until first successful download.
 - **`fetched_last_modified`** — the change-detection anchor (see

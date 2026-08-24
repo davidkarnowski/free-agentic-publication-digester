@@ -47,9 +47,14 @@ def pending_packages(conn, collections=None):
           AND (e.extracted_at IS NULL
                OR e.extracted_at < p.fetched_at
                OR e.min_version < ?)
+          -- The per-package ceiling (2026-08-24): a package past it is a
+          -- disclosed gap (the coverage statement's "fetched but not
+          -- extracted" line), not pending work. Same shape as
+          -- MAX_PACKAGE_FETCH_ATTEMPTS one layer down.
+          AND p.extract_attempts < ?
         ORDER BY p.package_id
         """,
-        (EXTRACTOR_VERSION,),
+        (EXTRACTOR_VERSION, config.MAX_PACKAGE_EXTRACT_ATTEMPTS),
     ).fetchall()
     if collections:
         rows = [r for r in rows if r["collection"] in collections]
@@ -103,6 +108,12 @@ def extract_package(conn, package_row):
     }
     if package["collection"] == "FR":
         _process_graphics(conn, package, raw_path, stats)
+    # A success starts the ceiling over (the fetch_attempts rule).
+    conn.execute(
+        "UPDATE packages SET extract_attempts = 0, extract_error = NULL"
+        " WHERE package_id = ?",
+        (package["package_id"],),
+    )
     conn.commit()
     logger.info(
         "%s: %d record(s), %d chars extracted%s",
@@ -153,17 +164,57 @@ def _process_graphics(conn, package, xml_path, stats):
             stats["assets_failed"] += 1
 
 
+def _record_failure(conn, package_id, exc):
+    """Advance the per-package extraction ladder (2026-08-24). Runs AFTER
+    the failed extraction's rollback, in its own short transaction, so the
+    bookkeeping survives it. Returns the new attempt count.
+
+    Before this the failure path wrote nothing, so pending_packages()
+    reselected the package every govinfo cycle forever — FR-1995-01-04,
+    a ZIP that is not XML, was re-parsed every ~30 minutes for eighteen
+    days. The identical bug shape the sync layer fixed on 2026-08-10
+    (MAX_PACKAGE_FETCH_ATTEMPTS) and the LLM layer fixed in July
+    (MAX_ITEM_SUMMARY_ATTEMPTS); the pattern had not crossed over here."""
+    row = conn.execute(
+        "SELECT extract_attempts FROM packages WHERE package_id = ?", (package_id,)
+    ).fetchone()
+    attempts = (row["extract_attempts"] or 0) + 1
+    conn.execute(
+        "UPDATE packages SET extract_attempts = ?, extract_error = ?,"
+        " last_extract_attempt_at = ? WHERE package_id = ?",
+        (attempts, repr(exc)[:500], utc_now_iso(), package_id),
+    )
+    conn.commit()
+    return attempts
+
+
 def run(conn, collections=None):
-    """Extract all pending packages. One bad package doesn't kill the run."""
+    """Extract all pending packages. One bad package doesn't kill the run,
+    and one bad package doesn't get retried forever either
+    (config.MAX_PACKAGE_EXTRACT_ATTEMPTS)."""
     results = {"packages": 0, "records": 0, "chars": 0, "failed": 0,
-               "assets_extracted": 0, "assets_failed": 0}
+               "exhausted": 0, "assets_extracted": 0, "assets_failed": 0}
     for row in pending_packages(conn, collections):
         try:
             stats = extract_package(conn, row)
         except Exception as exc:  # noqa: BLE001 — isolation per package
             conn.rollback()
             results["failed"] += 1
-            logger.warning("%s: extraction failed: %r", row["package_id"], exc)
+            attempts = _record_failure(conn, row["package_id"], exc)
+            if attempts >= config.MAX_PACKAGE_EXTRACT_ATTEMPTS:
+                # Logged once, here, at the moment it crosses: from the
+                # next cycle on the package is not selected, so this
+                # line cannot repeat every 30 minutes the way the
+                # failure itself did.
+                results["exhausted"] += 1
+                logger.warning(
+                    "%s: extraction exhausted after %d attempts — disclosed,"
+                    " not retried (a re-fetch or content revision resets it): %r",
+                    row["package_id"], attempts, exc)
+            else:
+                logger.warning("%s: extraction failed (%d/%d attempts): %r",
+                               row["package_id"], attempts,
+                               config.MAX_PACKAGE_EXTRACT_ATTEMPTS, exc)
             continue
         results["packages"] += 1
         results["records"] += stats["records"]

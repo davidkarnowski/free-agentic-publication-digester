@@ -71,6 +71,18 @@ this file.
 - Manifest day-keying is UTC (`export_manifest`) — observation stamps
   are UTC by GUIDE §3; do not convert manifests to Eastern.
 - `WITHOUT ROWID` on the composite-key tables.
+- **`MAX_PACKAGE_EXTRACT_ATTEMPTS = 5` and no new `fetch_status` value**
+  (2026-08-24). A package whose raw file cannot be parsed stays
+  `fetched` — the bytes on disk are correct and hashed — and simply
+  stops being pending once `packages.extract_attempts` reaches the
+  ceiling; the Coverage Statement's "fetched but not extracted" line is
+  where it is disclosed. Before this, `extract.run` wrote nothing on
+  failure and re-parsed `FR-1995-01-04` every ~30 minutes for eighteen
+  days — the third layer to need the ceiling the LLM (July) and sync
+  (2026-08-10) layers already had. A re-fetch or content revision resets
+  the count; an `EXTRACTOR_VERSION` bump does not (the counter clears
+  when the new extractor succeeds). `scripts/audit.py` lists the
+  repeaters; check it before assuming a parser is fine.
 
 ## Code expectations
 

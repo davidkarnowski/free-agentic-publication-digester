@@ -119,3 +119,97 @@ def test_collection_filter(conn, fake_parsers):
     results = extract.run(conn, collections={"CREC"})
     assert results["packages"] == 1
     assert fake_parsers.calls == ["B"]
+
+
+# ------------------------------------ the extraction attempt ceiling --
+# 2026-08-24: FR-1995-01-04 (a ZIP that is not XML) was re-parsed every
+# ~30-minute govinfo cycle for eighteen days because a failed extraction
+# wrote nothing. Same shape as MAX_PACKAGE_FETCH_ATTEMPTS (2026-08-10).
+
+
+def _attempts(conn, pid):
+    return conn.execute(
+        "SELECT extract_attempts, extract_error, last_extract_attempt_at"
+        " FROM packages WHERE package_id = ?", (pid,)).fetchone()
+
+
+def test_a_failing_package_is_retried_until_the_ceiling_then_excluded(
+        conn, monkeypatch, caplog):
+    import logging as _logging
+
+    from fapd import config
+
+    mod = FakeParserModule(error_for={"BAD"})
+    monkeypatch.setattr(extract, "_parser_for", lambda c: mod.parse)
+    monkeypatch.setattr(config, "MAX_PACKAGE_EXTRACT_ATTEMPTS", 3)
+    add_package(conn, "BAD")
+
+    with caplog.at_level(_logging.WARNING, logger="fapd.extract"):
+        for n in range(1, 4):
+            results = extract.run(conn)
+            assert results["failed"] == 1
+            row = _attempts(conn, "BAD")
+            assert row["extract_attempts"] == n
+            assert "corrupt xml" in row["extract_error"]
+            assert row["last_extract_attempt_at"] is not None
+        assert results["exhausted"] == 1
+    assert caplog.text.count("extraction exhausted") == 1, "logged once, at the crossing"
+
+    # past the ceiling: not pending, not re-parsed, still 'fetched'
+    assert extract.pending_packages(conn) == []
+    assert extract.run(conn)["failed"] == 0
+    assert mod.calls == ["BAD"] * 3
+    status = conn.execute(
+        "SELECT fetch_status FROM packages WHERE package_id = 'BAD'").fetchone()
+    assert status["fetch_status"] == "fetched", "no new fetch_status value"
+
+
+def test_a_success_resets_the_extraction_ladder(conn, monkeypatch):
+    mod = FakeParserModule(error_for={"A"})
+    monkeypatch.setattr(extract, "_parser_for", lambda c: mod.parse)
+    add_package(conn, "A")
+    extract.run(conn)
+    assert _attempts(conn, "A")["extract_attempts"] == 1
+
+    mod.error_for = set()  # the parser was fixed
+    assert extract.run(conn)["packages"] == 1
+    row = _attempts(conn, "A")
+    assert row["extract_attempts"] == 0 and row["extract_error"] is None
+
+
+def test_a_refetch_resets_the_extraction_ladder(conn, monkeypatch):
+    """A re-download is new bytes: the ceiling starts over, the same way
+    fetch_attempts does on a content revision."""
+    from fapd import config
+
+    mod = FakeParserModule(error_for={"A"})
+    monkeypatch.setattr(extract, "_parser_for", lambda c: mod.parse)
+    monkeypatch.setattr(config, "MAX_PACKAGE_EXTRACT_ATTEMPTS", 2)
+    add_package(conn, "A")
+    extract.run(conn)
+    extract.run(conn)
+    assert extract.pending_packages(conn) == []
+
+    # what _download_package writes on a successful re-fetch
+    conn.execute(
+        "UPDATE packages SET fetched_at = '2027-01-01T00:00:00Z',"
+        " extract_attempts = 0, extract_error = NULL WHERE package_id = 'A'")
+    conn.commit()
+    assert [r["package_id"] for r in extract.pending_packages(conn)] == ["A"]
+
+
+def test_the_ceiling_bookkeeping_survives_the_rollback(conn, monkeypatch):
+    """The failed extraction is rolled back; the attempt record must not
+    be — it is written in its own transaction afterwards."""
+    mod = FakeParserModule(error_for={"A"})
+    monkeypatch.setattr(extract, "_parser_for", lambda c: mod.parse)
+    add_package(conn, "A")
+    extract.run(conn)
+    # a fresh connection sees the committed bookkeeping
+    from pathlib import Path
+
+    other = db.connect(Path(conn.execute("PRAGMA database_list").fetchone()["file"]))
+    assert other.execute(
+        "SELECT extract_attempts FROM packages WHERE package_id = 'A'"
+    ).fetchone()["extract_attempts"] == 1
+    other.close()

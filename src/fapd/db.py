@@ -28,7 +28,10 @@ CREATE TABLE IF NOT EXISTS packages (
     fetched_last_modified TEXT,
     last_error            TEXT,
     fetch_attempts        INTEGER NOT NULL DEFAULT 0,
-    last_attempt_at       TEXT
+    last_attempt_at       TEXT,
+    extract_attempts      INTEGER NOT NULL DEFAULT 0,
+    extract_error         TEXT,
+    last_extract_attempt_at TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_packages_collection_lastmod
@@ -393,6 +396,14 @@ def connect(db_path=None):
     # rows is the deliberate one-shot scripts/migrate_digest_day.py,
     # never startup DDL.
     _ensure_columns(conn, "packages", {"digest_day": "TEXT"})
+    # Extraction attempt ceiling (2026-08-24, docs/schema.md): additive,
+    # so no rebuild — unlike fetch_attempts, which rode the CHECK-widening
+    # migration of 2026-08-10 and therefore never needed this hook.
+    _ensure_columns(conn, "packages", {
+        "extract_attempts": "INTEGER NOT NULL DEFAULT 0",
+        "extract_error": "TEXT",
+        "last_extract_attempt_at": "TEXT",
+    })
     return conn
 
 

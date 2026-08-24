@@ -269,6 +269,17 @@ MAX_LEXICON_CORRECTION_ATTEMPTS = 2
 # a disclosed gap rather than still-generating.
 MAX_PACKAGE_FETCH_ATTEMPTS = 48
 
+# The same ceiling one layer up (2026-08-24): extract.run caught a parser
+# exception, rolled back, and wrote nothing, so a package whose raw file
+# is not parseable re-entered pending_packages() every govinfo cycle
+# forever — FR-1995-01-04, a 1995 issue re-listed by a lastModified churn
+# on 2026-08-06, was re-parsed every ~30 minutes for eighteen days. Low
+# on purpose: extraction is local and deterministic, so five identical
+# failures on the same bytes settle the question; a re-fetch or content
+# revision resets the count. Past it the package is a disclosed gap (the
+# coverage statement's "fetched but not extracted" line), never re-queued.
+MAX_PACKAGE_EXTRACT_ATTEMPTS = 5
+
 LLM_TIMEOUT = 300  # seconds per call
 
 # GUIDE.md §3: scope. Order is sync order. USCOURTS added 2026-07-25 (J1).

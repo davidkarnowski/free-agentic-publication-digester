@@ -31,6 +31,24 @@ def repeat_failures_report(pipeline_db_path, limit=10):
     return rows
 
 
+def extraction_repeat_failures_report(pipeline_db_path, limit=10):
+    """Packages mid-ceiling or exhausted at the EXTRACTION layer
+    (2026-08-24) — the fetch report above cannot see these: their
+    fetch_status is 'fetched' and healthy, the raw file is on disk, and
+    the failure is ours to parse, so it never writes a fetch_log row."""
+    db = sqlite3.connect(f"file:{pipeline_db_path}?mode=ro", uri=True)
+    db.row_factory = sqlite3.Row
+    rows = db.execute(
+        "SELECT package_id, collection, extract_attempts,"
+        " last_extract_attempt_at, extract_error FROM packages"
+        " WHERE extract_attempts > 0"
+        " ORDER BY extract_attempts DESC, last_extract_attempt_at DESC LIMIT ?",
+        (limit,),
+    ).fetchall()
+    db.close()
+    return rows
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--days", type=int, default=7, help="how many UTC days back to report")
@@ -112,6 +130,19 @@ def main() -> int:
             if exhausted:
                 print("  exhausted, by collection: "
                       + ", ".join(f"{c}={n}" for c, n in exhausted))
+        else:
+            print("  (none)")
+
+        repeats = extraction_repeat_failures_report(config.PIPELINE_DB)
+        print("\nRepeat-failure extractions (extract_attempts > 0, top 10 by attempts):")
+        if repeats:
+            ceiling = config.MAX_PACKAGE_EXTRACT_ATTEMPTS
+            for r in repeats:
+                state = "exhausted" if r["extract_attempts"] >= ceiling else "retrying"
+                print(f"  {r['extract_attempts']:>3}/{ceiling}  {state:<9}"
+                      f"  {r['package_id']}"
+                      f"  (last: {r['last_extract_attempt_at'] or '—'};"
+                      f" {(r['extract_error'] or '')[:60]})")
         else:
             print("  (none)")
 

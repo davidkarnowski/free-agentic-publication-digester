@@ -171,6 +171,12 @@ def _upsert_package(conn, collection, pkg):
                                    THEN 0 ELSE packages.fetch_attempts END,
             last_attempt_at = CASE WHEN excluded.last_modified > packages.last_modified
                                    THEN NULL ELSE packages.last_attempt_at END,
+            -- The extraction ceiling (2026-08-24) follows the same rule:
+            -- new content, fresh ladder.
+            extract_attempts = CASE WHEN excluded.last_modified > packages.last_modified
+                                    THEN 0 ELSE packages.extract_attempts END,
+            extract_error    = CASE WHEN excluded.last_modified > packages.last_modified
+                                    THEN NULL ELSE packages.extract_error END,
             last_modified = MAX(packages.last_modified, excluded.last_modified),
             title         = COALESCE(excluded.title, packages.title),
             package_link  = COALESCE(excluded.package_link, packages.package_link),
@@ -307,7 +313,8 @@ def _download_package(client, conn, collection, package_id):
         " title = COALESCE(?, title), download_url = ?, download_format = ?,"
         " raw_path = ?, fetch_status = 'fetched', fetched_at = ?,"
         " fetched_last_modified = last_modified, last_error = NULL,"
-        " fetch_attempts = 0, last_attempt_at = NULL"
+        " fetch_attempts = 0, last_attempt_at = NULL,"
+        " extract_attempts = 0, extract_error = NULL"
         " WHERE package_id = ?",
         (
             date_issued,

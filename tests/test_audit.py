@@ -50,3 +50,36 @@ def test_repeat_failures_report_empty_database(tmp_path):
     conn.close()
 
     assert audit.repeat_failures_report(db_path) == []
+
+
+# ------------------------------------- extraction repeat failures (2026-08-24) --
+
+
+def seed_extraction_failure(conn, package_id, *, attempts, at, error="ParseError"):
+    conn.execute(
+        "INSERT INTO packages (package_id, collection, last_modified, fetch_status,"
+        " first_seen_at, extract_attempts, last_extract_attempt_at, extract_error)"
+        " VALUES (?, 'FR', '2026-08-06T00:00:00Z', 'fetched', '2026-08-06T00:00:00Z',"
+        " ?, ?, ?)",
+        (package_id, attempts, at, error),
+    )
+    conn.commit()
+
+
+def test_extraction_repeat_failures_report_lists_repeaters_by_attempts(tmp_path):
+    db_path = tmp_path / "fapd.db"
+    conn = db.connect(db_path)
+    seed_extraction_failure(conn, "FR-1995-01-04", attempts=5,
+                            at="2026-08-24T19:14:39Z",
+                            error="ParseError('not well-formed')")
+    seed_extraction_failure(conn, "FR-once", attempts=1, at="2026-08-24T18:00:00Z")
+    seed_package(conn, "BILLS-fetch-only", fetch_attempts=3)  # fetch-layer, not ours
+    conn.close()
+
+    rows = audit.extraction_repeat_failures_report(db_path)
+    assert [r["package_id"] for r in rows] == ["FR-1995-01-04", "FR-once"]
+    assert rows[0]["extract_attempts"] == 5
+    assert "ParseError" in rows[0]["extract_error"]
+    # and the fetch-layer report does not see extraction failures
+    assert [r["package_id"] for r in audit.repeat_failures_report(db_path)] == [
+        "BILLS-fetch-only"]
