@@ -37,7 +37,17 @@
 | **Data date range** | {data_start_date} to {data_end_date} |
 | **Generated at** | {generation_timestamp_utc} (UTC) |
 | **Pipeline version** | {pipeline_version} ({git_commit_short}) |
+| **Inference** | {inference_status} |
 | **Source watermarks** | CREC: {crec_watermark} · BILLS: {bills_watermark} · FR: {fr_watermark} · USCOURTS: {uscourts_watermark} |
+
+<!-- Inference row (GUIDE §6 r15, 2026-08-24): exactly one of three
+     neutral forms, read from day_inference (src/fapd/inference.py):
+       model layers ran — {backend}/{models}
+       model layers ran in part — {backend}/{models}; not available: {layer names}
+       No inference was available for this publication day. All content
+       is source-derived or mechanically constructed.
+     Never a cause, error text, or timestamp — the operator's ruling:
+     causes live in the provenance manifest and the operations report. -->
 
 <!-- Mechanical calendar context (GUIDE §5, amended 2026-08-03): on a
      weekend or federal holiday the header carries the SAME fedcal
@@ -104,7 +114,19 @@ Session status: {senate_session_status}. Floor pages: {senate_page_range}
      line is a model-generated restatement of the item's stored summary —
      labeled interpretation per GUIDE §2: derived only from the adjacent
      summary text, no new facts, linted un-masked, omitted when no usable
-     restatement exists.) -->
+     restatement exists.
+
+     An item the rules selected that has NO stored summary — a day
+     without inference, an item past its attempt ceiling, a withdrawn
+     row — still renders, in every summarized section (1–5 and 9), as
+     the same shape minus the prose: the summary slot reads
+     "*listed from the record*", the plain-terms line is absent, the
+     rule and citation lines stay. The section carries ONE note above
+     its list ("Items marked *listed from the record* are listed without
+     a summary.") and no per-item reason (GUIDE §6 r15). -->
+- **{item_title}** — *listed from the record*
+  - Included because: {inclusion_rule}
+  - Source: [{package_id} / {granule_id}](https://www.govinfo.gov/app/details/{package_id}/{granule_id})
 - **{item_title}** — {factual_summary_1_to_3_sentences}
   - *In plain terms:* {plain_language_restatement_of_the_summary}
   - Included because: {inclusion_rule} (e.g., "floor time: {n} pages of CREC,
@@ -509,6 +531,17 @@ accounting — are defined in [GUIDE.md](../GUIDE.md) §2. Ruleset in effect:
 {ruleset_version}. To reproduce this digest: re-run the report stage against
 the extracted records for {data_start_date}–{data_end_date}; no upstream
 re-fetch is required (GUIDE.md §5).
+
+*Inference (GUIDE §6 r15, standing): The pipeline finalizes every
+publication day with or without an inference provider. Model layers
+are additive. When no inference was available for a day, the digest
+states that fact in its own prose and nothing more; the cause is
+operational detail recorded in the day's provenance and operations
+report, not in the published digest. The Coverage Statement's
+arithmetic reconciles regardless. Items are listed with their
+citations whether or not they were summarized. A day finalized
+without model layers is frozen like any other day; prose is not
+backfilled into a frozen digest.*
 
 License: this digest's compilation and prose are
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (credit

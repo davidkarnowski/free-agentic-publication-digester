@@ -204,6 +204,19 @@ CREATE TABLE IF NOT EXISTS day_summaries (
     PRIMARY KEY (date, prompt_version)
 ) WITHOUT ROWID;
 
+-- Per-day inference status (GUIDE §6 r15, 2026-08-24): which model
+-- layers the finalizing run ran, and what produced the prose. The
+-- digest renders one neutral line from it and never the cause
+-- (docs/schema.md `day_inference`; fapd/inference.py is the only writer).
+CREATE TABLE IF NOT EXISTS day_inference (
+    date           TEXT PRIMARY KEY,          -- digest date YYYY-MM-DD
+    available      INTEGER NOT NULL,          -- 1 when at least one layer ran
+    backend        TEXT,                      -- llm backend name (cli/api/gemini/none)
+    models         TEXT,                      -- comma-joined resolved models that produced prose
+    layers         TEXT NOT NULL,             -- JSON {layer: ran|skipped|failed}
+    recorded_at    TEXT NOT NULL
+) WITHOUT ROWID;
+
 CREATE TABLE IF NOT EXISTS sync_state (
     collection              TEXT PRIMARY KEY,
     last_modified_watermark TEXT NOT NULL,

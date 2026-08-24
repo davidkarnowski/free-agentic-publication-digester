@@ -30,7 +30,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from . import config, fedcal
+from . import config, fedcal, inference
 from .rules import CREC_FLOOR_CHAR_THRESHOLD
 from .sync import publication_date
 
@@ -242,6 +242,61 @@ def _load_items(conn, date):
     return items
 
 
+def _load_unsummarized(conn, date):
+    """Items the rules SELECTED for the date that have no summary row at
+    the current prompt version — the same rows the Coverage Statement
+    already counts as "counted, not summarized", in the same shape
+    `_load_items` returns so every section renders them through its
+    ordinary item builder (GUIDE §6 r15: listed with their citations
+    whether or not they were summarized). `summary`/`plain`/`method` are
+    None; `inclusion_rule` is the rule that selected the item. Selection
+    is `rules.select_items` — never re-derived here."""
+    from .rules import select_items
+
+    selected = [
+        s for s in select_items(conn, date)
+        if conn.execute(
+            "SELECT 1 FROM summaries WHERE package_id = ? AND granule_id = ?"
+            " AND prompt_version = ?",
+            (s["package_id"], s["granule_id"], config.PROMPT_VERSION),
+        ).fetchone() is None
+    ]
+    if not selected:
+        return []
+    fields = {}
+    for row in conn.execute(
+        """
+        SELECT e.package_id, e.granule_id,
+               COALESCE(e.collection, p.collection) AS collection,
+               p.date_issued, p.digest_day,
+               e.doc_type, e.title, e.agency, e.metadata, e.char_count,
+               substr(e.text, 1, 400) AS text_head,
+               g.title AS granule_title
+        FROM extracted_texts e
+        JOIN packages p ON p.package_id = e.package_id
+        LEFT JOIN granules g
+               ON g.package_id = e.package_id AND g.granule_id = e.granule_id
+        WHERE p.digest_day = ?
+        """,
+        (date,),
+    ):
+        fields[(row["package_id"], row["granule_id"])] = dict(row)
+    items = []
+    for s in selected:
+        item = fields.get((s["package_id"], s["granule_id"]))
+        if item is None:
+            continue
+        try:
+            item["metadata"] = json.loads(item["metadata"] or "{}")
+        except (TypeError, ValueError):
+            item["metadata"] = {}
+        item.update({"method": None, "inclusion_rule": s["rule_id"],
+                     "summary": None, "plain": None})
+        items.append(item)
+    items.sort(key=lambda i: (i["package_id"], i["granule_id"]))
+    return items
+
+
 def _graphics_by_package(conn, date):
     rows = conn.execute(
         """
@@ -423,6 +478,7 @@ def _header_lines(conn, date, git_short):
         f"| **Data date range** | {date} to {date} |",
         f"| **Generated at** | {_utc_now()} (UTC) |",
         f"| **Pipeline version** | {git_short} |",
+        f"| **Inference** | {_inference_row(conn, date)} |",
         f"| **Source watermarks** | {watermark} |",
         "",
     ]
@@ -459,6 +515,53 @@ def _header_lines(conn, date, git_short):
         "",
     ]
     return lines
+
+
+def _inference_row(conn, date):
+    """The header's Inference row (GUIDE §6 r15): one of the three
+    neutral forms `inference.label` allows, and never a cause.
+
+    Days finalized before `day_inference` existed have no row. Two of
+    them are distinguishable and are told apart honestly: a day with
+    stored model prose ran its layers (the status simply was not
+    recorded); a day with neither prose nor a row had no inference."""
+    status = inference.load(conn, date)
+    if status is not None:
+        return inference.label(status)
+    ran = conn.execute(
+        "SELECT 1 FROM summaries s JOIN packages p USING (package_id)"
+        " WHERE p.digest_day = ? AND s.method = 'llm' AND s.prompt_version = ?"
+        " UNION ALL SELECT 1 FROM day_summaries WHERE date = ? LIMIT 1",
+        (date, config.PROMPT_VERSION, date),
+    ).fetchone()
+    if ran:
+        return "model layers ran (inference status not recorded for this day)"
+    return inference.label(None)
+
+
+#: The per-item marker for an item listed without a summary — the whole
+#: of what the digest says about it (operator ruling 2026-08-24: no
+#: reason, no error text). Mechanical: title, citation, rule.
+_RECORD_MARK = "*listed from the record*"
+
+
+def _summary_tail(item):
+    """The ` — summary` tail of an item's heading line, or the neutral
+    record marker when the item was selected but has no stored summary
+    (GUIDE §6 r15: items are listed with their citations whether or not
+    they were summarized)."""
+    summary = item.get("summary")
+    if summary:
+        return f" — {_one_line(summary)}"
+    return f" — {_RECORD_MARK}"
+
+
+def _record_note(subset):
+    """The one neutral note a section carries when any of its items is
+    listed without a summary — once per section, never per item."""
+    if any(not i.get("summary") for i in subset):
+        return [f"Items marked {_RECORD_MARK} are listed without a summary.", ""]
+    return []
 
 
 def _plain_line(item):
@@ -985,6 +1088,12 @@ def _presact_lines(conn, date, items):
              " corroborated, with every observation preserved."),
             "",
         ]
+    # Section 9 has always listed every action, summarized or not; the
+    # record marker (GUIDE §6 r15) makes the unsummarized ones say so
+    # the same way sections 1–5 now do.
+    lines += _record_note([
+        presact_by_key.get((r.get("package_id"), r.get("granule_id"))) or {}
+        for r in rows])
     if not rows:
         lines += [
             ("No presidential actions dated this day were observed. The White"
@@ -1025,8 +1134,7 @@ def _presact_item_lines(row, item=None):
     meta, url = row["_meta"], (row["_meta"].get("url") or "")
     title = row["title"] or "(untitled)"
     head = f"- **{title}**" if not url else f"- **[{title}]({url})**"
-    if item and item.get("summary"):
-        head += f" — {_one_line(item['summary'])}"
+    head += _summary_tail(item or {})
     lines = [head]
     if item:
         lines += _plain_line(item)
@@ -1144,7 +1252,7 @@ def _crec_item_lines(item):
     raw = item["granule_title"] or _first_nonempty_line(item["text_head"]) or item["granule_id"]
     title = _truncate(_display_title(raw))
     return [
-        f"- **{title}** — {_one_line(item['summary'])}",
+        f"- **{title}**{_summary_tail(item)}",
         *_plain_line(item),
         _included_line(item),
         _source_line(item["package_id"], item["granule_id"]),
@@ -1215,6 +1323,7 @@ def _crec_lines(conn, date, items):
             ),
             "",
         ]
+    lines += _record_note(floor + votes)
     for number, doc_type, heading, word in (
         ("1.1", "SENATE", "Senate", "Senate"),
         ("1.2", "HOUSE", "House of Representatives", "House"),
@@ -1284,6 +1393,7 @@ def _bills_lines(conn, date, items):
         "accounted for in the Coverage Statement.",
         "",
     ]
+    lines += _record_note(selected)
     if selected:
         for item in selected:
             metadata = item["metadata"]
@@ -1291,7 +1401,7 @@ def _bills_lines(conn, date, items):
             version = metadata.get("bill_version") or item["doc_type"] or "?"
             title = _one_line(item["title"]) or "(untitled)"
             lines += [
-                f"- **{label} ({version}) — {title}** — {_one_line(item['summary'])}",
+                f"- **{label} ({version}) — {title}**{_summary_tail(item)}",
                 *_plain_line(item),
                 _included_line(item),
                 _source_line(item["package_id"]),
@@ -1355,7 +1465,7 @@ def _fr_item_lines(item, date, out_dir, assets):
     if metadata.get("cfr"):
         paren += f"; {metadata['cfr']}"
     title = _one_line(item["title"]) or "(untitled)"
-    head = f"- **{title}** ({paren}) — {_one_line(item['summary'])}"
+    head = f"- **{title}** ({paren}){_summary_tail(item)}"
     for key, label in (("action", "Action"), ("dates", "Dates")):
         value = metadata.get(key)
         if value:
@@ -1429,6 +1539,7 @@ def _fr_lines(conn, date, items, out_dir):
         f"| **Total FR documents** | **{total}** |",
         "",
     ]
+    lines += _record_note(fr_items)
     for heading, subset, none_line in (
         ("### 3.2 Rules Published", rules, "No rules were published in this issue."),
         (
@@ -1478,12 +1589,13 @@ def _plaw_lines(conn, date, items):
                   key=lambda i: i["package_id"])
     lines = ["## 4. Enacted Laws", "",
              f"Source: Public and Private Laws (PLAW) published {date}.", ""]
+    lines += _record_note(laws)
     if laws:
         for item in laws:
             metadata = item["metadata"]
             cite = (metadata.get("citations") or [item["package_id"]])[0]
-            head = f"- **{cite} — {_one_line(item['title'] or '(untitled)')}** — " \
-                   f"{_one_line(item['summary'])}"
+            head = (f"- **{cite} — {_one_line(item['title'] or '(untitled)')}**"
+                    f"{_summary_tail(item)}")
             if metadata.get("approved_date"):
                 head += f" Approved: {metadata['approved_date']}."
             lines += [head, *_plain_line(item), _included_line(item),
@@ -1521,7 +1633,7 @@ def _uscourts_item_lines(item):
     head = f"- **{title}**"
     if details:
         head += f" ({'; '.join(details)})"
-    head += f" — {_one_line(item['summary'])}"
+    head += _summary_tail(item)
     return [
         head,
         *_plain_line(item),
@@ -1577,6 +1689,7 @@ def _uscourts_lines(conn, date, items):
         "bankruptcy opinions are counted in 5.2 and in the Coverage Statement.",
         "",
     ]
+    lines += _record_note(selected)
     if selected:
         for court, group in _by_court(selected):
             lines += [f"#### {court}", ""]
@@ -1836,6 +1949,18 @@ def _methodology_lines(date, git_short):
         ),
         f"report stage against the extracted records for {date}; no upstream re-fetch",
         "is required (GUIDE.md §5).",
+        "",
+        # GUIDE §6 r15, quoted verbatim (a drift test may compare the two).
+        "*Inference (GUIDE §6 r15, standing): The pipeline finalizes every",
+        "publication day with or without an inference provider. Model layers",
+        "are additive. When no inference was available for a day, the digest",
+        "states that fact in its own prose and nothing more; the cause is",
+        "operational detail recorded in the day's provenance and operations",
+        "report, not in the published digest. The Coverage Statement's",
+        "arithmetic reconciles regardless. Items are listed with their",
+        "citations whether or not they were summarized. A day finalized",
+        "without model layers is frozen like any other day; prose is not",
+        "backfilled into a frozen digest.*",
         "",
         "*Filing note (2026-08-06, standing): digests from 2026-08-06 file",
         "govinfo packages under their day of first observation — FAPD's three",
@@ -2213,7 +2338,9 @@ def render(conn, date, out_dir=None):
     out_dir = Path(out_dir) if out_dir is not None else Path(config.DIGEST_DIR)
     git_short = _git_short()
 
-    items = _load_items(conn, date)
+    # Summarized items plus the selected-but-unsummarized ones (GUIDE §6
+    # r15): one list, one shape, so each section's builder renders both.
+    items = _load_items(conn, date) + _load_unsummarized(conn, date)
     lines = _header_lines(conn, date, git_short)
     lines += _day_in_review_lines(conn, date)
     lines += _crec_lines(conn, date, items)

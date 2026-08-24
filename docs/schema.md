@@ -486,6 +486,34 @@ iterations never touch the summaries table. Rows are written by
 `analyze.run_plain` (batched, cheap tier); a missing row simply renders the
 item without its "In plain terms" line — presentation aid, never coverage.
 
+### `day_inference` (GUIDE §6 r15 — which model layers ran, added 2026-08-24)
+
+One row per publication day, keyed by `date`: `available` (1 when at
+least one model layer ran), `backend` (the `llm` backend name that was
+in effect — `cli`/`api`/`gemini`/`none`), `models` (comma-joined
+resolved model names that actually produced prose that day; may be
+empty), `layers` (JSON `{"map"|"plain"|"compose"|"sections"|"tags":
+"ran"|"skipped"|"failed"}`), `recorded_at`. Written only by
+`fapd.inference.record`, called by the finalizing run
+(`run_pipeline.stage_analyze`) after the model layers — **write-once
+per finalize, last finalize wins**: a re-finalize of the same day
+overwrites the row, and that is the frozen state the digest reports.
+A missing row means the day was finalized before this table existed
+(or a run that did not record one); `report.py` treats that honestly —
+a day with stored model prose but no row says its status was not
+recorded, a day with neither says no inference was available.
+
+The digest reads it through `inference.load`/`inference.label` for its
+**Inference** header row, which carries exactly one of three neutral
+forms (all layers ran → attribution; some ran → attribution plus the
+reader-facing names of the layers not available; none → "No inference
+was available for this publication day…"). The *cause* — provider not
+configured, authentication refused, quota exhausted — is never stored
+here for the digest's use and never rendered (operator ruling
+2026-08-24); it lives in the provenance manifest, the operations
+report, and the logs. Additive and self-migrating (`IF NOT EXISTS`);
+no `_ensure_columns` entry is needed because the table is new.
+
 ---
 
 ## Provenance layer (sources expansion, GUIDE §7)

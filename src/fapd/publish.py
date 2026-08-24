@@ -1076,7 +1076,7 @@ _SOURCE_LI_RE = re.compile(r"<li>Source:\s*(.*?)</li>", re.DOTALL)
 _META_TABLE_RE = re.compile(r"<table>.*?Digest date.*?</table>", re.DOTALL)
 _META_ROW_RE = re.compile(
     r"<td>(?:<strong>)?(Digest date|Data date range|Generated at|"
-    r"Pipeline version|Source watermarks)(?:</strong>)?</td>\s*<td>(.*?)</td>",
+    r"Pipeline version|Inference|Source watermarks)(?:</strong>)?</td>\s*<td>(.*?)</td>",
     re.DOTALL)
 _TAGS_P_RE = re.compile(r"<p>Tags: (.*?)</p>", re.DOTALL)
 _CONTENTS_RE = re.compile(r"<h2[^>]*>Contents</h2>\s*<ul>.*?</ul>\s*(<hr\s*/?>)?",
@@ -1104,7 +1104,12 @@ def _compact_meta(html_body):
         '<details class="meta-more"><summary>Provenance</summary><dl>'
         f'<dt>Data date range</dt><dd>{fields.get("Data date range", "")}</dd>'
         f'<dt>Pipeline version</dt><dd>{fields.get("Pipeline version", "")}</dd>'
-        f'<dt>Source watermarks</dt><dd>{fields.get("Source watermarks", "")}</dd>'
+        # The Inference row (GUIDE §6 r15): rendered when the digest
+        # carries one — digests before 2026-08-24 have no such row and
+        # get no invented one.
+        + (f'<dt>Inference</dt><dd>{fields["Inference"]}</dd>'
+           if "Inference" in fields else "")
+        + f'<dt>Source watermarks</dt><dd>{fields.get("Source watermarks", "")}</dd>'
         "</dl></details></div>"
     )
     return html_body[:match.start()] + strip + html_body[match.end():]

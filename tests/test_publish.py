@@ -2761,3 +2761,22 @@ def test_today_labels_ai_prose_as_ours_not_the_governments(conn, tmp_path):
     # the label is explained, not just displayed
     assert "FAPD-AI</strong> was written by this project" in page
     assert "official summary</strong> is the publisher" in page
+
+
+def test_inference_row_folds_into_provenance_when_present(digests, tmp_path):
+    """GUIDE §6 r15: the digest's Inference row travels into the page's
+    provenance <details>; a digest without one (every day before
+    2026-08-24) gets no invented row."""
+    with_row = DIGEST_C.replace(
+        "| **Pipeline version** | abc1234 |",
+        "| **Pipeline version** | abc1234 |\n"
+        "| **Inference** | No inference was available for this publication day."
+        " All content is source-derived or mechanically constructed. |")
+    (digests / "2026-07-03.md").write_text(with_row)
+    (digests / "2026-07-02.md").write_text(DIGEST_C.replace("2026-07-03", "2026-07-02"))
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "2026-07-03.html").read_text()
+    assert ("<dt>Inference</dt><dd>No inference was available for this publication"
+            " day. All content is source-derived or mechanically constructed.</dd>") in page
+    assert "<dt>Inference</dt>" not in (out / "2026-07-02.html").read_text()

@@ -12,7 +12,7 @@ import pytest
 from conftest import install_digest_day_default
 from PIL import Image
 
-from fapd import config, db, report
+from fapd import config, db, inference, report
 
 DATE = "2026-07-23"
 CREC_PKG = "CREC-2026-07-23"
@@ -379,9 +379,17 @@ def test_judicial_if_none_line_and_coverage(conn, tmp_path):
     conn.commit()
     path = report.render(conn, DATE, out_dir=tmp_path)
     md = path.read_text(encoding="utf-8")
-    assert "No appellate or national court opinions matched a listing rule" in md
-    # Unsummarized appellate opinions land in the excluded remainder;
-    # district + bankruptcy stay counted-only. 0 + 2 + 2 == 4 units.
+    # Since GUIDE §6 r15 (2026-08-24) the selected-but-unsummarized
+    # opinions are LISTED from the record, not hidden behind the
+    # none-matched line — which is reserved for a day where no opinion
+    # matched a rule at all.
+    assert "No appellate or national court opinions matched a listing rule" not in md
+    assert "- **Doe v. Example Agency** (No. 26-00042; filed 2026-07-23) — "\
+           "*listed from the record*" in md
+    assert "Items marked *listed from the record* are listed without a summary." in md
+    # Coverage arithmetic is untouched: unsummarized appellate opinions
+    # still land in the excluded remainder; district + bankruptcy stay
+    # counted-only. 0 + 2 + 2 == 4 units.
     assert "| USCOURTS | 4 | 4 | 0 | 2 | 2 |" in md
 
 
@@ -1334,3 +1342,129 @@ def test_display_title_preserves_nicknames_and_apostrophised_surnames():
     # the typographic apostrophe behaves like the ASCII one
     assert report._display_title("RECOGNIZING PAT O’BRIEN") == (
         "Recognizing Pat O’Brien")
+
+
+# ---------------------------------------------------------------------------
+# GUIDE §6 r15 (2026-08-24): the digest stands without inference
+# ---------------------------------------------------------------------------
+
+
+def _strip_generated(md):
+    return "\n".join(l for l in md.splitlines() if not l.startswith("| **Generated at**"))
+
+
+def test_zero_summary_day_renders_mechanically_and_validates(conn, tmp_path):
+    conn.execute("DELETE FROM summaries")
+    conn.execute("DELETE FROM plain_summaries")
+    conn.commit()
+    path = report.render(conn, DATE, out_dir=tmp_path)
+    md = path.read_text(encoding="utf-8")
+    # The header says exactly the ruled sentence, and no cause.
+    assert f"| **Inference** | {inference.NO_INFERENCE} |" in md
+    # Every selected item still appears, with its citation and rule,
+    # marked from the record — sections 1, 2, 3, 5 all carry one.
+    assert "- **Consideration of S. 9999, Interstate Bridge Inspection Act** — "\
+           "*listed from the record*" in md
+    assert "- **H. R. 8888 (enr) — Rural Broadband Mapping Act** — "\
+           "*listed from the record*" in md
+    assert "- **Energy Conservation Standards** (2026-11111; 10 CFR Part 430) — "\
+           "*listed from the record*" in md
+    assert "- **Doe v. Example Agency** (No. 26-00042; filed 2026-07-23) — "\
+           "*listed from the record*" in md
+    assert "*In plain terms:*" not in md
+    assert md.count("Items marked *listed from the record* are listed without a summary.") == 4
+    # Coverage arithmetic unchanged: nothing summarized, everything accounted
+    # for (CREC: the two sub-threshold floor granules — the roll-call one
+    # included, now that its SEL-02 summary is gone — are CREC-EX-01).
+    assert "| CREC | 1 | 5 | 0 | 3 | 2 |" in md
+    assert "| BILLS | 2 | — | 0 | 2 | 0 |" in md
+    assert "| FR | 1 | 6 | 0 | 2 | 4 |" in md
+    assert "| USCOURTS | 4 | 4 | 0 | 2 | 2 |" in md
+    # No reason text anywhere near the marker.
+    for line in md.splitlines():
+        if "listed from the record" in line:
+            assert "error" not in line.lower() and "quota" not in line.lower()
+
+
+def test_mixed_day_lists_both_forms_and_reconciles(conn, tmp_path):
+    conn.execute("DELETE FROM summaries WHERE granule_id = '2026-22222'")
+    conn.commit()
+    path = report.render(conn, DATE, out_dir=tmp_path)
+    md = path.read_text(encoding="utf-8")
+    assert "- **Test Procedure Update** (2026-22222) — *listed from the record*" in md
+    assert ("- **Energy Conservation Standards** (2026-11111; 10 CFR Part 430) — "
+            "A final rule amending conservation standards") in md
+    # The note appears once, in the section that needs it, not elsewhere.
+    assert md.count("Items marked *listed from the record* are listed without a summary.") == 1
+    assert md.index("## 3. Federal Register") < md.index("Items marked *listed from the record*")
+    assert md.index("Items marked *listed from the record*") < md.index("## 4. Enacted Laws")
+    # FR: 6 units, 3 summarized (was 4), notices 2 counted, remainder excluded.
+    assert "| FR | 1 | 6 | 3 | 2 | 1 |" in md
+
+
+def test_recorded_status_renders_attribution(conn, tmp_path):
+    inference.record(conn, DATE, backend="cli", models=["haiku", "opus"],
+                     layers=dict.fromkeys(inference.LAYERS, "ran"))
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text(encoding="utf-8")
+    assert "| **Inference** | model layers ran — cli/haiku, opus |" in md
+
+
+def test_partial_status_names_layers_not_causes(conn, tmp_path):
+    inference.record(conn, DATE, backend="gemini", models=["gemini-2.5-flash"],
+                     layers={"map": "ran", "plain": "failed", "compose": "skipped",
+                             "sections": "ran", "tags": "ran"})
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text(encoding="utf-8")
+    assert ("| **Inference** | model layers ran in part — gemini/gemini-2.5-flash;"
+            " not available: plain-language lines, Day in Review |") in md
+    assert "failed" not in md.split("## Contents")[0]
+
+
+def test_recorded_no_inference_uses_the_ruled_sentence_only(conn, tmp_path):
+    inference.record(conn, DATE, backend="gemini", models=[],
+                     layers=dict.fromkeys(inference.LAYERS, "failed"))
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text(encoding="utf-8")
+    header = md.split("## Contents")[0]
+    assert inference.NO_INFERENCE in header
+    assert "gemini" not in header and "failed" not in header
+
+
+def test_unrecorded_day_with_model_prose_says_so(digest):
+    _, md = digest  # seeded summaries, no day_inference row: pre-r15 shape
+    assert ("| **Inference** | model layers ran (inference status not recorded"
+            " for this day) |") in md
+
+
+def test_empty_unrecorded_day_carries_the_no_inference_row(project):
+    connection = db.connect(project / "data" / "empty.db")
+    try:
+        md = report.render(connection, "2026-01-01").read_text(encoding="utf-8")
+        assert f"| **Inference** | {inference.NO_INFERENCE} |" in md
+    finally:
+        connection.close()
+
+
+def test_banned_word_in_unsummarized_official_title_passes_the_gate(conn, tmp_path):
+    add_text(conn, FR_PKG, "2026-77777", "FR", "RULE",
+             title="Landmark Appliance Standards", chars=5000)
+    conn.commit()
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text(encoding="utf-8")
+    assert "- **Landmark Appliance Standards** (2026-77777) — *listed from the record*" in md
+
+
+def test_methodology_quotes_rule_15_verbatim(digest):
+    _, md = digest
+    assert ("*Inference (GUIDE §6 r15, standing): The pipeline finalizes every\n"
+            "publication day with or without an inference provider.") in md
+    assert "prose is not\nbackfilled into a frozen digest.*" in md
+
+
+def test_render_is_deterministic_with_and_without_summaries(conn, tmp_path):
+    first = _strip_generated(report.render(conn, DATE, out_dir=tmp_path).read_text())
+    second = _strip_generated(report.render(conn, DATE, out_dir=tmp_path).read_text())
+    assert first == second
+    conn.execute("DELETE FROM summaries")
+    conn.execute("DELETE FROM plain_summaries")
+    conn.commit()
+    bare1 = _strip_generated(report.render(conn, DATE, out_dir=tmp_path).read_text())
+    bare2 = _strip_generated(report.render(conn, DATE, out_dir=tmp_path).read_text())
+    assert bare1 == bare2 and bare1 != first
