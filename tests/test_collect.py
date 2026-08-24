@@ -3,6 +3,7 @@
 no network, no threads, no LLM."""
 
 import datetime as dt
+import functools
 import json
 
 from conftest import DATE, LONG_TEXT, install_digest_day_default, seed_corpus, seed_item
@@ -1101,3 +1102,153 @@ def test_the_retry_is_not_a_back_door_when_pushes_are_disabled(tmp_path,
     assert worker.cycle(conn, "c2") == {
         "ran": False, "finalized": _eod_row(conn)["finalized_date"]}
     conn.close()
+
+
+# ---------------------------------------------- the mechanical floor (r15) --
+# 2026-08-24: eight of ten finalizers halted on a provider quota, all three
+# ladder rungs spent before the quota reset, and nine hand-rendered days
+# never pushed because run_pipeline.py records nothing.
+
+
+def test_eod_retry_spacing_is_the_ladder_not_the_error_doubling(tmp_path, monkeypatch):
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    sup.finalizer_runner = lambda date=None: 1
+    sup.evidence_runner = lambda: 0
+    worker = collect.EODWorker(sup, 10)
+    conn = conn_factory()
+    monkeypatch.setattr(config, "EOD_FINALIZE_RETRY_MINUTES", (15, 60, 200))
+    monkeypatch.setattr(config, "EOD_MAX_FINALIZE_ATTEMPTS", 4)
+
+    assert worker.interval_min(conn) == 10, "idle: the base poll interval"
+    assert worker.backoff_on_errors is False
+    monkeypatch.setattr(worker, "eod_due", lambda c, now=None: "2026-08-21")
+    seen = []
+    for _ in range(4):
+        worker.run_cycle()
+        seen.append(worker.interval_min(conn))
+    assert seen == [15, 60, 200, 200], "rungs, then the last rung repeats"
+    conn.close()
+
+
+def test_analyze_worker_leaves_finalized_days_alone(tmp_path, monkeypatch):
+    """No backfill into a frozen day (operator ruling 2026-08-24): a
+    summary paid for after the freeze would sit unpublished (F-013)."""
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch, llm_enabled=True)
+    ran = []
+
+    class _LLM:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+    sup.llm_factory = _LLM
+    monkeypatch.setattr(collect, "dates_with_pending",
+                        lambda conn: ["2026-08-24", "2026-08-23", "2026-08-22"])
+    monkeypatch.setattr(collect, "trigger_fires", lambda conn, date: True)
+    from fapd import analyze
+    monkeypatch.setattr(analyze, "run", lambda conn, c, date: (
+        ran.append(date) or {"llm_summarized": 0, "official": 0}))
+    monkeypatch.setattr(analyze, "run_plain", lambda conn, c, date: {"plain_written": 0})
+    monkeypatch.setattr(collect, "journal_model_events", lambda conn, cid: 0)
+
+    conn = conn_factory()
+    collect.EODWorker(sup, 10)._record_finalized(conn, "2026-08-23")
+    collect.AnalyzeWorker(sup, 15).cycle(conn, "c1")
+    assert ran == ["2026-08-24"], "08-23 and earlier are frozen"
+    conn.close()
+
+
+def test_the_finalized_marker_only_moves_forward(tmp_path, monkeypatch):
+    """A manual --finalize of an older day (a recovered HALT) must not
+    rewind the marker, or every day in between comes due again."""
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    worker = collect.EODWorker(sup, 10)
+    conn = conn_factory()
+    worker._record_finalized(conn, "2026-08-23")
+    worker._record_finalized(conn, "2026-08-21")
+    assert collect.last_finalized_date(conn) == "2026-08-23"
+    worker._record_finalized(conn, "2026-08-24")
+    assert collect.last_finalized_date(conn) == "2026-08-24"
+    conn.close()
+
+
+def test_finalize_now_runs_the_full_eod_path_for_the_named_day(tmp_path, monkeypatch):
+    calls = []
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    sup.finalizer_runner = lambda date=None: calls.append(("finalize", date)) or 0
+    sup.evidence_runner = lambda: calls.append("push") or 0
+    monkeypatch.setattr(config, "EVIDENCE_PUSH", True)
+
+    conn = conn_factory()
+    # a halted ladder for that day does not block the operator
+    w = collect.EODWorker(sup, 10)
+    for _ in range(config.EOD_MAX_FINALIZE_ATTEMPTS):
+        w._record_finalize_failure(conn, "2026-08-21")
+    conn.close()
+
+    result = sup.finalize_now("2026-08-21")
+    assert result == {"ran": True, "date": "2026-08-21",
+                      "finalized": "2026-08-21", "pushed": True}
+    assert calls == [("finalize", "2026-08-21"), "push"]
+    conn = conn_factory()
+    row = conn.execute("SELECT * FROM collector_state WHERE worker='eod'").fetchone()
+    assert row["finalized_date"] == "2026-08-21"
+    assert row["finalize_attempts"] == 0 and row["finalize_target"] is None
+    assert row["evidence_pushed_at"] is not None
+    assert not sup.pause_event.is_set()
+    conn.close()
+
+
+def test_finalize_now_failure_is_recorded_not_raised(tmp_path, monkeypatch):
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    sup.finalizer_runner = lambda date=None: 1
+    assert sup.finalize_now("2026-08-21") is None
+    conn = conn_factory()
+    row = conn.execute("SELECT * FROM collector_state WHERE worker='eod'").fetchone()
+    assert row["finalize_target"] == "2026-08-21" and row["finalize_attempts"] == 1
+    assert row["finalized_date"] is None
+    conn.close()
+
+
+def test_a_finalized_day_that_was_never_pushed_gets_pushed(tmp_path, monkeypatch):
+    """The second shape of 'not in the repository': the marker is set,
+    evidence_pushed_at is NULL, error is NULL — the row reads clean."""
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch)
+    monkeypatch.setattr(config, "EVIDENCE_PUSH", True)
+    calls = []
+    sup.evidence_runner = lambda: calls.append("push") or 0
+    sup.finalizer_runner = lambda date=None: (_ for _ in ()).throw(
+        AssertionError("must not re-run the finalizer"))
+    worker = collect.EODWorker(sup, 10)
+    conn = conn_factory()
+    worker._record_finalized(conn, "2026-08-21")
+    monkeypatch.setattr(worker, "eod_due", lambda c, now=None: None)
+    result = worker.cycle(conn, "c1")
+    assert calls == ["push"]
+    assert result["pushed"] is True
+    assert _eod_row(conn)["evidence_pushed_at"] is not None
+    # and not again once it has been pushed
+    result = worker.cycle(conn, "c2")
+    assert calls == ["push"] and "pushed" not in result
+    conn.close()
+
+
+def test_supervisor_passes_no_llm_through_to_the_finalizer(tmp_path, monkeypatch):
+    seen = {}
+
+    def fake_run(cmd, cwd, check):
+        seen["cmd"] = cmd
+        return type("P", (), {"returncode": 0})()
+
+    import subprocess
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    sup, _ = make_supervisor(tmp_path, monkeypatch)
+    sup.llm_enabled = False
+    sup.finalizer_runner = functools.partial(collect._run_finalizer, no_llm=True)
+    assert sup.finalizer_runner("2026-08-24") == 0
+    assert seen["cmd"][-3:] == ["--date", "2026-08-24", "--no-llm"]
+    sup.finalizer_runner = functools.partial(collect._run_finalizer, no_llm=False)
+    sup.finalizer_runner("2026-08-24")
+    assert "--no-llm" not in seen["cmd"]

@@ -93,6 +93,41 @@ A non-NULL `evidence_push_error` with `evidence_push_attempts` at
 is a disclosed gap and will not retry. Fix the cause, then run
 `deploy/vps/scripts/evidence-commit.sh` in the container.
 
+**The second shape (2026-08-24):** `finalized_date` set, `evidence_pushed_at`
+NULL, error NULL — a day finalized whose push never ran. The supervisor
+now retries that shape on its idle cycles too, but read the row, not
+the absence of an error.
+
+**A manual `scripts/run_pipeline.py --date D` renders and builds the
+site and records nothing** — it does not set `finalized_date` and does
+not push. Nine hand-rendered days (2026-08-15..23) sat unpushed with
+this row reading clean for that reason. The recovery after a `HALTED`
+finalizer is `scripts/collect.py --finalize D` inside the container: the
+same finalizer, marker, and push as the nightly path, bypassing the
+halt because the operator is the one who fixed the cause.
+
+### Did inference run?
+
+Since GUIDE §6 r15 a day finalizes with or without a provider. The
+digest's **Inference** row says only whether model layers ran; the
+cause lives here:
+
+```sh
+deploy/vps/scripts/vps-ssh.sh 'sudo docker exec fapd-backend python -c "
+import sqlite3
+c = sqlite3.connect(\"file:/app/data/fapd.db?mode=ro\", uri=True)
+for r in c.execute(\"SELECT date, available, backend, models, layers FROM day_inference ORDER BY date DESC LIMIT 5\"): print(r)"'
+# and the reason, from the ledger:
+deploy/vps/scripts/vps-ssh.sh 'sudo docker exec fapd-backend python -c "
+import sqlite3
+c = sqlite3.connect(\"file:/app/data/llm_ledger.db?mode=ro\", uri=True)
+for r in c.execute(\"SELECT substr(ts_utc,1,16), backend, purpose, substr(error,1,100) FROM llm_calls WHERE error LIKE \x27provider unavailable%\x27 ORDER BY ts_utc DESC LIMIT 5\"): print(r)"'
+```
+
+A day with `available=0` and a provider that should have worked is a
+finding; a day with `available=0` under `LLM_BACKEND=none` is the
+configuration working.
+
 ## Cadence
 
 | When | What | Why |

@@ -1,9 +1,16 @@
 """Run the full daily pipeline with live narration and a detail report.
 
-Usage: uv run python scripts/run_pipeline.py [--date YYYY-MM-DD]
+Usage: uv run python scripts/run_pipeline.py [--date YYYY-MM-DD] [--no-llm]
 
 Stages: sync -> agencies -> email -> extract -> analyze/plain/compose ->
-render -> site. Each stage is a module-level function returning its stats
+render -> site. The model layers are attempted, recorded per day, and
+never fatal (GUIDE §6 r15): with no provider — configured off via
+--no-llm / LLM_BACKEND=none, unauthenticated, or out of quota — the day
+still renders, validates, and freezes on stored rows, and the digest
+says only that no inference was available. A manual run of this script
+renders and builds the site; it does NOT mark the day finalized or push
+evidence — that is `scripts/collect.py --finalize DATE`.
+Each stage is a module-level function returning its stats
 so the wiring is testable (tests/test_scripts.py) and a scheduler (the
 VPS cron, docs/vps-runtime-plan.md) exercises exactly the code an
 operator run does. Verbose logging is forced on so every HTTP request
@@ -26,17 +33,16 @@ from fapd import (
     agencies,
     analyze,
     assess,
-    compose,
     config,
     db,
     email_sources,
     extract,
+    finalize,
     health,
     insight,
     llm,
     logging_setup,
     report,
-    tags,
 )
 from fapd.client import BudgetExceededError, GovinfoClient
 from fapd.publish import build_day, build_site
@@ -139,29 +145,55 @@ def stage_extract(conn):
     return ex
 
 
-def stage_analyze(conn, date):
-    """Map + plain-speak + compose. Returns the layer stats plus the
-    ledger's before/after token totals for the detail report."""
-    with llm.LLMClient() as lclient:
+#: Set by main(--no-llm): every LLMClient this run constructs is the
+#: NullBackend, so the ledger still records the skipped layers (nothing
+#: bypasses logging) and the digest carries the same neutral Inference
+#: row as any other no-inference day (GUIDE §6 r15).
+NO_LLM = False
+
+
+def llm_client():
+    """The run's LLM client. One seam so --no-llm reaches every stage
+    that talks to a model (analyze, render correction, source text,
+    insight) rather than only the first."""
+    if NO_LLM:
+        return llm.LLMClient(backend=llm.NullBackend("disabled by operator"))
+    return llm.LLMClient()
+
+
+def stage_analyze(conn, date, *, llm_client_factory=None):
+    """Map + plain-speak + compose + sections + tags, each attempted and
+    recorded, none fatal (GUIDE §6 r15 via fapd.finalize). Returns the
+    per-layer stats, the layer outcomes, and the ledger's before/after
+    token totals for the detail report.
+
+    Until 2026-08-24 one LLMError here was the whole run: exit 1 before
+    render, three times, then a halted day — while the digest could
+    have rendered on stored rows the entire time."""
+    factory = llm_client_factory or llm_client
+    with factory() as lclient:
         before = lclient.tokens_today()
-        a = analyze.run(conn, lclient, date)
+        result = finalize.run_model_layers(conn, lclient, date)
+        after = lclient.tokens_today()
+    st = result["stats"]
+    a, p, c, s, t = (st.get(k) for k in ("map", "plain", "compose", "sections", "tags"))
+    if a:
         print(f"   map: selected={a['selected']} official={a['official']} "
               f"llm={a['llm_summarized']} calls={a['llm_calls']} "
               f"failed={len(a['failed_items'])}", flush=True)
-        p = analyze.run_plain(conn, lclient, date)
+    if p:
         print(f"   plain: {p['plain_written']}/{p['plain_pending']} written "
               f"({len(p['failed_items'])} failed)", flush=True)
-        c = compose.compose_day(conn, lclient, date)
-        s = compose.compose_sections(conn, lclient, date)
-        t = tags.run(conn, lclient, date)
+    if s and t:
         print(f"   sections: {s['composed']} synopsis(es) "
               f"(skipped={s['skipped_existing']}); tags: {t['mechanical']} "
               f"mechanical + {t['llm']} discovery", flush=True)
+    if c:
         print(f"   compose: composed={c['composed']} "
               f"skipped_existing={c['skipped_existing']}", flush=True)
-        after = lclient.tokens_today()
-    return {"map": a, "plain": p, "compose": c, "sections": s,
-            "before": before, "after": after}
+    print("   " + finalize.summary_line(result), flush=True)
+    return {"map": a, "plain": p, "compose": c, "sections": s, "tags": t,
+            "layers": result["layers"], "before": before, "after": after}
 
 
 def stage_render(conn, date, *, llm_client=None):
@@ -192,7 +224,15 @@ def stage_render(conn, date, *, llm_client=None):
         print(f"   lexicon gate: {violation['term']!r} in {violation['layer']}"
               f" summary for {violation['package_id']}/{violation['granule_id']}"
               " — attempting a corrective rewrite", flush=True)
-        result = analyze.correct_lexicon_violation(conn, llm_client, **violation)
+        try:
+            result = analyze.correct_lexicon_violation(conn, llm_client, **violation)
+        except llm.LLMError as exc:
+            # No provider to rewrite with (r15): the violation stands as
+            # a validation failure for this attempt, exactly as before —
+            # but it is reported, not a traceback out of the finalizer.
+            print(f"   correction unavailable ({str(exc)[:120]}) — nothing"
+                  f" written: {exc}", flush=True)
+            return None, f"FAILED: {exc}"
         print(f"   correction outcome: {result['outcome']}", flush=True)
         try:
             out_path = report.render(conn, date)
@@ -313,9 +353,15 @@ def detail_report(*, gov_requests, before, after, timings, validation,
 
 
 def main(argv=None) -> int:
+    global NO_LLM
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", help="digest date (default: newest complete day)")
+    ap.add_argument("--no-llm", action="store_true",
+                    help="mechanical run: no provider is called; every model"
+                         " layer is recorded as skipped and the digest carries"
+                         " the no-inference disclosure (GUIDE §6 r15)")
     args = ap.parse_args(argv)
+    NO_LLM = bool(args.no_llm)
     logging_setup.setup(verbose=True)
     timings = {}
 
@@ -350,7 +396,7 @@ def main(argv=None) -> int:
     done(t0)
 
     t0 = stage(f"STAGE 4/5 — RENDER + VALIDATE digest for {date}")
-    with llm.LLMClient() as lclient:
+    with llm_client() as lclient:
         out_path, validation = stage_render(conn, date, llm_client=lclient)
     timings["render"] = time.monotonic() - t0
     done(t0)
@@ -361,7 +407,7 @@ def main(argv=None) -> int:
     done(t0)
 
     t0 = stage("STAGE 4c — SOURCE-PAGE TEXT (descriptions + assessments)")
-    with llm.LLMClient() as lclient:
+    with llm_client() as lclient:
         stage_source_text(conn, llm_client=lclient)
     timings["source_text"] = time.monotonic() - t0
     done(t0)
@@ -372,7 +418,7 @@ def main(argv=None) -> int:
     done(t0)
 
     t0 = stage(f"POST — OPERATIONS REPORT (developer feedback loop) for {date}")
-    with llm.LLMClient() as lclient:
+    with llm_client() as lclient:
         stage_insight(conn, date, llm_client=lclient)
     timings["insight"] = time.monotonic() - t0
     done(t0)

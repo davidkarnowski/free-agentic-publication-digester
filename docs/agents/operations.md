@@ -49,6 +49,19 @@ gates → docs/code-standards.md → this file.
   `BudgetExceededError` records `ok=True, paused` — treating it as an
   error inflated backoff and made the health page blame the publisher
   for our own pacing.
+- **The mechanical digest is the floor (GUIDE §6 r15, 2026-08-24).**
+  A provider that is disabled, unauthenticated, or out of quota no
+  longer fails the finalizer: `fapd.finalize.run_model_layers` attempts
+  every model layer, records the outcome per day in `day_inference`,
+  and the render proceeds on stored rows. The retry ladder
+  (`EOD_FINALIZE_RETRY_MINUTES = (15, 60, 200)`, four attempts) is for
+  validation failures and crashes; its rungs are hours apart on
+  purpose, because the old 10/20/40-minute doubling spent all three
+  attempts before a vendor's 07:00Z quota reset on 2026-08-22 and -23.
+  `scripts/collect.py --finalize D` is the recovery after a `HALTED`
+  day — a bare `run_pipeline.py` renders and records nothing (nine
+  unpushed days, 2026-08-15..23). The continuous analyze worker skips
+  days at or before `finalized_date`: no backfill into a frozen day.
 - **The EOD finalizer holds the floor.** It pauses collectors, runs
   `run_pipeline` as a subprocess with an **explicit `--date`** (the
   supervisor's target — on 2026-08-01 the two disagreed and a

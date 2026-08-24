@@ -4,6 +4,7 @@ Usage:
   uv run python scripts/collect.py                 # run forever (SIGTERM to stop)
   uv run python scripts/collect.py --once          # one serial cycle of every worker
   uv run python scripts/collect.py --once --no-llm # mechanical-only cycle
+  uv run python scripts/collect.py --finalize D    # finalize day D now (marker + push)
 
 Workers: govinfo delta, one per agency host (each on its own pacing
 clock), email, analyze-on-trigger. Compose never runs here — the
@@ -47,6 +48,12 @@ def main(argv=None) -> int:
     ap.add_argument("--eod", action="store_true",
                     help="enable the in-supervisor end-of-day finalizer "
                          "(the container path; never implicit)")
+    ap.add_argument("--finalize", metavar="DATE",
+                    help="finalize one publication day now, through the same"
+                         " EOD path the supervisor uses (finalizer, durable"
+                         " marker, evidence push), then exit — the manual"
+                         " recovery after a HALTED day; a bare run_pipeline.py"
+                         " renders but records nothing")
     ap.add_argument("--interval-govinfo", type=int, metavar="MIN")
     ap.add_argument("--interval-agency", type=int, metavar="MIN")
     ap.add_argument("--interval-email", type=int, metavar="MIN")
@@ -60,8 +67,13 @@ def main(argv=None) -> int:
         ("email", args.interval_email),
     ) if v}
     sup = Supervisor(llm_enabled=not args.no_llm, intervals=intervals,
-                     eod_enabled=args.eod,
+                     eod_enabled=args.eod or bool(args.finalize),
                      wayback_factory=_NullWayback if args.no_wayback else None)
+
+    if args.finalize:
+        result = sup.finalize_now(args.finalize)
+        print(f"   eod {result}")
+        return 0 if result and result.get("ran") else 1
 
     if args.once:
         results = sup.run_once()

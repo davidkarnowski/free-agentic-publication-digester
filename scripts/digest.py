@@ -42,6 +42,9 @@ def default_date(conn):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", help="digest date YYYY-MM-DD (default: latest extracted day)")
+    ap.add_argument("--no-llm", action="store_true",
+                    help="render from stored rows only; model layers are"
+                         " recorded as skipped (GUIDE §6 r15)")
     ap.add_argument("--verbose", "-v", action="store_true")
     args = ap.parse_args()
     logging_setup.setup(verbose=args.verbose)
@@ -57,25 +60,31 @@ def main() -> int:
     day_tokens = None
     try:
         # Built concurrently with this script; report-only runs must still work.
-        from fapd import analyze, compose, llm, tags
+        from fapd import finalize, llm
     except ImportError as exc:
         print(
             f"analysis layer unavailable ({exc}); "
             "rendering the digest from already-stored summaries only"
         )
     else:
-        with llm.LLMClient() as client:
+        # The same layer runner the finalizer uses (GUIDE §6 r15): every
+        # layer attempted and recorded, a provider outage never a
+        # traceback — the render below works on whatever is stored.
+        if args.no_llm:
+            client = llm.LLMClient(backend=llm.NullBackend("disabled by operator"))
+        else:
+            client = llm.LLMClient()
+        with client:
             before = client.tokens_today()
-            analyze.run(conn, client, date)
-            plain_stats = analyze.run_plain(conn, client, date)
-            compose.compose_day(conn, client, date)
-            compose.compose_sections(conn, client, date)
-            tags.run(conn, client, date)
+            result = finalize.run_model_layers(conn, client, date)
             after = client.tokens_today()
-        print(
-            f"plain: {plain_stats['plain_written']}/{plain_stats['plain_pending']} written"
-            f" ({len(plain_stats['failed_items'])} failed)"
-        )
+        plain_stats = result["stats"].get("plain")
+        if plain_stats:
+            print(
+                f"plain: {plain_stats['plain_written']}/{plain_stats['plain_pending']}"
+                f" written ({len(plain_stats['failed_items'])} failed)"
+            )
+        print(finalize.summary_line(result))
         run_input = after[0] - before[0]
         run_output = after[1] - before[1]
         day_tokens = after

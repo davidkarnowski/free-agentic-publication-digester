@@ -10,6 +10,7 @@ module** (§6 rule 12: day/section composition is end-of-day only).
 """
 
 import datetime as dt
+import functools
 import json
 import logging
 import random
@@ -316,6 +317,11 @@ class Worker:
     opens its own connection (thread- and process-safe under WAL)."""
 
     name = "worker"
+    #: Doubling backoff on consecutive errors (2**n, capped at 8x). The
+    #: EOD worker turns this off: its spacing is the finalize ladder
+    #: (config.EOD_FINALIZE_RETRY_MINUTES), a policy, not a multiplier —
+    #: the multiplier put all three 2026-08-22 attempts before 06:12Z.
+    backoff_on_errors = True
 
     def __init__(self, supervisor, interval_min):
         self.sup = supervisor
@@ -366,8 +372,9 @@ class Worker:
                 errors = conn.execute(
                     "SELECT consecutive_errors FROM collector_state WHERE worker = ?",
                     (self.name,)).fetchone()
+                streak = errors["consecutive_errors"] if errors else 0
                 minutes = self.interval_min(conn) * (
-                    2 ** min(errors["consecutive_errors"] if errors else 0, 3))
+                    2 ** min(streak, 3) if self.backoff_on_errors else 1)
             finally:
                 conn.close()
             # jitter ±10% so worker clocks don't align into bursts
@@ -452,7 +459,13 @@ class AnalyzeWorker(Worker):
         stats = {"dates": 0, "summarized": 0, "plain": 0}
         if not self.sup.llm_enabled:
             return stats
+        # A finalized day is frozen (GUIDE §5, §6 r15 — no backfill): a
+        # summary paid for after the freeze would sit unpublished, the
+        # F-013 shape. Rule 13's window still bounds the rest.
+        frozen_through = last_finalized_date(conn)
         for date in dates_with_pending(conn):
+            if frozen_through and date <= frozen_through:
+                continue
             if not trigger_fires(conn, date):
                 continue
             with self.sup.llm_factory() as lclient:
@@ -538,15 +551,53 @@ class RenderWorker(Worker):
                 "health_refreshed": bool(refreshed), "health_at": health_at}
 
 
+def last_finalized_date(conn):
+    """Newest finalized publication day, or None: the dedicated column
+    (review D5 — no last_result writer can touch it), falling back to
+    the JSON `finalized`/`date` keys only for rows written before the
+    column existed. Module-level because two workers read it: the EOD
+    worker to know what is due, the analyze worker to leave frozen days
+    alone (GUIDE §6 r15)."""
+    row = conn.execute(
+        "SELECT finalized_date, last_result FROM collector_state"
+        " WHERE worker = 'eod'").fetchone()
+    if not row:
+        return None
+    if row["finalized_date"]:
+        return row["finalized_date"]
+    if row["last_result"]:
+        prev = json.loads(row["last_result"])
+        return prev.get("finalized") or prev.get("date")
+    return None
+
+
 class EODWorker(Worker):
-    """The end-of-day finalizer, in-supervisor (docs §9): once per UTC
-    day at/after config.EOD_UTC_HOUR it pauses the collectors, runs the
-    finalizer (run_pipeline as a subprocess — its own process, its own
-    connections), pushes the evidence commit when enabled, and resumes.
-    Only added when the supervisor is constructed with eod_enabled=True
-    (the container path) — never implicitly in --once runs."""
+    """The end-of-day finalizer, in-supervisor (docs §9): once per
+    publication day, at/after config.EOD_ET_HOUR on Washington's clock,
+    it pauses the collectors, runs the finalizer (run_pipeline as a
+    subprocess — its own process, its own connections), pushes the
+    evidence commit when enabled, and resumes. Only added when the
+    supervisor is constructed with eod_enabled=True (the container path)
+    — never implicitly in --once runs.
+
+    Retry spacing is config.EOD_FINALIZE_RETRY_MINUTES, not the generic
+    error-doubling: the ladder exists for validation failures and
+    crashes (a provider outage no longer fails the run — GUIDE §6 r15),
+    and its later rungs are deliberately hours apart so a transient
+    cause has time to clear."""
 
     name = "eod"
+    backoff_on_errors = False
+
+    def interval_min(self, conn):
+        row = conn.execute(
+            "SELECT finalize_target, finalize_attempts FROM collector_state"
+            " WHERE worker = 'eod'").fetchone()
+        attempts = row["finalize_attempts"] if row and row["finalize_target"] else 0
+        if attempts <= 0:
+            return self.base_interval_min
+        rungs = config.EOD_FINALIZE_RETRY_MINUTES
+        return rungs[min(attempts, len(rungs)) - 1]
 
     def eod_due(self, conn, now=None):
         """The publication day to finalize, or None. Due once that day
@@ -575,33 +626,24 @@ class EODWorker(Worker):
         return target
 
     def _last_finalized(self, conn):
-        """Newest finalized day: the dedicated column (review D5 — no
-        last_result writer can touch it), falling back to the JSON
-        `finalized`/`date` keys only for rows written before the column
-        existed."""
-        row = conn.execute(
-            "SELECT finalized_date, last_result FROM collector_state"
-            " WHERE worker = 'eod'").fetchone()
-        if not row:
-            return None
-        if row["finalized_date"]:
-            return row["finalized_date"]
-        if row["last_result"]:
-            prev = json.loads(row["last_result"])
-            return prev.get("finalized") or prev.get("date")
-        return None
+        return last_finalized_date(conn)
 
     def _record_finalized(self, conn, target):
         """Durable success marker + ladder reset, in the columns
         record_state never writes — an error or idle cycle replacing
-        last_result cannot erase this."""
+        last_result cannot erase this. The marker only moves forward: a
+        manual --finalize of an older day (a recovered HALT) must not
+        rewind it, or every day in between would come due again."""
         conn.execute(
             """
             INSERT INTO collector_state (worker, finalized_date,
                 finalize_target, finalize_attempts)
             VALUES ('eod', ?, NULL, 0)
             ON CONFLICT (worker) DO UPDATE SET
-                finalized_date = excluded.finalized_date,
+                finalized_date = CASE
+                    WHEN finalized_date IS NULL
+                      OR excluded.finalized_date > finalized_date
+                    THEN excluded.finalized_date ELSE finalized_date END,
                 finalize_target = NULL,
                 finalize_attempts = 0
             """,
@@ -691,9 +733,19 @@ class EODWorker(Worker):
         if not config.EVIDENCE_PUSH:
             return idle
         row = conn.execute(
-            "SELECT evidence_push_error, evidence_push_attempts"
+            "SELECT evidence_push_error, evidence_push_attempts,"
+            " evidence_pushed_at, finalized_date"
             " FROM collector_state WHERE worker = 'eod'").fetchone()
-        if not row or not row["evidence_push_error"]:
+        if not row:
+            return idle
+        # Two shapes of "never reached the repository": a push that ran
+        # and failed (error set), and a finalized day whose push never
+        # ran at all (pushes were off, or the process died between the
+        # two). 2026-08-15..23: nine hand-finalized days sat unpushed
+        # with this row reading clean, because only the first shape was
+        # retried.
+        never_pushed = bool(row["finalized_date"]) and not row["evidence_pushed_at"]
+        if not row["evidence_push_error"] and not never_pushed:
             return idle
         if row["evidence_push_attempts"] >= config.EVIDENCE_PUSH_MAX_ATTEMPTS:
             # Disclosed gap, not a silent retry loop (GUIDE §2 applied to
@@ -729,6 +781,19 @@ class EODWorker(Worker):
         target = self.eod_due(conn)
         if not target:
             return self._retry_pending_push(conn, finalized)
+        return self._finalize(conn, cycle_id, target)
+
+    def finalize_now(self, conn, cycle_id, target):
+        """The manual recovery (`scripts/collect.py --finalize D`): the
+        same finalizer, durable marker, and evidence push as the nightly
+        path, for a day the operator names — bypassing the due check and
+        the halt, since the operator is the one who fixed the cause. A
+        bare run_pipeline.py renders the day and records nothing, which
+        is how nine days went unpushed in August 2026."""
+        logger.info("manual finalize requested for %s", target)
+        return self._finalize(conn, cycle_id, target)
+
+    def _finalize(self, conn, cycle_id, target):
         logger.info("EOD finalizer firing for %s — pausing collectors", target)
         self.sup.pause_event.set()
         try:
@@ -746,8 +811,9 @@ class EODWorker(Worker):
                         "EOD finalizer HALTED for %s after %d failed"
                         " attempts — the day remains unfinalized and will"
                         " NOT be retried; fix the cause, then run"
-                        " scripts/run_pipeline.py --date %s and the next"
-                        " success clears the ladder", target, attempts, target)
+                        " scripts/collect.py --finalize %s (a bare"
+                        " run_pipeline.py renders but records and pushes"
+                        " nothing)", target, attempts, target)
                 raise RuntimeError(f"finalizer exited {exit_code} for {target}")
             self._record_finalized(conn, target)
             journal_new(conn, "govinfo", cycle_id)  # late finalizer items
@@ -758,18 +824,22 @@ class EODWorker(Worker):
             self.sup.pause_event.clear()
 
 
-def _run_finalizer(date=None):
+def _run_finalizer(date=None, *, no_llm=False):
     """Run the daily pipeline for a specific publication day.
 
     The date is passed explicitly: run_pipeline otherwise picks its own
     via digest.default_date(), and the two disagreed — on 2026-08-02 the
-    EOD target was 2026-07-31 while the run published 2026-08-01."""
+    EOD target was 2026-07-31 while the run published 2026-08-01.
+    no_llm mirrors the supervisor's --no-llm into the finalizer, so a
+    mechanical-only collector finalizes a mechanical-only day (r15)."""
     import subprocess
     import sys
 
     cmd = [sys.executable, "scripts/run_pipeline.py"]
     if date:
         cmd += ["--date", date]
+    if no_llm:
+        cmd += ["--no-llm"]
     return subprocess.run(cmd, cwd=config.PROJECT_ROOT, check=False).returncode
 
 
@@ -807,7 +877,8 @@ class Supervisor:
         self.llm_factory = llm_factory or self._default_llm
         self.llm_enabled = llm_enabled
         self.pause_event = threading.Event()
-        self.finalizer_runner = finalizer_runner or _run_finalizer
+        self.finalizer_runner = finalizer_runner or functools.partial(
+            _run_finalizer, no_llm=not llm_enabled)
         self.evidence_runner = evidence_runner or _run_evidence_commit
         self.today_builder = today_builder or self._default_today_builder
         self.sources_builder = sources_builder or self._default_sources_builder
@@ -882,6 +953,28 @@ class Supervisor:
         """Every worker exactly one serial cycle — the testable path and
         the cron-compatible fallback shape."""
         return {w.name: w.run_cycle() for w in self.workers}
+
+    def finalize_now(self, target):
+        """`scripts/collect.py --finalize D`: one EOD cycle for the named
+        day through the worker's own code (ladder bookkeeping, durable
+        marker, evidence push). Returns the cycle's stats dict, or None
+        when the finalizer failed (recorded on the ladder like any
+        nightly failure)."""
+        worker = next((w for w in self.workers if w.name == "eod"), None)
+        if worker is None:
+            worker = EODWorker(self, 10)
+        cycle_id = uuid.uuid4().hex[:12]
+        conn = self.conn_factory()
+        try:
+            stats = worker.finalize_now(conn, cycle_id, target)
+            record_state(conn, "eod", ok=True, stats=stats)
+            return stats
+        except Exception as exc:  # noqa: BLE001 — same containment as run_cycle
+            logger.warning("manual finalize failed: %r", exc)
+            record_state(conn, "eod", ok=False, error=repr(exc))
+            return None
+        finally:
+            conn.close()
 
     def run_forever(self):
         stop = threading.Event()

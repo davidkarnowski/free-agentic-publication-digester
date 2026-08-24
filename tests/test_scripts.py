@@ -370,3 +370,78 @@ def test_default_date_uses_washingtons_day_not_utcs(monkeypatch):
     assert digest.default_date(conn) == "2026-07-31", \
         "digested a publication day that had not ended"
     conn.close()
+
+
+# ------------------------------------------ the mechanical floor (r15) --
+
+
+def test_no_llm_flag_makes_every_client_the_null_backend(monkeypatch):
+    from fapd import llm as _llm
+
+    monkeypatch.setattr(run_pipeline, "NO_LLM", True)
+    with run_pipeline.llm_client() as client:
+        assert isinstance(client._backend, _llm.NullBackend)
+        assert client.status()["unavailable"] == "disabled by operator"
+    monkeypatch.setattr(run_pipeline, "NO_LLM", False)
+    monkeypatch.setattr(run_pipeline.llm, "LLMClient", lambda *a, **kw: "real")
+    assert run_pipeline.llm_client() == "real"
+
+
+def test_stage_analyze_never_raises_for_a_provider(conn, monkeypatch):
+    """One LLMError used to be exit 1 before render (2026-08-15..23)."""
+    from fapd import finalize
+    from fapd import llm as _llm
+
+    class _Client:
+        def __init__(self):
+            self.unavailable = None
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def tokens_today(self):
+            return (0, 0, 0)
+
+        def status(self):
+            return {"backend": "fake", "unavailable": self.unavailable,
+                    "models_used": []}
+
+    client = _Client()
+
+    def fn_for(name):
+        if name == "map":
+            def _fail(conn, c, date):
+                c.unavailable = "quota exhausted"
+                raise _llm.ProviderUnavailableError("quota exhausted")
+            return _fail
+        return lambda conn, c, date: {"x": 1}
+
+    monkeypatch.setattr(finalize, "_layer_fn", fn_for)
+    out = run_pipeline.stage_analyze(conn, "2026-08-24", llm_client_factory=lambda: client)
+    assert out["layers"]["map"] == "failed"
+    assert out["layers"]["tags"] == "skipped"
+    assert out["map"] is None and out["before"] == (0, 0, 0)
+
+
+def test_main_accepts_no_llm(monkeypatch, tmp_path):
+    class FakeConn:
+        def close(self):
+            pass
+
+    monkeypatch.setattr(run_pipeline.db, "connect", lambda: FakeConn())
+    monkeypatch.setattr(run_pipeline.logging_setup, "setup", lambda **kw: None)
+    for name in ("stage_sync", "stage_agencies", "stage_email", "stage_extract",
+                 "stage_day_view", "stage_source_text", "stage_insight"):
+        monkeypatch.setattr(run_pipeline, name, lambda *a, **kw: {})
+    monkeypatch.setattr(run_pipeline, "stage_analyze",
+                        lambda *a, **kw: {"before": (0, 0, 0), "after": (0, 0, 0)})
+    monkeypatch.setattr(run_pipeline, "stage_render",
+                        lambda *a, **kw: (tmp_path / "d.md", "PASSED"))
+    monkeypatch.setattr(run_pipeline, "stage_site", lambda: {"out_dir": tmp_path})
+    monkeypatch.setattr(run_pipeline, "detail_report", lambda **kw: None)
+    assert run_pipeline.main(["--date", "2026-08-24", "--no-llm"]) == 0
+    assert run_pipeline.NO_LLM is True
+    run_pipeline.NO_LLM = False

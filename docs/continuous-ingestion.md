@@ -161,19 +161,26 @@ anyway: the supervisor pauses collector workers during finalization
 
 ## §9 Backend container (OB-1 — LIVE since 2026-07-30)
 
-- `deploy/vps/Dockerfile.backend`: `python:3.12-slim` + uv + git; repo
-  at `/app`; entrypoint `scripts/collect.py` (run_forever).
+- `deploy/vps/Dockerfile.backend`: `python:3.12-slim` + uv + git + curl
+  + openssh-client + Node 22 with `@anthropic-ai/claude-code` (the CLI
+  backend; retained as of 2026-08-24 — see GUIDE §6 r7's provider
+  record); repo at `/app`; entrypoint `scripts/collect.py` (run_forever).
 - Compose service `backend` under `profiles: ["backend"]`:
   `restart: unless-stopped`; networks `[fapd_backend]` (private bridge,
   egress-only — NOT `fapd_edge`; no published ports; unreachable from
-  proxy/web/public); volumes `fapd-data:/app/data`,
-  `fapd-site:/app/site`; `env_file: .env` (server-side, never synced);
-  a mounted read-only deploy key for evidence pushes.
+  proxy/web/public); four volumes `fapd-data:/app/data`,
+  `fapd-site:/app/site`, `fapd-digests:/app/digests`,
+  `fapd-provenance:/app/provenance` (the last two since 2026-08-07 —
+  `.git` is deliberately not one); `env_file: .env` (server-side, never
+  synced; carries `LLM_BACKEND` and the provider keys); a mounted
+  read-only deploy key for evidence pushes.
 - **EODWorker inside the supervisor** replaces host scheduling. Once
   the publication day has closed on Washington's clock (EOD_ET_HOUR =
   0; the target is always the PREVIOUS Eastern day, so "due at any
-  hour" is the intended meaning) and the durable `finalized` marker in
-  `collector_state.last_result` does not already cover the target, it:
+  hour" is the intended meaning) and the durable marker
+  `collector_state.finalized_date` (a column since 2026-08-02 — never
+  `last_result`, which every cycle overwrites) does not already cover
+  the target, it:
   sets a pause event all collector workers respect (checked at cycle
   start — in-flight cycles are NOT drained, finding F-006/R16), runs
   `scripts/run_pipeline.py --date <target>` **as a subprocess** (its

@@ -29,7 +29,13 @@ source of truth. This skill never writes or restarts anything.
    evidence-push check. `origin/main..HEAD` must be 0, and the `eod` row
    must show `evidence_push_error` NULL. **A digest that is live on the
    site but absent from `origin/main` is a finding, not a pass** — those
-   are two separate gates and they fail separately (F-021).
+   are two separate gates and they fail separately (F-021). Read
+   `evidence_pushed_at` too: `finalized_date` set with `evidence_pushed_at`
+   NULL and no error is the second shape (2026-08-24), not a pass.
+3b. **Did inference run?** OPS-GUIDE "Did inference run?": the newest
+   `day_inference` rows. `available=0` on a day the provider should have
+   worked is a finding even though the digest rendered — the digest says
+   only that no inference was available, never why (GUIDE §6 r15).
 4. If asked about the VPS or after a deploy: the OPS-GUIDE **VPS**
    block (curl 200s, container statuses, fapd-web networks ==
    `fapd_edge` only, cert expiry).

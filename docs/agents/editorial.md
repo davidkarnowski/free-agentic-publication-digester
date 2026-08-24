@@ -35,6 +35,20 @@ file.
   number of calls, not their size. Batch first (`MAX_BATCH_ITEMS`),
   group-retry second (`MAX_RETRY_BATCH_ITEMS`), isolate last — 25
   single-item retries cost 645K tokens on 2026-07-29 (42% of the day).
+  *(2026-08-24: the figure is CLI-specific. Production ran Gemini
+  2026-08-15..24 at ~6K input tokens a call; the ledger's `backend`
+  column says which economics a day was under.)*
+- **Model layers are additive; the render never waits on a vendor
+  (GUIDE §6 r15, 2026-08-24).** `llm.LLMClient` classifies a provider
+  as unavailable (disabled via `LLM_BACKEND=none`, unauthenticated,
+  quota exhausted, refused) and trips a per-run breaker so one 429 is
+  not thirty; transient 5xx get a bounded ladder honoring the server's
+  retry hint (`LLM_TRANSIENT_ATTEMPTS`, `LLM_RETRY_MAX_WAIT_S`).
+  `fapd.finalize.run_model_layers` records each layer's outcome in
+  `day_inference`; the digest's Inference row states only that no
+  inference was available — never the cause (operator ruling). Prose is
+  never backfilled into a finalized day.
+
 - **Retry ceilings are per ITEM as well as per run.** The per-run
   ceiling resets every collector cycle (15 min), so before
   `summary_attempts` existed, one unsummarizable item was retried

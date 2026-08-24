@@ -69,6 +69,15 @@ docs/accessibility.md → this file.
 - **Case normalization, truncation, and display transforms are
   disclosed** in the Methodology section when they alter source text
   presentation.
+- **The Inference row and the mechanical listing (GUIDE §6 r15,
+  2026-08-24).** The digest header's **Inference** row has two states —
+  attribution when model layers ran, or the exact sentence "No inference
+  was available for this publication day. All content is source-derived
+  or mechanically constructed." — and no third. Items the rules selected
+  but no layer summarized render as mechanical lines (title, type,
+  citation, rule; marker *listed from the record*), never as a reason.
+  The coverage arithmetic is unchanged; the render stays zero-LLM and
+  deterministic (`day_inference` is read, never computed at render).
 
 ## Things that are intentional here — do not "fix" without the operator
 

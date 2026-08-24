@@ -28,6 +28,17 @@ report); this skill drives it. The pipeline digests the newest
    main** per the evidence exemption — never mixed with code changes.
 
 ## Notes
+- **A manual run renders and builds the site; it does NOT finalize or
+  push.** `finalized_date` and the evidence push belong to the
+  supervisor's EOD path. To recover a `HALTED` day on the box, use
+  `scripts/collect.py --finalize D` (VPS-gated) — never a bare
+  `run_pipeline.py`, which is how nine days went unpushed in 2026-08.
+- `--no-llm` runs the mechanical pipeline: no provider is called, every
+  model layer is recorded as skipped, and the digest's Inference row
+  carries the neutral no-inference sentence (GUIDE §6 r15). A provider
+  outage mid-run does the same for the remaining layers on its own; the
+  run no longer exits 1 for it. The narration's `layers:` line is where
+  the reason shows — the digest never says.
 - `Validation: FAILED` writes nothing, by design — report the gate that
   refused, don't override (there is no override).
 - govinfo 503s with Retry-After waits are normal under load; the client
