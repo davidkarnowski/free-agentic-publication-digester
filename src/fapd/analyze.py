@@ -21,6 +21,7 @@ import json
 import logging
 
 from . import config, rules
+from .llm import LLMError, ProviderUnavailableError
 from .report import _BANNED_RE, _official_spans
 from .sync import utc_now_iso
 
@@ -302,6 +303,41 @@ def _record_attempts(conn, layer, items):
                     layer, len(items), config.MAX_ITEM_SUMMARY_ATTEMPTS)
 
 
+def _attempts_exhausted(conn, package_id, granule_id, layer):
+    """True when the item has already used its MAX_ITEM_SUMMARY_ATTEMPTS
+    for `layer` (GUIDE §6 r14). The same predicate collect.pending_items
+    applies for the collector's trigger accounting — until 2026-08-24
+    only that path honored the ceiling, so the finalizer (and any manual
+    run) re-attempted every exhausted item at full batch cost."""
+    row = conn.execute(
+        "SELECT attempts FROM summary_attempts WHERE package_id = ?"
+        " AND granule_id = ? AND prompt_version = ? AND layer = ?",
+        (package_id, granule_id, config.PROMPT_VERSION, layer),
+    ).fetchone()
+    return bool(row) and row["attempts"] >= config.MAX_ITEM_SUMMARY_ATTEMPTS
+
+
+def _recording(conn, layer, keys_of, call):
+    """Wrap a batch call so a raised LLMError still advances every item
+    in the batch on the r14 ladder before propagating. Before this,
+    attempts were recorded only for items still queued at the END of a
+    layer, so a call that raised (a 429 storm, a CLI outage) recorded
+    nothing and the same items came back untouched next cycle.
+
+    A ProviderUnavailableError is the provider's failure, not the
+    item's (GUIDE §6 r15): recording it would burn item ceilings on a
+    vendor outage, so it propagates without a mark."""
+    def guarded(llm, stats, entries, purpose):
+        try:
+            return call(llm, stats, entries, purpose)
+        except ProviderUnavailableError:
+            raise
+        except LLMError:
+            _record_attempts(conn, layer, keys_of(entries))
+            raise
+    return guarded
+
+
 def _log_retry_ceiling(layer, queue, stats):
     """Anything past the single-retry ceiling is left unsummarized and
     said so — the coverage accounting is what discloses it. Silence here
@@ -400,24 +436,34 @@ def run_plain(conn, llm, date):
                if not _lexicon_correction_exhausted(
                    conn, r["package_id"], r["granule_id"], "plain")]
     stats["skipped_lexicon_withdrawn"] = before_guard - len(pending)
+    # GUIDE §6 rule 14: an item past its per-item ceiling is a disclosed
+    # gap, not pending work (backlog D4 — the plain layer recorded
+    # attempts but never read them).
+    before_ceiling = len(pending)
+    pending = [r for r in pending
+               if not _attempts_exhausted(conn, r["package_id"], r["granule_id"], "plain")]
+    stats["exhausted"] = before_ceiling - len(pending)
     stats["plain_pending"] = len(pending)
 
+    plain_call = _recording(
+        conn, "plain", lambda rows: [(r["package_id"], r["granule_id"]) for r in rows],
+        _plain_call)
     retry_queue = []
     for start in range(0, len(pending), config.MAX_PLAIN_BATCH_ITEMS):
         batch = pending[start : start + config.MAX_PLAIN_BATCH_ITEMS]
         batch_no = start // config.MAX_PLAIN_BATCH_ITEMS + 1
-        mapping, result = _plain_call(llm, stats, batch, f"plain:batch{batch_no}")
+        mapping, result = plain_call(llm, stats, batch, f"plain:batch{batch_no}")
         retry_queue.extend(_harvest_plain(conn, stats, batch, mapping, result))
 
     # Group retry first (cheap), then single-item isolation for the stubborn
     # remainder — the reliability the old one-call-per-item path provided,
     # without paying for it on every recovered item.
     retry_queue = _retry_in_groups(
-        llm, stats, retry_queue, _plain_call,
+        llm, stats, retry_queue, plain_call,
         lambda group, mapping, result: _harvest_plain(conn, stats, group, mapping, result),
         "plain:retry-group")
     for row in retry_queue[:config.MAX_SINGLE_RETRIES_PER_RUN]:
-        mapping, result = _plain_call(llm, stats, [row], "plain:retry-single")
+        mapping, result = plain_call(llm, stats, [row], "plain:retry-single")
         if _harvest_plain(conn, stats, [row], mapping, result):
             stats["failed_items"].append(
                 {"package_id": row["package_id"], "granule_id": row["granule_id"]}
@@ -613,6 +659,7 @@ def run(conn, llm, date):
         "input_tokens": 0,
         "output_tokens": 0,
         "skipped_existing": 0,
+        "exhausted": 0,
         "failed_items": [],
     }
     items = rules.select_items(conn, date)
@@ -631,6 +678,13 @@ def run(conn, llm, date):
         if _lexicon_correction_exhausted(conn, item["package_id"], item["granule_id"], "map"):
             stats["skipped_lexicon_withdrawn"] = stats.get("skipped_lexicon_withdrawn", 0) + 1
             continue
+        # GUIDE §6 rule 14: past the per-item ceiling the item is a
+        # disclosed gap. collect.pending_items already skipped these for
+        # the collector's trigger; the finalizer path did not, so every
+        # exhausted item was re-bought at full batch cost each EOD.
+        if _attempts_exhausted(conn, item["package_id"], item["granule_id"], "map"):
+            stats["exhausted"] += 1
+            continue
         row = conn.execute(
             "SELECT text, metadata FROM extracted_texts"
             " WHERE package_id = ? AND granule_id = ?",
@@ -648,11 +702,14 @@ def run(conn, llm, date):
         else:
             pending.append((item, row["text"]))
 
+    call = _recording(
+        conn, "map", lambda entries: [(i["package_id"], i["granule_id"]) for i, _t in entries],
+        _call)
     retry_queue = []
     for start in range(0, len(pending), MAX_BATCH_ITEMS):
         batch = pending[start : start + MAX_BATCH_ITEMS]
         batch_no = start // MAX_BATCH_ITEMS + 1
-        mapping, result = _call(llm, stats, batch, f"map:batch{batch_no}")
+        mapping, result = call(llm, stats, batch, f"map:batch{batch_no}")
         retry_queue.extend(_harvest(conn, stats, batch, mapping, result))
 
     # Group retry, then single-item isolation for whatever is still missing;
@@ -660,11 +717,11 @@ def run(conn, llm, date):
     # surface as known gaps in the Coverage Statement, not as silent
     # omissions (GUIDE §2).
     retry_queue = _retry_in_groups(
-        llm, stats, retry_queue, _call,
+        llm, stats, retry_queue, call,
         lambda group, mapping, result: _harvest(conn, stats, group, mapping, result),
         "map:retry-group")
     for entry in retry_queue[:config.MAX_SINGLE_RETRIES_PER_RUN]:
-        mapping, result = _call(llm, stats, [entry], "map:retry-single")
+        mapping, result = call(llm, stats, [entry], "map:retry-single")
         if _harvest(conn, stats, [entry], mapping, result):
             item = entry[0]
             stats["failed_items"].append(

@@ -498,3 +498,105 @@ def test_plain_retries_batch_before_isolating(conn):
     assert "plain:retry-group" in fake.purposes
     # the group call carries every missing item, rather than one call each
     assert fake.purposes.count("plain:retry-group") == 1
+
+
+# ---------------------------------------------------------------------------
+# GUIDE §6 rule 14 attempt accounting on the finalizer path (2026-08-24)
+# ---------------------------------------------------------------------------
+
+
+def _set_attempts(conn, pid, gid, layer, n):
+    conn.execute(
+        "INSERT INTO summary_attempts (package_id, granule_id, prompt_version,"
+        " layer, attempts, last_at) VALUES (?, ?, ?, ?, ?, 'x')",
+        (pid, gid, config.PROMPT_VERSION, layer, n))
+    conn.commit()
+
+
+def _attempts(conn, pid, gid, layer):
+    row = conn.execute(
+        "SELECT attempts FROM summary_attempts WHERE package_id=? AND granule_id=?"
+        " AND prompt_version=? AND layer=?",
+        (pid, gid, config.PROMPT_VERSION, layer)).fetchone()
+    return row["attempts"] if row else 0
+
+
+class RaisingLLM:
+    """Every call raises the given exception — a 429 storm or an outage."""
+
+    def __init__(self, exc):
+        self.exc = exc
+        self.calls = 0
+
+    def complete(self, prompt, **kw):
+        self.calls += 1
+        raise self.exc
+
+
+def test_run_skips_items_at_the_per_item_ceiling(conn):
+    """The collector's trigger honored MAX_ITEM_SUMMARY_ATTEMPTS; the
+    finalizer path did not, so an exhausted item was re-bought nightly."""
+    seed_two_llm_items(conn)
+    _set_attempts(conn, "CREC-2026-07-23", "G1", "map", config.MAX_ITEM_SUMMARY_ATTEMPTS)
+    fake = FakeLLM()
+    stats = analyze.run(conn, fake, DATE)
+    assert stats["exhausted"] == 1
+    assert stats["llm_summarized"] == 1
+    assert "CREC-2026-07-23|G1" not in fake.prompts[0]
+    assert "CREC-2026-07-23|G2" in fake.prompts[0]
+
+
+def test_run_plain_skips_items_at_the_per_item_ceiling(conn):
+    """Backlog D4: the plain layer recorded attempts but never read them."""
+    seed_summary(conn, "FR-2026-07-23", "2026-1")
+    seed_summary(conn, "FR-2026-07-23", "2026-2")
+    _set_attempts(conn, "FR-2026-07-23", "2026-1", "plain", config.MAX_ITEM_SUMMARY_ATTEMPTS)
+    llm = PlainFakeLLM()
+    stats = analyze.run_plain(conn, llm, "2026-07-23")
+    assert stats["exhausted"] == 1
+    assert stats["plain_pending"] == 1 and stats["plain_written"] == 1
+    assert "FR-2026-07-23|2026-1" not in llm.calls[0]["prompt"]
+
+
+def test_a_batch_that_raises_advances_every_item_in_it(conn):
+    """Before this, attempts were recorded only for items still queued at
+    the end of a layer — a raising call recorded nothing, so a 429 storm
+    left every item's ladder untouched."""
+    from fapd import llm as _llm
+
+    seed_two_llm_items(conn)
+    fake = RaisingLLM(_llm.LLMError("cli backend failed (map:batch1): boom"))
+    try:
+        analyze.run(conn, fake, DATE)
+    except _llm.LLMError:
+        pass
+    else:
+        raise AssertionError("a plain LLMError still propagates")
+    assert fake.calls == 1
+    assert _attempts(conn, "CREC-2026-07-23", "G1", "map") == 1
+    assert _attempts(conn, "CREC-2026-07-23", "G2", "map") == 1
+
+    seed_summary(conn, "FR-2026-07-23", "2026-1")
+    try:
+        analyze.run_plain(conn, RaisingLLM(_llm.LLMError("boom")), "2026-07-23")
+    except _llm.LLMError:
+        pass
+    assert _attempts(conn, "FR-2026-07-23", "2026-1", "plain") == 1
+
+
+def test_a_provider_outage_advances_no_item(conn):
+    """GUIDE §6 r15: the provider failed, not the item — burning item
+    ceilings on a vendor outage would turn an outage into permanent gaps."""
+    from fapd import llm as _llm
+
+    seed_two_llm_items(conn)
+    fake = RaisingLLM(_llm.ProviderUnavailableError("quota exhausted"))
+    try:
+        analyze.run(conn, fake, DATE)
+    except _llm.ProviderUnavailableError:
+        pass
+    else:
+        raise AssertionError("ProviderUnavailableError must propagate")
+    assert conn.execute("SELECT COUNT(*) FROM summary_attempts").fetchone()[0] == 0
+    # ...and it is still an LLMError for callers that catch the base class
+    assert issubclass(_llm.ProviderUnavailableError, _llm.LLMError)

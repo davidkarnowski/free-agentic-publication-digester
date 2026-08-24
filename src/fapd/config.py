@@ -242,6 +242,12 @@ MAX_SINGLE_RETRIES_PER_RUN = 12
 # that produced 1,345 single retries and 39.7M input tokens, 60% of the
 # day. After this many attempts an item is left unsummarized and
 # disclosed by the coverage accounting, which is what rule 14 intends.
+# Enforced in BOTH places that pick pending work — collect.pending_items
+# (the collector's trigger) and analyze.run / run_plain (the finalizer
+# and manual runs); until 2026-08-24 only the first honored it, so the
+# EOD re-bought every exhausted item nightly. A batch call that raises
+# LLMError now advances every item in it; a ProviderUnavailableError
+# (the vendor's failure, GUIDE §6 r15) advances none.
 MAX_ITEM_SUMMARY_ATTEMPTS = 3
 
 # GUIDE §6 rule 14a (incident 2026-08-08, CREC-2026-07-13-pt1-PgH4403,

@@ -157,9 +157,14 @@ file.
   prompt-size guard (`LLM_MAX_PROMPT_CHARS`) is standing policy.
   **Remaining, low priority:** split the ledger's `input_tokens` into
   its three billed components so spend is measurable in dollars.
-- **D4** — the plain layer records attempts but never reads them; the
-  per-item ceiling doesn't bind it. One predicate in `run_plain`'s
-  pending query, mirroring `pending_map_items`.
+- **D4** — **Done 2026-08-24** (`bug/analyze-attempts`): the plain
+  layer recorded attempts but never read them, and the map layer read
+  them only in `collect.pending_items` — the finalizer path re-bought
+  every exhausted item nightly. `analyze._attempts_exhausted` now binds
+  both `run` and `run_plain` (stats `exhausted`), and a batch call that
+  raises `LLMError` advances every item in it via `_recording` (a
+  `ProviderUnavailableError` advances none — the vendor's failure, not
+  the item's, GUIDE §6 r15). Before this a 429 storm recorded nothing.
 - **D8** — **Done 2026-08-02**: `config.BANNED_TERMS` is the single
   source; all five prose prompts restate it verbatim (str.replace
   substitution, drift-tested in `test_prompt_lexicon.py`) and the gate
