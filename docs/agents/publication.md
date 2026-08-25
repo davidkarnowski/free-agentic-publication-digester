@@ -86,7 +86,7 @@ docs/accessibility.md → this file.
 - `MAX_GRAPHICS_PER_ITEM = 2` with a disclosed remainder.
 - The lexicon gate deliberately does NOT mask the Day in Review or
   section synopses — compose prose gets the strictest scrutiny.
-- `build_today` does not write `style.css` (only `build_site` does) —
+- `build_today` does not write `style.css` (only `build_site` and `refresh_sources` do — the latter since fc7ab66, for the activity-graph grid) —
   a CSS change needs a site build to deploy; plan accordingly rather
   than moving the write.
 - The filter bar lists every keyword the day produced (operator,
@@ -114,7 +114,9 @@ docs/accessibility.md → this file.
   publish.build_today(db.connect())'` and
   `uv run python scripts/build_site.py`) and open the result.
 - Audits that must hold: `git grep -n "<script" src/fapd/publish.py` →
-  only `_LOCAL_TIME_JS`; `git grep -n "llm" src/fapd/report.py` → no
+  only `_LOCAL_TIME_JS`, and `git grep -nE "\son[a-z]+=" src/fapd/publish.py`
+  → nothing (inline event handlers are scripts too — the audio players
+  shipped `onclick=` on 2026-08-18 and the `<script` count stayed at one); `git grep -n "llm" src/fapd/report.py` → no
   call sites (comments/lazy compose reads exempt).
 
 ## Current backlog (2026-08-02 amended review)

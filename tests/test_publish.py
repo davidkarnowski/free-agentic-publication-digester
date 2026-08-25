@@ -43,6 +43,16 @@ DIGEST_B = """# Daily Digest — 2026-07-02
 Quiet day. Nothing else happened.
 """
 
+# code-standards §2 r10 widened 2026-08-24: "one script" also means no
+# inline event handlers — the audio players shipped `onclick=` on 08-18
+# and every `<script`-counting audit stayed green (doc-audit item 2).
+_HANDLER_RE = re.compile(r"\son[a-z]+=", re.IGNORECASE)
+
+
+def assert_no_handlers(text, name=""):
+    assert not _HANDLER_RE.search(text), f"inline event handler in {name}"
+
+
 
 @pytest.fixture
 def digests(tmp_path):
@@ -838,6 +848,7 @@ def test_the_health_surface_adds_no_script(health_site):
     out = health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
     for path in sorted(out.rglob("*.html")):
         assert "<script" not in path.read_text(), path.name
+        assert_no_handlers(path.read_text(), path.name)
 
 
 def test_doc_pages_built_from_docs_site(digests, tmp_path, monkeypatch):
@@ -1657,6 +1668,7 @@ def test_blog_pages_ship_no_script(digests, devnotes_root, tmp_path):
     publish.build_site(digests, out)
     for name in ("blog.html", "blog-launch.html"):
         assert "<script" not in (out / name).read_text(), name
+        assert_no_handlers((out / name).read_text(), name)
 
 
 def test_blog_degrades_gracefully_when_the_post_is_missing(digests, tmp_path,
@@ -1960,6 +1972,7 @@ def test_today_filter_states_what_is_selected(conn, tmp_path):
     assert '.filter-count::after { content: counter(shown)' in css
     # still no second script
     assert page.count("<script") == 1
+    assert_no_handlers(page, "today.html")
 
 
 def test_filter_bar_is_a_labelled_group_with_headings(conn, tmp_path):

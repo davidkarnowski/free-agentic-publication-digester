@@ -1406,8 +1406,7 @@ def render_audio_heading(heading_html: str, audio_url: str, title: str = "Listen
         f'<div class="heading-audio-wrapper">\n'
         f'  {heading_html}\n'
         f'  <details class="audio-disclosure">\n'
-        f'    <summary class="audio-speaker-btn" title="Listen to audio narration" aria-label="{html.escape(aria_label)}"'
-        f' onclick="const a=this.parentElement.querySelector(\'audio\'); if(a){{if(a.paused){{a.play();}}else{{a.pause();}}}}">\n'
+        f'    <summary class="audio-speaker-btn" title="Listen to audio narration" aria-label="{html.escape(aria_label)}">\n'
         f'      <svg class="speaker-icon" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">\n'
         f'        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>\n'
         f'        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>\n'
@@ -1437,8 +1436,7 @@ def render_audio_player(audio_url: str, title: str = "Listen to section narratio
     """Render an accessible inline click-to-expand speaker icon + audio player component."""
     return (
         f'<details class="audio-disclosure">\n'
-        f'  <summary class="audio-speaker-btn" title="Listen to audio narration" aria-label="{html.escape(aria_label)}"'
-        f' onclick="const a=this.parentElement.querySelector(\'audio\'); if(a){{if(a.paused){{a.play();}}else{{a.pause();}}}}">\n'
+        f'  <summary class="audio-speaker-btn" title="Listen to audio narration" aria-label="{html.escape(aria_label)}">\n'
         f'    <svg class="speaker-icon" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">\n'
         f'      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>\n'
         f'      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>\n'

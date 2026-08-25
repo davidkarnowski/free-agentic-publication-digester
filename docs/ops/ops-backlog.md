@@ -168,7 +168,12 @@ one.*
   evidence commit) resurrected them into the record until a follow-up
   guarded commit deleted them and the missed `site/assets/2026-07-23/`.
 - **Trigger:** the next content retirement, or any renderer change that
-  renames an output path.
+  renames an output path. *2026-08-24:* the static-asset copier
+  (`publish.py`, 14137fc) adds another never-deleted class,
+  `out_dir/assets/**`, and `site/assets/audio/` already holds ~20 MB of
+  MP3 that no page references (six `blog-gemini-guest-*.mp3`, one
+  `digest-2026-07-23.mp3` for a retired day) — the operator decides
+  whether they are wired or removed; nothing here deletes them.
 - **Sketch:** either a manifest-of-expected-outputs sweep at the end of
   `build_site` (delete files under managed directories that this render
   did not produce, with a printed list — loud, never silent), or a
@@ -314,6 +319,11 @@ not reusable.)*
 - **Trigger:** any change that introduces a second script, an embed, or
   externally-hosted assets. The multi-media workstream's embed posture
   is exactly such a change and should not land before this does.
+  *Fired 2026-08-18 and went unnoticed:* the audio players (7628614)
+  shipped inline `onclick=` handlers, which a hash-only `script-src`
+  rejects, and every `<script`-counting audit stayed green. Removed
+  2026-08-24 (docs/realign branch); the audits now grep for attribute
+  handlers too.
 - **Sketch:** the site has exactly one inline script (the live page's
   local-time snippet, code-standards §2 r10), so a hash-based CSP is
   achievable without a nonce pipeline: `default-src 'self'`,
