@@ -769,6 +769,14 @@ All LLM prompts are code, versioned, and change through procedure:
   the source-page surfaces use, and the derived-text marking §2 requires.
   Until they exist the Inventory above stays at seven — this bullet is a
   commitment, not a claim.
+  *Narration (noted 2026-08-24).* Text-to-speech narration of our own
+  prose (`src/fapd/tts.py`, built 2026-08-18) is a model-generated
+  output that exists in the code but is **gated off and outside the
+  Inventory**: it has no version constant, no ledger rows, and no
+  storage-time gate, and production sets no key for it. Only the About
+  page's pre-recorded narration is served. It joins the Inventory when
+  it meets the conditions the media surfaces above state — versioned,
+  ledgered, gated, labeled — and not before.
 - **The insight surface is developer-facing, never editorial.** Its
   output appears only in the daily operations report under
   `provenance/runs/` — never in a digest, the site's reader pages, or
@@ -968,8 +976,13 @@ discipline:
 - **Log every request, twice.** Accountability has two layers, both with the
   API key redacted:
   1. `data/fetch_log.db` — the canonical, queryable record of every outbound
-     request (URL, UTC timestamp, status, bytes, elapsed ms, attempt, error),
-     written by the HTTP client itself so nothing can bypass it.
+     request to a publisher (URL, UTC timestamp, status, bytes, elapsed ms,
+     attempt, error), written by the HTTP client itself so no fetch of
+     official material can bypass it. Two outbound classes live elsewhere
+     by design (noted 2026-08-24): inference calls are ledgered in
+     `data/llm_ledger.db` (§6 r7, every call including failures), and the
+     text-to-speech path (`tts.py`) is gated off in production and ledgered
+     nowhere — it stays off until it is (§3a).
   2. `data/logs/access-YYYY-MM-DD.log` — a human-readable narrative at DEBUG
      level (every request, pacing sleeps, retries and why, watermark moves,
      per-package outcomes), regardless of console verbosity.

@@ -130,6 +130,9 @@ file.
   `is_error`, which the old code returned as a legitimate empty
   completion. `LLMClient` now classifies the envelope
   (`TransientLLMError` iff provably zero-billed), retries exactly once
+  *(until 2026-08-24; now the bounded ladder `LLM_TRANSIENT_ATTEMPTS`
+  honoring the server's retry hint, d5cc37f — and this class is no
+  longer CLI-specific: Gemini's 429/5xx use the same path)*
   for free with both attempts ledgered, and raises on the
   silent-garbage path; replay-tested against the actual 08-03
   envelope. §6 retry economics untouched — billed or unprovable

@@ -4979,3 +4979,84 @@ fails twice and then succeeds, nothing is stuck. One genuine stray:
 `FR-1995-01-04`, a 1995 issue re-touched by govinfo on 08-06, fails
 extraction every thirty minutes with no ceiling. The sync layer got its
 ceiling on 08-10; the extract layer is next.
+
+## 2026-08-24 — the fortnight the log missed (reconstructed from git and the ledger)
+
+This entry is reconstructed, not a first-hand session log. Eighteen
+commits landed between 2026-08-15 and 08-20 with no WORKLOG line and
+no §14 decision between them; what follows is read back from `git log
+11ab4a5^..14137fc`, the commit bodies, and the LLM ledger on the box.
+Where a reason is inferred rather than recorded, it says so.
+
+**08-14, 23:08Z — the CLI backend stops.** The ledger's first failure
+reads: *"Your organization has disabled Claude subscription access for
+Claude Code · Use an Anthropic API key instead, or ask your admin to
+enable access."* Thirty-five zero-billed envelope failures follow
+through the evening of 08-15; the last successful CLI call is
+08-14 21:51Z. Digest 2026-08-14 was rendered by hand at 14:41Z on
+08-15.
+
+**08-15 — Gemini.** `11ab4a5` adds a `GeminiBackend` to `llm.py`
+(REST, `requests.post`, key from `GOOGLE_GEMINI_API_KEY`) and a
+`gemini` sub-dict in `config.LLM_MODELS` mapping both tiers to
+`gemini-2.5-flash`; `scripts/staged/2026-08-15-switch-to-gemini-backend.sh`
+carries the key to the box, sets `LLM_BACKEND=gemini`, and recreates
+the container. The ledger shows the first Gemini calls that afternoon —
+and the first 429s the same hour. Nothing in GUIDE §6 r7's provider
+record or CLAUDE.md §14 was written; the 2026-08-24 entry above is
+where the consequence (a ~20-request free-tier quota against a
+finalizer that needs ~80 calls) was finally read out of the ledger.
+
+**08-15 — the sources activity graph.** Five commits (`10a0e75`
+through `5ed80d7`): a 7-day activity heatmap and legend on every
+source card, then 24-hour polling micro-segments, a single-pass hourly
+query, and two rounds of flexbox hardening for Brave. Side effect worth
+knowing: `refresh_sources` now emits `style.css` (`fc7ab66`), so the
+15-minute health refresh rewrites a third file — the autostash in
+`evidence-commit.sh` covers it, and CLAUDE.md §9 now says so.
+
+**08-16 — the retry loop that came and went.** `a4058cc` added a
+three-attempt loop with `time.sleep(2*attempt)` inside
+`GeminiBackend.complete`, retrying every exception; `3e88577`, the same
+day, removed it and instead classified 429/500/502/503/504 as
+`TransientLLMError` for `LLMClient`'s single zero-billed retry
+(`52f019f` updated the tests to "2-attempt" behavior). Neither commit
+has a body. The inference: the loop duplicated the client's retry and
+slept for real in tests. The effect: no wait at all between the two
+attempts, and the server's "Please retry in 37s" never read — which is
+the mechanism the 2026-08-24 entry describes. Also 08-16: the Gemini
+guest blog post (`a54c3f5`, `25caf9d`, `b90797e`, `5552ebc`) and its
+allowlist entry.
+
+**08-18 — narration.** `7628614` adds `src/fapd/tts.py` (OpenAI
+`tts-1` over `urllib`), a Day-in-Review narration hook in
+`compose.py`, an inline audio player in `publish.py`, and ~20 MB of
+MP3 under `site/assets/audio/` — six About-page sections that the live
+About page plays, six `blog-gemini-guest-*.mp3` that no page
+references, and one `digest-2026-07-23.mp3` for a retired day.
+`25b16fa` (08-20) makes the compose hook survive a missing TTS service.
+Production sets no `OPENAI_API_KEY`, so digest narration has never
+fired there. Two things this fortnight did not do: version or ledger
+the narration as a model surface (GUIDE §3a now says it is gated off
+and outside the inventory until it is), and notice that the player's
+`onclick=` handler was a second script on a site whose rule, privacy
+page, and CSP plan all say "exactly one" — the `<script`-counting
+audits stayed green (OB-18's trigger fired unremarked; the handlers
+are removed in the commit that follows this entry).
+
+**08-20 — static assets and the deploy.** `fdb5880`/`fca6fe3`/
+`14137fc`: `build_site` copies `static_assets/` and `site/assets/` into
+the output tree so blog and About media survive a rebuilt site volume,
+`Dockerfile.backend` bakes `site/assets/*` into `/app/static_assets/`,
+and the image was rebuilt and deployed at 20:50Z. `14137fc` is also a
+code commit carrying `site/` evidence (the MP3s), which CLAUDE.md §8
+says not to mix — recorded here, not amended.
+
+What the fortnight looks like from the ledger: haiku at ~80 calls and
+~3M input tokens a day through 08-14; Gemini at 30–50 attempted, 12–34
+successful, 16–24 refused, ~300K input tokens a day from 08-15; the
+finalizer halting on eight of ten nights; eight digests hand-rendered
+the next afternoon; no evidence commit for ten days. The doc audit
+that went with the 2026-08-24 diagnosis (`docs/doc-audit-2026-08-24.md`)
+lists the 32 places the prose had drifted from this code; this branch
+closes the ones the wave-1 commits did not.

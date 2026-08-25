@@ -120,8 +120,13 @@ this file.
 - Gates before reporting: `uv run ruff check .` and `uv run pytest -q`.
 - Audits that must hold: `grep -rn "requests.get\|requests.post" src/fapd/
   --include="*.py" | grep -v client.py` → only hits inside the client
-  module (nothing fetches around the budget); no literal API key
-  anywhere (`git grep -i "api_key ="` shows only env reads).
+  module and `llm.py` (the Gemini backend posts to Google — inference,
+  not a publisher fetch, ledgered in `llm_ledger.db` per GUIDE §6 r7;
+  nothing fetches official material around the budget). `tts.py` uses
+  `urllib` and is gated off (GUIDE §3a); any new outbound path must be
+  named here or it is an audit escape. No literal API key anywhere
+  (`git grep -i "api_key ="` shows only env reads and the two
+  constructor assignments in `llm.py`/`tts.py`).
 
 ## Current backlog (2026-08-02 amended review; IDs are section D-numbers)
 

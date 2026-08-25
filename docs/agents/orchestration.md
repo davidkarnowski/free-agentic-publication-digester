@@ -28,8 +28,8 @@ for the duration of its task).
 |---|---|
 | Acquisition | `src/fapd/client.py`, `sync.py`, `agencies.py`, `email_sources.py`, `probe.py`, `sources.py` · `sources/registry.yaml` · `scripts/check_sources.py`, `scripts/sources_doc.py` · `docs/adding-sources.md`, `docs/email-sources.md` |
 | Corpus & Provenance | `src/fapd/db.py`, `extract.py`, `graphics.py`, `provenance.py`, `src/fapd/parsers/*` · `docs/schema.md`, `PROVENANCE.md` |
-| Editorial | `src/fapd/rules.py`, `analyze.py`, `compose.py`, `tags.py`, `insight.py`, `llm.py` |
-| Publication | `src/fapd/report.py`, `publish.py`, `fedcal.py` · `digests/TEMPLATE.md` · `docs/accessibility.md`, `docs/site/*` |
+| Editorial | `src/fapd/rules.py`, `analyze.py`, `compose.py`, `tags.py`, `insight.py`, `llm.py`, `finalize.py`, `inference.py`, `tts.py` |
+| Publication | `src/fapd/report.py`, `publish.py`, `fedcal.py` · `digests/TEMPLATE.md`, `static_assets/` · `docs/accessibility.md`, `docs/site/*` |
 | Operations | `src/fapd/collect.py`, `health.py` · `scripts/run_pipeline.py`, `scripts/collect.py`, `scripts/audit.py` · `deploy/vps/*` · `docs/ops/*`, `docs/continuous-ingestion.md` |
 
 **Shared resources — orchestrator-owned. No section agent edits these;

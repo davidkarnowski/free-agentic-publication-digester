@@ -7,10 +7,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends git openssh-cli
     && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir uv
 
-# The claude CLI (LLM_BACKEND=cli, the operator's decision 2026-07-30):
-# pipeline LLM calls bill the operator's Claude subscription via a
-# setup-token (CLAUDE_CODE_OAUTH_TOKEN in the server-side .env) instead
-# of API credits. Node 22 is the CLI's runtime requirement.
+# The claude CLI (LLM_BACKEND=cli, the operator's decision 2026-07-30;
+# production again since 2026-08-24 after the vendor's 08-14..24 block —
+# GUIDE §6 r7 provider record): pipeline LLM calls bill the operator's
+# Claude subscription via a setup-token (CLAUDE_CODE_OAUTH_TOKEN in the
+# server-side .env) instead of API credits. Node 22 is the CLI's runtime
+# requirement. The image also serves the api/gemini/none backends, which
+# need nothing installed here; dropping Node when the CLI is retired is
+# plan OPS-3 (docs/ops/plan-2026-08-24-eod-llm-resilience.md).
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/* \

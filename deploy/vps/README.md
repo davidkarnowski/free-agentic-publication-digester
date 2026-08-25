@@ -96,6 +96,31 @@ deploy that. TLS: `sudo certbot certonly --webroot
 proxy serves the ACME webroot; its renewal deploy-hook reload covers
 this cert too).
 
+### The server-side `.env` (never synced, never in the repo)
+
+`/opt/fapd/.env` is read by compose (`env_file`) and is the only place
+provider choices live on the box. Keys, all documented in the repo's
+`.env.example`: `GOVINFO_API_KEY`, `CONTACT_EMAIL`, `IMAP_*` (mailbox
+ingest), `SITE_BASE_URL`, `FAPD_EVIDENCE_PUSH=1`, and the inference
+block — `LLM_BACKEND` (`cli` / `api` / `gemini` / `none`), with
+`CLAUDE_CODE_OAUTH_TOKEN` for `cli`, `ANTHROPIC_API_KEY` for `api`,
+`GOOGLE_GEMINI_API_KEY` for `gemini`; `OPENAI_API_KEY` is deliberately
+unset (narration is gated off, GUIDE §3a). A backend change is made by a
+staged script under `scripts/staged/` that backs the file up and
+recreates the container (`2026-08-15-switch-to-gemini-backend.sh`,
+`2026-08-24-restore-cli-backend.sh`), and is recorded in GUIDE §6 r7's
+provider record and CLAUDE.md §14 — the ledger's `backend` column alone
+is not a record anyone reads in time.
+
+### Static assets and the image bake
+
+`Dockerfile.backend` copies `site/assets/*` from the repo export into
+`/app/static_assets/` at build time (commit 14137fc), and `build_site`
+copies `static_assets/` then `site/assets/` into the output tree on
+every render (size-compare, not hash-compare). This is what keeps blog
+and About-page media present when the site volume is rebuilt; it is
+also one more class of output that nothing ever deletes (OB-12).
+
 ## Verify (after every deploy)
 
 ```sh

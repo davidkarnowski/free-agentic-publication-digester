@@ -53,7 +53,7 @@ the same content in formats that do not depend on our styling.
 
 ## Multi-modal audio modality & assistive access
 
-As part of our commitment to universal access, daily digests and primary explanatory pages feature synthesized audio narrations in addition to canonical text.
+As part of our commitment to universal access, the About page carries synthesized audio narration of its sections in addition to the canonical text. Narration for the daily digests is built but not enabled: no digest page carries audio today, and none will until the narration surface is versioned and ledgered like every other model output (GUIDE §3a). When that changes, this page will say so.
 
 - **Verbatim Content Parity**: The audio narration provides an exact spoken reading of the synthesized prose. Text and audio present identical factual information — neither modality receives exclusive content.
 - **Screen Reader & Assisted Technology First**: Audio is presented using HTML5 native `<audio>` elements with explicit `controls`, `preload="none"`, and descriptive `aria-label` attributes.

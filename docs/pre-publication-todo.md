@@ -280,7 +280,14 @@ close (check them off with dates).
   _doc_sources`) — the markdown is the versioned backend file; HTML is
   never hand-written.
 - [ ] **Redundant, provider-segmented inference** (filed 2026-08-05,
-  operator). Stand up additional LLM providers beside Anthropic (Google
+  operator). *Status 2026-08-24: the provider half shipped — Google
+  Gemini backend 11ab4a5 (2026-08-15), ran production 08-15..24; the
+  fallthrough defect below is fixed (an unknown `LLM_BACKEND` is a
+  `ValueError`, d5cc37f) and `LLM_BACKEND=none` is a first-class
+  backend (GUIDE §6 r15). Still open: the Protocol/ABC contract, the
+  explicit failover mechanism (plan FEAT-4, parked), and the disclosure
+  question — answered in part: the digest attributes the provider that
+  produced prose and never states why another did not.* Stand up additional LLM providers beside Anthropic (Google
   and Cerebras named) so no single vendor's outage, rate limit, or
   refusal can stop a digest. GUIDE §6 rule 7's 2026-08-05 amendment
   governs: `backend` stays the provenance of who produced each output,

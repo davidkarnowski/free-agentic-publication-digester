@@ -34,7 +34,7 @@ is always current; it derives them from the registry at build time.)
   begins 2026-07-27** (two development-era digests were retired on
   2026-08-03; they remain in git history). Each finished day also has
   a frozen observed listing at `/day/<date>.html`.
-- **Test suite:** 665 tests (verified by collection 2026-08-07).
+- **Test suite:** 740+ tests (741 collected in a clean checkout, 2026-08-24).
 
 ---
 

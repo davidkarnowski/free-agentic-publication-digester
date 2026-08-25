@@ -40,8 +40,8 @@ GUIDE.md §1–§2.
 | Deps | deliberately few: requests, python-dotenv, pyyaml, pypdf, pillow, markdown, protego, dkimpy, anthropic |
 | Storage | SQLite ×3: `data/fapd.db` (pipeline), `data/fetch_log.db` (every HTTP attempt), `data/llm_ledger.db` (every LLM call) |
 | Site | static HTML, no framework — `publish.py` renders it; exactly one script (the live page's local-time snippet, code-standards §2 r10) |
-| Lint/tests | ruff (line 100), pytest (650+ tests; bare `pytest` collects `tests/` only via pyproject `testpaths` — the dev stack's staged repo copy would otherwise double-collect), CI on push/PR |
-| LLM | pluggable backends: `claude` CLI (local default) / Anthropic API (`LLM_BACKEND=api`); tier aliases resolved per backend via `config.LLM_MODELS` |
+| Lint/tests | ruff (line 100), pytest (740+ tests; bare `pytest` collects `tests/` only via pyproject `testpaths` — the dev stack's staged repo copy would otherwise double-collect), CI on push/PR |
+| LLM | pluggable backends: `claude` CLI (default; production again since 2026-08-24) / Anthropic API (`LLM_BACKEND=api`) / Google Gemini (`LLM_BACKEND=gemini`, `GOOGLE_GEMINI_API_KEY`; production 2026-08-15..24) / none (`LLM_BACKEND=none`, GUIDE §6 r15); tier aliases resolved per backend via `config.LLM_MODELS`; an unknown value is an error, not the CLI |
 
 ## 4. Repository layout
 
@@ -171,8 +171,9 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   nightly push into a non-fast-forward: F-019 recorded this on
   2026-08-05, was hand-fixed and left open, and it duly ate the
   2026-08-06 evidence commit. `--autostash` is equally load-bearing —
-  `RenderWorker._refresh_health` rewrites `site/sources*.html` on a
-  clock, so the tree is reliably dirty. Do not "simplify" either away.
+  `RenderWorker._refresh_health` rewrites `site/sources*.html` (and,
+  since fc7ab66, `site/style.css`) on a clock, so the tree is reliably
+  dirty. Do not "simplify" either away.
 - **A failed evidence push is durable, loud, and retried on a bounded
   ladder** (`evidence_pushed_at` / `evidence_push_error` /
   `evidence_push_attempts`). **The digest being live is NOT evidence
@@ -290,6 +291,8 @@ live in `.claude/agents/fapd-*.md` (tracked).
 | Digest layout & validation gates | `src/fapd/report.py` |
 | Site & agent surfaces | `src/fapd/publish.py` (+ `fedcal.py` for the weekend/holiday banner) |
 | Provenance / hashes | `src/fapd/provenance.py`, `PROVENANCE.md` |
+| No-inference floor / layer outcomes | `src/fapd/finalize.py`, `inference.py` (`day_inference`), the digest's Inference row in `report.py` |
+| Narration (TTS, gated off) | `src/fapd/tts.py`; called from `compose.py` only with `OPENAI_API_KEY`; players rendered by `publish.py` — GUIDE §3a narration note |
 | Email ingestion | `src/fapd/email_sources.py`, `docs/email-sources.md` |
 | Continuous ingestion | `src/fapd/collect.py`, `docs/continuous-ingestion.md` |
 | VPS / deploy | `deploy/vps/README.md`, `docs/ops/` |
