@@ -336,7 +336,18 @@ class Worker:
 
     def run_cycle(self):
         cycle_id = uuid.uuid4().hex[:12]
-        conn = self.sup.conn_factory()
+        try:
+            conn = self.sup.conn_factory()
+        except Exception as exc:  # noqa: BLE001 — a connect failure must not
+            # kill the worker thread either. Nothing can be recorded without
+            # a connection, so the log line is the whole signal; the loop's
+            # normal interval brings the next attempt. Before 2026-08-25 this
+            # call sat outside the try, and a start-up migration race killed
+            # 25 of 29 threads — eod, govinfo, analyze and render among them —
+            # silently, with every collector_state row still reading clean.
+            logger.error("%s: could not open the database: %r — skipping"
+                         " this cycle", self.name, exc)
+            return None
         try:
             stats = self.cycle(conn, cycle_id)
             record_state(conn, self.name, ok=True, stats=stats)
@@ -366,17 +377,25 @@ class Worker:
                 # collectors sit out and re-check shortly.
                 stop_event.wait(30)
                 continue
-            self.run_cycle()
-            conn = self.sup.conn_factory()
+            # A thread that dies is a worker that stops forever with no
+            # health signal (collector_state only records what a cycle
+            # wrote). Nothing below may raise past this point.
             try:
-                errors = conn.execute(
-                    "SELECT consecutive_errors FROM collector_state WHERE worker = ?",
-                    (self.name,)).fetchone()
-                streak = errors["consecutive_errors"] if errors else 0
-                minutes = self.interval_min(conn) * (
-                    2 ** min(streak, 3) if self.backoff_on_errors else 1)
-            finally:
-                conn.close()
+                self.run_cycle()
+                conn = self.sup.conn_factory()
+                try:
+                    errors = conn.execute(
+                        "SELECT consecutive_errors FROM collector_state WHERE worker = ?",
+                        (self.name,)).fetchone()
+                    streak = errors["consecutive_errors"] if errors else 0
+                    minutes = self.interval_min(conn) * (
+                        2 ** min(streak, 3) if self.backoff_on_errors else 1)
+                finally:
+                    conn.close()
+            except Exception as exc:  # noqa: BLE001 — see above
+                logger.error("%s: loop iteration failed: %r — retrying after"
+                             " the base interval", self.name, exc)
+                minutes = self.base_interval_min
             # jitter ±10% so worker clocks don't align into bursts
             stop_event.wait(minutes * 60 * random.uniform(0.9, 1.1))
 

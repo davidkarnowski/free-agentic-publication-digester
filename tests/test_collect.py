@@ -5,6 +5,7 @@ no network, no threads, no LLM."""
 import datetime as dt
 import functools
 import json
+import sqlite3
 
 from conftest import DATE, LONG_TEXT, install_digest_day_default, seed_corpus, seed_item
 
@@ -1252,3 +1253,47 @@ def test_supervisor_passes_no_llm_through_to_the_finalizer(tmp_path, monkeypatch
     sup.finalizer_runner = functools.partial(collect._run_finalizer, no_llm=False)
     sup.finalizer_runner("2026-08-24")
     assert "--no-llm" not in seen["cmd"]
+
+
+# ------------------------------------------ a worker thread never dies --
+
+
+def test_run_cycle_survives_a_connect_failure(tmp_path, monkeypatch, caplog):
+    import logging as _logging
+
+    sup, _ = make_supervisor(tmp_path, monkeypatch)
+    worker = collect.EmailWorker(sup, 5)
+
+    def boom():
+        raise sqlite3.OperationalError("duplicate column name: extract_attempts")
+
+    sup.conn_factory = boom
+    with caplog.at_level(_logging.ERROR, logger="fapd.collect"):
+        assert worker.run_cycle() is None
+    assert "could not open the database" in caplog.text
+
+
+def test_loop_survives_anything_and_keeps_going(tmp_path, monkeypatch, caplog):
+    """The 2026-08-25 shape: an exception on the first iteration must not
+    end the thread — the next iteration runs after the base interval."""
+    import logging as _logging
+    import threading
+
+    sup, _ = make_supervisor(tmp_path, monkeypatch)
+    worker = collect.EmailWorker(sup, 5)
+    calls = []
+    stop = threading.Event()
+
+    def flaky():
+        calls.append(1)
+        if len(calls) == 1:
+            raise RuntimeError("first iteration explodes")
+        stop.set()
+        return {}
+
+    monkeypatch.setattr(worker, "run_cycle", flaky)
+    monkeypatch.setattr(stop, "wait", lambda seconds: None)   # no real sleeping
+    with caplog.at_level(_logging.ERROR, logger="fapd.collect"):
+        worker.loop(stop)
+    assert len(calls) == 2, "the loop ran again after the failure"
+    assert "loop iteration failed" in caplog.text

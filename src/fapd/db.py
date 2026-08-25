@@ -416,5 +416,16 @@ def _ensure_columns(conn, table, columns):
     have = {r["name"] for r in conn.execute(f"PRAGMA table_info({table})")}
     for name, decl in columns.items():
         if name not in have:
-            conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}")
+            try:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}")
+            except sqlite3.OperationalError as exc:
+                # The supervisor opens ~30 connections at once on start-up,
+                # every one of which runs this: between one connection's
+                # PRAGMA and its ALTER, another has already added the
+                # column. Losing that race is success, not failure — the
+                # column exists. Deploy 2026-08-25 01:19Z: three new
+                # packages columns, 25 of 29 worker threads died on
+                # "duplicate column name" before their first cycle.
+                if "duplicate column" not in str(exc).lower():
+                    raise
     conn.commit()
