@@ -48,19 +48,64 @@ def utc_now_iso():
     return dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def publication_date(when=None):
-    """The federal publication day (GUIDE §3, amended 2026-07-30): the
-    calendar date in Washington, D.C., because that is the clock the
-    publishers keep — the Federal Register's 8:45 a.m. release, floor
-    proceedings, opinion postings. Midnight UTC is 8 p.m. Eastern, so
-    dating by UTC filed an evening release under the next publication
-    day and rolled the live view over while Washington was still
-    working. Observation timestamps stay UTC; only the day a document
-    belongs to is Eastern. DST is handled by the zone itself."""
+def publication_date(when=None, tz=None):
+    """The publication day (GUIDE §3, amended 2026-07-30): the calendar
+    date on the publication clock (`config.PUBLICATION_TZ`, Washington's
+    in production), because that is the clock the publishers keep — the
+    Federal Register's 8:45 a.m. release, floor proceedings, opinion
+    postings. Midnight UTC is 8 p.m. Eastern, so dating by UTC filed an
+    evening release under the next publication day and rolled the live
+    view over while Washington was still working. Observation timestamps
+    stay UTC; only the day a document belongs to is on the publication
+    clock. DST is handled by the zone itself. `tz` is the test seam; the
+    default is read at call time so a replaced config attribute holds."""
     when = when or dt.datetime.now(dt.UTC)
     if when.tzinfo is None:
         when = when.replace(tzinfo=dt.UTC)
-    return when.astimezone(config.PUBLICATION_TZ).strftime("%Y-%m-%d")
+    return when.astimezone(tz or config.PUBLICATION_TZ).strftime("%Y-%m-%d")
+
+
+def publication_day_hour(iso_stamp, tz=None):
+    """(publication day, wall-clock hour 0-23) for a stored UTC stamp —
+    the ONE conversion GUIDE §3 (2026-08-26) licenses: presentation
+    bucketing of activity on the publication clock, never storage or
+    dating. A stamp with no zone is UTC, as every writer stores it.
+    Returns None for an unparseable stamp so a caller drops the row
+    rather than inventing a bucket. On the night the zone falls back,
+    two UTC hours land in one wall-clock hour; on the night it springs
+    forward, one wall-clock hour receives nothing — see
+    `publication_day_hours` for the day's honest hour count."""
+    if not iso_stamp:
+        return None
+    try:
+        when = dt.datetime.fromisoformat(iso_stamp)
+    except (TypeError, ValueError):
+        return None
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=dt.UTC)
+    local = when.astimezone(tz or config.PUBLICATION_TZ)
+    return local.strftime("%Y-%m-%d"), local.hour
+
+
+def publication_day_start_utc(day, tz=None):
+    """The UTC instant at which publication day `day` ('YYYY-MM-DD')
+    begins, in the exact stamp format the pipeline's writers use
+    (`utc_now_iso`: ...Z) so it can bound a query against stored stamps
+    as a string (CLAUDE.md §10: never introduce a new timestamp format)."""
+    local_midnight = dt.datetime.combine(
+        dt.date.fromisoformat(day), dt.time(0), tzinfo=tz or config.PUBLICATION_TZ)
+    return local_midnight.astimezone(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def publication_day_hours(day, tz=None):
+    """How many wall-clock hours publication day `day` holds: 24, or 23
+    and 25 on the zone's two shift nights — the number a graph states
+    beside a DST day instead of silently normalizing it."""
+    zone = tz or config.PUBLICATION_TZ
+    start = dt.datetime.combine(dt.date.fromisoformat(day), dt.time(0), tzinfo=zone)
+    end = dt.datetime.combine(dt.date.fromisoformat(day) + dt.timedelta(days=1),
+                              dt.time(0), tzinfo=zone)
+    return round((end.astimezone(dt.UTC) - start.astimezone(dt.UTC)).total_seconds() / 3600)
 
 
 def publication_date_of(iso_stamp):

@@ -313,20 +313,66 @@ ANALYZE_MAX_AGE_DAYS = 1
 # Past this fraction of a class's daily request budget, its collector
 # doubles its interval for the rest of the UTC day (EOD headroom).
 BUDGET_BACKPRESSURE_FRACTION = 0.7
-# The federal publication day (GUIDE §3, amended 2026-07-30). Washington's
-# clock is the publishers' clock; dating by UTC filed evening releases
-# under the following day. Observation timestamps stay UTC — only the
-# publication day a document belongs to is Eastern.
-PUBLICATION_TZ = ZoneInfo("America/New_York")
-PUBLICATION_TZ_LABEL = "Eastern time (Washington, D.C.)"
+# The publication clock (GUIDE §3, amended 2026-07-30 and 2026-08-26).
+# The publishers' own clock is the project's clock for every timing
+# question: the day a document belongs to, the end-of-day boundary, the
+# live page's rollover, and the axis of every reader-facing activity
+# graph. Observation timestamps stay UTC in storage and in machine
+# surfaces; the clock below is for dating and for presentation only.
+#
+# THIS IS THE ONE PLACE THE CLOCK IS NAMED (docs/forking.md). Rendered
+# prose and code paths read these constants and never spell out
+# "Eastern", "ET", or "Washington" themselves — a fork for a state or
+# another country sets FAPD_PUBLICATION_TZ and, if the built-in table
+# does not know its zone, the label knobs beside it. A zone name
+# zoneinfo cannot resolve raises at import (code-standards §2 r9: fail
+# loud on missing config). The second FedGov-specific knob is the
+# working calendar, src/fapd/fedcal.py.
+PUBLICATION_TZ_NAME = os.environ.get("FAPD_PUBLICATION_TZ", "").strip() or "America/New_York"
+PUBLICATION_TZ = ZoneInfo(PUBLICATION_TZ_NAME)
+
+# Reader-facing names for known zones: (long label, abbreviation, place).
+# The abbreviation is FIXED on purpose — zoneinfo's own abbreviations
+# flip between standard and daylight forms (EST/EDT) twice a year, and a
+# label that changes with the season is a label a reader has to decode.
+_PUBLICATION_TZ_NAMES = {
+    "America/New_York": ("Eastern time", "ET", "Washington, D.C."),
+}
+
+
+def _derive_tz_abbrev(tz, name):
+    """A fixed abbreviation for a zone the table above does not know: the
+    zone's own abbreviation when it is the same in January and July (no
+    daylight shift, e.g. JST), otherwise the IANA name itself — honest and
+    unambiguous, if not pretty; FAPD_PUBLICATION_TZ_ABBREV overrides it."""
+    import datetime as _dt
+
+    jan = _dt.datetime(2025, 1, 1, 12, tzinfo=tz).tzname() or ""
+    jul = _dt.datetime(2025, 7, 1, 12, tzinfo=tz).tzname() or ""
+    return jan if jan and jan == jul else name
+
+
+_tz_label, _tz_abbrev, _tz_place = _PUBLICATION_TZ_NAMES.get(
+    PUBLICATION_TZ_NAME,
+    (f"{PUBLICATION_TZ_NAME} time",
+     _derive_tz_abbrev(PUBLICATION_TZ, PUBLICATION_TZ_NAME),
+     PUBLICATION_TZ_NAME.rsplit("/", 1)[-1].replace("_", " ")))
+#: Long form, spoken by screen readers ("Eastern time").
+PUBLICATION_TZ_LABEL = os.environ.get("FAPD_PUBLICATION_TZ_LABEL", "").strip() or _tz_label
+#: Short form shown beside a clock reading ("ET").
+PUBLICATION_TZ_ABBREV = os.environ.get("FAPD_PUBLICATION_TZ_ABBREV", "").strip() or _tz_abbrev
+#: The place whose clock it is, for prose ("Washington, D.C.").
+PUBLICATION_TZ_PLACE = os.environ.get("FAPD_PUBLICATION_TZ_PLACE", "").strip() or _tz_place
 
 # EOD finalizer (in-supervisor, docs/continuous-ingestion.md §9): fires
-# once per publication day at/after this hour, read on WASHINGTON's
-# clock — 0 means the finalizer runs when the publication day it
-# finalizes actually ends (operator, 2026-07-30). Expressed in Eastern,
-# not UTC, because midnight ET is 04:00 UTC in summer and 05:00 in
-# winter; a fixed UTC hour would drift by an hour twice a year. Still
-# inside the §4 off-peak window. Evidence pushes gate on
+# once per publication day at/after this hour, read on the PUBLICATION
+# clock above — 0 means the finalizer runs when the publication day it
+# finalizes actually ends (operator, 2026-07-30). Expressed on that
+# clock, not UTC, because midnight Eastern is 04:00 UTC in summer and
+# 05:00 in winter; a fixed UTC hour would drift by an hour twice a
+# year. Still inside the §4 off-peak window. (The name keeps its "ET"
+# from before the clock became configurable; it is read through
+# PUBLICATION_TZ whatever the zone.) Evidence pushes gate on
 # FAPD_EVIDENCE_PUSH=1.
 EOD_ET_HOUR = 0
 EVIDENCE_PUSH = os.environ.get("FAPD_EVIDENCE_PUSH", "") == "1"

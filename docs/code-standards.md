@@ -35,6 +35,7 @@ optional parameters are the whole pattern.**
 | `source_health(entries, pipeline_db=, fetch_db=, today=, window_days=)` | `src/fapd/health.py` — reads both DBs read-only; the date seam makes a trailing window testable |
 | `build_site(digest_dir, out_dir, pipeline_db=, fetch_db=)` | `src/fapd/publish.py` — carries the health seam through to the site build |
 | `build_today(conn, out_dir=, date=)` / `refresh_sources(out_dir=, pipeline_db=, fetch_db=)` | `src/fapd/publish.py` — the functions `Supervisor` injects as `today_builder`/`sources_builder`; `date=` is what makes past-day renders (and the future raw-day view) possible |
+| `sync.publication_date(when=, tz=)` / `publication_day_hour(stamp, tz=)` / `publication_day_start_utc(day, tz=)` / `publication_day_hours(day, tz=)` | `src/fapd/sync.py` — the publication clock (GUIDE §3, 2026-08-26): `tz=` defaults to `config.PUBLICATION_TZ` read at call time, so a test proves a different zone through the parameter or a replaced config attribute; the env knob `FAPD_PUBLICATION_TZ` is proved separately in a fresh interpreter |
 
 New code that talks to the network, a subprocess, a clock, or an LLM
 **must** expose the same shape of seam and add a row here (same commit).
@@ -169,3 +170,8 @@ are forbidden.
   with the `api` adapter (Congress.gov bill actions): the first source
   whose index fetch carries a credential, and the reason `api_key`
   redaction moved down to `HttpClient` where no subclass can forget it.
+- 2026-08-26 — §1 gains the publication-clock row (`sync.publication_*`
+  with `tz=`), added when the clock became one config knob
+  (`FAPD_PUBLICATION_TZ`, GUIDE §3 amendment): a clock is a dependency
+  like a network, and the seam is how a fork's zone gets proved by test
+  rather than asserted.

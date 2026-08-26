@@ -501,3 +501,105 @@ def test_revision_after_exhaustion_gets_a_fresh_ceiling(conn):
     assert row["fetch_status"] == "pending"      # a revision is a new problem
     assert row["fetch_attempts"] == 0
     assert row["last_attempt_at"] is None
+
+
+# ---------------------------------------------------------------------------
+# The publication clock (GUIDE §3, amended 2026-08-26): one knob, three uses
+# ---------------------------------------------------------------------------
+
+TOKYO = __import__("zoneinfo").ZoneInfo("Asia/Tokyo")
+
+
+def test_publication_day_hour_buckets_on_the_publication_clock():
+    """A 03:30Z stamp in summer is 23:30 the evening before in
+    Washington: it lands on the PREVIOUS publication day, hour 23 —
+    the bar the digest for that day covers, not the next UTC day's."""
+    assert sync.publication_day_hour("2026-07-31T03:30:00Z") == ("2026-07-30", 23)
+    # winter: 03:30Z is 22:30 EST the evening before
+    assert sync.publication_day_hour("2026-01-15T03:30:00Z") == ("2026-01-14", 22)
+    # an offset form parses the same way; a bare stamp is UTC
+    assert sync.publication_day_hour("2026-07-31T03:30:00+00:00") == ("2026-07-30", 23)
+    assert sync.publication_day_hour("2026-07-31T03:30:00") == ("2026-07-30", 23)
+    assert sync.publication_day_hour("") is None
+    assert sync.publication_day_hour("not a stamp") is None
+
+
+def test_publication_clock_is_the_configured_zone_not_a_constant():
+    """The abstraction, proved rather than asserted: the same code under
+    a different zone buckets differently. `tz=` is the seam; the default
+    is config.PUBLICATION_TZ read at call time."""
+    import datetime as dt
+
+    assert sync.publication_day_hour("2026-07-31T03:30:00Z", tz=TOKYO) == ("2026-07-31", 12)
+    assert sync.publication_date(dt.datetime(2026, 7, 31, 3, 30, tzinfo=dt.UTC),
+                                 tz=TOKYO) == "2026-07-31"
+    assert sync.publication_day_start_utc("2026-07-31", tz=TOKYO) == "2026-07-30T15:00:00Z"
+
+
+def test_publication_clock_read_at_call_time(monkeypatch):
+    """A replaced config attribute holds — the seam every renderer test
+    relies on, and what makes FAPD_PUBLICATION_TZ a one-place change."""
+    monkeypatch.setattr(config, "PUBLICATION_TZ", TOKYO)
+    assert sync.publication_day_hour("2026-07-31T03:30:00Z") == ("2026-07-31", 12)
+    assert sync.publication_day_start_utc("2026-07-31") == "2026-07-30T15:00:00Z"
+
+
+def test_publication_day_start_utc_is_in_the_writers_stamp_format():
+    """Bounds a query against stored stamps as a string, so it must be
+    the exact ...Z format sync.utc_now_iso writes (CLAUDE.md §10)."""
+    assert sync.publication_day_start_utc("2026-07-31") == "2026-07-31T04:00:00Z"   # EDT
+    assert sync.publication_day_start_utc("2026-01-15") == "2026-01-15T05:00:00Z"   # EST
+
+
+def test_dst_nights_are_counted_not_normalized():
+    """The publication day has 25 hours on the fall-back night and 23 on
+    the spring-forward night; a graph states that instead of hiding it.
+    The two 01:30 readings on 2026-11-01 (EDT, then EST) both bucket
+    into wall-clock hour 1 — one bar carrying two hours, disclosed."""
+    assert sync.publication_day_hours("2026-11-01") == 25
+    assert sync.publication_day_hours("2026-03-08") == 23
+    assert sync.publication_day_hours("2026-08-26") == 24
+    assert sync.publication_day_hour("2026-11-01T05:30:00Z") == ("2026-11-01", 1)
+    assert sync.publication_day_hour("2026-11-01T06:30:00Z") == ("2026-11-01", 1)
+    assert sync.publication_day_hours("2026-11-01", tz=TOKYO) == 24
+
+
+def test_fapd_publication_tz_env_knob_reaches_config_and_the_helpers():
+    """End to end through the environment, in a fresh interpreter: the
+    IANA name, the labels the table does not know derived honestly (a
+    zone without a daylight shift keeps its own abbreviation), and the
+    bucketing helpers following the knob. An unknown zone fails loud."""
+    import os
+    import subprocess
+    import sys
+
+    probe = (
+        "from fapd import config, sync;"
+        "print(config.PUBLICATION_TZ.key, config.PUBLICATION_TZ_ABBREV,"
+        " config.PUBLICATION_TZ_PLACE, config.PUBLICATION_TZ_LABEL,"
+        " sync.publication_day_hour('2026-07-31T03:30:00Z'), sep='|')"
+    )
+    env = {**os.environ, "FAPD_PUBLICATION_TZ": "Asia/Tokyo"}
+    out = subprocess.run([sys.executable, "-c", probe], env=env,
+                         capture_output=True, text=True, check=True).stdout.strip()
+    assert out == "Asia/Tokyo|JST|Tokyo|Asia/Tokyo time|('2026-07-31', 12)"
+
+    env["FAPD_PUBLICATION_TZ_LABEL"] = "Japan Standard Time"
+    env["FAPD_PUBLICATION_TZ_ABBREV"] = "JT"
+    env["FAPD_PUBLICATION_TZ_PLACE"] = "Tokyo, Japan"
+    out = subprocess.run([sys.executable, "-c", probe], env=env,
+                         capture_output=True, text=True, check=True).stdout.strip()
+    assert out == "Asia/Tokyo|JT|Tokyo, Japan|Japan Standard Time|('2026-07-31', 12)"
+
+    bad = subprocess.run([sys.executable, "-c", probe],
+                         env={**os.environ, "FAPD_PUBLICATION_TZ": "Not/AZone"},
+                         capture_output=True, text=True, check=False)
+    assert bad.returncode != 0
+    assert "Not/AZone" in bad.stderr
+
+
+def test_the_default_clock_is_washingtons():
+    """Production's clock, and the labels the digests already print."""
+    assert config.PUBLICATION_TZ.key == "America/New_York"
+    assert (config.PUBLICATION_TZ_LABEL, config.PUBLICATION_TZ_ABBREV,
+            config.PUBLICATION_TZ_PLACE) == ("Eastern time", "ET", "Washington, D.C.")
