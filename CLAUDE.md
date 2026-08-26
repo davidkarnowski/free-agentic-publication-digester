@@ -143,17 +143,26 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   contract ("reported, not hidden"), pinned by tests.
 - **USCOURTS syncs only a 7-day date_issued window** (USCOURTS-FETCH-01)
   — old-case lastModified churn is listed, skipped, and disclosed.
-- **Publication days are Eastern, observation stamps are UTC** (GUIDE
-  §3, amended 2026-07-30). `sync.publication_date()` is the single
-  source of that boundary — used by agency/email ingest, the `/today`
-  renderer, the EOD target, and (since 2026-08-02)
-  `scripts/digest.py::default_date()`, a call site the amendment missed:
-  its UTC "today" made the in-progress day look complete for four hours
-  every evening and published an Aug 1 digest at 22:39 ET on Aug 1.
-  Never date a document with `now[:10]`/UTC again, and never convert a
-  stored observation stamp to Eastern: what is Eastern is the day a
-  document belongs to. When auditing this rule, enumerate ALL call
-  sites — `report._claimed_day()` was the last known-wrong one, fixed
+- **Publication days are on the publication clock, observation stamps
+  are UTC** (GUIDE §3, amended 2026-07-30 and 2026-08-26). The clock is
+  `config.PUBLICATION_TZ` (`FAPD_PUBLICATION_TZ`, Eastern in
+  production) and `sync.publication_date()` is the single source of the
+  day boundary — used by agency/email ingest, the `/today` renderer, the
+  EOD target, and (since 2026-08-02) `scripts/digest.py::default_date()`,
+  a call site the amendment missed: its UTC "today" made the in-progress
+  day look complete for four hours every evening and published an Aug 1
+  digest at 22:39 ET on Aug 1. Never date a document with
+  `now[:10]`/UTC again, and never convert a stored observation stamp to
+  the publication clock *for storage or for dating*: what is on the
+  publication clock is the day a document belongs to. The one licensed
+  conversion (2026-08-26) is **presentation bucketing** — a reader-facing
+  graph or health window places stored UTC stamps into publication-clock
+  days and hours, in Python via `sync.publication_day_hour()`, and says
+  which clock it shows; a table or graph never mixes the two. Rendered
+  prose never hard-codes "Eastern"/"ET"/"Washington" — the labels come
+  from config (`PUBLICATION_TZ_LABEL`/`_ABBREV`/`_PLACE`), pinned by an
+  audit test. When auditing this rule, enumerate ALL call sites —
+  `report._claimed_day()` was the last known-wrong one, fixed
   2026-08-02 (review D1).
 - **`collector_state.last_result` is a status line; durable facts get
   their own column** — `run_cycle` and its error path replace the JSON
@@ -486,3 +495,17 @@ live in `.claude/agents/fapd-*.md` (tracked).
   to the CLI backend at 22:28 UTC after the block lifted
   (`scripts/staged/2026-08-24-restore-cli-backend.sh`); the Gemini key
   stays configured for a future explicit failover (parked).
+- **2026-08-26** — **The publication clock is one knob, and it is the
+  clock of presentation** (operator). Eastern is the project's main
+  clock for every timing question because it is the federal publishers'
+  schedule; a fork for a state or another country must change it in one
+  place. Ruled: `config.PUBLICATION_TZ` (`FAPD_PUBLICATION_TZ`) plus its
+  labels own the clock, no rendered string hard-codes it, and
+  `fedcal.py` is the second, documented swap point (docs/forking.md).
+  Same ruling: the source cards' activity graphs bucketed request
+  stamps by UTC day and hour (and item stamps by publication day but
+  UTC hour) — unlabeled, and lining up with no digest day. GUIDE §3/§5
+  amended first: storage and dating unchanged (UTC stamps,
+  publication-day filing); *presentation* of activity over time buckets
+  on the publication clock in Python and labels the clock; DST nights
+  are disclosed by the day's hour count, never normalized.

@@ -442,6 +442,49 @@ direct HTML index pages where no feed exists). Governing rules:
   policy (§7). The transition date is named in the worklog and on the
   public methods page, so a reader comparing an old digest to a new one
   can see why a boundary moved.
+
+  **Amended 2026-08-26 — the publication clock is the clock of
+  presentation, and one knob (operator).** The publication clock is the
+  project's main clock and schedule guide for every timing question,
+  and it is named in exactly one place: `config.PUBLICATION_TZ` (the
+  IANA zone `FAPD_PUBLICATION_TZ`, default `America/New_York`), with its
+  reader-facing labels beside it (`PUBLICATION_TZ_LABEL`,
+  `PUBLICATION_TZ_ABBREV`, `PUBLICATION_TZ_PLACE`). Rendered prose and
+  code paths never carry a hard-coded "Eastern", "ET", or "Washington";
+  they read the labels, so a fork of this project for a state or another
+  country changes its clock once (docs/forking.md; the federal working
+  calendar, `fedcal.py`, is the second knob).
+
+  Three uses of time, kept distinct:
+
+  1. **Storage** — observation stamps (`first_seen_at`, `observed_at`,
+     `ts_utc`) are written, stored, and served in machine surfaces as
+     UTC. Unchanged, and never converted for storage.
+  2. **Dating and filing** — the day a document belongs to is the
+     publication-clock day, computed by the one shared helper
+     (`sync.publication_date`, `publication_date_of`) and written once
+     (`packages.digest_day`). Unchanged.
+  3. **Presentation of activity over time** — a graph or a health window
+     that shows a reader *when* we ingested or requested something
+     (the source cards' 7-day heatmap and 24-hour micro-bars, the
+     per-source day-by-day charts, the trailing health windows) buckets
+     its days and hours on the publication clock, so a bar labeled
+     2026-08-25 covers the same day the 2026-08-25 digest covers, and
+     the surface says which clock it shows. Before this amendment the
+     source cards bucketed request stamps by UTC day and hour and item
+     stamps by publication day but UTC hour — three clocks on one card,
+     none labeled — so an evening's polling fell under the next day's
+     bar and lined up with nothing the digests said.
+
+  The rule that follows: **a stored stamp is converted to the
+  publication clock for bucketing on a reader-facing surface, never for
+  storing or dating, and the two clocks are never mixed in one table or
+  one graph.** The conversion happens in Python with the zone itself
+  (SQLite has no time zones); on the two nights a year the zone shifts,
+  a wall-clock hour holds two hours of activity or none, and the surface
+  states the day's hour count rather than normalizing it away.
+  Trailing-by-the-clock figures ("last 24 hours") are not buckets and
+  are unaffected.
 - **Dating rule (added 2026-07-28; boundary amended 2026-07-30).** A
   digest for day D lists only releases the agency itself dates on D
   (claimed publication date, resolved to a federal publication day). Items *first observed* on D but claimed earlier — feed
@@ -1102,6 +1145,18 @@ without touching upstream:
   "nothing happened." *(2026-08-06: observation-day filing — the §3
   amendment — removes the CREC case that motivated this amendment; it
   remains for genuine corrections.)*
+
+  **Amended 2026-08-26 — which clock a derived surface shows
+  (operator).** Every derived surface that places observations on a
+  time axis — `/today`'s hour headings and observed-at stamps, the day
+  views, the source cards' activity graphs and the per-source charts,
+  the health windows — shows the publication clock (§3, the 2026-08-26
+  amendment) and labels it with the configured abbreviation and its
+  spoken long form, in the same visible-plus-screen-reader pattern the
+  live page already uses. The machine surfaces keep UTC in every
+  `datetime` attribute and JSON stamp; what changes is only where a
+  reader-facing bucket boundary falls and what the label beside it
+  says. No surface hard-codes the clock's name: `config.py` owns it.
 - **Storage:** filesystem for raw documents (`data/raw/<collection>/<date>/`),
   SQLite for metadata and extracted records. No cloud dependency to start.
 - **Language:** Python (mature XML tooling, easy scheduling). Decide at first
