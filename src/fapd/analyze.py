@@ -88,6 +88,60 @@ def _key(item):
     return f"{item['package_id']}|{item['granule_id']}"
 
 
+def _normalize_key(key):
+    """Canonical spelling of a response key. The prompt presents a
+    package-level item (granule_id = '': PLAW, PRESACT, BILLS) as
+    'PLAW-119publ93|' — a trailing pipe every model reads as punctuation
+    and drops, so the reply comes back keyed 'PLAW-119publ93'. Measured
+    2026-08-25/26: every PLAW and PRESACT item fell through the whole
+    retry ladder (7-11 map:retry-single calls, 258K-416K input tokens a
+    day) although the model summarized it every time. A bare id is read
+    as the granule-less key; whitespace is stripped; a key that already
+    carries a pipe is left alone, so 'CREC-x' can never be taken for
+    'CREC-x|G1' (a batch may hold several granules of one package)."""
+    k = key.strip()
+    return k if "|" in k else f"{k}|"
+
+
+def _match_key(mapping, item):
+    """The reply value for item: the exact key first, then any response
+    key whose normalized spelling equals it. Returns (value, response_key);
+    response_key is None when nothing matched."""
+    key = _key(item)
+    if key in mapping:
+        return mapping[key], key
+    for resp_key, value in mapping.items():
+        if isinstance(resp_key, str) and _normalize_key(resp_key) == key:
+            return value, resp_key
+    return None, None
+
+
+def _match_replies(layer, stats, items, mapping):
+    """Reply values aligned with items (None where absent). Keys accepted
+    only after normalization are counted in stats['keys_normalized'] and
+    logged at INFO — an accepted spelling, not a fault; keys matching no
+    item at all still warn (right-count-wrong-keys is otherwise
+    indistinguishable from truncation, F-010)."""
+    values, used, normalized = [], set(), 0
+    for item in items:
+        value, resp_key = _match_key(mapping, item)
+        values.append(value)
+        if resp_key is not None:
+            used.add(resp_key)
+            if resp_key != _key(item):
+                normalized += 1
+    if normalized:
+        stats["keys_normalized"] = stats.get("keys_normalized", 0) + normalized
+        logger.info("%s: %d response key(s) matched after normalization"
+                    " (bare package id or stray whitespace for the canonical"
+                    " 'package|granule' key)", layer, normalized)
+    unmatched = set(mapping) - used
+    if unmatched:
+        logger.warning("%s: %d response key(s) match no requested item,"
+                       " e.g. %r", layer, len(unmatched), sorted(unmatched)[:3])
+    return values
+
+
 def _parse_reply(text):
     """Strict-JSON reply parsing with markdown-fence tolerance. Returns the
     key -> summary mapping, or {} when the reply is unusable (every item of
@@ -171,12 +225,8 @@ def _harvest(conn, stats, entries, mapping, result):
     share_in = result["input_tokens"] // len(entries)
     share_out = result["output_tokens"] // len(entries)
     missing = []
-    unmatched = set(mapping) - {_key(item) for item, _ in entries}
-    if unmatched:
-        logger.warning("map: %d response key(s) match no requested item,"
-                       " e.g. %r", len(unmatched), sorted(unmatched)[:3])
-    for item, text in entries:
-        summary = mapping.get(_key(item))
+    values = _match_replies("map", stats, [item for item, _ in entries], mapping)
+    for (item, text), summary in zip(entries, values):
         if isinstance(summary, str) and summary.strip():
             _store(
                 conn, item, method="llm", summary=summary.strip(),
@@ -372,12 +422,8 @@ def _harvest_plain(conn, stats, entries, mapping, result):
     share_in = result["input_tokens"] // len(entries)
     share_out = result["output_tokens"] // len(entries)
     missing = []
-    unmatched = set(mapping) - {_key(row) for row in entries}
-    if unmatched:
-        logger.warning("plain: %d response key(s) match no requested item,"
-                       " e.g. %r", len(unmatched), sorted(unmatched)[:3])
-    for row in entries:
-        plain = mapping.get(_key(row))
+    values = _match_replies("plain", stats, entries, mapping)
+    for row, plain in zip(entries, values):
         if isinstance(plain, str) and plain.strip():
             _store_plain(
                 conn, row, plain=" ".join(plain.split()), model=result["model"],
@@ -404,6 +450,7 @@ def run_plain(conn, llm, date):
         "llm_calls": 0,
         "input_tokens": 0,
         "output_tokens": 0,
+        "keys_normalized": 0,
         "failed_items": [],
     }
     pending = [
@@ -619,7 +666,7 @@ def correct_lexicon_violation(conn, llm, *, package_id, granule_id, layer, term)
         result = llm.complete(prompt, purpose=purpose,
                               package_id=package_id, granule_id=granule_id or None)
         mapping = _parse_reply(result["text"])
-        candidate = mapping.get(_key(item))
+        candidate, _resp_key = _match_key(mapping, item)  # same key contract as the harvests
         attempts_so_far += 1
         _record_attempts(conn, correction_layer, [(package_id, granule_id)])
 
@@ -660,6 +707,7 @@ def run(conn, llm, date):
         "output_tokens": 0,
         "skipped_existing": 0,
         "exhausted": 0,
+        "keys_normalized": 0,
         "failed_items": [],
     }
     items = rules.select_items(conn, date)

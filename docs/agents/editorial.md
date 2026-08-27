@@ -101,6 +101,28 @@ file.
   never-fabricate bucket. `analyze.run()`/`run_plain()` must keep
   skipping an item whose correction ceiling is exhausted — otherwise the
   withdrawn row just looks like fresh pending work again next cycle.
+- **The reply-key contract tolerates the spellings models actually
+  produce (2026-08-27).** The prompt keys each item `package|granule`;
+  a package-level item (PLAW, PRESACT, BILLS — `granule_id = ''`) is
+  therefore presented as `PLAW-119publ93|`, and every model reads the
+  trailing pipe as punctuation and replies under `PLAW-119publ93`.
+  Daily from at least 2026-08-25 the exact-match harvest missed those
+  keys, logged `map: N response key(s) match no requested item, e.g.
+  ['PLAW-119publ93']`, and marched every PLAW/PRESACT item down the
+  ladder — 7-11 `map:retry-single` calls and 258K-416K input tokens a
+  day (28% of spend), 4-5 items rendered "listed from the record" —
+  while the model had summarized each one correctly every time.
+  `analyze._match_key` now accepts the exact key, the bare package id
+  for a granule-less item, and whitespace-padded keys, in both harvests
+  and the lexicon-correction path; a bare id never matches an item that
+  HAS a granule (ambiguous inside a batch), and a key matching nothing
+  still warns and still retries. Recovered matches count in stats
+  `keys_normalized` and log at INFO. No prompt text changed, so no
+  version bump: a bump would regenerate every map summary for the
+  window to fix a reading problem on our side. The fakes in
+  `test_analyze.py` echoed the prompt's exact key, which is how the
+  corpus's granule-less BILLS items never surfaced this —
+  `TrimmingFakeLLM` now replays what production models do.
 - **Prompts state the whole contract.** The banned lexicon lives in
   `report._BANNED_TERMS` (Publication's gate); a prompt that omits terms
   the gate enforces produces expensive rejected prose (review D8). When

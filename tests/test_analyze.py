@@ -218,10 +218,12 @@ def test_failed_items_recorded_and_never_written(conn):
 class PlainFakeLLM:
     """Returns a strict-JSON mapping covering every key found in the prompt."""
 
-    def __init__(self, garbage_first=False, omit_keys=()):
+    def __init__(self, garbage_first=False, omit_keys=(), *, trim_pipe=False, extra=None):
         self.calls = []
         self.garbage_first = garbage_first
         self.omit_keys = set(omit_keys)
+        self.trim_pipe = trim_pipe  # reply under the bare package id, as models do
+        self.extra = dict(extra or {})  # reply keys that match no requested item
 
     def complete(self, prompt, **kw):
         self.calls.append({"prompt": prompt, **kw})
@@ -233,7 +235,9 @@ class PlainFakeLLM:
         import re as _re
 
         keys = _re.findall(r"key=([^\s]+)", prompt)
-        reply = {k: f"plain for {k}" for k in keys if k not in self.omit_keys}
+        reply = {(k.rstrip("|") if self.trim_pipe else k): f"plain for {k}"
+                 for k in keys if k not in self.omit_keys}
+        reply.update(self.extra)
         return {"text": _json.dumps(reply), "input_tokens": 1000, "output_tokens": 200,
                 "model": kw.get("model", "x")}
 
@@ -600,3 +604,151 @@ def test_a_provider_outage_advances_no_item(conn):
     assert conn.execute("SELECT COUNT(*) FROM summary_attempts").fetchone()[0] == 0
     # ...and it is still an LLMError for callers that catch the base class
     assert issubclass(_llm.ProviderUnavailableError, _llm.LLMError)
+
+
+# ---------------------------------------------------------------------------
+# Response-key contract for package-level items (2026-08-27)
+# ---------------------------------------------------------------------------
+#
+# A package-level item (PLAW, PRESACT, BILLS) has granule_id = '' and its
+# canonical key is "PLAW-119publ93|" — a trailing pipe the model reads as
+# punctuation and drops. Production (daily since at least 2026-08-25) had
+# every PLAW/PRESACT item fall through the whole retry ladder although the
+# model summarized it every time under "PLAW-119publ93": 7-11
+# map:retry-single calls a day, 258K-416K input tokens, and 4-5 items
+# rendered "listed from the record". The harvest now recognizes the
+# canonical spellings of a key; the prompt is unchanged (no version bump).
+
+
+class TrimmingFakeLLM(FakeLLM):
+    """What production models actually do with a granule-less key: reply
+    under the bare package id, dropping the trailing pipe. FakeLLM's
+    auto-answer echoes the exact prompt key, which is why the shared
+    corpus's granule-less BILLS items never surfaced this."""
+
+    def complete(self, prompt, *, purpose, model=None, package_id=None, granule_id=None):
+        self.prompts.append(prompt)
+        self.purposes.append(purpose)
+        keys = re.findall(r"DOCUMENT key=(\S+) ", prompt)
+        text = json.dumps({k.rstrip("|"): f"Factual summary of {k}." for k in keys})
+        return {"text": text, "input_tokens": 600, "output_tokens": 60, "model": "fake-haiku"}
+
+
+def _stored_summary(conn, pid, gid):
+    row = conn.execute(
+        "SELECT summary FROM summaries WHERE package_id = ? AND granule_id = ?",
+        (pid, gid)).fetchone()
+    return row["summary"] if row else None
+
+
+def test_production_replay_bare_package_id_is_stored_first_try(conn):
+    """The incident shape end to end: a model that always trims the pipe
+    used to cost batch + group + single (4 calls for one item) and still
+    end in failed_items. Now: one call, one row, no attempt recorded."""
+    seed_item(conn, "PLAW-119publ93", "", "PLAW", "PLAW", LONG_TEXT)
+    seed_item(conn, "PR-whitehouse-executive-orders-abc123", "", "PRESACT", "EO", LONG_TEXT)
+    fake = TrimmingFakeLLM()
+    stats = analyze.run(conn, fake, DATE)
+    assert fake.purposes == ["map:batch1"]
+    assert stats["llm_summarized"] == 2
+    assert stats["failed_items"] == []
+    assert stats["keys_normalized"] == 2
+    assert _stored_summary(conn, "PLAW-119publ93", "") == "Factual summary of PLAW-119publ93|."
+    assert _stored_summary(conn, "PR-whitehouse-executive-orders-abc123", "") is not None
+    assert conn.execute("SELECT COUNT(*) FROM summary_attempts").fetchone()[0] == 0
+
+
+def test_granule_less_bare_package_id_key_is_stored(conn):
+    seed_item(conn, "PLAW-119publ99", "", "PLAW", "PLAW", LONG_TEXT)
+    fake = FakeLLM(scripted=[json.dumps({"PLAW-119publ99": "Enacts a thing."})])
+    stats = analyze.run(conn, fake, DATE)
+    assert stats["llm_calls"] == 1
+    assert stats["keys_normalized"] == 1
+    assert _stored_summary(conn, "PLAW-119publ99", "") == "Enacts a thing."
+
+
+def test_granule_less_trailing_pipe_key_still_matches_exactly(conn):
+    """The canonical spelling keeps working and is not counted as
+    normalized."""
+    seed_item(conn, "PLAW-119publ99", "", "PLAW", "PLAW", LONG_TEXT)
+    fake = FakeLLM(scripted=[json.dumps({"PLAW-119publ99|": "Enacts a thing."})])
+    stats = analyze.run(conn, fake, DATE)
+    assert stats["llm_calls"] == 1
+    assert stats["keys_normalized"] == 0
+    assert _stored_summary(conn, "PLAW-119publ99", "") == "Enacts a thing."
+
+
+def test_whitespace_padded_key_is_normalized(conn):
+    k1, k2 = seed_two_llm_items(conn)
+    fake = FakeLLM(scripted=[json.dumps({f" {k1} ": "One.", k2: "Two."})])
+    stats = analyze.run(conn, fake, DATE)
+    assert stats["llm_calls"] == 1
+    assert stats["keys_normalized"] == 1
+    assert _stored_summary(conn, "CREC-2026-07-23", "G1") == "One."
+
+
+def test_bare_package_id_never_matches_a_granule_item(conn):
+    """Normalization is not guessing: a bare package id for an item that
+    HAS a granule is ambiguous (the batch may hold several granules of
+    that package) and stays on the retry path, still warned about."""
+    k1, k2 = seed_two_llm_items(conn)
+    fake = FakeLLM(scripted=[json.dumps({"CREC-2026-07-23": "Which one?", k2: "Two."})])
+    stats = analyze.run(conn, fake, DATE)
+    assert fake.purposes == ["map:batch1", "map:retry-group"]
+    assert k1.split("|")[1] in fake.prompts[1]
+    assert stats["keys_normalized"] == 0
+    assert stats["llm_summarized"] == 2
+
+
+def test_genuinely_wrong_key_still_goes_to_retry_and_warns(conn, caplog):
+    seed_item(conn, "PLAW-119publ99", "", "PLAW", "PLAW", LONG_TEXT)
+    fake = FakeLLM(scripted=[json.dumps({"PLAW-119publ98": "Wrong law."})])
+    with caplog.at_level("INFO", logger="fapd.analyze"):
+        stats = analyze.run(conn, fake, DATE)
+    assert fake.purposes == ["map:batch1", "map:retry-group"]
+    assert stats["keys_normalized"] == 0
+    assert "match no requested item" in caplog.text
+    assert "PLAW-119publ98" in caplog.text
+    assert _stored_summary(conn, "PLAW-119publ99", "") == "Factual summary of PLAW-119publ99|."
+
+
+def test_normalized_keys_log_at_info_not_warning(conn, caplog):
+    seed_item(conn, "PLAW-119publ99", "", "PLAW", "PLAW", LONG_TEXT)
+    fake = FakeLLM(scripted=[json.dumps({"PLAW-119publ99": "Enacts a thing."})])
+    with caplog.at_level("INFO", logger="fapd.analyze"):
+        analyze.run(conn, fake, DATE)
+    assert "matched after normalization" in caplog.text
+    assert not [r for r in caplog.records if r.levelname == "WARNING"]
+
+
+def test_run_plain_accepts_bare_package_id_for_granule_less_item(conn):
+    seed_summary(conn, "PLAW-119publ93", "", summary="Enacts a thing.")
+    fake = PlainFakeLLM(trim_pipe=True)
+    stats = analyze.run_plain(conn, fake, "2026-07-23")
+    assert len(fake.calls) == 1
+    assert stats["plain_written"] == 1
+    assert stats["keys_normalized"] == 1
+    assert stats["failed_items"] == []
+    row = conn.execute(
+        "SELECT plain FROM plain_summaries WHERE package_id = 'PLAW-119publ93'"
+        " AND granule_id = ''").fetchone()
+    assert row["plain"] == "plain for PLAW-119publ93|"
+
+
+def test_run_plain_trailing_pipe_key_still_matches(conn):
+    seed_summary(conn, "PLAW-119publ93", "", summary="Enacts a thing.")
+    fake = PlainFakeLLM()
+    stats = analyze.run_plain(conn, fake, "2026-07-23")
+    assert stats["plain_written"] == 1
+    assert stats["keys_normalized"] == 0
+
+
+def test_run_plain_wrong_key_still_retries(conn):
+    seed_summary(conn, "PLAW-119publ93", "", summary="Enacts a thing.")
+    fake = PlainFakeLLM(omit_keys={"PLAW-119publ93|"}, extra={"PLAW-119publ92": "nope"})
+    stats = analyze.run_plain(conn, fake, "2026-07-23")
+    assert [c["purpose"] for c in fake.calls] == [
+        "plain:batch1", "plain:retry-group", "plain:retry-single"]
+    assert stats["plain_written"] == 0
+    assert stats["keys_normalized"] == 0
+    assert stats["failed_items"] == [{"package_id": "PLAW-119publ93", "granule_id": ""}]
