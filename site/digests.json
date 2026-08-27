@@ -2,6 +2,12 @@
  "agent_guide": "agents.html",
  "digests": [
   {
+   "canonical_markdown": "digests/2026-08-26.md",
+   "date": "2026-08-26",
+   "html": "https://fapd.info/2026-08-26.html",
+   "teaser": "Both chambers are absent from this digest: no floor proceedings or recorded votes appear, and the only legislative item observed is a single bill introduced in the House."
+  },
+  {
    "canonical_markdown": "digests/2026-08-25.md",
    "date": "2026-08-25",
    "html": "https://fapd.info/2026-08-25.html",
@@ -182,6 +188,6 @@
    "teaser": "The House introduced 44 bills, 7 with published texts, on topics including offshore oil and gas whistleblower protections, youth mental health and social media, infant formula contaminants, school nutrition, education, trade and manufacturing, occupational safety, and fishing practices, each referred to committee."
   }
  ],
- "generated": "2026-08-26T04:53:00Z",
+ "generated": "2026-08-27T04:56:24Z",
  "title": "Free Agentic Publication Digester \u2014 Daily Federal Digest"
 }
