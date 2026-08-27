@@ -5060,3 +5060,76 @@ the next afternoon; no evidence commit for ten days. The doc audit
 that went with the 2026-08-24 diagnosis (`docs/doc-audit-2026-08-24.md`)
 lists the 32 places the prose had drifted from this code; this branch
 closes the ones the wave-1 commits did not.
+
+## 2026-08-26/27 — three clean nights, then the leaks the insight reports had been describing
+
+Three unattended finalizers in a row on the r15 code (targets 08-24,
+08-25, 08-26), each `layers: map=ran plain=ran compose=ran sections=ran
+tags=ran`, each pushed within the hour. The morning checks were dull in
+the way they are supposed to be: no failed SSH in 24 hours, no journal
+errors, scanners hitting `/wp-admin/install.php` and getting 404s,
+libssl and libheif patched by unattended-upgrades, cert good to October.
+The one operational quirk worth writing down: `docker logs --since` on
+`fapd-web` returns nothing because the host's logrotate rotates the
+json log under Docker; `--tail` works, and the public access record is
+the edge proxy's `/opt/spiralyst/logs/nginx/access.log`, which has no
+`$host` field — fapd.info is separable from the cohabitant only by
+path.
+
+The insight reports, read against the data rather than taken at their
+word. "Coverage collapsed on 08-23/24" was observation-day filing plus
+a pro-forma Monday session — no Record observed Sunday or Monday,
+and the issue that arrived Tuesday had 28 granules below the floor
+thresholds. The govinfo error rate (28–31%) is the on-demand ZIP 503
+baseline scaled by USCOURTS volume (537 packages on 08-26); nothing
+stuck, nothing exhausted. Two of the model's five suggestions were
+real, and both were token leaks. The CLI's "You've hit your session
+limit · resets 8:10pm (UTC)" envelope hit at 16:42Z on 08-25 and 20:03Z
+on 08-26 — the subscription's five-hour window at ~2.4M input tokens a
+day — and was classified as a plain transient, so the analyze worker
+failed its cycle and tried again every fifteen minutes until the reset.
+And `map:retry-single` was burning 258–416K input tokens a day (28% of
+spend) on items the model had summarized correctly every time: a
+granule-less item is keyed `PLAW-119publ93|`, the model drops the
+trailing pipe, `_harvest` did an exact lookup, and the item marched
+through group retry, single retry, the per-item ceiling, and out the
+other side as "listed from the record". The fake LLMs in the tests
+echoed the key back pipe-included, which is why no test ever saw it.
+Both fixed on their own branches (`bug/cli-session-limit`,
+`bug/map-key-contract`); no prompt version bump, because the prompt
+was never wrong.
+
+The larger number came from measuring the CLI itself. A nine-token
+"Reply OK" through `claude -p` as FAPD calls it bills 26,587 input
+tokens — Claude Code's coding-assistant system prompt, tool
+definitions, and dynamic sections, re-sent on every stateless call.
+With `--system-prompt`, `--tools ""`,
+`--exclude-dynamic-system-prompt-sections` and `--setting-sources ""`
+the same call bills 250. On 08-26 that overhead was ~1.65M of the
+day's 2.44M input tokens; our own preambles are 180–460 tokens a layer.
+Proposed as `feature/cli-lean-context`, with the §3a question (the
+system prompt is part of the prompt) left for the operator: bump the
+version, or ratify it as a transport change after a dev-stack
+comparison.
+
+Two more pieces this sprint. The operator's ruling that Eastern is the
+project's main clock for every timing question became GUIDE §3's
+three-clocks amendment (storage UTC, dating by publication day,
+presentation on the publication clock — never mixed in one table), one
+env knob `FAPD_PUBLICATION_TZ` with fixed labels, the sources page's
+activity graphs re-bucketed on that clock with DST nights disclosed as
+23- and 25-hour days, sixteen hard-coded "Eastern"/"ET" render strings
+routed through config (an AST audit test keeps it at zero), and
+`docs/forking.md` naming the two things a state-government fork
+changes: the zone and `fedcal.py`. And a read-only analysis of the
+TTS narration feature (`tts.py`, About-page MP3s): a usable player and
+file-layout kernel, but unversioned, unledgered, narrating the
+unvalidated Day in Review at compose time, hand-made About recordings
+nobody can regenerate, and 19.5 MB of MP3 that is half the repository's
+history — the next-steps list is in the 08-26 session record, and
+none of it is built yet.
+
+The agent doing the clock work died twice on the account's session
+limit mid-branch — the same limit the pipeline hits — and was resumed
+each time from its own commits. The no-amend rule held: a wrong test
+count in one commit body was corrected in the next body, not rewritten.
