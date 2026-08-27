@@ -15,7 +15,13 @@ do not guess.
 
 Everything is mechanical: SQL over the two databases the pipeline
 already keeps, read-only, zero LLM calls (docs/code-standards.md §2
-rule 5). Requests logged by the availability probe (``client =
+rule 5). Time is handled the way GUIDE §3 (amended 2026-08-26) says:
+stored stamps are UTC and stay UTC; windows and the activity graphs'
+day/hour buckets are on the publication clock (``config.PUBLICATION_TZ``),
+converted in Python because SQLite has no time zones — the query groups
+rows by UTC hour (or minute, for a zone with a fractional offset) and the
+few resulting keys are re-bucketed here, so the whole log never crosses
+the process boundary and the pass over it stays single. Requests logged by the availability probe (``client =
 'probe'``) are excluded from every figure here — a probe measures
 reachability on its own cadence, not ingestion. Missing databases are
 not an error — a fresh clone or a CI run
@@ -31,7 +37,13 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from . import config
-from .sync import publication_date, utc_now_iso
+from .sync import (
+    publication_date,
+    publication_day_hour,
+    publication_day_hours,
+    publication_day_start_utc,
+    utc_now_iso,
+)
 
 logger = logging.getLogger("fapd.health")
 
@@ -167,6 +179,19 @@ def label_definitions():
                           rate=round(DEGRADED_ERROR_RATE * 100),
                           errs=DEGRADED_CONSECUTIVE_ERRORS)
         for name, text in HEALTH_LABELS.items()
+    }
+
+
+def clock():
+    """Which clock the windows and graphs are on — stated in every
+    payload beside the numbers, the same way the thresholds are. Stored
+    stamps are UTC; presentation buckets are on this zone."""
+    return {
+        "zone": config.PUBLICATION_TZ_NAME,
+        "label": config.PUBLICATION_TZ_LABEL,
+        "abbrev": config.PUBLICATION_TZ_ABBREV,
+        "place": config.PUBLICATION_TZ_PLACE,
+        "stored_stamps": "UTC",
     }
 
 
@@ -415,10 +440,11 @@ _CLASSES = ("answered", "client_error", "server_error", "no_response")
 def _collect_fetch(conn, window_start, window_end_exclusive, recency_start):
     """{host: {attempts, answered, client_error, server_error, no_response,
     error_rate, last_ok_at}} over the window, probe traffic excluded.
-    Timestamps in the fetch log are UTC; the item window is in publication
-    (Eastern) days, so the two edges differ by a few hours. That is
-    immaterial to a trailing count and is stated rather than papered
-    over."""
+    The three bounds are UTC stamps of publication-day boundaries
+    (`publication_day_start_utc`), so the request window covers exactly
+    the publication days the item window covers — until 2026-08-26 the
+    edges were bare dates compared against UTC stamps and differed from
+    the item window by a few hours."""
     probe = _probe_filter(conn)
     hosts = {}
     for row in conn.execute(_FETCH_SQL.format(probe=probe),
@@ -456,51 +482,98 @@ FROM parsed
 GROUP BY 1
 """
 
+# The activity graphs bucket by the OBSERVATION stamp on the publication
+# clock — when we ingested, in the day/hour frame the digests use. Rows
+# are grouped in SQL by a UTC prefix of the stamp (`{klen}` = 13 for
+# 'YYYY-MM-DDTHH', or 16 to the minute when the zone's offset is not a
+# whole hour, see `_bucket_key_len`) and the handful of distinct keys is
+# converted in Python — the log never crosses the process boundary
+# row by row, and the pass stays single.
 _HOURLY_ITEMS_SQL = """
 SELECT p.collection AS collection,
        json_extract(e.metadata, '$.source_id') AS source_id,
-       p.digest_day AS digest_day,
-       CAST(substr(p.first_seen_at, 12, 2) AS INTEGER) AS hour,
+       substr(p.first_seen_at, 1, {klen}) AS bucket,
        COUNT(*) AS items
 FROM extracted_texts e
 JOIN packages p USING (package_id)
-WHERE p.digest_day >= ? AND p.digest_day <= ? AND p.first_seen_at IS NOT NULL
-GROUP BY 1, 2, 3, 4
+WHERE p.first_seen_at >= ? AND p.first_seen_at < ?
+GROUP BY 1, 2, 3
 """
 
 _HOURLY_FETCH_SQL = """
 WITH parsed AS (
     SELECT substr(url, instr(url, '//') + 2) AS rest,
-           substr(ts_utc, 1, 10) AS fetch_day,
-           CAST(substr(ts_utc, 12, 2) AS INTEGER) AS hour,
+           substr(ts_utc, 1, {klen}) AS bucket,
            status
     FROM fetch_log
-    WHERE ts_utc >= ? AND {probe}
+    WHERE ts_utc >= ? AND ts_utc < ? AND {probe}
 )
 SELECT lower(CASE WHEN instr(rest, '/') > 0
                   THEN substr(rest, 1, instr(rest, '/') - 1)
                   ELSE rest END) AS host,
-       fetch_day,
-       hour,
+       bucket,
        COUNT(*) AS requests,
        SUM(CASE WHEN status IS NOT NULL AND status < 400
                 THEN 1 ELSE 0 END) AS ok
 FROM parsed
-GROUP BY 1, 2, 3
+GROUP BY 1, 2
 """
 
 
-def _collect_daily_activity(conn, fconn, today, days=7):
+def _bucket_key_len(tz=None):
+    """How much of a UTC stamp a SQL GROUP BY may keep before the
+    publication-clock conversion: the hour (13 chars) when every UTC
+    hour maps onto one wall-clock hour — a whole-hour offset in both
+    January and July — else the minute (16), so a zone such as
+    Asia/Kolkata (+05:30) still buckets correctly. A few hundred keys
+    either way."""
+    import datetime as _dt
+
+    zone = tz or config.PUBLICATION_TZ
+    for month in (1, 7):
+        off = _dt.datetime(2025, month, 1, 12, tzinfo=zone).utcoffset()
+        if off is None or off.total_seconds() % 3600:
+            return 16
+    return 13
+
+
+class _Bucketer:
+    """Memoized UTC-key -> (publication day, hour) for one collection
+    pass; keys outside [start, end] publication days are dropped (None)
+    rather than filed on a day the graph does not show."""
+
+    def __init__(self, start_day, end_day, tz=None):
+        self.start, self.end, self.tz, self.memo = start_day, end_day, tz, {}
+
+    def __call__(self, key):
+        try:
+            return self.memo[key]
+        except KeyError:
+            pass
+        got = publication_day_hour(key, self.tz) if key else None
+        if got and not (self.start <= got[0] <= self.end):
+            got = None
+        self.memo[key] = got
+        return got
+
+
+def _collect_daily_activity(conn, fconn, today, days=7, tz=None):
     import sqlite3
     start_date = _shift(today, days - 1)
+    klen = _bucket_key_len(tz)
+    lo = publication_day_start_utc(start_date, tz)
+    hi = publication_day_start_utc(_shift(today, -1), tz)
+    bucket = _Bucketer(start_date, today, tz)
     daily_items = {}
     hourly_items = {}
     if conn:
         try:
-            for row in conn.execute(_HOURLY_ITEMS_SQL, (start_date, today)):
+            for row in conn.execute(_HOURLY_ITEMS_SQL.format(klen=klen), (lo, hi)):
+                where = bucket(row["bucket"])
+                if where is None:
+                    continue
                 key = ("source_id", row["source_id"]) if row["source_id"] else ("collection", row["collection"])
-                d_day = row["digest_day"]
-                hr = row["hour"]
+                d_day, hr = where
                 n_items = row["items"]
 
                 # Accumulate both hourly and daily totals in a single pass
@@ -517,10 +590,13 @@ def _collect_daily_activity(conn, fconn, today, days=7):
     if fconn:
         try:
             p_filter = _probe_filter(fconn)
-            for row in fconn.execute(_HOURLY_FETCH_SQL.format(probe=p_filter), (start_date,)):
+            for row in fconn.execute(_HOURLY_FETCH_SQL.format(probe=p_filter, klen=klen),
+                                     (lo, hi)):
+                where = bucket(row["bucket"])
+                if where is None:
+                    continue
                 host = row["host"]
-                f_day = row["fetch_day"]
-                hr = row["hour"]
+                f_day, hr = where
                 reqs = row["requests"]
                 ok = row["ok"] or 0
                 failed = reqs - ok
@@ -648,6 +724,7 @@ def _unavailable(reason, today, window_days):
         "window_start": _shift(today, window_days - 1),
         "window_end": today,
         "recent_window_hours": RECENT_WINDOW_HOURS,
+        "clock": clock(),
         "thresholds": thresholds(),
         "label_definitions": label_definitions(),
         "sources": {},
@@ -666,6 +743,11 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
     recency_start = _shift(today, RECENCY_LOOKBACK_DAYS)
     fetch_end = _shift(today, -1)
     recent_start = _hours_before(now, RECENT_WINDOW_HOURS)
+    # Request stamps are UTC; the window is publication days. Bound the
+    # log by the UTC instants those days begin at, not by bare dates.
+    fetch_lo = publication_day_start_utc(window_start)
+    fetch_hi = publication_day_start_utc(fetch_end)
+    recency_lo = publication_day_start_utc(recency_start)
 
     pipeline_path = Path(pipeline_db or config.PIPELINE_DB)
     fetch_path = Path(fetch_db or config.FETCH_LOG_DB)
@@ -694,8 +776,8 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
         try:
             fconn_obj = _ro(fetch_path)
             try:
-                hosts = _collect_fetch(fconn_obj, window_start, fetch_end,
-                                       recency_start)
+                hosts = _collect_fetch(fconn_obj, fetch_lo, fetch_hi,
+                                       recency_lo)
                 recent_hosts = _collect_fetch_recent(fconn_obj, recent_start, now)
                 fetch_available = True
             except sqlite3.Error as exc:
@@ -738,6 +820,7 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
         "recent_window_hours": RECENT_WINDOW_HOURS,
         "recency_lookback_days": RECENCY_LOOKBACK_DAYS,
         "fetch_log_available": fetch_available,
+        "clock": clock(),
         "thresholds": thresholds(),
         "label_definitions": label_definitions(),
         "fetch_disclaimer": FETCH_DISCLAIMER,
@@ -848,6 +931,10 @@ def _one_source(entry, volume, hosts, collectors, host_sources, *,
         daily_activity.append({
             "date": d,
             "day_label": day_lbl,
+            # 23 or 25 on the zone's two shift nights — stated, so a bar
+            # holding two hours (or none) is disclosed rather than
+            # normalized (GUIDE §3, 2026-08-26).
+            "hours": publication_day_hours(d),
             "items": d_items,
             "requests": reqs,
             "failed": failed,

@@ -18,7 +18,7 @@ import markdown
 
 from . import config, sources
 from . import health as health_mod
-from .sync import utc_now_iso
+from .sync import publication_day_hour, publication_day_start_utc, utc_now_iso
 
 SITE_TITLE = "Free Agentic Publication Digester — Daily Federal Digest"
 SITE_TAGLINE = (
@@ -1923,6 +1923,12 @@ def _activity_legend():
         '<div class="activity-legend-card">'
         '<div class="legend-header"><strong>7-Day Activity Heatmap Legend</strong></div>'
         '<p class="legend-intro">Each source card features a 7-day activity graph showing daily ingestion volume and request health for the trailing week:</p>'
+        f'<p class="legend-intro">Days and the 24 hourly segments inside each day are on '
+        f'<strong>{html.escape(config.PUBLICATION_TZ_LABEL)}</strong> '
+        f'({html.escape(config.PUBLICATION_TZ_PLACE)}), the publication clock — the same '
+        f'days the digests cover; the stored stamps behind them remain UTC. On the two nights '
+        f'a year that clock shifts, one wall-clock hour holds two hours of activity or none, '
+        f'and the day states its hour count (23 or 25) instead of hiding it.</p>'
         '<div class="legend-items">'
         '<div class="legend-item"><span class="legend-swatch act-high-active"></span><span><strong>High Volume</strong> &ndash; 3+ items ingested cleanly</span></div>'
         '<div class="legend-item"><span class="legend-swatch act-delivering"></span><span><strong>Delivering</strong> &ndash; 1&ndash;2 items ingested or requests answered</span></div>'
@@ -1997,8 +2003,10 @@ def _health_section(health):
         f'{t["min_attempts_for_rate"]} requests were made), or when the '
         f'collector recorded {t["degraded_consecutive_errors"]} or more '
         f'consecutive failed cycles. "Most recent item" looks back up to '
-        f'{t["recency_lookback_days"]} days. Item counts are dated by '
-        f'publication day in Washington; request counts are stamped UTC.</p>')
+        f'{t["recency_lookback_days"]} days. Every window and every bar is '
+        f'bounded by publication days on {html.escape(config.PUBLICATION_TZ_LABEL)} '
+        f'({html.escape(config.PUBLICATION_TZ_PLACE)}); the stored request stamps '
+        f'remain UTC.</p>')
     parts.append(f'<p class="health-note">{html.escape(health_mod.FETCH_DISCLAIMER)}'
                  "</p>")
     if not health.get("fetch_log_available"):
@@ -2209,44 +2217,65 @@ def _daily_items(conn, start_day, end_day):
     return out
 
 
+# Grouped by a UTC prefix of the stamp and re-bucketed onto publication
+# days in Python — the same shape as fapd.health's activity queries
+# (GUIDE §3, 2026-08-26): SQLite has no time zones, and a day on this
+# chart must be the day the digest covers.
 _DAILY_FETCH_SQL = """
 WITH parsed AS (
     SELECT substr(url, instr(url, '//') + 2) AS rest,
-           substr(ts_utc, 1, 10) AS day, {elapsed} AS elapsed_ms
+           substr(ts_utc, 1, {klen}) AS bucket, {elapsed} AS elapsed_ms
     FROM fetch_log
-    WHERE ts_utc >= ? AND {probe}
+    WHERE ts_utc >= ? AND ts_utc < ? AND {probe}
 )
 SELECT lower(CASE WHEN instr(rest, '/') > 0
                   THEN substr(rest, 1, instr(rest, '/') - 1)
                   ELSE rest END) AS host,
-       day, COUNT(*) AS n, AVG(elapsed_ms) AS avg_ms
+       bucket, COUNT(*) AS n,
+       COUNT(elapsed_ms) AS n_ms, SUM(elapsed_ms) AS sum_ms
 FROM parsed
 GROUP BY 1, 2
 """
 
 
-def _daily_fetches(conn, start_ts):
+def _daily_fetches(conn, start_day, end_day):
     """{host: {day: {"n": requests, "avg_ms": mean elapsed or None}}} over
-    the chart window, probe traffic excluded (same predicate as every
-    fetch figure in fapd.health). Tolerates a log from before the
-    elapsed_ms column existed — the sparkline is then simply absent."""
+    the chart's publication days, probe traffic excluded (same predicate
+    as every fetch figure in fapd.health). Tolerates a log from before
+    the elapsed_ms column existed — the sparkline is then simply absent."""
     import sqlite3
 
     try:
         cols = {r[1] for r in conn.execute("PRAGMA table_info(fetch_log)")}
         elapsed = "elapsed_ms" if "elapsed_ms" in cols else "NULL"
+        klen = health_mod._bucket_key_len()
         sql = _DAILY_FETCH_SQL.format(
-            elapsed=elapsed, probe=health_mod._probe_filter(conn))
-        out = {}
-        for row in conn.execute(sql, (start_ts,)):
-            out.setdefault(row["host"], {})[row["day"]] = {
-                "n": row["n"],
-                "avg_ms": (round(row["avg_ms"]) if row["avg_ms"] is not None
-                           else None),
-            }
-        return out
+            elapsed=elapsed, probe=health_mod._probe_filter(conn), klen=klen)
+        lo = publication_day_start_utc(start_day)
+        hi = publication_day_start_utc(_next_day(end_day))
+        acc = {}
+        for row in conn.execute(sql, (lo, hi)):
+            where = publication_day_hour(row["bucket"])
+            if where is None or not (start_day <= where[0] <= end_day):
+                continue
+            rec = acc.setdefault(row["host"], {}).setdefault(
+                where[0], {"n": 0, "n_ms": 0, "sum_ms": 0})
+            rec["n"] += row["n"]
+            rec["n_ms"] += row["n_ms"] or 0
+            rec["sum_ms"] += row["sum_ms"] or 0
+        return {host: {day: {"n": r["n"],
+                             "avg_ms": (round(r["sum_ms"] / r["n_ms"])
+                                        if r["n_ms"] else None)}
+                       for day, r in days.items()}
+                for host, days in acc.items()}
     except sqlite3.Error:
         return {}
+
+
+def _next_day(day):
+    import datetime as _dt
+
+    return (_dt.date.fromisoformat(day) + _dt.timedelta(days=1)).isoformat()
 
 
 def _chart_days(end_day, n=CHART_WINDOW_DAYS):
@@ -2432,6 +2461,9 @@ def _card_activity_graph(record):
         date_str = day["date"]
         is_today = (date_str == end_date)
         day_tag = f"{day['day_label']} ({date_str}{' - Today' if is_today else ''})"
+        hours = day.get("hours", 24)
+        if hours != 24:
+            day_tag += f" [{hours}-hour day: the clock shifted]"
 
         if st == "unmeasured":
             day_detail = "Source not active (unmeasured)"
@@ -2453,7 +2485,7 @@ def _card_activity_graph(record):
             h_info = hourly[h] if h < len(hourly) else {"hour": h, "items": 0, "requests": 0, "failed": 0, "status": "quiet"}
             h_st = h_info["status"]
             seg_class = f"seg-{h_st}"
-            h_time = f"{h:02d}:00 UTC"
+            h_time = f"{h:02d}:00 {config.PUBLICATION_TZ_ABBREV}"
 
             if h_st == "unmeasured":
                 h_desc = "Unmeasured"
@@ -2483,7 +2515,8 @@ def _card_activity_graph(record):
         f'<div class="src-timeline">'
         f'<div class="timeline-header">'
         f'<span class="timeline-title">7-Day Activity</span>'
-        f'<span class="timeline-dates">{html.escape(start_date)} &ndash; {html.escape(end_date)}</span>'
+        f'<span class="timeline-dates">{html.escape(start_date)} &ndash; {html.escape(end_date)}'
+        f'{_clock_suffix(", days and hours in ")}</span>'
         f'</div>'
         f'<div class="timeline-days">{"".join(day_cards)}</div>'
         f'</div>'
@@ -2763,6 +2796,11 @@ def _source_page_body(entry, record, *, description, assessment, state,
         charts = [c for c in charts if c]
         parts.append(f"<h3>Last {CHART_WINDOW_DAYS} days, day by day</h3>")
         if charts:
+            parts.append(
+                f'<p class="stat-note">Each day runs midnight to midnight on '
+                f"{html.escape(config.PUBLICATION_TZ_LABEL)} "
+                f"({html.escape(config.PUBLICATION_TZ_PLACE)}), the publication "
+                "day the digests use; the stored request stamps remain UTC.</p>")
             parts.extend(charts)
         else:
             parts.append('<p class="stat-note">No requests and no items '
@@ -2817,7 +2855,7 @@ def _build_source_pages(out_dir, entries, health, doc_pages=(), *,
     fconn = _ro_conn(fetch_db or config.FETCH_LOG_DB)
     if fconn is not None and fetch_days:
         try:
-            fetch_by_day = _daily_fetches(fconn, f"{fetch_days[0]}T00:00:00Z")
+            fetch_by_day = _daily_fetches(fconn, fetch_days[0], fetch_days[-1])
         finally:
             fconn.close()
     all_time = health_mod.fetch_stats_all_time(
@@ -3240,8 +3278,9 @@ _TODAY_DOC_TYPES = {
 }
 
 
-def _et_clock(utc_stamp):
-    """HH:MM:SS in Washington for a stored UTC stamp — the clock the
+def _publication_clock(utc_stamp):
+    """HH:MM:SS on the publication clock (config.PUBLICATION_TZ —
+    Washington's in production) for a stored UTC stamp — the clock the
     publishers keep, to the second we actually recorded. The
     machine-readable UTC value stays in the element's datetime
     attribute, and the page's one script appends the reader's own local
@@ -3252,7 +3291,19 @@ def _et_clock(utc_stamp):
         when = _dt.datetime.fromisoformat(utc_stamp)
     except ValueError:
         return utc_stamp[11:19]
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=_dt.UTC)
     return when.astimezone(config.PUBLICATION_TZ).strftime("%H:%M:%S")
+
+
+def _clock_suffix(lead=" "):
+    """The clock's name after a reading, in the one pattern every surface
+    uses (A11Y-14, 1.3.1): the long form for screen readers, the fixed
+    abbreviation visible. `lead` is the text before both forms. Reads
+    config at call time, so the label follows FAPD_PUBLICATION_TZ."""
+    return (f'<span class="vh">{html.escape(lead + config.PUBLICATION_TZ_LABEL)}</span>'
+            f'<span aria-hidden="true">{html.escape(lead + config.PUBLICATION_TZ_ABBREV)}'
+            "</span>")
 
 
 def _today_doc_label(item):
@@ -3335,19 +3386,17 @@ def _looks_like_prose(text):
     return lower / len(words) >= _MIN_PROSE_LOWER_RATIO
 
 
-def _et_hour_label(utc_stamp):
-    """'2 PM Eastern' for the ET hour a stamp falls in, or None when the
-    stamp is unparseable — the stream's hour headings, so a 300-item day
-    has scannable structure and a quiet evening is visible as absence."""
-    import datetime as _dt
-
-    try:
-        when = _dt.datetime.fromisoformat(utc_stamp)
-    except (TypeError, ValueError):
+def _publication_hour_label(utc_stamp):
+    """'2 PM' plus the clock suffix for the publication-clock hour a stamp
+    falls in, or None when the stamp is unparseable — the stream's hour
+    headings, so a 300-item day has scannable structure and a quiet
+    evening is visible as absence."""
+    where = publication_day_hour(utc_stamp)
+    if where is None:
         return None
-    when = when.astimezone(config.PUBLICATION_TZ)
-    hour = when.hour % 12 or 12
-    return f"{hour} {'AM' if when.hour < 12 else 'PM'} Eastern"
+    hour24 = where[1]
+    hour = hour24 % 12 or 12
+    return f"{hour} {'AM' if hour24 < 12 else 'PM'}{_clock_suffix()}"
 
 
 def _today_display_title(item):
@@ -3386,12 +3435,12 @@ def _today_item_row(item, filterable=()):
     # A bare clock reading followed by two letters says nothing about
     # what the number is, and the distinction this project cares about
     # most — observation time, not publication time — was nowhere in the
-    # markup (1.3.1, A11Y-14). "ET" stays visible and is spoken in full.
+    # markup (1.3.1, A11Y-14). The abbreviation stays visible and is
+    # spoken in full (`_clock_suffix`, the one pattern for every surface).
     observed = (f'<time class="utc" datetime="{html.escape(stamp)}">'
                 f'<span class="vh">Observed at </span>'
-                f"{html.escape(_et_clock(stamp))}"
-                f'<span class="vh"> Eastern time</span>'
-                f'<span aria-hidden="true"> ET</span></time>'
+                f"{html.escape(_publication_clock(stamp))}"
+                f"{_clock_suffix()}</time>"
                 if stamp else "")
     url = _today_official_url(item)
     title_html = (f'<a href="{html.escape(url)}">{html.escape(title)}</a>'
@@ -3799,6 +3848,8 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
         (p.stem for p in Path(config.DIGEST_DIR).glob("*.md")
          if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.stem)), reverse=True)[:3]
     digest_exists = (Path(config.DIGEST_DIR) / f"{date}.md").exists()
+    _clock_label = html.escape(config.PUBLICATION_TZ_LABEL)
+    _clock_place = html.escape(config.PUBLICATION_TZ_PLACE)
     # Bare dates are unusable in a screen reader's link list (2.4.4).
     recent_links = " · ".join(
         f'<a href="{d}.html"><span class="vh">Digest for </span>{d}</a>'
@@ -3821,12 +3872,12 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
         "filter bar narrows the stream to matching entries, and picking "
         "several narrows to entries carrying all of them.</p>"
         "<p><strong>About the dates and times on this page.</strong> A "
-        "publication day here runs on <strong>Eastern time in "
-        "Washington, D.C.</strong> — the clock the publishers themselves "
+        f"publication day here runs on <strong>{_clock_label} in "
+        f"{_clock_place}</strong> — the clock the publishers themselves "
         "keep, from the Federal Register's morning release to the close "
         "of floor proceedings. This page therefore covers midnight to "
-        "midnight Eastern, and rolls over to the next day at midnight "
-        "Eastern. Times are shown in Eastern; if your browser runs "
+        f"midnight {_clock_label}, and rolls over to the next day at midnight "
+        f"{_clock_label}. Times are shown in {_clock_label}; if your browser runs "
         "scripts, your own local time appears beside each one. The "
         "underlying timestamps are UTC and are readable in the page "
         "markup and in today.json.</p>"
@@ -3847,7 +3898,7 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
         intro = (
             "<p>Official federal publications as our collectors observe "
             "them, newest first — refreshed within minutes of arrival. "
-            "Times are Eastern (Washington's clock).</p>"
+            f"Times are shown in {_clock_label} ({_clock_place}).</p>"
             '<details class="today-about"><summary>How this live view works'
             f"</summary>{about}</details>")
     else:
@@ -3857,8 +3908,8 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
             if digest_exists else "")
         intro = (
             "<p>Official federal publications as our collectors observed "
-            "them through this day, newest first. Times are Eastern "
-            "(Washington's clock). This listing does not update."
+            "them through this day, newest first. Times are shown in "
+            f"{_clock_label} ({_clock_place}). This listing does not update."
             f"{digest_link}</p>")
     # The federal working calendar explains a quiet stream before a
     # reader (or an agent reading today.json) wonders if the pipeline is
@@ -3887,13 +3938,13 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
             f"</strong> {html.escape(day_context['note'])}</div>")
     if live:
         meta = (f'<p class="today-meta">Last updated <time class="utc"'
-                f' datetime="{html.escape(now)}">{html.escape(_et_clock(now))}'
-                f" ET</time> · {len(status['items'])} item(s) observed so far"
+                f' datetime="{html.escape(now)}">{html.escape(_publication_clock(now))}'
+                f"{_clock_suffix()}</time> · {len(status['items'])} item(s) observed so far"
                 f" · {status['pending_llm']} item(s) awaiting an FAPD-AI summary.")
     else:
         meta = (f'<p class="today-meta">Generated <time class="utc"'
-                f' datetime="{html.escape(now)}">{html.escape(_et_clock(now))}'
-                f" ET</time> · {len(status['items'])} item(s) observed for "
+                f' datetime="{html.escape(now)}">{html.escape(_publication_clock(now))}'
+                f"{_clock_suffix()}</time> · {len(status['items'])} item(s) observed for "
                 f"this day · {status['pending_llm']} item(s) without a "
                 "stored FAPD-AI summary (a disclosed gap, not pending work).")
     arrived = "arrived today" if live else "arrived during this day"
@@ -3954,8 +4005,8 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
             parts.append(
                 f'<a class="skip-link" href="#today-stream">Skip '
                 f"{len(facets)} keyword filters and go to the stream</a>")
-        # Group consecutive items (already newest-first) by the ET hour
-        # they were observed in. Each hour is its own <ul>; the filter
+        # Group consecutive items (already newest-first) by the
+        # publication-clock hour they were observed in. Each hour is its own <ul>; the filter
         # CSS reaches every list via the general-sibling combinator, and
         # the shown-counter scope lives on the form so it totals across
         # lists. Known limit, accepted: an hour heading stays visible
@@ -3964,7 +4015,7 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
         stream = []
         current_hour = object()
         for i in status["items"]:
-            hour = _et_hour_label(i["observed_at"] or "")
+            hour = _publication_hour_label(i["observed_at"] or "")
             if hour != current_hour:
                 if stream:
                     stream.append("</ul>")
@@ -3994,7 +4045,7 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
     if live:
         # The site's one script lives on /today.html only (docs/
         # code-standards §2 r10); the frozen day view ships none — its
-        # server-rendered Eastern stamps stand alone.
+        # server-rendered publication-clock stamps stand alone.
         head_extra += _LOCAL_TIME_JS
     if live:
         page = _render_page(f"Today (live) — {SITE_TITLE}", "".join(parts),
@@ -4223,11 +4274,14 @@ def _sources_json(entries, health, base=""):
             "health label is a judgement about one. An HTTP 4xx or 5xx is "
             "a server declining to return content; the reason is not "
             "visible to us and is not inferred."),
+        "clock": health_mod.clock(),
         "measurement": (
             "Health is computed for sources whose registry status is "
-            "'active'; every other entry carries measured: false. Item "
-            "counts are dated by publication day in Washington, D.C.; "
-            "request counts are stamped UTC and include retries. Requests "
+            "'active'; every other entry carries measured: false. Windows "
+            "and the daily_activity buckets are publication days and hours "
+            f"on {config.PUBLICATION_TZ_LABEL} ({config.PUBLICATION_TZ_PLACE}), "
+            "the zone named in `clock`; stored request stamps are UTC and "
+            "request counts include retries. Requests "
             "are attributed by host, so sources sharing a host report the "
             "same request figures (see fetch.shared_with_sources)."),
         "sources": listed,

@@ -716,3 +716,90 @@ def test_window_size_is_injectable(tmp_path, days):
     assert got["window_days"] == days
     assert got["window_start"] == health._shift(TODAY, days - 1)
     assert got["sources"]["justice-newsroom"]["window_days"] == days
+
+
+# ---------------------------------------------------------------------------
+# The activity graphs bucket on the publication clock (GUIDE §3, 2026-08-26)
+# ---------------------------------------------------------------------------
+
+TOKYO = __import__("zoneinfo").ZoneInfo("Asia/Tokyo")
+
+
+def _activity(result, sid):
+    return {d["date"]: d for d in result["sources"][sid]["daily_activity"]}
+
+
+def test_activity_buckets_days_and_hours_on_the_publication_clock(tmp_path):
+    """A request and an item stamped 03:30Z on the 31st happened at 23:30
+    the evening of the 30th in Washington: both land on the 30th's bar,
+    hour 23 — where the 30th's digest would have them — not on the
+    31st's bar at hour 3, which is where UTC bucketing put them."""
+    result = run(
+        tmp_path, [WEB],
+        rows=[("P1", "AGENCYPR", "2026-07-30", 400, meta("justice-newsroom"),
+               "2026-07-31T03:30:00Z")],
+        fetches=[("2026-07-31T03:30:00Z", "https://feeds.example.gov/press.xml", 200)])
+    days = _activity(result, "justice-newsroom")
+    assert days["2026-07-30"]["items"] == 1 and days["2026-07-30"]["requests"] == 1
+    assert days["2026-07-31"]["items"] == 0 and days["2026-07-31"]["requests"] == 0
+    h = days["2026-07-30"]["hourly"]
+    assert h[23]["items"] == 1 and h[23]["requests"] == 1 and h[23]["status"] == "high"
+    assert h[3]["items"] == 0 and h[3]["requests"] == 0
+    assert result["clock"]["zone"] == "America/New_York"
+    assert result["clock"]["abbrev"] == "ET" and result["clock"]["stored_stamps"] == "UTC"
+
+
+def test_activity_follows_the_configured_clock(tmp_path, monkeypatch):
+    """The same rows under Asia/Tokyo: 03:30Z is 12:30 JST the same day.
+    Proved through the config attribute, which every reader consults at
+    call time — the one-place change FAPD_PUBLICATION_TZ promises."""
+    monkeypatch.setattr(health.config, "PUBLICATION_TZ", TOKYO)
+    monkeypatch.setattr(health.config, "PUBLICATION_TZ_NAME", "Asia/Tokyo")
+    result = run(
+        tmp_path, [WEB],
+        rows=[("P1", "AGENCYPR", "2026-07-31", 400, meta("justice-newsroom"),
+               "2026-07-31T03:30:00Z")],
+        fetches=[("2026-07-31T03:30:00Z", "https://feeds.example.gov/press.xml", 200)])
+    days = _activity(result, "justice-newsroom")
+    assert days["2026-07-31"]["hourly"][12]["items"] == 1
+    assert days["2026-07-31"]["hourly"][12]["requests"] == 1
+    assert days["2026-07-30"]["items"] == 0
+    assert result["clock"]["zone"] == "Asia/Tokyo"
+
+
+def test_bucket_key_length_follows_the_zone_offset():
+    """Whole-hour zones group by UTC hour; a half-hour zone must group to
+    the minute or every bucket lands 30 minutes wrong."""
+    assert health._bucket_key_len() == 13
+    assert health._bucket_key_len(TOKYO) == 13
+    assert health._bucket_key_len(__import__("zoneinfo").ZoneInfo("Asia/Kolkata")) == 16
+
+
+def test_dst_day_states_its_hour_count_and_merges_the_repeated_hour(tmp_path):
+    """2026-11-01: clocks fall back at 02:00 EDT, so the publication day
+    has 25 hours and 01:xx happens twice. Both readings bucket into
+    wall-clock hour 1 — disclosed by `hours`, never normalized."""
+    result = run(
+        tmp_path, [WEB], today="2026-11-02",
+        fetches=[("2026-11-01T05:30:00Z", "https://feeds.example.gov/press.xml", 200),
+                 ("2026-11-01T06:30:00Z", "https://feeds.example.gov/press.xml", 200)])
+    days = _activity(result, "justice-newsroom")
+    assert days["2026-11-01"]["hours"] == 25
+    assert days["2026-11-02"]["hours"] == 24
+    assert days["2026-11-01"]["hourly"][1]["requests"] == 2
+    (tmp_path / "spring").mkdir()
+    spring = run(tmp_path / "spring", [WEB], today="2026-03-08")
+    assert _activity(spring, "justice-newsroom")["2026-03-08"]["hours"] == 23
+
+
+def test_fetch_window_is_bounded_by_publication_day_instants(tmp_path):
+    """The 14-day request window starts at the publication day's own
+    midnight (04:00Z in summer), not at 00:00Z — a request at 03:00Z on
+    the window's first date belongs to the day before it."""
+    start = health._shift(TODAY, health.HEALTH_WINDOW_DAYS - 1)   # 2026-07-18
+    result = run(
+        tmp_path, [WEB],
+        fetches=[(f"{start}T03:00:00Z", "https://feeds.example.gov/press.xml", 200),
+                 (f"{start}T04:30:00Z", "https://feeds.example.gov/press.xml", 500)])
+    fetch = result["sources"]["justice-newsroom"]["fetch"]
+    assert fetch["attempts"] == 1 and fetch["server_error"] == 1

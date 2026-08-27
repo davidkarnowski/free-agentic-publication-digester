@@ -98,9 +98,29 @@ docs/accessibility.md → this file.
 
 - Shared dating logic: anything answering "what day does this item
   belong to" calls the same helper the digest uses — never a local
-  reimplementation. (Currently `report._claimed_day`, Eastern since the
-  2026-08-02 D1 fix; the level-up plan may hoist it — follow wherever
-  the single implementation lives.)
+  reimplementation. (Currently `report._claimed_day`, on the publication
+  clock since the 2026-08-02 D1 fix; the level-up plan may hoist it —
+  follow wherever the single implementation lives.)
+- **The clock is named in config alone** (GUIDE §3/§5, 2026-08-26).
+  A rendered string never spells out "Eastern", "ET", or "Washington":
+  it reads `config.PUBLICATION_TZ_LABEL` / `_ABBREV` / `_PLACE`, and a
+  clock reading gets its name through `publish._clock_suffix()` — the
+  spoken long form in a `.vh` span plus the visible fixed abbreviation,
+  the one pattern for the live page's stamps, its hour headings, and the
+  source cards' timeline header. Wall-clock conversion goes through
+  `sync.publication_day_hour()` / `publish._publication_clock()`; never
+  `astimezone` a literal zone. Pinned by
+  `test_no_rendered_string_hard_codes_the_clock` (an `ast` walk over
+  publish/report/health/insight that skips only docstrings).
+- **Source-page graphs bucket on the publication clock.** The 7-day
+  heatmap, its 24 hourly micro-bars, and the per-source 30-day request
+  series are placed in publication-clock days and hours (`health.py`
+  converts; `publish._daily_fetches` does the same for the 30-day
+  series), and each surface says so in prose — the legend, the
+  threshold note, the per-source "day by day" note, and the
+  `clock` block in `sources.json`. A DST day carries `hours` (23/25)
+  and its tooltip says the clock shifted; the micro-bar for the
+  repeated hour holds both hours. Stored stamps stay UTC.
 - All interpolated text is `html.escape`d; URLs get `quote=True` in
   attributes. New-page checklist: `_render_page`, nav entry via
   `_site_nav`, sitemap/llms.txt if reader-facing, dark-mode +
@@ -113,7 +133,10 @@ docs/accessibility.md → this file.
   (`uv run python -c 'from fapd import db, publish;
   publish.build_today(db.connect())'` and
   `uv run python scripts/build_site.py`) and open the result.
-- Audits that must hold: `git grep -n "<script" src/fapd/publish.py` →
+- Audits that must hold: `git grep -nE "Eastern|Washington|\bET\b"
+  src/fapd/publish.py src/fapd/report.py` → docstrings and comments
+  only (the test above is the executable form);
+  `git grep -n "<script" src/fapd/publish.py` →
   only `_LOCAL_TIME_JS`, and `git grep -nE "\son[a-z]+=" src/fapd/publish.py`
   → nothing (inline event handlers are scripts too — the audio players
   shipped `onclick=` on 2026-08-18 and the `<script` count stayed at one); `git grep -n "llm" src/fapd/report.py` → no

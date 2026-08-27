@@ -78,7 +78,7 @@ _WEEKDAY_NAMES = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 
 
 def reduced_publishing(date_str):
-    """Why `date_str` (an ET publication day, 'YYYY-MM-DD') is a
+    """Why `date_str` (a publication-clock day, 'YYYY-MM-DD') is a
     reduced-publishing day, or None for an ordinary federal business day.
 
     Returns {"kind": "weekend"|"holiday", "name": ..., "note": ...} —

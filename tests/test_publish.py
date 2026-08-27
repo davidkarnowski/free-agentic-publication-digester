@@ -2228,9 +2228,11 @@ def test_today_stream_groups_by_eastern_hour(conn, tmp_path):
     _seed_today(conn)
     publish.build_today(conn, out_dir=tmp_path, date=DATE)
     page = (tmp_path / "today.html").read_text()
-    assert '<h3 class="today-hour">7 AM Eastern</h3>' in page
-    assert '<h3 class="today-hour">6 AM Eastern</h3>' in page
-    assert (page.index("7 AM Eastern") < page.index("6 AM Eastern"))
+    suffix = ('<span class="vh"> Eastern time</span>'
+              '<span aria-hidden="true"> ET</span>')   # the clock, from config
+    assert f'<h3 class="today-hour">7 AM{suffix}</h3>' in page
+    assert f'<h3 class="today-hour">6 AM{suffix}</h3>' in page
+    assert (page.index("7 AM<span") < page.index("6 AM<span"))
     assert page.count('<ul class="today-list">') == 2
 
 
@@ -2793,3 +2795,96 @@ def test_inference_row_folds_into_provenance_when_present(digests, tmp_path):
     assert ("<dt>Inference</dt><dd>No inference was available for this publication"
             " day. All content is source-derived or mechanically constructed.</dd>") in page
     assert "<dt>Inference</dt>" not in (out / "2026-07-02.html").read_text()
+
+
+# ---------------------------------------------------------------------------
+# The publication clock on the site (GUIDE §3/§5, 2026-08-26)
+# ---------------------------------------------------------------------------
+
+def test_sources_page_names_the_clock_its_graphs_are_on(health_site):
+    """Every micro-bar hour, the timeline header, the legend and the
+    threshold note say which clock they are on, in the visible-plus-
+    spoken pattern the live page uses; nothing on the card says UTC as
+    if it were the bucket."""
+    import json
+
+    from fapd import config
+
+    out = health_site(items=DELIVERING_ITEMS, fetches=CLEAN_FETCHES)
+    page = (out / "sources.html").read_text()
+    abbrev, label = config.PUBLICATION_TZ_ABBREV, config.PUBLICATION_TZ_LABEL
+    assert f"23:00 {abbrev}: " in page and "23:00 UTC" not in page
+    assert (f'<span class="vh">, days and hours in {label}</span>'
+            f'<span aria-hidden="true">, days and hours in {abbrev}</span>') in page
+    assert f"are on <strong>{label}</strong> (Washington, D.C.), the publication clock" in page
+    assert "one wall-clock hour holds two hours of activity or none" in page
+    assert f"bounded by publication days on {label}" in page
+    # the 03:00Z-05:00Z requests are the evening of the 30th in Washington
+    assert "Thu (2026-07-30) 23:00 ET: 1 request(s) answered cleanly" in page
+    data = json.loads((out / "sources.json").read_text())
+    assert data["clock"] == {"zone": "America/New_York", "label": "Eastern time",
+                             "abbrev": "ET", "place": "Washington, D.C.",
+                             "stored_stamps": "UTC"}
+    assert "on Eastern time (Washington, D.C.), the zone named in `clock`" in data["measurement"]
+    src_page = (out / "sources" / "example-newsroom.html").read_text()
+    assert f"Each day runs midnight to midnight on {label} (Washington, D.C.)" in src_page
+
+
+def test_sources_render_is_deterministic(health_site, tmp_path, monkeypatch):
+    """Two builds of the same databases are byte-identical once the one
+    generated-at stamp is frozen: the bucketing added a Python pass over
+    the rows and must not have added any order dependence."""
+    from fapd import health
+
+    monkeypatch.setattr(publish, "utc_now_iso", lambda: "2026-07-31T12:00:00Z")
+    monkeypatch.setattr(health, "utc_now_iso", lambda: "2026-07-31T12:00:00Z")
+    out = health_site(items=DELIVERING_ITEMS, fetches=CLEAN_FETCHES)
+    first = {p.relative_to(out): p.read_bytes()
+             for p in out.rglob("*") if p.suffix in (".html", ".json")}
+    out2 = health_site(items=DELIVERING_ITEMS, fetches=CLEAN_FETCHES)
+    second = {p.relative_to(out2): p.read_bytes()
+              for p in out2.rglob("*") if p.suffix in (".html", ".json")}
+    assert first == second
+    assert any(str(k).startswith("sources/") for k in first)
+
+
+def _rendered_strings(path):
+    """Every string constant in a module that is not a docstring — the
+    text that can reach a page or a report."""
+    import ast
+
+    tree = ast.parse(path.read_text())
+    doc_ids = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef,
+                             ast.ClassDef)):
+            body = node.body
+            if (body and isinstance(body[0], ast.Expr)
+                    and isinstance(body[0].value, ast.Constant)
+                    and isinstance(body[0].value.value, str)):
+                doc_ids.add(id(body[0].value))
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Constant) and isinstance(node.value, str)
+                and id(node) not in doc_ids):
+            yield node.lineno, node.value
+
+
+def test_no_rendered_string_hard_codes_the_clock():
+    """The clock is named in config.py alone (GUIDE §3, 2026-08-26): no
+    string that can reach a reader in the renderers or the health
+    module spells out Eastern, ET, or Washington. Docstrings and
+    comments may (incident history); the audit skips only those."""
+    import re
+    from pathlib import Path
+
+    from fapd import config
+
+    src = Path(config.PROJECT_ROOT) / "src" / "fapd"
+    clock = re.compile(r"Eastern|Washington|(^|[^A-Za-z])E[SD]?T([^A-Za-z]|$)")
+    offenders = [
+        (name, line, text[:60])
+        for name in ("publish.py", "report.py", "health.py", "insight.py")
+        for line, text in _rendered_strings(src / name)
+        if clock.search(text)
+    ]
+    assert offenders == []

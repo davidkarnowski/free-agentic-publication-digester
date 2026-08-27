@@ -32,6 +32,20 @@ files under its cover date, because that is the date on which it is
 legally published — and it is the case where all three clocks agree by
 design.
 
+**Which clock the graphs are on.** The stamps we store are UTC, and
+they stay UTC in the page markup and the machine files. Everything we
+*show* on a time axis — the live page's hour headings, the source
+cards' 7-day activity graph and its hourly segments, the per-source
+day-by-day charts, the health windows — is placed in publication-clock
+days and hours (Eastern time, Washington, D.C.), so a bar labeled with a
+date covers the same day the digest for that date covers, and each of
+those surfaces says which clock it shows. On the two nights a year the
+clock shifts, one wall-clock hour holds two hours of activity or none;
+the graph states that day's hour count (23 or 25) rather than hiding it.
+The clock itself is set in one place in the code
+(`FAPD_PUBLICATION_TZ`), so a copy of this project run for another
+government can keep another clock the same way.
+
 Why observation rather than the publisher's stamp? Because the
 publisher's stamp can lie about availability. If a publishing system
 goes down and a document stamped Monday only becomes reachable

@@ -30,7 +30,8 @@ is always current; it derives them from the registry at build time.)
   `/sources/<id>.html` — statistics, method, health history, and
   labeled model-written orientation.
 - **Latest digest:** [2026-08-02](digests/2026-08-02.md); digests
-  publish daily just after midnight Eastern. The **official record
+  publish daily just after midnight on the publication clock (Eastern,
+  Washington's — `FAPD_PUBLICATION_TZ`; see docs/forking.md). The **official record
   begins 2026-07-27** (two development-era digests were retired on
   2026-08-03; they remain in git history). Each finished day also has
   a frozen observed listing at `/day/<date>.html`.

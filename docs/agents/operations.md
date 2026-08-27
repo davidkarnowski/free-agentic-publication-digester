@@ -68,6 +68,22 @@ gates → docs/code-standards.md → this file.
   premature digest published), pushes evidence only on exit 0, and
   resumes in a `finally`. Known limit (review §II.5): pause does not
   drain in-flight cycles; do not build anything that assumes it does.
+- **Health windows and activity buckets are on the publication clock;
+  stored stamps are UTC** (GUIDE §3, 2026-08-26). `health.py` bounds
+  the 14-day and recency request windows by the UTC instants those
+  publication days begin at (`sync.publication_day_start_utc`), and the
+  activity graphs' day/hour buckets come from `sync.publication_day_hour`
+  over the observation stamp. The SQL groups rows by a UTC prefix of
+  the stamp (`_bucket_key_len`: the hour, or the minute for a zone
+  with a fractional offset) and the few hundred keys are converted in
+  Python — the log never crosses the process boundary row by row and
+  the pass stays single (measured on the operator's machine: +5 ms over
+  the UTC version on the densest week, 1.6K rows; the 200 ms the call
+  costs is the un-indexed `packages` scan, the same before and after).
+  Trailing "last 24 hours" figures are by the clock from `now` and are
+  not buckets. Every payload carries a `clock` block naming the zone.
+  Before this, request stamps bucketed by UTC day and hour and item
+  stamps by publication day but UTC hour — three clocks on one card.
 - **Health reports our observation of our own ingestion — never an
   opinion about the publisher.** "No response on 12 of 40 requests" is
   a fact we recorded; "unreliable agency" is not computable from
