@@ -308,6 +308,7 @@ live in `.claude/agents/fapd-*.md` (tracked).
 | Local pre-deploy testing | `deploy/dev/README.md` (prod image + VPS data seed) |
 | VPS access (read-only checks) | `deploy/vps/scripts/vps-ssh.sh` + gitignored `deploy/vps/deploy.env` |
 | Section-agent instructions | `docs/agents/` (§11) |
+| Forking: the publication clock and the working calendar | `docs/forking.md` → `config.py` (`FAPD_PUBLICATION_TZ` + labels), `fedcal.py` |
 
 ## 13. Posture
 

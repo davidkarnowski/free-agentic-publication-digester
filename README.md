@@ -397,6 +397,20 @@ including what AI assistance changed about where design attention went,
 is at [docs/site/ai-development.md](docs/site/ai-development.md)
 (published on the site as "How AI Built This").
 
+## Forking for another government
+
+The digester is built for the United States federal government's
+publishing day, but that assumption lives in two places, and both are
+documented in **[docs/forking.md](docs/forking.md)**: the publication
+clock — `FAPD_PUBLICATION_TZ` (an IANA zone; default `America/New_York`)
+with its three label knobs, the one place the clock is named, which
+every digest date, end-of-day boundary, live-page rollover, activity
+graph, and clock label reads — and the federal working calendar,
+`src/fapd/fedcal.py`, whose holiday tables a fork replaces behind one
+function. Stored observation stamps are UTC under any clock; an audit
+test fails the build if a renderer ever spells the default clock out
+again.
+
 ## Licensing
 
 - **Code:** [Apache-2.0](LICENSE) (with [NOTICE](NOTICE)).
