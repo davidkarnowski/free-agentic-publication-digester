@@ -582,7 +582,7 @@ def test_fapd_publication_tz_env_knob_reaches_config_and_the_helpers():
     env = {**os.environ, "FAPD_PUBLICATION_TZ": "Asia/Tokyo"}
     out = subprocess.run([sys.executable, "-c", probe], env=env,
                          capture_output=True, text=True, check=True).stdout.strip()
-    assert out == "Asia/Tokyo|JST|Tokyo|Asia/Tokyo time|('2026-07-31', 12)"
+    assert out == "Asia/Tokyo|JST|Tokyo|Tokyo time|('2026-07-31', 12)"
 
     env["FAPD_PUBLICATION_TZ_LABEL"] = "Japan Standard Time"
     env["FAPD_PUBLICATION_TZ_ABBREV"] = "JT"
@@ -603,3 +603,19 @@ def test_the_default_clock_is_washingtons():
     assert config.PUBLICATION_TZ.key == "America/New_York"
     assert (config.PUBLICATION_TZ_LABEL, config.PUBLICATION_TZ_ABBREV,
             config.PUBLICATION_TZ_PLACE) == ("Eastern time", "ET", "Washington, D.C.")
+
+
+def test_unknown_zone_labels_derive_from_the_city():
+    """A fork that sets only FAPD_PUBLICATION_TZ gets an honest, readable
+    label rather than a wrong 'ET' or a raw IANA string (adopted from the
+    parallel 2026-08-26 branch): the curated entry for the default, the
+    city otherwise, and a seasonal abbreviation never leaks through."""
+    from fapd import config
+
+    assert config.publication_tz_names("America/New_York") == (
+        "Eastern time", "ET", "Washington, D.C.")
+    assert config.publication_tz_names("America/Denver") == (
+        "Denver time", "Denver", "Denver")          # MST/MDT flips -> city
+    assert config.publication_tz_names("Asia/Tokyo") == (
+        "Tokyo time", "JST", "Tokyo")               # fixed JST is kept
+    assert config.publication_tz_names("Asia/Ho_Chi_Minh")[0] == "Ho Chi Minh time"

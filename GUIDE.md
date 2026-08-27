@@ -453,7 +453,10 @@ direct HTML index pages where no feed exists). Governing rules:
   code paths never carry a hard-coded "Eastern", "ET", or "Washington";
   they read the labels, so a fork of this project for a state or another
   country changes its clock once (docs/forking.md; the federal working
-  calendar, `fedcal.py`, is the second knob).
+  calendar, `fedcal.py`, is the second knob). The knob exists for forks
+  only: for this project the value is federal policy fixed by this
+  section — Washington's clock is the publishers' clock — and changing
+  it is a GUIDE amendment, not a configuration edit.
 
   Three uses of time, kept distinct:
 

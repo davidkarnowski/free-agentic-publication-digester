@@ -328,6 +328,11 @@ BUDGET_BACKPRESSURE_FRACTION = 0.7
 # zoneinfo cannot resolve raises at import (code-standards §2 r9: fail
 # loud on missing config). The second FedGov-specific knob is the
 # working calendar, src/fapd/fedcal.py.
+#
+# Configurable for FORKS ONLY. For THIS project the value is federal
+# policy fixed by GUIDE §3 — Washington's clock is the publishers'
+# clock — not an operational knob to be turned; changing it here is a
+# GUIDE amendment, not a config edit.
 PUBLICATION_TZ_NAME = os.environ.get("FAPD_PUBLICATION_TZ", "").strip() or "America/New_York"
 PUBLICATION_TZ = ZoneInfo(PUBLICATION_TZ_NAME)
 
@@ -340,23 +345,37 @@ _PUBLICATION_TZ_NAMES = {
 }
 
 
+def _tz_city(name):
+    """'America/Denver' -> 'Denver', 'Asia/Ho_Chi_Minh' -> 'Ho Chi Minh'."""
+    return name.rsplit("/", 1)[-1].replace("_", " ")
+
+
 def _derive_tz_abbrev(tz, name):
     """A fixed abbreviation for a zone the table above does not know: the
     zone's own abbreviation when it is the same in January and July (no
-    daylight shift, e.g. JST), otherwise the IANA name itself — honest and
-    unambiguous, if not pretty; FAPD_PUBLICATION_TZ_ABBREV overrides it."""
+    daylight shift, e.g. JST), otherwise the zone's city — a label a
+    reader can place, and one that does not flip with the season;
+    FAPD_PUBLICATION_TZ_ABBREV overrides it."""
     import datetime as _dt
 
     jan = _dt.datetime(2025, 1, 1, 12, tzinfo=tz).tzname() or ""
     jul = _dt.datetime(2025, 7, 1, 12, tzinfo=tz).tzname() or ""
-    return jan if jan and jan == jul else name
+    return jan if jan and jan == jul else _tz_city(name)
 
 
-_tz_label, _tz_abbrev, _tz_place = _PUBLICATION_TZ_NAMES.get(
-    PUBLICATION_TZ_NAME,
-    (f"{PUBLICATION_TZ_NAME} time",
-     _derive_tz_abbrev(PUBLICATION_TZ, PUBLICATION_TZ_NAME),
-     PUBLICATION_TZ_NAME.rsplit("/", 1)[-1].replace("_", " ")))
+def publication_tz_names(name, tz=None):
+    """(long label, abbreviation, place) for an IANA zone: the curated
+    federal entry for the default, otherwise derived from the city so a
+    fork that sets only FAPD_PUBLICATION_TZ still renders an honest label
+    ("Denver time", "Denver") rather than a wrong "ET"."""
+    if name in _PUBLICATION_TZ_NAMES:
+        return _PUBLICATION_TZ_NAMES[name]
+    tz = tz or ZoneInfo(name)
+    city = _tz_city(name)
+    return (f"{city} time", _derive_tz_abbrev(tz, name), city)
+
+
+_tz_label, _tz_abbrev, _tz_place = publication_tz_names(PUBLICATION_TZ_NAME, PUBLICATION_TZ)
 #: Long form, spoken by screen readers ("Eastern time").
 PUBLICATION_TZ_LABEL = os.environ.get("FAPD_PUBLICATION_TZ_LABEL", "").strip() or _tz_label
 #: Short form shown beside a clock reading ("ET").
