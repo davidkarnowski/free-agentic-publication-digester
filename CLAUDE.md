@@ -101,6 +101,14 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
 
 - **main is sacred — for code** (GUIDE §10, verbatim): work on
   `feature/…`, `bug/…`, `arch/…`; CI green before fast-forward merge.
+  **Enforced by a GitHub ruleset since 2026-08-27** (`main: CI green,
+  no force-push, no deletion`, id 21668661): a push to `main` must carry
+  a passing `test` check on its tip commit, force-pushes and deletion
+  are refused for everyone including the owner, and the **only bypass
+  is the `fapd-pipeline` deploy key** — the nightly evidence commit has
+  no CI run before it pushes. Removing that bypass silently breaks the
+  evidence push (the F-019/F-021 class); an emergency push without CI
+  means editing the ruleset in Settings, not working around it.
   About to edit code on `main`? **STOP and confirm a branch name with
   the operator.** Check `git rev-parse --abbrev-ref HEAD` at task start.
 - **Evidence exemption:** `digests/`, `provenance/`, `site/`,

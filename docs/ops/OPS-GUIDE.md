@@ -84,6 +84,12 @@ print({k: r[k] for k in (\"finalized_date\", \"evidence_pushed_at\",
                          \"evidence_push_error\", \"evidence_push_attempts\")})"'
 ```
 
+The push succeeds only because the `fapd-pipeline` deploy key is the
+bypass actor on the `main` ruleset (2026-08-27): the evidence commit
+is created in the container and never sees CI. A push rejected with a
+rules/`required_status_checks` message means that bypass was removed —
+check the ruleset before anything else.
+
 `accept-new` is not optional in that first command: a freshly recreated
 container has an empty `known_hosts`, and a bare fetch fails `Host key
 verification failed`, which reads like a credential fault and is not.

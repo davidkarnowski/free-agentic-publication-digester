@@ -63,4 +63,5 @@ day; certs and firewall last checked 2026-08-05 — see the review table).*
 | `fapd-web` networks == exactly `fapd_edge` | 2026-08-05 |
 | `fapd-backend` egress-only, no published ports | 2026-08-05 |
 | ufw open ports == exactly 2222 / 80 / 443 | 2026-08-05 |
+| GitHub: sole collaborator is the owner; one write deploy key (`fapd-pipeline`); `main` ruleset active (CI check `test`, no force-push, no deletion; deploy-key bypass only); Actions default token read-only, fork-PR workflows need approval | 2026-08-27 |
 | Secrets bind-mounted read-only, `0600` root-owned | 2026-08-05 |
