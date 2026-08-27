@@ -474,6 +474,7 @@ class AnalyzeWorker(Worker):
 
     def cycle(self, conn, cycle_id):
         from . import analyze
+        from .llm import ProviderUnavailableError
 
         stats = {"dates": 0, "summarized": 0, "plain": 0}
         if not self.sup.llm_enabled:
@@ -487,9 +488,26 @@ class AnalyzeWorker(Worker):
                 continue
             if not trigger_fires(conn, date):
                 continue
-            with self.sup.llm_factory() as lclient:
-                a = analyze.run(conn, lclient, date)
-                p = analyze.run_plain(conn, lclient, date)
+            try:
+                with self.sup.llm_factory() as lclient:
+                    a = analyze.run(conn, lclient, date)
+                    p = analyze.run_plain(conn, lclient, date)
+            except ProviderUnavailableError as exc:
+                # The provider's breaker tripped (GUIDE §6 r15) — on the
+                # daytime worker that is the CLI's rolling session window
+                # (2026-08-25/26), expected to recur on a heavy day. It
+                # is the vendor pacing us, not a fault of ours: recorded
+                # paused, like our own budget in run_cycle, so the error
+                # streak and its backoff stay meaningful. The breaker is
+                # per client and each date builds a fresh one, so stop
+                # here rather than pay the same refusal for the next
+                # date; the next cycle, on its normal interval, is the
+                # retry.
+                logger.warning("%s: %s — provider unavailable (%s); pausing"
+                               " this cycle", self.name, date, exc.reason)
+                stats["paused"] = "provider"
+                stats["detail"] = str(exc)[:300]
+                break
             stats["dates"] += 1
             stats["summarized"] += a["llm_summarized"] + a["official"]
             stats["plain"] += p["plain_written"]

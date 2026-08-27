@@ -48,6 +48,26 @@ file.
   `day_inference`; the digest's Inference row states only that no
   inference was available — never the cause (operator ruling). Prose is
   never backfilled into a finalized day.
+- **The CLI's session window is a quota, not a hiccup (2026-08-25
+  16:42Z and 2026-08-26 20:03Z).** On a heavy day (2.4M input tokens)
+  the `claude` CLI answers with a zero-billed envelope — "You've hit
+  your session limit · resets 8:10pm (UTC)", the subscription's rolling
+  five-hour window — which `_envelope_error` classified as an ordinary
+  transient: the 3-attempt ladder ran (2 s, 4 s), a plain `LLMError`
+  failed the analyze worker's cycle, and the next cycle fifteen minutes
+  later paid the same refusal again until the reset. Now "session
+  limit"/"usage limit" (and the CLI's own "rate limit" text — the
+  envelope carries no status, so there the words are decisive) are
+  `quota exhausted`: the ladder trips the breaker and raises
+  `ProviderUnavailableError`, the finalizer records the layer per §6
+  r15, and `collect.AnalyzeWorker.cycle` records the cycle
+  `paused: provider` (no error streak, no backoff — the vendor is
+  pacing us, the same shape as our own budget). The envelope's
+  "resets H:MMam/pm (Zone)" is parsed by `llm.parse_cli_reset_hint`
+  into `TransientLLMError.retry_after` and logged once at the trip;
+  the ladder's wait stays capped by `LLM_RETRY_MAX_WAIT_S`, so a
+  three-hour hint never stalls a process. The next cycle's fresh client
+  is the retry — there is no in-process wait for the window.
 
 - **Retry ceilings are per ITEM as well as per run.** The per-run
   ceiling resets every collector cycle (15 min), so before

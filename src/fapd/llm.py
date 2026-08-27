@@ -36,6 +36,7 @@ import re
 import sqlite3
 import subprocess
 import time
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import requests
 
@@ -177,6 +178,45 @@ def parse_retry_hint(body_text=None, headers=None):
     return float(m.group(1)) if m else None
 
 
+#: The `claude` CLI's limit envelope names a wall-clock reset, not a wait:
+#: "You've hit your session limit · resets 8:10pm (UTC)" (production,
+#: 2026-08-25 16:42Z and 2026-08-26 20:03Z) — the subscription's rolling
+#: five-hour window. The zone in parentheses is whatever the CLI was
+#: configured with, so "resets 5:10pm (America/Los_Angeles)" is the same
+#: hint in a different clock.
+_CLI_RESET_RE = re.compile(
+    r"resets\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)\s*\(([^)]+)\)", re.IGNORECASE)
+
+
+def parse_cli_reset_hint(text, now=None):
+    """Seconds until the CLI's "resets H:MMam/pm (Zone)" wall-clock time —
+    its next occurrence after `now` (UTC-aware; default: the clock) — or
+    None when the text carries no parseable hint. A 12-hour time with
+    am/pm and a ZoneInfo zone name are the whole grammar; an unknown zone
+    or an impossible time is None, never a guess. Never raises — the hint
+    is a courtesy, and the ladder's cap bounds the wait regardless."""
+    m = _CLI_RESET_RE.search(text or "")
+    if not m:
+        return None
+    hour, minute, meridiem, zone_name = m.groups()
+    hour, minute = int(hour), int(minute or 0)
+    if not 1 <= hour <= 12 or minute > 59:
+        return None
+    hour = hour % 12 + (12 if meridiem.lower() == "pm" else 0)
+    try:
+        zone = ZoneInfo(zone_name.strip())
+    except (ZoneInfoNotFoundError, ValueError):
+        return None
+    now = now or dt.datetime.now(dt.UTC)
+    local_now = now.astimezone(zone)
+    target = local_now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    # Compare on the UTC line: same-tzinfo arithmetic ignores the offset,
+    # which is wrong across a DST change.
+    if target.astimezone(dt.UTC) <= now:
+        target += dt.timedelta(days=1)
+    return (target.astimezone(dt.UTC) - now).total_seconds()
+
+
 #: Message fragments that mean the provider will refuse every call this
 #: run, not just this one — the breaker's classification table for text
 #: we cannot classify by HTTP status. Ordered: first match wins.
@@ -188,6 +228,11 @@ _UNAVAILABLE_PATTERNS = (
     ("credit balance", "quota exhausted"),
     ("resource_exhausted", "quota exhausted"),
     ("quota", "quota exhausted"),
+    # The CLI's subscription windows (2026-08-25/26): a "session limit"
+    # or "usage limit" does not lift until the window resets, hours
+    # away — every call until then is the same refusal.
+    ("session limit", "quota exhausted"),
+    ("usage limit", "quota exhausted"),
 )
 
 
@@ -302,9 +347,21 @@ class CLIBackend:
         # subscription access for Claude Code") was zero-billed and
         # therefore retried — 35 times over the next day, identically.
         # Classify it so the breaker stops the run after the ladder.
-        unavailable = classify_unavailable(str(data.get("result") or ""))
+        result = str(data.get("result") or "")
+        unavailable = classify_unavailable(result)
+        if unavailable is None and "rate limit" in result.lower():
+            # Bare "rate limit" text is not decisive for an HTTP body
+            # (classify_unavailable leaves it to the status code), but
+            # the CLI has no status: its rate-limit envelope IS the
+            # subscription window, same class as "session limit".
+            unavailable = "quota exhausted"
+        # "resets 8:10pm (UTC)" (2026-08-25/26): hours away, so the
+        # ladder's capped wait cannot outlast it — the hint is recorded
+        # for the breaker's log line, not honored to the minute.
+        retry_after = parse_cli_reset_hint(result)
         if billed == 0 and not data.get("modelUsage"):
             return TransientLLMError(msg + " — zero tokens billed",
+                                     retry_after=retry_after,
                                      unavailable=unavailable)
         return LLMError(msg + f" — {billed} token(s) billed, not retried",
                         unavailable=unavailable)
@@ -537,12 +594,22 @@ class LLMClient:
                 "unavailable": self.unavailable,
                 "models_used": sorted(self._models_used)}
 
-    def _trip(self, reason, purpose):
+    def _trip(self, reason, purpose, resets_in=None):
         if not self.unavailable:
             logger.error(
                 "LLM %s: provider unavailable for the rest of this run"
                 " (%s) — first seen on %s; later calls short-circuit",
                 self._backend.name, reason, purpose)
+            if resets_in:
+                # The provider named its own reset (the CLI's session
+                # window). Said once, here, so the operator reading the
+                # log knows when the next fresh client can expect an
+                # answer — the breaker itself never waits for it.
+                resets_at = dt.datetime.now(dt.UTC) + dt.timedelta(seconds=resets_in)
+                logger.warning(
+                    "LLM %s: %s — resets %s UTC (in %d min); provider marked"
+                    " unavailable for this run", self._backend.name, reason,
+                    resets_at.strftime("%H:%M"), int(resets_in // 60))
             self.unavailable = reason
 
     def complete(self, prompt, *, purpose, model=None, package_id=None,
@@ -621,7 +688,8 @@ class LLMClient:
                     if exc.unavailable:
                         # The ladder is exhausted on a refusal that will
                         # not change this run: quota, auth. Trip.
-                        self._trip(exc.unavailable, purpose)
+                        self._trip(exc.unavailable, purpose,
+                                   resets_in=exc.retry_after)
                         raise ProviderUnavailableError(
                             exc.unavailable,
                             f"{self._backend.name} backend unavailable"

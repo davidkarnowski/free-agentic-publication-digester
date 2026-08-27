@@ -1297,3 +1297,83 @@ def test_loop_survives_anything_and_keeps_going(tmp_path, monkeypatch, caplog):
         worker.loop(stop)
     assert len(calls) == 2, "the loop ran again after the failure"
     assert "loop iteration failed" in caplog.text
+
+
+# ------------------------------ the provider's breaker on the daytime worker --
+
+
+def test_analyze_worker_pauses_on_a_provider_breaker_instead_of_failing(
+        tmp_path, monkeypatch, caplog):
+    """The CLI's session window (2026-08-25 16:42Z, 2026-08-26 20:03Z): a
+    quota-class refusal survives the ladder as ProviderUnavailableError.
+    Raised out of cycle() it was an error — a streak, a doubled interval,
+    and a source-health page reporting us degraded because the vendor
+    was pacing us. Now the cycle records itself paused, like our own
+    budget, and the next cycle's fresh client is the retry."""
+    from fapd import analyze
+    from fapd.llm import ProviderUnavailableError
+
+    sup, conn_factory = make_supervisor(tmp_path, monkeypatch, llm_enabled=True)
+    built = []
+
+    class _LLM:
+        def __init__(self):
+            built.append(self)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+    sup.llm_factory = _LLM
+    monkeypatch.setattr(collect, "dates_with_pending",
+                        lambda conn: ["2026-08-26", "2026-08-25"])
+    monkeypatch.setattr(collect, "trigger_fires", lambda conn, date: True)
+    ran = []
+
+    def run(conn, c, date):
+        ran.append(date)
+        raise ProviderUnavailableError(
+            "quota exhausted",
+            "cli backend unavailable (map:batch1) after 3 zero-billed attempt(s):"
+            " CLI error envelope: result=\"You've hit your session limit ·"
+            " resets 8:10pm (UTC)\"")
+
+    monkeypatch.setattr(analyze, "run", run)
+    monkeypatch.setattr(analyze, "run_plain",
+                        lambda conn, c, date: (_ for _ in ()).throw(
+                            AssertionError("plain must not run after the map layer tripped")))
+    monkeypatch.setattr(collect, "journal_model_events", lambda conn, cid: 0)
+
+    worker = collect.AnalyzeWorker(sup, 15)
+    with caplog.at_level("WARNING", logger="fapd.collect"):
+        stats = worker.run_cycle()
+    assert stats["paused"] == "provider"
+    assert "session limit" in stats["detail"]
+    assert stats["dates"] == 0
+    # One date, one client, one refusal: the second pending date is not
+    # asked — a fresh client per date would pay the same refusal again.
+    assert ran == ["2026-08-26"] and len(built) == 1
+    paused = [r for r in caplog.records if "provider unavailable" in r.getMessage()]
+    assert len(paused) == 1 and "quota exhausted" in paused[0].getMessage()
+
+    conn = conn_factory()
+    row = conn.execute(
+        "SELECT consecutive_errors, last_ok_at, last_result FROM"
+        " collector_state WHERE worker = 'analyze'").fetchone()
+    assert row["consecutive_errors"] == 0        # not a failure
+    assert row["last_ok_at"] is not None         # the worker is alive
+    assert json.loads(row["last_result"])["paused"] == "provider"
+    conn.close()
+
+    # A real fault in the same place still counts as one.
+    monkeypatch.setattr(analyze, "run",
+                        lambda conn, c, date: (_ for _ in ()).throw(
+                            RuntimeError("our own bug")))
+    assert worker.run_cycle() is None
+    conn = conn_factory()
+    assert conn.execute(
+        "SELECT consecutive_errors FROM collector_state WHERE worker='analyze'"
+    ).fetchone()[0] == 1
+    conn.close()

@@ -2,6 +2,7 @@
 The claude CLI is faked via an injected runner; the Anthropic SDK via an
 injected fake client — no monkeypatching of either backend's internals."""
 
+import datetime as dt
 import json
 import sqlite3
 from types import SimpleNamespace
@@ -652,3 +653,116 @@ def test_gemini_backend_selected_from_config(tmp_path, monkeypatch):
     client = LLMClient(db_path=tmp_path / "g.db")
     assert isinstance(client._backend, llm.GeminiBackend)
 
+
+
+# --------------------------------- the CLI's session window (2026-08-25/26) --
+
+
+def _session_limit_envelope(text="You've hit your session limit · resets 8:10pm (UTC)"):
+    """The production envelope of 2026-08-25 16:42Z / 2026-08-26 20:03Z:
+    zero-billed, and it said the same thing every cycle until the
+    subscription's five-hour window reset."""
+    data = json.loads(_error_envelope())
+    data["result"] = text
+    return json.dumps(data)
+
+
+def test_cli_session_limit_is_quota_class_and_trips_after_the_ladder(tmp_path, monkeypatch,
+                                                                     caplog):
+    """Before: a plain transient — three attempts, 2 s / 4 s, a bare
+    LLMError, and the analyze worker's next cycle hammered again. Now the
+    ladder still runs (zero-billed, so it is free) but exhausts into the
+    breaker, and the reset the CLI named is logged once at the trip."""
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 3)
+    client, calls = make_client(tmp_path, [
+        FakeProc(stdout=_session_limit_envelope(), returncode=1),
+        FakeProc(stdout=_session_limit_envelope(), returncode=1),
+        FakeProc(stdout=_session_limit_envelope(), returncode=1),
+        FakeProc(stdout=cli_json("never asked")),
+    ])
+    waits = []
+    client._sleep = waits.append
+    with (caplog.at_level("WARNING", logger="fapd.llm"),
+          pytest.raises(llm.ProviderUnavailableError) as info):
+        client.complete("x", purpose="map:batch1")
+    assert info.value.reason == "quota exhausted"
+    assert client.status()["unavailable"] == "quota exhausted"
+    assert len(calls) == 3                      # the ladder, never more
+    # The reset hint is hours away; the ladder waits the policy cap, not
+    # the hint — a three-hour sleep inside a worker thread is the bug
+    # this must not introduce.
+    assert waits == [float(config.LLM_RETRY_MAX_WAIT_S)] * 2
+    # (The ladder's attempt lines echo the envelope text; the trip line
+    # is the one that states the reset in UTC.)
+    resets = [r for r in caplog.records if "unavailable for this run" in r.getMessage()]
+    assert len(resets) == 1 and resets[0].levelname == "WARNING"
+    assert "resets 20:10 UTC" in resets[0].getMessage()
+    # …and the next call never reaches the CLI: ledgered, zero, raised.
+    with pytest.raises(llm.ProviderUnavailableError):
+        client.complete("y", purpose="map:batch2")
+    assert len(calls) == 3
+    rows = client._db.execute(
+        "SELECT error, input_tokens FROM llm_calls ORDER BY id").fetchall()
+    assert len(rows) == 4
+    assert all(r[1] == 0 for r in rows)
+    assert rows[-1][0] == "provider unavailable: quota exhausted (short-circuit)"
+
+
+def test_cli_limit_envelope_wordings_are_all_quota_class():
+    """The three wordings the CLI uses for its subscription windows. Bare
+    "rate limit" text stays undecided for an HTTP body without a status
+    (test_classify_unavailable_table); the CLI envelope has no status,
+    so there it is decisive."""
+    for text in ("You've hit your session limit · resets 8:10pm (UTC)",
+                 "You've hit your usage limit · resets 5:10pm (America/Los_Angeles)",
+                 "Rate limit reached · resets 9am (UTC)"):
+        err = CLIBackend._envelope_error(json.loads(_session_limit_envelope(text)))
+        assert isinstance(err, llm.TransientLLMError), text
+        assert err.unavailable == "quota exhausted", text
+        assert err.retry_after is not None and err.retry_after > 0, text
+    # A limit envelope that DID bill stays the never-retried kind, but
+    # still trips the breaker: the refusal is the same either way.
+    data = json.loads(_error_envelope(billed=12))
+    data["result"] = "You've hit your session limit · resets 8:10pm (UTC)"
+    err = CLIBackend._envelope_error(data)
+    assert type(err) is LLMError and err.unavailable == "quota exhausted"
+    assert llm.classify_unavailable("Rate limit exceeded", None) is None  # unchanged
+
+
+def test_parse_cli_reset_hint():
+    f = llm.parse_cli_reset_hint
+    now = dt.datetime(2026, 8, 25, 16, 42, tzinfo=dt.UTC)      # the incident
+    assert f("You've hit your session limit · resets 8:10pm (UTC)", now) == 3.0 * 3600 + 28 * 60
+    # am, and a zone that is not UTC: 5:10pm Pacific on 08-25 is 00:10Z 08-26.
+    assert f("resets 5:10pm (America/Los_Angeles)", now) == 7.0 * 3600 + 28 * 60
+    assert f("resets 9am (UTC)", now) == (24 - 16) * 3600 - 42 * 60 + 9 * 3600  # tomorrow
+    # Next occurrence: a time already past today rolls to tomorrow.
+    assert f("resets 4:00pm (UTC)", now) == 24 * 3600 - 42 * 60
+    # 12-hour clock edges.
+    assert f("resets 12:00am (UTC)", now) == 7 * 3600 + 18 * 60
+    assert f("resets 12:30pm (UTC)", dt.datetime(2026, 8, 25, 12, 0, tzinfo=dt.UTC)) == 1800.0
+    # Unparseable: no hint, an unknown zone, an impossible time, no text.
+    assert f("Your organization has disabled Claude subscription access", now) is None
+    assert f("resets 8:10pm (Mars/Olympus_Mons)", now) is None
+    assert f("resets 13:10pm (UTC)", now) is None
+    assert f("resets 8:70pm (UTC)", now) is None
+    assert f("", now) is None
+    assert f(None, now) is None
+    # No `now`: the clock — still a positive interval under a day.
+    secs = f("resets 8:10pm (UTC)")
+    assert 0 < secs <= 24 * 3600
+
+
+def test_cli_reset_hint_is_ignored_on_the_plain_transient_path(tmp_path, monkeypatch):
+    """A zero-billed hiccup with no limit wording keeps the 2**attempt
+    ladder — the hint parser must not invent a wait from unrelated text."""
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 2)
+    client, _ = make_client(tmp_path, [
+        FakeProc(stdout=_error_envelope(), returncode=1),
+        FakeProc(stdout=cli_json("ok")),
+    ])
+    waits = []
+    client._sleep = waits.append
+    assert client.complete("x", purpose="map:test")["text"] == "ok"
+    assert waits == [2.0]
+    assert client.unavailable is None
