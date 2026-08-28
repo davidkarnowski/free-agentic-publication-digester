@@ -48,7 +48,8 @@ is always current; it derives them from the registry at build time.)</p>
   <code>/sources/&lt;id&gt;.html</code> — statistics, method, health history, and
   labeled model-written orientation.</li>
 <li><strong>Latest digest:</strong> <a href="2026-08-02.html">2026-08-02</a>; digests
-  publish daily just after midnight Eastern. The <strong>official record
+  publish daily just after midnight on the publication clock (Eastern,
+  Washington's — <code>FAPD_PUBLICATION_TZ</code>; see docs/forking.md). The <strong>official record
   begins 2026-07-27</strong> (two development-era digests were retired on
   2026-08-03; they remain in git history). Each finished day also has
   a frozen observed listing at <code>/day/&lt;date&gt;.html</code>.</li>
@@ -364,6 +365,18 @@ digests does not hide its own machine authorship; the full statement,
 including what AI assistance changed about where design attention went,
 is at <code>docs/site/ai-development.md</code>
 (published on the site as "How AI Built This").</p>
+<h2 id="forking-for-another-government">Forking for another government</h2>
+<p>The digester is built for the United States federal government's
+publishing day, but that assumption lives in two places, and both are
+documented in <strong><code>docs/forking.md</code></strong>: the publication
+clock — <code>FAPD_PUBLICATION_TZ</code> (an IANA zone; default <code>America/New_York</code>)
+with its three label knobs, the one place the clock is named, which
+every digest date, end-of-day boundary, live-page rollover, activity
+graph, and clock label reads — and the federal working calendar,
+<code>src/fapd/fedcal.py</code>, whose holiday tables a fork replaces behind one
+function. Stored observation stamps are UTC under any clock; an audit
+test fails the build if a renderer ever spells the default clock out
+again.</p>
 <h2 id="licensing">Licensing</h2>
 <ul>
 <li><strong>Code:</strong> <code>Apache-2.0</code> (with <code>NOTICE</code>).</li>
@@ -393,7 +406,7 @@ is at <code>docs/site/ai-development.md</code>
 </ul>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-08-27T04:55:56Z (UTC). Canonical source:
+  <p>Generated 2026-08-28T04:52:04Z (UTC). Canonical source:
   <code>README.md</code> in the
   <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in

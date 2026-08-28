@@ -51,6 +51,19 @@ beside it when the two differ. One exception: the Federal Register
 files under its cover date, because that is the date on which it is
 legally published — and it is the case where all three clocks agree by
 design.</p>
+<p><strong>Which clock the graphs are on.</strong> The stamps we store are UTC, and
+they stay UTC in the page markup and the machine files. Everything we
+<em>show</em> on a time axis — the live page's hour headings, the source
+cards' 7-day activity graph and its hourly segments, the per-source
+day-by-day charts, the health windows — is placed in publication-clock
+days and hours (Eastern time, Washington, D.C.), so a bar labeled with a
+date covers the same day the digest for that date covers, and each of
+those surfaces says which clock it shows. On the two nights a year the
+clock shifts, one wall-clock hour holds two hours of activity or none;
+the graph states that day's hour count (23 or 25) rather than hiding it.
+The clock itself is set in one place in the code
+(<code>FAPD_PUBLICATION_TZ</code>), so a copy of this project run for another
+government can keep another clock the same way.</p>
 <p>Why observation rather than the publisher's stamp? Because the
 publisher's stamp can lie about availability. If a publishing system
 goes down and a document stamped Monday only becomes reachable
@@ -131,7 +144,7 @@ deliberately not summarized is counted under a named mechanical rule.
 Silent omission is the failure mode this project is built to prevent.</p>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-08-27T04:55:56Z (UTC). Canonical source:
+  <p>Generated 2026-08-28T04:52:04Z (UTC). Canonical source:
   <code>docs/site/faq.md</code> in the
   <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in
