@@ -493,6 +493,145 @@ def test_find_lexicon_violation_exempts_official_title_quote(conn):
     assert report.find_lexicon_violation(conn, DATE) is None
 
 
+# ------------------------- phrase-scoped exemption (GUIDE §2, 2026-08-30) --
+# 2026-08-28/29: two bills renaming sites whose official titles contain
+# "historic" as a proper-noun component were withdrawn because the map
+# summary named the same place in wording that was not a byte-identical
+# copy of the WHOLE title. These pin the fix directly against
+# report._official_spans (no DB, fast) plus the incidents replayed
+# end-to-end through find_lexicon_violation below.
+
+
+def test_official_spans_exempts_a_partial_quote_of_a_title():
+    """The 2026-08-28 incident, replayed directly: the summary paraphrases
+    the title's wrapper sentence but names the site in an exact,
+    word-bounded quote of it — no longer required to recite the whole
+    title to earn the exemption."""
+    title = ('105 HR 1693 RH: To redesignate the National Historic Trails'
+             ' Interpretive Center in Casper, Wyoming, as the "Barbara L.'
+             ' Cubin National Historic Trails Interpretive Center".')
+    summary = ("This bill designates the National Historic Trails"
+               " Interpretive Center in Casper, Wyoming, in honor of"
+               " Barbara L. Cubin.")
+    matches = list(report._BANNED_RE.finditer(summary))
+    assert len(matches) == 1
+    spans = report._official_spans(summary, [title])
+    assert any(a <= matches[0].start() and matches[0].end() <= b for a, b in spans)
+
+
+def test_official_spans_exempts_the_2026_08_29_incident_shape():
+    title = ('119 HR 8121 RH: To designate the Christiansted Bandstand at'
+             ' the Christiansted National Historic Site, St. Croix,'
+             ' Virgin Islands, as the "Peter G. Thurland, Sr., Bandstand".')
+    summary = ("This bill names the bandstand at Christiansted National"
+               " Historic Site after Peter G. Thurland, Sr.")
+    spans = report._official_spans(summary, [title])
+    match = next(report._BANNED_RE.finditer(summary))
+    assert any(a <= match.start() and match.end() <= b for a, b in spans)
+
+
+def test_official_spans_still_rejects_genuine_editorializing():
+    """A title containing the word does not license OUR sentence to use
+    it in unconnected, unquoted wording."""
+    title = "An Act to designate the National Historic Trails Center."
+    summary = "This is a truly historic moment for the committee."
+    assert report._official_spans(summary, [title]) == []
+
+
+def test_official_spans_rejects_a_bare_word_borrowed_from_another_item():
+    """Cross-item abuse: item B's editorializing must not exempt itself
+    just because SOME title that day happens to share the word,
+    unconnected to it."""
+    title_a = "An Act to designate the National Historic Trails Center."
+    summary_b = "This historic legislation updates funding formulas."
+    assert report._official_spans(summary_b, [title_a, "Some Other Bill"]) == []
+
+
+def test_official_spans_requires_a_content_word_not_a_bare_stopword():
+    """'a historic' recurs by chance in unrelated official text
+    constantly (it is just an article plus the adjective) — the floor
+    must be a CONTENT word, or this bigram alone would exempt almost
+    anything. 'historic day', reused verbatim, is a real quotation and
+    does exempt; 'historic moment', never quoted, does not."""
+    source = "The floor proceedings included a historic day for the Senate."
+    exempted = "Today was a historic day for the Senate."
+    not_exempted = "It was truly a historic moment for the committee."
+    assert report._official_spans(exempted, [source]) != []
+    assert report._official_spans(not_exempted, [source]) == []
+
+
+def test_official_spans_never_crosses_a_sentence_boundary():
+    source = "Section one is historic. Section two addresses funding for roads."
+    summary = "The report addresses funding for roads in a historic way."
+    assert report._official_spans(summary, [source]) == []
+
+
+def test_official_spans_full_string_case_still_works():
+    """The pre-2026-08-30 shape — a complete quotation — must keep
+    working; the change adds a narrower floor, it does not remove the
+    wider one."""
+    caption = "Landmark Legal Foundation v. EPA"
+    summary = f"The court in {caption} ruled against the agency."
+    assert report._official_spans(summary, [caption]) != []
+
+
+def test_official_spans_multiword_banned_phrase_partial_quote():
+    """A multi-word banned term ('in an attempt to') is a motive-
+    attribution phrase, not a proper noun — the same rule still applies:
+    the exempted span is scoped to the phrase itself, so a paraphrase of
+    what comes AFTER it (an ordinary word, not a banned one) is
+    irrelevant to whether the phrase itself was quoted."""
+    source = "The agency acted in an attempt to resolve the dispute quickly."
+    summary = ("The filing states the agency acted in an attempt to"
+               " resolve the matter.")
+    assert report._official_spans(summary, [source]) != []
+
+
+def test_lexicon_officials_includes_extracted_document_body(conn):
+    """The 2026-08-30 corpus broadening: a summary quoting a phrase from
+    the document's own BODY — not its title, not an official abstract —
+    now has an exemption path. Before this, the only official text a map
+    summary could quote was a title or an FR abstract."""
+    add_package(conn, "USCOURTS-ca9-26-77777", "USCOURTS")
+    add_text(
+        conn, "USCOURTS-ca9-26-77777", "USCOURTS-ca9-26-77777-0",
+        "USCOURTS", "APPELLATE", title="United States v. Doe",
+        metadata={"court_code": "ca9", "case_number": "26-77777",
+                  "date_filed": DATE},
+        chars=9000,
+        text="The panel found the agency's action to be an unprecedented"
+             " expansion of its own authority under the statute.",
+    )
+    add_summary(
+        conn, "USCOURTS-ca9-26-77777", "USCOURTS-ca9-26-77777-0",
+        "USCOURTS-SEL-01",
+        "The panel described an unprecedented expansion of agency"
+        " authority under the statute.",
+    )
+    assert report.find_lexicon_violation(conn, DATE) is None
+
+
+def test_lexicon_officials_excludes_other_items_own_llm_summaries(conn):
+    """Model output is never a source of exemption for model output — an
+    item cannot borrow license from a DIFFERENT item's stored (LLM)
+    summary, only from text the digest itself did not write."""
+    add_package(conn, "USCOURTS-ca9-26-88888", "USCOURTS")
+    add_text(
+        conn, "USCOURTS-ca9-26-88888", "USCOURTS-ca9-26-88888-0",
+        "USCOURTS", "APPELLATE", title="United States v. Roe",
+        metadata={"court_code": "ca9", "case_number": "26-88888",
+                  "date_filed": DATE},
+        chars=9000,
+    )
+    add_summary(
+        conn, "USCOURTS-ca9-26-88888", "USCOURTS-ca9-26-88888-0",
+        "USCOURTS-SEL-01",
+        "The panel called this a truly historic ruling for the circuit.",
+    )
+    violation = report.find_lexicon_violation(conn, DATE)
+    assert violation is not None and violation["term"] == "historic"
+
+
 def test_presact_item_renders_stored_summary_and_plain(conn, tmp_path):
     """Added 2026-08-09: PRESACT items are selected and LLM-summarized
     like any other collection (PRESACT-SEL-01..04 are ordinary
