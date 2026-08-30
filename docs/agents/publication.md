@@ -166,6 +166,13 @@ docs/accessibility.md → this file.
   escapes spaces, so every multi-word banned phrase had been
   unmatchable since the gate's creation — fixed, the gate is stronger
   now.
+  *Broadened 2026-08-30:* the exemption is now phrase-scoped rather than
+  whole-string-scoped (`_phrase_candidates`/`_spans_in_corpus`), and the
+  corpus includes `extracted_texts.text`, not just titles/official
+  summaries/action sentences — see `docs/agents/editorial.md` for the
+  mechanism and the incident that motivated it. `find_lexicon_violation`
+  builds the corpus once per call, not once per item; do not inline
+  `_official_corpus` back inside a per-item loop.
 - **D6 / D7** — make the coverage gate independently computed so it can
   actually fail; classes that fall through the rule registry
   (introduced bills, AGENCYPR/VOTES/BILLACTIONS) get named attribution.

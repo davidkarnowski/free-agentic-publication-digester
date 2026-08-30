@@ -101,6 +101,33 @@ file.
   never-fabricate bucket. `analyze.run()`/`run_plain()` must keep
   skipping an item whose correction ceiling is exhausted — otherwise the
   withdrawn row just looks like fresh pending work again next cycle.
+- **The lexicon exemption is phrase-scoped, not whole-string-scoped
+  (GUIDE §2, amended 2026-08-30).** Two bills renaming a "National
+  Historic..." site were withdrawn on 2026-08-28/29 because their map
+  summaries named the same place in wording that was not a byte-
+  identical copy of the WHOLE official title — `_official_spans`
+  required the model to recite an entire title/summary/action sentence
+  to earn the exemption for the name inside it. Now the model only has
+  to quote the phrase it actually uses: `_phrase_candidates` builds
+  word-bounded windows of the RENDER's own wording around each hit,
+  from the term plus one adjacent *content* word (stopwords alone never
+  satisfy the floor — "a historic" recurs by chance in any day's text;
+  "historic day", genuinely quoted, does not) out to the render's own
+  sentence boundary, and `_spans_in_corpus` checks whether that exact
+  phrase occurs anywhere in the day's official text. The corpus also
+  widened to include `extracted_texts.text` — the document's own body,
+  not just its title — the single most common thing a summary
+  legitimately quotes. `summaries.summary`/plain lines/`day_summaries`
+  stay excluded from the corpus on purpose: model output is never a
+  source of exemption for model output, ours or a different item's.
+  **Perf note:** `find_lexicon_violation` builds the corpus ONCE before
+  its per-item loop (`_official_corpus`, then `_spans_in_corpus` per
+  item) — building it inside the per-scan function, as an earlier draft
+  did, cost over a second per call on a heavy day and would have
+  reproduced the exact shape of incident r14 exists to prevent, just in
+  CPU time instead of tokens. `analyze._lexicon_clean`'s per-item
+  self-gate stays a one-shot `_official_spans` call against that item's
+  own title(s) only — a deliberately small, scoped corpus, unaffected.
 - **The reply-key contract tolerates the spellings models actually
   produce (2026-08-27).** The prompt keys each item `package|granule`;
   a package-level item (PLAW, PRESACT, BILLS — `granule_id = ''`) is
