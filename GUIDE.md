@@ -105,14 +105,39 @@ reporting component must comply.
     quoted action sentences — renders verbatim and is never gated, altered,
     or suppressed on lexicon grounds. The rule exists to keep what we write
     unbiased, never to censor what the government published.
-  - *Official-name exemption (same amendment).* Generated prose may contain
-    a banned term only where it occurs inside an exact occurrence of an
-    official title or name stored in the corpus for that digest day — a
-    statute name ("National Historic Preservation Act"), a case caption
-    ("Landmark Legal Foundation v. EPA"), a document title. Naming the
-    record is stating a fact. The same term outside such a span remains a
-    violation, and the exemption is positional: it never blinds the gate to
-    the surrounding prose.
+  - *Official-name exemption (amended 2026-08-02; broadened 2026-08-30,
+    operator).* Generated prose may contain a banned term where it occurs
+    inside an exact, word-bounded quotation of text the government
+    published for that digest day — not only a title, but the extracted
+    body of the document itself, an official (non-LLM) summary, or a
+    quoted action sentence. **The test is provenance of the quoted
+    phrase, not completeness of the quoted sentence:** the model does not
+    have to recite an entire title verbatim to earn the exemption for the
+    name inside it. Two bills renaming the National Historic Trails
+    Interpretive Center and the Christiansted National Historic Site were
+    withdrawn on 2026-08-28/29 because their titles carried "historic" as
+    a proper-noun component — exempted where the title rendered whole —
+    while the model's own summary sentence, which named the same place in
+    different wording, matched nothing, because the prior rule required a
+    byte-identical copy of the *complete* title, summary, or action
+    sentence to exempt anything inside it. Naming the record is stating a
+    fact whether or not the model also recites everything around the
+    name.
+    The exemption stays bounded three ways. First, positional and
+    same-day only: the quoted phrase must appear verbatim in the render,
+    and only against that digest day's own published corpus — never
+    another day's, never all-time. Second, phrase-scoped, not
+    word-scoped: the exempting span is the phrase the term sits in at its
+    source occurrence (capped at a sentence boundary, a minimum of one
+    adjacent word where the source provides one) — not the bare banned
+    word alone, so an unrelated item cannot borrow a license from a
+    different item's title that happens to share the word. Third, our own
+    voice is never a source of exemption for our own voice: a summary,
+    plain-language line, section synopsis, or Day-in-Review paragraph —
+    ours, on any item, from any day — is model output and is excluded
+    from the corpus that grants exemptions; only text the digest did not
+    write can license a banned word in text the digest did write. The
+    same term outside such a span remains a violation.
 - **Coverage symmetry.** Selection criteria for "what matters today" must be
   mechanical and party-blind: e.g., floor time consumed, number of cosponsors,
   regulatory economic-significance designation, stage of legislative process —

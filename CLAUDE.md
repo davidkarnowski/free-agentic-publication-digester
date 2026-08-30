@@ -518,3 +518,18 @@ live in `.claude/agents/fapd-*.md` (tracked).
   publication-day filing); *presentation* of activity over time buckets
   on the publication clock in Python and labels the clock; DST nights
   are disclosed by the day's hour count, never normalized.
+- **2026-08-30** — **The lexicon exemption is phrase-scoped, not
+  whole-string-scoped** (GUIDE §2 amended, operator). Two bills renaming
+  "National Historic..." sites were withdrawn 2026-08-28/29 because the
+  prior rule required a byte-identical copy of an entire official title/
+  summary/sentence to exempt a banned word inside it; the model quoting
+  the same name in different wording earned nothing. Now the exemption
+  is: the exact phrase the render uses at that hit — term plus at least
+  one adjacent content word, never a bare stopword alone, capped at a
+  sentence boundary — occurs verbatim somewhere in that day's published
+  corpus, which now includes `extracted_texts.text` (the document body,
+  not just titles). Model output — ours, on any item — stays excluded
+  from the corpus; only text the digest did not write can license a
+  banned word in text it did write. `find_lexicon_violation` builds the
+  corpus once per call, not once per item, after a synthetic stress test
+  measured the naive per-item shape at over a second per call.
