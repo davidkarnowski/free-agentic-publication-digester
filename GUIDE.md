@@ -1487,6 +1487,19 @@ Mechanics:
 
 ## 8. Roadmap
 
+*Superseded 2026-08-31 (operator-directed project-wide review).* The
+phase list below is the July 2026 plan for a project that had not yet
+shipped, preserved as history. Phases 0–3, J1 and R are done (R's
+"cron/systemd timer" became the in-container supervisor,
+docs/continuous-ingestion.md); CHRG/CRPT/DCPD were cancelled by the
+2026-07-31 probe and PRESACT shipped instead; the bulk-data backfill
+and the graphics vision pass were never built and are not planned; J2
+remains open. **The living roadmap is
+[docs/roadmap.md](docs/roadmap.md)** — grouped by kind (editorial
+signal, machine surfaces, inference, operations, code health, sources,
+documentation), each item naming its gate. This guide still governs;
+the roadmap plans.
+
 - **Phase 0 — Foundation (now):** this guide, worklog, repo scaffolding,
   obtain API key, verify access with a handful of hand-run requests.
 - **Phase 1 — Fetch & store:** rate-limited govinfo client, daily delta sync
