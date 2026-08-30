@@ -2047,18 +2047,28 @@ def _validate_lexicon(markdown, conn, date):
     """GUIDE §2: the banned lexicon binds OUR prose only — official source
     text renders verbatim and is never gated (scope amendment 2026-08-02).
 
-    The exemption is POSITIONAL (reviews D21/D8): a banned term passes
-    only where it sits inside an exact occurrence of an official string —
-    a title from any collection ("Landmark Legal Foundation v. EPA", the
-    "National Historic Preservation Act"), an official summary, a quoted
-    action sentence. This closes both failure directions at once: an
-    official case caption can no longer block the digest (D21 — five
-    collections' titles were unmasked), and a short official title can no
-    longer blind the gate to a violation in surrounding prose the way the
-    old global str.replace masking did (D8). It also implements the §2
-    official-name exemption: model prose may name a statute or case whose
-    official name contains a banned word, verbatim; the same word outside
-    such a span still fails. Known honest boundary: a title that falls
+    The exemption is POSITIONAL (reviews D21/D8) and, since 2026-08-30,
+    PHRASE-scoped rather than whole-string-scoped: a banned term passes
+    where the exact quoted phrase it sits in at its point of use — a
+    title from any collection, the extracted body of the document being
+    summarized, an official summary, a quoted action sentence — occurs
+    verbatim somewhere in that digest day's own published corpus. The
+    model no longer has to recite an entire title to earn the exemption
+    for the name inside it (2026-08-28/29: two bills renaming sites whose
+    official names contain "historic" were withdrawn because their map
+    summaries named the same place in different wording than the title's
+    full sentence — the prior rule required a byte-identical copy of the
+    *whole* official string). This closes three failure directions at
+    once: an official case caption can no longer block the digest (D21 —
+    five collections' titles were unmasked), a short official title can
+    no longer blind the gate to a violation in surrounding prose the way
+    the old global str.replace masking did (D8), and a paraphrased-but-
+    verbatim-partial quote of an official name is no longer punished for
+    not reciting the whole sentence around it (2026-08-30). It also
+    implements the §2 official-name exemption: model prose may name a
+    statute or case whose official name contains a banned word, verbatim,
+    in whole or in an exact word-bounded part; the same word outside such
+    a quotation still fails. Known honest boundary: a title that falls
     back to the text head's first line is not collected here."""
     officials = _lexicon_officials(conn, date)
     # URLs are citations, not prose — link slugs echo source headlines
@@ -2075,17 +2085,38 @@ def _validate_lexicon(markdown, conn, date):
 def _lexicon_officials(conn, date):
     """Every verbatim official string for this digest day that the §2
     positional exemption may match against — titles, official summaries,
-    quoted action sentences, across every collection. Extracted out of
-    `_validate_lexicon` so `find_lexicon_violation` can reuse the exact
-    same exemption corpus without re-deriving it (no drift possible
-    between what render() exempts and what a corrective call is told is
-    exempt)."""
+    quoted action sentences, and (2026-08-30) the extracted body of every
+    document, across every collection. Extracted out of `_validate_lexicon`
+    so `find_lexicon_violation` can reuse the exact same exemption corpus
+    without re-deriving it (no drift possible between what render()
+    exempts and what a corrective call is told is exempt).
+
+    Deliberately excluded: `summaries.summary`, plain-language lines,
+    section synopses, and `day_summaries` — model output, on this item or
+    any other, is never a source of exemption for model output (GUIDE §2,
+    amended 2026-08-30). Only text the digest did not write can license a
+    banned word in text the digest did write."""
     officials = [
         row[0]
         for row in conn.execute(
             "SELECT DISTINCT s.summary FROM summaries s JOIN packages p USING (package_id)"
             " WHERE s.method = 'official' AND s.prompt_version = ? AND p.digest_day = ?",
             (config.PROMPT_VERSION, date),
+        )
+    ]
+    # The document's own extracted body — the single most direct source
+    # of "what the government actually wrote," and, until 2026-08-30, the
+    # one form of official text this exemption never consulted: a model
+    # quoting a phrase from the very document it is summarizing had no
+    # exemption path at all unless that phrase also happened to be the
+    # title.
+    officials += [
+        row[0]
+        for row in conn.execute(
+            "SELECT DISTINCT et.text FROM extracted_texts et"
+            " JOIN packages p USING (package_id)"
+            " WHERE p.digest_day = ?",
+            (date,),
         )
     ]
     # Titles are the publisher's own text in EVERY section — bill and law
@@ -2144,27 +2175,146 @@ def _lexicon_officials(conn, date):
     return officials
 
 
-def _official_spans(scan, officials):
-    """Character ranges of `scan` covered by an exact occurrence of an
-    official string, in any form it renders: raw, whitespace-normalized
-    (_one_line), or display-cased (_display_title re-cases ALL-CAPS
-    source titles). Only strings that themselves contain a banned term
-    can exempt anything, so the search stays cheap — a typical day has a
-    handful of such titles among thousands of official strings."""
-    spans = []
+#: A word, for phrase-window purposes: letters/digits with internal
+#: apostrophes/hyphens (so "L." and "Cubin's" and "self-executing" each
+#: count as one word, not several).
+_WORD_RE = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9'’-]*[A-Za-z0-9])?")
+
+#: Never let a candidate phrase cross one of these — a quotation is
+#: bounded by the sentence (or rendered line) it actually appeared in,
+#: on both the render side and the official-text side. Line breaks count
+#: because markdown puts unrelated items on separate lines/bullets.
+_SENTENCE_BOUNDARY_RE = re.compile(r"[.!?\n]")
+
+#: Function words too generic to anchor an exemption on their own — "a
+#: historic" recurs by chance in unrelated official text constantly, and
+#: exempting on it would make the floor meaningless. A candidate must add
+#: at least one word outside this set; growth past a stopword toward a
+#: real content word is fine and expected ("a historic day" exempts on
+#: "historic day", not on "a historic").
+_STOPWORDS = frozenset((
+    "a", "an", "the", "this", "that", "these", "those", "is", "are",
+    "was", "were", "be", "been", "being", "of", "for", "and", "or",
+    "to", "in", "on", "at", "as", "it", "its", "by", "with",
+))
+
+
+def _official_corpus(officials):
+    """The day's official text, in every form it might render (raw,
+    whitespace-normalized, display-cased — `_display_title` re-cases
+    ALL-CAPS source titles), joined with a separator that cannot occur in
+    real rendered text, so a phrase can never spuriously match across two
+    unrelated official strings. Only strings that themselves contain a
+    banned term are included, so the corpus — and every scan against it —
+    stays small: a typical day has a handful of such strings among
+    thousands."""
+    forms = []
     seen = set()
     for text in officials:
         if not text:
             continue
-        for form in {text, _one_line(text), _display_title(text)}:
-            if not form or form in seen or not _BANNED_RE.search(form):
-                continue
-            seen.add(form)
-            start = scan.find(form)
-            while start != -1:
-                spans.append((start, start + len(form)))
-                start = scan.find(form, start + 1)
+        for form in (text, _one_line(text), _display_title(text)):
+            if form and form not in seen and _BANNED_RE.search(form):
+                seen.add(form)
+                forms.append(form)
+    return "\n\x00\n".join(forms)
+
+
+def _phrase_candidates(scan, start, end):
+    """Word-bounded windows of `scan` containing `scan[start:end]`, from
+    the minimum GUIDE §2 requires (the match plus at least one adjacent
+    CONTENT word — _STOPWORDS alone never satisfy the floor, or "a
+    historic" would exempt against any unrelated document that happens to
+    contain that everyday bigram) out to the widest the match's own
+    sentence allows — never crossing a sentence or line boundary in the
+    render. Every candidate contains the match; none extends past where
+    the render itself stops being the same quotation.
+
+    Ordered narrowest first: the caller stops at the first hit, so a
+    short quotation that IS in the record is preferred over inventing a
+    longer one it wouldn't have needed. Structurally bounded — a typical
+    sentence yields a handful of words on each side, so the candidate
+    count stays in the tens, not a search over the whole document."""
+    words = list(_WORD_RE.finditer(scan))
+    idx = next((i for i, w in enumerate(words) if w.start() <= start < w.end()), None)
+    if idx is None:
+        return []  # not reachable for a real \b-bounded match; fail closed
+    match_lo = idx
+    while match_lo > 0 and words[match_lo - 1].start() >= start:
+        match_lo -= 1  # a multi-word banned phrase spans more than one token
+    match_hi = idx
+    while match_hi + 1 < len(words) and words[match_hi + 1].end() <= end:
+        match_hi += 1
+
+    left_bound = match_lo
+    while left_bound > 0 and not _SENTENCE_BOUNDARY_RE.search(
+        scan, words[left_bound - 1].end(), words[left_bound].start()
+    ):
+        left_bound -= 1
+    right_bound = match_hi
+    while right_bound + 1 < len(words) and not _SENTENCE_BOUNDARY_RE.search(
+        scan, words[right_bound].end(), words[right_bound + 1].start()
+    ):
+        right_bound += 1
+
+    candidates = []
+    for lo in range(match_lo, left_bound - 1, -1):
+        for hi in range(match_hi, right_bound + 1):
+            if lo == match_lo and hi == match_hi:
+                continue  # the floor: at least one adjacent word, never the bare term
+            added = [w.group(0) for w in words[lo:match_lo]] + \
+                    [w.group(0) for w in words[match_hi + 1:hi + 1]]
+            if all(w.lower() in _STOPWORDS for w in added):
+                continue  # stopwords alone never satisfy the content-word floor
+            candidates.append((words[lo].start(), words[hi].end()))
+    # No neighbor at all on either side (the match is its whole sentence):
+    # the floor genuinely cannot be met, so there is nothing to try — the
+    # bare term alone never exempts, degenerate render or not.
+    # Narrowest first: total width, then how centered the growth is.
+    candidates.sort(key=lambda span: span[1] - span[0])
+    return candidates
+
+
+def _spans_in_corpus(scan, corpus):
+    """Character ranges of `scan` where a banned term is exempt against an
+    ALREADY-BUILT corpus string (see `_official_corpus`): the exact phrase
+    the render uses AT THAT OCCURRENCE — from the term plus one adjacent
+    content word out to its own sentence boundary — occurs verbatim
+    somewhere in the corpus (GUIDE §2, amended 2026-08-30). Provenance of
+    the quoted phrase is what earns the exemption, not recitation of an
+    entire official title or sentence around it.
+
+    Candidates are generated from the RENDER's own wording at each hit,
+    not from the official text, so the model does not have to guess which
+    subset of a source string will be recognized — whatever phrase it
+    actually wrote either was drawn verbatim from the record or it was
+    not, and this asks that question directly, once per match.
+
+    Split from `_official_spans` so a caller scanning many texts against
+    the same day's officials (`find_lexicon_violation`, one call per item
+    per layer) builds the corpus ONCE rather than re-filtering the day's
+    entire official-text pool on every item — on a heavy day that
+    rebuild alone measured over a second; done per item it would have
+    reproduced the exact shape of incident r14 exists to prevent, just in
+    CPU time instead of tokens."""
+    if not corpus:
+        return []
+    spans = []
+    for match in _BANNED_RE.finditer(scan):
+        for lo, hi in _phrase_candidates(scan, match.start(), match.end()):
+            if corpus.find(scan[lo:hi]) != -1:
+                spans.append((lo, hi))
+                break
     return spans
+
+
+def _official_spans(scan, officials):
+    """`_spans_in_corpus` for a single scan against a fresh corpus built
+    from `officials` — the convenience form for a one-shot caller
+    (`_validate_lexicon`, once per render). A caller scanning many texts
+    against the same officials should build the corpus once with
+    `_official_corpus` and call `_spans_in_corpus` directly instead."""
+    return _spans_in_corpus(scan, _official_corpus(officials))
 
 
 def find_lexicon_violation(conn, date):
@@ -2185,13 +2335,13 @@ def find_lexicon_violation(conn, date):
     not attributable to a per-item row — compose-level prose (Day in
     Review, section synopses/tags) is explicitly out of scope (rule
     14a); the caller falls back to the pre-existing whole-day retry."""
-    officials = _lexicon_officials(conn, date)
+    corpus = _official_corpus(_lexicon_officials(conn, date))
     for item in _load_items(conn, date):
         for field, layer in (("summary", "map"), ("plain", "plain")):
             text = item.get(field)
             if not text:
                 continue
-            exempt = _official_spans(text, officials)
+            exempt = _spans_in_corpus(text, corpus)
             for match in _BANNED_RE.finditer(text):
                 if not any(a <= match.start() and match.end() <= b for a, b in exempt):
                     return {
