@@ -36,3 +36,8 @@ site/today.json
 # working-tree copy; covers the gitignored-but-present site/today.* and
 # the .claude re-include leak transitively.
 deploy/dev/repo/
+
+# Operator-only planning notes: candid risk/cost/sequencing documents that
+# are not part of the public record (CLAUDE.md §13). The public counterpart
+# is docs/roadmap.md.
+docs/private/
