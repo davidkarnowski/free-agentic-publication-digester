@@ -105,6 +105,13 @@ real session day because selection is by character count.
   the URL query string; a connection-level error would write that URL
   into the ledger. Verified not exploited on production (0 rows). Move
   to the `x-goog-api-key` header with a test. *Gate: CI.*
+- **One pacing clock per host across processes.** The collector and the
+  nightly finalizer each keep per-host pacing in memory; on nights when
+  both poll the same host, gao.gov's 420-second `crawl-delay` was
+  undercut six times in seven days (gaps of 58–355 s, all on a feed
+  that answered 304). The fetch log is already the shared record —
+  read the host's last request from it before pacing. *Gate: CI; GUIDE
+  §4 already states the rule the code should meet.*
 - Content-Security-Policy (OB-18, now achievable: one script, no inline
   handlers), `scripts/check.sh` (OB-7), the weekly CVE sweep script
   (OB-17), stale-output deletion in `build_site` (OB-12/OB-19 merged).
