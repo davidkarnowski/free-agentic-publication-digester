@@ -4,7 +4,7 @@
 > ingestion as well as human reading: see /agents.html.
 
 ## Core
-- [Latest digest](https://fapd.info/2026-08-30.html)
+- [Latest digest](https://fapd.info/2026-08-31.html)
 - [All digests (index)](https://fapd.info/index.html)
 - [Machine-readable digest index](https://fapd.info/digests.json)
 - [Atom feed of digests](https://fapd.info/feed.xml)
