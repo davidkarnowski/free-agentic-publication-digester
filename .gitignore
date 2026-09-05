@@ -20,6 +20,13 @@ __pycache__/
 
 # Local research/analysis material (NotebookLM bundles etc.) — never published
 research/
+
+# Operator's private working tree — internal plans, dossier facts, and the
+# agent secrets guide. Untracked was never enough: an untracked file still
+# lands in `git add -A`, and this repo is PUBLIC (CLAUDE.md §13). Made an
+# ignore rule on 2026-09-05 after a session spent excluding it by hand with
+# `:!docs/private` pathspecs — discipline that works until the once it does not.
+docs/private/
 # Assistant-harness: local settings stay out; skills and section-agent
 # launchers are tracked project assets. The pattern must be `.claude/*`
 # (not `.claude/`) for the re-includes to work.
