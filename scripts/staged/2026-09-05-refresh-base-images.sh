@@ -115,9 +115,12 @@ echo "== 4. Recreate (web is forced: same tag, new image) =="
 
 echo
 echo "== 5. Site handoff (deploy.sh does this post-up; a bare rebuild must too) =="
-"$VPS_SSH" "cd /opt/fapd && sudo docker compose exec -T -w /app backend uv run python scripts/build_site.py || true"
-"$VPS_SSH" "cd /opt/fapd && sudo docker compose exec -T -w /app backend uv run python -c \
-  'from fapd import db, publish; conn = db.connect(); publish.build_today(conn); conn.close()' || true"
+# Same two calls deploy.sh makes post-up, in the same form (docker exec,
+# container WORKDIR, `|| true`): a rebuild must not fail the run on a
+# render that the RenderWorker will redo on its own clock anyway.
+"$VPS_SSH" "sudo docker exec fapd-backend uv run python scripts/build_site.py || true"
+"$VPS_SSH" "sudo docker exec fapd-backend uv run python -c \
+   'from fapd import db, publish; publish.build_today(db.connect())' || true"
 
 echo
 echo "== 6. Verify =="
