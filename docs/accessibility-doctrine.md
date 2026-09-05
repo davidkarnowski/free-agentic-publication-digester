@@ -197,9 +197,25 @@ row, and an archive is a surface a reader hits forty times in a row.
 
 Where a narrow viewport forces a choice between the enhanced size and
 horizontal scroll, **reflow wins and the size relaxes toward the AA
-floor** — with the breakpoint and the resulting size stated in the CSS
-comment. Horizontal scroll fails 1.4.10 for everyone; a 38 px target
+floor**. Horizontal scroll fails 1.4.10 for everyone; a 38 px target
 still passes 2.5.8 comfortably.
+
+**Prefer a fluid resolution to a breakpoint.** A breakpoint answers the
+conflict at one guessed width; a percentage answers it at every width.
+The archive's day cells hold a hard 44 px of height and take a seventh
+of whatever the viewport gives — 44.6 px from a 390 px phone upward,
+about 37.7 px at 320 px — so the grid cannot overflow at any size and
+the AA floor is never approached, let alone crossed. That shape is
+preferred wherever a control can express its size as a share of its
+container.
+
+**Watch what a new surface inherits.** A11Y-23 was not a target-size
+mistake: the day cells were the right size and the *global* `th, td`
+rule added 0.7 rem of side padding, a border and zebra striping to each
+one, so seven columns wanted about 500 px. A component that reuses a
+generic element inherits every rule written for that element's other
+uses; reset explicitly, and check the computed width at 320 px rather
+than the declared one.
 
 ---
 

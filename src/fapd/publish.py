@@ -1055,13 +1055,33 @@ h2.filter-lead {
 .cal-grid {
   display: flex; flex-wrap: wrap; gap: 1.75rem 2.25rem; margin: 1.25rem 0;
 }
-.cal-month { scroll-margin-top: 1rem; }
+/* Fluid between a comfortable minimum and a cap. `min-width: 0` is
+   load-bearing: a flex item defaults to min-content and refuses to
+   shrink past it, which is how a grid pushes a page sideways. */
+.cal-month {
+  flex: 1 1 17rem; max-width: 21rem; min-width: 0;
+  scroll-margin-top: 1rem;
+}
 .cal-month:focus { outline: none; }
 .cal-month:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
-table.cal { border-collapse: separate; border-spacing: 3px; }
+/* A calendar is not a data table and must not inherit one. The global
+   `th, td` rule adds 0.7rem of side padding, a 1px border and zebra
+   striping to every cell; left alone it made each day cell ~68px wide,
+   so seven columns wanted ~500px and scrolled a 390px phone sideways
+   (A11Y-23). The nth-child selector is repeated because the global
+   stripe rule outranks a plain `.cal td`. */
+.cal th, .cal td, .cal tr:nth-child(even) td {
+  border: 0; padding: 0; background: none; text-align: center;
+}
+/* Percentage columns, not pixel ones: the grid then fits whatever
+   viewport it is given and can never overflow. `table-layout: fixed`
+   keeps the seven columns equal regardless of their contents. */
+table.cal {
+  width: 100%; table-layout: fixed;
+  border-collapse: separate; border-spacing: 3px;
+}
 table.cal caption {
   text-align: left; font-weight: 600; padding: 0 0 0.35rem 3px;
-  white-space: nowrap;
 }
 table.cal caption .cal-count {
   font-weight: 400; color: var(--muted); font-size: 0.85rem;
@@ -1071,13 +1091,17 @@ table.cal caption .cal-count {
   padding: 0 0 0.2rem; text-align: center;
 }
 .cal th abbr { text-decoration: none; }
-/* SC 2.5.5 Target Size (Enhanced, AAA): 44x44 CSS px, well past the
-   24px AA minimum of 2.5.8. This is the switch-access, head-pointer and
-   touch requirement, and an archive is a surface a reader hits many
-   times in a row (doctrine §4.2). */
+/* Target size (doctrine §4.2). The height is a hard 44px — SC 2.5.5
+   Enhanced, well past the 24px AA minimum of 2.5.8 — because switch
+   access, head pointers and touch are what the minimum fails first.
+   The width takes a seventh of whatever the viewport gives: 44px and
+   more on a laptop, about 38px on a 320px phone, which still clears
+   2.5.8 with room to spare. Reflow wins over the enhanced size when
+   they conflict, and a fluid width means they resolve on their own at
+   every width instead of at one guessed breakpoint. */
 .cal a, .cal .cal-none {
   display: flex; align-items: center; justify-content: center;
-  min-width: 44px; min-height: 44px;
+  width: 100%; min-width: 0; min-height: 44px;
   font-variant-numeric: tabular-nums; font-size: 0.95rem;
   border-radius: 6px;
 }
@@ -1118,11 +1142,9 @@ table.cal caption .cal-count {
   display: flex; flex-wrap: wrap; gap: 0.35rem 1.25rem; }
 .month-links a { text-decoration-thickness: 1px; }
 .archive-more { margin-top: 1.5rem; }
-/* Reflow to a 320px viewport (1.4.10) keeps seven columns: cells relax
-   to 38px, still comfortably past the 24px AA floor. Horizontal page
-   scroll fails everyone; a slightly smaller target does not. */
+/* No size breakpoint is needed any more — the columns are fluid — so
+   this only tightens the gap between months on a small screen. */
 @media (max-width: 430px) {
-  .cal a, .cal .cal-none { min-width: 38px; min-height: 38px; }
   .cal-grid { gap: 1.25rem; }
 }
 @media (forced-colors: active) {

@@ -197,20 +197,43 @@ def test_the_decorative_border_token_is_not_used_for_calendar_cells():
     assert "var(--border)" not in cell_rule
 
 
-def test_calendar_day_targets_meet_the_enhanced_size():
-    """SC 2.5.5 (44px, AAA) for the archive, because switch access and
-    head pointers are what the 24px minimum fails first. The narrow
-    breakpoint relaxes toward the floor rather than introducing
-    horizontal scroll (SC 1.4.10) — and stays well past 24px."""
+def test_calendar_day_targets_are_fluid_and_never_overflow():
+    """Doctrine §4.2. The height is a hard 44px (SC 2.5.5 Enhanced); the
+    width is a seventh of the viewport, so the grid fits any screen by
+    construction rather than at a guessed breakpoint. A11Y-23 was the
+    fixed-pixel version scrolling a phone sideways."""
     rule = re.search(r"\.cal a, \.cal \.cal-none \{[^}]*\}",
                      publish._STYLE).group()
-    assert "min-width: 44px" in rule and "min-height: 44px" in rule
-    narrow = re.search(
-        r"@media \(max-width: 430px\) \{.*?\.cal a, \.cal \.cal-none "
-        r"\{([^}]*)\}", publish._STYLE, re.DOTALL).group(1)
-    sizes = [int(v) for v in re.findall(r"min-(?:width|height): (\d+)px",
-                                        narrow)]
-    assert sizes and all(24 <= s < 44 for s in sizes), sizes
+    assert "min-height: 44px" in rule
+    assert "width: 100%" in rule
+    # A fixed min-width is what made the grid unable to fit a phone.
+    assert "min-width: 0" in rule and "min-width: 44px" not in rule
+    table = re.search(r"table\.cal \{[^}]*\}", publish._STYLE).group()
+    assert "width: 100%" in table and "table-layout: fixed" in table
+
+
+def test_calendar_cells_do_not_inherit_the_data_table_styling():
+    """A11Y-23's cause: the global `th, td` rule put 0.7rem of side
+    padding and a border on every day cell, so seven columns wanted
+    ~500px. The reset must also outrank the zebra-stripe selector."""
+    reset = re.search(
+        r"\.cal th, \.cal td, \.cal tr:nth-child\(even\) td \{[^}]*\}",
+        publish._STYLE)
+    assert reset, "the calendar does not reset the data-table cell styling"
+    assert "padding: 0" in reset.group() and "border: 0" in reset.group()
+
+
+def test_the_calendar_reflows_to_a_320px_viewport():
+    """SC 1.4.10, computed from the declared values rather than assumed:
+    seven columns plus their spacing, inside the page's own padding,
+    must leave a cell wider than the 24px AA target floor."""
+    side_padding = float(re.search(r"main \{[^}]*padding:\s*[\d.]+rem\s+([\d.]+)rem",
+                                   publish._STYLE).group(1)) * 16
+    spacing = float(re.search(r"table\.cal \{[^}]*border-spacing:\s*(\d+)px",
+                              publish._STYLE, re.DOTALL).group(1))
+    content = 320 - 2 * side_padding
+    cell = (content - 8 * spacing) / 7
+    assert cell >= 24, f"{cell:.1f}px per cell at a 320px viewport"
 
 
 # ---------------------------------------------------------------------------

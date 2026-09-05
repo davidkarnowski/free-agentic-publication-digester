@@ -4,9 +4,10 @@
 https://fapd.info, as rendered by `src/fapd/publish.py`. Last reviewed:
 2026-07-30.*
 
-*Findings A11Y-21 and A11Y-22 were added 2026-09-05, found by
-`tests/test_accessibility.py` on its first run and resolved the same
-day; the 2026-07-30 status below describes the original audit pass and
+*Findings A11Y-21, A11Y-22 and A11Y-23 were added 2026-09-05 and
+resolved the same day — the first two found by
+`tests/test_accessibility.py` on its first run, the third reported by
+the operator from a phone; the 2026-07-30 status below describes the original audit pass and
 is left as written.*
 
 *Remediation status, 2026-07-30: 19 of 20 findings resolved across two
@@ -1229,6 +1230,51 @@ The lesson is the one the sweep was written for: a fix applied per page
 class is a fix that a later page class silently misses. The test now
 asserts the invariant across every page the build produces, so a new
 page class inherits the requirement instead of having to remember it.
+
+---
+
+### A11Y-23 — High — 1.4.10 Reflow; 2.5.8 Target Size (Minimum)
+
+**Status: resolved 2026-09-05**, hours after the archive shipped;
+reported by the operator from a phone. Pinned by
+`test_calendar_day_targets_are_fluid_and_never_overflow`,
+`test_calendar_cells_do_not_inherit_the_data_table_styling`, and
+`test_the_calendar_reflows_to_a_320px_viewport`, which computes the cell
+width at a 320 px viewport from the declared values.
+
+**Where:** `publish._STYLE` — the archive calendars.
+
+The calendar overflowed the viewport on a phone, scrolling the page
+horizontally.
+
+The cause was not the target size, which is what the design had
+reasoned about. It was inheritance: the stylesheet's global
+`th, td { border: 1px solid var(--border); padding: 0.4rem 0.7rem; }`
+applies to every table on the site, so each 44 px day cell rendered
+inside a `<td>` about 68 px wide. Seven columns plus `border-spacing`
+wanted roughly 500 px, against about 358 px of content width on a
+390 px phone. The cells also picked up a stray border and the zebra
+striping meant for data tables.
+
+The 430 px breakpoint written for exactly this risk did not save it: it
+relaxed the *link's* min-width to 38 px while the inherited cell padding
+stayed, so the grid was still ~380 px wide inside the breakpoint.
+
+Fixed in two parts. The calendar now resets the data-table cell styling
+explicitly (`.cal th, .cal td, .cal tr:nth-child(even) td` — the
+nth-child selector repeated because the global stripe rule outranks a
+plain `.cal td`). And the grid became fluid rather than fixed:
+`table-layout: fixed` at `width: 100%` inside a `min-width: 0` flex
+item, with the day cell keeping a hard 44 px height and taking a
+seventh of the available width. The size breakpoint was deleted — there
+is nothing left for it to do.
+
+Two lessons, both now in the doctrine (§4.2). A component built from a
+generic element inherits every rule written for that element's other
+uses, so a new surface states what it does not want. And a fluid
+resolution beats a breakpoint: a percentage answers the reflow/target
+conflict at every width, where a breakpoint answers it at one guessed
+width and, here, answered the wrong half of the problem.
 
 ---
 

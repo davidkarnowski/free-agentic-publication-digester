@@ -118,11 +118,13 @@ Each one has a concrete design consequence. Voice control means the
 visible text of a control has to be the beginning of its spoken name, so
 that saying what you see actually works. Switch access and head pointers
 mean targets are sized generously — the calendar's day cells are built
-to the enhanced 44-by-44-pixel standard rather than the minimum,
-with real spacing between them, because a target that is merely legal to
-hit is not the same as a target that is comfortable to hit forty times.
+to the enhanced 44-pixel standard rather than the minimum, with real
+spacing between them, because a target that is merely legal to hit is
+not the same as a target that is comfortable to hit forty times.
 Magnification means content reflows down to a narrow viewport without a
-horizontal scrollbar. Forced-colors means we declare how our elements
+horizontal scrollbar, and where those two pull against each other the
+cells take a share of the width they are given rather than a fixed
+number of pixels, so both hold at once. Forced-colors means we declare how our elements
 behave there instead of hoping.
 
 ## Measured, not eyeballed
