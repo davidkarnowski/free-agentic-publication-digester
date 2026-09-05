@@ -4,10 +4,14 @@ Derived output only (GUIDE §5): zero LLM calls, regenerable at any time
 from digests/*.md. Pages are plain HTML5 + one shared stylesheet, no
 external resources, and exactly one script — _LOCAL_TIME_JS on the live
 page, which appends the reader's local time beside published stamps and
-loads/stores nothing (code-standards §2 r10). Everything renders
+loads/stores nothing (code-standards §2 r10). Universal access is a
+pillar, not a polish pass: every surface here is built to GUIDE §2a and
+the method in docs/accessibility-doctrine.md. Everything renders
 identically from the filesystem, GitHub Pages, or any static host.
 """
 
+import calendar as _calendar
+import datetime as dt
 import html
 import json as _json_mod
 import re
@@ -1041,6 +1045,92 @@ h2.filter-lead {
   .chart-line { stroke: #444; }
   .model-block { border: 1px dashed #444; }
 }
+/* ---- the digest archive: calendars of ordinary links --------------
+   Doctrine §1 rung 1: a month is a table, a day is a link. There is no
+   widget here and nothing to learn, which is why it behaves the same
+   for a crawler, a screen reader, a switch user and a mouse. */
+.archive { margin-top: 2.75rem; }
+.archive > h2 { margin-bottom: 0.15rem; }
+.archive-intro { color: var(--muted); margin-top: 0; max-width: 62ch; }
+.cal-grid {
+  display: flex; flex-wrap: wrap; gap: 1.75rem 2.25rem; margin: 1.25rem 0;
+}
+.cal-month { scroll-margin-top: 1rem; }
+.cal-month:focus { outline: none; }
+.cal-month:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+table.cal { border-collapse: separate; border-spacing: 3px; }
+table.cal caption {
+  text-align: left; font-weight: 600; padding: 0 0 0.35rem 3px;
+  white-space: nowrap;
+}
+table.cal caption .cal-count {
+  font-weight: 400; color: var(--muted); font-size: 0.85rem;
+}
+.cal th {
+  font-weight: 600; font-size: 0.78rem; color: var(--muted);
+  padding: 0 0 0.2rem; text-align: center;
+}
+.cal th abbr { text-decoration: none; }
+/* SC 2.5.5 Target Size (Enhanced, AAA): 44x44 CSS px, well past the
+   24px AA minimum of 2.5.8. This is the switch-access, head-pointer and
+   touch requirement, and an archive is a surface a reader hits many
+   times in a row (doctrine §4.2). */
+.cal a, .cal .cal-none {
+  display: flex; align-items: center; justify-content: center;
+  min-width: 44px; min-height: 44px;
+  font-variant-numeric: tabular-nums; font-size: 0.95rem;
+  border-radius: 6px;
+}
+/* --border is 1.34:1 against the page: right for a dividing rule, and
+   nowhere near the 3:1 SC 1.4.11 wants from a control boundary.
+   --control-border is 3.22:1 light / 3.61:1 dark. */
+.cal a {
+  background: var(--accent-soft); color: var(--accent);
+  border: 1px solid var(--control-border); text-decoration: none;
+}
+.cal a:hover { background: var(--accent); color: var(--accent-on); }
+.cal a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+/* A day with no digest is text, never a disabled link: nothing
+   focusable that does nothing. */
+.cal .cal-none { color: var(--muted); border: 1px solid transparent; }
+/* Reduced-publishing days are marked, never dimmed — `opacity` would
+   composite the text back toward the background and destroy a computed
+   contrast ratio (doctrine §2). */
+.cal .cal-closed { background: var(--stripe); border-style: dashed; }
+.cal-legend {
+  list-style: none; padding: 0; margin: 0.5rem 0 0;
+  display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem;
+  color: var(--muted); font-size: 0.9rem;
+}
+.cal-legend .swatch {
+  display: inline-block; width: 1rem; height: 1rem; vertical-align: -0.2rem;
+  margin-right: 0.35rem; border-radius: 3px;
+  border: 1px solid var(--control-border);
+}
+.cal-legend .swatch-day { background: var(--accent-soft); }
+.cal-legend .swatch-closed { background: var(--stripe); border-style: dashed; }
+.cal-legend .swatch-none { background: transparent; border-color: var(--border); }
+/* No generated-content separator between month links: CSS ::after
+   content reaches the accessibility tree (A11Y-15), so a decorative
+   middle dot would be announced between every month. Spacing carries
+   the separation instead, and each link is its own list item. */
+.month-links { list-style: none; padding: 0; margin: 0.4rem 0 0;
+  display: flex; flex-wrap: wrap; gap: 0.35rem 1.25rem; }
+.month-links a { text-decoration-thickness: 1px; }
+.archive-more { margin-top: 1.5rem; }
+/* Reflow to a 320px viewport (1.4.10) keeps seven columns: cells relax
+   to 38px, still comfortably past the 24px AA floor. Horizontal page
+   scroll fails everyone; a slightly smaller target does not. */
+@media (max-width: 430px) {
+  .cal a, .cal .cal-none { min-width: 38px; min-height: 38px; }
+  .cal-grid { gap: 1.25rem; }
+}
+@media (forced-colors: active) {
+  .cal a { border: 1px solid LinkText; }
+  .cal .cal-closed { border-style: dashed; }
+  .cal .cal-none { border: 1px solid GrayText; }
+  .cal-legend .swatch { border: 1px solid CanvasText; }
+}
 """
 
 _DATE_MD_RE = re.compile(r"^\d{4}-\d{2}-\d{2}\.md$")
@@ -1621,7 +1711,11 @@ def _build_doc_pages(out_dir):
     brand = SITE_TITLE.split(" — ")[0]
     for md_text, stem, title, canonical in docs:
         _MD.reset()
-        body = _MD.convert(md_text)
+        # A11Y-22: the doc pages' tables get the same treatment the
+        # digest and sources pages already had — `scope` on header cells
+        # and a focusable labelled scroll region (A11Y-03). They were the
+        # one page class that bypassed the helper.
+        body = _accessible_tables(_MD.convert(md_text))
         if stem == "about":
             about_audio_map = {
                 r'(<h1 id="about-this-project">About this project</h1>)': ("assets/audio/about-intro.mp3", "About this project"),
@@ -2091,7 +2185,11 @@ def _sources_body(entries, health=None):
             "listed because a closed door is coverage information; where an "
             "agency offers a subscription email channel instead, a sibling "
             "entry appears above and the refusal here stands on the "
-            "record.</p>")
+            "record.</p>"
+            # A11Y-21 (SC 1.3.1, 2.4.10): the cards are h4, matching the
+            # active/planned groups, so the subgroup heading that makes
+            # h2 -> h3 -> h4 continuous has to exist here too.
+            f"<h3>Unavailable ({len(unavailable)})</h3>")
         parts.extend(_source_card(e, records.get(e["id"]))
                      for e in unavailable)
 
@@ -2103,7 +2201,8 @@ def _sources_body(entries, health=None):
             "<p>Sources examined and found outside the project's scope — "
             "they do not publish new federal government actions. The "
             "evaluation is kept so the decision stays visible and "
-            "revisitable.</p>")
+            "revisitable.</p>"
+            f"<h3>Evaluated and excluded ({len(excluded)})</h3>")
         parts.extend(_source_card(e, records.get(e["id"]))
                      for e in excluded)
 
@@ -3080,6 +3179,246 @@ def refresh_sources(out_dir=None, *, pipeline_db=None, fetch_db=None,
             "health": hp}
 
 
+# ---------------------------------------------------------------------------
+# The digest archive (GUIDE §2a; docs/accessibility-doctrine.md §1)
+# ---------------------------------------------------------------------------
+#
+# The index listed every digest since the record began — one card a day,
+# unbounded. The replacement keeps the recent listing and reaches older
+# days through month calendars in which every published day is an
+# ordinary link.
+#
+# Why a grid of links and not a date picker: the doctrine's ladder stops
+# at rung 1. A scripted date picker is the most reliably broken widget on
+# the web for keyboard and screen-reader users, `<input type="date">` is
+# unevenly implemented, and on a static site with no server-side routing
+# neither could act on what it collected anyway. A link needs no
+# assistive-technology pass to be trusted: it is the thing every
+# assistive technology was built to handle.
+
+RECENT_DIGEST_DAYS = 7
+
+_MONTH_NAMES = ("January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November",
+                "December")
+# Sunday-first, matching every US federal publication calendar a reader
+# of this site is likely to hold beside it.
+_WEEKDAY_COLS = (("Su", "Sunday"), ("Mo", "Monday"), ("Tu", "Tuesday"),
+                 ("We", "Wednesday"), ("Th", "Thursday"), ("Fr", "Friday"),
+                 ("Sa", "Saturday"))
+
+
+def _cal_long_date(date):
+    """'Friday, August 14, 2026' — the spoken form of a day cell."""
+    weekday = _WEEKDAY_COLS[(date.weekday() + 1) % 7][1]
+    return (f"{weekday}, {_MONTH_NAMES[date.month - 1]} {date.day}, "
+            f"{date.year}")
+
+
+def _cal_month_id(year, month):
+    return f"m-{year:04d}-{month:02d}"
+
+
+def _cal_month_table(year, month, published, *, depth=0):
+    """One month as a table of links.
+
+    `published` is a set of ISO dates. Accessibility contract, each part
+    load-bearing (doctrine §2, §4.2):
+
+    - `<caption>` names the month, so a screen reader's table list is a
+      month list, and `<th scope="col">` binds the weekday columns.
+    - The visible day number BEGINS the accessible name, so voice
+      control ("click 14") matches what is on screen (SC 2.5.3); the
+      spoken date and any reduced-publishing note are appended in a
+      `.vh` span, never prepended.
+    - A day with no digest renders as text, not a disabled link: nothing
+      focusable that does nothing.
+    - Weekends and federal holidays are marked from `fedcal`, and the
+      reason is in the accessible name — the mark is never carried by
+      colour alone (SC 1.4.1).
+    """
+    from . import fedcal
+
+    prefix = "../" * depth
+    weeks = _calendar.Calendar(firstweekday=6).monthdatescalendar(year, month)
+    count = sum(1 for d in published if d.startswith(f"{year:04d}-{month:02d}"))
+    head = "".join(
+        f'<th scope="col"><abbr title="{full}">{short}</abbr></th>'
+        for short, full in _WEEKDAY_COLS)
+    rows = []
+    for week in weeks:
+        cells = []
+        for date in week:
+            if date.month != month:
+                cells.append('<td class="cal-pad"></td>')
+                continue
+            iso = date.isoformat()
+            closed = fedcal.reduced_publishing(iso)
+            css = " cal-closed" if closed else ""
+            note = (f" ({closed['name']} — not a federal business day)"
+                    if closed else "")
+            spoken = f"{_cal_long_date(date)}{note}"
+            if iso in published:
+                cells.append(
+                    f'<td><a class="cal-day{css}" href="{prefix}{iso}.html">'
+                    f'{date.day}<span class="vh"> — digest for {spoken}'
+                    f"</span></a></td>")
+            else:
+                cells.append(
+                    f'<td><span class="cal-none{css}">{date.day}'
+                    f'<span class="vh"> — no digest for {spoken}</span>'
+                    f"</span></td>")
+        rows.append("<tr>" + "".join(cells) + "</tr>")
+    plural = "digest" if count == 1 else "digests"
+    # tabindex="-1" on the wrapper so a month link from the index lands
+    # focus on the calendar it names, not merely the scroll position.
+    return (
+        f'<div class="cal-month" id="{_cal_month_id(year, month)}" '
+        f'tabindex="-1"><table class="cal">'
+        f"<caption>{_MONTH_NAMES[month - 1]} {year} "
+        f'<span class="cal-count">({count} {plural})</span></caption>'
+        f"<thead><tr>{head}</tr></thead><tbody>{''.join(rows)}</tbody>"
+        f"</table></div>")
+
+
+def _cal_legend():
+    """The key. Each swatch is decorative; the words carry the meaning."""
+    return (
+        '<ul class="cal-legend">'
+        '<li><span class="swatch swatch-day" aria-hidden="true"></span>'
+        "Digest published</li>"
+        '<li><span class="swatch swatch-closed" aria-hidden="true"></span>'
+        "Weekend or federal holiday</li>"
+        '<li><span class="swatch swatch-none" aria-hidden="true"></span>'
+        "No digest for that day</li></ul>")
+
+
+def _archive_href(year, newest_year, *, depth=0):
+    """Where a given year's calendars live. The newest year renders
+    inline on archive.html; older years get their own page, so no two
+    URLs ever carry the same calendar."""
+    prefix = "../" * depth
+    if year == newest_year:
+        return f"{prefix}archive.html"
+    return f"{prefix}archive/{year}.html"
+
+
+def _month_links(published, newest_year, *, depth=0):
+    """Plain text links, newest first, to each month that has digests —
+    the fast path to a specific month without paging through calendars.
+    Operator's call, 2026-09-05: the grid answers 'which day', this
+    answers 'which month', and neither should do the other's job."""
+    months = sorted({d[:7] for d in published}, reverse=True)
+    items = []
+    for ym in months:
+        year, month = int(ym[:4]), int(ym[5:7])
+        href = (f"{_archive_href(year, newest_year, depth=depth)}"
+                f"#{_cal_month_id(year, month)}")
+        items.append(f'<li><a href="{href}">{_MONTH_NAMES[month - 1]} '
+                     f"{year}</a></li>")
+    return f'<ul class="month-links">{"".join(items)}</ul>'
+
+
+def _index_archive_block(published, newest):
+    """The index page's archive block: the newest month as a calendar,
+    then every month as a plain link. Bounded — the index stops growing
+    with the record."""
+    date = dt.date.fromisoformat(newest)
+    newest_year = date.year
+    return (
+        '<nav class="archive" aria-label="Digest archive">'
+        "<h2>Earlier days</h2>"
+        '<p class="archive-intro">Every published day, by date. Each day '
+        "links to that day&rsquo;s digest; the digest is the canonical "
+        "record of what the federal government published that day.</p>"
+        f'<div class="cal-grid">'
+        f"{_cal_month_table(date.year, date.month, published)}</div>"
+        f"{_cal_legend()}"
+        "<h3>Digests by month</h3>"
+        f"{_month_links(published, newest_year)}"
+        f'<p class="archive-more"><a href="'
+        f'{_archive_href(newest_year, newest_year)}">Full digest archive'
+        "</a></p></nav>")
+
+
+def _months_with_digests(year, published):
+    """The months of `year` that actually have digests, in calendar
+    order. Operator's call, 2026-09-05: an empty grid is not disclosure,
+    it is twelve rows of nothing — the record began 2026-07-27, so a
+    full-year page would have opened with six blank months. Absent DAYS
+    inside a month we do publish still render (a gap in a month we cover
+    is information); an absent month is simply not a month we cover."""
+    return sorted({int(d[5:7]) for d in published
+                   if d.startswith(f"{year:04d}-")})
+
+
+def _archive_body(year, published, *, years, depth=0):
+    """One year's calendars — only the months with digests — plus links
+    to the other years."""
+    newest_year = years[0]
+    months = _months_with_digests(year, published)
+    others = [y for y in years if y != year]
+    other_links = ("".join(
+        f'<li><a href="{_archive_href(y, newest_year, depth=depth)}">{y}'
+        "</a></li>" for y in others))
+    prefix = "../" * depth
+    return (
+        f"<h1>Digest archive — {year}</h1>"
+        '<p class="tagline">Every daily digest, by date. The digest for a '
+        "day is the canonical record of what the federal government "
+        "published that day.</p>"
+        # A11Y-02 / SC 2.4.1: twelve calendars is a long run of links to
+        # walk past by keyboard.
+        f'<a class="skip-link" href="#archive-end">Skip the '
+        f"{len(months)} {year} calendars</a>"
+        f'<div class="cal-grid">'
+        + "".join(_cal_month_table(year, m, published, depth=depth)
+                  for m in months)
+        + f"</div>{_cal_legend()}"
+        + (f"<h2>Other years</h2><ul>{other_links}</ul>" if others else "")
+        + '<p class="archive-more" id="archive-end" tabindex="-1">'
+        f'The complete machine-readable index is <a href="{prefix}'
+        'digests.json">digests.json</a>, and every digest is also '
+        f'published as Markdown in the <a href="{REPO_URL}">public '
+        "repository</a>.</p>")
+
+
+def _build_archive_pages(out_dir, dates, doc_pages=()):
+    """archive.html (the newest year) plus archive/<year>.html for each
+    earlier year. Returns the relative URLs built, for the sitemap.
+
+    Older years get their own page rather than all years on one, so the
+    archive stays bounded as the record grows; the newest year is inline
+    on archive.html so a reader who follows one link from the index is
+    already where the recent days are."""
+    if not dates:
+        return []
+    published = set(dates)
+    years = sorted({int(d[:4]) for d in dates}, reverse=True)
+    built = []
+    page = _render_page(
+        f"Digest archive {years[0]} — {SITE_TITLE}",
+        _archive_body(years[0], published, years=years),
+        _site_nav(doc_pages), "digests/",
+        description=("Every daily digest published by the Free Agentic "
+                     "Publication Digester, by date."))
+    (out_dir / "archive.html").write_text(page, encoding="utf-8")
+    built.append("archive.html")
+    for year in years[1:]:
+        page = _render_page(
+            f"Digest archive {year} — {SITE_TITLE}",
+            _archive_body(year, published, years=years, depth=1),
+            _site_nav(doc_pages), "digests/",
+            description=(f"Daily digests published in {year} by the Free "
+                         "Agentic Publication Digester, by date."))
+        year_dir = out_dir / "archive"
+        year_dir.mkdir(parents=True, exist_ok=True)
+        (year_dir / f"{year}.html").write_text(_rebase_page(page),
+                                               encoding="utf-8")
+        built.append(f"archive/{year}.html")
+    return built
+
+
 def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
                fetch_db=None):
     """Convert every digest to HTML plus an index. Returns stats.
@@ -3151,8 +3490,12 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
                     shutil.copy2(f, asset_dst / f.name)
                     assets_copied += 1
 
+    # Only the recent window gets a card: the archive block below
+    # reaches everything older, so the index stops growing with the
+    # record (it listed every digest until 2026-09-05).
+    recent = list(reversed(dates))[:RECENT_DIGEST_DAYS]
     cards = []
-    for date in reversed(dates):
+    for date in recent:
         teaser = teasers.get(date)
         teaser_html = (
             f'<p class="teaser">{html.escape(teaser)}</p>' if teaser else ""
@@ -3174,9 +3517,11 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
                                        doc_pages, pipeline_db=pipeline_db,
                                        fetch_db=fetch_db)
     blog_posts = _build_blog(out_dir, doc_pages)
+    archive_pages = _build_archive_pages(out_dir, dates, doc_pages)
     _build_agent_surfaces(out_dir, dates, teasers, doc_pages,
                           base=config.SITE_BASE_URL, blog_posts=blog_posts,
-                          entries=registry_entries, health=source_stats)
+                          entries=registry_entries, health=source_stats,
+                          archive_pages=archive_pages)
     sources_link = (
         '<p class="tagline"><a href="sources.html">Source guide</a> — every '
         "federal source we ingest, plan to ingest, or have evaluated, with "
@@ -3189,12 +3534,19 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
         "watch official publications arrive through the day, newest first "
         "(preliminary until the end-of-day digest freezes the record).</p>"
     )
+    recent_heading = (
+        f"<h2>The last {len(recent)} days</h2>" if len(recent) > 1
+        else "<h2>The most recent digest</h2>") if recent else ""
+    archive_block = (_index_archive_block(set(dates), dates[-1])
+                     if dates else "")
     index_body = (
         f"<h1>{html.escape(SITE_TITLE)}</h1>"
         f'<p class="tagline">{html.escape(SITE_TAGLINE)}</p>'
         f"{live_callout}"
         f"{sources_link}"
+        f"{recent_heading}"
         f'<ul class="digest-list">{"".join(cards)}</ul>'
+        f"{archive_block}"
     )
     index = _render_page(
         SITE_TITLE, index_body,
@@ -3212,6 +3564,7 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
         "doc_pages": len(doc_pages),
         "blog_posts": len(blog_posts),
         "source_pages": source_pages,
+        "archive_pages": len(archive_pages),
         "out_dir": out_dir,
     }
 
@@ -4301,7 +4654,8 @@ def _sources_json(entries, health, base=""):
 
 
 def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
-                          blog_posts=(), entries=(), health=None):
+                          blog_posts=(), entries=(), health=None,
+                          archive_pages=()):
     """llms.txt, digests.json, sources.json, feed.xml, robots.txt,
     sitemap.xml, agents.html.
 
@@ -4334,7 +4688,14 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
         "## Core",
         f"- [Latest digest]({base}/"
         + (f"{newest}.html" if newest else "index.html") + ")",
-        f"- [All digests (index)]({base}/index.html)",
+        (f"- [All digests (index)]({base}/index.html)"
+         f" (the home page lists the {RECENT_DIGEST_DAYS} most recent days"
+         " and links the archive; it is NOT a complete enumeration —"
+         " digests.json is)"),
+        (f"- [Digest archive]({base}/archive.html) — every published day"
+         " as a calendar of links, one page per year"
+         f" ({base}/archive/YYYY.html for earlier years). Human"
+         " navigation; agents should read digests.json instead."),
         f"- [Machine-readable digest index]({base}/digests.json)",
         f"- [Atom feed of digests]({base}/feed.xml)",
         (f"- [Today — live in-progress day, PRELIMINARY]({base}/today.html)"
@@ -4473,6 +4834,7 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
         + (["blog.html"] if blog_posts else [])
         + [f"blog-{slug}.html" for slug, _date, _title in blog_posts]
         + [f"{d}.html" for d in dates]
+        + list(archive_pages)
         + day_pages
     )
     sitemap = (

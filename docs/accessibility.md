@@ -4,6 +4,11 @@
 https://fapd.info, as rendered by `src/fapd/publish.py`. Last reviewed:
 2026-07-30.*
 
+*Findings A11Y-21 and A11Y-22 were added 2026-09-05, found by
+`tests/test_accessibility.py` on its first run and resolved the same
+day; the 2026-07-30 status below describes the original audit pass and
+is left as written.*
+
 *Remediation status, 2026-07-30: 19 of 20 findings resolved across two
 passes; A11Y-18 stays open because no fix exists at the current DOM
 order. Each finding below carries its own **Status:** line — nothing was
@@ -1169,6 +1174,61 @@ conformance failure; all three make a remediation harder to verify.
 3. `_STATUS_CHIPS` emits `tag-status-planned`, which has no rule in
    `_STYLE`. Planned sources render as plain chips. Cosmetic; noted so it
    is not mistaken for a deliberate difference.
+
+---
+
+### A11Y-21 — Medium — 1.3.1 Info and Relationships; 2.4.10 Section Headings
+
+**Status: resolved 2026-09-05** — both sections gained the `<h3>`
+subgroup heading the active/planned groups already had. Pinned by
+`tests/test_accessibility.py::test_heading_levels_never_skip`, which
+sweeps every built page class rather than this one.
+
+**Where:** `publish._sources_body` — the "Unavailable sources" and
+"Evaluated and excluded" sections.
+
+Found 2026-09-05 by the new tier-1 sweep, on its first run, on a page
+that had been live since 2026-08-03.
+
+`_source_section` renders each source group as `h2` -> `h3`
+(Active/Planned) -> `h4` (one per card). The two sections built outside
+that helper appended their cards directly under the `h2`, so the heading
+outline skipped a level for more than thirty consecutive cards. A screen
+reader user navigating by heading — which is how a 175 KB page is read —
+met a run of `h4`s under an `h2` with nothing explaining the jump, and
+"unavailable" and "excluded" were never announced as the groupings they
+are. The fix is the same subgroup heading the other groups carry, which
+also gives each group a count in its own heading.
+
+Not caught by the 2026-07-30 audit: heading structure was checked per
+section rather than as a whole-document outline, and both sections are
+far down a long page.
+
+---
+
+### A11Y-22 — Medium — 1.3.1 Info and Relationships; 2.1.1 Keyboard
+
+**Status: resolved 2026-09-05** — the explanatory pages now render
+through `_accessible_tables`, the same helper the digest and sources
+pages use. Pinned by
+`tests/test_accessibility.py::test_tables_keep_their_semantics`.
+
+**Where:** `publish._build_doc_pages` — About, Methods, FAQ, Privacy,
+Accessibility.
+
+Also found by the tier-1 sweep on its first run. A11Y-03 gave the digest
+pages scoped header cells and a focusable labelled scroll region for
+wide tables; `_sources_body` was routed through the same helper on
+2026-08-03. The doc pages went straight from `_MD.convert` to
+`_render_page` and were the one page class that never met it, so their
+markdown tables shipped bare `<th>` elements with no `scope` — including
+the FAQ's three-column check-cycle table — and a wide table scrolled the
+page rather than a labelled region a keyboard user can reach.
+
+The lesson is the one the sweep was written for: a fix applied per page
+class is a fix that a later page class silently misses. The test now
+asserts the invariant across every page the build produces, so a new
+page class inherits the requirement instead of having to remember it.
 
 ---
 

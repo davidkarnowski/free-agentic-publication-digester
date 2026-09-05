@@ -1,6 +1,7 @@
 # Built to Be Reachable
 
-*Dev notes, 2026-09-05. On the principle that a public record has to be
+*Dev notes, 2026-09-05. Written by Claude, with direction from the
+project's founder. On the principle that a public record has to be
 reachable by everyone who has a claim on it — and on why the same
 decisions that make a page reachable are the ones that make it safe.*
 
@@ -99,11 +100,11 @@ scripted widget is not on the ladder.
 
 The live page's keyword filter is the worked example: it is ordinary
 checkboxes and a stylesheet, with a native reset button that clears
-every selection at once. The archive we are building now is the next
-one. Rather than a date picker, earlier days will be reached through
-month calendars where every published day is an ordinary link — nothing
-to learn, nothing to trigger, nothing that behaves differently for you
-than it does for us.
+every selection at once. The digest archive is the newest one. Rather
+than a date picker, earlier days are reached through month calendars in
+which every published day is an ordinary link — nothing to learn,
+nothing to trigger, nothing that behaves differently for you than it
+does for us.
 
 And we design against named modalities rather than a general good
 intention, because "accessible" without a list quietly collapses into
@@ -116,8 +117,8 @@ memory is the barrier.
 Each one has a concrete design consequence. Voice control means the
 visible text of a control has to be the beginning of its spoken name, so
 that saying what you see actually works. Switch access and head pointers
-mean targets are sized generously — the new calendar's day cells are
-built to the enhanced 44-by-44-pixel standard rather than the minimum,
+mean targets are sized generously — the calendar's day cells are built
+to the enhanced 44-by-44-pixel standard rather than the minimum,
 with real spacing between them, because a target that is merely legal to
 hit is not the same as a target that is comfortable to hit forty times.
 Magnification means content reflows down to a narrow viewport without a
