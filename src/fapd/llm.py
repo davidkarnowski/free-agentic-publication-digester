@@ -458,9 +458,12 @@ class GeminiBackend:
             )
 
         model_name = model.removeprefix("models/")
+        # The key travels in a header, never the query string: a URL is
+        # the part of a request that gets logged, retried and pasted into
+        # a bug report. Google accepts either; only one of them keeps the
+        # secret out of our own logs.
         url = (
             f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
-            f"?key={self._api_key}"
         )
         payload = {
             "contents": [{"parts": [{"text": prompt}]}],
@@ -468,7 +471,8 @@ class GeminiBackend:
                 "maxOutputTokens": config.LLM_MAX_OUTPUT_TOKENS,
             },
         }
-        headers = {"Content-Type": "application/json"}
+        headers = {"Content-Type": "application/json",
+                   "x-goog-api-key": self._api_key}
 
         try:
             resp = self._requester(
@@ -563,7 +567,8 @@ def backend_from_config(name=None):
 
 
 class LLMClient:
-    def __init__(self, db_path=None, runner=None, backend=None, sleeper=None):
+    def __init__(self, db_path=None, runner=None, backend=None, sleeper=None,
+                 fallback=None):
         self._db_path = db_path or config.LLM_LEDGER_DB
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._db = sqlite3.connect(self._db_path)
@@ -583,16 +588,32 @@ class LLMClient:
         # again on this client — the ledger records each refusal.
         self.unavailable = getattr(self._backend, "unavailable", None)
         self._models_used = set()
+        # GUIDE §6 r7 explicit failover: the ONE backend we may hop to
+        # after the breaker trips — a name resolved through
+        # backend_from_config, or a ready backend object. Consumed on the
+        # first hop (set to None there), so a run can never chain
+        # providers or come back. None — the default, and every caller
+        # that does not opt in — is exactly the pre-2026-09-05 behaviour.
+        self._fallback = fallback
+        # Which backends actually produced a completion on this client.
+        # The day's attribution reads this, not `backend`: a day served
+        # by two providers must name both (r7, "attribution false").
+        self._backends_used = set()
 
     def status(self):
         """What the pipeline discloses and the health surface reads:
-        {"backend", "unavailable": reason|None, "models_used": [...]}
-        — models_used lists resolved model names that returned a
-        completion on THIS client (the r7 attribution the digest owes),
-        so a client that never got an answer reports an empty list."""
+        {"backend", "unavailable": reason|None, "models_used": [...],
+        "backends_used": [...]} — models_used lists resolved model names
+        that returned a completion on THIS client (the r7 attribution the
+        digest owes), so a client that never got an answer reports an
+        empty list. backends_used is the same fact for providers: after a
+        failover it holds both, which is what the day's attribution
+        records. "backend" stays the CURRENT backend — what the next call
+        would use — not a history."""
         return {"backend": self._backend.name,
                 "unavailable": self.unavailable,
-                "models_used": sorted(self._models_used)}
+                "models_used": sorted(self._models_used),
+                "backends_used": sorted(self._backends_used)}
 
     def _trip(self, reason, purpose, resets_in=None):
         if not self.unavailable:
@@ -612,6 +633,54 @@ class LLMClient:
                     resets_at.strftime("%H:%M"), int(resets_in // 60))
             self.unavailable = reason
 
+    def _failover(self, reason, purpose):
+        """Hop to the configured fallback provider. True when the run may
+        continue on it, False when it must stay tripped (GUIDE §6 r7).
+
+        Called only from complete(), only after the breaker has already
+        tripped — so the primary has refused in a way that will not
+        change within this run, and _trip() has already logged the
+        refusal and any reset time it named. This adds the second line:
+        which provider we moved to, and why.
+
+        One hop, always: the name is consumed before anything can fail,
+        so a fallback that is itself unavailable cannot send us round
+        again, and there is no path back to the primary. A configured
+        fallback that turns out to be unusable is an operator error worth
+        an ERROR line — the run still finalizes mechanically (r15), it
+        just does so without the redundancy someone believed it had.
+        """
+        if not self._fallback:
+            return False
+        name, self._fallback = self._fallback, None
+        primary = self._backend.name
+        if not isinstance(name, str):
+            # A ready backend was injected (the `backend=` parameter's
+            # pattern, for tests and for a caller assembling its own).
+            candidate = name
+        else:
+            try:
+                candidate = backend_from_config(name)
+            except ValueError as exc:
+                logger.error(
+                    "LLM failover: LLM_BACKEND_FALLBACK=%r is not a usable"
+                    " backend (%s) — staying unavailable for this run",
+                    name, exc)
+                return False
+        blocked = getattr(candidate, "unavailable", None)
+        if blocked:
+            logger.error(
+                "LLM failover: fallback %s is itself unavailable (%s) —"
+                " staying unavailable for this run", candidate.name, blocked)
+            return False
+        logger.warning(
+            "LLM failover: %s unavailable (%s) on %s — continuing this run on"
+            " %s; every later call is ledgered under %s (GUIDE §6 r7)",
+            primary, reason, purpose, candidate.name, candidate.name)
+        self._backend = candidate
+        self.unavailable = None
+        return True
+
     def complete(self, prompt, *, purpose, model=None, package_id=None,
                  granule_id=None, timeout=None):
         """One text-in/text-out completion. Records the call in the ledger
@@ -625,6 +694,15 @@ class LLMClient:
             # backend work, no wait. The reason is the breaker's, and
             # "(short-circuit)" tells the ledger reader this row cost no
             # HTTP request — the earlier row without it did.
+            # No failover from here, deliberately: a client whose backend
+            # was ALREADY unavailable at construction never tripped a
+            # breaker, and the commonest way to get here is
+            # LLM_BACKEND=none, which is an operator's instruction and
+            # not a failure to route around (GUIDE §6 r15). The cost of
+            # that boundary: a primary misconfigured at construction (an
+            # `api` backend with no key) does not hop either — it
+            # produces a mechanical day and an unmistakable log line
+            # rather than a silent switch to a provider nobody chose.
             self._log(resolved, purpose, package_id, granule_id, 0, 0, 0,
                       error=f"provider unavailable: {self.unavailable}"
                             " (short-circuit)")
@@ -648,6 +726,32 @@ class LLMClient:
                 f"prompt for {purpose!r} is {len(prompt):,} chars, past the"
                 f" {config.LLM_MAX_PROMPT_CHARS:,}-char guard — one call"
                 " must never carry an unbounded prompt (GUIDE §6 r8)")
+        # GUIDE §6 r7 explicit failover: at most two providers per call.
+        # The ladder below is per provider; a ProviderUnavailableError
+        # means this one is done for the run, so hop once (when a
+        # fallback is configured) and re-run the SAME prompt on it. With
+        # no fallback this loop runs exactly once and re-raises — the
+        # behaviour every caller had before 2026-09-05.
+        while True:
+            try:
+                return self._complete_once(prompt, resolved, purpose,
+                                           package_id, granule_id, timeout)
+            except ProviderUnavailableError as exc:
+                if not self._failover(exc.reason, purpose):
+                    raise
+                # Re-resolve the tier for the provider we just moved to:
+                # "haiku" resolves to "haiku" on the CLI and to
+                # "gemini-2.5-flash" on Gemini. Handing the fallback the
+                # primary's model name is the failure this line prevents.
+                resolved = config.LLM_MODELS.get(
+                    self._backend.name, {}).get(tier, tier)
+
+    def _complete_once(self, prompt, resolved, purpose, package_id,
+                       granule_id, timeout):
+        """One provider's attempt at `prompt` — the transient ladder and
+        every ledger write for it. Raises ProviderUnavailableError when
+        this provider is finished for the run; complete() decides whether
+        that ends the call or moves it to the fallback."""
         # Bounded retries for verifiably zero-billed transient failures
         # (TransientLLMError) ONLY: a failed attempt that cost nothing
         # cannot double-spend, so a hiccup stops costing a surface its
@@ -722,6 +826,7 @@ class LLMClient:
                 ) from exc
         duration_ms = int((time.monotonic() - started) * 1000)
         self._models_used.add(resolved)
+        self._backends_used.add(self._backend.name)
         self._log(resolved, purpose, package_id, granule_id,
                   result["input_tokens"], result["output_tokens"], duration_ms)
         logger.info(

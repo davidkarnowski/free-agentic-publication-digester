@@ -73,7 +73,9 @@ def main() -> int:
         if args.no_llm:
             client = llm.LLMClient(backend=llm.NullBackend("disabled by operator"))
         else:
-            client = llm.LLMClient()
+            # A re-render is a finalizer-class run, so it gets the same
+            # GUIDE §6 r7 failover as run_pipeline.py — unset by default.
+            client = llm.LLMClient(fallback=config.LLM_BACKEND_FALLBACK)
         with client:
             before = client.tokens_today()
             result = finalize.run_model_layers(conn, client, date)

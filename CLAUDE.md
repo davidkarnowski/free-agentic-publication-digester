@@ -41,7 +41,7 @@ GUIDE.md §1–§2.
 | Storage | SQLite ×3: `data/fapd.db` (pipeline), `data/fetch_log.db` (every HTTP attempt), `data/llm_ledger.db` (every LLM call) |
 | Site | static HTML, no framework — `publish.py` renders it; exactly one script (the live page's local-time snippet, code-standards §2 r10) |
 | Lint/tests | ruff (line 100), pytest (740+ tests; bare `pytest` collects `tests/` only via pyproject `testpaths` — the dev stack's staged repo copy would otherwise double-collect), CI on push/PR |
-| LLM | pluggable backends: `claude` CLI (default; production again since 2026-08-24) / Anthropic API (`LLM_BACKEND=api`) / Google Gemini (`LLM_BACKEND=gemini`, `GOOGLE_GEMINI_API_KEY`; production 2026-08-15..24) / none (`LLM_BACKEND=none`, GUIDE §6 r15); tier aliases resolved per backend via `config.LLM_MODELS`; an unknown value is an error, not the CLI |
+| LLM | pluggable backends: `claude` CLI (default; production again since 2026-08-24) / Anthropic API (`LLM_BACKEND=api`) / Google Gemini (`LLM_BACKEND=gemini`, `GOOGLE_GEMINI_API_KEY`; production 2026-08-15..24) / none (`LLM_BACKEND=none`, GUIDE §6 r15); tier aliases resolved per backend via `config.LLM_MODELS`; an unknown value is an error, not the CLI. `LLM_BACKEND_FALLBACK` is the one-hop failover (GUIDE §6 r7, 2026-09-05), **finalizer-only** |
 
 ## 4. Repository layout
 
@@ -262,6 +262,20 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   "improve" the disclosure with error text, and do not make an
   `LLMError` fatal to the finalizer again — that is what left ten days
   unpushed in August 2026.
+- **Provider failover is finalizer-only, and that asymmetry is the
+  design** (GUIDE §6 r7, 2026-09-05). `scripts/run_pipeline.py` and
+  `scripts/digest.py` pass `config.LLM_BACKEND_FALLBACK` to their
+  `LLMClient`; `collect.Supervisor._default_llm()` deliberately does
+  not, so the continuous `AnalyzeWorker` keeps r15's breaker-and-pause.
+  It looks like an oversight and is not: a free-tier fallback carries
+  ~20 requests a day, the all-day map/plain load is 30–60, and the
+  measured finalizer hour is 4–11 — so a fallback wired into the
+  collector is spent by mid-morning and gone at 04:00, which is exactly
+  the August 2026 starvation r15 records. Widening it needs a quota
+  reserve of its own (the §4 collector/finalizer 85% pattern), not a
+  one-line change. Two invariants inside the hop: it **re-resolves the
+  model tier** for the new backend, and attribution stays **plural**
+  (`backends_used` → `day_inference.backend` = `cli, gemini`).
 
 ## 10. Things that look intentional but are bugs
 
@@ -533,3 +547,34 @@ live in `.claude/agents/fapd-*.md` (tracked).
   banned word in text it did write. `find_lexicon_violation` builds the
   corpus once per call, not once per item, after a synthetic stress test
   measured the naive per-item shape at over a second per call.
+- **2026-09-05** — **Explicit provider failover, scoped to the
+  finalizer** (GUIDE §6 r7 amended, operator). `LLM_BACKEND_FALLBACK`
+  names ONE backend to continue on after `LLM_BACKEND` trips the per-run
+  breaker: one hop, never a chain, never a return, fired only on a
+  refusal that will not change within the run (quota exhausted, not
+  authenticated, provider refused) after the transient ladder is spent.
+  Logged at WARNING naming both providers; every call ledgered under the
+  backend that served it. *Incident:* on 2026-09-01 the CLI's
+  subscription session limit was open from 00:08 UTC; the 04:28
+  finalizer's first call (`map:batch1`) exhausted the ladder and tripped
+  the breaker, so compose/sections/tags short-circuited to `skipped` and
+  the digest published with no Day in Review. The limit reset at 04:40 —
+  four minutes after the finalizer gave up. Two things the mechanism
+  must keep doing: it **re-resolves the model tier** on the hop
+  (`haiku` is `haiku` on the CLI and `gemini-2.5-flash` on Gemini, so
+  carrying the primary's resolved name across calls a model that does
+  not exist there), and attribution is **plural** —
+  `status()["backends_used"]` and `day_inference.backend` hold every
+  provider that produced prose (`cli, gemini`), because naming only one
+  provider for a day served by two is the "attribution false" r7
+  forbids. **The scope is deliberate and is the whole safety argument:**
+  only `run_pipeline.py` and `digest.py` pass a fallback;
+  `Supervisor._default_llm()` does not, so the continuous analyze layer
+  keeps GUIDE §6 r15's breaker-and-pause. A free-tier fallback has ~20
+  requests a day and the all-day map/plain load is 30–60 — spending it
+  before 04:00 is precisely the August 2026 starvation r15 records; the
+  measured finalizer hour is 4–11 calls. Do not widen this to the
+  collector without a quota reserve of its own. Same change: the Gemini
+  API key moved from the URL query string to the `x-goog-api-key`
+  header — latent while Gemini was dormant, live the moment failover
+  makes it serve production traffic.

@@ -48,6 +48,18 @@ file.
   `day_inference`; the digest's Inference row states only that no
   inference was available — never the cause (operator ruling). Prose is
   never backfilled into a finalized day.
+- **Failover is one hop, and only the finalizer gets it (GUIDE §6 r7,
+  2026-09-05).** `LLM_BACKEND_FALLBACK` names one backend to continue
+  on after the primary trips the breaker — never a chain, never a
+  return, logged at WARNING, and each call ledgered under the backend
+  that served it. Two invariants: `complete()` **re-resolves the model
+  tier** on the hop (`haiku` → `gemini-2.5-flash`), and a day's
+  attribution is plural — `status()["backends_used"]` feeds
+  `day_inference.backend`, so a day the CLI started and Gemini finished
+  reads `cli, gemini`. The Inference row gains no new shape and still
+  names no cause. `scripts/run_pipeline.py` and `scripts/digest.py`
+  pass a fallback; `collect.Supervisor._default_llm()` does not, on
+  quota grounds — see CLAUDE.md §9 before changing that.
 - **The CLI's session window is a quota, not a hiccup (2026-08-25
   16:42Z and 2026-08-26 20:03Z).** On a heavy day (2.4M input tokens)
   the `claude` CLI answers with a zero-billed envelope — "You've hit

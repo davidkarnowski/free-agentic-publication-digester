@@ -117,6 +117,13 @@ LLM_LEDGER_DB = DATA_DIR / "llm_ledger.db"
 #   "api" — the Anthropic API (ANTHROPIC_API_KEY), for hosted/VPS runs;
 #   "gemini" / "google" — Google AI Studio (GOOGLE_GEMINI_API_KEY).
 LLM_BACKEND = os.environ.get("LLM_BACKEND", "cli").strip().lower()
+# The one backend we hop to when the primary trips the per-run breaker
+# (GUIDE §6 r7 explicit failover). Unset = no failover anywhere, which is
+# the behaviour every run had before 2026-09-05. Set on the box for the
+# finalizer only: scripts/run_pipeline.py and scripts/digest.py pass it
+# to their client; the continuous AnalyzeWorker deliberately does not.
+LLM_BACKEND_FALLBACK = os.environ.get(
+    "LLM_BACKEND_FALLBACK", "").strip().lower() or None
 MAP_MODEL = "haiku"
 COMPOSE_MODEL = "opus"
 # Tier alias -> concrete model, per backend. Env-overridable so models can

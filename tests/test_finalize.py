@@ -15,9 +15,13 @@ class _Client:
     """A stand-in LLM client with the two things finalize reads: a
     status() dict and (via the patched layer functions) a way to fail."""
 
-    def __init__(self, backend="fake", unavailable=None, models=("m1",)):
+    def __init__(self, backend="fake", unavailable=None, models=("m1",),
+                 backends_used=None):
         self._status = {"backend": backend, "unavailable": unavailable,
-                        "models_used": list(models)}
+                        "models_used": list(models),
+                        "backends_used": list(
+                            backends_used if backends_used is not None
+                            else [backend])}
 
     def status(self):
         return dict(self._status)
@@ -105,3 +109,40 @@ def test_summary_line_names_the_reason_for_the_operator(conn, monkeypatch):
         conn, _Client(unavailable="not authenticated", models=()), "2026-08-24")
     line = finalize.summary_line(result)
     assert "map=skipped" in line and "not authenticated" in line
+
+
+def test_a_failover_day_records_every_provider_that_produced_prose(conn, monkeypatch):
+    """GUIDE §6 r7: attribution follows the work. A day the CLI started
+    and Gemini finished names both — recording only the client's current
+    backend would make the digest's attribution false in one direction,
+    and only the original in the other."""
+    _patch_layers(monkeypatch, {})
+    client = _Client(backend="gemini", models=("haiku", "gemini-2.5-flash"),
+                     backends_used=["cli", "gemini"])
+    finalize.run_model_layers(conn, client, "2026-09-01")
+    row = inference.load(conn, "2026-09-01")
+    assert row["backend"] == "cli, gemini"
+    assert row["models"] == ["gemini-2.5-flash", "haiku"]
+    # And the reader-facing line still carries no cause (r15).
+    text = inference.label(row)
+    assert text == "model layers ran — cli, gemini/gemini-2.5-flash, haiku"
+    for banned in ("429", "quota", "error", "fail", "exhaust", "auth"):
+        assert banned not in text.lower()
+
+
+def test_a_day_with_no_prose_still_records_the_provider_that_was_asked(conn, monkeypatch):
+    """backends_used is empty when nothing was produced — the recorded
+    backend falls back to the client's own, so a no-inference day still
+    says which provider refused to answer."""
+    client = _Client(backend="cli", models=(), backends_used=[])
+
+    def map_fails(conn, c, date):
+        c.trip("quota exhausted")
+        raise llm.ProviderUnavailableError("quota exhausted")
+
+    _patch_layers(monkeypatch, {"map": map_fails})
+    finalize.run_model_layers(conn, client, "2026-09-01")
+    row = inference.load(conn, "2026-09-01")
+    assert row["backend"] == "cli"
+    assert row["available"] is False
+    assert inference.label(row) == inference.NO_INFERENCE

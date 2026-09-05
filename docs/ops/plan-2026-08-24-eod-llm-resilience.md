@@ -98,7 +98,7 @@ the provider itself.
 | FEAT-3 | feature | `--no-llm` on `run_pipeline.py` / `digest.py`; `collect.py --finalize D`; EOD honors `llm_enabled` | `arch/mechanical-digest` | OPS-GUIDE, skills, CLAUDE.md §7 |
 | BUG-4 | bug | Analyze attempt accounting | `bug/analyze-attempts` | config docstring, editorial.md |
 | BUG-5 | bug | Extraction retried forever | `bug/extract-ceiling` | docs/schema.md first, corpus.md, audit.py |
-| FEAT-4 | feature (deferred) | Explicit provider failover | `feature/provider-failover` | GUIDE §6 r7 |
+| FEAT-4 | feature (**shipped 2026-09-05**) | Explicit provider failover | `feature/provider-failover` | GUIDE §6 r7 |
 | OPS-2 | operations | Deploy, two health checks, watch one EOD | none | findings.md |
 | OPS-3 | operations | Image housekeeping (Node/CLI), Google budget alert | `chore/image-slim` | deploy README, Dockerfile comment, CVE guide |
 | DOC-1 | housekeeping | WORKLOG 2026-08-14 → 08-24; §14 decisions | `docs/realign-2026-08-24` | — |
@@ -385,7 +385,7 @@ tests and its doc lines.
   `digest_day=1995-01-04`.
 - **Verification:** extractor-raises test; audit line; suite.
 
-## FEAT-4 — Explicit provider failover (deferred)
+## FEAT-4 — Explicit provider failover (shipped 2026-09-05)
 
 - **Why:** GUIDE §6 r7 permits it; OPS-1(c) wants it; it is not needed
   for the floor. `LLM_BACKEND_FALLBACK=<name>`: used only after the
@@ -396,6 +396,24 @@ tests and its doc lines.
   the manifest and the operations report. Not before FEAT-1 and FEAT-2
   exist — a failover without correct attribution is the "silent
   provider change" r7 forbids.
+- **Shipped 2026-09-05**, on the incident that made it non-deferrable:
+  on 2026-09-01 the CLI's session limit was open from 00:08 UTC, the
+  04:28 finalizer's first call exhausted the ladder and tripped the
+  breaker, and compose/sections/tags were skipped — the digest published
+  with no Day in Review, and the limit reset at 04:40, four minutes
+  after the finalizer stopped. Built as designed above, with two
+  additions the design did not anticipate. First, the hop **re-resolves
+  the model tier** for the provider it moves to: `haiku` is `haiku` on
+  the CLI and `gemini-2.5-flash` on Gemini, so carrying the primary's
+  resolved name across would call a model that does not exist there.
+  Second, attribution needed a plural: `status()["backends_used"]` and
+  `day_inference.backend` now hold every provider that produced prose
+  for the day (`cli, gemini`), because recording only the client's
+  current backend is false in one direction and only the original is
+  false in the other — exactly the "attribution false" r7 names.
+  Scoped to the finalizer (`run_pipeline.py`, `digest.py`); the
+  continuous `AnalyzeWorker` is deliberately unchanged, since a
+  free-tier quota spent on all-day map/plain work is not there at 04:00.
 
 ## OPS-2 — Deploy and watch
 

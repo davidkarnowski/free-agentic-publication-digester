@@ -1275,11 +1275,36 @@ of the code, not of operator discipline.
    subscription access for the CLI; Google Gemini (`LLM_BACKEND=gemini`,
    `gemini-2.5-flash` for both tiers, free tier) from 2026-08-15; and
    the CLI again from 2026-08-24 22:28 UTC after the block lifted
-   (`scripts/staged/2026-08-24-restore-cli-backend.sh`). The Gemini key
-   stays configured for an explicit failover once one exists; no
-   automatic failover mechanism is implemented as of this note. A
+   (`scripts/staged/2026-08-24-restore-cli-backend.sh`). A
    backend change is recorded here, in the ledger's `backend` column,
    and in CLAUDE.md §14 — the 2026-08-15 switch had only the second.
+   *Explicit failover (added 2026-09-05, operator).* The failover this
+   rule has always permitted now exists, as `LLM_BACKEND_FALLBACK`.
+   Its shape is bounded on purpose. It is **one hop**: the primary named
+   by `LLM_BACKEND`, and at most one named fallback, never a chain and
+   never a return. It fires **only after the per-run breaker trips** —
+   that is, after the provider has refused in a way that will not change
+   within the run (quota exhausted, not authenticated, provider refused),
+   the transient ladder having already been spent; an ordinary error
+   still fails the call on the primary. It is **explicit and logged**: a
+   WARNING names both providers, the reason and the purpose, and every
+   call is ledgered under the `backend` that actually served it, so the
+   cost history stays readable per provider. And the **attribution
+   follows the work**: a day's `day_inference.backend` names every
+   provider that produced prose for it, so a day served by two reads
+   `cli, gemini` and neither name is a lie. The digest's Inference row
+   is unchanged in kind — it names providers and models, never the
+   cause, which stays in the operations report (rule 15). Failover is
+   configured per run and is **scoped to the end-of-day finalizer**: the
+   continuous analyze layer keeps the breaker-and-pause behaviour of
+   rule 15, because a fallback on a free tier has a small daily quota
+   and the day's last hour is what a digest cannot be re-run to recover.
+   The scoping is a deployment choice, not a property of the mechanism.
+   *Incident this answers:* on 2026-09-01 the CLI's subscription session
+   limit was open from 00:08 UTC; the 04:28 finalizer's first call
+   exhausted the ladder and tripped the breaker, so compose, sections
+   and tags were skipped and the digest published with no Day in Review.
+   The limit reset at 04:40 — four minutes after the finalizer stopped.
 8. **Measure first, then cap.** The token ledger (rule 7) runs from the
    analysis layer's very first call, but **no hard cap is enforced until
    real test runs establish a measured baseline** — capping against

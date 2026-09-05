@@ -82,7 +82,16 @@ def run_model_layers(conn, llm_client, date, *, record=True):
                            " is stored)", date, name, str(exc)[:300])
     status = llm_client.status()
     if record:
-        inference.record(conn, date, backend=status.get("backend"),
+        # Attribution follows the work, not the configuration (GUIDE §6
+        # r7). backends_used names every provider that actually produced
+        # prose for this day, so a day that failed over reads
+        # "cli, gemini" rather than whichever name happened to be current
+        # when the last layer finished. Falls back to the client's
+        # current backend when nothing was produced — a no-inference day
+        # still records which provider was asked.
+        inference.record(conn, date,
+                         backend=", ".join(status.get("backends_used") or ())
+                                 or status.get("backend"),
                          models=status.get("models_used") or [],
                          layers=layers)
     return {"stats": stats, "layers": layers, "status": status}

@@ -436,7 +436,7 @@ def test_gemini_5xx_outage_does_not_trip_the_breaker_but_quota_429_does(tmp_path
     assert all(r[1] == 0 for r in rows if r[0])   # every failed attempt, zero-billed
     assert client.status() == {"backend": "gemini",
                                "unavailable": "quota exhausted",
-                               "models_used": []}
+                               "models_used": [], "backends_used": []}
 
 
 _GEMINI_QUOTA_BODY = json.dumps({"error": {
@@ -554,7 +554,7 @@ def test_null_backend_ledgers_and_raises(tmp_path):
     assert row == ("none", config.LLM_MODELS.get("none", {}).get("haiku", "haiku"),
                    "provider unavailable: disabled (short-circuit)", 0, "P1")
     assert client.status() == {"backend": "none", "unavailable": "disabled",
-                               "models_used": []}
+                               "models_used": [], "backends_used": []}
 
 
 def test_null_backend_reason_is_free_text_for_the_ledger(tmp_path):
@@ -610,7 +610,8 @@ def test_status_tracks_models_used(tmp_path):
     client.complete("a", purpose="map:test", model="haiku")
     client.complete("b", purpose="compose:day-in-review", model="opus")
     assert client.status() == {"backend": "cli", "unavailable": None,
-                               "models_used": ["haiku", "opus"]}
+                               "models_used": ["haiku", "opus"],
+                               "backends_used": ["cli"]}
 
 
 def test_provider_unavailable_is_an_llm_error():
@@ -766,3 +767,205 @@ def test_cli_reset_hint_is_ignored_on_the_plain_transient_path(tmp_path, monkeyp
     assert client.complete("x", purpose="map:test")["text"] == "ok"
     assert waits == [2.0]
     assert client.unavailable is None
+
+
+# ---- GUIDE §6 r7 explicit failover (LLM_BACKEND_FALLBACK)
+#
+# The incident these pin: 2026-09-01, the CLI's session limit was open
+# from 00:08 UTC, the 04:28 finalizer's first call exhausted the ladder
+# and tripped the breaker, and compose/sections/tags were skipped — so
+# the digest published with no Day in Review. The limit reset at 04:40.
+
+
+def make_failover_client(tmp_path, procs, gemini_responses=None, fallback="gemini",
+                         gemini_key="fake-gemini-key"):
+    """A CLI-primary client whose fallback is a Gemini backend built from
+    injected fakes — the two existing seams (runner, requester) wired
+    together, so neither backend's internals are reached into."""
+    calls = []
+
+    def runner(cmd, **kwargs):
+        calls.append({"cmd": cmd, "input": kwargs.get("input")})
+        return procs.pop(0)
+
+    fake = FakeGeminiRequester(responses=list(gemini_responses or []))
+    # `fallback` takes a ready backend as well as a name — the same
+    # injection the `backend=` parameter uses, so the hop lands on the
+    # fake requester instead of a real HTTP client.
+    if fallback == "gemini":
+        fallback = llm.GeminiBackend(api_key=gemini_key, requester=fake)
+    client = LLMClient(db_path=tmp_path / "ledger.db", runner=runner,
+                       fallback=fallback)
+    return client, calls, fake
+
+
+def _ledger(client):
+    return client._db.execute(
+        "SELECT backend, model, input_tokens, error FROM llm_calls ORDER BY id"
+    ).fetchall()
+
+
+def test_session_limit_fails_over_to_the_fallback_and_serves_the_call(
+        tmp_path, monkeypatch, caplog):
+    """The Sept 1 shape: the CLI exhausts its ladder on the real session
+    limit envelope, and the SAME prompt is then served by the fallback."""
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 3)
+    client, calls, fake = make_failover_client(
+        tmp_path,
+        [FakeProc(stdout=_session_limit_envelope(), returncode=1)] * 3,
+        [FakeGeminiResponse(json_data=gemini_json("day in review"))],
+    )
+    client._sleep = lambda s: None
+    with caplog.at_level("WARNING", logger="fapd.llm"):
+        result = client.complete("x", purpose="compose:day-in-review")
+    assert result["text"] == "day in review"
+    assert len(calls) == 3                       # the CLI ladder, never more
+    assert len(fake.calls) == 1                  # one hop, one call
+    assert client.unavailable is None            # the run continues
+    # The hop is explicit and logged, naming both providers (r7).
+    hop = [r for r in caplog.records if "LLM failover:" in r.getMessage()]
+    assert len(hop) == 1 and hop[0].levelname == "WARNING"
+    assert "cli" in hop[0].getMessage() and "gemini" in hop[0].getMessage()
+    assert "quota exhausted" in hop[0].getMessage()
+
+
+def test_failover_ledgers_each_call_under_the_backend_that_served_it(tmp_path, monkeypatch):
+    """r7: the ledger's backend column is the provenance of which
+    provider produced a given output, failures included."""
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 2)
+    client, _, _ = make_failover_client(
+        tmp_path,
+        [FakeProc(stdout=_session_limit_envelope(), returncode=1)] * 2,
+        [FakeGeminiResponse(json_data=gemini_json("ok", inp=120, out=30))],
+    )
+    client._sleep = lambda s: None
+    client.complete("x", purpose="map:batch1", model="haiku")
+    rows = _ledger(client)
+    assert [r[0] for r in rows] == ["cli", "cli", "gemini"]
+    assert all(r[3] for r in rows[:2])           # the CLI rows carry the error
+    assert rows[-1][3] is None and rows[-1][2] == 120
+
+
+def test_failover_reresolves_the_tier_for_the_new_backend(tmp_path, monkeypatch):
+    """The bug this exists to prevent: "haiku" is "haiku" on the CLI and
+    "gemini-2.5-flash" on Gemini. Handing the fallback the primary's
+    model name would call a model that does not exist there."""
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 1)
+    client, _, fake = make_failover_client(
+        tmp_path,
+        [FakeProc(stdout=_session_limit_envelope(), returncode=1)],
+        [FakeGeminiResponse(json_data=gemini_json("ok"))],
+    )
+    client._sleep = lambda s: None
+    r = client.complete("x", purpose="map:batch1", model="haiku")
+    expected = config.LLM_MODELS["gemini"]["haiku"]
+    assert r["model"] == expected
+    assert expected in fake.calls[0]["url"]
+    assert _ledger(client)[-1][1] == expected
+
+
+def test_failover_attribution_names_every_provider_that_produced_prose(tmp_path, monkeypatch):
+    """status() is what the day's Inference row is built from, so a day
+    served by two providers must be able to say so."""
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 1)
+    client, _, _ = make_failover_client(
+        tmp_path,
+        [FakeProc(stdout=cli_json("first")),
+         FakeProc(stdout=_session_limit_envelope(), returncode=1)],
+        [FakeGeminiResponse(json_data=gemini_json("second"))],
+    )
+    client._sleep = lambda s: None
+    client.complete("a", purpose="map:batch1", model="haiku")     # cli serves
+    client.complete("b", purpose="compose:day-in-review", model="opus")  # hops
+    status = client.status()
+    assert status["backends_used"] == ["cli", "gemini"]
+    assert status["backend"] == "gemini"          # current, not a history
+    assert status["models_used"] == sorted(
+        {"haiku", config.LLM_MODELS["gemini"]["opus"]})
+
+
+def test_no_fallback_configured_is_exactly_todays_behaviour(tmp_path, monkeypatch):
+    """The default. Nothing about the breaker changes for a client that
+    was never given a fallback — this is what keeps the continuous
+    AnalyzeWorker on its pause-and-retry contract."""
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 2)
+    client, calls = make_client(tmp_path, [
+        FakeProc(stdout=_session_limit_envelope(), returncode=1),
+        FakeProc(stdout=_session_limit_envelope(), returncode=1),
+        FakeProc(stdout=cli_json("never asked")),
+    ])
+    client._sleep = lambda s: None
+    with pytest.raises(llm.ProviderUnavailableError):
+        client.complete("x", purpose="map:batch1")
+    assert client.unavailable == "quota exhausted"
+    assert len(calls) == 2
+    assert client.status()["backends_used"] == []
+
+
+def test_unknown_fallback_name_trips_instead_of_crashing(tmp_path, monkeypatch, caplog):
+    """A typo in LLM_BACKEND_FALLBACK must not take the finalizer down:
+    the day still finalizes mechanically (r15), loudly missing the
+    redundancy someone believed it had."""
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 1)
+    client, _ = make_client(tmp_path, [
+        FakeProc(stdout=_session_limit_envelope(), returncode=1)])
+    client._fallback = "gemeni"        # the typo
+    client._sleep = lambda s: None
+    with (caplog.at_level("ERROR", logger="fapd.llm"),
+          pytest.raises(llm.ProviderUnavailableError)):
+        client.complete("x", purpose="map:batch1")
+    assert client.unavailable == "quota exhausted"
+    assert any("not a usable backend" in r.getMessage()
+               for r in caplog.records if r.levelname == "ERROR")
+
+
+def test_fallback_without_a_key_trips_instead_of_hopping(tmp_path, monkeypatch, caplog):
+    """A fallback whose own backend reports unavailable at construction
+    (no GOOGLE_GEMINI_API_KEY) is not a fallback."""
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 1)
+    monkeypatch.delenv("GOOGLE_GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    client, _ = make_client(tmp_path, [
+        FakeProc(stdout=_session_limit_envelope(), returncode=1)])
+    client._fallback = "gemini"
+    client._sleep = lambda s: None
+    with (caplog.at_level("ERROR", logger="fapd.llm"),
+          pytest.raises(llm.ProviderUnavailableError)):
+        client.complete("x", purpose="map:batch1")
+    assert client.unavailable == "quota exhausted"
+    assert any("itself unavailable" in r.getMessage() for r in caplog.records)
+
+
+def test_failover_is_one_hop_only(tmp_path, monkeypatch):
+    """The fallback trips too: the run stops there. No chain, no return
+    to the primary, no second hop on a later call."""
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 1)
+    quota = {"error": {"code": 429, "status": "RESOURCE_EXHAUSTED",
+                       "message": "Quota exceeded"}}
+    client, calls, fake = make_failover_client(
+        tmp_path,
+        [FakeProc(stdout=_session_limit_envelope(), returncode=1)],
+        [FakeGeminiResponse(status_code=429, json_data=quota)],
+    )
+    client._sleep = lambda s: None
+    with pytest.raises(llm.ProviderUnavailableError):
+        client.complete("x", purpose="map:batch1")
+    assert client.unavailable == "quota exhausted"
+    assert len(calls) == 1 and len(fake.calls) == 1
+    # A later call short-circuits: no provider is asked again.
+    with pytest.raises(llm.ProviderUnavailableError):
+        client.complete("y", purpose="compose:day-in-review")
+    assert len(calls) == 1 and len(fake.calls) == 1
+
+
+def test_gemini_key_travels_in_a_header_not_the_url(tmp_path):
+    """A URL is the part of a request that gets logged, retried and
+    pasted into a bug report; the key must not be in it."""
+    client, fake = make_gemini_client(
+        tmp_path, responses=[FakeGeminiResponse(json_data=gemini_json())])
+    client.complete("x", purpose="map:test")
+    call = fake.calls[0]
+    assert "fake-gemini-key" not in call["url"]
+    assert "key=" not in call["url"]
+    assert call["headers"]["x-goog-api-key"] == "fake-gemini-key"
