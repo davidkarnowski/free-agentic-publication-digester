@@ -13,7 +13,7 @@ import logging
 import re
 
 from . import config
-from .client import BudgetExceededError, RateLimitFloorError
+from .client import BudgetExceededError, RateLimitFloorError, redact_secrets
 
 logger = logging.getLogger("fapd.sync")
 
@@ -310,7 +310,7 @@ def _download_pending(client, conn, collection, stats, max_downloads):
             conn.execute(
                 "UPDATE packages SET fetch_status = ?, last_error = ?,"
                 " fetch_attempts = ?, last_attempt_at = ? WHERE package_id = ?",
-                (status, repr(exc)[:500], attempts, utc_now_iso(), pid),
+                (status, redact_secrets(repr(exc))[:500], attempts, utc_now_iso(), pid),
             )
             conn.commit()
             stats["failed"] += 1

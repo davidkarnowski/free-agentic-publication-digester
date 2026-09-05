@@ -14,6 +14,7 @@ import logging
 from pathlib import Path
 
 from . import config
+from .client import redact_secrets
 from .sync import utc_now_iso
 
 logger = logging.getLogger("fapd.extract")
@@ -182,7 +183,7 @@ def _record_failure(conn, package_id, exc):
     conn.execute(
         "UPDATE packages SET extract_attempts = ?, extract_error = ?,"
         " last_extract_attempt_at = ? WHERE package_id = ?",
-        (attempts, repr(exc)[:500], utc_now_iso(), package_id),
+        (attempts, redact_secrets(repr(exc))[:500], utc_now_iso(), package_id),
     )
     conn.commit()
     return attempts

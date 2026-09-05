@@ -23,7 +23,7 @@ from html.parser import HTMLParser
 import requests
 
 from . import config, provenance
-from .client import RobotsDisallowedError
+from .client import RobotsDisallowedError, redact_secrets
 from .sync import utc_now_iso
 
 logger = logging.getLogger("fapd.probe")
@@ -249,9 +249,10 @@ def run(client, conn, entries, out_dir=None):
         try:
             findings = probe_source(client, conn, entry)
         except Exception as exc:  # noqa: BLE001 — one source never kills the sweep
+            detail = redact_secrets(repr(exc))
             findings = {"id": entry["id"], "verdict": "probe-crash",
-                        "error": repr(exc)[:300], "probed_at": utc_now_iso()}
-            logger.warning("%s: probe crashed: %r", entry["id"], exc)
+                        "error": detail[:300], "probed_at": utc_now_iso()}
+            logger.warning("%s: probe crashed: %s", entry["id"], detail)
         (out_dir / f"{entry['id']}.json").write_text(
             json.dumps(findings, indent=1, sort_keys=True), encoding="utf-8")
         summary.append({"id": findings["id"], "verdict": findings.get("verdict")})

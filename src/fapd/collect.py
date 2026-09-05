@@ -18,7 +18,7 @@ import threading
 import uuid
 
 from . import config, health
-from .client import BudgetExceededError
+from .client import BudgetExceededError, redact_secrets
 from .sync import publication_date, utc_now_iso
 
 logger = logging.getLogger("fapd.collect")
@@ -360,12 +360,16 @@ class Worker:
             # publisher as degraded because WE were pacing ourselves.
             logger.info("%s: paused by our own budget — %s", self.name, exc)
             record_state(conn, self.name, ok=True,
-                         stats={"paused": "budget", "detail": str(exc)})
+                         stats={"paused": "budget",
+                                "detail": redact_secrets(str(exc))})
             return {"paused": "budget"}
         except Exception as exc:  # noqa: BLE001 — a worker failure must not
             # kill the supervisor; the error streak is the health signal.
-            logger.warning("%s cycle failed: %r — continuing", self.name, exc)
-            record_state(conn, self.name, ok=False, error=repr(exc))
+            # The request URL rides inside the exception message, key and
+            # all (2026-09-05). Redact once and use it for both surfaces.
+            detail = redact_secrets(repr(exc))
+            logger.warning("%s cycle failed: %s — continuing", self.name, detail)
+            record_state(conn, self.name, ok=False, error=detail)
             return None
         finally:
             conn.close()
@@ -506,7 +510,7 @@ class AnalyzeWorker(Worker):
                 logger.warning("%s: %s — provider unavailable (%s); pausing"
                                " this cycle", self.name, date, exc.reason)
                 stats["paused"] = "provider"
-                stats["detail"] = str(exc)[:300]
+                stats["detail"] = redact_secrets(str(exc))[:300]
                 break
             stats["dates"] += 1
             stats["summarized"] += a["llm_summarized"] + a["official"]
@@ -1008,7 +1012,7 @@ class Supervisor:
             return stats
         except Exception as exc:  # noqa: BLE001 — same containment as run_cycle
             logger.warning("manual finalize failed: %r", exc)
-            record_state(conn, "eod", ok=False, error=repr(exc))
+            record_state(conn, "eod", ok=False, error=redact_secrets(repr(exc)))
             return None
         finally:
             conn.close()

@@ -41,7 +41,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import requests
 
 from . import config
-from .client import BudgetExceededError
+from .client import BudgetExceededError, redact_secrets
 
 logger = logging.getLogger("fapd.llm")
 
@@ -787,7 +787,7 @@ class LLMClient:
             except TransientLLMError as exc:
                 self._log(resolved, purpose, package_id, granule_id, 0, 0,
                           int((time.monotonic() - started) * 1000),
-                          error=str(exc)[:500])
+                          error=redact_secrets(str(exc))[:500])
                 if attempt >= max_attempts:
                     if exc.unavailable:
                         # The ladder is exhausted on a refusal that will
@@ -814,7 +814,7 @@ class LLMClient:
             except LLMError as exc:
                 self._log(resolved, purpose, package_id, granule_id, 0, 0,
                           int((time.monotonic() - started) * 1000),
-                          error=str(exc)[:500])
+                          error=redact_secrets(str(exc))[:500])
                 if exc.unavailable:
                     self._trip(exc.unavailable, purpose)
                     raise ProviderUnavailableError(

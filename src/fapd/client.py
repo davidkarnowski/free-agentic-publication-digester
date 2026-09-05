@@ -23,6 +23,7 @@ is still agency-class spend (same budget, counted across both labels).
 import datetime as dt
 import email.utils
 import logging
+import re
 import sqlite3
 import time
 from urllib.parse import urlencode, urlsplit
@@ -33,6 +34,42 @@ from protego import Protego
 from . import config
 
 logger = logging.getLogger("fapd.client")
+
+#: Query parameters whose VALUE is a secret and must never reach a log
+#: line, a database column, or an exception message. `api_key` is
+#: govinfo and api.data.gov; `key` is Google's older query-string form.
+SECRET_QUERY_PARAMS = ("api_key", "key")
+
+_SECRET_RE = re.compile(
+    r"\b(" + "|".join(SECRET_QUERY_PARAMS) + r")=[^&\s\"'`)>\]]+",
+    re.IGNORECASE,
+)
+
+
+def redact_secrets(text):
+    """Strip secret query-parameter values out of an arbitrary string.
+
+    `HttpClient._redacted_params` governs what this module *formats*.
+    This governs what it *repeats* — and the difference is where the key
+    actually leaked. `requests` embeds the full request URL in the
+    message of `HTTPError` **and** `ConnectionError`, and those strings
+    are stored verbatim by five different callers (the fetch log,
+    `collector_state.last_result`, `packages.fetch_error`,
+    `extracted_texts`, the probe report). None of them formatted a URL;
+    all of them recorded one.
+
+    So the rule is applied at both ends: where an exception is raised
+    (`_raise_for_status`) and where any exception text is persisted.
+    Belt and braces on purpose — the raise-site fix cannot cover an
+    exception type we have not met yet, and the next one will also
+    arrive with `resp.url` inside it.
+
+    Idempotent, and safe on None/non-str.
+    """
+    if not text:
+        return text
+    return _SECRET_RE.sub(lambda m: f"{m.group(1)}=REDACTED", str(text))
+
 
 # Distinguishes "nothing cached" from a cached "this host has no robots.txt",
 # which is a real verdict (RFC 9309: 4xx means allow).
@@ -128,6 +165,30 @@ class HttpClient:
         itself, and nothing forks that count)."""
         return (self.CLIENT_NAME,)
 
+    def _raise_for_status(self, resp):
+        """`resp.raise_for_status()` with the secret taken out of the
+        message.
+
+        requests builds the HTTPError text from `resp.url`, which still
+        carries `?api_key=…` — and that string is what every caller then
+        logs and stores. `_redacted_params` guarded what this class
+        formats itself; the key escaped anyway, riding inside an
+        exception nobody thought of as a log line. Found 2026-09-05 in
+        a govinfo 502: the redacted ERROR line and the unredacted
+        WARNING beneath it were the same request.
+
+        Same exception type and the same `.response`/`.request`, so every
+        `except requests.HTTPError` keeps working. Raised `from None`
+        deliberately: chaining would print the original — key and all —
+        in any traceback, which is the thing being prevented.
+        """
+        try:
+            resp.raise_for_status()
+        except requests.HTTPError as exc:
+            raise requests.HTTPError(
+                redact_secrets(str(exc)),
+                response=exc.response, request=exc.request) from None
+
     def _redacted_params(self, params):
         """What the fetch log is allowed to record of a request's query.
 
@@ -166,13 +227,18 @@ class HttpClient:
                     url, params=qp, headers=req_headers, timeout=config.REQUEST_TIMEOUT,
                 )
             except requests.RequestException as exc:
-                self._log(shown_url, None, 0, None, attempt, error=repr(exc))
+                # A connection/timeout error also carries the full URL —
+                # key included — in its own message. Redact once, then
+                # use that text for both the log and the ledger row.
+                detail = redact_secrets(repr(exc))
+                self._log(shown_url, None, 0, None, attempt, error=detail)
                 if attempt == config.MAX_ATTEMPTS:
-                    logger.error("GET %s failed after %d attempts: %r", shown_url, attempt, exc)
+                    logger.error("GET %s failed after %d attempts: %s",
+                                 shown_url, attempt, detail)
                     raise
                 delay = self._backoff(attempt)
-                logger.warning("GET %s: %r — backing off %.0fs before retry",
-                               shown_url, exc, delay)
+                logger.warning("GET %s: %s — backing off %.0fs before retry",
+                               shown_url, detail, delay)
                 self._sleep(delay)
                 continue
 
@@ -188,7 +254,7 @@ class HttpClient:
             if resp.status_code == 429 or resp.status_code >= 500:
                 if attempt == config.MAX_ATTEMPTS:
                     logger.error("GET %s: HTTP %d, out of attempts", shown_url, resp.status_code)
-                    resp.raise_for_status()
+                    self._raise_for_status(resp)
                 delay = self._retry_delay(resp, attempt)
                 source = "Retry-After" if "Retry-After" in resp.headers else "backoff"
                 logger.warning(
@@ -202,7 +268,7 @@ class HttpClient:
             self._post_response(resp)
             if resp.status_code == 304:
                 return resp  # conditional GET: not-modified is a success
-            resp.raise_for_status()
+            self._raise_for_status(resp)
             return resp
 
         raise RuntimeError("unreachable: retry loop exited without return or raise")

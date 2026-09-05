@@ -430,3 +430,144 @@ def test_a_temporary_disallow_is_not_persisted(tmp_path, monkeypatch):
     row = client._db.execute(
         "SELECT COUNT(*) FROM robots_cache WHERE host = 'y.gov'").fetchone()
     assert row[0] == 0, "a temporary disallow must not be cached"
+
+
+# ---- Secret redaction in EXCEPTION text (2026-09-05)
+#
+# The leak these pin: `_redacted_params` governed what the client
+# formats, and the fetch_log.url column was clean the whole time — but
+# requests builds the message of HTTPError AND ConnectionError from the
+# full request URL, key included, and five callers store that string.
+# Found in production on a govinfo 502: the ERROR line above it was
+# redacted and the WARNING below it was not, for the same request.
+
+
+class LeakyResponse(FakeResponse):
+    """A response whose raise_for_status raises the message requests
+    actually builds — the full URL, query string and all. The older
+    FakeResponse raises a bare "HTTP 500", which is why the tests above
+    could pass while production leaked."""
+
+    def __init__(self, status=502, url=None):
+        super().__init__(status=status)
+        self.url = url or ("https://api.govinfo.gov/collections/CREC/2026-09-05T12:39:48Z"
+                           "?pageSize=100&offsetMark=%2A&api_key=TESTKEY-abc123")
+
+    def raise_for_status(self):
+        import requests
+
+        raise requests.HTTPError(
+            f"{self.status_code} Server Error: Bad Gateway for url: {self.url}",
+            response=self)
+
+
+def test_redact_secrets_table():
+    from fapd.client import redact_secrets
+
+    key = "TESTKEY-abc123"
+    govinfo = ("HTTPError('502 Server Error: Bad Gateway for url:"
+               f" https://api.govinfo.gov/c/CREC/x?pageSize=100&api_key={key}')")
+    assert key not in redact_secrets(govinfo)
+    assert "api_key=REDACTED" in redact_secrets(govinfo)
+    assert "pageSize=100" in redact_secrets(govinfo)      # non-secrets survive
+
+    # Google's older query-string form, which the Gemini backend used
+    # until 2026-09-05 and which any future URL-in-a-message would carry.
+    goog = "https://generativelanguage.googleapis.com/v1beta/models/m:x?key=GKEY999"
+    assert "GKEY999" not in redact_secrets(goog)
+
+    # A connection error keeps its structure, loses only the value.
+    conn = f'ConnectionError(host="api.govinfo.gov", url="/p?api_key={key}&z=1")'
+    out = redact_secrets(conn)
+    assert key not in out and "z=1" in out
+
+    assert redact_secrets(redact_secrets(govinfo)) == redact_secrets(govinfo)  # idempotent
+    assert redact_secrets(None) is None
+    assert redact_secrets("") == ""
+    assert redact_secrets("sortkey=asc") == "sortkey=asc"   # \b, not a substring match
+
+
+def test_http_error_message_never_carries_the_key(tmp_path):
+    """The raise-site fix: what propagates out of client.get()."""
+    import requests
+
+    client, _, _ = make_client(tmp_path, [LeakyResponse() for _ in range(config.MAX_ATTEMPTS)])
+    with pytest.raises(requests.HTTPError) as info:
+        client.get("collections/CREC/x")
+    assert "TESTKEY-abc123" not in str(info.value)
+    assert "TESTKEY-abc123" not in repr(info.value)
+    assert "api_key=REDACTED" in str(info.value)
+    # Still a real HTTPError carrying its response — callers that branch
+    # on status must keep working.
+    assert info.value.response.status_code == 502
+
+
+def test_the_original_exception_is_not_chained_back_into_the_traceback(tmp_path):
+    """`from None` is load-bearing: chaining would print the unredacted
+    original in any traceback, which is the whole thing being prevented."""
+    import requests
+
+    client, _, _ = make_client(tmp_path, [LeakyResponse() for _ in range(config.MAX_ATTEMPTS)])
+    with pytest.raises(requests.HTTPError) as info:
+        client.get("collections/CREC/x")
+    exc = info.value
+    assert exc.__cause__ is None
+    assert exc.__suppress_context__ is True
+    chained = exc.__context__
+    assert chained is None or "TESTKEY-abc123" not in str(chained) or exc.__suppress_context__
+
+
+def test_connection_error_text_is_redacted_in_the_fetch_log(tmp_path):
+    """The persistence-site fix. A transport error never reaches
+    raise_for_status at all, and requests puts the URL in its message
+    too — so the raise-site fix alone would have left this open."""
+    import requests
+
+    key = "TESTKEY-abc123"
+
+    class RaisingSession:
+        def __init__(self):
+            self.calls = []
+
+        def get(self, url, params=None, headers=None, timeout=None):
+            self.calls.append(url)
+            raise requests.ConnectionError(
+                f"HTTPSConnectionPool(host='api.govinfo.gov'): url:"
+                f" /collections?pageSize=100&api_key={key}")
+
+        def close(self):
+            pass
+
+    clock = FakeClock()
+    client = GovinfoClient(db_path=tmp_path / "fetch_log.db",
+                           session=RaisingSession(),
+                           sleep=clock.sleep, monotonic=clock.monotonic)
+    with pytest.raises(requests.ConnectionError):
+        client.get("collections")
+    rows = client._db.execute("SELECT url, error FROM fetch_log").fetchall()
+    assert rows, "every attempt is logged, failures included"
+    for url, error in rows:
+        assert key not in (url or "")
+        assert key not in (error or "")
+    assert any("api_key=REDACTED" in (e or "") for _, e in rows)
+
+
+def test_no_persistence_site_writes_a_raw_exception_repr():
+    """Drift guard. Each of these lines stores arbitrary exception text
+    into a database column or a report file; every one must go through
+    redact_secrets first. A new caller that forgets is the recurrence."""
+    import pathlib
+    import re
+
+    root = pathlib.Path(__file__).resolve().parents[1] / "src" / "fapd"
+    offenders = []
+    for path in root.glob("*.py"):
+        if path.name == "db.py":       # str(exc) on a sqlite message, no URL
+            continue
+        for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if re.search(r"(?<!redact_secrets\()\b(?:repr|str)\(exc\)", line):
+                if "redact_secrets" in line:
+                    continue
+                if re.search(r'error=|"error"|stats\[.detail.\]|"detail"', line):
+                    offenders.append(f"{path.name}:{n}: {line.strip()}")
+    assert not offenders, "unredacted exception text persisted:\n" + "\n".join(offenders)
