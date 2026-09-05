@@ -355,3 +355,35 @@ not reusable.)*
   retirement runbook so the deletion and the volume are one action; the
   hazard is that they are currently two, and only one of them is
   obvious.
+
+**OB-20 — `deploy.sh` never refreshes a base image**
+- **Gap:** `deploy/vps/scripts/deploy.sh` builds with neither `--pull`
+  nor `--no-cache`, and `python:3.12-slim` / `nginx:1.30-alpine` are
+  pinned by **floating tag**. So a rebuild reuses whatever base layer the
+  box last cached, and the tag pointing at a patched upstream image
+  changes nothing. Deploying more often does not help — the bases simply
+  age in place, invisibly, because every surface reports the tag rather
+  than what is inside it.
+- **Measured 2026-09-05:** the backend image was 6 days old but built on
+  a `python:3.12-slim` pulled 3 weeks earlier; `nginx:1.30-alpine` was
+  pulled 7 weeks earlier. Both were one OpenSSL security release behind
+  (`3.5.6-1~deb13u2` vs `3.5.7-1~deb13u2` in `trixie-security`;
+  `libssl3 3.5.7-r0` vs `3.5.8-r0` in Alpine v3.24). Neither drift was
+  visible to anything but an explicit package-version read inside the
+  running containers.
+- **Handled for now by documentation, not code** (operator, 2026-09-05):
+  `AGENT-CVE-GUIDE.md` §5 gained a base-image-refresh runbook, and
+  `scripts/staged/2026-09-05-refresh-base-images.sh` is the worked
+  example. That closes the September gap; it does not stop the next one.
+- **Why not just add `--pull` to `deploy.sh`:** it would make every
+  deploy also a base upgrade — including an emergency deploy during an
+  incident, which is exactly when you want the smallest possible change.
+  Coupling "ship my code" to "adopt a new OS base" is the wrong default.
+- **Trigger:** the next sweep that finds base drift again despite the
+  runbook — that is the evidence that documentation was not enough.
+- **Sketch:** keep deploy.sh as-is and give the refresh its own verb
+  (`deploy.sh --refresh-bases`, or a `scripts/refresh_bases.sh`), so the
+  action is deliberate but no longer requires hand-writing a staged
+  script each time. Pair it with a drift check in `/fapd-health` that
+  reads the actual package versions rather than the image tag — the
+  missing measurement is what let this run for weeks unnoticed.
