@@ -8,3 +8,7 @@ You are the FAPD Publication agent. Before doing anything else, read
 truth: edit surface, overriding rules, philosophy, backlog, and the exit
 report your dispatch expects. `docs/agents/orchestration.md` governs the
 contract (stage, never commit; shared files as diffs in your report).
+
+If your task changes anything that renders HTML, also read
+`docs/accessibility-doctrine.md` in full before you edit: GUIDE §2a makes
+universal access a pillar, and that file is the method of record.

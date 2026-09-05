@@ -5133,3 +5133,86 @@ The agent doing the clock work died twice on the account's session
 limit mid-branch — the same limit the pipeline hits — and was resumed
 each time from its own commits. The no-amend rule held: a wrong test
 count in one commit body was corrected in the next body, not rewritten.
+
+## 2026-09-05 — the index outgrew itself, and access became a pillar
+
+The main index had been listing every digest since the record began —
+39 cards with teasers, 11.9 KB, one card a day, on its way to ~100 KB
+and 365 links within a year. The operator asked for a calendar or
+date-lookup instead, keeping the recent listing, and set the
+constraints: clean and simple, most readers are agents crawling from
+the agentic instruction page, and it must not break for people using
+assistive technology beyond a keyboard and mouse.
+
+The research answer and the house answer turned out to be the same one.
+Custom scripted date pickers are the most reliably broken widget on the
+web for keyboard and screen-reader users; the ARIA authoring practices'
+own datepicker patterns need roving focus that switch and voice users
+navigate worst; `<input type="date">` is unevenly implemented and, on a
+static site with no server-side routing, cannot act on what it collects
+anyway. A grid of ordinary links has none of those failure modes. So
+the archive is month calendars where every published day is an `<a>`:
+nothing to learn, nothing to trigger, and identical for a crawler, a
+screen reader, and a mouse. Prototyped against the real `_render_page`
+and `_STYLE` so the preview was the design rather than an
+approximation; the operator reviewed it and cut the index to a single
+month grid with plaintext month links into the archive for anything
+older. Bounded at ~12 KB forever instead of growing without limit.
+
+Designing it surfaced the real gap. The project had a 1,550-line
+accessibility audit with computed contrast ratios, twenty findings
+whose identifiers thread through the CSS and the tests, and an honest
+public statement — and **GUIDE.md, the constitution, did not contain
+the word "accessibility" anywhere.** The method lived in an audit
+explicitly frozen as "a record of what the site was," one bullet in the
+Publication agent's instructions, and comments in `publish.py`.
+Nothing bound a future change.
+
+So the operator ruled it a pillar and it is now GUIDE §2a, beside §2's
+editorial principles, on the argument that they make the same class of
+claim: §2 governs whether what we publish is honest, §2a governs
+whether it arrived. Twelve rules, of which two are new thinking rather
+than restated practice. The first is that the access rule and the
+security rule are the same rule — the site's single script, absent
+endpoints, refused input and zero third-party assets were adopted for
+reachability and are simultaneously its entire attack surface posture,
+and neither justification may be spent to buy the other, so a proposal
+to add any of them arrives as both kinds of change at once. The second
+is that we design against a named list of nine modalities, because
+"accessible" with no list collapses silently into "the keyboard works."
+
+The method that was implicit is now `docs/accessibility-doctrine.md`:
+the design ladder (semantic HTML, then a native element, then HTML+CSS
+where no native element exists, and there is no fourth rung), the
+modality table with each row's design consequence, an inventory of the
+thirteen patterns already in the codebase so agents reuse instead of
+inventing, the contrast and target-size arithmetic, the findings
+register's lifecycle, and three verification tiers with the rule that a
+claim earned at one is never reported as another. Enforcement is
+code-standards §2 r11 and a new §7 step; the three-document boundary —
+constitution, method, dated findings, public claim — is written into
+both files so this cannot rot back into one stale audit.
+
+The measurement rule earned itself immediately. The obvious border
+token for a calendar day cell computes to 1.34:1 against the page —
+correct for a dividing rule, nowhere near the 3:1 that SC 1.4.11 wants
+from a control boundary. The cells use `--control-border` instead, at
+3.22:1 light and 3.61:1 dark. Nothing about looking at it would have
+caught that.
+
+Two operator rulings kept the honesty straight. Tier 3 is real
+assistive technology and the equipment is not on hand, so the standing
+instruction is to design and implement against known-working methods
+and verify when able — with inspection never reported as
+assistive-technology verification, in the repository or on the site.
+And the public statement drops its "not yet tested with real assistive
+technology" bullet while the internal audit keeps it: the page never
+claimed the testing happened, and nothing was added in its place, so no
+claim widened on the strength of this work.
+
+Still to land on the branch: `tests/test_accessibility.py`, the archive
+in `publish.py`, and the blog post drafted alongside this
+(`docs/devnotes/2026-09-05-built-to-be-reachable.md`), which is written
+in the present tense about doctrine that exists as of this commit and
+is deliberately not registered for publication until the archive it
+describes is live.

@@ -2075,9 +2075,16 @@ def test_public_accessibility_statement_is_published():
     text = path.read_text(encoding="utf-8")
     assert "hustleyourcity@gmail.com" in text          # a reachable address
     assert "Known limitations" in text                 # named, not hidden
-    # the untested-with-real-AT limitation is stated (wording may vary;
-    # the substance is what the statement must not lose)
+    # The statement names assistive technology as something the site is
+    # built to work with, and points at the method (GUIDE §2a rule 10:
+    # honest or absent). It said "not yet tested with real assistive
+    # technology" until 2026-09-05, when the operator removed that line
+    # from the public page; the internal record keeps it, and nothing was
+    # added in its place, so no claim widened. What this assertion now
+    # protects is the design commitment and its published method — never
+    # a verification claim, which would be the overclaim §2a forbids.
     assert "assistive technology" in text
+    assert "accessibility-doctrine.md" in text
     assert "hustleyourcity@gmail.com" in text          # a real route to report
     assert "WCAG 2.2" in text and "conformant" in text  # the legal claim
     assert ("accessibility", "Accessibility") in publish._doc_page_index()

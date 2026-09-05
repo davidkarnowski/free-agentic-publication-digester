@@ -12,6 +12,16 @@ list. The public statement built from §6 is now a real page,
 `docs/site/accessibility.md`, rewritten so every sentence is true after
 the work landed, and it names what is still untested.*
 
+*Scope note, 2026-09-05: this file is the **findings record** — what was
+measured, when, and what happened to each finding. It is not the method.
+GUIDE §2a (Universal Access) now states what we owe every reader, and
+`docs/accessibility-doctrine.md` states how we comply — the design
+ladder, the modality table, the pattern inventory, the measurement
+procedure, and the verification tiers, several of which were first
+written down here in §1, §2 and §4a. Findings continue to be recorded
+here, identifiers are permanent, and nothing in this file is ever
+deleted or retroactively rewritten.*
+
 ---
 
 ## 1. Why this matters here

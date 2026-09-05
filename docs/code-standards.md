@@ -90,7 +90,23 @@ Deviations need an explicit comment explaining why.
    additive to content that is already correct without it — and the
    public privacy claims must be updated in the same commit. Interactive
    presentation should reach for CSS first; the keyword filter's
-   hidden-checkbox pattern is the worked example.
+   hidden-checkbox pattern is the worked example. r10 is an access
+   rule and a security rule at once, and neither justification may be
+   spent to buy the other (GUIDE §2a rule 5).
+11. **Every rendered surface is accessible by construction** (GUIDE §2a;
+   method in `docs/accessibility-doctrine.md`). Emit HTML through
+   `publish._render_page` so the page-level affordances apply. A new
+   affordance works down the doctrine's ladder — semantic HTML, then a
+   native element, then CSS-only; never a scripted widget — with an
+   accessible name that begins with its visible label, a target no
+   smaller than 24x24 CSS px (44x44 for navigation a reader hits
+   repeatedly), and nothing conveyed by color, position, or `title`
+   alone. Contrast and target sizes are computed, not eyeballed, and a
+   change touching color or control geometry states the resulting
+   ratios in its commit body. Pin the result with a test naming the
+   success criterion or the `A11Y-nn` identifier; removing an
+   accessibility affordance to simplify markup is a gate failure, not a
+   tradeoff.
 
 ## §3 Worked example — `stage_email`
 
@@ -156,6 +172,9 @@ signature, one test per contract.
    purpose, regeneration scope stated in the WORKLOG entry).
 5. Registry edits: `scripts/sources_doc.py` + drift test in the same
    commit.
+6. Anything that renders HTML: `uv run pytest -q tests/test_accessibility.py`,
+   and the §8 checklist in `docs/accessibility-doctrine.md` for a new
+   page class (findings-register entry included).
 
 (Automating 1–3 as one script is ops-backlog OB-7.)
 
@@ -170,6 +189,13 @@ are forbidden.
   with the `api` adapter (Congress.gov bill actions): the first source
   whose index fetch carries a credential, and the reason `api_key`
   redaction moved down to `HttpClient` where no subclass can forget it.
+- 2026-09-05 — §2 gains r11 (accessible by construction) and §7 gains
+  the access step, when GUIDE §2a made universal access a pillar and
+  `docs/accessibility-doctrine.md` became the method of record. r10
+  gained the sentence binding its access and security justifications
+  together: the site's no-script, no-endpoint posture was adopted for
+  reachability and is also its attack surface, and a future change
+  that argues one away is arguing away both.
 - 2026-08-26 — §1 gains the publication-clock row (`sync.publication_*`
   with `tz=`), added when the clock became one config knob
   (`FAPD_PUBLICATION_TZ`, GUIDE §3 amendment): a clock is a dependency

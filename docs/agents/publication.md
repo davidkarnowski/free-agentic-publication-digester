@@ -6,7 +6,8 @@ entire static site (index, dated digests, /today, sources/health pages,
 blog, machine surfaces), and the federal working calendar
 (`fedcal.py`, the weekend/holiday banner's source). Your edit
 surface is exactly: `src/fapd/report.py`, `publish.py`, `fedcal.py`;
-`digests/TEMPLATE.md`; `docs/accessibility.md`, `docs/site/*`; and the
+`digests/TEMPLATE.md`; `docs/accessibility.md`,
+`docs/accessibility-doctrine.md`, `docs/site/*`; and the
 tests for those modules. Everything else is read-only — notably the
 data layers you render (you consume `summaries`, `extracted_texts`,
 `item_journal`; you never write them), `rules.py` (Editorial owns
@@ -52,14 +53,43 @@ docs/accessibility.md → this file.
 - **Empty states render on purpose.** "No laws were published" is
   disclosure, not a bug. A section that vanishes on an empty day is a
   silent omission — the failure mode this project guards against most.
-- **Site philosophy: static HTML, near-zero JS, accessibility as a
-  feature.** One script exists (local-time display); the /today keyword
-  filter is pure CSS (hidden checkboxes — chosen over `:target`
-  because a fragment can't be un-clicked and scrolls the viewport).
-  Screen-reader context is real content (`.vh` spans, "opens in a new
-  tab" announcements, observed-time labels). Do not add JS, frameworks,
-  or external assets; do not remove a11y affordances to simplify
-  markup.
+- **Universal access is a pillar, not a feature (GUIDE §2a).** Read
+  `docs/accessibility-doctrine.md` in full before changing anything that
+  renders HTML — it is the method of record: the design ladder, the
+  modality table, the pattern inventory, the measurement procedure, the
+  three verification tiers, and the §8 definition of done you are
+  expected to satisfy. The short version, which does not replace
+  reading it:
+  - **Work down the ladder and stop at the first rung that works:**
+    semantic HTML, then a native element, then HTML+CSS interaction
+    where no native element exists. There is no fourth rung — a
+    scripted widget is not available to this project. The /today filter
+    (hidden checkboxes, `:target` rejected because a fragment cannot be
+    un-clicked and moves the viewport) and the calendar archive (a
+    month is a table, a day is a link) are the worked examples.
+  - **One script, no endpoint, no input, no third-party asset.** This
+    is simultaneously the access posture and the security posture
+    (GUIDE §2a rule 5). A proposal to add any of them is both kinds of
+    change at once and goes to the operator as both — it is never your
+    call, and never a simplification.
+  - **Screen-reader context is real content** (`.vh` spans, "opens in a
+    new tab" announcements, observed-time labels) and reaches the page
+    through `_render_page`'s seams. Never `title` as the only carrier
+    of information; never `opacity` to de-emphasize text (it composites
+    a computed contrast ratio away).
+  - **Compute, do not eyeball.** Contrast from the declared tokens in
+    both palettes; target size from the declared box. State the numbers
+    in your exit report. `--border` is 1.34:1 and is a decorative rule
+    only; a control boundary uses `--control-border` (3.22:1 light,
+    3.61:1 dark) under SC 1.4.11.
+  - **Removing an a11y affordance to simplify markup is a gate
+    failure** (GUIDE §2a rule 9), weighed like a validation gate and
+    not against delivery. A new page class is not done without pinned
+    tests and a `docs/accessibility.md` findings entry.
+  - **Never widen a public accessibility claim.** `docs/site/
+    accessibility.md` states what we build to; it never reports
+    inspection as though it were real-assistive-technology
+    verification (GUIDE §2a rule 10, doctrine §6).
 - **Every outbound link opens in a new tab, announced** —
   `_externalize_links` is the single seam; route any new page through
   `_render_page` so it applies.

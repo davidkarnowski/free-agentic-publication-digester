@@ -198,6 +198,118 @@ reporting component must comply.
   such in the coverage accounting. The reader must never have to work out
   whether they are reading the record or a machine's rendering of it.
 
+## 2a. Universal Access (non-negotiable, added 2026-09-05)
+
+*Operator ruling, 2026-09-05. This section is a pillar, not a
+preference: it sits beside §2 because it makes the same class of claim.
+§2 governs whether what we publish is honest. §2a governs whether it
+arrived. A digest that is accurate, cited, validated, frozen, and
+unreachable has not been published to the person who could not reach
+it.*
+
+This project's entire argument is that the official record of the United
+States federal government should be easier to reach. A person who reads
+with a screen reader, who runs the screen at 400%, who navigates by
+voice, who drives a browser with a switch or a head pointer, or who
+simply never uses a mouse has exactly the same claim on that record as
+anyone else. Where our presentation is what stands between them and it,
+we have taken a public record and made it private to readers whose
+equipment happens to match our assumptions. That is the failure this
+project exists to oppose, appearing in the presentation layer.
+
+The operative method — the design ladder, the modality list, the
+measurement procedure, the reusable patterns — is
+`docs/accessibility-doctrine.md`, which is subordinate to this section
+and may not weaken it. `docs/accessibility.md` is the dated findings
+record, and `docs/site/accessibility.md` is the public statement. This
+section governs all three.
+
+- **Equal access is an editorial obligation, not a feature.** It is
+  scheduled, resourced, and refused-to-be-traded on the same terms as
+  citation and provenance. "We will make it accessible later" is the
+  same sentence as "we will make it accurate later."
+
+- **WCAG 2.2 Level AA is the floor, never the target.** Where exceeding
+  it is cheap and materially better for a named reader, we exceed it and
+  record which criterion and why — as with interactive target sizes,
+  built to the enhanced 44×44 CSS-pixel standard (2.5.5) rather than the
+  24-pixel minimum (2.5.8), because switch access, head pointers, and
+  touch are the readers that minimum fails first.
+
+- **Nothing ships that requires script to be operable.** Every
+  capability the site offers exists in HTML and CSS. The site carries
+  exactly one script — the live page's local-time display — and it adds
+  information to a page that is already complete without it. A control
+  that needs JavaScript to work is a control that fails for some
+  assistive technology; custom widgets built where a native element
+  exists are the most reliably broken pattern on the web, and this
+  project does not ship them.
+
+- **The published site accepts no input, exposes no endpoint of its own,
+  and loads no third-party asset.** No login, no server-side search, no
+  submitting form, no comment field, no analytics, no hosted fonts, no
+  content delivery network, no embedded third-party player.
+
+- **The access rule and the security rule are the same rule, and neither
+  justification may be traded away for the other.** The two preceding
+  rules were adopted for reachability, and they are also the site's
+  security posture: a page with no script has nothing to inject, a page
+  with no endpoint has nothing to exploit, a page that accepts no input
+  cannot leak what it was given, and a page that loads nothing from a
+  third party cannot be compromised by a third party. A future change
+  that argues one of these constraints away on convenience grounds is
+  arguing away both at once, and must say so out loud to the operator
+  before it is made.
+
+- **We design against a named list of modalities, not a general good
+  intention.** "Accessible" without a list collapses silently into "the
+  keyboard works." The list, each entry binding a concrete design
+  consequence enumerated in the doctrine: screen readers; screen
+  magnification to 400%; voice control; switch access and scanning; head
+  pointers and eye gaze; keyboard-only navigation; forced-colors and
+  high-contrast modes; reduced motion; and readers for whom holding
+  state in working memory is itself the barrier.
+
+- **Meaning lives in the markup.** Headings are headings, tables carry a
+  caption and scoped headers, a link's purpose survives being read out
+  of context, a control's accessible name begins with its visible label,
+  and state is expressed in the document rather than held in a script.
+  This is one discipline serving three readerships at once — people
+  reading in a browser, people reading through assistive technology, and
+  software reading programmatically (§1, dual audience) — which is why
+  there is one artifact and never an "accessible version."
+
+- **Contrast and target size are computed, never judged by eye.** Ratios
+  are derived from the declared color values through the WCAG relative
+  luminance formula, with translucent fills and opacity composited over
+  their resolved backgrounds first, in every palette the site ships.
+  Target sizes are computed from the declared box — font size, line
+  height, padding, border. A change touching color or control geometry
+  states the resulting numbers where the work is recorded.
+
+- **An access regression is a gate failure.** An affordance is never
+  removed to simplify markup, shorten a diff, or accommodate a new
+  layout, and a change that removes one does not ship. This has the
+  standing of a validation gate under §2: it is not weighed against
+  delivery.
+
+- **Conformance claims are honest or absent.** We state the standard we
+  build to and the method we build by; we do not claim a level of
+  verification we have not performed, and we do not manufacture
+  assurance we cannot support. Overclaiming access is the same defect
+  class as overclaiming provenance (§7) and is treated the same way.
+
+- **A reader's report of a barrier is a defect report about the
+  product,** handled on the same footing as a factual correction to a
+  digest: it goes on the record and it gets fixed. No reporter is
+  required to identify a cause, name a criterion, or know why something
+  went wrong.
+
+- **A new page class is not done until it carries an entry in the
+  findings record and pinned tests.** Doctrine that nothing enforces is
+  decoration; this project's practice everywhere else is rule → code →
+  pinned test → dated audit, and access runs the same ladder.
+
 ## 3. Data Sources
 
 ### Primary: govinfo (GPO)

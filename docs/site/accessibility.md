@@ -15,6 +15,17 @@ The live page was substantially revised on 2026-08-02 (layout, hour
 groupings, a weekend/holiday notice); a follow-up audit of that page is
 queued and this statement will be updated with its date.
 
+The site is built to work with assistive technology by construction.
+Presentation is server-rendered semantic HTML; every control is a native
+HTML element rather than a custom widget, because native elements are
+what screen readers, voice control, switch access and magnification were
+built to handle; and the context a sighted reader gets from layout is
+written into the page as real text rather than added by script. Colour
+contrast and target sizes are computed from the stylesheet's declared
+values rather than judged by eye. The method we design by is published
+in full alongside the code, as `docs/accessibility-doctrine.md` in the
+public repository, so it can be checked rather than taken on trust.
+
 The site is static HTML with no framework and no external resources. It
 carries one small script, on the live page only, which adds your local
 time beside each published Eastern time — everything works with
@@ -24,10 +35,6 @@ filter, which transmits nothing.
 
 ## Known limitations
 
-- **Not yet tested with real assistive technology.** The audit was done
-  by inspection and measurement. Screen-reader announcement, focus
-  tracking under magnification, and voice-control naming have not been
-  confirmed against actual software.
 - **Focus can leave the viewport at high magnification** on the live
   page: a filter's checkbox sits at the top of the form while its
   visible chip may be rows lower. This follows from filtering without

@@ -26,6 +26,14 @@ GUIDE.md §1–§2.
   name; that's deliberate).
 - **docs/schema.md** — the design authority for the SQLite schema;
   `db.py` implements it, not the other way around.
+- **docs/accessibility-doctrine.md** — the method of record for
+  GUIDE §2a (universal access): the design ladder, the modality table,
+  the pattern inventory, how contrast and target size are computed, the
+  three verification tiers, and the definition of done for a new
+  surface. Subordinate to §2a and may not weaken it. Distinct from
+  **docs/accessibility.md** (the dated findings register, never
+  retroactively rewritten) and **docs/site/accessibility.md** (the
+  public claim).
 - **docs/code-standards.md** — engineering rules (see §6).
 - **docs/ops/** — operational runbooks and their authorization gates.
 - **docs/pre-publication-todo.md** = launch checklist;
@@ -204,6 +212,21 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   survivors. Disclosed cost (OB-19): a volume seeds from the image only
   when empty, so a *retired* digest must be deleted from the volume
   explicitly — the F-009 class.
+- **The single script and the absent endpoints are access
+  architecture and security architecture at the same time** (GUIDE §2a
+  rules 3-5, 2026-09-05). The site ships one script (`/today`'s
+  local-time display), accepts no input, exposes no endpoint of its
+  own, and loads nothing from a third party. Read as access: everything
+  works with scripting off, through any assistive technology, with no
+  widget to misbehave — and a control that needs JavaScript is a
+  control that fails for somebody. Read as security: nothing to inject,
+  nothing to exploit, nothing given to leak, no third party whose bad
+  day becomes ours. The two justifications are independent and neither
+  may be spent to buy the other, so a proposal to add a script, an
+  endpoint, an input, or an external asset is both kinds of change at
+  once and goes to the operator as both. Interactive presentation works
+  down the doctrine's ladder instead: semantic HTML, then a native
+  element, then CSS-only. Do not "modernize" this.
 - **`scripts/digest.py` imports the analysis layer lazily** — report-only
   runs must work even if analysis modules break.
 - **`LLMClient._ensure_backend_column`** does an in-place ALTER — the
@@ -329,6 +352,7 @@ live in `.claude/agents/fapd-*.md` (tracked).
 | VPS / deploy | `deploy/vps/README.md`, `docs/ops/` |
 | Local pre-deploy testing | `deploy/dev/README.md` (prod image + VPS data seed) |
 | VPS access (read-only checks) | `deploy/vps/scripts/vps-ssh.sh` + gitignored `deploy/vps/deploy.env` |
+| Accessibility method (before ANY HTML change) | `docs/accessibility-doctrine.md` → GUIDE §2a; findings in `docs/accessibility.md`, public claim in `docs/site/accessibility.md` |
 | Section-agent instructions | `docs/agents/` (§11) |
 | Forking: the publication clock and the working calendar | `docs/forking.md` → `config.py` (`FAPD_PUBLICATION_TZ` + labels), `fedcal.py` |
 
@@ -342,6 +366,12 @@ live in `.claude/agents/fapd-*.md` (tracked).
 - **Never propose raising request budgets, loosening validation gates,
   or evading an access refusal to fix a symptom** — these are GUIDE
   changes, made by the operator, or they don't happen.
+- **Universal access is a pillar (GUIDE §2a)**: a digest that is
+  accurate, cited, validated, frozen and unreachable has not been
+  published to the person who could not reach it. Read
+  `docs/accessibility-doctrine.md` before changing anything that renders
+  HTML. Never widen a public accessibility claim past what was actually
+  verified, and never report inspection as assistive-technology testing.
 - **VPS authorization gate:** only deploy to or act on the VPS when the
   operator explicitly asks in the current session ("deploy", "push to
   the VPS", or by naming the script). Never inferred from a generic
@@ -547,6 +577,33 @@ live in `.claude/agents/fapd-*.md` (tracked).
   banned word in text it did write. `find_lexicon_violation` builds the
   corpus once per call, not once per item, after a synthetic stress test
   measured the naive per-item shape at over a second per call.
+- **2026-09-05** — **Universal access is a pillar** (operator; GUIDE
+  §2a, new section). Access joins §2's editorial principles as a
+  non-negotiable: §2 governs whether what we publish is honest, §2a
+  governs whether it arrived. Twelve binding rules — WCAG 2.2 AA as a
+  floor and not a target; nothing ships that needs script to be
+  operable; the site accepts no input and exposes no endpoint of its
+  own; **the access rule and the security rule are the same rule and
+  neither justification may be spent to buy the other**; design against
+  a named list of nine modalities because "accessible" without a list
+  collapses into "the keyboard works"; meaning lives in the markup, one
+  artifact for all three readerships, never an "accessible version";
+  contrast and target size computed, never eyeballed; an access
+  regression has validation-gate standing; conformance claims honest or
+  absent; a reader's report of a barrier is a defect report; a new page
+  class is not done without pinned tests and a findings entry. Method
+  of record is the new `docs/accessibility-doctrine.md` (design ladder,
+  modality table, pattern inventory, measurement procedure, three
+  verification tiers, definition of done), subordinate to §2a; the
+  boundary between it, the dated findings register
+  (`docs/accessibility.md`) and the public claim
+  (`docs/site/accessibility.md`) is fixed in both files. Enforcement:
+  code-standards §2 r11 and a §7 verification step. Operator ruling the
+  same day on tiers: **design and implement against known-working
+  methods, and verify when able** — inspection is never reported as
+  assistive-technology verification, and no public claim widens on the
+  strength of this work.
+
 - **2026-09-05** — **Explicit provider failover, scoped to the
   finalizer** (GUIDE §6 r7 amended, operator). `LLM_BACKEND_FALLBACK`
   names ONE backend to continue on after `LLM_BACKEND` trips the per-run
