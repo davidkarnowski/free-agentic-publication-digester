@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Built to Be Reachable — Free Agentic Publication Digester — Daily Federal Digest</title>
+<meta name="description" content="An automated, citation-bound, opinion-agnostic daily digest of official United States government publications — congressional, executive, and judicial — built only from primary sources. Built for human readers and AI agents; agents start at /llms.txt.">
+<meta name="robots" content="index, follow">
+<link rel="alternate" type="text/plain" href="llms.txt"
+      title="LLM guide — this is an AI-first digest of official US federal publications">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+  <nav aria-label="Site">
+    <a class="brand" href="index.html"
+       aria-label="Free Agentic Publication Digester (FAPD)">FAPD<span
+       class="brand-full"> &mdash; Free Agentic Publication Digester</span></a>
+    <span class="nav-links"><a href="today.html"><span class="live-dot" aria-hidden="true"></span>Today (live)</a><a href="index.html">All digests</a><a href="sources.html">Sources</a><a href="blog.html">Blog</a><a href="about.html">About</a><a href="agents.html">For agents</a><details class="nav-more"><summary>More</summary><a href="accessibility.html">Accessibility</a><a href="ai-development.html">AI development</a><a href="bot.html">Bot</a><a href="faq.html">Faq</a><a href="methods.html">Methods</a><a href="privacy.html">Privacy</a><a href="readme.html">Readme</a></details></span>
+  </nav>
+</header>
+<main id="main" tabindex="-1">
+<article class="post"><h1 id="built-to-be-reachable">Built to Be Reachable</h1><p class="post-meta">Published 2026-09-05 · commentary about the project, not part of the daily digest or the official record</p>
+<p><em>Dev notes, 2026-09-05. Written by Claude, with direction from the
+project's founder. On the principle that a public record has to be
+reachable by everyone who has a claim on it — and on why the same
+decisions that make a page reachable are the ones that make it safe.</em></p>
+<p>The Free Agentic Publication Digester publishes what the United States
+federal government published. That is the whole product: the
+Congressional Record, the Federal Register, enacted laws, court
+opinions, agency releases — selected by mechanical rules, cited to the
+official source, and frozen at the end of each publication day.</p>
+<p>A record that a person cannot reach has not been published to that
+person. Not in any sense that matters to them. Someone reading with a
+screen reader, someone running the screen at four hundred percent,
+someone navigating by voice, someone driving a browser with a switch or
+a head pointer, someone who simply never uses a mouse — each of them has
+exactly the same claim on the Federal Register as anyone else. If our
+presentation is what stands between them and it, then we have taken a
+public record and made it private to the people whose bodies and
+equipment happen to match our assumptions.</p>
+<p>So access is not a feature on our roadmap. It is an editorial
+obligation, and as of today it is written into the project's governing
+document alongside the rules about citation and provenance, where it
+binds every change we make from here.</p>
+<h2 id="three-readerships-one-artifact">Three readerships, one artifact</h2>
+<p>This project has always been explicit about serving two audiences:
+people and AI agents. Working on access made us realize that framing was
+one short.</p>
+<p>There are three readerships — people reading in a browser, people
+reading through assistive technology, and software reading
+programmatically — and they are not three problems. They are one
+problem, and it has one answer: <strong>put the meaning in the markup.</strong></p>
+<p>A heading that is a heading, not a bold paragraph. A table with a
+caption that names it and column headers that scope. A link whose
+purpose survives being read out of context, because a screen reader
+lists links out of context. A label that says what a control does rather
+than relying on where it sits. State that lives in the document instead
+of in a script's memory.</p>
+<p>Every one of those decisions is simultaneously an accessibility
+decision, a semantics decision, and a machine-readability decision. The
+structure that lets a screen reader announce our archive is the same
+structure that lets a crawler enumerate it. We do not maintain an
+accessible version and a normal version, or a human site and a machine
+API. There is one artifact, built once, correctly, and the same care
+serves all three readerships at the same time.</p>
+<h2 id="the-most-secure-page-is-often-the-most-reachable-one">The most secure page is often the most reachable one</h2>
+<p>Here is a convergence we did not expect and now treat as doctrine.</p>
+<p>The site is static HTML. No framework. No build-time JavaScript
+toolchain shipped to your browser. No third-party fonts, no analytics,
+no content delivery network, no embedded players, no trackers. Exactly
+one small script exists on the entire site, on the live in-progress
+page, and it adds your local time beside our published Eastern time —
+everything works with scripting switched off.</p>
+<p>The site accepts no input. There is no login, no search box that queries
+a server, no form that submits, no comment field, no API endpoint of our
+own that takes a parameter.</p>
+<p>We adopted those constraints for reachability. A control that requires
+JavaScript to operate is a control that fails for some assistive
+technology, and custom date pickers and dropdown widgets are among the
+most reliably broken things on the web for exactly that reason. A page
+that works with scripting off works everywhere — on a decade-old
+browser, on a text browser, through a proxy, on a bad connection, inside
+a screen reader's own rendering.</p>
+<p>But run the same constraints through a security lens and you get the
+same list. A page with no script has nothing to inject. A page with no
+endpoint has nothing to exploit. A page that accepts no input cannot
+leak what it was given, because it was never given anything. A page that
+loads no third-party asset cannot be compromised by a third party's bad
+day, and cannot report you to anyone.</p>
+<p>Access and attack surface turn out to be the same measurement taken from
+two directions. We are keeping both justifications written down, because
+a rule with two independent reasons is a rule nobody will quietly trade
+away later for convenience.</p>
+<h2 id="how-we-actually-design-it">How we actually design it</h2>
+<p>We work down a ladder, in order, and we stop at the first rung that
+does the job.</p>
+<p>Semantic HTML first. Then a native element — a real link, a real
+checkbox, a real disclosure — because browsers and assistive technology
+have spent thirty years agreeing on what those mean. Then, only where no
+native element exists, an interaction built from HTML and CSS alone. A
+scripted widget is not on the ladder.</p>
+<p>The live page's keyword filter is the worked example: it is ordinary
+checkboxes and a stylesheet, with a native reset button that clears
+every selection at once. The digest archive is the newest one. Rather
+than a date picker, earlier days are reached through month calendars in
+which every published day is an ordinary link — nothing to learn,
+nothing to trigger, nothing that behaves differently for you than it
+does for us.</p>
+<p>And we design against named modalities rather than a general good
+intention, because "accessible" without a list quietly collapses into
+"the keyboard works." The list is written down: screen readers, screen
+magnification, voice control, switch access and scanning, head pointers
+and eye gaze, keyboard-only navigation, forced-colors and high-contrast
+modes, reduced motion, and readers for whom holding state in working
+memory is the barrier.</p>
+<p>Each one has a concrete design consequence. Voice control means the
+visible text of a control has to be the beginning of its spoken name, so
+that saying what you see actually works. Switch access and head pointers
+mean targets are sized generously — the calendar's day cells are built
+to the enhanced 44-pixel standard rather than the minimum, with real
+spacing between them, because a target that is merely legal to hit is
+not the same as a target that is comfortable to hit forty times.
+Magnification means content reflows down to a narrow viewport without a
+horizontal scrollbar, and where those two pull against each other the
+cells take a share of the width they are given rather than a fixed
+number of pixels, so both hold at once. Forced-colors means we declare how our elements
+behave there instead of hoping.</p>
+<h2 id="measured-not-eyeballed">Measured, not eyeballed</h2>
+<p>Color contrast on this site is computed, not judged. Ratios come from
+the declared color values through the standard relative-luminance
+formula, with translucent fills composited over their real backgrounds
+first, and they are computed for both the light and the dark palette.
+Target sizes are computed from the actual box — font size, line height,
+padding, border — rather than estimated from a screenshot. The numbers
+live in the repository where anyone can check our arithmetic, which is
+the same standard we hold ourselves to for every figure we publish about
+our own ingestion.</p>
+<p>That habit caught something while we were designing the archive. The
+obvious border color for a calendar day would have been the one the site
+already uses for dividing rules. Computed, it sits at 1.34 to 1 against
+the page — fine for a decorative line, well under the 3 to 1 that a
+control's boundary needs. We used the control border instead, at 3.22 to
+1 in light and 3.61 to 1 in dark. Nobody would have caught that by
+looking.</p>
+<h2 id="making-it-binding">Making it binding</h2>
+<p>A principle that is not enforced is decoration, and this project has a
+consistent way of preventing that: a rule goes into the governing
+document, the code implements it, a test pins it, and an audit records
+what was measured and when.</p>
+<p>Accessibility now runs that same ladder. There is a constitutional
+section stating what we owe every reader. There is a doctrine document
+stating how we comply — the design ladder, the modality list, the
+measurement method, the reusable patterns. There is a rule for new code,
+so that a new page cannot ship without an accessible name, an adequate
+target, and a test. And there is a permanent findings register where
+every accessibility identifier we have ever opened stays visible with
+its status, because deleting a resolved finding erases the evidence that
+we found it.</p>
+<p>We build to WCAG 2.2 Level AA as a floor rather than a target, and we go
+past it where going past it is cheap and matters to somebody — as with
+those target sizes.</p>
+<h2 id="tell-us-what-is-broken">Tell us what is broken</h2>
+<p>If something on this site does not work for you, email
+<strong>hustleyourcity@gmail.com</strong> with the page address and what happened. A
+description in your own words is enough. You do not need to identify a
+cause, name a standard, or know why it went wrong.</p>
+<p>Accessibility reports are handled exactly like factual corrections to a
+digest: they go on the record and they get fixed. That is not a
+courtesy. A person telling us they cannot reach the federal record
+through our site is reporting a defect in the product, and it is the
+most important kind of defect this project can have.</p>
+<p>Every digest is also published as plain Markdown in the public
+repository, and the machine surfaces — <code>/llms.txt</code>, <code>/digests.json</code>, the
+Atom feed, the per-day JSON — carry the same content in formats that do
+not depend on our styling at all. Those exist for AI agents. They work
+just as well as an escape hatch for a person whose tools disagree with
+our presentation, and we count that as part of the same commitment.</p>
+<p>The official record belongs to everyone. Publishing it is only half of
+the job; the other half is making sure that "everyone" was not a figure
+of speech.</p><p class="post-back"><a href="blog.html">&larr; All posts</a></p></article>
+</main>
+<footer class="site-footer">
+  <p>Generated 2026-09-06T04:24:53Z (UTC). Canonical source:
+  <code>docs/devnotes/2026-09-05-built-to-be-reachable.md</code> in the
+  <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
+  every item cites its official source; methodology in
+  <code>GUIDE.md</code> §2.</p>
+  <p>Content licensed
+  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0<span class="vh"> (opens in a new tab)</span></a> —
+  reuse with attribution to FAPD (Free Agentic Publication Digester);
+  quoted official government text is
+  public domain (17 U.S.C. § 105). Code licensed Apache-2.0.</p>
+</footer>
+</body>
+</html>

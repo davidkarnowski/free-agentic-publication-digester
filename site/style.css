@@ -965,3 +965,111 @@ h2.filter-lead {
   .chart-line { stroke: #444; }
   .model-block { border: 1px dashed #444; }
 }
+/* ---- the digest archive: calendars of ordinary links --------------
+   Doctrine §1 rung 1: a month is a table, a day is a link. There is no
+   widget here and nothing to learn, which is why it behaves the same
+   for a crawler, a screen reader, a switch user and a mouse. */
+.archive { margin-top: 2.75rem; }
+.archive > h2 { margin-bottom: 0.15rem; }
+.archive-intro { color: var(--muted); margin-top: 0; max-width: 62ch; }
+.cal-grid {
+  display: flex; flex-wrap: wrap; gap: 1.75rem 2.25rem; margin: 1.25rem 0;
+}
+/* Fluid between a comfortable minimum and a cap. `min-width: 0` is
+   load-bearing: a flex item defaults to min-content and refuses to
+   shrink past it, which is how a grid pushes a page sideways. */
+.cal-month {
+  flex: 1 1 17rem; max-width: 21rem; min-width: 0;
+  scroll-margin-top: 1rem;
+}
+.cal-month:focus { outline: none; }
+.cal-month:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+/* A calendar is not a data table and must not inherit one. The global
+   `th, td` rule adds 0.7rem of side padding, a 1px border and zebra
+   striping to every cell; left alone it made each day cell ~68px wide,
+   so seven columns wanted ~500px and scrolled a 390px phone sideways
+   (A11Y-23). The nth-child selector is repeated because the global
+   stripe rule outranks a plain `.cal td`. */
+.cal th, .cal td, .cal tr:nth-child(even) td {
+  border: 0; padding: 0; background: none; text-align: center;
+}
+/* Percentage columns, not pixel ones: the grid then fits whatever
+   viewport it is given and can never overflow. `table-layout: fixed`
+   keeps the seven columns equal regardless of their contents. */
+table.cal {
+  width: 100%; table-layout: fixed;
+  border-collapse: separate; border-spacing: 3px;
+}
+table.cal caption {
+  text-align: left; font-weight: 600; padding: 0 0 0.35rem 3px;
+}
+table.cal caption .cal-count {
+  font-weight: 400; color: var(--muted); font-size: 0.85rem;
+}
+.cal th {
+  font-weight: 600; font-size: 0.78rem; color: var(--muted);
+  padding: 0 0 0.2rem; text-align: center;
+}
+.cal th abbr { text-decoration: none; }
+/* Target size (doctrine §4.2). The height is a hard 44px — SC 2.5.5
+   Enhanced, well past the 24px AA minimum of 2.5.8 — because switch
+   access, head pointers and touch are what the minimum fails first.
+   The width takes a seventh of whatever the viewport gives: 44px and
+   more on a laptop, about 38px on a 320px phone, which still clears
+   2.5.8 with room to spare. Reflow wins over the enhanced size when
+   they conflict, and a fluid width means they resolve on their own at
+   every width instead of at one guessed breakpoint. */
+.cal a, .cal .cal-none {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; min-width: 0; min-height: 44px;
+  font-variant-numeric: tabular-nums; font-size: 0.95rem;
+  border-radius: 6px;
+}
+/* --border is 1.34:1 against the page: right for a dividing rule, and
+   nowhere near the 3:1 SC 1.4.11 wants from a control boundary.
+   --control-border is 3.22:1 light / 3.61:1 dark. */
+.cal a {
+  background: var(--accent-soft); color: var(--accent);
+  border: 1px solid var(--control-border); text-decoration: none;
+}
+.cal a:hover { background: var(--accent); color: var(--accent-on); }
+.cal a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+/* A day with no digest is text, never a disabled link: nothing
+   focusable that does nothing. */
+.cal .cal-none { color: var(--muted); border: 1px solid transparent; }
+/* Reduced-publishing days are marked, never dimmed — `opacity` would
+   composite the text back toward the background and destroy a computed
+   contrast ratio (doctrine §2). */
+.cal .cal-closed { background: var(--stripe); border-style: dashed; }
+.cal-legend {
+  list-style: none; padding: 0; margin: 0.5rem 0 0;
+  display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem;
+  color: var(--muted); font-size: 0.9rem;
+}
+.cal-legend .swatch {
+  display: inline-block; width: 1rem; height: 1rem; vertical-align: -0.2rem;
+  margin-right: 0.35rem; border-radius: 3px;
+  border: 1px solid var(--control-border);
+}
+.cal-legend .swatch-day { background: var(--accent-soft); }
+.cal-legend .swatch-closed { background: var(--stripe); border-style: dashed; }
+.cal-legend .swatch-none { background: transparent; border-color: var(--border); }
+/* No generated-content separator between month links: CSS ::after
+   content reaches the accessibility tree (A11Y-15), so a decorative
+   middle dot would be announced between every month. Spacing carries
+   the separation instead, and each link is its own list item. */
+.month-links { list-style: none; padding: 0; margin: 0.4rem 0 0;
+  display: flex; flex-wrap: wrap; gap: 0.35rem 1.25rem; }
+.month-links a { text-decoration-thickness: 1px; }
+.archive-more { margin-top: 1.5rem; }
+/* No size breakpoint is needed any more — the columns are fluid — so
+   this only tightens the gap between months on a small screen. */
+@media (max-width: 430px) {
+  .cal-grid { gap: 1.25rem; }
+}
+@media (forced-colors: active) {
+  .cal a { border: 1px solid LinkText; }
+  .cal .cal-closed { border-style: dashed; }
+  .cal .cal-none { border: 1px solid GrayText; }
+  .cal-legend .swatch { border: 1px solid CanvasText; }
+}
