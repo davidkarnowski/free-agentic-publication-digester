@@ -2,6 +2,12 @@
  "agent_guide": "agents.html",
  "digests": [
   {
+   "canonical_markdown": "digests/2026-09-07.md",
+   "date": "2026-09-07",
+   "html": "https://fapd.info/2026-09-07.html",
+   "teaser": "The digest carries one presidential document: a proclamation designating September 7, 2026 as Labor Day, which honors the contributions of American workers and references the Working Families Tax Cuts Act, protective tariffs, six consecutive months of manufacturing expansion, and a proposed fee on H-1B visa petitions."
+  },
+  {
    "canonical_markdown": "digests/2026-09-06.md",
    "date": "2026-09-06",
    "html": "https://fapd.info/2026-09-06.html",
@@ -254,6 +260,6 @@
    "teaser": "The House introduced 44 bills, 7 with published texts, on topics including offshore oil and gas whistleblower protections, youth mental health and social media, infant formula contaminants, school nutrition, education, trade and manufacturing, occupational safety, and fishing practices, each referred to committee."
   }
  ],
- "generated": "2026-09-07T04:18:00Z",
+ "generated": "2026-09-08T04:12:30Z",
  "title": "Free Agentic Publication Digester \u2014 Daily Federal Digest"
 }
