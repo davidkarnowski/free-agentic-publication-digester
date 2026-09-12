@@ -4,7 +4,7 @@
 > ingestion as well as human reading: see /agents.html.
 
 ## Core
-- [Latest digest](https://fapd.info/2026-09-10.html)
+- [Latest digest](https://fapd.info/2026-09-11.html)
 - [All digests (index)](https://fapd.info/index.html) (the home page lists the 7 most recent days and links the archive; it is NOT a complete enumeration — digests.json is)
 - [Digest archive](https://fapd.info/archive.html) — every published day as a calendar of links, one page per year (https://fapd.info/archive/YYYY.html for earlier years). Human navigation; agents should read digests.json instead.
 - [Machine-readable digest index](https://fapd.info/digests.json)
