@@ -88,6 +88,55 @@ no change) in WORKLOG before the deploy, and after the deploy runs §5.4
 server block, still on 443. It's a separate decision, not part of this
 plan.*
 
+### 3.1 AD-16 — repair the existing nginx fail2ban jails (operator-directed, 2026-09-13)
+
+Read-only inspection on 2026-09-13 found the host's `nginx-botsearch`,
+`nginx-http-auth` and `nginx-limit-req` jails running with **no chain in
+`iptables -S DOCKER-USER`**, so their bans probably never reach the
+packet filter (only `nginx-bad-request` and `nginx-noscript` have
+chains). The jail files are the cohabitant's (`/opt/spiralyst/fail2ban/`,
+deployed by copy into `/etc/fail2ban/jail.d/`), so the *fix* lands in
+that tree; this plan owns the diagnosis and the verification. The
+operator asked for this to be addressed alongside C-6.
+
+**Diagnose (orchestrator, read-only, before C-6):**
+
+```sh
+V=deploy/vps/scripts/vps-ssh.sh
+$V 'for j in nginx-botsearch nginx-http-auth nginx-limit-req nginx-bad-request nginx-noscript; do echo "== $j"; sudo fail2ban-client get $j actions; sudo fail2ban-client status $j | tail -4; done'
+$V 'sudo grep -E "nginx-(botsearch|http-auth|limit-req)" /var/log/fail2ban.log | grep -i -E "error|actionstart|exec" | tail -20'
+$V 'sudo ls -la /opt/spiralyst/logs/nginx/; sudo tail -2 /opt/spiralyst/logs/nginx/error.log'
+$V 'sudo iptables -S DOCKER-USER; sudo iptables -S | grep -c "^-N f2b-"'
+```
+
+Likely causes, in order of probability, and what each looks like:
+1. **The chain is created lazily on first ban** (fail2ban ≥1.0 with
+   `actionstart_on_demand`): the three jails have simply never banned
+   anyone, and `get <jail> actions` lists `iptables-allports`. Then
+   nothing is broken; record it and stop. Prove it by the
+   `actionstart_on_demand` setting (`fail2ban-client get <jail> actionstart_on_demand`
+   or the version's default) rather than by assumption.
+2. **`actionstart` failed** (an iptables error at jail start, logged as
+   `ERROR … returned 1`): the jails count failures but can never ban.
+   The fix is in the cohabitant's jail files; the error text says what.
+3. **The `error.log` jails point at a log that never receives the
+   matching lines** (`nginx-limit-req` reads `error.log`, and
+   `nginx-http-auth` is irrelevant to a site with no auth): a jail with
+   no matches never starts an action under on-demand mode. Not a bug,
+   but `nginx-http-auth` should be disabled as dead weight.
+
+**Fix path:** write the findings and the exact jail-file diff into a
+note for the operator (`docs/private/`, since the files are the
+cohabitant's), covering: enabling `actionstart_on_demand = false` on the
+nginx jails if the operator wants chains present from start (visible in
+`iptables -S` at any time, which is what made this detectable), disabling
+`nginx-http-auth`, and correcting whatever `actionstart` error appears.
+The operator applies it in the spiralyst-site tree and redeploys; the
+orchestrator re-runs the diagnose block afterwards and records the
+result in WORKLOG. Our own jail (`fapd-mcp`) sets its thresholds
+explicitly and is verified by chain presence after start (§5.5), so it
+doesn't depend on this repair.
+
 ## 4. Checkpoint C-3 — deploy (operator says "deploy")
 
 **Timing:** not between 03:30 and 06:00 UTC. The end-of-day finalizer
@@ -104,10 +153,14 @@ runs in that window, and a backend rebuild recreates the container.
    stock config can be compared or restored.
 4. Run `deploy/vps/scripts/deploy.sh`. It runs the test gate, the nginx
    syntax gate on the box in a throwaway container, the bundle and repo
-   rsync, builds `backend` and `mcp`, `up -d`, the site rebuild in the
-   container, `build_today`, the web reload and its verify block.
-   **If any step fails, stop.** Report the output faithfully and go to §7
+   rsync (with `logs/` excluded, SR-3), `mkdir -p logs`, builds
+   `backend` and `mcp`, `up -d`, the site rebuild in the container,
+   `build_today`, the web reload and its verify block.
+   **If any step fails, stop.** Report the output faithfully and go to §9
    rollback if the site is affected.
+5. Confirm the exclude worked: `vps-ssh.sh 'ls -la /opt/fapd/logs'`
+   shows the directory (and, after a second deploy, still shows the log
+   file).
 
 ## 5. Post-deploy verification (immediately, and again ~5 minutes later)
 
@@ -169,7 +222,23 @@ curl -s -D - -X POST $M -H 'Content-Type: application/json' -H 'Accept: applicat
 # refusals
 curl -s -o /dev/null -w '%{http_code}\n' $M                                          # 405
 curl -s -o /dev/null -w '%{http_code}\n' -X POST $M -H 'Origin: https://evil.example' -H 'Content-Type: application/json' -d '{}'   # 403
+
+# adversarial input from outside (SR-15): every one must be a well-formed
+# JSON-RPC error with the stated status; never a 5xx, never a traceback
+curl -s -w ' %{http_code}\n' -X POST $M -H 'Content-Type: text/plain' -d '{}'                       # 415 (nginx)
+curl -s -w ' %{http_code}\n' -X POST $M -H 'Host: evil.example' -H 'Content-Type: application/json' -d '{}'   # 403 (service)
+curl -s -w ' %{http_code}\n' -X POST $M -H 'Content-Type: application/json' -d "$(python3 -c 'print("["*40+"]"*40)')"   # 400 -32600/-32700
+curl -s -w ' %{http_code}\n' -X POST $M -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":NaN,"method":"ping"}'         # 400
+curl -s -w ' %{http_code}\n' -X POST $M -H 'Content-Type: application/json' -d '[{"jsonrpc":"2.0","id":1,"method":"ping"}]'        # 400 batching
+curl -s -w ' %{http_code}\n' -X POST $M -H 'Content-Type: application/json' -d "{\"jsonrpc\":\"2.0\",\"id\":\"$(python3 -c 'print("x"*200)')\",\"method\":\"ping\"}"   # 400, id not echoed
+curl -s -w ' %{http_code}\n' -X POST $M -H 'Content-Type: application/json' -H 'MCP-Protocol-Version: 2026-07-28' -H 'Mcp-Method: tools/call' -H 'Mcp-Name: get_digest' \
+  -d '{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"get_digest","arguments":{"date":"../../etc/passwd"},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"fapd-phase5-check","version":"1"},"io.modelcontextprotocol/clientCapabilities":{}}}}'   # 200 with -32602 naming "date", no path in the message
 ```
+
+Keep this block to the ~12 requests above. It's a public server and the
+fail2ban threshold is 20 rejected requests in 10 minutes from one
+address; running the block twice in a row from one machine would ban
+the operator's own address for an hour.
 
 **Real clients.** Record the date, client, version and result for each:
 1. Claude Code: in a scratch directory,
@@ -195,7 +264,31 @@ for p in 8080 8000 3000; do nc -vz -w 3 $H $p 2>&1 | tail -1; done
 
 Record the result under the C-1 WORKLOG entry.
 
-### 5.5 Health pass
+### 5.5 Checkpoint C-6 — install the fail2ban jail (operator runs the staged script)
+
+Only after §5.1–§5.3 pass and the `/mcp` access log exists on the host
+(`vps-ssh.sh 'sudo tail -3 /opt/fapd/logs/mcp-access.log'` shows lines
+whose **first field is a public address, not a 172.x Docker address**;
+if it's a Docker address, stop: the log format is wrong and a ban would
+be useless).
+
+1. The operator runs `scripts/staged/2026-09-XX-install-fapd-mcp-jail.sh`
+   on the box (it was rsynced with `deploy/vps/`; see Phase 4B §B.10 for
+   what it does). It ends in `SUCCESS` or `FAILURE`.
+2. Orchestrator verification (read-only):
+   ```sh
+   deploy/vps/scripts/vps-ssh.sh 'sudo fail2ban-client status fapd-mcp'
+   deploy/vps/scripts/vps-ssh.sh 'sudo iptables -S DOCKER-USER | grep -c f2b-fapd-mcp'     # 1 — load-bearing (§3.1)
+   deploy/vps/scripts/vps-ssh.sh 'sudo fail2ban-regex /opt/fapd/logs/mcp-access.log /etc/fail2ban/filter.d/fapd-mcp.conf | tail -8'
+   ```
+3. Don't test the ban by tripping it from the operator's machine. If a
+   live test is wanted, use a throwaway cloud shell or phone hotspot
+   address, send 25 `POST /mcp` requests with `Content-Type: text/plain`,
+   confirm `fail2ban-client status fapd-mcp` lists the address, then
+   `sudo fail2ban-client set fapd-mcp unbanip <addr>` (operator-gated
+   write). Record the result.
+
+### 5.6 Health pass
 
 Run `/fapd-health` (now including the MCP checks from Phase 4B) right
 away and again about 5 minutes later. The site, today page, backend
@@ -267,6 +360,7 @@ Only after §5.3 passes. The registry needs a publicly reachable remote.
 
 | Level | Symptom | Action | Effect |
 |---|---|---|---|
+| 0 — jail only | legitimate clients report bans | `sudo fail2ban-client set fapd-mcp unbanip <addr>`, or disable: `sudo fail2ban-client stop fapd-mcp` and remove `/etc/fail2ban/jail.d/fapd-mcp.local` | nginx limits keep working; nothing else changes |
 | 1 — MCP only | `/mcp` misbehaves; site fine | `vps-ssh.sh 'cd /opt/fapd && sudo docker compose stop mcp'` | `/mcp` answers 503 with the signpost; everything else is untouched. Then fix via branch → merge → deploy. |
 | 2 — web config | discovery headers or negotiation break pages | Revert the Phase 3/4B config on a branch (or remove the `./nginx` mount line), merge, deploy | `fapd-web` returns to stock config; the static documents stay harmless |
 | 3 — everything | anything worse | `git revert` the merge range on a branch → merge → deploy | Pre-plan state. Leftover built files in the site volume (`.well-known/`, `*.md`, `_signpost/`, `mcp/`) are inert. Delete them with a staged script (OB-19 pattern) if the retirement is permanent. |

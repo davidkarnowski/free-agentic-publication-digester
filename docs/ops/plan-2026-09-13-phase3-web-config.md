@@ -104,8 +104,10 @@ deviation. **Don't** weaken a requirement to make a test pass.
 
 # ---- Markdown content negotiation (master plan §8.2) -------------------
 map $http_accept $fapd_wants_md {
-    default                      0;
-    "~*(^|,)\s*text/markdown"    1;
+    default                                        0;
+    # SR-1: `text/markdown;q=0` is an explicit refusal, not a request.
+    "~*(^|,)\s*text/markdown\s*(;\s*q=0(\.0+)?\s*(,|$))" 0;
+    "~*(^|,)\s*text/markdown"                      1;
 }
 
 # Eligible HTML path -> its Markdown twin. Phase 2's build guarantees a
@@ -126,7 +128,19 @@ map "$fapd_wants_md:$fapd_twin" $fapd_negotiated {
     "~^1:(?<fapd_t>/.+)$"    $fapd_t;
 }
 
-# ---- Phase 4B inserts the MCP rate-limit zone and resolver here --------
+# ---- Client identity and abuse limits for /mcp (used by Phase 4B) ------
+# Only the edge proxy can reach fapd-web, and it sets X-Real-IP from the
+# true remote address, so the header is trustworthy here. SR-4: an empty
+# header (the dev stack, or a misconfiguration) must not silently disable
+# the limits — fall back to the direct peer address.
+map $http_x_real_ip $fapd_client {
+    default   $http_x_real_ip;
+    ""        $remote_addr;
+}
+limit_req_zone  $fapd_client zone=fapd_mcp:10m  rate=5r/s;
+limit_conn_zone $fapd_client zone=fapd_conn:10m;
+
+# ---- Phase 4B inserts the /mcp access-log format here -------------------
 # (PHASE-4B-HTTP-INSERTION-POINT)
 
 server {
@@ -317,6 +331,15 @@ updates them.
 5. Both insertion-point markers are present (Phase 4B depends on them).
 6. No `add_header` for HSTS, X-Frame-Options, X-Content-Type-Options or
    Referrer-Policy (the edge owns those).
+7. **Abuse-limit plumbing (SR-2, SR-4):** the `$fapd_client` map falls
+   back to `$remote_addr` on an empty header; `limit_req_zone
+   … zone=fapd_mcp` and `limit_conn_zone … zone=fapd_conn` are both keyed
+   on `$fapd_client`, not on the raw header.
+8. **`text/markdown;q=0` is not negotiated** (SR-1): exercise the Accept
+   map regexes with `text/markdown`, `text/html, text/markdown;q=0.8`,
+   `text/markdown;q=0`, `text/markdown; q=0.0, text/html` and assert
+   the expected 1/1/0/0.
+9. `deploy.sh`'s bundle rsync excludes `logs/` (SR-3).
 
 ### 3.4 `deploy/vps/scripts/deploy.sh`
 
@@ -342,6 +365,14 @@ style):
    (`set -e` aborts the deploy on failure. The bundle rsync's `--delete`
    removes `.nginx-candidate/` afterwards because it isn't in the source
    tree, which is intended.)
+
+   **SR-3 (security review): add `--exclude 'logs/'` to the bundle
+   rsync's exclude list**, next to `.env`, `secrets/`, `repo/`, with a
+   comment: Phase 4B bind-mounts `/opt/fapd/logs/` into `fapd-web` for
+   the `/mcp` access log that fail2ban reads; without the exclude,
+   `--delete` erases the host log directory on every deploy (the F-004
+   class). Pin it in `tests/test_dev_stack.py` beside the existing
+   exclude assertions.
 2. **After `up -d`**, reload so config-only changes take effect without
    recreating the container:
 
@@ -448,7 +479,9 @@ criterion in its §4.
 CONTEXT: Read docs/ops/plan-2026-09-13-agent-discovery.md first (rulings
 §3, the VPS findings §4 — the edge passes /.well-known and upstream
 headers through unchanged and already sends HSTS/nosniff/frame-options —
-the working protocol §7, and the §8 contracts you must match exactly).
+the working protocol §7, and the §8 contracts you must match exactly),
+then docs/ops/plan-2026-09-13-security-review.md (findings SR-1 to SR-4
+are yours and are already folded into this phase file).
 Branch feature/agent-discovery. Phase 1/2 (Publication: the documents and
 Markdown twins) and Phase 4A (the generic MCP package) run at the same
 time in the same tree; none of them edits your files. Leave the two

@@ -153,7 +153,7 @@ say so precisely, or the constitution overclaims.
 
 | Owner | Add |
 |---|---|
-| Operations | `packages/static-mcp/*` (the generic MCP package, its tests and its generic Dockerfile), `deploy/vps/mcp/*`, `deploy/vps/nginx/*`, `docs/mcp-server.md`, `.claude/skills/fapd-health/*` (read-only health commands) |
+| Operations | `packages/static-mcp/*` (the generic MCP package, its tests and its generic Dockerfile), `deploy/vps/mcp/*`, `deploy/vps/nginx/*`, `deploy/vps/fail2ban/*`, `deploy/dev/mcp/*`, `docs/mcp-server.md`, `.claude/skills/fapd-health/*` (read-only health commands) |
 | Publication | `docs/site/agent-skills/*` (the SKILL.md sources) |
 
 Shared-resources table: no change. `pyproject.toml` stays
