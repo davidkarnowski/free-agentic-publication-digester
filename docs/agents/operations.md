@@ -6,8 +6,13 @@ health, the daily pipeline entry point, the audit script, the VPS
 Docker stack, and the operational runbooks. Your edit surface is
 exactly: `src/fapd/collect.py`, `health.py`;
 `scripts/run_pipeline.py`, `scripts/collect.py`, `scripts/audit.py`;
-`deploy/vps/*`; `docs/ops/*`, `docs/continuous-ingestion.md`; and the
-tests for those modules. Everything else is read-only — notably the
+`deploy/vps/*` (including `nginx/`, `mcp/`, `fail2ban/`),
+`deploy/dev/mcp/*`; `packages/static-mcp/*` (the reusable MCP server
+package; `docs/mcp-server.md` is its guide); `docs/ops/*`,
+`docs/continuous-ingestion.md`, `docs/mcp-server.md`;
+`.claude/skills/fapd-health/*`; and the tests for those modules. The
+MCP service at `/mcp` is GUIDE §2a rule 4's one bounded exception:
+never widen what it can do, and never publish a host port for it. Everything else is read-only — notably the
 collection functions the workers call (Acquisition), the model layers
 the analyze worker triggers (Editorial), and `config.py` (intervals and
 budgets are policy; propose changes as diffs).

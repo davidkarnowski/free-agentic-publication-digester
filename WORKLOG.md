@@ -5216,3 +5216,58 @@ in `publish.py`, and the blog post drafted alongside this
 in the present tense about doctrine that exists as of this commit and
 is deliberately not registered for publication until the archive it
 describes is live.
+
+## 2026-09-13 — a scan scored the agent-first site 19/100, and a plan set answered it
+
+On 2026-09-12 the operator ran Cloudflare's URL Scanner with agent
+readiness on against fapd.info. Score 19, Level 1, "Basic Web
+Presence": three of sixteen scored checks passed (robots.txt, sitemap,
+the wildcard crawler rules). The grader does not score `llms.txt` by
+default, so the project's real agent surfaces were invisible to it,
+while the newer conventions it does score — Content Signals, RFC 8288
+`Link` headers, an RFC 9727 API catalog, an AI Catalog, an Agent Skills
+index, Markdown content negotiation, an MCP server card — were absent.
+Cloudflare's own numbers put those last two at "fewer than 15 sites" in
+the top 200,000, which is why the operator wanted all of it.
+
+The day produced four things. A read-only VPS inspection (authorized)
+established that the cohabitant's edge proxy passes every HTTPS path
+and every upstream header to `fapd-web` unchanged, so nothing outside
+this repository has to move; that `ufw` is exactly 2222/80/443 and MCP
+can ride the existing 443 with no new port (a Docker-published port
+would bypass ufw entirely); that `fapd-web` runs nginx's stock
+configuration; and that `agents.html`'s "no rate limiting" is an
+overclaim — the edge limits per address. A plan set went in as
+`docs/ops/plan-2026-09-13-agent-discovery.md` plus phase files 0–7 and
+`docs/mcp-server.md` (commit 778e253), cut on file-ownership lines so
+Phases 1, 3 and 4A can run in parallel. A second-pass security review
+(4c888ab) added an eight-stage validation layer for the MCP service,
+explicit fail2ban settings in the box's existing `DOCKER-USER` pattern,
+and a set of nginx corrections; it also found three existing nginx
+fail2ban jails with no packet-filter chain (cohabitant-owned; repair
+scheduled as AD-16). And the operator's rulings: every default
+recommendation approved; the MCP question settled as a containerized
+service that performs no inference, built as a reusable stdlib package
+so other projects can run it with their own manifest — a static "mock"
+was ruled out because MCP responses must echo the request id, which a
+fixed file cannot, and a Server Card by specification describes a
+server you can actually connect to.
+
+Phase 0 landed with this entry: GUIDE §1 gains two standing
+commitments (discovery through the conventions agents poll; the
+read-only MCP service), and §2a rule 4 gains its one bounded exception
+with the limits written in — no model, no egress, no writes, no
+credential, no session, no privilege, any widening a new ruling. The
+operator read the amendment text and approved it (checkpoint C-2)
+before it was committed. Ownership for the new paths is in the matrix;
+placeholder READMEs hold the globs until the phases fill them.
+
+One hazard caught while writing Phase 5, recorded so it is never
+learned the hard way: `evidence-commit.sh` pushes `main` and verifies
+`HEAD == origin/main`, so deploying from the feature branch would fail
+every nightly evidence push (the F-019/F-021 class). The plan mandates
+merge first, deploy from `main`.
+
+Next: Phase 1 (Publication), Phase 3 (Operations) and Phase 4A (the
+generic `static-mcp` package) launch in parallel; each agent keeps a
+progress log in `research/agent-logs/`.

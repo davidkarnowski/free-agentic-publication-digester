@@ -7,7 +7,8 @@ blog, machine surfaces), and the federal working calendar
 (`fedcal.py`, the weekend/holiday banner's source). Your edit
 surface is exactly: `src/fapd/report.py`, `publish.py`, `fedcal.py`;
 `digests/TEMPLATE.md`; `docs/accessibility.md`,
-`docs/accessibility-doctrine.md`, `docs/site/*`; and the
+`docs/accessibility-doctrine.md`, `docs/site/*` (including
+`docs/site/agent-skills/*/SKILL.md`, the Agent Skills sources); and the
 tests for those modules. Everything else is read-only — notably the
 data layers you render (you consume `summaries`, `extracted_texts`,
 `item_journal`; you never write them), `rules.py` (Editorial owns
@@ -67,11 +68,15 @@ docs/accessibility.md → this file.
     (hidden checkboxes, `:target` rejected because a fragment cannot be
     un-clicked and moves the viewport) and the calendar archive (a
     month is a table, a day is a link) are the worked examples.
-  - **One script, no endpoint, no input, no third-party asset.** This
-    is simultaneously the access posture and the security posture
-    (GUIDE §2a rule 5). A proposal to add any of them is both kinds of
-    change at once and goes to the operator as both — it is never your
-    call, and never a simplification.
+  - **One script, no input, no third-party asset, and no endpoint
+    except the read-only MCP service at `/mcp`** (GUIDE §2a rule 4's
+    bounded exception, 2026-09-13; Operations owns it, you never edit
+    it). This is simultaneously the access posture and the security
+    posture (GUIDE §2a rule 5). A proposal to add a script, an input, an
+    asset, or to widen `/mcp` is both kinds of change at once and goes
+    to the operator as both — it is never your call, and never a
+    simplification. Discovery `<link>` elements and Markdown twins are
+    presentation of existing content, not endpoints.
   - **Screen-reader context is real content** (`.vh` spans, "opens in a
     new tab" announcements, observed-time labels) and reaches the page
     through `_render_page`'s seams. Never `title` as the only carrier

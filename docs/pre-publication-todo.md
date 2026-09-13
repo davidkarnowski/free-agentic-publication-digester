@@ -170,7 +170,9 @@ close (check them off with dates).
      record all outcomes, including silence, in registry notes.
   3. Web Bot Auth request signing (Ed25519 + /.well-known JWKS on the
      site) + Cloudflare Verified/Friendly Bots submission; reference in
-     every letter. IETF WG specs due April/August 2026.
+     every letter. IETF WG specs due April/August 2026. *Scheduled
+     2026-09-13 as Phase 7 of docs/ops/plan-2026-09-13-agent-discovery.md
+     (scope stub: plan-2026-09-13-phase7-web-bot-auth.md).*
   Interim: Wayback CDX read-path for WAF-403 sources, pre-existing
   captures only (bright line: never Save-Page-Now-as-proxy), labeled
   archive-sourced. GUIDE amendments precede each implementation.
@@ -194,7 +196,13 @@ close (check them off with dates).
   **docs/agent-api-design.md** (`/api/v1/` sharded indexes +
   latest.json) as the umbrella for per-agency rollups and year-scale
   listing — now evidenced twice (3.7 MB day file measured 2026-08-03).
-  Rejected on constitutional grounds, recorded so it stays decided:
+  *2026-09-13: item (c) JSON Schemas is absorbed by
+  docs/ops/plan-2026-09-13-agent-discovery.md Phase 1 AD-3 (published
+  under `/schema/` with `/openapi.json` referencing them).*
+  Rejected on constitutional grounds, recorded so it stays decided
+  (*2026-09-13: server-side compute now has exactly one bounded
+  exception, the read-only MCP service at `/mcp`, GUIDE §2a rule 4; it
+  still evaluates no queries against the database*):
   query-parameter filtering and any server-side compute (static flat
   files only; filesystem-clone complete), and a rolling multi-day item
   blob (re-ships unchanged history daily; immutable per-day files +

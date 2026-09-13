@@ -71,6 +71,28 @@ Standing commitments for agentic access:
   (`/<YYYY-MM-DD>.html`); a machine-readable digest index
   (`digests.json`); an Atom feed for change discovery; the source guide
   and provenance manifests published alongside.
+- **Discovery through the conventions agents actually poll (amended
+  2026-09-13).** Besides `llms.txt` and the access page, the site
+  publishes machine discovery documents at their registered or
+  specified locations: Content Signals in robots.txt (search, AI input,
+  and AI training are all welcome; CC BY 4.0 attribution still
+  applies), RFC 8288 `Link` headers, an RFC 9727 API catalog with an
+  OpenAPI description of the static files, an AI Catalog, an Agent
+  Skills index, an `auth.md` stating that no authentication exists, and
+  a Markdown twin of every page with a Markdown form, served by
+  `Accept: text/markdown` content negotiation. **We publish no metadata
+  for a capability we do not operate:** a probe for an unoffered
+  protocol (OAuth, A2A, payments) receives an honest refusal naming
+  where to go instead, never a document that implies the capability
+  exists.
+- **A read-only MCP service, with no inference (amended 2026-09-13).**
+  `https://fapd.info/mcp` answers Model Context Protocol requests using
+  only the files this site already publishes. It calls no model, makes
+  no outbound connection, writes nothing, keeps no session, and knows
+  nothing the static site does not already say. It exists so agents
+  that speak MCP reach the same record, with the same disclosures, as
+  agents that read files. Its design and security posture are
+  documented in `docs/mcp-server.md`; its limits are §2a's.
 - **Honesty travels with the data.** Every surface an agent ingests
   carries the same disclosures humans get: citations to the official
   record, inclusion rules, coverage statements, which text is verbatim
@@ -246,9 +268,19 @@ section governs all three.
   project does not ship them.
 
 - **The published site accepts no input, exposes no endpoint of its own,
-  and loads no third-party asset.** No login, no server-side search, no
-  submitting form, no comment field, no analytics, no hosted fonts, no
-  content delivery network, no embedded third-party player.
+  and loads no third-party asset — with one bounded exception.** No
+  login, no server-side search, no submitting form, no comment field, no
+  analytics, no hosted fonts, no content delivery network, no embedded
+  third-party player. Choosing among static files by a request's
+  `Accept` header, and adding response headers to a GET, are neither
+  input nor an endpoint. **The exception (operator ruling, 2026-09-13)
+  is the MCP service at `/mcp`**: it reads a JSON-RPC request and answers
+  only from the published static files, mounted read-only. It calls no
+  model, makes no outbound connection, writes nothing, issues no
+  credential, keeps no session, and runs with no privilege. Any widening
+  of that exception (a write, a search index, a model call, an outbound
+  request, an account) is a new ruling under the next rule, not an
+  implementation detail.
 
 - **The access rule and the security rule are the same rule, and neither
   justification may be traded away for the other.** The two preceding
@@ -259,7 +291,13 @@ section governs all three.
   third party cannot be compromised by a third party. A future change
   that argues one of these constraints away on convenience grounds is
   arguing away both at once, and must say so out loud to the operator
-  before it is made.
+  before it is made. The MCP exception was argued this way on
+  2026-09-13 and is recorded in
+  `docs/ops/plan-2026-09-13-agent-discovery.md`. Read as access, it lets
+  agents that speak MCP reach the record without writing a file reader.
+  Read as security, it is a new input surface, contained by a read-only
+  mount, no egress, no state, a validation layer with strict parameter
+  patterns, and rate limits.
 
 - **We design against a named list of modalities, not a general good
   intention.** "Accessible" without a list collapses silently into "the

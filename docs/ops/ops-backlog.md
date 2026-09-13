@@ -82,6 +82,11 @@ one.*
 - **Sketch:** Ed25519 keys in `.env`/secrets; JWKS at
   `/.well-known/` on the site; sign per request; reference in M-23-22
   letters.
+- **2026-09-13:** scheduled as Phase 7 of the agent-discovery plan
+  (`docs/ops/plan-2026-09-13-phase7-web-bot-auth.md`, scope stub).
+  Trigger met from the other direction: Cloudflare's agent-readiness
+  guidance says a site that makes requests to other sites needs it,
+  and FAPD's crawler does.
 
 **OB-4 — GUIDE §6 rule-8 daily token cap**
 - **Gap:** no hard cap enforced; measure-first period is over — real

@@ -47,7 +47,8 @@ GUIDE.md §1–§2.
 | Language | Python ≥3.12, `uv`-managed, hatchling build |
 | Deps | deliberately few: requests, python-dotenv, pyyaml, pypdf, pillow, markdown, protego, dkimpy, anthropic |
 | Storage | SQLite ×3: `data/fapd.db` (pipeline), `data/fetch_log.db` (every HTTP attempt), `data/llm_ledger.db` (every LLM call) |
-| Site | static HTML, no framework — `publish.py` renders it; exactly one script (the live page's local-time snippet, code-standards §2 r10) |
+| Site | static HTML, no framework — `publish.py` renders it; exactly one script (the live page's local-time snippet, code-standards §2 r10); machine discovery documents under `/.well-known/`, `openapi.json`, `auth.md`, Markdown twins by content negotiation (agent-discovery plan, 2026-09-13) |
+| MCP | stdlib-only `static-mcp` package (`packages/static-mcp/`, generic and reusable) with FAPD's manifest in `deploy/vps/mcp/`; container `fapd-mcp` behind `fapd-web` at `/mcp`, no host port, no inference; dual-era MCP 2026-07-28 + legacy 2025-11-25/2025-06-18 without sessions (`docs/mcp-server.md`) |
 | Lint/tests | ruff (line 100), pytest (740+ tests; bare `pytest` collects `tests/` only via pyproject `testpaths` — the dev stack's staged repo copy would otherwise double-collect), CI on push/PR |
 | LLM | pluggable backends: `claude` CLI (default; production again since 2026-08-24) / Anthropic API (`LLM_BACKEND=api`) / Google Gemini (`LLM_BACKEND=gemini`, `GOOGLE_GEMINI_API_KEY`; production 2026-08-15..24) / none (`LLM_BACKEND=none`, GUIDE §6 r15); tier aliases resolved per backend via `config.LLM_MODELS`; an unknown value is an error, not the CLI. `LLM_BACKEND_FALLBACK` is the one-hop failover (GUIDE §6 r7, 2026-09-05), **finalizer-only** |
 
@@ -62,6 +63,7 @@ GUIDE.md §1–§2.
 | `site/` | derived static site (committed, regenerable) |
 | `provenance/manifests/` | committed daily manifests, hash-chained day to day |
 | `deploy/vps/` | the Docker stack running on the VPS (source of truth) |
+| `packages/static-mcp/` | reusable no-inference MCP server (generic; FAPD is one manifest) |
 | `docs/` | schema, research memos, ops runbooks, devnotes |
 | `data/` | gitignored local state (DBs, raw archive, captures) |
 
@@ -212,11 +214,16 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   survivors. Disclosed cost (OB-19): a volume seeds from the image only
   when empty, so a *retired* digest must be deleted from the volume
   explicitly — the F-009 class.
-- **The single script and the absent endpoints are access
+- **The single script and the one bounded endpoint are access
   architecture and security architecture at the same time** (GUIDE §2a
-  rules 3-5, 2026-09-05). The site ships one script (`/today`'s
-  local-time display), accepts no input, exposes no endpoint of its
-  own, and loads nothing from a third party. Read as access: everything
+  rules 3-5, 2026-09-05; exception ruled 2026-09-13). The site ships one
+  script (`/today`'s local-time display), accepts no input, exposes no
+  endpoint of its own except the read-only, no-inference MCP service at
+  `/mcp` (GUIDE §2a rule 4; `docs/mcp-server.md`), and loads nothing
+  from a third party. Do not widen `/mcp` (writes, search, model calls,
+  outbound requests, accounts) without a new §2a ruling, and never
+  publish a host port for `fapd-mcp` (Docker-published ports bypass
+  ufw). Read as access: everything
   works with scripting off, through any assistive technology, with no
   widget to misbehave — and a control that needs JavaScript is a
   control that fails for somebody. Read as security: nothing to inject,
@@ -350,6 +357,8 @@ live in `.claude/agents/fapd-*.md` (tracked).
 | Email ingestion | `src/fapd/email_sources.py`, `docs/email-sources.md` |
 | Continuous ingestion | `src/fapd/collect.py`, `docs/continuous-ingestion.md` |
 | VPS / deploy | `deploy/vps/README.md`, `docs/ops/` |
+| Agent discovery documents (Content Signals, Link headers, API/AI catalogs, agent skills, auth.md, Markdown twins) | `publish._build_agent_surfaces`, `docs/ops/plan-2026-09-13-agent-discovery.md` |
+| MCP service | `docs/mcp-server.md`, `packages/static-mcp/`, `deploy/vps/mcp/`, `deploy/vps/nginx/`, `deploy/vps/fail2ban/` |
 | Local pre-deploy testing | `deploy/dev/README.md` (prod image + VPS data seed) |
 | VPS access (read-only checks) | `deploy/vps/scripts/vps-ssh.sh` + gitignored `deploy/vps/deploy.env` |
 | Accessibility method (before ANY HTML change) | `docs/accessibility-doctrine.md` → GUIDE §2a; findings in `docs/accessibility.md`, public claim in `docs/site/accessibility.md` |
@@ -635,3 +644,27 @@ live in `.claude/agents/fapd-*.md` (tracked).
   API key moved from the URL query string to the `x-goog-api-key`
   header — latent while Gemini was dormant, live the moment failover
   makes it serve production traffic.
+
+- **2026-09-13** — **Agent discovery layer and a no-inference MCP
+  service** (operator; GUIDE §1 and §2a rules 4–5 amended). A Cloudflare
+  agent-readiness scan (2026-09-12) scored the site 19 / Level 1: the
+  project's agent surfaces (llms.txt, agents.html) were real but
+  invisible to the conventions graders and agents now poll. Ruled:
+  Content Signals `search=yes, ai-input=yes, ai-train=yes`;
+  `.well-known` discovery adopted (superseding agent-api-design §9);
+  RFC 8288 Link headers, RFC 9727 API catalog + OpenAPI, AI Catalog,
+  Agent Skills, auth.md, Markdown twins with content negotiation;
+  honest refusals for OAuth, A2A, WebMCP and payment protocols; and one
+  bounded exception to §2a's "no endpoint" rule: `/mcp`, a dual-era MCP
+  service reading only the published files read-only, no model, no
+  egress, no state, behind fapd-web on a new internal network, no host
+  port, with an eight-stage validation layer and a fail2ban jail
+  (`docs/ops/plan-2026-09-13-security-review.md`). Built as a reusable
+  stdlib package (`packages/static-mcp/`) so other projects can run it
+  with their own manifest. Web Bot Auth for the crawler scheduled as its
+  own plan. VPS inspection the same day found the edge passes
+  `/.well-known/` and upstream headers through unchanged, found
+  agents.html's "no rate limiting" was an overclaim (the edge limits per
+  address; corrected in the build), and found three existing nginx
+  fail2ban jails with no packet-filter chain (repair scheduled, AD-16).
+  Plan: `docs/ops/plan-2026-09-13-agent-discovery.md` and its phase files.

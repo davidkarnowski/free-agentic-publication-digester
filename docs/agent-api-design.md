@@ -402,6 +402,17 @@ evidence is: git history ordering plus the manifest chain around it.
 
 ## §9 Discovery, versioning, stability promises
 
+> **Superseded in part, 2026-09-13** (operator;
+> `docs/ops/plan-2026-09-13-agent-discovery.md`). `.well-known` discovery
+> was rejected below as "a convention nobody polls". A Cloudflare
+> agent-readiness scan on 2026-09-12 probed fourteen `.well-known` paths
+> on fapd.info, and the MCP and AI Catalog specifications now name
+> `/.well-known/ai-catalog.json` as the domain-level discovery point.
+> The site now publishes an RFC 9727 API catalog, an AI Catalog and an
+> Agent Skills index there, with RFC 8288 `Link` headers pointing at
+> them. The rest of this section (versioning, stability promises)
+> stands.
+
 **Discovery.** Three pointers, all existing surfaces:
 
 - `llms.txt` gains an `## API` block naming `api/v1/index.json`,
@@ -477,6 +488,13 @@ day; no re-download of unchanged history, enforced by immutability plus
 the free 304 machinery of §7 rather than by any custom protocol.
 
 ## §12 Considered and rejected
+
+> **Amended 2026-09-13:** the first bullet now has one bounded
+> exception, the read-only MCP service at `/mcp` (GUIDE §2a rule 4). It
+> evaluates no queries against the database and computes nothing at
+> request time beyond selecting and slicing published static files; the
+> constraint this bullet defends is intact. The `.well-known` bullet is
+> superseded (see the §9 note).
 
 - **Any server-side API (REST backend, GraphQL, search endpoint).**
   Rejected on the hard constraint, and the constraint is the product:
