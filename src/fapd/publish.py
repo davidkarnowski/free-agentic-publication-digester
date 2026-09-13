@@ -1475,8 +1475,81 @@ def _externalize_links(page_html, base=None):
     return _A_TAG_RE.sub(_sub, page_html)
 
 
+# ---------------------------------------------------------------------------
+# Markdown twins (agent-discovery plan Phase 2, master plan §8.2; GUIDE §1
+# "a Markdown twin of every page with a Markdown form"). A twin is an
+# alternate representation of the same resource for software, selected by
+# `Accept: text/markdown` content negotiation (Phase 3 routes it); a person
+# browsing never sees one, so it is not an "accessible version" (GUIDE §2a
+# rule 7). A digest's twin IS the canonical record, byte for byte; every
+# generated twin is built from the same data objects as its HTML page, in
+# the same function, so the two cannot disagree (docs/agents/publication.md,
+# the 721-backfill lesson).
+# ---------------------------------------------------------------------------
+
+#: Request paths that are negotiated to a Markdown twin — master plan §8.2,
+#: row by row: `/` or `/index.html`; a root `/<name>.html` with `<name>`
+#: matching `[A-Za-z0-9._-]+` except `today` and `50x`; `/sources/<id>.html`;
+#: `/archive/<YYYY>.html`. Phase 3's routing test imports this tuple, so
+#: its name and shape are part of the contract.
+TWIN_ELIGIBLE_PATTERNS = (
+    re.compile(r"^/(?:index\.html)?$"),
+    re.compile(r"^/(?!today\.html$)(?!50x\.html$)[A-Za-z0-9._-]+\.html$"),
+    re.compile(r"^/sources/[A-Za-z0-9._-]+\.html$"),
+    re.compile(r"^/archive/\d{4}\.html$"),
+)
+
+
+def markdown_twin_for(path):
+    """The twin's request path for an eligible request path, else None:
+    `/` → `/index.md`, `/<x>.html` → `/<x>.md`."""
+    if not any(p.match(path) for p in TWIN_ELIGIBLE_PATTERNS):
+        return None
+    if path == "/":
+        return "/index.md"
+    return path[:-len(".html")] + ".md"
+
+
+def _twin_header(page, canonical, base=None):
+    """The standard header block of every non-digest twin (Phase 2 §3.1):
+    the same facts as the HTML footer — licence, attribution, the citation
+    ethic, the canonical source — so the disclosures travel with the data
+    (GUIDE §1). Nothing that changes per build: no generated time."""
+    if base is None:
+        base = config.SITE_BASE_URL
+    url = _abs(base, f"/{page}.html")
+    return (
+        f"<!-- Markdown twin of {url} · Free Agentic Publication Digester -->\n"
+        f"> This is the Markdown form of {url}. Content is licensed CC BY 4.0\n"
+        '> (credit "FAPD — Free Agentic Publication Digester"); quoted official'
+        " government\n"
+        "> text is public domain. For factual claims, cite the official source"
+        " each item\n"
+        f"> links to. Canonical source: `{canonical}` in {REPO_URL}.\n"
+        "\n")
+
+
+def _write_twin(out_dir, rel, text):
+    path = Path(out_dir) / rel
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def _md_escape(text):
+    """Neutralise the few characters that would turn plain data into
+    Markdown structure inside a list item or table cell."""
+    return (text or "").replace("|", "\\|").replace("\n", " ")
+
+
 def _render_page(title, body_html, nav_links, canonical, description=None,
-                 head_extra=""):
+                 head_extra="", markdown_twin=None):
+    """The one page shell. `markdown_twin` (a relative path such as
+    `agents.md`) names the page's Markdown twin in `<head>`; the href is
+    relative so `_rebase_page` rebases it on subdirectory pages."""
+    if markdown_twin:
+        head_extra = (f'<link rel="alternate" type="text/markdown" '
+                      f'href="{html.escape(markdown_twin, quote=True)}">\n'
+                      + head_extra)
     return _externalize_links(_PAGE.format(
         title=html.escape(title),
         head_extra=head_extra,
@@ -1776,8 +1849,13 @@ def _build_doc_pages(out_dir):
             body,
             _site_nav(doc_pages, skip_stem=stem),
             canonical,
+            markdown_twin=f"{stem}.md",
         )
         (out_dir / f"{stem}.html").write_text(page, encoding="utf-8")
+        # The twin is the source Markdown as the page renders it —
+        # _doc_sources already applied the image and README link
+        # rewrites — behind the standard header block.
+        _write_twin(out_dir, f"{stem}.md", _twin_header(stem, canonical) + md_text)
     return doc_pages
 
 
@@ -1882,11 +1960,19 @@ def _health_chip(label):
 
 
 def _n(value):
-    """Thousands-separated integer, or an em dash when we have no value."""
-    return f"{value:,}" if isinstance(value, int) else "&mdash;"
+    """Thousands-separated integer, or an em dash when we have no value.
+    A literal dash, not an entity: the same fact renders in HTML and in
+    the Markdown twins."""
+    return f"{value:,}" if isinstance(value, int) else "—"
 
 
-def _fetch_sentence(fetch):
+# The per-source statistics are computed once as plain (label, text)
+# facts and formatted twice — HTML by the `_*_block` functions below,
+# Markdown by `_facts_md` — so sources.html, sources/<id>.html and their
+# twins state the same figures from the same data (Phase 2 §3.2). A
+# label of None is a note sentence with no leading term.
+
+def _fetch_facts(fetch):
     """The request outcomes for one host, by status class. Every number is
     a count of requests WE made; none of them measures the publisher."""
     bits = [
@@ -1896,77 +1982,107 @@ def _fetch_sentence(fetch):
         f"{_n(fetch['server_error'])} server declined (5xx)",
         f"{_n(fetch['no_response'])} no response",
     ]
-    line = (f'<p><span class="src-stat-label">Our requests to '
-            f"{html.escape(fetch['host'])}:</span> " + " · ".join(bits)
-            + f" &mdash; {fetch['error_rate_pct']}% returned no content</p>")
+    facts = [(f"Our requests to {fetch['host']}",
+              " · ".join(bits)
+              + f" — {fetch['error_rate_pct']}% returned no content")]
     extra = []
     if fetch.get("last_ok_at"):
-        extra.append("last answered request "
-                     f"{html.escape(fetch['last_ok_at'])} UTC")
+        extra.append(f"last answered request {fetch['last_ok_at']} UTC")
     if fetch.get("shared_with_sources", 1) > 1:
         extra.append(f"this host serves {fetch['shared_with_sources']} "
                      "registered sources, so these figures are host-wide")
     if extra:
-        line += f'<p class="src-stat-label">{"; ".join(extra)}.</p>'
-    return line
+        facts.append((None, "; ".join(extra) + "."))
+    return facts
+
+
+def _health_facts(record):
+    """The measured-window facts for an active source: only what was
+    actually measured — an absent number is omitted or shown as an em
+    dash, never filled in with a zero that would read as an observation.
+    Callers handle the no-record and unmeasured cases themselves."""
+    facts = []
+    if record["items"]:
+        facts.append(("Items ingested",
+                      (f"{_n(record['items'])} in {record['window_days']} days "
+                      f"({record['items_per_day']} per day) · most recent "
+                      f"{record['last_item_date'] or ''}")))
+    else:
+        recent = (f"most recent {record['last_item_date']}"
+                  if record["last_item_date"] else
+                  "none recorded in the lookback period")
+        facts.append(("Items ingested",
+                      (f"none in the last {record['window_days']} days — "
+                      f"{recent}")))
+    if record["avg_chars"] is not None:
+        facts.append(("Content length",
+                      (f"{_n(record['avg_chars'])} characters average, "
+                      f"{_n(record['median_chars'])} median "
+                      f"(shortest {_n(record['min_chars'])}, "
+                      f"longest {_n(record['max_chars'])})")))
+    if record["delivery_mode"]:
+        note = record.get("delivery_mode_note")
+        facts.append(("Delivery mode",
+                      record["delivery_mode"] + (f" — {note}" if note else "")))
+    if record["fetch"]:
+        facts.extend(_fetch_facts(record["fetch"]))
+    elif record.get("fetch_note"):
+        facts.append((None, record["fetch_note"]))
+    collector = record.get("collector")
+    if collector and collector.get("consecutive_errors"):
+        facts.append(("Collector",
+                      (f"{collector['consecutive_errors']} consecutive cycle(s) "
+                      "ended in an error; last completed cycle "
+                      f"{collector.get('last_ok_at') or 'not recorded'}")))
+    # The label itself already sits in the card's subtitle; repeating the
+    # chip here would announce it twice. What belongs here is only the
+    # sentence that shows how the label follows from the numbers above.
+    facts.append((None, record["health_reason"]))
+    return facts
+
+
+def _fact_html(label, text):
+    if label is None:
+        return f'<p class="src-stat-label">{html.escape(text)}</p>'
+    if label == "Delivery mode":
+        # The mode is an identifier (`feed-only`), set in code like the
+        # registry's own field; the note after the dash is prose.
+        mode, sep, note = text.partition(" — ")
+        text_html = f"<code>{html.escape(mode)}</code>" + (
+            f" — {html.escape(note)}" if sep else "")
+    else:
+        text_html = html.escape(text)
+    return f'<p><span class="src-stat-label">{html.escape(label)}:</span> {text_html}</p>'
+
+
+def _facts_md(facts):
+    """Facts as a two-column Markdown table; a note (label None) becomes a
+    line under the table."""
+    rows = [(label, text) for label, text in facts if label is not None]
+    notes = [text for label, text in facts if label is None]
+    lines = []
+    if rows:
+        lines += ["| Measure | Value |", "|---|---|"]
+        lines += [f"| {_md_escape(label)} | {_md_escape(text)} |"
+                  for label, text in rows]
+        lines.append("")
+    lines += [f"{_md_escape(text)}" + "\n" for text in notes]
+    return "\n".join(lines)
+
+
+def _unmeasured_note(record, verb):
+    return (f"{record['health_reason']} Ingestion statistics are {verb} for "
+            "active sources only.")
 
 
 def _health_block(record):
-    """The per-card statistics panel. Renders only what was actually
-    measured: an absent number is omitted or shown as an em dash, never
-    filled in with a zero that would read as an observation."""
+    """The per-card statistics panel — HTML formatting of `_health_facts`."""
     if not record:
         return ""
     if not record["measured"]:
         return (f'<p class="src-stats src-unmeasured">'
-                f"{html.escape(record['health_reason'])} Ingestion "
-                f"statistics are shown for active sources only.</p>")
-
-    parts = []
-    if record["items"]:
-        parts.append(
-            f'<p><span class="src-stat-label">Items ingested:</span> '
-            f"{_n(record['items'])} in {record['window_days']} days "
-            f"({record['items_per_day']} per day) · most recent "
-            f"{html.escape(record['last_item_date'] or '')}</p>")
-    else:
-        recent = (f"most recent {html.escape(record['last_item_date'])}"
-                  if record["last_item_date"] else
-                  "none recorded in the lookback period")
-        parts.append(
-            f'<p><span class="src-stat-label">Items ingested:</span> '
-            f"none in the last {record['window_days']} days &mdash; "
-            f"{recent}</p>")
-    if record["avg_chars"] is not None:
-        parts.append(
-            f'<p><span class="src-stat-label">Content length:</span> '
-            f"{_n(record['avg_chars'])} characters average, "
-            f"{_n(record['median_chars'])} median "
-            f"(shortest {_n(record['min_chars'])}, "
-            f"longest {_n(record['max_chars'])})</p>")
-    if record["delivery_mode"]:
-        note = record.get("delivery_mode_note")
-        parts.append(
-            f'<p><span class="src-stat-label">Delivery mode:</span> '
-            f"<code>{html.escape(record['delivery_mode'])}</code>"
-            + (f" &mdash; {html.escape(note)}" if note else "") + "</p>")
-    if record["fetch"]:
-        parts.append(_fetch_sentence(record["fetch"]))
-    elif record.get("fetch_note"):
-        parts.append(f'<p class="src-stat-label">'
-                     f"{html.escape(record['fetch_note'])}</p>")
-    collector = record.get("collector")
-    if collector and collector.get("consecutive_errors"):
-        parts.append(
-            f'<p><span class="src-stat-label">Collector:</span> '
-            f"{collector['consecutive_errors']} consecutive cycle(s) ended "
-            f"in an error; last completed cycle "
-            f"{html.escape(collector.get('last_ok_at') or 'not recorded')}</p>")
-    # The label itself already sits in the card's subtitle; repeating the
-    # chip here would announce it twice. What belongs here is only the
-    # sentence that shows how the label follows from the numbers above.
-    parts.append(f'<p class="src-stat-label">'
-                 f"{html.escape(record['health_reason'])}</p>")
+                f"{html.escape(_unmeasured_note(record, 'shown'))}</p>")
+    parts = [_fact_html(label, text) for label, text in _health_facts(record)]
     return f'<div class="src-stats">{"".join(parts)}</div>'
 
 
@@ -2061,6 +2177,30 @@ def _activity_legend():
     )
 
 
+# The ingestion-scope disclosure, one sentence for sources.html, the
+# per-source pages and every sources twin (GUIDE §2: our statistics
+# describe our ingestion, never a publisher).
+_INGESTION_SCOPE_EMPHASIS = "this project's ingestion of each source"
+_INGESTION_SCOPE_SENTENCE = (
+    f"These figures describe {_INGESTION_SCOPE_EMPHASIS}, and nothing else. "
+    "They are counts of items we recorded and of requests we made, taken "
+    "mechanically from the pipeline's own databases at build time. They are "
+    "not a measurement of any agency, department, or publisher, and no "
+    "label below is a judgement about one.")
+
+# The source directory's groups, in page order — one definition for
+# sources.html and sources.md (registry order within each group is
+# precedence).
+_SOURCE_GROUPS = (
+    ("govinfo-collections", "Official govinfo collections",
+     lambda e: e["type"] == "govinfo-collection"),
+    ("agency-web-channels", "Agency newsrooms and web channels",
+     lambda e: e["type"] in _WEB_TYPES),
+    ("agency-email-bulletins", "Agency email bulletins",
+     lambda e: e["type"] == "email"),
+)
+
+
 def _health_section(health):
     """The directory-wide health summary: what the labels mean, how many
     sources wear each one, and the aggregate volume — placed before the
@@ -2084,13 +2224,11 @@ def _health_section(health):
     defs = health["label_definitions"]
     t = health["thresholds"]
 
-    parts.append(
-        "<p>These figures describe <strong>this project's ingestion of "
-        "each source</strong>, and nothing else. They are counts of items "
-        "we recorded and of requests we made, taken mechanically from the "
-        "pipeline's own databases at build time. They are not a "
-        "measurement of any agency, department, or publisher, and no "
-        "label below is a judgement about one.</p>")
+    # quote=False: the sentence's apostrophe stays a character, so the
+    # emphasised phrase is still found after escaping.
+    parts.append("<p>" + html.escape(_INGESTION_SCOPE_SENTENCE, quote=False).replace(
+        _INGESTION_SCOPE_EMPHASIS,
+        f"<strong>{_INGESTION_SCOPE_EMPHASIS}</strong>", 1) + "</p>")
     parts.append(
         f'<p class="src-counts"><strong>{summary["delivering"]}</strong> of '
         f'{summary["sources_measured"]} active sources delivered items in '
@@ -2170,33 +2308,33 @@ def _sources_body(entries, health=None):
 
     records = (health or {}).get("sources") or {}
     listed = [e for e in entries if e["status"] in ("active", "planned")]
-    parts.append(_source_section(
-        "govinfo-collections", "Official govinfo collections",
-        "<p>Structured document collections published by the Government "
-        "Publishing Office through govinfo.gov — the core official record "
-        "the digest is built from. Each collection syncs through the "
-        "govinfo collections API with per-collection watermarks.</p>",
-        [e for e in listed if e["type"] == "govinfo-collection"], records))
-    parts.append(_source_section(
-        "agency-web-channels", "Agency newsrooms and web channels",
-        "<p>Press-release feeds and indexes, APIs, and bulk data that "
-        "agencies publish on the web, read through the project's "
-        "robots-respecting identified client. The subtitle on each card "
-        "names the channel type.</p>",
-        [e for e in listed if e["type"] in _WEB_TYPES], records))
-    parts.append(_source_section(
-        "agency-email-bulletins", "Agency email bulletins",
-        "<p>Bulletins the agencies themselves distribute by subscription "
-        "email (GovDelivery and similar services), delivered to a single "
-        "identified project mailbox and ingested from the message body. "
-        "Every message's DKIM signature is checked on arrival and the "
-        "result is disclosed on each item — a failing signature is "
-        "labeled, never silently dropped, because official content is "
-        "not discarded over a mail-infrastructure hiccup. Sender and "
-        "mailbox addresses are recorded "
-        "in the registry, not republished here; where a registry note "
-        "quotes one, it appears as [address withheld].</p>",
-        [e for e in listed if e["type"] == "email"], records))
+    intros = {
+        "govinfo-collections": (
+            "<p>Structured document collections published by the Government "
+            "Publishing Office through govinfo.gov — the core official record "
+            "the digest is built from. Each collection syncs through the "
+            "govinfo collections API with per-collection watermarks.</p>"),
+        "agency-web-channels": (
+            "<p>Press-release feeds and indexes, APIs, and bulk data that "
+            "agencies publish on the web, read through the project's "
+            "robots-respecting identified client. The subtitle on each card "
+            "names the channel type.</p>"),
+        "agency-email-bulletins": (
+            "<p>Bulletins the agencies themselves distribute by subscription "
+            "email (GovDelivery and similar services), delivered to a single "
+            "identified project mailbox and ingested from the message body. "
+            "Every message's DKIM signature is checked on arrival and the "
+            "result is disclosed on each item — a failing signature is "
+            "labeled, never silently dropped, because official content is "
+            "not discarded over a mail-infrastructure hiccup. Sender and "
+            "mailbox addresses are recorded "
+            "in the registry, not republished here; where a registry note "
+            "quotes one, it appears as [address withheld].</p>"),
+    }
+    for anchor, title, member in _SOURCE_GROUPS:
+        parts.append(_source_section(
+            anchor, title, intros[anchor],
+            [e for e in listed if member(e)], records))
 
     unavailable = [e for e in entries if e["status"] == "unavailable"]
     if unavailable:
@@ -2249,9 +2387,81 @@ def _registry_entries():
     return sources.load_registry(registry_path)
 
 
+def _source_line_md(entry, record):
+    """One directory entry as a Markdown list item: the same registry
+    fields and, for a measured source, the same 24-hour figures and
+    health sentence the HTML card shows (`_card_stats_block`)."""
+    line = (f"- **{_md_escape(entry['name'])}** (`{entry['id']}`) — "
+            f"{_STATUS_PHRASES[entry['status']]}; "
+            f"{_md_escape(_redact_addresses(entry['method']))}; "
+            f"[page](sources/{entry['id']}.md)")
+    if record and record.get("health"):
+        line += f" — ingestion health: {_HEALTH_WORDS.get(record['health'], record['health'])}"
+    if record and record["measured"]:
+        recent = _recent_bits(record)
+        if recent:
+            line += f"; last {recent[0]} hours: {' · '.join(recent[1])}"
+        line += f". {_md_escape(record['health_reason'])}"
+    return line
+
+
+def _sources_md(entries, health):
+    """sources.md — the same `entries` and `health` objects as
+    sources.html, the ingestion-scope disclosure first."""
+    counts = {s: sum(1 for e in entries if e["status"] == s)
+              for s in sources.STATUSES}
+    counts_text = ", ".join(
+        f"{counts[s]} {_STATUS_PHRASES[s]}" for s, _d in _STATUS_DEFS if counts[s])
+    records = (health or {}).get("sources") or {}
+    lines = ["# Sources", "",
+             f"> {_INGESTION_SCOPE_SENTENCE}", "",
+             f"{len(entries)} sources registered — {counts_text}.", ""]
+    if not health or not health.get("available"):
+        reason = (health or {}).get("unavailable_reason",
+                                    "no pipeline database in this build")
+        lines += [(f"Per-source statistics are not available in this build — "
+                  f"{reason}. The directory below is rendered from the "
+                  "registry alone."), ""]
+    else:
+        summary = health["summary"]
+        lines += [(f"{summary['delivering']} of {summary['sources_measured']} "
+                  "active sources delivered items in the "
+                  f"{summary['window_days']} days ending {health['window_end']} "
+                  f"— {_n(summary['items_window'])} item(s) in all, about "
+                  f"{summary['items_per_day']} per day across the directory. "
+                  f"{summary['sources_with_fetch_errors']} source(s) recorded "
+                  "requests that returned no content, across "
+                  f"{len(summary['hosts_with_fetch_errors'])} host(s), out of "
+                  f"{_n(summary['requests_window'])} request(s) we made."), "",
+                  f"{health_mod.FETCH_DISCLAIMER}", ""]
+    lines += ["Status key:", ""]
+    lines += [f"- **{_STATUS_PHRASES[s]}** — {d}." for s, d in _STATUS_DEFS]
+    lines.append("")
+    listed = [e for e in entries if e["status"] in ("active", "planned")]
+    for _anchor, title, member in _SOURCE_GROUPS:
+        group = [e for e in listed if member(e)]
+        lines += [f"## {title}", ""]
+        for status in ("active", "planned"):
+            subset = [e for e in group if e["status"] == status]
+            if not subset:
+                continue
+            lines += [f"### {status.capitalize()} ({len(subset)})", ""]
+            lines += [_source_line_md(e, records.get(e["id"])) for e in subset]
+            lines.append("")
+    for status, title in (("unavailable", "Unavailable sources"),
+                          ("evaluated-excluded", "Evaluated and excluded")):
+        subset = [e for e in entries if e["status"] == status]
+        if subset:
+            lines += [f"## {title} ({len(subset)})", ""]
+            lines += [_source_line_md(e, records.get(e["id"])) for e in subset]
+            lines.append("")
+    return "\n".join(lines)
+
+
 def _build_sources_page(out_dir, doc_pages=(), entries=(), health=None):
     """Render the source guide as a human-readable directory derived from
-    sources/registry.yaml at build time. Returns True if the page was built."""
+    sources/registry.yaml at build time, plus its Markdown twin. Returns
+    True if the page was built."""
     if not entries:
         return False
     page = _render_page(
@@ -2263,8 +2473,12 @@ def _build_sources_page(out_dir, doc_pages=(), entries=(), health=None):
                      "Digester ingests, plans to ingest, or has evaluated — "
                      "with the items, content lengths, and request outcomes "
                      "we recorded for each."),
+        markdown_twin="sources.md",
     )
     (out_dir / "sources.html").write_text(page, encoding="utf-8")
+    _write_twin(out_dir, "sources.md",
+                _twin_header("sources", "sources/registry.yaml")
+                + _sources_md(entries, health))
     return True
 
 
@@ -2512,14 +2726,15 @@ def _svg_sparkline(days, values, *, title, unit="ms"):
             f'{_vh_series_table(caption, days, values, unit)}</figure>')
 
 
-def _recent_sentence(record):
-    """The trailing-24-hour figures as one sentence. Request counts are
-    host-wide (the same attribution as every fetch figure) and None where
-    no requests are made for the source — an absent number is omitted,
-    never shown as zero traffic."""
+def _recent_bits(record):
+    """The trailing-24-hour figures as (hours, [phrases]), or None when
+    the record carries none. Request counts are host-wide (the same
+    attribution as every fetch figure) and None where no requests are
+    made for the source — an absent number is omitted, never shown as
+    zero traffic."""
     recent = (record or {}).get("recent")
     if not recent:
-        return ""
+        return None
     bits = []
     if recent.get("requests") is not None:
         # A zero is a true observation (a cold snapshot, a quiet host)
@@ -2535,7 +2750,16 @@ def _recent_sentence(record):
     items = recent.get("items", 0)
     bits.append(f"{_n(items)} item(s) ingested" if items
                 else "no items ingested")
-    return (f'<p><span class="src-stat-label">Last {recent["hours"]} '
+    return recent["hours"], bits
+
+
+def _recent_sentence(record):
+    """`_recent_bits` as one HTML sentence."""
+    recent = _recent_bits(record)
+    if not recent:
+        return ""
+    hours, bits = recent
+    return (f'<p><span class="src-stat-label">Last {hours} '
             f'hours:</span> {" · ".join(bits)}</p>')
 
 
@@ -2662,29 +2886,47 @@ def _model_text_block(label, paragraphs, provenance):
             "</div>")
 
 
-def _description_block(desc):
+def _model_text_md(label, paragraphs, provenance):
+    """The Markdown form of `_model_text_block`: the same label in words,
+    the same paragraphs, the same provenance line."""
+    body = "\n\n".join(_md_escape(p) for p in paragraphs if p)
+    return f"**{label}**\n\n{body}\n\n_{_md_escape(provenance)}_\n"
+
+
+def _description_data(desc):
+    """(label, paragraphs, provenance) for a stored orientation, or None."""
     if not desc:
-        return ""
+        return None
     prov = (f"Model-written orientation, generated {desc['generated_at'][:10]}"
             f" by {desc.get('model') or 'unrecorded model'}, prompt version "
             f"{desc['prompt_version']}. It may draw on general knowledge of "
             "public institutions and is not official-record content.")
     paragraphs = [desc["summary"]] + [
         p.strip() for p in (desc["description"] or "").split("\n\n")]
-    return _model_text_block("Model-written orientation", paragraphs, prov)
+    return "Model-written orientation", paragraphs, prov
 
 
-def _assessment_block(assessment):
+def _assessment_data(assessment):
+    """(label, paragraphs, provenance) for a stored assessment, or None."""
     if not assessment:
-        return ""
+        return None
     prov = (f"Model-written assessment of our own ingestion, generated "
             f"{assessment['generated_at'][:10]} by "
             f"{assessment.get('model') or 'unrecorded model'}, prompt version "
             f"{assessment['prompt_version']}, trigger: "
             f"{assessment.get('trigger_reason') or 'unrecorded'}. It restates "
             "our measured figures and is not official-record content.")
-    return _model_text_block("Model-written ingestion assessment",
-                             [assessment["assessment"]], prov)
+    return "Model-written ingestion assessment", [assessment["assessment"]], prov
+
+
+def _description_block(desc):
+    data = _description_data(desc)
+    return _model_text_block(*data) if data else ""
+
+
+def _assessment_block(assessment):
+    data = _assessment_data(assessment)
+    return _model_text_block(*data) if data else ""
 
 
 def _methods_rows(entry):
@@ -2750,40 +2992,87 @@ def _methods_rows(entry):
     return rows
 
 
-def _all_time_block(entry, record, all_time, fetch_log_present):
-    """Lifetime request figures for the source's host, with the
-    host-sharing and unmarked-probe disclosures. Host-keyed, so it can
-    exist even for a source that is not currently measured — a refusal's
-    request history is accountability data."""
+def _all_time_facts(entry, record, all_time, fetch_log_present):
+    """Lifetime request figures for the source's host as (kind, label,
+    text) facts — kind "stat" (a labelled figure), "label" (a sentence in
+    the statistics register) or "note" (a disclosure). Host-keyed, so it
+    can exist even for a source that is not currently measured — a
+    refusal's request history is accountability data."""
     if entry["type"] == "email":
-        return (f'<p class="stat-note">{html.escape(health_mod.EMAIL_FETCH_NOTE)}'
-                "</p>")
+        return [("note", None, health_mod.EMAIL_FETCH_NOTE)]
     host = health_mod.fetch_host(entry)
     if not host:
-        return ('<p class="stat-note">No request host is registered for '
-                "this source.</p>")
+        return [("note", None, "No request host is registered for this source.")]
     if not fetch_log_present:
-        return ('<p class="stat-note">The request log is not present in '
-                "this build, so all-time request statistics are omitted "
-                "rather than shown as zero.</p>")
+        return [("note", None, ("The request log is not present in this build, "
+                 "so all-time request statistics are omitted rather than "
+                 "shown as zero."))]
     rec = all_time.get(host)
     if not rec:
-        return (f'<p class="stat-note">No requests to {html.escape(host)} '
-                "are recorded in the request log.</p>")
-    parts = [
-        (f'<p><span class="src-stat-label">Our requests to '
-         f"{html.escape(host)}, all time (since "
-         f"{html.escape((rec.get('first_seen') or '')[:10] or 'the log began')}"
-         f"):</span> {_n(rec['requests'])} request(s) · {_n(rec['ok'])} "
-         f"answered · {_n(rec['failures'])} returned no content</p>")]
+        return [("note", None, (f"No requests to {host} are recorded in the "
+                 "request log."))]
+    since = (rec.get("first_seen") or "")[:10] or "the log began"
+    facts = [("stat", f"Our requests to {host}, all time (since {since})",
+              (f"{_n(rec['requests'])} request(s) · {_n(rec['ok'])} answered · "
+              f"{_n(rec['failures'])} returned no content"))]
     fetch = (record or {}).get("fetch")
     if fetch and fetch.get("shared_with_sources", 1) > 1:
-        parts.append(
-            f'<p class="src-stat-label">This host serves '
-            f"{fetch['shared_with_sources']} registered sources, so these "
-            "figures are host-wide.</p>")
-    parts.append(f'<p class="stat-note">{html.escape(ALL_TIME_PROBE_NOTE)}</p>')
+        facts.append(("label", None,
+                      (f"This host serves {fetch['shared_with_sources']} "
+                      "registered sources, so these figures are host-wide.")))
+    facts.append(("note", None, ALL_TIME_PROBE_NOTE))
+    return facts
+
+
+def _all_time_block(entry, record, all_time, fetch_log_present):
+    """`_all_time_facts` as HTML."""
+    parts = []
+    for kind, label, text in _all_time_facts(entry, record, all_time,
+                                             fetch_log_present):
+        if kind == "stat":
+            parts.append(_fact_html(label, text))
+        elif kind == "label":
+            parts.append(f'<p class="src-stat-label">{html.escape(text)}</p>')
+        else:
+            parts.append(f'<p class="stat-note">{html.escape(text)}</p>')
     return "".join(parts)
+
+
+def _all_time_md(entry, record, all_time, fetch_log_present):
+    lines = []
+    for kind, label, text in _all_time_facts(entry, record, all_time,
+                                             fetch_log_present):
+        lines.append(f"- **{_md_escape(label)}:** {_md_escape(text)}"
+                     if kind == "stat" else _md_escape(text))
+        lines.append("")
+    return "\n".join(lines)
+
+
+def _chart_series(entry, record, days, fetch_days, items_by_day, fetch_by_day):
+    """The per-day series behind the charts, computed once for the HTML
+    charts and the twin's day-by-day table: items per day for the
+    source, and — for a web host — requests and mean response time per
+    day on the floored request axis (see ALL_TIME_STATS_SINCE)."""
+    host = health_mod.fetch_host(entry)
+    host_days = fetch_by_day.get(host, {}) if host else {}
+    item_days = items_by_day.get(health_mod.source_key(entry), {})
+    fetch = (record or {}).get("fetch")
+    return {
+        "host": host if host and entry["type"] != "email" and fetch_days else None,
+        "shared_note": (" (host-wide)" if fetch
+                        and fetch.get("shared_with_sources", 1) > 1 else ""),
+        "req_values": [host_days.get(d, {}).get("n", 0) for d in fetch_days],
+        "ms_values": [host_days.get(d, {}).get("avg_ms") for d in fetch_days],
+        "item_values": [item_days.get(d, 0) for d in days],
+    }
+
+
+def _chart_clock_note():
+    """Read at call time, like every other clock label (GUIDE §3/§5:
+    the clock is one config knob)."""
+    return (f"Each day runs midnight to midnight on {config.PUBLICATION_TZ_LABEL} "
+            f"({config.PUBLICATION_TZ_PLACE}), the publication day the digests "
+            "use; the stored request stamps remain UTC.")
 
 
 def _source_page_body(entry, record, *, description, assessment, state,
@@ -2892,41 +3181,29 @@ def _source_page_body(entry, record, *, description, assessment, state,
                  "</div>")
     # -- Charts -----------------------------------------------------------
     if days:
-        host = health_mod.fetch_host(entry)
-        host_days = fetch_by_day.get(host, {}) if host else {}
         # Request-derived series run on the floored axis (see
         # ALL_TIME_STATS_SINCE): pre-production days are absent from the
         # chart, not drawn as observed zeroes.
-        req_values = [host_days.get(d, {}).get("n", 0) for d in fetch_days]
-        ms_values = [host_days.get(d, {}).get("avg_ms") for d in fetch_days]
-        key = health_mod.source_key(entry)
-        item_days = items_by_day.get(key, {})
-        item_values = [item_days.get(d, 0) for d in days]
+        series = _chart_series(entry, record, days, fetch_days, items_by_day,
+                               fetch_by_day)
+        host = series["host"]
         charts = []
-        if host and entry["type"] != "email" and fetch_days:
-            shared_note = ""
-            fetch = (record or {}).get("fetch")
-            if fetch and fetch.get("shared_with_sources", 1) > 1:
-                shared_note = " (host-wide)"
+        if host:
             charts.append(_svg_bar_chart(
-                fetch_days, req_values,
-                title=f"Requests per day to {host}{shared_note}",
+                fetch_days, series["req_values"],
+                title=f"Requests per day to {host}{series['shared_note']}",
                 unit="requests"))
         charts.append(_svg_bar_chart(
-            days, item_values, title="Items ingested per day",
+            days, series["item_values"], title="Items ingested per day",
             unit="items"))
-        if host and entry["type"] != "email" and fetch_days:
+        if host:
             charts.append(_svg_sparkline(
-                fetch_days, ms_values,
+                fetch_days, series["ms_values"],
                 title=f"Daily mean response time of {host}"))
         charts = [c for c in charts if c]
         parts.append(f"<h3>Last {CHART_WINDOW_DAYS} days, day by day</h3>")
         if charts:
-            parts.append(
-                f'<p class="stat-note">Each day runs midnight to midnight on '
-                f"{html.escape(config.PUBLICATION_TZ_LABEL)} "
-                f"({html.escape(config.PUBLICATION_TZ_PLACE)}), the publication "
-                "day the digests use; the stored request stamps remain UTC.</p>")
+            parts.append(f'<p class="stat-note">{html.escape(_chart_clock_note())}</p>')
             parts.extend(charts)
         else:
             parts.append('<p class="stat-note">No requests and no items '
@@ -2937,6 +3214,109 @@ def _source_page_body(entry, record, *, description, assessment, state,
         parts.append("<h2>Our ingestion assessment</h2>")
         parts.append(_assessment_block(assessment))
     return "".join(parts)
+
+
+def _source_page_md(entry, record, *, description, assessment, state,
+                    all_time, fetch_log_present, days, fetch_days,
+                    items_by_day, fetch_by_day):
+    """sources/<id>.md — the same inputs as `_source_page_body`, the same
+    sections in the same order, the model-written blocks under the same
+    labels. Charts become the day-by-day table their captions describe."""
+    sid = entry["id"]
+    urls = entry["urls"]
+    link = urls.get("home") or next(iter(urls.values()))
+    health_word = (_HEALTH_WORDS.get(record["health"], record["health"])
+                   if record and record.get("health") else None)
+    lines = [
+        f"# {entry['name']}", "",
+        f"{_STATUS_PHRASES[entry['status']]}"
+        + (f" · ingestion health: {health_word}" if health_word else "")
+        + f" · {entry['branch'].capitalize()} · Tier {entry['tier']} · "
+        f"{_TYPE_LABELS.get(entry['type'], entry['type'])} · {entry['parent_org']}",
+        "",
+        f"Official site: {link} · All sources: [sources.md](../sources.md)", "",
+        "## What this source is", "", _md_escape(entry["description"]), "",
+    ]
+    data = _description_data(description)
+    if data:
+        lines += [_model_text_md(*data)]
+    lines += ["## Identity and registry record", "",
+              "| Field | Value |", "|---|---|",
+              f"| Registry id | `{sid}` |",
+              f"| Agency / parent organization | {_md_escape(entry['parent_org'])} |",
+              f"| Branch | {_md_escape(entry['branch'])} |",
+              f"| Type | {_md_escape(_TYPE_LABELS.get(entry['type'], entry['type']))} |",
+              f"| Status | {entry['status']} |",
+              f"| Tier | {entry['tier']} |"]
+    lines += [f"| URL ({_md_escape(kind)}) | {_md_escape(url)} |"
+              for kind, url in sorted(urls.items())]
+    lines.append(f"| Registered | {entry['added']} |")
+    notes = entry["notes"].strip()
+    if notes:
+        lines.append(f"| Registry notes | {_md_escape(_redact_addresses(notes))} |")
+    lines += ["", "## How we ingest it", "", "| Term | Description |", "|---|---|"]
+    lines += [f"| {_md_escape(term)} | {_md_escape(desc)} |"
+              for term, desc in _methods_rows(entry)]
+    lines += ["", "## Ingestion health", ""]
+    if record and record.get("health"):
+        lines += [f"**{health_word}** — {_md_escape(record['health_reason'])}", ""]
+        st = state.get(sid)
+        if st:
+            lines += [(f"This label has held since {st['since']} (UTC) and was "
+                      f"last re-checked {st['last_checked']} (UTC)."), ""]
+        lines += [health_mod.FETCH_DISCLAIMER, ""]
+    else:
+        lines += [(record or {}).get("health_reason")
+                  or "No health label is computed in this build.", ""]
+    lines += ["## Ingestion statistics", "",
+              ("These figures describe this project's ingestion of this source "
+              "— items we recorded and requests we made — and nothing else. "
+              "They are not a measurement of the publisher."), ""]
+    if not record:
+        lines += ["Statistics are not available in this build.", ""]
+    elif not record["measured"]:
+        lines += [_unmeasured_note(record, "measured"), ""]
+    else:
+        lines += [f"### Last {health_mod.RECENT_WINDOW_HOURS} hours", ""]
+        recent = _recent_bits(record)
+        lines += [f"Last {recent[0]} hours: {' · '.join(recent[1])}" if recent
+                  else "No trailing-24-hour figures are available in this build.",
+                  ""]
+        lines += [f"### Last {record['window_days']} days", "",
+                  _facts_md(_health_facts(record))]
+    lines += ["### All time", "",
+              _all_time_md(entry, record, all_time, fetch_log_present)]
+    if days:
+        series = _chart_series(entry, record, days, fetch_days, items_by_day,
+                               fetch_by_day)
+        lines += [f"### Last {CHART_WINDOW_DAYS} days, day by day", ""]
+        if any(series["item_values"]) or any(series["req_values"]):
+            host = series["host"]
+            lines += [_chart_clock_note(), ""]
+            header = "| Day | Items ingested |"
+            rule = "|---|---|"
+            if host:
+                header += (f" Requests to {host}{series['shared_note']} |"
+                           " Mean response time (ms) |")
+                rule += "---|---|"
+            lines += [header, rule]
+            req = dict(zip(fetch_days, series["req_values"]))
+            ms = dict(zip(fetch_days, series["ms_values"]))
+            for day, items in zip(days, series["item_values"]):
+                row = f"| {day} | {items} |"
+                if host:
+                    t = ms.get(day)
+                    row += f" {req.get(day, '—')} | {t if t is not None else '—'} |"
+                lines.append(row)
+            lines.append("")
+        else:
+            lines += [(f"No requests and no items were recorded in the last "
+                      f"{CHART_WINDOW_DAYS} days, so there is nothing to chart."),
+                      ""]
+    data = _assessment_data(assessment)
+    if data:
+        lines += ["## Our ingestion assessment", "", _model_text_md(*data)]
+    return "\n".join(lines)
 
 
 def _build_source_pages(out_dir, entries, health, doc_pages=(), *,
@@ -2989,25 +3369,32 @@ def _build_source_pages(out_dir, entries, health, doc_pages=(), *,
         since=ALL_TIME_STATS_SINCE)
 
     for entry in entries:
-        body = _source_page_body(
-            entry, records.get(entry["id"]),
-            description=descriptions.get(entry["id"]),
-            assessment=assessments.get(entry["id"]),
-            state=state, all_time=all_time,
-            fetch_log_present=fetch_log_present,
-            days=days, fetch_days=fetch_days, items_by_day=items_by_day,
-            fetch_by_day=fetch_by_day)
+        # One set of inputs, two renderers: the HTML body and the Markdown
+        # twin are formatted from the same objects (Phase 2 §3.2).
+        inputs = {
+            "description": descriptions.get(entry["id"]),
+            "assessment": assessments.get(entry["id"]),
+            "state": state, "all_time": all_time,
+            "fetch_log_present": fetch_log_present,
+            "days": days, "fetch_days": fetch_days, "items_by_day": items_by_day,
+            "fetch_by_day": fetch_by_day}
+        record = records.get(entry["id"])
+        canonical = f"sources/registry.yaml (id: {entry['id']})"
         page = _render_page(
             f"{entry['name']} — source page — {SITE_TITLE}",
-            body,
+            _source_page_body(entry, record, **inputs),
             _site_nav(doc_pages, current="sources"),
-            f"sources/registry.yaml (id: {entry['id']})",
+            canonical,
             description=(f"How the Free Agentic Publication Digester ingests "
                          f"{entry['name']}: method, status, measured "
                          "statistics, and health history."),
+            markdown_twin=f"sources/{entry['id']}.md",
         )
         (sub / f"{entry['id']}.html").write_text(
             _rebase_page(page), encoding="utf-8")
+        _write_twin(out_dir, f"sources/{entry['id']}.md",
+                    _twin_header(f"sources/{entry['id']}", canonical)
+                    + _source_page_md(entry, record, **inputs))
     return len(entries)
 
 
@@ -3084,6 +3471,20 @@ def _blog_exists():
                for f, _slug, _date in _BLOG_POSTS)
 
 
+# The blog's disclosures, shared by the HTML pages and their Markdown twins
+# so the commentary label travels with the text wherever it is read.
+_BLOG_INDEX_INTRO = (
+    "Notes on how the Free Agentic Publication Digester is built: the "
+    "pipeline, the editorial gates, and the access policy it keeps with the "
+    "servers it reads.")
+_BLOG_INDEX_DISCLOSURE = (
+    "These posts are commentary about the project. They are not part of "
+    "the daily digest and not part of the official record — for what the "
+    "government published, read the dated digests.")
+_BLOG_POST_DISCLOSURE = ("commentary about the project, not part of the "
+                         "daily digest or the official record")
+
+
 def _blog_body(posts):
     cards = []
     for slug, date, title, teaser, _md, _canonical in posts:
@@ -3094,16 +3495,23 @@ def _blog_body(posts):
             f"{html.escape(title)}</a>"
             f'<span class="post-date">{html.escape(date)}</span>'
             f"{teaser_html}</li>")
+    disclosure = html.escape(_BLOG_INDEX_DISCLOSURE, quote=False).replace(
+        "dated digests", '<a href="index.html">dated digests</a>')
     return (
         "<h1>Blog</h1>"
-        "<p>Notes on how the Free Agentic Publication Digester is built: "
-        "the pipeline, the editorial gates, and the access policy it keeps "
-        "with the servers it reads. These posts are commentary about the "
-        "project. They are not part of the daily digest and not part of the "
-        'official record — for what the government published, read the '
-        '<a href="index.html">dated digests</a>.</p>'
+        f"<p>{html.escape(_BLOG_INDEX_INTRO, quote=False)} {disclosure}</p>"
         f'<ul class="post-list">{"".join(cards)}</ul>'
     )
+
+
+def _blog_md(posts):
+    """blog.md: the same posts, dates and teasers as blog.html, linking
+    each post's own twin."""
+    lines = ["# Blog", "", _BLOG_INDEX_INTRO, "", _BLOG_INDEX_DISCLOSURE, ""]
+    for slug, date, title, teaser, _md, _canonical in posts:
+        lines.append(f"- [{_md_escape(title)}](blog-{slug}.md) — {date}"
+                     + (f" — {_md_escape(teaser)}" if teaser else ""))
+    return "\n".join(lines) + "\n"
 
 
 def _blog_post_body(date, md_text):
@@ -3114,8 +3522,7 @@ def _blog_post_body(date, md_text):
     _MD.reset()
     body = _MD.convert(md_text)
     meta = (f'<p class="post-meta">Published {html.escape(date)} · '
-            "commentary about the project, not part of the daily digest or "
-            "the official record</p>")
+            f"{html.escape(_BLOG_POST_DISCLOSURE)}</p>")
     head, sep, tail = body.partition("</h1>")
     body = head + sep + meta + tail if sep else meta + body
     # Wrapped so long-form typography (section headings, pull quotes) is
@@ -3156,18 +3563,28 @@ def _build_blog(out_dir, doc_pages=()):
             # index omits its own.
             _site_nav(doc_pages),
             canonical,
+            markdown_twin=f"blog-{slug}.md",
         )
         (out_dir / f"blog-{slug}.html").write_text(page, encoding="utf-8")
+        # The post's twin carries the same disclosure the page's meta line
+        # does: commentary travels labeled, wherever it is read.
+        _write_twin(out_dir, f"blog-{slug}.md",
+                    _twin_header(f"blog-{slug}", canonical)
+                    + f"> Published {date} · {_BLOG_POST_DISCLOSURE}.\n\n"
+                    + md_text)
+    canonical = "/".join(_BLOG_DIR) + "/ (allowlisted posts only)"
     index = _render_page(
         f"Blog — {SITE_TITLE}",
         _blog_body(posts),
         _site_nav(doc_pages, current="blog"),
-        "/".join(_BLOG_DIR) + "/ (allowlisted posts only)",
+        canonical,
         description=("Notes on how the Free Agentic Publication Digester is "
                      "built — commentary about the project, not part of the "
                      "daily digest."),
+        markdown_twin="blog.md",
     )
     (out_dir / "blog.html").write_text(index, encoding="utf-8")
+    _write_twin(out_dir, "blog.md", _twin_header("blog", canonical) + _blog_md(posts))
     return [(slug, date, title) for slug, date, title, _t, _m, _c in posts]
 
 
@@ -3225,6 +3642,16 @@ def refresh_sources(out_dir=None, *, pipeline_db=None, fetch_db=None,
 # assistive technology was built to handle.
 
 RECENT_DIGEST_DAYS = 7
+
+# Index-page sentences shared by index.html and its Markdown twin, so the
+# PRELIMINARY wording and the source-guide description are one text.
+_LIVE_CALLOUT_TEXT = (
+    "watch official publications arrive through the day, newest first "
+    "(preliminary until the end-of-day digest freezes the record).")
+_SOURCES_LINK_TEXT = (
+    "every federal source we ingest, plan to ingest, or have evaluated, "
+    "with method, status, and the items and request outcomes we recorded "
+    "for each.")
 
 _MONTH_NAMES = ("January", "February", "March", "April", "May", "June",
                 "July", "August", "September", "October", "November",
@@ -3411,9 +3838,37 @@ def _archive_body(year, published, *, years, depth=0):
         "repository</a>.</p>")
 
 
+def _archive_md(year, published, *, years, depth=0):
+    """One year's archive as Markdown — the same `published` set and the
+    same months as the calendars, each published day linking its digest's
+    `.md` twin (rebased `../` one level down), plus the other years."""
+    prefix = "../" * depth
+    lines = [f"# Digest archive — {year}", "",
+             ("Every daily digest, by date. The digest for a day is the "
+             "canonical record of what the federal government published "
+             "that day."), ""]
+    for month in _months_with_digests(year, published):
+        lines += [f"## {_MONTH_NAMES[month - 1]} {year}", ""]
+        lines += [f"- [{d}]({prefix}{d}.md)"
+                  for d in sorted(published)
+                  if d.startswith(f"{year:04d}-{month:02d}-")]
+        lines.append("")
+    others = [y for y in years if y != year]
+    if others:
+        lines += ["## Other years", ""]
+        lines += [f"- [{y}]({_archive_href(y, years[0], depth=depth)[:-5]}.md)"
+                  for y in others]
+        lines.append("")
+    lines += [(f"The complete machine-readable index is {prefix}digests.json, "
+              "and every digest is also published as Markdown in the public "
+              f"repository: {REPO_URL}"), ""]
+    return "\n".join(lines)
+
+
 def _build_archive_pages(out_dir, dates, doc_pages=()):
     """archive.html (the newest year) plus archive/<year>.html for each
-    earlier year. Returns the relative URLs built, for the sitemap.
+    earlier year, each with its Markdown twin. Returns the relative URLs
+    built, for the sitemap.
 
     Older years get their own page rather than all years on one, so the
     archive stays bounded as the record grows; the newest year is inline
@@ -3429,8 +3884,11 @@ def _build_archive_pages(out_dir, dates, doc_pages=()):
         _archive_body(years[0], published, years=years),
         _site_nav(doc_pages), "digests/",
         description=("Every daily digest published by the Free Agentic "
-                     "Publication Digester, by date."))
+                     "Publication Digester, by date."),
+        markdown_twin="archive.md")
     (out_dir / "archive.html").write_text(page, encoding="utf-8")
+    _write_twin(out_dir, "archive.md", _twin_header("archive", "digests/")
+                + _archive_md(years[0], published, years=years))
     built.append("archive.html")
     for year in years[1:]:
         page = _render_page(
@@ -3438,11 +3896,15 @@ def _build_archive_pages(out_dir, dates, doc_pages=()):
             _archive_body(year, published, years=years, depth=1),
             _site_nav(doc_pages), "digests/",
             description=(f"Daily digests published in {year} by the Free "
-                         "Agentic Publication Digester, by date."))
+                         "Agentic Publication Digester, by date."),
+            markdown_twin=f"archive/{year}.md")
         year_dir = out_dir / "archive"
         year_dir.mkdir(parents=True, exist_ok=True)
         (year_dir / f"{year}.html").write_text(_rebase_page(page),
                                                encoding="utf-8")
+        _write_twin(out_dir, f"archive/{year}.md",
+                    _twin_header(f"archive/{year}", "digests/")
+                    + _archive_md(year, published, years=years, depth=1))
         built.append(f"archive/{year}.html")
     return built
 
@@ -3505,8 +3967,12 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
             body,
             _nav_for(dates, i, doc_pages),
             f"digests/{path.name}",
+            markdown_twin=f"{path.stem}.md",
         )
         (out_dir / f"{path.stem}.html").write_text(page, encoding="utf-8")
+        # The digest's twin IS the canonical Markdown: a byte-identical
+        # copy, no header, no footer, no edits (Phase 2 §3).
+        (out_dir / f"{path.stem}.md").write_bytes(path.read_bytes())
 
 
         asset_src = digest_dir / "assets" / path.stem
@@ -3551,20 +4017,17 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
                           entries=registry_entries, health=source_stats,
                           archive_pages=archive_pages)
     sources_link = (
-        '<p class="tagline"><a href="sources.html">Source guide</a> — every '
-        "federal source we ingest, plan to ingest, or have evaluated, with "
-        "method, status, and the items and request outcomes we recorded "
-        "for each.</p>" if sources_built else ""
+        f'<p class="tagline"><a href="sources.html">Source guide</a> — '
+        f"{_SOURCES_LINK_TEXT}</p>" if sources_built else ""
     )
     live_callout = (
         '<p class="live-callout"><a href="today.html">'
         '<span class="live-dot"></span>Today — live</a> '
-        "watch official publications arrive through the day, newest first "
-        "(preliminary until the end-of-day digest freezes the record).</p>"
+        f"{_LIVE_CALLOUT_TEXT}</p>"
     )
     recent_heading = (
-        f"<h2>The last {len(recent)} days</h2>" if len(recent) > 1
-        else "<h2>The most recent digest</h2>") if recent else ""
+        f"The last {len(recent)} days" if len(recent) > 1
+        else "The most recent digest") if recent else ""
     archive_block = (_index_archive_block(set(dates), dates[-1])
                      if dates else "")
     index_body = (
@@ -3572,7 +4035,7 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
         f'<p class="tagline">{html.escape(SITE_TAGLINE)}</p>'
         f"{live_callout}"
         f"{sources_link}"
-        f"{recent_heading}"
+        f"{f'<h2>{recent_heading}</h2>' if recent_heading else ''}"
         f'<ul class="digest-list">{"".join(cards)}</ul>'
         f"{archive_block}"
     )
@@ -3580,8 +4043,26 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
         SITE_TITLE, index_body,
         _site_nav(doc_pages, current="index"),
         "digests/",
+        markdown_twin="index.md",
     )
     (out_dir / "index.html").write_text(index, encoding="utf-8")
+    # index.md — the same variables as index.html, in the same function,
+    # so the two cannot disagree about the recent window or its teasers.
+    recent_md = [
+        f"- [Daily Digest — {date}]({date}.md)"
+        + (f" — {_md_escape(teasers[date])}" if teasers.get(date) else "")
+        for date in recent]
+    _write_twin(out_dir, "index.md", _twin_header("index", "digests/") + "\n".join(
+        [f"# {SITE_TITLE}", "", SITE_TAGLINE, "",
+         f"**Today — live** ([today.html](today.html)): {_LIVE_CALLOUT_TEXT}",
+         ""]
+        + ([f"[Source guide](sources.md) — {_SOURCES_LINK_TEXT}", ""]
+           if sources_built else [])
+        + ([f"## {recent_heading}", ""] + recent_md + [""] if recent else [])
+        + (["## Earlier days", "",
+            ("Every published day, by date: [full digest archive](archive.md)."
+            " The complete machine-readable index is digests.json."), ""]
+           if dates else [])) + "\n")
 
     (out_dir / "style.css").write_text(_STYLE, encoding="utf-8")
     (out_dir / ".nojekyll").write_text("", encoding="utf-8")
@@ -4760,8 +5241,12 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
         _MD.convert(_AGENTS_MD),
         _site_nav(doc_pages, current="agents"),
         "GUIDE.md §1 (dual audience)",
+        markdown_twin="agents.md",
     )
     (out_dir / "agents.html").write_text(page, encoding="utf-8")
+    _write_twin(out_dir, "agents.md",
+                _twin_header("agents", "GUIDE.md §1 (dual audience)", base)
+                + _AGENTS_MD)
 
     # llms.txt (agent guidance convention)
     lines = [
