@@ -7,6 +7,7 @@ same exclude list production uses, or the two images quietly diverge.
 Each guard here pins a hazard the plan documents (deploy/dev/README.md).
 """
 
+import re
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -81,6 +82,44 @@ def test_both_stagers_share_the_exclude_list():
     # the staged dev context must be excluded from the prod export, or a
     # laptop that ran dev-up.sh bakes a recursive repo copy into prod
     assert "deploy/dev/repo/" in (PROJECT_ROOT / excl).read_text(encoding="utf-8")
+
+
+def test_deploy_bundle_rsync_excludes_the_host_log_directory():
+    """SR-3 (agent-discovery security review): Phase 4B bind-mounts
+    /opt/fapd/logs/ into fapd-web for the /mcp access log fail2ban
+    reads. The bundle rsync runs with --delete, so without this exclude
+    every deploy erases the host log directory — the F-004 class."""
+    sh = (VPS / "scripts" / "deploy.sh").read_text(encoding="utf-8")
+    assert "--exclude 'logs/'" in sh
+    assert sh.index("--exclude 'logs/'") < sh.index('deploy/vps/ "${VPS}:${REMOTE_DIR}/"')
+
+
+def _live_yaml(path):
+    return "\n".join(ln for ln in path.read_text(encoding="utf-8").splitlines()
+                     if not ln.lstrip().startswith("#"))
+
+
+def test_both_stacks_mount_the_repo_managed_nginx_config():
+    """Agent-discovery Phase 3: fapd-web runs deploy/vps/nginx/, mounted
+    read-only as the whole of /etc/nginx/conf.d — a DIRECTORY, because a
+    single-file bind mount keeps the old inode after rsync replaces the
+    file (2026-07-30). Dev mounts the same directory so the dev stack
+    renders through the same routing production will."""
+    prod = _live_yaml(VPS / "docker-compose.yml")
+    dev = _live_yaml(DEV / "docker-compose.yml")
+    assert "- ./nginx:/etc/nginx/conf.d:ro" in prod
+    assert "- ../vps/nginx:/etc/nginx/conf.d:ro" in dev
+    assert "/etc/nginx/conf.d/default.conf" not in prod + dev   # never a file
+    assert (VPS / "nginx" / "default.conf").is_file()
+
+
+def test_web_services_share_the_nginx_image_pin():
+    prod = re.search(r"image:\s*(nginx:\S+)", _live_yaml(VPS / "docker-compose.yml"))
+    dev = re.search(r"image:\s*(nginx:\S+)", _live_yaml(DEV / "docker-compose.yml"))
+    assert prod and dev and prod.group(1) == dev.group(1)
+    # the deploy-time syntax gate and the rehearsal test the SAME image
+    for script in (VPS / "scripts" / "deploy.sh", VPS / "nginx" / "rehearse.sh"):
+        assert prod.group(1) in script.read_text(encoding="utf-8"), script
 
 
 def test_dev_env_example_defuses_the_prod_defaults():

@@ -3,7 +3,10 @@
 *Never writes anything. Anything that would — restarts, deploys, config
 flips — lives behind the authorization gate in
 [AGENT-VPS-SERVICING-GUIDE.md](AGENT-VPS-SERVICING-GUIDE.md) §4.
-Last reviewed: 2026-08-07.*
+Last reviewed: 2026-09-13 (the fapd-web configuration became
+repo-managed — agent-discovery plan Phase 3, pending deploy: the
+discovery-surface checks and the nginx rehearsal row were added; the
+rest re-read unchanged).*
 
 ## Local checks (the operator machine)
 
@@ -58,6 +61,32 @@ deploy/vps/scripts/vps-ssh.sh 'sudo docker inspect fapd-web --format "{{json .Ne
 #   ^ exactly fapd_edge, nothing else
 deploy/vps/scripts/vps-ssh.sh 'sudo certbot certificates 2>/dev/null | grep -A3 fapd.info'
 ```
+
+### Is the repo-managed web config live?
+
+`fapd-web` runs `deploy/vps/nginx/` (agent-discovery plan Phase 3;
+**pending deploy** as of 2026-09-13 — until Phase 5 deploys it these
+checks describe the target state, and the stock config answers
+without a `Link` header and with `nginx/1.x` in its 404 body). Three
+curls through the edge, all read-only:
+
+```sh
+curl -sI https://fapd.info/ | grep -i '^link:'      # the five §8.3 rels, one header
+curl -sS -o /dev/null -w '%{http_code} %{content_type}\n' \
+  https://fapd.info/.well-known/api-catalog          # 200 application/linkset+json
+curl -sS https://fapd.info/.well-known/oauth-authorization-server | head -c 200
+#   ^ a 404 whose JSON body says "not offered" — the signpost, not nginx's page
+curl -sI https://fapd.info/ | grep -ic '^strict-transport-security:'   # exactly 1 (the edge's)
+```
+
+A `Link` header missing after a deploy means the reload did not happen
+(deploy.sh runs `nginx -t && nginx -s reload` in `fapd-web` after
+`up -d`; a config-only change is otherwise invisible to compose). Two
+`Strict-Transport-Security` headers means someone duplicated an
+edge-owned header in `fapd-web` — `tests/test_web_conf.py` pins against
+it. Before any change under `deploy/vps/nginx/` reaches the box,
+`deploy/vps/nginx/rehearse.sh` runs locally and must print `SUCCESS`
+(the cadence table).
 
 ### Did the evidence reach the repository?
 
@@ -145,3 +174,4 @@ configuration working.
 | TLS <30 days to expiry | `certbot renew --dry-run` (on box) | catch hook breakage before the real renewal |
 | After a collector change | `collect.py --once --no-llm --no-wayback` + collector_state read | cycle integrity without token spend or archive writes |
 | Before any deploy | `deploy/dev/scripts/dev-up.sh` render against a recent VPS seed | the change seen on production-shaped data first (advisory) |
+| Before a deploy that touches `deploy/vps/nginx/` | `deploy/vps/nginx/rehearse.sh` → `SUCCESS` | a bad fapd-web config crash-loops the site and endangers the edge proxy's restart; the throwaway container proves the request matrix in ~10 s (deploy.sh repeats `nginx -t` on the box before the swap) |

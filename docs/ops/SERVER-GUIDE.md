@@ -52,6 +52,8 @@ day; certs and firewall last checked 2026-08-05 — see the review table).*
 
 | Item | Last verified |
 |---|---|
+| `fapd-web` runs the repo-managed config (`deploy/vps/nginx/`, directory mount): discovery content types, `Link` header, Markdown negotiation, CORS, signposted `/.well-known/` 404s, `server_tokens off` (agent-discovery Phase 3) | **pending deploy** (files landed 2026-09-13; rehearsed locally only — never verified on the box until Phase 5) |
+| `deploy.sh` syntax-gates the nginx candidate on the box before the swap and reloads `fapd-web` after `up -d`; bundle rsync excludes `logs/` (SR-3) | **pending deploy** (2026-09-13; `bash -n` and static tests only) |
 | **Evidence push repaired** — silently failing since the 2026-08-06 deploy; the stranded commit recovered and the cause fixed (F-021, plan P0–P3) | 2026-08-07 |
 | Connection facts reachable from this repo (`deploy.env` + `vps-ssh.sh`) | 2026-08-07 |
 | Containers healthy, `fapd-web` on exactly `fapd_edge`, site serving | 2026-08-07 |

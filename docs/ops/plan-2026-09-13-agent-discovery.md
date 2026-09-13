@@ -105,7 +105,7 @@ private tree (`docs/private/agent-discovery-box-facts-2026-09-13.md`).
 | Does `https://fapd.info/.well-known/*` reach `fapd-web`? | Yes. The edge proxy passes every HTTPS path to `fapd-web`; the ACME webroot is only on port 80. | Discovery files published in `site/.well-known/` are reachable. No edge change needed. |
 | Does the edge strip or replace upstream headers or 404 bodies? | No. No header hiding, no 404 interception for fapd.info. The edge adds HSTS, nosniff, frame-options and referrer-policy itself. | `Link`, `Vary`, CORS and content types set in `fapd-web` reach clients. Signposted 404 bodies survive. |
 | Who serves the stock 404 page? | `fapd-web` (it shows its nginx version; the edge hides its own). | Phase 3 sets `server_tokens off` in `fapd-web`. |
-| What config does `fapd-web` run? | The image's stock `default.conf`. Nothing repo-managed. | Phase 3 adds `deploy/vps/nginx/fapd-web.conf`. |
+| What config does `fapd-web` run? | The image's stock `default.conf`. Nothing repo-managed. | Phase 3 adds `deploy/vps/nginx/default.conf`. |
 | Compression? | The edge gzips HTML, JSON, plain text, CSS, JS and SVG. It doesn't gzip Markdown, linkset, AI-catalog, Atom or XML types. | Phase 3 enables gzip for those types inside `fapd-web` (in-repo). |
 | Rate limiting? | The edge applies a per-client-address request limit to all of fapd.info. | `/mcp` is already covered; Phase 4B adds a tighter MCP zone. **`agents.html` currently says "no rate limiting", which is an overclaim.** AD-8 fixes the sentence. |
 | Open host ports | `ufw`: exactly 2222, 80, 443 (matches SERVER-GUIDE). | MCP rides existing 443 through the edge proxy. **No port opens.** |
@@ -178,7 +178,7 @@ Phase 0 ─┬─▶ Phase 1 ──▶ Phase 2 ──┬────────
 **Why these boundaries.** Each phase's files belong to exactly one
 section owner (`docs/agents/orchestration.md` §2), so phases that run at
 the same time can't edit the same file. Phase 3 and Phase 4B both edit
-`deploy/vps/nginx/fapd-web.conf` and the compose files, which is why 4B
+`deploy/vps/nginx/default.conf` and the compose files, which is why 4B
 waits for 3 and reuses the same Operations agent. Phases 1, 2 and 4C all
 edit `publish.py`, which is why they're serial in one Publication agent.
 
@@ -389,7 +389,7 @@ file**. A drift test fails if they differ.
 | 0 | **done 2026-09-13** (C-2 approved) | 778e253 (plan), 4c888ab (security review), 07b6db4 (governance) | `research/agent-logs/agent-discovery-orchestrator-20260913.md` | 2026-09-13 |
 | 1 | **done 2026-09-13** (all 9 acceptance criteria met; 27 new tests) | see git log: "site: agents can discover…" | `research/agent-logs/agent-discovery-phase1-20260913.md` | 2026-09-13 |
 | 2 | in progress (same Publication agent, 2026-09-13) | — | `research/agent-logs/agent-discovery-phase2-20260913.md` | — |
-| 3 | in progress (agent launched 2026-09-13) | — | `research/agent-logs/agent-discovery-phase3-20260913.md` | — |
+| 3 | **done 2026-09-13** (rehearsal 24 pass / 0 fail / 2 explained skips; 41 static tests) | see git log: "ops: fapd-web gets a repo-managed…" | `research/agent-logs/agent-discovery-phase3-20260913.md` | 2026-09-13 |
 | 4A | in progress (agent launched 2026-09-13) | — | `research/agent-logs/agent-discovery-phase4a-20260913.md` | — |
 | 4B | not started | — | — | — |
 | 4C | not started | — | — | — |

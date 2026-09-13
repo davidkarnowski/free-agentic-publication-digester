@@ -27,6 +27,12 @@ services:
       # containers share no network. Docker seeds an empty volume from the
       # backend image's baked site/ on first mount.
       - fapd-site:/usr/share/nginx/html:ro
+      # Repo-managed server config (agent-discovery plan Phase 3). A
+      # DIRECTORY mount on purpose: rsync replaces files with new inodes,
+      # which a single-file bind mount would never see (2026-07-30).
+      # Config-only deploys reload in place (deploy.sh: nginx -t, then
+      # nginx -s reload); the mount itself recreates the container once.
+      - ./nginx:/etc/nginx/conf.d:ro
     # Bounds + rotation (review D18/D19/R4): this is a shared VPS — a
     # runaway container must be contained, and an unrotated log must not
     # fill the disk. Values copied from the dev stack, where the block

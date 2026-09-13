@@ -22,6 +22,16 @@ operator's private server guide — not in this public-bound repo.
   edge proxy (spiralyst-proxy) is the only other member; it terminates
   TLS for fapd.info and proxies here. FAPD and Spiralyst containers
   share no network — the proxy alone bridges the two edge networks.
+  Since the agent-discovery plan (Phase 3, 2026-09-13; **pending
+  deploy**) it runs the repo-managed configuration in
+  [`nginx/`](nginx/README.md), mounted read-only as the whole of
+  `/etc/nginx/conf.d/` — a directory, never a file, because rsync
+  replaces files with new inodes that a single-file bind mount never
+  sees. That config sets the discovery documents' content types, the
+  RFC 8288 `Link` header, `Accept: text/markdown` negotiation, CORS on
+  machine-readable files, signposted 404s under `/.well-known/`, and
+  `server_tokens off`. The edge still owns HSTS, nosniff,
+  frame-options and referrer-policy; `fapd-web` repeats none of them.
 - `fapd-backend` (live since 2026-07-30, `profiles: ["backend"]`) — the collector
   supervisor + end-of-day finalizer. Own private egress-only network;
   NOT on `fapd_edge`; no published ports; unreachable from the proxy,
@@ -53,15 +63,30 @@ What the script does, in order:
 
 1. **Test gate** — ruff + the full pytest suite; a red suite never
    deploys.
+1b. **nginx syntax gate** (2026-09-13) — the candidate `nginx/` is
+   rsynced to `/opt/fapd/.nginx-candidate/` and `nginx -t` runs against
+   it in a throwaway container of the same pinned image, **before** the
+   bundle rsync swaps it in. A bad config would crash-loop `fapd-web`,
+   which is the edge proxy's static upstream: an edge restart in that
+   window takes the cohabitant down too. The bundle rsync's `--delete`
+   removes the candidate directory afterwards (intended).
 2. **Bundle rsync** (`deploy/vps/` → `/opt/fapd/`) with the
    load-bearing excludes `.env`, `secrets/`, `repo/` — those exist
    only on the box, and `--delete` without them destroys the
-   deployment's own state (finding F-004).
+   deployment's own state (finding F-004) — and, since 2026-09-13,
+   `logs/` (security review SR-3): Phase 4B bind-mounts
+   `/opt/fapd/logs/` into `fapd-web` for the `/mcp` access log that
+   fail2ban reads, and without the exclude every deploy would erase it.
 3. **Repo export** (`./` → `/opt/fapd/repo/`, the backend build
    context, `.git` included for evidence commits) using the shared
    exclude list `deploy/common/repo-excludes.txt`.
 4. **Build + up**: `docker compose --profile backend build backend &&
-   --profile backend up -d`.
+   --profile backend up -d`, then `nginx -t && nginx -s reload` inside
+   `fapd-web` (2026-09-13): the config is a directory mount, and compose
+   recreates a container only when its service definition changes, so
+   a config-only change is invisible to `up -d` and takes effect on the
+   reload. Verify then also curls `/.well-known/api-catalog` (expects
+   `200 application/linkset+json`) and greps the `Link` header on `/`.
 5. **Three post-up steps**, each load-bearing: in-container
    `build_site.py` (F-009 — the site volume seeds from the image on
    first mount ONLY; a rebuild does not refresh it), in-container
@@ -82,7 +107,9 @@ evidence-path allowlist, bot identity named on the commit itself).
 **Pre-deploy check:** render your change against production-shaped
 data first — `deploy/dev/` runs the same image recipe on a VPS data
 snapshot at localhost:8080 (see its README). Advisory today, and
-cheap.
+cheap. **A change under `nginx/` additionally runs
+`deploy/vps/nginx/rehearse.sh` first** (local throwaway container, the
+full request matrix, ~10 s) and must print `SUCCESS`.
 
 ### First-time bring-up (once per box)
 
@@ -125,6 +152,10 @@ also one more class of output that nothing ever deletes (OB-12).
 
 ```sh
 curl -sI https://fapd.info | head -1        # HTTP/2 200
+curl -sI https://fapd.info/ | grep -i '^link:'                       # five rels (plan §8.3)
+curl -sS -o /dev/null -w '%{http_code} %{content_type}\n' \
+  https://fapd.info/.well-known/api-catalog                        # 200 application/linkset+json
+curl -sI https://fapd.info/.well-known/oauth-authorization-server | head -1   # 404 (signposted)
 ssh <box> 'sudo docker ps --format "{{.Names}}\t{{.Status}}" | grep fapd'
 ssh <box> 'sudo docker inspect fapd-web --format "{{json .NetworkSettings.Networks}}"'
 #   ^ must list fapd_edge and nothing else

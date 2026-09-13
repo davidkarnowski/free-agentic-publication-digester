@@ -5313,3 +5313,53 @@ Verified: ruff clean; full suite 901 passed, 1 skip (the documented
 cross-phase skip in test_web_conf, which Phase 5 forbids at deploy
 time). Phase 3 and 4A files were in the same tree and are not in this
 commit.
+
+## 2026-09-13 — Phase 3 lands: fapd-web runs a repo-managed configuration
+
+The Operations agent delivered Phase 3 through the same two
+interruptions as Phase 1, resuming from its log both times. `fapd-web`
+no longer runs the image's stock file: `deploy/vps/nginx/default.conf`
+plus three `.inc` snippets are mounted as the whole of
+`/etc/nginx/conf.d` (a directory, never a single file — rsync replaces
+inodes) in both the production and dev compose files. The config
+serves every discovery document with its contract media type, sends the
+five-relation RFC 8288 `Link` header and `Vary: Accept` on HTML and
+Markdown, negotiates `Accept: text/markdown` to the Markdown twins for
+exactly the paths the master plan's §8.2 table names (Phase 2 builds
+them; a `text/markdown;q=0` is a refusal, not a request), adds CORS on
+public machine-readable files, answers probes under `/.well-known/` for
+protocols the site does not operate with a 404 whose JSON body points at
+the real surfaces, hides the server version, refuses non-GET/HEAD
+methods on static paths, caps bodies at 1 KiB, gzips the types the edge
+does not, and carries the `$fapd_client` map and both `/mcp` limit zones
+for Phase 4B. `deploy.sh` gained a syntax gate that tests the candidate
+config in a throwaway container on the box before the bundle is swapped
+in, the `logs/` rsync exclude the security review required, and a
+post-up `nginx -t && nginx -s reload`.
+
+The proof is `deploy/vps/nginx/rehearse.sh`: the real renderer builds a
+site into a temp directory, a throwaway `nginx:1.30-alpine` serves it
+with this config, and 24 requests are checked — all passing, two skips
+explained (the favicon and the `sources/` twin belong to phases that had
+not merged when it ran; stand-ins were planted with a printed warning).
+Eight seconds on a laptop. Two things it caught that the draft config
+had wrong: `text/html` is always in `charset_types` and naming it again
+is a warning; and the official image's entrypoint tries to edit
+`default.conf` in place for the IPv6 listen, which a read-only mount
+refuses — harmless only because the config lists both listens
+explicitly. The dev stack ran the new config end to end (HTTP 200 on `/`
+and `/today.html`), but its curl rows were not captured: the local
+Docker daemon died during the two-hour rate-limit pause and did not
+come back before the report. Advisory only; the rehearsal covers the
+same image, mount and renderer, and Phase 5's pre-merge checklist
+re-runs both.
+
+One integration decision on the agent's question: JSON responses carry
+no charset parameter (RFC 8259 defines none; the contract table serves
+`application/json` bare), so the JSON types were dropped from
+`charset_types` by the orchestrator. The rehearsal could not be re-run
+for that one-line change with Docker down; it is owed before merge.
+
+Verified by the agent: ruff clean on its files; full suite 874 passed,
+1 documented skip (Phase 2's twin patterns). The Phase 1 head-link
+parity test ran live and passed.

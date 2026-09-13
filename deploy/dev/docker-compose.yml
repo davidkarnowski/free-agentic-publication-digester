@@ -29,6 +29,10 @@ services:
     ports: ["8080:80"]              # published directly; no edge proxy in dev
     volumes:
       - fapd-site:/usr/share/nginx/html:ro
+      # The same repo-managed nginx config production runs (agent-
+      # discovery plan Phase 3) — a directory mount, same reason as
+      # prod. Relative to this file's directory (--project-directory).
+      - ../vps/nginx:/etc/nginx/conf.d:ro
     mem_limit: 128m
     cpus: 0.5
     logging:
