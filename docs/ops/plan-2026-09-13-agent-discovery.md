@@ -1,7 +1,7 @@
 # Plan — agent discovery and a no-inference MCP service (2026-09-13)
 
-*Master plan. Status: **approved in principle by the operator
-2026-09-13; nothing built.** Branch: `feature/agent-discovery`. The
+*Master plan. Status: **in execution on branch `feature/agent-discovery`
+(operator go 2026-09-13; see the §10 status table). Nothing deployed.** The
 per-phase files listed in §6 carry the executable detail; this file
 carries the why, the rulings, the contracts that let phases run in
 parallel, the working protocol every agent follows, and the status table.
@@ -388,11 +388,11 @@ file**. A drift test fails if they differ.
 |---|---|---|---|---|
 | 0 | **done 2026-09-13** (C-2 approved) | 778e253 (plan), 4c888ab (security review), 07b6db4 (governance) | `research/agent-logs/agent-discovery-orchestrator-20260913.md` | 2026-09-13 |
 | 1 | **done 2026-09-13** (all 9 acceptance criteria met; 27 new tests) | see git log: "site: agents can discover…" | `research/agent-logs/agent-discovery-phase1-20260913.md` | 2026-09-13 |
-| 2 | in progress (same Publication agent, 2026-09-13) | — | `research/agent-logs/agent-discovery-phase2-20260913.md` | — |
+| 2 | **done 2026-09-13** (7 criteria met; 19 tests; digest twins byte-identical) | see git log: "site: every page with a Markdown form…" | `research/agent-logs/agent-discovery-phase2-20260913.md` | 2026-09-13 |
 | 3 | **done 2026-09-13** (rehearsal 24 pass / 0 fail / 2 explained skips; 41 static tests) | see git log: "ops: fapd-web gets a repo-managed…" | `research/agent-logs/agent-discovery-phase3-20260913.md` | 2026-09-13 |
-| 4A | in progress (agent launched 2026-09-13) | — | `research/agent-logs/agent-discovery-phase4a-20260913.md` | — |
-| 4B | not started | — | — | — |
-| 4C | not started | — | — | — |
+| 4A | **done 2026-09-13** (420 package tests; 118-payload corpus; legacy conformance scenarios pass; 2026-07-28 conformance scenarios pending the suite's alpha, re-run at Phase 5) | see git log: "mcp: static-mcp, a reusable…" | `research/agent-logs/agent-discovery-phase4a-20260913.md` | 2026-09-13 |
+| 4B | in progress (Operations agent, 2026-09-13) | — | `research/agent-logs/agent-discovery-phase4b-20260913.md` | — |
+| 4C | in progress (Publication agent, 2026-09-13) | — | `research/agent-logs/agent-discovery-phase4c-20260913.md` | — |
 | 5 | not started | — | — | — |
 | 6 | not started | — | — | — |
 | 7 | scoped only | — | — | — |

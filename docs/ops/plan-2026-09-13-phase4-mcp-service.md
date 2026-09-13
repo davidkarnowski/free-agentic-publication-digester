@@ -1035,11 +1035,21 @@ write, used when a legitimate shared-egress client reports being blocked
 ### B.8 Acceptance criteria (4B)
 
 1. `rehearse.sh` passes rows 1–18 and M1–M11 (SKIPs explained).
-2. The dev stack serves `http://localhost:8080/mcp` to a real client:
-   run `claude mcp add --transport http fapd-dev http://localhost:8080/mcp`
+2. A real client talks to the FAPD manifest **without the local Docker
+   stack** (operator direction 2026-09-13: do not use `deploy/dev` for
+   this testing). Build a site into a temp directory with the real
+   renderer (`publish.build_site(out_dir=…)`, then `build_today` and
+   `build_day` for one date via the `_seed_today` helper or a snapshot if
+   one exists), run `PYTHONPATH=packages/static-mcp/src python -m
+   static_mcp serve --manifest deploy/dev/mcp/fapd.manifest.json --root
+   <tmp>/site --host 127.0.0.1 --port 8080`, then
+   `claude mcp add --transport http fapd-local http://127.0.0.1:8080/mcp`
    in a scratch directory (or MCP Inspector) and call `list_digests` and
    `get_digest`. Record the transcript summary. **Remove the scratch MCP
-   config afterwards.**
+   config afterwards.** The rehearsal's M-rows (`rehearse.sh`) run only if
+   a Docker daemon is available for throwaway containers; if not, record
+   each as SKIP with the reason — Phase 5's pre-merge checklist re-runs
+   them before anything deploys.
 3. All B.6 tests pass; full ruff and pytest green.
 4. `docs/mcp-server.md` and the runbooks describe the built system;
    nothing claims "deployed".

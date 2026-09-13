@@ -13,7 +13,7 @@ REPO_ROOT="$PWD"
 . "$REPO_ROOT/deploy/vps/scripts/_env.sh"
 
 echo "==> [1/4] test gate"
-uv run ruff check src/ scripts/ tests/
+uv run ruff check src/ scripts/ tests/ packages/
 uv run pytest -q
 
 echo "==> [1b/4] nginx config syntax gate (on the box, throwaway container)"

@@ -1,0 +1,84 @@
+{
+  "manifest_version": 1,
+  "server": {
+    "name": "com.example/docs",
+    "title": "Example Docs",
+    "version": "1.0.0",
+    "description": "Read-only access to the Example documentation. No inference.",
+    "websiteUrl": "https://example.com/",
+    "repository": {"url": "https://github.com/example/docs", "source": "github", "subfolder": "packages/static-mcp"},
+    "instructions": "This server returns published documentation files verbatim. Use list_pages to find dates and get_page to read one page. Cite the page URL when quoting it."
+  },
+  "public_base_url": "https://example.com",
+  "endpoint_path": "/mcp",
+  "protocol_versions": {"modern": ["2026-07-28"], "legacy": ["2025-11-25", "2025-06-18"]},
+  "http": {
+    "allowed_hosts": ["example.com", "www.example.com"],
+    "allowed_origins": ["https://example.com"],
+    "allow_missing_origin": true,
+    "max_body_bytes": 65536,
+    "max_concurrency": 16,
+    "request_timeout_seconds": 10
+  },
+  "limits": {"max_file_bytes": 16777216, "max_result_bytes": 524288},
+  "cache": {"ttl_ms": 300000, "scope": "public"},
+  "params": {
+    "date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "description": "A date, YYYY-MM-DD."},
+    "slug": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,62}$", "description": "A page slug."},
+    "offset": {"type": "integer", "minimum": 0, "maximum": 10000, "default": 0, "description": "Items to skip."},
+    "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 20, "description": "Items per page."},
+    "include_drafts": {"type": "boolean", "default": false, "description": "Include entries marked draft."}
+  },
+  "resources": [
+    {"uri": "https://example.com/guide.txt", "name": "guide", "title": "Guide", "description": "The documentation guide.", "mimeType": "text/plain", "file": "guide.txt"},
+    {"uri": "https://example.com/index.json", "name": "index", "title": "Index", "description": "The page index.", "mimeType": "application/json", "file": "index.json"}
+  ],
+  "resource_templates": [
+    {"uriTemplate": "https://example.com/pages/{date}.md", "name": "page", "title": "Page", "description": "A dated documentation page.", "mimeType": "text/markdown", "file": "pages/{date}.md", "params": ["date"]}
+  ],
+  "tools": [
+    {
+      "name": "get_page",
+      "title": "Get a page",
+      "description": "Returns the documentation page for a date, verbatim.",
+      "params": {"date": {"ref": "date", "required": true}},
+      "preamble": "Documentation page from example.com, returned verbatim.",
+      "handler": {"kind": "text_file", "file": "pages/{date}.md", "mime_type": "text/markdown",
+                  "not_found": "No page exists for {date}. Call list_pages for available dates."}
+    },
+    {
+      "name": "list_pages",
+      "title": "List pages",
+      "description": "Lists the dates that have a documentation page, newest first.",
+      "params": {"offset": {"ref": "offset"}, "limit": {"ref": "limit"}},
+      "handler": {"kind": "file_listing", "glob": "pages/*.md",
+                  "name_pattern": "^(?P<key>[0-9]{4}-[0-9]{2}-[0-9]{2})\\.md$",
+                  "order": "desc", "page": {"offset": "offset", "limit": "limit"}}
+    },
+    {
+      "name": "list_entries",
+      "title": "List index entries",
+      "description": "Lists index entries with their slugs and titles, excluding drafts by default.",
+      "params": {"offset": {"ref": "offset"}, "limit": {"ref": "limit"}, "include_drafts": {"ref": "include_drafts"}},
+      "handler": {"kind": "json_file", "file": "index.json", "select": "entries",
+                  "envelope": ["title"], "fields": ["slug", "title", "kind"],
+                  "filters": [{"param": "include_drafts", "when": false, "exclude_where": {"field": "draft", "equals": true}}],
+                  "page": {"offset": "offset", "limit": "limit"},
+                  "not_found": "The index is not available."}
+    },
+    {
+      "name": "get_entry",
+      "title": "Get an index entry",
+      "description": "Returns one index entry by slug.",
+      "params": {"slug": {"ref": "slug", "required": true}},
+      "handler": {"kind": "json_file", "file": "index.json", "select": "entries",
+                  "find": {"field": "slug", "param": "slug"}, "not_found": "No entry named {slug}."}
+    },
+    {
+      "name": "about",
+      "title": "About this server",
+      "description": "Points to the documentation for this server.",
+      "handler": {"kind": "static_text", "text": "Documentation: https://example.com/docs/mcp"}
+    }
+  ]
+}

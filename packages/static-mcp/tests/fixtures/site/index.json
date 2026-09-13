@@ -1,0 +1,13 @@
+{
+  "title": "Example index",
+  "generated": "2026-01-03T00:00:00Z",
+  "entries": [
+    {"slug": "alpha", "kind": "note", "draft": false, "title": "Alpha", "words": 12},
+    {"slug": "beta", "kind": "note", "draft": false, "title": "Beta", "words": 7},
+    {"slug": "gamma", "kind": "page", "draft": true, "title": "Gamma (draft)", "words": 3},
+    {"slug": "delta", "kind": "page", "draft": false, "title": "Delta", "words": 40},
+    {"slug": "epsilon", "kind": "note", "draft": true, "title": "Epsilon (draft)", "words": 1},
+    {"slug": "zeta", "kind": "page", "draft": false, "title": "Zeta", "words": 22}
+  ],
+  "meta": {"nested": {"value": 42}}
+}

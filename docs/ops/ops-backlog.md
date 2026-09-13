@@ -392,3 +392,17 @@ not reusable.)*
   script each time. Pair it with a drift check in `/fapd-health` that
   reads the actual package versions rather than the image tag — the
   missing measurement is what let this run for weeks unnoticed.
+
+**OB-21 — Site-building tests copy the static assets into every tmp_path**
+- **Gap:** every `build_site` in the test suite copies `site/assets/`
+  (the blog images and audio) into its temp site; with pytest's default
+  retention of three base temps, one evening's runs filled a laptop's
+  disk twice (2026-09-13, agent-discovery Phases 1/2/4A; ENOSPC
+  surfacing as unrelated tracebacks).
+- **Done 2026-09-13 (half):** `tmp_path_retention_count = 1` and
+  `tmp_path_retention_policy = "failed"` in pyproject — the scratch
+  directory is now empty after a green run.
+- **Remaining:** a `build_site(copy_assets=False)` seam (or a test
+  fixture that points `static_assets`/`site/assets` at an empty dir) so
+  a test build never copies media it does not assert on. Publication
+  owns the seam.

@@ -1,0 +1,3 @@
+Example site guide.
+
+This is a plain-text guide used by the fixture site.

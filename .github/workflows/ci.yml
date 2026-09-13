@@ -15,6 +15,6 @@ jobs:
       - name: Install dependencies
         run: uv sync
       - name: Lint
-        run: uv run ruff check src/ scripts/ tests/
+        run: uv run ruff check src/ scripts/ tests/ packages/
       - name: Tests
         run: uv run pytest -q

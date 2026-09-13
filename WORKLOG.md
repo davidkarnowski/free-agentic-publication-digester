@@ -5363,3 +5363,65 @@ for that one-line change with Docker down; it is owed before merge.
 Verified by the agent: ruff clean on its files; full suite 874 passed,
 1 documented skip (Phase 2's twin patterns). The Phase 1 head-link
 parity test ran live and passed.
+
+## 2026-09-13 — Phases 2 and 4A land, after the disk ran out twice
+
+Both agents finished their work and then hit ENOSPC at the final
+whole-suite run: every site-building test copies the blog's image
+assets into its temp site, pytest keeps three generations by default,
+and three parallel agents plus full-suite runs exhausted the disk. The
+operator freed space; the root cause is now half-fixed in pyproject
+(retention one, keep only failures — the scratch directory is 0 B
+after a green run) and tracked as OB-21 for the other half (a test
+build should not copy media it never asserts on).
+
+**Phase 2 — Markdown twins.** Every page with a Markdown form now has
+one beside it: digests byte-identical to `digests/<date>.md` (git
+stores identical content once), doc pages and the README with the same
+transforms the HTML gets, `agents.md`, blog posts with their commentary
+disclosure, and generated twins for the index, blog index, archive,
+`sources.md` and every `sources/<id>.md` — 59 root twins and 129 source
+twins on the real record. The generated ones are built in the same
+function from the same variables as their HTML; most of the phase's
+work was splitting the sources page's statistics helpers into (label,
+text) facts plus two formatters, which is what makes "the twin says the
+same numbers" a tested property rather than a promise. Every twinned
+page names its twin in `<head>`; `today.html` and `day/` do not.
+`TWIN_ELIGIBLE_PATTERNS` lives in `publish.py` so Phase 3's routing
+test and the build share one object — that test now runs live instead
+of skipping. 19 tests.
+
+**Phase 4A — `static-mcp`.** The reusable, stdlib-only MCP server:
+3,000 lines of source across errors, validate (stages L2–L3 and the
+pure part of L1), manifest (schema, parameter compilation, argument
+validation, template regexes), handlers (the containment core, an LRU
+JSON cache, four handler kinds, paging with disclosed truncation),
+protocol (era classification, the `-32022`/`-32020` rules, the base64
+sentinel), dispatch, server, card and cli. 420 tests including a
+118-payload adversarial corpus run both in-process and over a raw
+socket, a 2,000-mutation seeded fuzz, source scans proving no
+interpreter path and no network client, hidden-instruction pattern
+checks, and transcripts per protocol era. The agent read the 2026-07-28
+spec and found one rule the plan missed: `clientCapabilities` is
+mandatory on every modern request (missing → `-32602`); implemented as
+the spec says. The official conformance suite's npm `latest` has no
+2026-07-28 scenarios; the legacy scenarios pass (initialize, ping,
+tools/list, resources/list; the DNS-rebinding scenario's "accepts a
+localhost Origin" fails only because the fixture's allow-list does not
+list localhost, which is the allow-list working). The alpha release
+with the 2026-07-28 scenarios is queued for Phase 5.
+
+Integration: the package's `tests/` gained an `__init__.py` because its
+`conftest.py` shadowed the repository's rootless `tests/conftest.py`
+under the top-level name `conftest` (15 collection errors in a full
+run); its own path setup moved into the conftest. Shared-file diffs
+applied: `testpaths`, the CI and deploy.sh ruff paths. Verified after
+both integrations: ruff clean; **1340 passed, 1 skipped** (the corpus's
+CRLF-in-header payload cannot be sent as a well-formed HTTP request;
+its in-process leg runs).
+
+Operator direction the same evening: the local Docker dev stack is not
+to be used for this testing. Phase 4B's real-client check now runs the
+service directly on 127.0.0.1 against a temp-built site; the rehearsal's
+container rows run only if a daemon is present and are otherwise
+recorded as skipped until Phase 5.

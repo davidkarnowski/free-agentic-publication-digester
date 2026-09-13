@@ -43,7 +43,12 @@ packages = ["src/fapd"]
 # stack's staged build context (deploy/dev/repo/ — a full working-tree
 # copy including tests/) is collected too, and every test module exists
 # twice under one import name: 29 collection errors.
-testpaths = ["tests"]
+testpaths = ["tests", "packages/static-mcp/tests"]
+# Site-building tests copy the blog's image assets into every tmp_path;
+# with pytest's default of keeping three base temps, one evening's runs
+# filled a laptop's disk twice (2026-09-13, agent-discovery Phases 1/2/4A).
+tmp_path_retention_count = 1
+tmp_path_retention_policy = "failed"
 
 [tool.ruff]
 line-length = 100
