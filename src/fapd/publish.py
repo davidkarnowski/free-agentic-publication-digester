@@ -46,6 +46,11 @@ _PAGE = """<!DOCTYPE html>
 <meta name="robots" content="index, follow">
 <link rel="alternate" type="text/plain" href="llms.txt"
       title="LLM guide — this is an AI-first digest of official US federal publications">
+<link rel="api-catalog" href=".well-known/api-catalog">
+<link rel="service-desc" type="application/vnd.oai.openapi+json" href="openapi.json">
+<link rel="service-doc" type="text/html" href="agents.html">
+<link rel="ai-catalog" type="application/ai-catalog+json" href=".well-known/ai-catalog.json">
+<link rel="icon" href="favicon.ico" sizes="32x32">
 <link rel="stylesheet" href="style.css">
 {head_extra}</head>
 <body>
@@ -4080,6 +4085,37 @@ _LOCAL_TIME_JS = """<script>
 """
 
 
+# The honesty disclosures that ride inside today.json and day/<date>.json
+# as the `labels` object, keyed by the field each one explains. One
+# constant, two surfaces: the payload writes it, and the published JSON
+# Schema copies each label into the matching property's description
+# (`_today_schema`), so the schema can never say something the file does
+# not (GUIDE §1: honesty travels with the data).
+_TODAY_LABELS = {
+    "summary_method": "official = agency/GPO text; llm = model-generated,"
+                      " labeled",
+    "opening_verbatim": "first ~240 chars of the official text, unedited",
+    "tags": "mechanical (branch, document type, agency); no model-generated"
+            " item tags yet",
+    "items": "ALL observed items including backfill — filter on"
+             " is_backfill=false to match the human page's listing",
+    "is_backfill": "true = the publisher dates this item on another day"
+                   " (claimed_day); not part of this day's news",
+    "corroborated_by": "on a listed item: the OTHER ingestion channels the"
+                       " same document (same canonical URL) arrived through"
+                       " — independent receipt, not a content judgment",
+    "duplicate_of": "on a non-listed item: the package_id of the listed"
+                    " twin; the human pages show that one entry, marked"
+                    " corroborated — filter these out to match the human"
+                    " listing",
+    "counts": "whole-day observation counts by collection/doc_type,"
+              " backfill included",
+    "day_context": "null on federal business days; on weekends/federal"
+                   " holidays an object {kind, name, note} explaining why"
+                   " the stream may be short",
+}
+
+
 def build_today(conn, out_dir=None, date=None):
     """Render site/today.html + today.json from collect.today_status —
     mechanical, zero LLM, derived-only (never committed; gitignored).
@@ -4459,34 +4495,7 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
         "generated": now,
         "disclosure": disclosure_text,
         "canonical_record": "the dated digest, frozen at end of day",
-        "labels": {"summary_method": "official = agency/GPO text;"
-                                     " llm = model-generated, labeled",
-                   "opening_verbatim": "first ~240 chars of the official"
-                                       " text, unedited",
-                   "tags": "mechanical (branch, document type, agency);"
-                           " no model-generated item tags yet",
-                   "items": "ALL observed items including backfill —"
-                            " filter on is_backfill=false to match the"
-                            " human page's listing",
-                   "is_backfill": "true = the publisher dates this item"
-                                  " on another day (claimed_day); not"
-                                  " part of this day's news",
-                   "corroborated_by": "on a listed item: the OTHER"
-                                      " ingestion channels the same"
-                                      " document (same canonical URL)"
-                                      " arrived through — independent"
-                                      " receipt, not a content judgment",
-                   "duplicate_of": "on a non-listed item: the package_id"
-                                   " of the listed twin; the human pages"
-                                   " show that one entry, marked"
-                                   " corroborated — filter these out to"
-                                   " match the human listing",
-                   "counts": "whole-day observation counts by"
-                             " collection/doc_type, backfill included",
-                   "day_context": "null on federal business days; on"
-                                  " weekends/federal holidays an object"
-                                  " {kind, name, note} explaining why"
-                                  " the stream may be short"},
+        "labels": dict(_TODAY_LABELS),
         "counts": status["counts"],
         # Same computed value the human banner renders (fedcal): an agent
         # reading a one-item Sunday has exactly the same "is the pipeline
@@ -4571,6 +4580,58 @@ work. Check the source guide for what is ingested today.
   (`provenance/manifests/`) whose SHA-256 records let you verify captured
   content.
 
+## Discovery for agents
+
+Besides this page and `/llms.txt`, the site publishes the machine
+discovery documents agents actually poll, each at its registered or
+specified location (GUIDE §1). Every one of them is a static file.
+
+- **Content Signals** in `/robots.txt`: search, AI input, and AI
+  training are all welcome (`search=yes, ai-input=yes, ai-train=yes`);
+  CC BY 4.0 attribution still applies.
+- **API catalog** (RFC 9727) at `/.well-known/api-catalog`, and an
+  **OpenAPI 3.1 description** of the static read files at
+  `/openapi.json`, with JSON Schemas under `/schema/` for
+  `digests.json`, `today.json`, `day/<date>.json`, and `sources.json`.
+- **AI Catalog** at `/.well-known/ai-catalog.json`: every machine
+  surface here with representative queries, also named by the
+  `Agentmap:` line in `/robots.txt`.
+- **Agent Skills** at `/.well-known/agent-skills/index.json`: four
+  step-by-step instruction files for reading a digest, reading the live
+  day, understanding source coverage, and verifying the record against
+  the repository, each with a SHA-256 digest of its served bytes.
+- **`/auth.md`**: the authentication document, which says there is no
+  authentication.
+- **Markdown twins:** append `.md` to a page URL, or send
+  `Accept: text/markdown`. For a digest, `/<YYYY-MM-DD>.md` is the
+  canonical record, byte-identical to the repository file.
+- **MCP:** a read-only Model Context Protocol endpoint; see the
+  [MCP service](#mcp) section below.
+
+<h2 id="mcp">MCP service</h2>
+
+A read-only Model Context Protocol endpoint at `/mcp` is described in
+docs/mcp-server.md.
+
+## Protocols this site does not offer, and why
+
+We publish no metadata for a capability we do not operate (GUIDE §1).
+The protocols below are declined on purpose, with the reason stated.
+
+- **OAuth / OpenID Connect discovery, OAuth protected-resource
+  metadata:** nothing here is protected, so there is no authorization
+  server to describe. See `/auth.md`.
+- **A2A agent card:** FAPD publishes a record; it is not an agent that
+  accepts tasks.
+- **WebMCP:** it would need a second script in every page. The site
+  keeps exactly one (GUIDE §2a), and everything WebMCP would offer is
+  already available as files, Markdown, and MCP.
+- **Payment protocols (x402, MPP, UCP, ACP, AP2):** everything here is
+  free.
+
+Requests to those protocols' well-known locations receive a 404 whose
+body points here.
+
 ## How to read it faithfully
 
 - Text in item summaries marked as official (Federal Register SUMMARY
@@ -4590,8 +4651,9 @@ work. Check the source guide for what is ingested today.
 
 ## Courtesy
 
-Everything is static — no auth, no rate limiting, and nothing an
-agent needs to execute. We ask
+Everything is static except the read-only MCP service — no
+authentication, nothing an agent needs to execute, and a generous
+per-address rate limit that protects the shared server. We ask
 visiting agents the same courtesy our own crawler practices on government
 sites: identify honestly and use conditional requests. Fetching every
 page daily is entirely fine.
@@ -4721,6 +4783,14 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
          " navigation; agents should read digests.json instead."),
         f"- [Machine-readable digest index]({base}/digests.json)",
         f"- [Atom feed of digests]({base}/feed.xml)",
+        (f"- [API catalog (RFC 9727)]({base}/.well-known/api-catalog) and"
+         f" [OpenAPI description]({base}/openapi.json)"),
+        f"- [AI catalog]({base}/.well-known/ai-catalog.json)",
+        (f"- [Agent skills]({base}/.well-known/agent-skills/index.json)"
+         " — step-by-step instructions for reading and citing the digest"),
+        (f"- [MCP service]({base}/agents.html#mcp) — read-only, no"
+         f" inference: {base}/mcp"),
+        f"- [auth.md]({base}/auth.md) — no authentication exists",
         (f"- [Today — live in-progress day, PRELIMINARY]({base}/today.html)"
          " (also /today.json, whose `facets.tags` gives keyword counts and"
          " whose items carry the same tags for client-side filtering."
@@ -4780,6 +4850,10 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
         "  Publication Digester'); quoted official government text is public",
         "  domain. For factual claims, cite the underlying official source",
         "  each item links to; cite FAPD for the aggregation.",
+        ("- Markdown: append .md to a digest URL (/<YYYY-MM-DD>.md is the"
+         " canonical record), or send Accept: text/markdown."),
+        ("- Declined protocols (OAuth, A2A, WebMCP, payments) and why:"
+         f" {base}/agents.html"),
     ]
     (out_dir / "llms.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -4828,6 +4902,11 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
     # robots.txt + sitemap.xml — automated access is explicitly welcome.
     # (The Sitemap directive formally requires an absolute URL; the
     # root-relative fallback is for local viewing before a domain exists.)
+    # Content-Signal (contentsignals.org; GUIDE §1, operator ruling D1
+    # 2026-09-13) sits INSIDE the `User-agent: *` group, where the
+    # convention scopes it. The MCP line is true once Phase 4 of the
+    # agent-discovery plan lands; the branch merges whole. If Phase 4 is
+    # ever dropped, delete that line.
     (out_dir / "robots.txt").write_text(
         "# AI agents and crawlers are welcome here — indexing is\n"
         "# encouraged. This is an AI-first digest of official US federal\n"
@@ -4837,9 +4916,21 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
         "#   LLM guide:    /llms.txt\n"
         "#   Machine index: /digests.json   Atom: /feed.xml\n"
         "#   Source stats:  /sources.json  (our ingestion, not the record)\n"
+        "#   API catalog:  /.well-known/api-catalog   OpenAPI: /openapi.json\n"
+        "#   AI catalog:   /.well-known/ai-catalog.json\n"
+        "#   Agent skills: /.well-known/agent-skills/index.json\n"
+        "#   MCP:          /mcp  (read-only, no inference; see /agents.html)\n"
+        "#   Auth:         /auth.md  (there is none)\n"
         "# /today.html is a PRELIMINARY live view; the dated digests are\n"
         "# the record.\n"
-        f"User-agent: *\nAllow: /\n\nSitemap: {base}/sitemap.xml\n",
+        "# Content signals (https://contentsignals.org/): search, AI input\n"
+        "# and AI training are all welcome. CC BY 4.0 attribution applies.\n"
+        "User-agent: *\n"
+        "Content-Signal: search=yes, ai-input=yes, ai-train=yes\n"
+        "Allow: /\n"
+        "\n"
+        f"Sitemap: {base}/sitemap.xml\n"
+        f"Agentmap: {base}/.well-known/ai-catalog.json\n",
         encoding="utf-8",
     )
     # Day views are enumerated from what actually exists on disk — the
@@ -4867,3 +4958,681 @@ def _build_agent_surfaces(out_dir, dates, teasers, doc_pages=(), base="",
         + "</urlset>\n"
     )
     (out_dir / "sitemap.xml").write_text(sitemap, encoding="utf-8")
+
+    _build_discovery_documents(out_dir, base)
+
+
+# ---------------------------------------------------------------------------
+# Discovery documents (GUIDE §1 "discovery through the conventions agents
+# actually poll", amended 2026-09-13; docs/ops/plan-2026-09-13-phase1-
+# discovery-documents.md). Every file here is static, deterministic and
+# timestamp-free — two builds are byte-identical — and is written by
+# _build_discovery_documents from _build_agent_surfaces. The nginx side
+# (content types, CORS, the Link header) is Phase 3's and lives under
+# deploy/vps/; these files are correct and usable before it lands.
+# ---------------------------------------------------------------------------
+
+_DISCOVERY_JSON_SCHEMA = "https://json-schema.org/draft/2020-12/schema"
+_AGENT_SKILLS_SCHEMA = "https://schemas.agentskills.io/discovery/0.2.0/schema.json"
+_DATE_PATTERN = r"^\d{4}-\d{2}-\d{2}$"
+
+
+def _abs(base, path):
+    """The one URL rule for the discovery documents: absolute when
+    SITE_BASE_URL is set, root-relative otherwise (a local build, most
+    tests). `path` always starts with '/'."""
+    return f"{base}{path}" if base else path
+
+
+def _dump_json(path, payload):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(_json_mod.dumps(payload, indent=1, sort_keys=True) + "\n",
+                    encoding="utf-8")
+
+
+def _today_schema(base, *, file_name):
+    """JSON Schema for today.json — and, wrapped by _json_schemas, for the
+    frozen day files. Describes what _build_day_page writes today, not an
+    ideal; additionalProperties is true everywhere because the file
+    promises additive change. Every _TODAY_LABELS entry becomes the
+    matching property's description, so the disclosures travel with the
+    schema."""
+    labels = _TODAY_LABELS
+    nullable_string = {"type": ["string", "null"]}
+    item = {
+        "type": "object",
+        "additionalProperties": True,
+        "required": ["package_id", "observed_at", "official_url",
+                     "channel_label", "tags", "is_backfill",
+                     "opening_verbatim"],
+        "properties": {
+            "package_id": {"type": "string"},
+            "granule_id": nullable_string,
+            "collection": nullable_string,
+            "doc_type": nullable_string,
+            "title": nullable_string,
+            "agency": nullable_string,
+            "source_class": nullable_string,
+            "source_id": nullable_string,
+            "observed_at": {"type": "string",
+                            "description": "UTC stamp of first observation"},
+            "official_url": {"type": ["string", "null"],
+                             "description": "the item's own captured URL, or"
+                             " the govinfo details page for govinfo"
+                             " collections; null for an email bulletin"
+                             " with no URL"},
+            "channel_label": {"type": "string"},
+            "url": nullable_string,
+            "channel": nullable_string,
+            "dkim_result": nullable_string,
+            "claimed_published_at": nullable_string,
+            "claimed_day": nullable_string,
+            "is_backfill": {"type": "boolean",
+                            "description": labels["is_backfill"]},
+            "opening_verbatim": {"type": ["string", "null"],
+                                 "description": labels["opening_verbatim"]},
+            "summary": nullable_string,
+            "summary_method": {"type": ["string", "null"],
+                               "description": labels["summary_method"]},
+            "inclusion_rule": nullable_string,
+            "tags": {"type": "array", "items": {"type": "string"},
+                     "description": labels["tags"]},
+            "corroborated_by": {"type": "array",
+                                "items": {"type": "object",
+                                          "additionalProperties": True},
+                                "description": labels["corroborated_by"]},
+            "duplicate_of": {"type": "string",
+                             "description": labels["duplicate_of"]},
+        },
+    }
+    return {
+        "$schema": _DISCOVERY_JSON_SCHEMA,
+        "$id": _abs(base, f"/schema/{file_name}"),
+        "title": "today.json — the live, PRELIMINARY publication day",
+        "description": ("Every item our collectors observed for the current"
+                        " publication day, newest first. Preliminary until"
+                        " the end-of-day gates freeze the dated digest, which"
+                        " is the record. Additive change only."),
+        "type": "object",
+        "additionalProperties": True,
+        "required": ["date", "generated", "disclosure", "canonical_record",
+                     "labels", "counts", "day_context", "backfill_count",
+                     "corroborated_count", "backfill_note", "facets",
+                     "pending_llm", "last_observed_at", "items"],
+        "properties": {
+            "date": {"type": "string", "pattern": _DATE_PATTERN},
+            "generated": {"type": "string",
+                          "description": "UTC stamp of this render"},
+            "disclosure": {"type": "string"},
+            "canonical_record": {"type": "string"},
+            "labels": {"type": "object", "additionalProperties": True,
+                       "description": "the honesty disclosures for this"
+                       " file, keyed by the field each explains — the"
+                       " same text as this schema's descriptions"},
+            "counts": {"type": "object", "additionalProperties": True,
+                       "description": labels["counts"]},
+            "day_context": {"type": ["object", "null"],
+                            "additionalProperties": True,
+                            "description": labels["day_context"]},
+            "backfill_count": {"type": "integer"},
+            "corroborated_count": {"type": "integer"},
+            "backfill_note": {"type": "string"},
+            "facets": {"type": "object", "additionalProperties": True,
+                       "description": "tags: keyword -> item count;"
+                       " note: how to filter client-side"},
+            "pending_llm": {"type": "integer",
+                            "description": "items awaiting a model layer;"
+                            " additive, not an error count"},
+            "last_observed_at": {"type": ["string", "null"]},
+            "items": {"type": "array", "items": item,
+                      "description": labels["items"]},
+        },
+    }
+
+
+def _json_schemas(base):
+    """filename -> JSON Schema (draft 2020-12) for every machine file the
+    OpenAPI document references."""
+    today = _today_schema(base, file_name="today.schema.json")
+    frozen = {k: v for k, v in today.items() if k not in ("$schema", "$id")}
+    frozen["title"] = "day/<date>.json — a finished publication day, frozen"
+    frozen["description"] = ("today.json's shape and labels, frozen at end"
+                             " of day (or reconstructed from the stored"
+                             " observation journal, disclosed in"
+                             " reconstructed_on). The dated digest remains"
+                             " the record.")
+    absent = {
+        "title": "day/<date>.json — designed absent state",
+        "description": ("A date the observation journal does not cover has"
+                        " no listing to freeze; the file says so instead of"
+                        " rendering an empty day. Check `available` before"
+                        " reading a day file as a listing."),
+        "type": "object",
+        "additionalProperties": True,
+        "required": ["date", "available", "unavailable_reason",
+                     "canonical_record", "items"],
+        "properties": {
+            "date": {"type": "string", "pattern": _DATE_PATTERN},
+            "available": {"const": False},
+            "unavailable_reason": {"type": "string"},
+            "canonical_record": {"type": "string"},
+            "items": {"type": "array", "items": {"type": "object"}},
+        },
+    }
+    day = {
+        "$schema": _DISCOVERY_JSON_SCHEMA,
+        "$id": _abs(base, "/schema/day.schema.json"),
+        "title": "day/<date>.json — the frozen observed listing for a day",
+        "description": ("One of two shapes: the frozen listing (today.json"
+                        " plus frozen: true and an optional"
+                        " reconstructed_on), or the designed absent state"
+                        " (available: false) for a date before the"
+                        " observation journal began."),
+        "anyOf": [
+            {"allOf": [frozen, {
+                "type": "object",
+                "required": ["frozen"],
+                "properties": {
+                    "frozen": {"const": True},
+                    "reconstructed_on": {
+                        "type": "string", "pattern": _DATE_PATTERN,
+                        "description": "present when the listing was rebuilt"
+                        " from the stored observation journal on this"
+                        " date rather than frozen at end of day"},
+                },
+            }]},
+            absent,
+        ],
+    }
+    digests = {
+        "$schema": _DISCOVERY_JSON_SCHEMA,
+        "$id": _abs(base, "/schema/digests.schema.json"),
+        "title": "digests.json — every published digest",
+        "description": ("The complete enumeration of published digest days,"
+                        " newest first. The dated digests are the record;"
+                        " this index enumerates them and nothing else."),
+        "type": "object",
+        "additionalProperties": True,
+        "required": ["title", "generated", "agent_guide", "digests"],
+        "properties": {
+            "title": {"type": "string"},
+            "generated": {"type": "string",
+                          "description": "UTC stamp of the site build"},
+            "agent_guide": {"type": "string"},
+            "digests": {"type": "array", "items": {
+                "type": "object",
+                "additionalProperties": True,
+                "required": ["date", "html", "canonical_markdown", "teaser"],
+                "properties": {
+                    "date": {"type": "string", "pattern": _DATE_PATTERN},
+                    "html": {"type": "string"},
+                    "canonical_markdown": {
+                        "type": "string",
+                        "description": "path of the canonical Markdown in"
+                        " the public repository (digests/<date>.md)"},
+                    "teaser": {"type": ["string", "null"],
+                               "description": "the opening of the Day in"
+                               " Review, which is model-generated prose;"
+                               " never official text"},
+                },
+            }},
+        },
+    }
+    source = {
+        "type": "object",
+        "additionalProperties": True,
+        "required": ["id", "name", "description", "method", "urls", "added",
+                     "card", "page"],
+        "properties": {
+            "id": {"type": "string"},
+            "name": {"type": "string"},
+            "status": {"type": "string",
+                       "description": "active, planned, unavailable (a"
+                       " refusal kept as a record), or evaluated-excluded"},
+            "description": {"type": "string"},
+            "method": {"type": "string"},
+            "notes": {"type": ["string", "null"]},
+            "urls": {"type": "object", "additionalProperties": True},
+            "added": {"type": "string", "pattern": _DATE_PATTERN},
+            "card": {"type": "string"},
+            "page": {"type": "string"},
+            "measured": {"type": "boolean",
+                         "description": "true only for active sources;"
+                         " every other entry carries no statistics"},
+            "health": {"type": ["string", "null"],
+                       "description": "computed from the numbers beside it"
+                       " with the thresholds in this file; a statement"
+                       " about our ingestion, not about the publisher"},
+        },
+    }
+    sources = {
+        "$schema": _DISCOVERY_JSON_SCHEMA,
+        "$id": _abs(base, "/schema/sources.schema.json"),
+        "title": "sources.json — source directory and ingestion statistics",
+        "description": ("The registry plus the same mechanical statistics"
+                        " and health labels as sources.html, with the"
+                        " thresholds that produced them. Not part of the"
+                        " official record; never cite as government"
+                        " publication."),
+        "type": "object",
+        "additionalProperties": True,
+        "required": ["title", "generated", "canonical", "human_page",
+                     "available", "scope", "clock", "measurement", "sources"],
+        "properties": {
+            "title": {"type": "string"},
+            "generated": {"type": "string"},
+            "canonical": {"type": "string"},
+            "human_page": {"type": "string"},
+            "available": {"type": "boolean",
+                          "description": "false when the statistics could"
+                          " not be computed; see unavailable_reason"},
+            "scope": {"type": "string",
+                      "description": "describes OUR ingestion, not any"
+                      " agency — the file's own words"},
+            "clock": {"type": "object", "additionalProperties": True},
+            "measurement": {"type": "string"},
+            "window": {"type": "object", "additionalProperties": True},
+            "thresholds": {"type": "object", "additionalProperties": True},
+            "health_labels": {"type": "object", "additionalProperties": True},
+            "summary": {"type": "object", "additionalProperties": True},
+            "unavailable_reason": {"type": ["string", "null"]},
+            "sources": {"type": "array", "items": source},
+        },
+    }
+    return {
+        "digests.schema.json": digests,
+        "today.schema.json": today,
+        "day.schema.json": day,
+        "sources.schema.json": sources,
+    }
+
+
+def _openapi_doc(base):
+    """OpenAPI 3.1 for what are, in fact, GET-only static files. RFC 9727's
+    service-desc relation points here."""
+    def _get(operation_id, summary, description, media, schema=None,
+             parameters=None, templated=False):
+        content = {media: {}}
+        if schema:
+            content[media]["schema"] = {"$ref": _abs(base, f"/schema/{schema}")}
+        op = {
+            "operationId": operation_id,
+            "summary": summary,
+            "description": description,
+            "responses": {"200": {"description": "the file",
+                                  "content": content}},
+        }
+        if parameters:
+            op["parameters"] = parameters
+        if templated:
+            op["responses"]["404"] = {
+                "description": "no file exists for that date"}
+        return {"get": op}
+
+    date_param = [{
+        "name": "date", "in": "path", "required": True,
+        "description": "a publication day, YYYY-MM-DD",
+        "schema": {"type": "string", "pattern": _DATE_PATTERN},
+    }]
+    return {
+        "openapi": "3.1.0",
+        "info": {
+            "title": "Free Agentic Publication Digester — static read API",
+            "version": "1.0.0",
+            "description": (
+                "Every path here is a static file served by HTTP GET. There"
+                " is no authentication, no account, and no request body"
+                " (see /auth.md). Content is licensed CC BY 4.0; quoted"
+                " official government text within it is public domain"
+                " (17 U.S.C. § 105). The dated digests are the record;"
+                " today.json is a PRELIMINARY live view that may change"
+                " until the end-of-day gates freeze the day. For a factual"
+                " claim, cite the official source each item links to; cite"
+                " FAPD for the aggregation. sources.json describes our own"
+                " ingestion and is never government publication."),
+            "license": {"name": "CC BY 4.0", "identifier": "CC-BY-4.0"},
+        },
+        "servers": [{"url": base or "/"}],
+        "security": [],
+        "externalDocs": {"description": "Access for AI agents",
+                         "url": _abs(base, "/agents.html")},
+        "paths": {
+            "/digests.json": _get(
+                "listDigests", "Every published digest",
+                "The complete enumeration of published digest days, newest"
+                " first, each with its HTML URL, the path of its canonical"
+                " Markdown in the public repository, and a teaser.",
+                "application/json", "digests.schema.json"),
+            "/today.json": _get(
+                "getToday", "The live publication day (PRELIMINARY)",
+                "Every item observed so far for the current publication"
+                " day. PRELIMINARY: items may change until the end-of-day"
+                " gates freeze the dated digest. Filter on"
+                " is_backfill=false for the day's own news, drop items"
+                " carrying duplicate_of to match the human listing, and"
+                " read day_context before calling a day quiet.",
+                "application/json", "today.schema.json"),
+            "/day/{date}.json": _get(
+                "getDay", "A finished day's frozen observed listing",
+                "today.json's shape and labels for a finished publication"
+                " day, frozen at end of day (or reconstructed from the"
+                " stored observation journal, disclosed in place). A date"
+                " before the journal began answers available: false. The"
+                " dated digest remains the record.",
+                "application/json", "day.schema.json",
+                parameters=date_param, templated=True),
+            "/sources.json": _get(
+                "listSources", "Source directory and ingestion statistics",
+                "Every source the pipeline ingests, plans to ingest, or"
+                " found unavailable, with the statistics of OUR ingestion"
+                " and the thresholds behind every health label. Not part"
+                " of the official record.",
+                "application/json", "sources.schema.json"),
+            # The Markdown twin is Phase 2 of the agent-discovery plan;
+            # the branch merges whole, so this path ships true.
+            "/{date}.md": _get(
+                "getDigestMarkdown", "The canonical digest Markdown",
+                "The dated digest as canonical Markdown — the record,"
+                " byte-identical to digests/<date>.md in the public"
+                " repository. Read the header's Inference row and the"
+                " Coverage Statement before citing.",
+                "text/markdown", parameters=date_param, templated=True),
+            "/feed.xml": _get(
+                "getFeed", "Atom feed of digests",
+                "The twenty most recent digest days as an Atom feed, for"
+                " change discovery.", "application/atom+xml"),
+            "/llms.txt": _get(
+                "getLlmsTxt", "Guide for AI agents",
+                "Where everything is and how to read it faithfully.",
+                "text/plain"),
+        },
+    }
+
+
+def _api_catalog(base):
+    """RFC 9727 linkset. No `status` relation on purpose: FAPD runs no
+    status endpoint, and pointing it at sources.json would misdescribe
+    that file. The /mcp anchor references the server card Phase 4C of
+    the agent-discovery plan builds."""
+    return {"linkset": [
+        {
+            "anchor": _abs(base, "/"),
+            "service-desc": [
+                {"href": _abs(base, "/openapi.json"),
+                 "type": "application/vnd.oai.openapi+json"}],
+            "service-doc": [
+                {"href": _abs(base, "/agents.html"), "type": "text/html"},
+                {"href": _abs(base, "/llms.txt"), "type": "text/plain"},
+                {"href": _abs(base, "/auth.md"), "type": "text/markdown"}],
+            "describedby": [
+                {"href": _abs(base, "/.well-known/ai-catalog.json"),
+                 "type": "application/ai-catalog+json"}],
+        },
+        {
+            "anchor": _abs(base, "/mcp"),
+            "service-desc": [
+                {"href": _abs(base, "/mcp/server-card"),
+                 "type": "application/mcp-server-card+json"}],
+            "service-doc": [
+                {"href": _abs(base, "/agents.html#mcp"),
+                 "type": "text/html"}],
+        },
+    ]}
+
+
+_AUTH_MD = """# auth.md — Free Agentic Publication Digester
+
+This file exists so automated clients can learn, without guessing, how
+to authenticate to fapd.info. The answer is that you do not.
+
+- **Audience:** any AI agent, crawler, or program.
+- **Registration:** none. There are no accounts, API keys, OAuth
+  clients, or registration endpoints, and none are planned.
+- **Supported access:** anonymous HTTPS `GET` and `HEAD` for every
+  published file, and anonymous JSON-RPC `POST` to the read-only MCP
+  service at `/mcp`. Nothing else is accepted.
+- **Credentials:** none are issued or read. Send none; an
+  `Authorization` header is ignored.
+- **What we ask in return:** identify yourself honestly in
+  `User-Agent`, and use conditional requests (`If-None-Match`,
+  `If-Modified-Since`). A per-address rate limit protects the shared
+  server.
+- **Start here:** `/llms.txt` · `/.well-known/api-catalog` ·
+  `/agents.html`
+"""
+
+
+# Representative queries for the AI catalog's skill entries, written by
+# hand (mechanical, party-neutral: document types and dates, never
+# parties, officials or issues). Kept in code rather than SKILL.md front
+# matter because the Agent Skills spec's `metadata` map is string-valued.
+_SKILL_QUERIES = {
+    "fapd-daily-digest": [
+        "read the federal publication digest for a given date",
+        "how to cite a FAPD digest item correctly"],
+    "fapd-live-day": [
+        "what federal documents have been observed so far today",
+        "read a frozen day listing without counting backfill as news"],
+    "fapd-source-coverage": [
+        "which federal sources does the digest ingest and which are unavailable",
+        "how to read the digest's source health labels"],
+    "fapd-verify-the-record": [
+        "verify a digest file against the public repository history",
+        "what a provenance manifest hash proves"],
+}
+
+_FRONT_MATTER_RE = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
+_SKILL_NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+
+def _skill_sources():
+    """[(name, bytes, description)] for every docs/site/agent-skills/<name>/
+    SKILL.md, alphabetical by name. The bytes are what the build serves;
+    the index digest is computed from them. Front matter is validated
+    here so a malformed skill fails the build, not a reader."""
+    import yaml
+
+    skills = []
+    skill_dir = config.PROJECT_ROOT / "docs" / "site" / "agent-skills"
+    if not skill_dir.is_dir():
+        return skills
+    for path in sorted(skill_dir.glob("*/SKILL.md")):
+        raw = path.read_bytes()
+        match = _FRONT_MATTER_RE.match(raw.decode("utf-8"))
+        if not match:
+            raise ValueError(f"{path}: SKILL.md has no YAML front matter")
+        meta = yaml.safe_load(match.group(1)) or {}
+        name = meta.get("name")
+        if name != path.parent.name or not _SKILL_NAME_RE.match(name or "") \
+                or not 1 <= len(name) <= 64:
+            raise ValueError(f"{path}: front-matter name {name!r} must equal"
+                             " the directory name and match the RFC pattern")
+        if not meta.get("description"):
+            raise ValueError(f"{path}: front matter needs a description")
+        skills.append((name, raw, str(meta["description"])))
+    return skills
+
+
+def _agent_skills_index(base, skills):
+    """Agent Skills Discovery RFC v0.2.0 index; digests are sha256 of the
+    exact served bytes."""
+    import hashlib
+
+    return {
+        "$schema": _AGENT_SKILLS_SCHEMA,
+        "skills": [
+            {"name": name,
+             "type": "skill-md",
+             "description": description,
+             "url": _abs(base, f"/.well-known/agent-skills/{name}/SKILL.md"),
+             "digest": "sha256:" + hashlib.sha256(raw).hexdigest()}
+            for name, raw, description in skills
+        ],
+    }
+
+
+def _ai_catalog(base, skills):
+    """AI Catalog (specVersion 1.0). host.identifier is the bare domain,
+    not a did:web — a DID would need a /.well-known/did.json we do not
+    publish. The MCP entry points at the card Phase 4C builds."""
+    def entry(kind, name, display, media, path, description, tags, queries):
+        return {
+            "identifier": f"urn:air:fapd.info:{kind}:{name}",
+            "displayName": display,
+            "type": media,
+            "url": _abs(base, path),
+            "description": description,
+            "tags": tags,
+            "representativeQueries": queries,
+        }
+
+    entries = [
+        entry("mcp", "fapd", "FAPD MCP service",
+              "application/mcp-server-card+json", "/mcp/server-card",
+              "Read-only Model Context Protocol service answering only from"
+              " the published static files. No inference, no writes, no"
+              " sessions, no accounts.",
+              ["mcp", "federal", "digest", "read-only"],
+              ["list the most recent federal publication digests",
+               "get the digest for 2026-09-04",
+               "what did the Federal Register publish yesterday"]),
+        entry("api", "static-read-api", "Static read API catalog",
+              "application/linkset+json", "/.well-known/api-catalog",
+              "RFC 9727 catalog of the static read files, with an OpenAPI"
+              " 3.1 description and JSON Schemas.",
+              ["api-catalog", "openapi", "json-schema"],
+              ["machine-readable index of daily federal digests",
+               "OpenAPI description of the FAPD files"]),
+        entry("data", "digest-index", "Digest index",
+              "application/json", "/digests.json",
+              "Every published digest day with its HTML URL, canonical"
+              " Markdown path and teaser. The dated digests are the record.",
+              ["digest", "index", "federal"],
+              ["which dates have a published federal digest",
+               "teaser for each daily digest"]),
+        entry("data", "live-day", "Live day (PRELIMINARY)",
+              "application/json", "/today.json",
+              "Every item observed so far for the current publication day,"
+              " with honesty labels. Preliminary until the dated digest"
+              " freezes.",
+              ["live", "preliminary", "federal"],
+              ["federal publications observed so far today",
+               "preliminary list of today's Congressional Record items"]),
+        entry("data", "source-directory", "Source directory",
+              "application/json", "/sources.json",
+              "Every source the pipeline ingests, plans to ingest, or found"
+              " unavailable, with the statistics of our own ingestion. Not"
+              " government publication.",
+              ["sources", "ingestion", "statistics"],
+              ["which federal sources does the digest ingest",
+               "sources that are unavailable to automated clients"]),
+        entry("feed", "digests", "Atom feed of digests",
+              "application/atom+xml", "/feed.xml",
+              "The most recent digest days as an Atom feed, for change"
+              " discovery.",
+              ["atom", "feed", "digest"],
+              ["subscribe to new daily federal digests",
+               "Atom feed of the most recent digest days"]),
+        entry("guide", "llms", "Guide for AI agents (llms.txt)",
+              "text/plain", "/llms.txt",
+              "Where everything is and how to read it faithfully.",
+              ["llms-txt", "guide"],
+              ["how should an AI agent use fapd.info",
+               "where are the machine-readable files on fapd.info"]),
+    ]
+    for name, _raw, description in skills:
+        if name not in _SKILL_QUERIES:
+            raise ValueError(f"no representative queries for skill {name!r}"
+                             " in publish._SKILL_QUERIES")
+        entries.append(entry(
+            "skill", name, f"Agent skill: {name}",
+            "application/agent-skills+md",
+            f"/.well-known/agent-skills/{name}/SKILL.md",
+            description, ["agent-skill", "instructions"],
+            list(_SKILL_QUERIES[name])))
+    return {
+        "specVersion": "1.0",
+        "host": {
+            "displayName": "Free Agentic Publication Digester",
+            "identifier": "fapd.info",
+            "documentationUrl": _abs(base, "/agents.html"),
+        },
+        "entries": entries,
+    }
+
+
+def _signpost_not_offered(base):
+    """Body Phase 3 serves for a probe of a protocol we do not operate
+    (OAuth, A2A, payments): an honest refusal naming where to go."""
+    return {
+        "status": "not offered",
+        "explanation": (
+            "fapd.info does not operate this protocol. The site publishes"
+            " official US federal publication digests as static files, a"
+            " read-only MCP service at /mcp, and the discovery documents"
+            " listed below. Nothing here requires authentication or"
+            " payment."),
+        "start_here": [
+            _abs(base, "/llms.txt"),
+            _abs(base, "/.well-known/api-catalog"),
+            _abs(base, "/.well-known/ai-catalog.json"),
+            _abs(base, "/agents.html"),
+            _abs(base, "/auth.md"),
+        ],
+        "declined_protocols": _abs(base, "/agents.html"),
+    }
+
+
+_FAVICON_SIZE = 32
+_FAVICON_BG = (0x1F, 0x4E, 0x79)   # #1f4e79
+# The "F" glyph as rectangles (x0, y0, x1, y1), top-left origin.
+_FAVICON_GLYPH = ((8, 6, 13, 26), (8, 6, 24, 11), (8, 14, 21, 18))
+
+
+def _favicon_ico():
+    """A deterministic 32×32 32-bit ICO from stdlib struct: a #1f4e79
+    square with a white F. Decorative, so it needs no text alternative;
+    generated in code so two builds are byte-identical."""
+    import struct
+
+    n = _FAVICON_SIZE
+    rows = []
+    for y in range(n - 1, -1, -1):            # BMP rows are bottom-up
+        row = bytearray()
+        for x in range(n):
+            lit = any(x0 <= x < x1 and y0 <= y < y1
+                      for x0, y0, x1, y1 in _FAVICON_GLYPH)
+            r, g, b = (255, 255, 255) if lit else _FAVICON_BG
+            row += bytes((b, g, r, 255))      # BGRA
+        rows.append(bytes(row))
+    pixels = b"".join(rows)
+    and_mask = b"\x00" * (n * 4)              # 1 bpp, rows padded to 4 bytes
+    bmp_header = struct.pack("<IiiHHIIiiII", 40, n, n * 2, 1, 32, 0,
+                             len(pixels) + len(and_mask), 0, 0, 0, 0)
+    image = bmp_header + pixels + and_mask
+    icon_dir = struct.pack("<HHH", 0, 1, 1)
+    entry = struct.pack("<BBBBHHII", n, n, 0, 0, 1, 32, len(image), 22)
+    return icon_dir + entry + image
+
+
+def _build_discovery_documents(out_dir, base):
+    """Write every Phase 1 discovery document (master plan §8.1). All of
+    them are timestamp-free, so a rebuild is byte-identical."""
+    schema_dir = out_dir / "schema"
+    for file_name, schema in _json_schemas(base).items():
+        _dump_json(schema_dir / file_name, schema)
+    _dump_json(out_dir / "openapi.json", _openapi_doc(base))
+    well_known = out_dir / ".well-known"
+    _dump_json(well_known / "api-catalog", _api_catalog(base))
+    (out_dir / "auth.md").write_text(_AUTH_MD, encoding="utf-8")
+    skills = _skill_sources()
+    skills_dir = well_known / "agent-skills"
+    for name, raw, _description in skills:
+        target = skills_dir / name / "SKILL.md"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(raw)
+    _dump_json(skills_dir / "index.json", _agent_skills_index(base, skills))
+    _dump_json(well_known / "ai-catalog.json", _ai_catalog(base, skills))
+    _dump_json(out_dir / "_signpost" / "not-offered.json",
+               _signpost_not_offered(base))
+    (out_dir / "favicon.ico").write_bytes(_favicon_ico())

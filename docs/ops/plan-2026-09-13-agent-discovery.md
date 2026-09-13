@@ -387,8 +387,8 @@ file**. A drift test fails if they differ.
 | Phase | Status | Commit(s) | Agent log | WORKLOG entry |
 |---|---|---|---|---|
 | 0 | **done 2026-09-13** (C-2 approved) | 778e253 (plan), 4c888ab (security review), 07b6db4 (governance) | `research/agent-logs/agent-discovery-orchestrator-20260913.md` | 2026-09-13 |
-| 1 | in progress (agent launched 2026-09-13) | — | `research/agent-logs/agent-discovery-phase1-20260913.md` | — |
-| 2 | not started | — | — | — |
+| 1 | **done 2026-09-13** (all 9 acceptance criteria met; 27 new tests) | see git log: "site: agents can discover…" | `research/agent-logs/agent-discovery-phase1-20260913.md` | 2026-09-13 |
+| 2 | in progress (same Publication agent, 2026-09-13) | — | `research/agent-logs/agent-discovery-phase2-20260913.md` | — |
 | 3 | in progress (agent launched 2026-09-13) | — | `research/agent-logs/agent-discovery-phase3-20260913.md` | — |
 | 4A | in progress (agent launched 2026-09-13) | — | `research/agent-logs/agent-discovery-phase4a-20260913.md` | — |
 | 4B | not started | — | — | — |

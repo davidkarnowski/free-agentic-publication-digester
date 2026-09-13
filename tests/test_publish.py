@@ -1088,6 +1088,23 @@ def test_agent_surfaces_built(digests, tmp_path):
     # navigation reaches the agents page from digest pages
     assert 'href="agents.html">For agents</a>' in (out / "2026-07-01.html").read_text()
 
+    # Agent discovery, Phase 1 (2026-09-13): the new sections, lines and
+    # files exist; tests/test_agent_discovery.py pins their contents.
+    for heading in ("Discovery for agents", "MCP service",
+                    "Protocols this site does not offer, and why"):
+        assert heading in agents, heading
+    assert "no rate limiting" not in agents
+    for line in ("/.well-known/api-catalog", "/openapi.json",
+                 "/.well-known/ai-catalog.json",
+                 "/.well-known/agent-skills/index.json", "/auth.md",
+                 "Declined protocols", "Accept: text/markdown"):
+        assert line in llms, line
+    for rel in ("openapi.json", ".well-known/api-catalog", "auth.md",
+                ".well-known/agent-skills/index.json",
+                ".well-known/ai-catalog.json", "favicon.ico",
+                "_signpost/not-offered.json", "schema/today.schema.json"):
+        assert (out / rel).is_file(), rel
+
 
 # ------------------------------------------------------------------ /today --
 
@@ -1299,6 +1316,25 @@ def test_agent_surfaces_are_bot_friendly(tmp_path, monkeypatch):
     assert "AI-first" in robots and "Allow: /" in robots
     assert "today.html" in (tmp_path / "sitemap.xml").read_text()
     assert "PRELIMINARY" in (tmp_path / "llms.txt").read_text()
+    # Content Signals (operator ruling D1, 2026-09-13) inside the `*`
+    # group — after the User-agent line, before the blank line — plus
+    # the Agentmap pointer; and no crawler loses access to anything.
+    import protego
+
+    assert robots.count("Content-Signal:") == 1
+    group = robots.split("User-agent: *\n", 1)[1].split("\n\n", 1)[0]
+    assert "Content-Signal: search=yes, ai-input=yes, ai-train=yes" in group
+    assert "Sitemap: /sitemap.xml" in robots
+    assert "Agentmap: /.well-known/ai-catalog.json" in robots
+    parsed = protego.Protego.parse(robots)
+    for agent in ("GPTBot", "ClaudeBot", "*"):
+        assert parsed.can_fetch("/", agent)
+        assert parsed.can_fetch("/2026-07-29.html", agent)
+    for pointer in ("/.well-known/api-catalog", "/openapi.json",
+                    "/.well-known/ai-catalog.json",
+                    "/.well-known/agent-skills/index.json", "/mcp",
+                    "/auth.md"):
+        assert pointer in robots, pointer
 
 
 def test_index_page_has_live_callout_above_digest_list(tmp_path):

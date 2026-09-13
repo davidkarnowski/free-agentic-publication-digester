@@ -5271,3 +5271,45 @@ merge first, deploy from `main`.
 Next: Phase 1 (Publication), Phase 3 (Operations) and Phase 4A (the
 generic `static-mcp` package) launch in parallel; each agent keeps a
 progress log in `research/agent-logs/`.
+
+## 2026-09-13 — Phase 1 lands: the discovery documents
+
+The Publication agent delivered Phase 1 of the agent-discovery plan
+through two interruptions (a network outage, then the account's session
+limit); its progress log carried a current NEXT: each time and nothing
+was redone. The build now writes, deterministically and with no
+timestamps, every "P1" document in the master plan's contract table:
+robots.txt with `Content-Signal: search=yes, ai-input=yes, ai-train=yes`
+inside the `*` group and an `Agentmap:` line; `openapi.json` (3.1,
+GET-only) with four JSON Schemas under `/schema/` whose descriptions
+copy the payloads' own label strings, so the disclosures travel with the
+schema; `/.well-known/api-catalog` (RFC 9727 linkset, deliberately no
+`status` relation); `/auth.md` ("the answer is that you do not");
+`/.well-known/agent-skills/index.json` with four SKILL.md files whose
+digests are recomputed from the served bytes; `/.well-known/ai-catalog.json`
+with eleven entries and hand-written, party-neutral representative
+queries; five discovery `<link>` elements in every page head, rebased
+under `sources/`, `archive/` and `day/`; a generated 32×32 favicon; and
+the signpost body Phase 3 will serve for unoffered protocols.
+`agents.html` gained Discovery, an MCP placeholder, and "Protocols this
+site does not offer, and why"; its Courtesy sentence no longer claims
+"no rate limiting" — the overclaim found on the box on 2026-09-13.
+
+Two of the agent's deviations are worth keeping in mind. The `{#mcp}`
+heading id cannot ride on a Markdown heading without the attr_list
+extension, and enabling that site-wide would let `{...}` in official
+digest text mutate attributes, so the heading is raw HTML — Phase 4C
+must keep it that way. And `day.schema.json` is an `anyOf` because
+`build_day` writes two real shapes (the frozen listing and the designed
+absent state); describing only one would overclaim.
+
+One incident: a test run failed with ENOSPC because pytest's scratch
+held 7.8 GB of earlier site builds (each copies the devnotes image
+assets). The agent removed only that scratch directory. Ops-backlog
+candidate: exclude static assets from test builds or trim pytest's
+retention.
+
+Verified: ruff clean; full suite 901 passed, 1 skip (the documented
+cross-phase skip in test_web_conf, which Phase 5 forbids at deploy
+time). Phase 3 and 4A files were in the same tree and are not in this
+commit.
