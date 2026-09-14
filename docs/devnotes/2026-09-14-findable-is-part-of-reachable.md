@@ -20,6 +20,10 @@ us at Level 1, which the scanner calls "Basic Web Presence." Three of 16
 checks passed: a robots.txt file, a sitemap and the fact that our
 robots.txt treated AI crawlers like any other visitor.
 
+![Cloudflare URL Scanner "Agent Readiness" panel for fapd.info on Sept. 12: a gauge reading 19, labeled Level 1, Basic Web Presence, beside four category dials: Discoverability 50 (2 of 4 checks), Content Accessibility 0 (0 of 1), Bot Access Control 50 (1 of 2), Protocol Discovery 0 (0 of 9).](assets/findable/agent-readiness-sept-12-level-1.png)
+
+*The Sept. 12 report from Cloudflare's [URL Scanner](https://radar.cloudflare.com/scan): 19 out of 100, Level 1.*
+
 The first reaction was that the grader had it wrong. It didn't. It was
 measuring something we had never thought about.
 
@@ -202,12 +206,18 @@ on Sept. 14.
 | OAuth, A2A, WebMCP | fail | fail (declined) |
 | DNS-AID | fail | fail (not possible at our DNS host) |
 
-Level 1 to Level 4, which the scanner calls "Agent-Integrated." Of the
-checks still red, four are refusals we publish the reasons for, one is
-a scanner reading our truthful `auth.md` as incomplete, and one needs a
-DNS record type our provider does not offer. That last one is the
-difference between "we chose not to" and "our provider cannot," and it
-deserves to be said plainly.
+The score went from 19 to 63, and the level from 1 to 4, which the
+scanner calls "Agent-Integrated." Content and bot-access checks are
+perfect; discoverability is three of four; protocol discovery is four
+of nine. Of the checks still red, four are refusals we publish the
+reasons for, one is a scanner reading our truthful `auth.md` as
+incomplete, and one needs a DNS record type our provider does not
+offer. That last one is the difference between "we chose not to" and
+"our provider cannot," and it deserves to be said plainly.
+
+![Cloudflare URL Scanner "Agent Readiness" panel for fapd.info on Sept. 14: a gauge reading 63, labeled Level 4, Agent-Integrated, with dials Discoverability 75 (3 of 4 checks), Content Accessibility 100 (1 of 1), Bot Access Control 100 (2 of 2), Protocol Discovery 44 (4 of 9); below, the Discoverability list shows robots.txt, Sitemap and Link Headers passing and DNS for AI Discovery failing.](assets/findable/agent-readiness-sept-14-level-4.png)
+
+*The Sept. 14 report from Cloudflare's [URL Scanner](https://radar.cloudflare.com/scan): 63 out of 100, Level 4.*
 
 ## The first real reader
 
