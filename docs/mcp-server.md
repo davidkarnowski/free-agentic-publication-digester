@@ -214,6 +214,7 @@ deploy/vps/scripts/vps-ssh.sh 'sudo tail -20 /opt/fapd/logs/mcp-access.log'
 | Rehearse web + MCP in throwaway containers | `deploy/vps/nginx/rehearse.sh` (rows M1–M17; needs a local Docker daemon) |
 | Dev stack | `deploy/dev/scripts/dev-up.sh`, then `docker compose … up -d mcp` → `http://localhost:8080/mcp` (`deploy/dev/README.md`) |
 | Deploy | `deploy/vps/scripts/deploy.sh`, **only on the operator's "deploy"**, from `main` (see the Phase 5 plan for why); it builds `mcp`, creates `logs/`, and verifies with a `server/discover` POST |
+| MCP Registry listing (C-4, done 2026-09-14) | `info.fapd/fapd` 1.0.0, published by the operator with `mcp-publisher` after domain proof at `/.well-known/mcp-registry-auth`; detail: `https://registry.modelcontextprotocol.io/v0.1/servers/info.fapd%2Ffapd/versions/1.0.0`; a new version means bumping the manifest's `server.version` and re-publishing |
 | The fail2ban jail (installed 2026-09-14) | files and installer in the operator's private host tree; verify with `fail2ban-client status fapd-mcp` and the `f2b-fapd-mcp` chain in `iptables -S DOCKER-USER` |
 | Health (read-only) | `/fapd-health`; or a `server/discover` POST (below); `docker port fapd-mcp` prints nothing |
 | Unban a legitimate client (operator) | `sudo fail2ban-client set fapd-mcp unbanip <addr>` |

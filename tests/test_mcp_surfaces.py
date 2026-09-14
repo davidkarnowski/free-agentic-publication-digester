@@ -341,3 +341,14 @@ def test_the_real_proof_line_is_well_formed_and_built(site):
     line = publish.MCP_REGISTRY_AUTH_LINE
     assert re.fullmatch(r"v=MCPv1; k=ed25519; p=[A-Za-z0-9+/]{43}=", line), line
     assert (site / ".well-known" / "mcp-registry-auth").read_text(encoding="utf-8") == line + "\n"
+
+
+def test_agents_page_names_the_registry_listing_once_published(site, monkeypatch):
+    raw = publish._mcp_manifest()
+    url = "https://registry.modelcontextprotocol.io/v0.1/servers/info.fapd%2Ffapd/versions/1.0.0"
+    assert publish._mcp_registry_listing_url(raw) == url
+    agents = (site / "agents.html").read_text(encoding="utf-8")
+    assert url in agents and "official MCP Registry" in agents
+    monkeypatch.setattr(publish, "MCP_REGISTRY_PUBLISHED", "")
+    assert publish._mcp_registry_listing_url(raw) is None
+    assert "MCP Registry" not in publish._mcp_agents_md(raw)

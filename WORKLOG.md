@@ -5969,3 +5969,31 @@ verbatim, at `research/Cloudflare_Access/outside-agent-review-2026-09-14.md`.
 Its one actionable idea — structured citation metadata beside MCP
 results so downstream agents keep the government citation, not the
 tool result, as the source — is OB-25.
+
+## 2026-09-14 — C-4 done: FAPD is listed in the official MCP Registry
+
+The operator generated the Ed25519 key pair locally (OpenSSL 3 from
+Homebrew; `secrets/key.pem`, now ignored by git and excluded from the
+deploy's repo export — a check on the box confirms nothing under
+`secrets/` reached it or the image), supplied the public line, and the
+site built and deployed `/.well-known/mcp-registry-auth` (text/plain,
+served 200). The first `mcp-publisher login http` failed with
+"timestamp outside valid window (±15 seconds)" — the Mac's clock,
+fixed with an NTP sync — and the second succeeded; `mcp-publisher
+publish` reported `info.fapd/fapd` version 1.0.0. Verified through the
+registry API: one result, status active, published 2026-09-14
+20:57:13 UTC, latest, remote `https://fapd.info/mcp`; the detail
+endpoint answers 200. The agents page's MCP section now names the
+listing (generated from the manifest's name and version once
+`publish.MCP_REGISTRY_PUBLISHED` is set); the MCP guide carries the
+row and the re-publish rule (bump `server.version`, publish again).
+
+That closes Phase 5. Of the plan's definition of done: every "build"
+row is live and both graders record Level 4 (1); `/mcp` serves both
+eras to two real clients (2); no new port, networks internal, the
+container non-root and read-only (3); the governing documents and
+runbooks describe the built system, with the security configuration
+now in the private host tree (4); the package stands alone with its
+README and tests (5); ruff and pytest green, CI green, fast-forward
+merges throughout (6); the blog draft is written (7) — publishing it is
+the operator's decision.

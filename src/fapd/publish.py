@@ -5180,6 +5180,11 @@ _MCP_TABLE_CAPTIONS = ("Tools of the MCP service",
 # until the operator supplies the line (checkpoint C-4); then the file is
 # built. The private key never enters the repository or the box.
 MCP_REGISTRY_AUTH_LINE = "v=MCPv1; k=ed25519; p=Lh2rfWDsxKCEQ+Tm+HIOe56NRQSHBKTGv9VHJkdQ7kY="
+# The date the operator published the server to the official MCP Registry
+# (checkpoint C-4). Empty until then; when set, the agents page names the
+# listing, whose URL is derived from the manifest's name and version.
+MCP_REGISTRY_PUBLISHED = "2026-09-14"
+MCP_REGISTRY_BASE = "https://registry.modelcontextprotocol.io/v0.1/servers"
 
 
 def _mcp_manifest(path=None):
@@ -5268,6 +5273,17 @@ def _mcp_resource_rows(manifest):
              f" `{t['mimeType']}` |"
              for t in manifest.get("resource_templates", [])]
     return rows
+
+
+def _mcp_registry_listing_url(manifest):
+    """The registry's detail endpoint for this server, or None before C-4."""
+    if not MCP_REGISTRY_PUBLISHED:
+        return None
+    from urllib.parse import quote
+
+    server = manifest["server"]
+    return (f"{MCP_REGISTRY_BASE}/{quote(server['name'], safe='')}"
+            f"/versions/{quote(server['version'], safe='')}")
 
 
 def _mcp_agents_md(manifest):
@@ -5379,8 +5395,12 @@ def _mcp_agents_md(manifest):
          " in the repository."),
         ("- The generic server behind it, reusable with a manifest of your own:"
          f" [`packages/static-mcp`]({REPO_URL}/tree/main/packages/static-mcp)."),
-        "",
     ]
+    listing = _mcp_registry_listing_url(manifest)
+    if listing:
+        lines.append(f"- Listed in the official MCP Registry as `{manifest['server']['name']}`"
+                     f" (since {MCP_REGISTRY_PUBLISHED}): [{listing}]({listing}).")
+    lines.append("")
     return "\n".join(lines)
 
 
