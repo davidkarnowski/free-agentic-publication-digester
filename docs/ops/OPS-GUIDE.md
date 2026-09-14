@@ -3,10 +3,11 @@
 *Never writes anything. Anything that would — restarts, deploys, config
 flips — lives behind the authorization gate in
 [AGENT-VPS-SERVICING-GUIDE.md](AGENT-VPS-SERVICING-GUIDE.md) §4.
-Last reviewed: 2026-09-14 (agent-discovery Phase 4B, pending deploy:
-the MCP service checks — container, `server/discover`, the no-port
-invariant, the jail — and the manual-unban note were added; the Phase 3
-block re-read unchanged).*
+Last reviewed: 2026-09-14 (agent-discovery Phase 5: the Phase 3 and
+MCP blocks are live checks now, every command run against the box after
+the deploy; the jail commands wait on checkpoint C-6. Running the
+verification probes from an address the box's existing jails do not
+ignore banned the operator's own address once — see the WORKLOG).*
 
 ## Local checks (the operator machine)
 
@@ -65,9 +66,8 @@ deploy/vps/scripts/vps-ssh.sh 'sudo certbot certificates 2>/dev/null | grep -A3 
 ### Is the repo-managed web config live?
 
 `fapd-web` runs `deploy/vps/nginx/` (agent-discovery plan Phase 3;
-**pending deploy** as of 2026-09-13 — until Phase 5 deploys it these
-checks describe the target state, and the stock config answers
-without a `Link` header and with `nginx/1.x` in its 404 body). Three
+live since 2026-09-14; before that the stock config answered without a
+`Link` header and with `nginx/1.x` in its 404 body). Three
 curls through the edge, all read-only:
 
 ```sh
@@ -91,9 +91,10 @@ it. Before any change under `deploy/vps/nginx/` reaches the box,
 ### The MCP service
 
 `fapd-mcp` and `fapd-web`'s `/mcp` gate (agent-discovery Phase 4B;
-**pending deploy** as of 2026-09-14 — until Phase 5 deploys them these
-checks describe the target state, and `/mcp` answers 404 from the stock
-site). Guide: `docs/mcp-server.md`. All read-only:
+live since 2026-09-14). Guide: `docs/mcp-server.md`. All read-only.
+Do not run the adversarial probes of the Phase 5 checklist from an
+address the box's existing nginx jails do not ignore: one of them bans
+on a single `/.git` request.
 
 ```sh
 deploy/vps/scripts/vps-ssh.sh 'sudo docker ps --format "{{.Names}}\t{{.Status}}" | grep fapd-mcp'

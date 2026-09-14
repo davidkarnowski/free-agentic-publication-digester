@@ -39,9 +39,8 @@ source of truth. This skill never writes or restarts anything.
 4. If asked about the VPS or after a deploy: the OPS-GUIDE **VPS**
    block (curl 200s, container statuses, fapd-web networks ==
    `fapd_edge` + `fapd_mcp`, cert expiry).
-4b. **The MCP service** (OPS-GUIDE "The MCP service"; **pending deploy**
-   until Phase 5 of the agent-discovery plan — before that, report the
-   block as not applicable, not as failing). Read-only, all of it:
+4b. **The MCP service** (OPS-GUIDE "The MCP service"; live since
+   2026-09-14, agent-discovery Phase 5). Read-only, all of it:
    `fapd-mcp` container `Up … (healthy)`; `docker port fapd-mcp` prints
    **nothing** (any output is a finding: a published port bypasses
    ufw); `fapd-mcp` networks == exactly `fapd_mcp`; a modern

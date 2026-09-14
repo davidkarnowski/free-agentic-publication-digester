@@ -1,16 +1,14 @@
 # The FAPD MCP service
 
-> **Status: built, pending deploy (2026-09-14).** The generic package
-> (Phase 4A, commit c70ec16) and FAPD's integration (Phase 4B: manifest,
-> containers, the `/mcp` transport gate, the fail2ban jail files, tests)
-> are in the tree on `feature/agent-discovery`; a real client (Claude
-> Code 2.1.270) has talked to the FAPD manifest on a laptop (§8).
-> **Nothing is deployed:** `https://fapd.info/mcp` does not answer until
+> **Status: live since 2026-09-14.** Deployed from `main` (f1ef74c) by
 > Phase 5 of
 > [docs/ops/plan-2026-09-13-agent-discovery.md](ops/plan-2026-09-13-agent-discovery.md)
-> deploys it, re-runs the rehearsal, and updates this banner to "live"
-> with the verification date. Until then, don't cite this file as a
-> description of production.
+> after the rehearsal passed on the box (43 rows). Verified the same day
+> from outside: both protocol eras, the refusals, the adversarial inputs,
+> no new host port; Claude Code 2.1.270 called `list_digests` and
+> `get_digest` against `https://fapd.info/mcp`. The fail2ban jail waits
+> on checkpoint C-6; the MCP Registry listing on C-4. WORKLOG 2026-09-14
+> carries the observed values.
 
 *Owner: Operations (`docs/agents/operations.md`). Governing rule: GUIDE
 §2a rule 4, the one bounded exception to "no endpoint of its own".

@@ -406,3 +406,48 @@ not reusable.)*
   fixture that points `static_assets`/`site/assets` at an empty dir) so
   a test build never copies media it does not assert on. Publication
   owns the seam.
+
+**OB-22 — The operator address is ignored by the box's nginx jails only at runtime**
+- **Gap:** on 2026-09-14 the cohabitant's `nginx-noscript` jail
+  (`maxretry = 1`) banned the operator's own address on the Phase 5
+  checklist's `GET /.git/config` probe, box-wide, for an hour. The
+  address was unbanned and added to the four nginx jails' ignore lists
+  with `fail2ban-client set <jail> addignoreip`, which a fail2ban
+  restart or reload forgets.
+- **Trigger:** the next fail2ban reload on the box (a config change,
+  the C-6 jail install, a package upgrade), or the next time the
+  verification blocks run from a new address.
+- **Fix path:** `ignoreip` in the cohabitant's jail files
+  (spiralyst-site tree, operator-applied), or a documented rule that
+  the §5.2/§5.3 probes run only from an ignored address. Our own
+  `fapd-mcp` jail file already lists loopback and the Docker ranges;
+  the operator's address is a per-box fact and does not belong in the
+  repository.
+
+**OB-23 — Running the rehearsal on the box when the laptop has no daemon**
+- **Gap:** `deploy/vps/nginx/rehearse.sh` needs Docker, `uv`, curl and
+  the repo. The box has Docker but no `uv`; the laptop had `uv` but no
+  daemon on 2026-09-14. The rehearsal ran on the box from a scratch
+  copy of the tree with two throwaway shims (`docker` through sudo;
+  `uv run python` mapped onto the backend image's own `/app/.venv`
+  interpreter with the candidate tree first on the path, as the
+  operator's uid, scratch dir mounted at the same path inside). It
+  worked, twice, and was cleaned up, but it lives only in a WORKLOG
+  entry and the orchestrator log.
+- **Trigger:** the next time a rehearsal is owed and the laptop's
+  daemon is down.
+- **Fix path:** either a `rehearse.sh --on-box` mode that stages and
+  runs itself through `vps-ssh.sh` with those two shims, or a runbook
+  paragraph in AGENT-VPS-SERVICING-GUIDE. Operations owns both. Note
+  the first run wrote the fixture as root and broke the script's own
+  cleanup: the `--user` flag on the shim is load-bearing.
+
+**OB-24 — MCP Inspector and the conformance suite as the second and third clients**
+- **Gap:** the plan's definition of done asks for two real clients
+  against production. Claude Code 2.1.270 is recorded (2026-09-14).
+  MCP Inspector (`npx @modelcontextprotocol/inspector`) and the
+  conformance suite's read-only server scenarios have not been run
+  against `https://fapd.info/mcp`; each is a small, bounded request
+  count.
+- **Trigger:** the next session with `npx` available and the operator
+  present; also a prerequisite for closing the plan's item 2.

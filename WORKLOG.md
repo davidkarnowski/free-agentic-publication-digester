@@ -5675,3 +5675,86 @@ deploy now" (C-3). The branch is rebased onto the current `main` (nine
 nightly evidence commits since it was cut; the branch touches no
 evidence path) so the merge is a fast-forward, CI re-runs on the
 rebased tip, and the deploy follows from `main` per Phase 5 §1.
+
+## 2026-09-14 — Deployed: agent discovery layer and the MCP service are live
+
+Operator: "commit, merge and deploy now" (C-3). `main` fast-forwarded to
+f1ef74c (twelve commits: Phases 0–4C, the rehearsal fix, the checkpoint
+record), CI green on that tip, `deploy/vps/scripts/deploy.sh` run at
+17:00 UTC from `main` with a clean tree. Pre-deploy snapshot of the
+stock `fapd-web` config kept in the private tree. The script's four
+stages passed: test gate, nginx syntax gate with the new `logs/` mount,
+rsync, build of `backend` and `mcp`, `up -d` (network `fapd_fapd_mcp`
+created; `fapd-backend`, `fapd-web`, `fapd-mcp` recreated and healthy),
+site rebuild, `build_today`, nginx reload, and the verify block: front
+page 200, API catalog `application/linkset+json`, the five-relation
+`Link` header, a modern `server/discover` through the edge answering
+200 with `info.fapd/fapd`, and `docker port fapd-mcp` printing nothing.
+
+**Post-deploy verification (Phase 5 §5), observed values:**
+
+- §5.1 on the box: `fapd_fapd_mcp` is `internal=true` with members
+  `fapd-web fapd-mcp`; `fapd-mcp` is `ReadonlyRootfs true`, user
+  `10001:10001`, `CapDrop [ALL]`, `PortBindings {}`,
+  `no-new-privileges`, mounts `/etc/static-mcp` and `/srv/site` both
+  read-only and nothing else; an outbound request from inside it fails
+  on name resolution; `fapd_edge` members are exactly
+  `spiralyst-proxy fapd-web`; the edge cannot resolve `fapd-mcp`; ufw
+  still shows six ALLOW lines; `/opt/fapd/logs/mcp-access.log` exists
+  and its first field is a public client address.
+- §5.2 from outside: `Link` and `Vary: Accept` on `/`;
+  `Accept: text/markdown` on `/` → `text/markdown`; the negotiated
+  `2026-09-13.html` hashes equal to `digests/2026-09-13.md` on
+  `origin/main`; api-catalog, ai-catalog, agent-skills index, openapi,
+  auth.md, robots.txt, `/mcp/server-card`
+  (`application/mcp-server-card+json`),
+  `/.well-known/mcp/server-card.json`, favicon and `agents.md` all 200
+  with the specified types; `Access-Control-Allow-Origin: *` on the
+  machine files; the OAuth well-known probe 404 with the signpost body;
+  no nginx version string in a 404 body.
+- §5.3 from outside, twelve requests: modern `server/discover` 200;
+  modern `tools/call get_digest 2026-09-13` 200 with the preamble and
+  the digest; legacy `initialize` 2025-06-18 200 with no session
+  header; `GET /mcp` 405 with the JSON signpost; foreign `Origin` 403;
+  `text/plain` 415 with the signpost; 40-deep nesting, `NaN` and a batch
+  array each 400 with a well-formed JSON-RPC error and no 5xx;
+  traversal in `date` → 200 with `-32602` naming the parameter and no
+  path. A foreign `Host` was dropped by the edge before reaching us
+  (stricter than the expected 403 from the service).
+- §5.4: ports 8080, 8000 and 3000 time out from outside; 443 answers.
+- Real client: Claude Code 2.1.270 added `https://fapd.info/mcp` over
+  HTTP from a scratch directory, listed as Connected, called
+  `list_digests` (limit 3 → 2026-09-13, -12, -11) and `get_digest` for
+  2026-09-13 and quoted `# Daily Digest — 2026-09-13`; the service log
+  shows both calls under 2026-07-28. Config removed afterwards.
+- §5.6 health pass at +2 and +9 minutes: all three containers healthy;
+  `fapd-web` on exactly `fapd_edge` + `fapd_fapd_mcp`; every collector
+  worker at zero consecutive errors with success stamps after the
+  restart; the `eod` row finalized 2026-09-13 and pushed at 04:17 UTC
+  with no error; zero stranded commits; day_inference available for
+  the last three days; certificate valid to 2026-10-28; disk 50%.
+
+**Incident during verification, resolved.** Fifteen requests into the
+§5.2 block the box stopped answering this machine at the network level.
+Not our jail (C-6 is not installed yet): the cohabitant's
+`nginx-noscript` jail, `maxretry = 1`, banned the laptop's address at
+17:06:18 on the checklist's own `GET /.git/config` probe, in
+`DOCKER-USER` for all ports, so from this machine fapd.info was
+unreachable while everyone else was served (the operator saw the site
+"broken"). Lifted with `fail2ban-client set nginx-noscript unbanip`, and
+at the operator's direction the address was added to the four nginx
+jails' ignore lists at runtime (`addignoreip`; a fail2ban restart drops
+it — persisting it belongs in the cohabitant's jail files). The plan
+predicted this hazard for our own jail and missed that the existing
+jails would get there first: the §5.2 and §5.3 blocks must not be run
+from an address that is not ignored, and `/.git/config` is a one-strike
+probe on this box.
+
+**Outstanding:** C-6 (the operator runs
+`scripts/staged/2026-09-14-install-fapd-mcp-jail.sh`; then the chain
+check); C-4 registry listing; the Cloudflare re-scan (operator) and the
+isitagentready scan (needs the operator's OK to send our URL to a third
+party); MCP Inspector as the second real client. A second observation
+worth the operator's eye: `day_inference` for 2026-09-13 reads
+`available=1` with an empty `models` list, unlike the two days before —
+predates the deploy, not caused by it.
