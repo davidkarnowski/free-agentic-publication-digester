@@ -391,12 +391,12 @@ pat = next(l.split("=", 1)[1].strip() for l in open(conf) if l.startswith("failr
 rx = re.compile(pat.replace("<HOST>", r"(?:::f{4,6}:)?(?P<host>[\w\-.:^_]*\w)"))  # as tests/test_fail2ban_filter.py
 lines = open(log).read().splitlines()
 hits = [l for l in lines if rx.search(l)]
-want = [l for l in lines if re.search(r'" (400|403|405|413|415|429) ', l)]
-never = [l for l in hits if re.search(r'" (200|202|404) ', l)]
+want = [l for l in lines if re.search(r'" (400|403|405|413|415) ', l)]
+never = [l for l in hits if re.search(r'" (200|202|404|429) ', l)]
 print(1 if hits and hits == want and not never else 0, len(hits), len(lines))
 PY
 )
-verdict "M17 fail2ban filter over the log matches exactly the 400/403/405/413/415/429 lines, none of the 200/202/404 ($M17)" \
+verdict "M17 fail2ban filter over the log matches exactly the 400/403/405/413/415 lines, none of the 200/202/404/429 ($M17)" \
   "$(echo "$M17" | grep -q '^1 ' && echo 1 || echo 0)"
 
 echo "== 5. verdict =="

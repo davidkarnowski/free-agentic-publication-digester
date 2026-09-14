@@ -11,7 +11,7 @@ nginx's `limit_req`/`limit_conn` are the primary control.
 
 | File | Installed as | Role |
 |---|---|---|
-| `filter.d/fapd-mcp.conf` | `/etc/fail2ban/filter.d/fapd-mcp.conf` | counts `POST /mcp` lines with status 400, 403, 405, 413, 415 or 429; **not** 404 (a modern client probing an unimplemented method legitimately gets 404/`-32601`) |
+| `filter.d/fapd-mcp.conf` | `/etc/fail2ban/filter.d/fapd-mcp.conf` | counts `POST /mcp` lines with status 400, 403, 405, 413 or 415; **not** 404 (a modern client probing an unimplemented method legitimately gets 404/`-32601`) and **not** 429 (nginx's rate limit is already the answer to speed; an eager honest agent, or many agents behind one cloud egress address, must not earn an hour's ban for it — 2026-09-14) |
 | `jail.d/fapd-mcp.local` | `/etc/fail2ban/jail.d/fapd-mcp.local` | polling backend, `iptables-allports` in the `DOCKER-USER` chain (published container ports never traverse `INPUT`), explicit thresholds (the `[DEFAULT]` section is the cohabitant's) |
 | `logrotate.d/fapd-mcp` | `/etc/logrotate.d/fapd-mcp` | daily, keep 7, `copytruncate` (the container is not signalled by host logrotate; the polling backend follows truncation) |
 

@@ -121,8 +121,13 @@ with the nginx rate limit as the primary control.** Reasoning:
   box default (1 h, incrementing on repeat), and the nginx limits do
   the everyday work.
 - **What the jail counts:** responses on `/mcp` with status 400, 403,
-  405, 413, 415 or 429. **Not** 404: a modern client probing an
-  unimplemented method gets a legitimate 404/`-32601`.
+  405, 413 or 415. **Not** 404: a modern client probing an
+  unimplemented method gets a legitimate 404/`-32601`. **Not** 429
+  (amended 2026-09-14, operator): a rate-limit hit is nginx doing its
+  job, and counting it meant an honest agent paging at ten requests a
+  second, or many agents behind one cloud egress address, collected
+  twenty strikes in four seconds and an hour's ban. The jail is for
+  protocol abuse; speed is the limit zone's business.
 - **Which log:** the jail needs the *real* client address. The edge's
   own access log (cohabitant-owned) has it, but adding filters there
   means editing the cohabitant's tree. Instead, `fapd-web` writes a

@@ -44,16 +44,18 @@ def _line(status, addr="203.0.113.7", method="POST", ua="curl/8.7.1"):
             f'{status} 123 rt=0.004 "{ua}"')
 
 
-@pytest.mark.parametrize("status", [400, 403, 405, 413, 415, 429])
+@pytest.mark.parametrize("status", [400, 403, 405, 413, 415])
 def test_filter_matches_every_rejection_status(status):
     m = _failregex().search(_line(status))
     assert m, status
     assert m.group("host") == "203.0.113.7"       # <HOST> is the FIRST field
 
 
-@pytest.mark.parametrize("status", [200, 202, 404, 500, 503])
+@pytest.mark.parametrize("status", [200, 202, 404, 429, 500, 503])
 def test_filter_ignores_successes_and_the_legitimate_404(status):
     """404 is a modern client probing an unimplemented method (-32601);
+    429 is nginx's rate limit already doing its job (an eager honest agent
+    or a shared cloud egress must not earn a ban for it — 2026-09-14);
     5xx is our side, not the client's."""
     assert not _failregex().search(_line(status)), status
 
@@ -63,8 +65,8 @@ def test_filter_matches_the_status_as_a_whole_token():
     \\s rather than a literal space; without it 4000 would count as 400."""
     rx = _failregex()
     assert not rx.search(_line("4000"))
-    assert not rx.search(_line("4291"))
-    assert rx.search(_line(429))
+    assert not rx.search(_line("4131"))
+    assert rx.search(_line(413))
 
 
 def test_filter_counts_only_posts_to_mcp():
