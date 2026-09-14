@@ -5826,3 +5826,31 @@ agentic readiness and other issues". Done this round, in the tree
 Verified: ruff clean; **1405 passed, 1 skipped**; package suite 421
 passed. Next: merge, deploy (nginx format, manifests, the mcp image),
 then the operator runs the two staged scripts.
+
+## 2026-09-14 — Second deploy: the request-id join and the 429-free jail filter are on the box
+
+`main` fast-forwarded to 998389c (the branch's four commits: the jail
+filter, the request-id join, the staged fail2ban script, and a fix for
+a pre-existing race in the package's test helper that CI surfaced —
+the server logs after it responds, so a test reading `logs()[-1]`
+straight after a request could see the previous line; the helper now
+waits for its own line). `deploy.sh` at 17:46 UTC, exit 0: the site
+rebuilt, `fapd-mcp` recreated (new image, manifest with
+`request_id_header`), `fapd-web` reloaded in place, verify block
+passed (200, catalog, Link header, `server/discover` → `info.fapd/fapd`,
+no published port).
+
+Verified after: one `server/discover` from outside produced
+`rid=74f8210962bd2a7c9b4a86078ab771e6` at the end of the nginx `/mcp`
+log line and `"request_id":"74f8…"` in the service's own line for the
+same request; the live nginx config forwards `X-Request-Id`; the
+bundle's filter on the box reads
+`(400|403|405|413|415)\s`; both staged scripts are under
+`/opt/fapd/repo/scripts/staged/`; all three containers healthy.
+
+**For the operator to run on the box, in this order:**
+1. `OPERATOR_IP=<your address> bash /opt/fapd/repo/scripts/staged/2026-09-14-fail2ban-adjustments.sh`
+   (operator ignore list, http-auth jail off, fail2ban after docker).
+2. `bash /opt/fapd/repo/scripts/staged/2026-09-14-install-fapd-mcp-jail.sh`
+   (checkpoint C-6: our jail, its logrotate snippet, chain check).
+Then the orchestrator's read-only C-6 verification in Phase 5 §5.5.
