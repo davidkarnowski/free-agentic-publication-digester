@@ -282,7 +282,7 @@ verdict "M3 modern tools/call get_digest $DATE -> 200, text after the preamble =
 
 get /mcp; MCP_REQ=$((MCP_REQ + 1))
 verdict "M4 GET /mcp -> 405, JSON signpost body" \
-  "$([ "$STATUS" = 405 ] && has "$(hdr content-type)" application/json && grep -q '"see"' "$B" && echo 1 || echo 0)"
+  "$([ "$STATUS" = 405 ] && has "$(hdr content-type)" application/json && grep -q 'agents.html#mcp' "$B" && echo 1 || echo 0)"
 
 head -c 102400 /dev/zero | tr '\0' x > "$TMP/big.json"
 get /mcp -X POST -H 'Content-Type: application/json' --data-binary "@$TMP/big.json"; MCP_REQ=$((MCP_REQ + 1))
@@ -314,9 +314,11 @@ else
   verdict "M10 outbound request from inside fapd-mcp fails (no egress)" 1
 fi
 
-INSPECT=$(docker inspect "$MCP" --format '{{.HostConfig.ReadonlyRootfs}} {{.Config.User}} {{.HostConfig.CapDrop}} ports={{len .NetworkSettings.Ports}}')
+# HostConfig.PortBindings, not NetworkSettings.Ports: the latter lists the
+# Dockerfile's EXPOSE 8080 (unbound, null) and would count it as a port.
+INSPECT=$(docker inspect "$MCP" --format '{{.HostConfig.ReadonlyRootfs}} {{.Config.User}} {{.HostConfig.CapDrop}} ports={{json .HostConfig.PortBindings}}')
 verdict "M11 docker inspect fapd-mcp: ReadonlyRootfs true, user 10001, CapDrop ALL, no port bindings ($INSPECT)" \
-  "$(echo "$INSPECT" | grep -q '^true 10001:10001 \[ALL\] ports=0$' && echo 1 || echo 0)"
+  "$(echo "$INSPECT" | grep -qE '^true 10001:10001 \[ALL\] ports=(\{\}|null)$' && echo 1 || echo 0)"
 
 get /mcp -X POST -H 'Content-Type: text/plain' --data-binary '{"jsonrpc":"2.0","id":1,"method":"ping"}'; MCP_REQ=$((MCP_REQ + 1))
 verdict "M12 POST /mcp with Content-Type: text/plain -> 415 from nginx" "$([ "$STATUS" = 415 ] && echo 1 || echo 0)"
@@ -359,22 +361,28 @@ for _ in $(seq 1 100); do [ -e "$TMP/m15.ready" ] && break; sleep 0.1; done
 sleep 0.5
 mcp_post '{"jsonrpc":"2.0","method":"notifications/initialized"}' -H 'X-Real-IP: 203.0.113.15'
 : > "$TMP/m15.go"; wait
-MCP_REQ=$((MCP_REQ + 13))
+# Only the connections nginx must answer count toward M16: the two the
+# limit refused (429) and the extra one. The ten admitted uploads were
+# aborted by the client mid-body; whether nginx writes a 400 line for an
+# aborted upload is its choice and timing, not a property of our log.
+MCP_REQ=$((MCP_REQ + 3))
 verdict "M15 12 held-open connections from one address, then one more -> 429 (limit_conn)" \
   "$([ "$STATUS" = 429 ] && echo 1 || echo 0)"
 
 LOGF="$TMP/logs/mcp-access.log"
 docker stop "$MCP" >/dev/null
 mcp_post "{\"jsonrpc\":\"2.0\",\"id\":\"m7\",\"method\":\"server/discover\",\"params\":{$META}}" \
-  "${MODERN_H[@]}" -H 'Mcp-Method: server/discover'; s7=$STATUS; b7=$(grep -c '"see"' "$B"); MCP_REQ=$((MCP_REQ + 1))
+  "${MODERN_H[@]}" -H 'Mcp-Method: server/discover'; s7=$STATUS; b7=$(grep -c 'llms.txt' "$B"); MCP_REQ=$((MCP_REQ + 1))
 get /; s7b=$STATUS
 verdict "M7 mcp container stopped: POST /mcp -> 503 with the mcp-unavailable signpost; GET / still 200" \
   "$([ "$s7" = 503 ] && [ "$b7" -gt 0 ] && [ "$s7b" = 200 ] && echo 1 || echo 0)"
 
+sleep 1                          # let nginx finalize the last connections
 LINES=$(wc -l < "$LOGF" | tr -d ' ')
 BAD=$(grep -vcE '^[0-9a-fA-F.:]+ - \[[^]]+\] "[A-Z]+ /mcp HTTP/1\.[01]" [0-9]{3} ' "$LOGF" || true)
-verdict "M16 /mcp access log: $LINES lines (>= $MCP_REQ requests), first field an address, no bodies, one line per request" \
-  "$([ "$LINES" -ge "$MCP_REQ" ] && [ "$BAD" = 0 ] && ! grep -q 'jsonrpc' "$LOGF" && grep -q '^203\.0\.113\.8 ' "$LOGF" && echo 1 || echo 0)"
+m16=$([ "$LINES" -ge "$MCP_REQ" ] && [ "$BAD" = 0 ] && ! grep -q 'jsonrpc' "$LOGF" && grep -q '^203\.0\.113\.8 ' "$LOGF" && echo 1 || echo 0)
+[ "$m16" = 1 ] || { echo "  M16 status histogram:"; awk '{print $9}' "$LOGF" | sort | uniq -c | sed 's/^/    /'; echo "  M16 malformed lines: $BAD"; }
+verdict "M16 /mcp access log: $LINES lines (>= $MCP_REQ requests), first field an address, no bodies, one line per request" "$m16"
 
 M17=$(uv run python - "$LOGF" deploy/vps/fail2ban/filter.d/fapd-mcp.conf <<'PY'
 import re, sys

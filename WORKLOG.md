@@ -5551,3 +5551,113 @@ Phase 1 courtesy wording, and test assertions. Log:
 **Next:** Phase 5's pre-merge checklist. Owed before merge: the
 rehearsal re-run (rows 1–18 and M1–M17, including the Phase 3 charset
 change), which needs a Docker daemon.
+
+## 2026-09-14 — Phase 5 pre-merge: the rehearsal passes on the box; AD-16 diagnosed
+
+The operator authorized VPS testing (not deployment) this session. The
+laptop's Docker daemon is down, so the nginx and MCP rehearsal
+(`deploy/vps/nginx/rehearse.sh`) ran on the box instead, from a scratch
+copy of the branch tip (e6dad93) in the operator's home directory, with
+two small stand-ins: `docker` through sudo, and `uv run python` through
+the backend image's own interpreter with the candidate tree first on
+the path, running as the operator's uid. Nothing under `/opt/fapd` was
+touched; the scratch copy, the throwaway `fapd-mcp:rehearsal` image and
+both throwaway networks were removed afterwards, and `docker ps` shows
+only the four production containers.
+
+**First run: 37 pass, 6 fail.** Two failures were the harness (the
+renderer had run as root, so the script could not plant its stand-in
+files); four were real script defects, all in rows written by Phase 4B
+without a daemon to run them: M4 and M7 looked for a `"see"` key that
+only the script's own planted signposts carried, while the real Phase
+4C signposts say `agents.html#mcp` and `llms.txt`; M11 read
+`NetworkSettings.Ports`, which lists the Dockerfile's `EXPOSE 8080` as
+an unbound entry, instead of `HostConfig.PortBindings`; M16 counted the
+ten uploads that M15 deliberately aborts mid-body as lines nginx must
+log, which is nginx's choice and timing rather than a property of our
+log format. Fixed: the checks follow the real documents, M11 reads the
+bindings, M16 counts only the three connections nginx must answer,
+settles a second, and prints a status histogram when it fails.
+
+**Second and third runs: SUCCESS, 43 pass, 0 fail, 0 skip** (the third
+on the full tree after an rsync exclude that had also matched
+`docs/site/` was anchored). Two warnings remain by design: `today.html`
+is planted because `build_site` never writes it, and the script always
+plants a stand-in skill named `x`. Output of the final run:
+
+```
+== 1. preconditions (local machine only) ==
+== 2. fixture site (real renderer into a temp dir) ==
+  built 482 files; fixture digest date: 2026-09-04
+  WARNING: planted .well-known/agent-skills/x/SKILL.md (its phase has not merged; routing is proven on a stand-in)
+  WARNING: planted today.html (its phase has not merged; routing is proven on a stand-in)
+== 3. throwaway containers: nginx:1.30-alpine + fapd-mcp:rehearsal on two throwaway networks ==
+  PASS  0  nginx -t succeeds
+  PASS  0b nginx -t emits no [warn]/[emerg]
+== 4. the request matrix (phase file §3.5) ==
+  PASS  1  GET / -> 200 text/html, all five Link rels, Vary: Accept
+  PASS  2  GET / (Accept: text/markdown) -> 200 text/markdown; charset=utf-8, body == index.md
+  PASS  3  GET /2026-09-04.html (Accept: text/markdown) -> body byte-equals digests/2026-09-04.md
+  PASS  4  GET /today.html (Accept: text/markdown) -> text/html, not negotiated, not 404
+  PASS  5  GET / (browser Accept) -> text/html
+  PASS  6  GET /.well-known/api-catalog -> 200 application/linkset+json, ACAO *
+  PASS  7  GET /.well-known/ai-catalog.json -> 200 application/ai-catalog+json, ACAO *
+  PASS  8  GET /.well-known/agent-skills/fapd-daily-digest/SKILL.md -> 200 text/markdown
+  PASS  9  GET /.well-known/mcp/server-cards.json -> 404 application/json, signpost body, ACAO *
+  PASS  10 GET /.well-known/oauth-authorization-server -> 404 + signpost
+  PASS  11 GET /_signpost/not-offered.json directly -> 404 (internal), signpost NOT served
+  PASS  12 GET /.git/config, GET /.env -> 404, 404
+  PASS  13 POST /index.html -> 405
+  PASS  14 GET /auth.md -> 200 text/markdown, ACAO *, Link present
+  PASS  15 GET /digests.json (Accept-Encoding: gzip) -> 200, ACAO *, Content-Encoding: gzip
+  PASS  16 GET /robots.txt -> 200 text/plain, ACAO *
+  PASS  17 404 bodies carry no nginx/1. version string; Server header is bare
+  PASS  18 GET /favicon.ico -> 200
+  PASS  19 SR-1: Accept: text/markdown;q=0 is a refusal -> text/html
+  PASS  20 Accept: text/html, text/markdown;q=0.8 -> negotiated to Markdown
+  PASS  21 HEAD / -> 200
+  PASS  22 no edge-owned security header is duplicated by fapd-web
+  PASS  23 GET /2026-09-04.html -> 200 text/html with Link (digest pages carry discovery too)
+  PASS  24 GET /sources/agriculture-email.html (Accept: text/markdown) -> 200 text/markdown
+== 4b. the MCP rows (phase 4 file §B.4, M1–M17) ==
+  PASS  M1 modern server/discover -> 200, supportedVersions has 2026-07-28, serverInfo info.fapd/fapd
+  PASS  M2 legacy initialize 2025-06-18 -> 200, protocolVersion echoed, no Mcp-Session-Id
+  PASS  M3 modern tools/call get_digest 2026-09-04 -> 200, text after the preamble == digests/2026-09-04.md
+  PASS  M4 GET /mcp -> 405, JSON signpost body
+  PASS  M5 POST /mcp with a 100 KB body -> 413
+  PASS  M6 POST /mcp with Origin: https://evil.example -> 403
+  PASS  M8 60 rapid POSTs from one X-Real-IP -> some 429s (got 35)
+  PASS  M9 GET /mcp/server-card -> 200 application/mcp-server-card+json
+  PASS  M10 outbound request from inside fapd-mcp fails (no egress)
+  PASS  M11 docker inspect fapd-mcp: ReadonlyRootfs true, user 10001, CapDrop ALL, no port bindings (true 10001:10001 [ALL] ports={})
+  PASS  M12 POST /mcp with Content-Type: text/plain -> 415 from nginx
+  PASS  M13 POST /mcp with Host: evil.example -> 403 from the service, JSON-RPC error without id
+  PASS  M14 40-deep nesting, NaN, batch array, 200-char id -> 400 each, well-formed JSON-RPC, no 5xx
+  PASS  M15 12 held-open connections from one address, then one more -> 429 (limit_conn)
+  PASS  M7 mcp container stopped: POST /mcp -> 503 with the mcp-unavailable signpost; GET / still 200
+  PASS  M16 /mcp access log: 83 lines (>= 76 requests), first field an address, no bodies, one line per request
+  PASS  M17 fail2ban filter over the log matches exactly the 400/403/405/413/415/429 lines, none of the 200/202/404 (1 55 83)
+== 5. verdict ==
+  passes: 43  fails: 0  skips: 0  warnings: 2
+SUCCESS
+```
+
+**AD-16 (Phase 5 §3.1), read-only:** the three nginx jails without a
+packet-filter chain are the three that have never banned an address;
+the two with chains are the two that have. No action-start error is
+logged for any of them. That is cause 1 of the plan's list: fail2ban
+creates the chain on the first ban, so nothing is broken and no repair
+is needed for those three. The diagnosis surfaced a different,
+cohabitant-owned finding: one existing jail's current bans are all
+addresses in a content-delivery network's edge ranges, which means it
+is banning the CDN rather than the client behind it, box-wide. fapd.info
+is not routed through that network (its address resolves directly), so
+FAPD readers are unaffected; the details and the fix path are in the
+operator's private box-facts note. Our own `fapd-mcp` jail keys on the
+true client address, and rehearsal row M16 proves the log carries it.
+
+Pre-merge checklist state: items 1, 2, 3 and 5 done, CI green on
+e6dad93 (PR #36; re-runs on this commit). Still the operator's: item 4
+(dev-stack rows, ruled out 2026-09-13 — waived unless the operator
+says otherwise), item 6 (read the agents page MCP section), C-1, then
+the fast-forward merge and "deploy".
