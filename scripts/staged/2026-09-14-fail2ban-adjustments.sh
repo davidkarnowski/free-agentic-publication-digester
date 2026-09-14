@@ -35,7 +35,7 @@
 #   OPERATOR_IP=<your public address> bash /opt/fapd/repo/scripts/staged/2026-09-14-fail2ban-adjustments.sh
 
 set -u
-: "${OPERATOR_IP:?set OPERATOR_IP=<the operator's public IPv4 address>}"
+: "${OPERATOR_IP:?set OPERATOR_IP=<the operator public IPv4 address>}"
 STAMP=$(date -u +%Y%m%dT%H%M%SZ)
 JAIL=/etc/fail2ban/jail.d/nginx-docker.local
 TREE=/opt/spiralyst/fail2ban/jail.d/nginx-docker.local

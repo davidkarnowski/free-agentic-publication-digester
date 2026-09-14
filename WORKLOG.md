@@ -5758,3 +5758,71 @@ party); MCP Inspector as the second real client. A second observation
 worth the operator's eye: `day_inference` for 2026-09-13 reads
 `available=1` with an empty `models` list, unlike the two days before —
 predates the deploy, not caused by it.
+
+## 2026-09-14 — Security review follow-through, the re-scan, and the second client
+
+Operator: "proceed with the fail2ban fixes, the completion of the
+agentic readiness and other issues". Done this round, in the tree
+(branch `ops/mcp-jail-and-log-join`, deployed after merge):
+
+- **The MCP jail no longer counts 429.** A rate-limit hit is nginx's
+  limit zone doing its job; counting it meant an honest agent paging
+  at ten requests a second, or many agents behind one cloud egress,
+  earned twenty strikes in four seconds and an hour's ban. The filter
+  counts 400/403/405/413/415 only; test, README, guide, review and
+  rehearsal row M17 agree.
+- **The two MCP logs now join on a request id.** nginx's `$request_id`
+  ends every `/mcp` access-log line (`rid=`) and is forwarded as
+  `X-Request-Id`; the generic package gained an optional
+  `http.request_id_header` and logs the header's value as `request_id`
+  when it is an opaque token of up to 64 safe characters, `(invalid)`
+  otherwise, `null` when unconfigured. The proxy log keeps the address,
+  the service log keeps the method and tool, and neither has to carry
+  the other's field. Package tests (+2, field-set test updated), the
+  web-config test, both manifests, the privacy page, the agents page
+  bullet, the MCP guide and the package README say so.
+- **Second real client:** MCP Inspector (npx, latest on 2026-09-14) in
+  CLI mode against production listed all eight tools and called
+  `get_live_day`; with Claude Code 2.1.270 earlier the same day, the
+  plan's "two real clients" is met.
+- **isitagentready.com re-scan, 2026-09-14 17:30 UTC: Level 4,
+  "Agent-Integrated"** (the 2026-09-12 Cloudflare scan read Level 1,
+  score 19). JSON saved at
+  `research/Cloudflare_Access/isitagentready-scan-2026-09-14.json`.
+  Per check: robots.txt pass; sitemap pass; Link headers pass
+  (api-catalog, service-desc, service-doc, describedby); DNS-AID not
+  found (Phase 6, operator); Markdown negotiation pass; AI crawler
+  rules pass (wildcard); Content Signals pass; Web Bot Auth not found
+  (informational; Phase 7); API catalog pass (two APIs); OAuth
+  discovery and protected-resource metadata not found (declined by
+  design, published on the agents page); auth.md "exists but does not
+  describe agent registration" (a scanner disagreement: ours truthfully
+  says there is none; left as it is, per the plan's rule); MCP server
+  card pass; A2A card not found (declined by design); Agent Skills
+  pass; WebMCP not detected (declined by design); ARD/AI catalog pass
+  (eleven resources); the five commerce checks "not a commerce site".
+  The next level the scanner names needs auth.md to advertise OAuth
+  registration and an A2A card — both things we do not operate, so
+  Level 4 is the honest ceiling. The Cloudflare Radar re-scan is the
+  operator's to run.
+- **AD-16 corrected.** The private note's reading of the Cloudflare-
+  range bans as "banning the CDN" was wrong; the Spiralyst tree's own
+  2026-09-12 entry had it right: neither site is behind Cloudflare, the
+  banned addresses are scanners egressing Cloudflare (Workers/WARP)
+  with user agents like `http://fapd.info/wp-admin/install.php`, and
+  the ruling was to leave them banned. Recorded as an open question for
+  the operator against the re-scan goal (both readiness scanners egress
+  Cloudflare ranges; today's scan got through).
+- **Fail2ban adjustments, staged for the operator** (the classifier
+  refused an agent write to the shared host config, which is the right
+  outcome): `scripts/staged/2026-09-14-fail2ban-adjustments.sh` writes
+  a box-local `[DEFAULT] ignoreip` with the operator's address (OB-22),
+  disables the never-used `nginx-http-auth` jail (also committed in the
+  Spiralyst tree as 377fe98), and installs the fail2ban-after-docker
+  systemd drop-in the Spiralyst TODO §6.1 had staged, which protects
+  every DOCKER-USER jail including ours from the boot-time wipe seen on
+  2026-09-07. C-6's own installer is unchanged and still to run.
+
+Verified: ruff clean; **1405 passed, 1 skipped**; package suite 421
+passed. Next: merge, deploy (nginx format, manifests, the mcp image),
+then the operator runs the two staged scripts.
