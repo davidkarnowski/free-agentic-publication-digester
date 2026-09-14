@@ -20,13 +20,10 @@ from test_publish import _seed_today, digests, registry_root  # noqa: F401
 
 from fapd import config, publish
 
-# Paths the discovery documents reference that Phase 4 of the plan builds
-# (the MCP server card). The Phase 4C agent removes entries as it builds
-# them; until then a reference to one is expected, not a broken link.
-PHASE4_PENDING = {"/mcp/server-card"}
-
 # Paths that are never files: the MCP endpoint answers POST only (master
-# plan §8.1). A reference to it is documented, not broken.
+# plan §8.1). A reference to it is documented, not broken. (The server
+# card it references is a built file since Phase 4C; test_mcp_surfaces
+# pins it.)
 NON_FILE_PATHS = {"/mcp"}
 
 # The live day is written by build_today (the collector's render seam),
@@ -79,7 +76,7 @@ def _strip_base(url):
 
 def _assert_resolves(out, url, *, where):
     path = _strip_base(url)
-    if path in PHASE4_PENDING or path in NON_FILE_PATHS or path in LIVE_PATHS:
+    if path in NON_FILE_PATHS or path in LIVE_PATHS:
         return
     assert path.startswith("/"), f"{where}: {url!r} is not root-relative"
     target = out / path.lstrip("/")

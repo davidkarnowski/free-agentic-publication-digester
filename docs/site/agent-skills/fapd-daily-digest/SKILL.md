@@ -62,6 +62,12 @@ page is not.
    Check the digest that exists for the nearest later date: its
    Coverage Statement files items by the day they were first observed,
    and the header's weekend or holiday note explains a short day.
+9. **If you speak MCP.** The same two files are tools on the read-only
+   Model Context Protocol service at `https://fapd.info/mcp`:
+   `list_digests` returns the index (step 1) and `get_digest` returns
+   the canonical Markdown for a date (step 3), verbatim, with the same
+   citation rule stated in its preamble. `https://fapd.info/agents.html#mcp`
+   describes how to connect and what the service does not do.
 
 ## What not to conclude
 

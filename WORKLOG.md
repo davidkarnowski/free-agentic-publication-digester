@@ -5499,3 +5499,55 @@ not deploy without 4C.
 Verified by the orchestrator: ruff clean; **1388 passed, 1 skipped**
 (+48 tests). Agent log:
 `research/agent-logs/agent-discovery-phase4b-20260913.md`.
+
+## 2026-09-14 — Phase 4C lands: the site describes the MCP service from its manifest
+
+Done in the main session rather than by a fresh Publication agent
+(operator direction: each relaunch re-reads the plan set). Phase 4B's
+manifest was already in the tree, so nothing was built against a
+fixture.
+
+**What the site now says, and where it comes from.** Every public
+statement about the MCP service is generated from
+`deploy/vps/mcp/fapd.manifest.json`, read as plain JSON through a seam
+(`publish._mcp_manifest`, None when the file is absent). The Server Card
+is written at `/mcp/server-card` and, byte-identical, at
+`/.well-known/mcp/server-card.json`, with the field mapping of the
+package's `build_card`; a drift test imports the package and compares.
+The `agents.html` MCP section replaces Phase 1's one-line placeholder:
+endpoint, the three protocol versions, the card, the posture, how to
+connect (Claude Code's one command and a generic JSON client block, each
+introduced by a sentence), a captioned tools table and a captioned
+resources table whose rows are exactly what `static-mcp describe`
+prints (drift-tested, on the page and in the Markdown twin), what the
+service does not do, the body and result caps taken from the manifest's
+numbers, the rate-limit and blocking courtesy in qualitative terms, the
+privacy note, and links to the guide and the reusable package. llms.txt
+gains one line per tool under the MCP line, in manifest order. The
+API-catalog `/mcp` anchor and the AI-catalog MCP entry are emitted only
+when the manifest exists, replacing the test suite's "Phase 4 pending"
+allowance. Two signposts for nginx's error pages: the 405/415 body says
+what the endpoint accepts and where to read, the 503 body says the
+service is unavailable and every file it serves is also static. Neither
+states a cause.
+
+**Claims corrected.** The privacy page gains the MCP paragraph (what the
+service logs, what it never logs, what the web server's separate `/mcp`
+log holds, that blocks expire) and its "Nothing on this site collects…"
+sentence now says "these pages", which is what it was always about. The
+accessibility doctrine's §7 keeps its argument and names the bounded
+exception in the same sentence. The daily-digest and live-day skills
+each gain an "If you speak MCP" step naming the equivalent tools; a
+test checks every backticked name in those steps against the manifest.
+
+**Verified:** ruff clean; **1403 passed, 1 skipped** (+15; the skip is
+the package's CRLF-header payload, unchanged). A smoke build of the real
+digests renders the section, both card paths, both signposts and eight
+tool lines. The Phase 0 §2.7 honesty grep over the repository finds only
+the amended rule text in GUIDE/CLAUDE.md, dated history, the approved
+Phase 1 courtesy wording, and test assertions. Log:
+`research/agent-logs/agent-discovery-phase4c-20260913.md`.
+
+**Next:** Phase 5's pre-merge checklist. Owed before merge: the
+rehearsal re-run (rows 1–18 and M1–M17, including the Phase 3 charset
+change), which needs a Docker daemon.

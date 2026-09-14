@@ -79,7 +79,7 @@ def test_agents_twin_is_the_agents_markdown(digests, tmp_path):  # noqa: F811
     out = tmp_path / "site"
     publish.build_site(digests, out)
     twin = (out / "agents.md").read_text(encoding="utf-8")
-    assert twin.endswith(publish._AGENTS_MD)
+    assert twin.endswith(publish._agents_md(publish._mcp_manifest()))
     assert '<h2 id="mcp">MCP service</h2>' in twin
 
 

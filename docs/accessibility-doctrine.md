@@ -283,8 +283,10 @@ argument together. The engineering consequence, stated here so it is
 actionable:
 
 The site is static HTML with no framework, exactly one script, no form
-that submits, no endpoint of our own, and no third-party asset —
-no analytics, no hosted fonts, no CDN, no embedded player. Read as
+that submits, no endpoint of our own except the read-only MCP service
+at `/mcp` (GUIDE §2a rule 4, 2026-09-13), which serves software rather
+than a page and changes nothing a person reads, and no third-party
+asset — no analytics, no hosted fonts, no CDN, no embedded player. Read as
 access, that is: everything works with scripting off, in any browser, on
 any connection, through any assistive technology, with nothing to learn
 and no widget to misbehave. Read as security, it is: nothing to inject,

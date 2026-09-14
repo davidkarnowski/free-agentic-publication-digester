@@ -51,6 +51,14 @@ record. The dated digest, frozen at the end of the day, is the record
    observed set with mechanical rules applied; the dated digest at the
    `html` URL in `https://fapd.info/digests.json` is what was validated
    and published as the record.
+9. **If you speak MCP.** The read-only Model Context Protocol service at
+   `https://fapd.info/mcp` offers the same listings as tools:
+   `get_live_day` (step 1; it applies step 3's backfill exclusion by
+   default and takes `include_backfill` to lift it, and `collection` to
+   keep one collection), `list_day_views` (the dates that have a frozen
+   listing) and `get_day_listing` (step 7). Each answer is the published
+   file, paged; nothing is computed for you.
+   `https://fapd.info/agents.html#mcp` describes how to connect.
 
 ## Fields worth knowing
 

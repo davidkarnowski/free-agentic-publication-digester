@@ -18,7 +18,7 @@ reused.
   identical minus the local-time hint.
 - **No accounts, nothing transmitted.** The live page's keyword filter
   is a plain HTML form whose state never leaves your browser: it is not
-  submitted, not stored, and not readable by us. Nothing on this site
+  submitted, not stored, and not readable by us. Nothing on these pages
   collects, transmits, or retains anything you type or click.
 - **No third-party requests.** Pages load no external fonts, scripts,
   images, or embeds — your visit talks to this server and no one else.
@@ -33,6 +33,18 @@ rate-limiting and intrusion detection), retained briefly under routine
 log rotation, and shared with no one. TLS certificates are issued by
 Let's Encrypt; certificate issuance is public by design (Certificate
 Transparency logs), like every HTTPS site's.
+
+**The MCP service.** Requests to `https://fapd.info/mcp` pass through
+the same web server logs described above. The MCP service itself logs,
+for each request, the time, the protocol method, the tool or resource
+name, the response status and size, the processing time, and the
+client's self-reported software name. It does not log your IP address,
+the arguments you sent, or the content of any request or response. The
+web server in front of it keeps a separate access log for `/mcp`
+(address, time, method, status, size, software name; never a request
+body) used for rate limiting and to block addresses that send many
+rejected requests in a short time; those blocks expire on their own.
+Logs rotate on the same schedule.
 
 That is the entire data story. There is nothing else to disclose.
 

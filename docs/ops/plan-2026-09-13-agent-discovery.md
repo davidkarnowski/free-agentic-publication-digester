@@ -392,7 +392,7 @@ file**. A drift test fails if they differ.
 | 3 | **done 2026-09-13** (rehearsal 24 pass / 0 fail / 2 explained skips; 41 static tests) | see git log: "ops: fapd-web gets a repo-managed…" | `research/agent-logs/agent-discovery-phase3-20260913.md` | 2026-09-13 |
 | 4A | **done 2026-09-13** (420 package tests; 118-payload corpus; legacy conformance scenarios pass; 2026-07-28 conformance scenarios pending the suite's alpha, re-run at Phase 5) | see git log: "mcp: static-mcp, a reusable…" | `research/agent-logs/agent-discovery-phase4a-20260913.md` | 2026-09-13 |
 | 4B | **done 2026-09-14** (B.8 #2–5 met; #1 rehearsal M-rows SKIP without Docker, re-run at Phase 5; 48 tests; real Claude Code client on 127.0.0.1) | see git log: "ops: the MCP service joins the stack…" | `research/agent-logs/agent-discovery-phase4b-20260913.md` | 2026-09-14 |
-| 4C | in progress (orchestrator, main session, 2026-09-14 — operator direction) | — | `research/agent-logs/agent-discovery-phase4c-20260913.md` | — |
+| 4C | **done 2026-09-14** (all 5 criteria met; 15 tests; done in the main session at operator direction) | see git log: "site: the site describes the MCP service…" | `research/agent-logs/agent-discovery-phase4c-20260913.md` | 2026-09-14 |
 | 5 | not started | — | — | — |
 | 6 | not started | — | — | — |
 | 7 | scoped only | — | — | — |
