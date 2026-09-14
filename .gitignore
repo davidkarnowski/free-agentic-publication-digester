@@ -43,3 +43,9 @@ site/today.json
 # working-tree copy; covers the gitignored-but-present site/today.* and
 # the .claude re-include leak transitively.
 deploy/dev/repo/
+
+# Operator secrets (2026-09-14): the MCP Registry signing key lives in
+# secrets/key.pem. Never committed; also excluded from the deploy's repo
+# export (deploy/common/repo-excludes.txt) so it is never baked into an
+# image. Only the PUBLIC proof line is in the code.
+secrets/

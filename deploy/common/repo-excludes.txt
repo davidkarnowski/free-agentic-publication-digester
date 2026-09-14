@@ -26,3 +26,7 @@ deploy/dev/repo/
 # $REMOTE_DIR/repo/ and `COPY repo/ /app` bakes host, port, user and key
 # path into a container image — a leak into an artifact, not just a file.
 deploy/vps/deploy.env
+# Operator secrets (2026-09-14): the MCP Registry signing key. The public
+# proof line is a constant in publish.py; the private key must never reach
+# the box or an image.
+secrets/

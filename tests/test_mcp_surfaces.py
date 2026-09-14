@@ -319,6 +319,7 @@ def test_skills_name_real_tools_for_the_mcp_step():
 
 def test_registry_proof_file_is_built_only_when_the_line_is_set(digests, tmp_path, monkeypatch):  # noqa: F811
     monkeypatch.setattr(config, "SITE_BASE_URL", "")
+    monkeypatch.setattr(publish, "MCP_REGISTRY_AUTH_LINE", "")
     out = tmp_path / "site"
     publish.build_site(digests, out)
     assert not (out / ".well-known" / "mcp-registry-auth").exists()
@@ -332,3 +333,11 @@ def test_registry_proof_file_is_built_only_when_the_line_is_set(digests, tmp_pat
     out3 = tmp_path / "site3"
     publish.build_site(digests, out3)
     assert (out3 / ".well-known" / "mcp-registry-auth").read_bytes() == proof.read_bytes()
+
+
+def test_the_real_proof_line_is_well_formed_and_built(site):
+    """Checkpoint C-4: the operator's public line (never the private key)
+    is served verbatim at /.well-known/mcp-registry-auth."""
+    line = publish.MCP_REGISTRY_AUTH_LINE
+    assert re.fullmatch(r"v=MCPv1; k=ed25519; p=[A-Za-z0-9+/]{43}=", line), line
+    assert (site / ".well-known" / "mcp-registry-auth").read_text(encoding="utf-8") == line + "\n"

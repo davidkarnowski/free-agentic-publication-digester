@@ -5179,7 +5179,7 @@ _MCP_TABLE_CAPTIONS = ("Tools of the MCP service",
 # served verbatim at /.well-known/mcp-registry-auth as text/plain. Empty
 # until the operator supplies the line (checkpoint C-4); then the file is
 # built. The private key never enters the repository or the box.
-MCP_REGISTRY_AUTH_LINE = ""
+MCP_REGISTRY_AUTH_LINE = "v=MCPv1; k=ed25519; p=Lh2rfWDsxKCEQ+Tm+HIOe56NRQSHBKTGv9VHJkdQ7kY="
 
 
 def _mcp_manifest(path=None):
