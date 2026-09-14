@@ -45,8 +45,7 @@ operator's private server guide — not in this public-bound repo.
   else; non-root, read-only rootfs, all capabilities dropped. Abuse
   controls: the edge's per-address limit → `fapd-web`'s `/mcp` zones
   (429) → the service's concurrency cap (503) → a host fail2ban jail on
-  repeated rejections ([`fail2ban/`](fail2ban/README.md), installed by
-  the operator at checkpoint C-6). `fapd-web` writes the `/mcp` access
+  repeated rejections (jail files in the operator's private host tree (not in this repository — operator ruling 2026-09-14: security configuration is applied to the box directly, never published); installed 2026-09-14). `fapd-web` writes the `/mcp` access
   log to `./logs` (bind mount, excluded from the bundle rsync).
 - `fapd-backend` (live since 2026-07-30, `profiles: ["backend"]`) — the collector
   supervisor + end-of-day finalizer. Own private egress-only network;

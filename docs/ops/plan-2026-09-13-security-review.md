@@ -140,9 +140,11 @@ with the nginx rate limit as the primary control.** Reasoning:
   rsync runs with `--delete`. A `logs/` directory under `/opt/fapd`
   would be erased on every deploy unless excluded. It is now excluded,
   pinned by a test, and documented next to the F-004 excludes.
-- **Install path:** jail and filter files live in
-  `deploy/vps/fail2ban/`; a staged script under `scripts/staged/`
-  copies them into `/etc/fail2ban/` and reloads. Host fail2ban config
+- **Install path:** jail, filter and logrotate files live in the
+  operator's private host tree (moved out of this repository on
+  2026-09-14 — operator ruling: security configuration is applied to
+  the box directly and never published); the installer there copies
+  them into `/etc/fail2ban/` and reloads. Host fail2ban config
   is shared with the cohabitant, so the script only *adds* files, and
   the operator runs it (checkpoint C-6). Verification: `fail2ban-client
   status fapd-mcp` and an `f2b-fapd-mcp` chain in `iptables -S DOCKER-USER`.

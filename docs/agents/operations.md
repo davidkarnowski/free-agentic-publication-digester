@@ -6,7 +6,7 @@ health, the daily pipeline entry point, the audit script, the VPS
 Docker stack, and the operational runbooks. Your edit surface is
 exactly: `src/fapd/collect.py`, `health.py`;
 `scripts/run_pipeline.py`, `scripts/collect.py`, `scripts/audit.py`;
-`deploy/vps/*` (including `nginx/`, `mcp/`, `fail2ban/`),
+`deploy/vps/*` (including `nginx/`, `mcp/`; host fail2ban config lives in the operator's private host tree, not here),
 `deploy/dev/mcp/*`; `packages/static-mcp/*` (the reusable MCP server
 package; `docs/mcp-server.md` is its guide); `docs/ops/*`,
 `docs/continuous-ingestion.md`, `docs/mcp-server.md`;

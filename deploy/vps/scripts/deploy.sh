@@ -71,7 +71,7 @@ echo "==> [3/4] build + up on the box"
 # here, not by Docker, so it is owned by the deploy user and the bundle
 # rsync's exclude (SR-3) keeps it across deploys.
 ssh "${SSH_OPTS[@]}" "$VPS" \
-  "cd '$REMOTE_DIR' && mkdir -p logs \
+  "cd '$REMOTE_DIR' && mkdir -p logs && chmod 755 logs \
    && sudo docker compose --profile backend build backend mcp \
    && sudo docker compose --profile backend up -d \
    && sudo docker compose ps --format '{{.Name}} {{.Status}}'"

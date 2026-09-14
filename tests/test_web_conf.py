@@ -387,10 +387,9 @@ def test_rehearsal_runs_the_mcp_rows_on_an_internal_throwaway_network():
     for row in [f"M{n} " for n in range(1, 18)]:
         assert row in sh, row
     assert "_signpost/mcp-method.json" in sh and "_signpost/mcp-unavailable.json" in sh
-    assert "filter.d/fapd-mcp.conf" in sh                       # M17 reads the real filter
+    assert "FAPD_F2B_FILTER" in sh      # M17 reads the filter from the private host tree, or SKIPs
 
 
 def test_shell_scripts_parse():
-    for script in (DEPLOY_SH, NGINX / "rehearse.sh",
-                   PROJECT_ROOT / "scripts" / "staged" / "2026-09-14-install-fapd-mcp-jail.sh"):
+    for script in (DEPLOY_SH, NGINX / "rehearse.sh"):
         subprocess.run(["bash", "-n", str(script)], check=True)

@@ -384,11 +384,15 @@ m16=$([ "$LINES" -ge "$MCP_REQ" ] && [ "$BAD" = 0 ] && ! grep -q 'jsonrpc' "$LOG
 [ "$m16" = 1 ] || { echo "  M16 status histogram:"; awk '{print $9}' "$LOGF" | sort | uniq -c | sed 's/^/    /'; echo "  M16 malformed lines: $BAD"; }
 verdict "M16 /mcp access log: $LINES lines (>= $MCP_REQ requests), first field an address, no bodies, one line per request" "$m16"
 
-M17=$(uv run python - "$LOGF" deploy/vps/fail2ban/filter.d/fapd-mcp.conf <<'PY'
+# The jail filter lives in the operator's private host tree, not here
+# (security configuration is applied to the box directly, 2026-09-14).
+# Point FAPD_F2B_FILTER at that file to run M17; otherwise the row SKIPs.
+if [ -n "${FAPD_F2B_FILTER:-}" ] && [ -f "$FAPD_F2B_FILTER" ]; then
+M17=$(uv run python - "$LOGF" "$FAPD_F2B_FILTER" <<'PY'
 import re, sys
 log, conf = sys.argv[1], sys.argv[2]
 pat = next(l.split("=", 1)[1].strip() for l in open(conf) if l.startswith("failregex"))
-rx = re.compile(pat.replace("<HOST>", r"(?:::f{4,6}:)?(?P<host>[\w\-.:^_]*\w)"))  # as tests/test_fail2ban_filter.py
+rx = re.compile(pat.replace("<HOST>", r"(?:::f{4,6}:)?(?P<host>[\w\-.:^_]*\w)"))
 lines = open(log).read().splitlines()
 hits = [l for l in lines if rx.search(l)]
 want = [l for l in lines if re.search(r'" (400|403|405|413|415) ', l)]
@@ -398,6 +402,9 @@ PY
 )
 verdict "M17 fail2ban filter over the log matches exactly the 400/403/405/413/415 lines, none of the 200/202/404/429 ($M17)" \
   "$(echo "$M17" | grep -q '^1 ' && echo 1 || echo 0)"
+else
+skip "M17 fail2ban filter over the log — set FAPD_F2B_FILTER to the private host tree's filter.d/fapd-mcp.conf (the authoritative check is fail2ban-regex on the box)"
+fi
 
 echo "== 5. verdict =="
 echo "  passes: $PASSES  fails: ${#FAILS[@]}  skips: ${#SKIPS[@]}  warnings: $WARNINGS"

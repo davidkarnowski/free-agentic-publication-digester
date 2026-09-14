@@ -417,11 +417,12 @@ not reusable.)*
 - **Trigger:** the next fail2ban reload on the box (a config change,
   the C-6 jail install, a package upgrade), or the next time the
   verification blocks run from a new address.
-- **Staged 2026-09-14 (same day):** `scripts/staged/2026-09-14-fail2ban-adjustments.sh`
-  writes a box-local `jail.d/zz-operator-ignore.local` with a
-  `[DEFAULT] ignoreip` (survives reloads; not in any repository), and
-  OPS-GUIDE now says the probes run only from an ignored address.
-  Closes when the operator has run it. Our own
+- **Done 2026-09-14:** the operator ran the adjustments script (now in
+  the private host tree): a box-local `jail.d/zz-operator-ignore.local`
+  with a `[DEFAULT] ignoreip` (survives reloads; not in any repository),
+  the dead `nginx-http-auth` jail disabled, and the fail2ban-after-docker
+  systemd drop-in. OPS-GUIDE says the probes run only from an ignored
+  address. Our own
   `fapd-mcp` jail file already lists loopback and the Docker ranges;
   the operator's address is a per-box fact and does not belong in the
   repository.

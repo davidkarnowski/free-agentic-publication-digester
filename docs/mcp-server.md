@@ -172,7 +172,7 @@ No account, key or token exists or is needed.
 | Writes, model calls, outbound requests | Impossible by construction: no handler kind does them; read-only volume; read-only root filesystem; `internal` network (no egress) |
 | Path traversal | Parameters are validated against anchored patterns that can't match `/`, `\`, `..` or a leading `.` (enforced when the manifest loads); every resolved path must stay inside the site root, **after** symlink resolution |
 | Oversized or slow requests | nginx: POST only (405), `application/json` only (415), 64 KiB body cap (413), request buffering on, 2/10/15 s connect/send/read timeouts, `proxy_next_upstream off` (a POST is never replayed); server: body cap, socket timeout. The eight-stage validation layer is in the package README |
-| Flooding | Edge per-address limit, plus `fapd-web`'s `/mcp` zones (5 r/s, burst 20, 10 connections per address → 429), plus a server concurrency cap (503), plus the host `fapd-mcp` fail2ban jail: 20 rejected requests (400/403/405/413/415; never 404, and never 429 — a rate-limit hit is not abuse) in 10 minutes → 1 h ban in `DOCKER-USER`, doubling to at most a day (`deploy/vps/fail2ban/README.md`; installed by the operator at checkpoint C-6) |
+| Flooding | Edge per-address limit, plus `fapd-web`'s `/mcp` zones (5 r/s, burst 20, 10 connections per address → 429), plus a server concurrency cap (503), plus the host `fapd-mcp` fail2ban jail: 20 rejected requests (400/403/405/413/415; never 404, and never 429 — a rate-limit hit is not abuse) in 10 minutes → 1 h ban in `DOCKER-USER`, doubling to at most a day (jail files in the operator's private host tree, not this repository; installed 2026-09-14) |
 | DNS rebinding / browser misuse | `Origin` validated: only `https://fapd.info` and `https://www.fapd.info` are accepted when present (403 otherwise). Requests without `Origin` (server-side clients) are allowed. No CORS on `/mcp`. |
 | Privilege | Non-root user 10001, all capabilities dropped, `no-new-privileges`, PID and memory limits |
 | Information leakage | No tracebacks or filesystem paths in responses; no session IDs; `Cache-Control: no-store` |
@@ -214,7 +214,7 @@ deploy/vps/scripts/vps-ssh.sh 'sudo tail -20 /opt/fapd/logs/mcp-access.log'
 | Rehearse web + MCP in throwaway containers | `deploy/vps/nginx/rehearse.sh` (rows M1–M17; needs a local Docker daemon) |
 | Dev stack | `deploy/dev/scripts/dev-up.sh`, then `docker compose … up -d mcp` → `http://localhost:8080/mcp` (`deploy/dev/README.md`) |
 | Deploy | `deploy/vps/scripts/deploy.sh`, **only on the operator's "deploy"**, from `main` (see the Phase 5 plan for why); it builds `mcp`, creates `logs/`, and verifies with a `server/discover` POST |
-| Install the fail2ban jail (once, operator) | `scripts/staged/2026-09-14-install-fapd-mcp-jail.sh` on the box, after `/mcp` verifies (checkpoint C-6) |
+| The fail2ban jail (installed 2026-09-14) | files and installer in the operator's private host tree; verify with `fail2ban-client status fapd-mcp` and the `f2b-fapd-mcp` chain in `iptables -S DOCKER-USER` |
 | Health (read-only) | `/fapd-health`; or a `server/discover` POST (below); `docker port fapd-mcp` prints nothing |
 | Unban a legitimate client (operator) | `sudo fail2ban-client set fapd-mcp unbanip <addr>` |
 | Take it offline, keep the site | `vps-ssh.sh 'cd /opt/fapd && sudo docker compose stop mcp'` (operator-gated write) |

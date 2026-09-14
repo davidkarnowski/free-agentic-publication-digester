@@ -9,7 +9,6 @@ The identity contract (master plan §8.4) is pinned here because Phase 4C
 generates the Server Card, the catalogs and agents.html from this file.
 """
 
-import configparser
 import json
 import sys
 from pathlib import Path
@@ -305,11 +304,3 @@ def test_both_compose_files_mount_the_manifest_directory_this_test_validates():
         text = (PROJECT_ROOT / compose).read_text(encoding="utf-8")
         assert mount in text, compose
         assert '"/etc/static-mcp/fapd.manifest.json"' in text, compose
-
-
-def test_jail_ini_parses_as_fail2ban_would():
-    """A smoke that the jail file is valid ini (the filter and jail
-    contents are pinned in tests/test_fail2ban_filter.py)."""
-    cp = configparser.ConfigParser()
-    cp.read(PROJECT_ROOT / "deploy" / "vps" / "fail2ban" / "jail.d" / "fapd-mcp.local")
-    assert cp.has_section("fapd-mcp")

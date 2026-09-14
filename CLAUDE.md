@@ -358,7 +358,7 @@ live in `.claude/agents/fapd-*.md` (tracked).
 | Continuous ingestion | `src/fapd/collect.py`, `docs/continuous-ingestion.md` |
 | VPS / deploy | `deploy/vps/README.md`, `docs/ops/` |
 | Agent discovery documents (Content Signals, Link headers, API/AI catalogs, agent skills, auth.md, Markdown twins) | `publish._build_agent_surfaces`, `docs/ops/plan-2026-09-13-agent-discovery.md` |
-| MCP service | `docs/mcp-server.md`, `packages/static-mcp/`, `deploy/vps/mcp/`, `deploy/vps/nginx/`, `deploy/vps/fail2ban/` |
+| MCP service | `docs/mcp-server.md`, `packages/static-mcp/`, `deploy/vps/mcp/`, `deploy/vps/nginx/`; host fail2ban jail: operator's private host tree, applied directly (2026-09-14) |
 | Local pre-deploy testing | `deploy/dev/README.md` (prod image + VPS data seed) |
 | VPS access (read-only checks) | `deploy/vps/scripts/vps-ssh.sh` + gitignored `deploy/vps/deploy.env` |
 | Accessibility method (before ANY HTML change) | `docs/accessibility-doctrine.md` → GUIDE §2a; findings in `docs/accessibility.md`, public claim in `docs/site/accessibility.md` |

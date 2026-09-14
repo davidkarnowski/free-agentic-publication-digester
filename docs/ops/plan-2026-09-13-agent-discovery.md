@@ -393,7 +393,7 @@ file**. A drift test fails if they differ.
 | 4A | **done 2026-09-13** (420 package tests; 118-payload corpus; legacy conformance scenarios pass; 2026-07-28 conformance scenarios pending the suite's alpha, re-run at Phase 5) | see git log: "mcp: static-mcp, a reusable…" | `research/agent-logs/agent-discovery-phase4a-20260913.md` | 2026-09-13 |
 | 4B | **done 2026-09-14** (B.8 #2–5 met; #1 rehearsal M-rows SKIP without Docker, re-run at Phase 5; 48 tests; real Claude Code client on 127.0.0.1) | see git log: "ops: the MCP service joins the stack…" | `research/agent-logs/agent-discovery-phase4b-20260913.md` | 2026-09-14 |
 | 4C | **done 2026-09-14** (all 5 criteria met; 15 tests; done in the main session at operator direction) | see git log: "site: the site describes the MCP service…" | `research/agent-logs/agent-discovery-phase4c-20260913.md` | 2026-09-14 |
-| 5 | **deployed 2026-09-14** (rehearsal 43/0/0 on the box; C-1 confirmed; merged f1ef74c; §5.1–5.4 and §5.6 verified; one real client). isitagentready re-scan 2026-09-14: **Level 4 / Agent-Integrated** (was Level 1); MCP Inspector as the second client. Outstanding: C-6 jail install (staged, operator), C-4 registry listing, the Cloudflare Radar re-scan (operator), DNS (Phase 6) | see git log: "ops: the rehearsal's MCP rows…", "ops: record C-1…" | `research/agent-logs/agent-discovery-orchestrator-20260913.md` | 2026-09-14 (three entries) |
+| 5 | **deployed 2026-09-14** (rehearsal 43/0/0 on the box; C-1 confirmed; merged f1ef74c; §5.1–5.4 and §5.6 verified; one real client). isitagentready re-scan 2026-09-14: **Level 4 / Agent-Integrated** (was Level 1); MCP Inspector as the second client. C-6 done 2026-09-14 (chain verified; the jail files moved to the operator's private host tree). Outstanding: C-4 registry listing, the Cloudflare Radar re-scan (operator), DNS (Phase 6) | see git log: "ops: the rehearsal's MCP rows…", "ops: record C-1…" | `research/agent-logs/agent-discovery-orchestrator-20260913.md` | 2026-09-14 (three entries) |
 | 6 | not started | — | — | — |
 | 7 | scoped only | — | — | — |
 
@@ -436,6 +436,14 @@ file**. A drift test fails if they differ.
 | Our fail2ban jail starts without a packet-filter chain, like three existing jails on the box | medium | Chain existence verified after start (Phase 5 §5.5), never assumed. |
 
 ## 13. Change log of this plan
+
+- 2026-09-14 (evening): operator ruling — **security configuration is
+  not published.** The fail2ban jail, filter, logrotate snippet and the
+  two host scripts left this repository for the operator's private host
+  tree and are applied to the box directly; references here point there
+  without paths. Git history keeps the earlier copies (public since the
+  Phase 4B commit); the thresholds they carried are also stated in
+  `docs/mcp-server.md`.
 
 - 2026-09-13 (second pass): security review added
   ([plan-2026-09-13-security-review.md](plan-2026-09-13-security-review.md))

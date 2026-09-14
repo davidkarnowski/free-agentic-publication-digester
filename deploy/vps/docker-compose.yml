@@ -43,7 +43,7 @@ services:
       # lands here — nginx's default logs still go to stdout/stderr.
       # deploy.sh creates the directory (mkdir -p) before `up -d` and its
       # bundle rsync excludes it (SR-3); rotation is the logrotate snippet
-      # installed with the jail (deploy/vps/fail2ban/).
+      # installed with the jail from the operator's private host tree.
       - ./logs:/var/log/fapd:rw
     # Bounds + rotation (review D18/D19/R4): this is a shared VPS — a
     # runaway container must be contained, and an unrotated log must not

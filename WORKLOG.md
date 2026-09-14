@@ -5854,3 +5854,47 @@ bundle's filter on the box reads
 2. `bash /opt/fapd/repo/scripts/staged/2026-09-14-install-fapd-mcp-jail.sh`
    (checkpoint C-6: our jail, its logrotate snippet, chain check).
 Then the orchestrator's read-only C-6 verification in Phase 5 §5.5.
+
+## 2026-09-14 — C-6 done, and the security configuration leaves the public repository
+
+The operator ran both staged scripts. The adjustments script ended in
+SUCCESS (operator ignore list on the four nginx jails, `nginx-http-auth`
+gone, fail2ban ordered after Docker). The jail installer ended in
+FAILURE, and both of its complaints were real:
+
+- **The filter matched nothing in production** — 35 log lines, 0
+  matched, including the 400 and 403 rejections from the afternoon's
+  probes. fail2ban cuts the timestamp out of a line before matching,
+  leaving empty brackets, and the pattern demanded something inside
+  them. The unit test's re-implementation never stripped the date, so
+  it passed on every sample line. The bracket group is now zero-or-more;
+  `fail2ban-regex` on the box matches exactly the four rejection lines.
+- **No packet-filter chain.** fail2ban creates a jail's chain at the
+  first ban by default (the AD-16 finding, now understood), so the
+  installer's chain check could only ever pass after someone had been
+  banned. The action now carries `actionstart_on_demand=false` in the
+  bracket syntax jail.conf documents (a bare jail-level key did
+  nothing); after `reload --restart` the `f2b-fapd-mcp` chain is present
+  in `DOCKER-USER` with the jail freshly started.
+- logrotate refused the snippet because `/opt/fapd/logs` was
+  group-writable (created with the deploy user's umask); the directory
+  is 755 now and `deploy.sh` sets it that way, and the installer judges
+  logrotate's output rather than its exit code, which is non-zero here
+  even when the snippet parses.
+
+Applied to the box directly and verified: jail running, chain present,
+regex matching, logrotate accepting.
+
+**Operator ruling the same hour: security configuration is not
+published.** The fail2ban jail, filter and logrotate snippet, the
+installer and the adjustments script have left this repository for the
+operator's private host tree beside the box's other fail2ban config,
+and are applied to the box directly from there. Every reference here
+now says so without a path; rehearsal row M17 reads the filter from an
+environment variable or skips (the authoritative check is
+`fail2ban-regex` on the box, which is what caught the real bug); the
+test that parsed the jail file is gone. Git history keeps the earlier
+copies, public since the Phase 4B commit; the thresholds they carried
+are still described in prose in the MCP guide. Rewriting history would
+need a force-push to `main`, which the ruleset forbids and the
+operator has not asked for.
