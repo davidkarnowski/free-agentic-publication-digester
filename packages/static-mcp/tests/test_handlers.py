@@ -27,8 +27,8 @@ def test_static_text(store, manifest):
 
 def test_text_file_with_preamble_and_not_found(store, manifest):
     out = call(store, manifest, "get_page", date="2026-01-01")
-    assert out.content[0]["text"] == "Page text follows verbatim."
-    assert out.content[1]["text"].startswith("# Page for 2026-01-01")
+    assert out.content[0]["text"].startswith("# Page for 2026-01-01")   # payload first
+    assert out.content[-1]["text"] == "Page text follows verbatim."    # the disclosure last
     missing = call(store, manifest, "get_page", date="2030-01-01")
     assert missing.is_error is True
     assert missing.content == [{"type": "text", "text":
@@ -197,3 +197,137 @@ def test_match_field_case_insensitive_is_exact_equality_after_casefold(site, sto
                 include_drafts=True).structured["total"] == 0          # not a prefix match
     strict = call(store, manifest, "list_entries", kind="note", include_drafts=True)
     assert strict.structured["total"] == notes.structured["total"]
+
+
+# ------------------------------------------------------- block order / schema --
+
+
+def test_payload_is_the_first_block_and_the_preamble_the_last(store, manifest):
+    """Every handler kind: a client that reads content[0] reads the data."""
+    listing = call(store, manifest, "list_entries", include_drafts=True)
+    assert json.loads(listing.content[0]["text"]) == listing.structured
+    assert len(listing.content) == 1                     # no preamble on this fixture tool
+    from support_static_mcp import manifest_dict
+
+    from static_mcp.manifest import parse_manifest
+
+    data = manifest_dict()
+    next(t for t in data["tools"] if t["name"] == "list_entries")["preamble"] = "Index follows."
+    with_preamble = parse_manifest(data)
+    listed = call(Store(store.root, with_preamble.limits), with_preamble, "list_entries",
+                  include_drafts=True)
+    assert json.loads(listed.content[0]["text"]) == listed.structured
+    assert listed.content[-1]["text"] == "Index follows."
+    about = call(store, manifest, "about")
+    assert about.content[0]["text"] == manifest.tools_by_name["about"].handler["text"]
+    report = call(store, manifest, "get_report")
+    assert report.content[0]["text"].startswith("# Report")
+    assert report.content[-1]["text"] == "Report text follows verbatim."
+
+
+def test_output_schema_only_where_results_are_structured(manifest):
+    defs = {t["name"]: t for t in (tool.definition() for tool in manifest.tools)}
+    assert "outputSchema" not in defs["get_page"]            # text_file
+    assert "outputSchema" not in defs["about"]               # static_text
+    paged = defs["list_entries"]["outputSchema"]
+    assert paged["type"] == "object" and paged["additionalProperties"] is True
+    assert paged["required"] == ["items", "offset", "limit", "total", "next_offset"]
+    assert defs["get_entry"]["outputSchema"]["required"] == ["item"]
+    assert defs["list_pages"]["outputSchema"]["properties"]["items"]["items"] == {"type": "string"}
+    assert defs["get_index"]["outputSchema"] == {"type": "object", "additionalProperties": True}
+
+
+def test_structured_results_satisfy_their_own_output_schema(store, manifest):
+    """Required keys present and typed as declared, for every structured tool."""
+    def check(value, schema):
+        assert isinstance(value, dict)
+        for key in schema.get("required", []):
+            assert key in value, key
+        for key, sub in schema.get("properties", {}).items():
+            if key not in value:
+                continue
+            kinds = sub["type"] if isinstance(sub["type"], list) else [sub["type"]]
+            py = {"integer": int, "string": str, "boolean": bool, "array": list,
+                  "object": dict, "null": type(None)}
+            assert any(isinstance(value[key], py[k]) for k in kinds), (key, value[key])
+    for name, args in (("list_entries", {"include_drafts": True}), ("get_entry", {"slug": "delta"}),
+                       ("list_pages", {}), ("get_index", {}), ("get_meta", {})):
+        tool = manifest.tools_by_name[name]
+        out = call(store, manifest, name, **args)
+        assert out.has_structured, name
+        check(out.structured, tool.output_schema)
+
+
+def test_descriptions_of_preambled_tools_say_the_order(manifest):
+    from static_mcp.manifest import ORDER_SENTENCE
+
+    for tool in manifest.tools:
+        assert (ORDER_SENTENCE in tool.description) == (tool.preamble is not None), tool.name
+        if tool.preamble:
+            assert tool.description.index(ORDER_SENTENCE) < tool.description.index("Returned text")
+
+
+# ------------------------------------------------------------- sections --
+
+
+def test_text_file_sections_slice_verbatim(store, manifest):
+    whole = call(store, manifest, "get_report").content[0]["text"]
+    one = call(store, manifest, "get_report", part="one").content[0]["text"]
+    assert one.startswith("## 1. First part\n") and one in whole
+    assert "### 1.1 Sub" in one and "## not a heading" in one   # the fenced line is data, kept
+    assert "## 2. Second part" not in one                        # stops at the next level-2 heading
+    two = call(store, manifest, "get_report", part="two").content[0]["text"]
+    assert two == "## 2. Second part\n\nBeta text.\n\n"
+    closing = call(store, manifest, "get_report", part="closing").content[0]["text"]
+    assert closing == "## Closing\n\nDone.\n"                    # last block runs to the end
+    front = call(store, manifest, "get_report", part="front").content[0]["text"]
+    assert front == "# Report\n\nFront matter line.\n\n"         # before the first level-2 heading
+    assert whole == front + one + two + closing                 # the slices are the file
+
+
+def test_text_file_section_absent_is_a_tool_error_naming_what_is_present(site, manifest):
+    (site / "report.md").write_text("# Report\n\n## 2. Second part\n\nOnly two.\n", encoding="utf-8")
+    fresh = Store(site, manifest.limits)
+    out = call(fresh, manifest, "get_report", part="closing")
+    assert out.is_error and "No section closing" in out.content[0]["text"]
+    assert "present: front, two" in out.content[0]["text"]
+
+
+def test_sections_manifest_rules():
+    from support_static_mcp import build_manifest, manifest_dict
+
+    from static_mcp.errors import ManifestError
+    from static_mcp.manifest import parse_manifest
+
+    def with_sections(sections, **param_over):
+        data = manifest_dict()
+        if param_over:
+            data["params"]["part"] = {**data["params"]["part"], **param_over}
+        tool = next(t for t in data["tools"] if t["name"] == "get_report")
+        tool["handler"]["sections"] = sections
+        return data
+
+    good = with_sections({"param": "part", "level": 2, "map": {"front": None, "one": "1. ",
+                                                              "two": "2. ", "closing": "Closing"}})
+    assert parse_manifest(good).tools_by_name["get_report"].handler["sections"]["level"] == 2
+    for bad, fragment in (
+        (with_sections({"param": "part", "level": 2, "map": {"front": None, "one": "1. "}}),
+         "keys must equal"),
+        (with_sections({"param": "part", "level": 9, "map": good["tools"][-1]["handler"]["sections"]["map"]}),
+         "level"),
+        (with_sections({"param": "part", "level": 2, "map": {"front": None, "one": None,
+                                                             "two": "2. ", "closing": "C"}}),
+         "at most one"),
+        (with_sections({"param": "part", "level": 2, "map": {"front": None, "one": "",
+                                                             "two": "2. ", "closing": "C"}}),
+         "non-empty"),
+        (with_sections({"param": "nope", "level": 2, "map": {}}), "undeclared"),
+    ):
+        with pytest.raises(ManifestError) as exc:
+            parse_manifest(bad)
+        assert fragment in str(exc.value), fragment
+    no_enum = with_sections(good["tools"][-1]["handler"]["sections"])
+    del no_enum["params"]["part"]["enum"]
+    with pytest.raises(ManifestError, match="with an enum"):
+        parse_manifest(no_enum)
+    assert build_manifest  # imported for symmetry with the other helpers

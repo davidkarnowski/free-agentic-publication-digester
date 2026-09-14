@@ -7,4 +7,4 @@ never writes, never calls a model, never opens an outbound connection, and
 never mints a session.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"

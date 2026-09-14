@@ -201,6 +201,37 @@ def _apply_filters(items: list[Any], filters: list[dict[str, Any]], args: dict[s
     return items
 
 
+def _slice_section(text: str, level: int, prefix: str | None) -> str | None:
+    """The block of ``text`` under the heading of ``level`` whose title starts
+    with ``prefix``, up to the next heading of the same or a shallower
+    level; or, for ``prefix`` None, the text before the first heading of
+    ``level``. Headings inside fenced code blocks are ignored. Verbatim:
+    the slice is the file's own bytes. None when the heading is absent."""
+    lines = text.splitlines(keepends=True)
+    start: int | None = 0 if prefix is None else None
+    in_fence = False
+    for i, line in enumerate(lines):
+        if line.startswith(("```", "~~~")):
+            in_fence = not in_fence
+            continue
+        if in_fence or not line.startswith("#"):
+            continue
+        depth = len(line) - len(line.lstrip("#"))
+        if depth > level or not line[depth:].startswith(" "):
+            continue                                   # deeper heading, or not a heading
+        if prefix is None:
+            if depth == level:
+                return "".join(lines[:i])
+            continue                                   # a shallower title precedes the header
+        if start is not None:
+            return "".join(lines[start:i])
+        if depth == level and line[depth + 1:].startswith(prefix):
+            start = i
+    if start is None:
+        return None
+    return "".join(lines[start:])
+
+
 def _project(items: list[Any], fields: list[str] | None) -> list[Any]:
     if fields is None:
         return items
@@ -216,11 +247,12 @@ def _envelope(doc: Any, keys: list[str] | None) -> dict[str, Any]:
 def _finish(
     outcome_structured: dict[str, Any], preamble: str | None, limits: Limits
 ) -> ToolOutcome:
-    """Assemble a structured outcome with its text twin."""
-    content: list[dict[str, Any]] = []
+    """Assemble a structured outcome with its text twin: the payload first,
+    the preamble (a disclosure) last, so a client that reads only the first
+    block reads the data."""
+    content: list[dict[str, Any]] = [_text(_pretty(outcome_structured))]
     if preamble:
         content.append(_text(preamble))
-    content.append(_text(_pretty(outcome_structured)))
     return ToolOutcome(content=content, structured=outcome_structured, has_structured=True)
 
 
@@ -278,8 +310,9 @@ def run_tool(store: Store, tool: ToolSpec, args: dict[str, Any]) -> ToolOutcome:
     preamble = tool.preamble
 
     if kind == "static_text":
-        content = [_text(preamble)] if preamble else []
-        content.append(_text(substitute(h["text"], args)))
+        content = [_text(substitute(h["text"], args))]
+        if preamble:
+            content.append(_text(preamble))
         return _bounded(ToolOutcome(content=content), limits, "The text")
 
     if kind == "text_file":
@@ -293,8 +326,19 @@ def run_tool(store: Store, tool: ToolSpec, args: dict[str, Any]) -> ToolOutcome:
             )
         except NotText:
             return _error(f"The file behind {tool.name} is not readable as UTF-8 text.")
-        content = [_text(preamble)] if preamble else []
-        content.append(_text(text))
+        sections = h.get("sections")
+        if sections and sections["param"] in args:
+            wanted = args[sections["param"]]          # an enum member: ours, not free text
+            sliced = _slice_section(text, sections["level"], sections["map"][wanted])
+            if sliced is None:
+                present = [k for k, p in sections["map"].items()
+                           if _slice_section(text, sections["level"], p) is not None]
+                return _error(f"No section {wanted} in this file; present: "
+                              f"{', '.join(present) or 'none'}.")
+            text = sliced
+        content = [_text(text)]
+        if preamble:
+            content.append(_text(preamble))
         return _bounded(ToolOutcome(content=content), limits, "The file")
 
     if kind == "file_listing":

@@ -84,6 +84,17 @@
       "type": "boolean",
       "default": false,
       "description": "Include draft entries."
+    },
+    "part": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]{1,16}$",
+      "enum": [
+        "front",
+        "one",
+        "two",
+        "closing"
+      ],
+      "description": "A part of the report."
     }
   },
   "resources": [
@@ -319,6 +330,33 @@
           "limit": "limit"
         },
         "not_found": "No big document."
+      }
+    },
+    {
+      "name": "get_report",
+      "title": "Get the report",
+      "description": "Returns the report, or one part of it.",
+      "params": {
+        "part": {
+          "ref": "part"
+        }
+      },
+      "preamble": "Report text follows verbatim.",
+      "handler": {
+        "kind": "text_file",
+        "file": "report.md",
+        "mime_type": "text/markdown",
+        "not_found": "No report.",
+        "sections": {
+          "param": "part",
+          "level": 2,
+          "map": {
+            "front": null,
+            "one": "1. ",
+            "two": "2. ",
+            "closing": "Closing"
+          }
+        }
       }
     }
   ]

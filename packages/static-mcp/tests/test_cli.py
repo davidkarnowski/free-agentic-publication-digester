@@ -18,7 +18,7 @@ def _run(argv):
 
 def test_check_passes_for_fixture_and_example(site):
     code, out, _ = _run(["check", "--manifest", str(MANIFEST_PATH), "--root", str(site)])
-    assert code == 0 and out.endswith("ok\n") and "9 tool(s)" in out
+    assert code == 0 and out.endswith("ok\n") and "10 tool(s)" in out
     code, out, _ = _run(["check", "--manifest", str(EXAMPLE_MANIFEST_PATH)])
     assert code == 0
 

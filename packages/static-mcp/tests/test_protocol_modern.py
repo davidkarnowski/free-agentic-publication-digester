@@ -70,7 +70,7 @@ def test_tools_call_success_and_is_error(manifest, store):
     assert status == 200
     r = body["result"]
     assert r["resultType"] == "complete" and r["isError"] is False
-    assert r["content"][1]["text"].startswith("# Page for 2026-01-02")
+    assert r["content"][0]["text"].startswith("# Page for 2026-01-02")    # payload first
     assert "ttlMs" not in r
     assert log["mcp_name"] == "get_page"
 

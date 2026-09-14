@@ -280,7 +280,7 @@ placeholders for the tool's own parameters.
 | kind | Fields | Does |
 |---|---|---|
 | `static_text` | `text` | returns fixed text (for example a pointer to documentation) |
-| `text_file` | `file` (template), `mime_type`, `not_found` | reads one UTF-8 file under the root |
+| `text_file` | `file` (template), `mime_type`, `not_found`, `sections` (optional: `{"param": "<enum string param>", "level": 2, "map": {"<enum value>": "<heading prefix>" or null, …}}`) | reads one UTF-8 file under the root; with `sections` and the parameter given, returns one heading block verbatim — from the heading of `level` whose title starts with the prefix to the next heading of the same or a shallower level, or for a null value the text before the first heading of that level; headings inside fenced code are ignored; an absent section is a tool error naming the sections present |
 | `json_file` | `file` (template), `select` (dotted key path; omitted = whole document), `envelope` (top-level keys copied alongside), `fields` (item keys kept), `filters`, `find` (`{field, param}`), `page` (`{offset: <param>, limit: <param>}`), `order` (`asc` / `desc` by position), `not_found` | reads, selects, filters, projects, pages |
 | `file_listing` | `glob` (relative, no `..`), `name_pattern` (anchored regex with one named group `key`), `order`, `page` | lists matching files, returning the `key` values |
 
@@ -301,9 +301,16 @@ regex, no sorting by a client-chosen field.
 ### Result shapes
 
 - `tools/call` → `{"content": [...], "structuredContent": …?, "isError": false}`.
-  A `preamble` is the first text block. `json_file` and `file_listing`
-  put the JSON value in `structuredContent` and a pretty-printed copy in
-  a text block, for clients that ignore structured content.
+  **The payload is the first text block; a `preamble` (a disclosure) is
+  the last** (since 0.3.0 — before, the preamble came first, and a client
+  that read only `content[0]` read the disclosure and missed the data).
+  Every tool with a preamble says so at the end of its description.
+  `json_file` and `file_listing` put the JSON value in `structuredContent`
+  and a pretty-printed copy in a text block, for clients that ignore
+  structured content, and declare an `outputSchema` for it (loose on
+  purpose: the keys that are always there are required, the envelope's
+  own keys are allowed). Text tools return content only — no duplicated
+  text, no schema.
 - A selected list becomes `{"items": [...], "total": n, …envelope}`; with
   `page`, also `offset`, `limit` and `next_offset` (null on the last
   page). `find` and a selected object become `{"item": {...}, …envelope}`.
