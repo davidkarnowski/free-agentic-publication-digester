@@ -27,12 +27,18 @@ services:
     container_name: fapd-dev-web
     restart: unless-stopped
     ports: ["8080:80"]              # published directly; no edge proxy in dev
+    networks: [default, fapd_mcp]   # default keeps the published port reachable
     volumes:
       - fapd-site:/usr/share/nginx/html:ro
       # The same repo-managed nginx config production runs (agent-
       # discovery plan Phase 3) — a directory mount, same reason as
       # prod. Relative to this file's directory (--project-directory).
       - ../vps/nginx:/etc/nginx/conf.d:ro
+      # The /mcp access log (Phase 4B). nginx opens the path at config
+      # time, so the directory must exist; a named volume here rather than
+      # prod's ./logs bind mount, so a dev run leaves no stray directory
+      # in the working tree. Nothing reads it in dev.
+      - fapd-dev-logs:/var/log/fapd
     mem_limit: 128m
     cpus: 0.5
     logging:
@@ -93,6 +99,42 @@ services:
       driver: json-file
       options: { max-size: "5m", max-file: "3" }
 
+  # Mirrors production's mcp service (agent-discovery Phase 4B): the same
+  # image recipe, manifest layout, hardening and internal network, so
+  # http://localhost:8080/mcp exercises the real proxy path. The dev
+  # manifest differs from prod's in allowed_hosts only (localhost and
+  # 127.0.0.1 added) — pinned by tests/test_mcp_manifest.py. The build
+  # context is the staged repo/ (dev-up.sh stages packages/ with it).
+  mcp:
+    build:
+      context: ./repo/packages/static-mcp
+    image: fapd-dev-mcp:latest
+    container_name: fapd-dev-mcp
+    restart: unless-stopped
+    command: ["--manifest", "/etc/static-mcp/fapd.manifest.json"]
+    networks:
+      fapd_mcp:
+        aliases: [fapd-mcp]         # the name default.conf's upstream resolves
+    volumes:
+      - fapd-site:/srv/site:ro
+      - ./mcp:/etc/static-mcp:ro
+    read_only: true
+    user: "10001:10001"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "3" }
+
+networks:
+  fapd_mcp:
+    driver: bridge
+    internal: true
+
 volumes:
   fapd-site:
   fapd-data:
+  fapd-dev-logs:

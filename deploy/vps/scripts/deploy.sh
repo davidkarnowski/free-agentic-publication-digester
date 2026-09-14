@@ -23,11 +23,16 @@ echo "==> [1b/4] nginx config syntax gate (on the box, throwaway container)"
 # swapped in. The config has no static upstreams, so -t needs no network.
 # The bundle rsync's --delete below removes .nginx-candidate/ afterwards
 # (it is not in the source tree), which is intended. Same image pin as
-# the web service — bump both together.
+# the web service — bump both together. The logs/ mount is load-bearing
+# (Phase 4B): nginx opens every access_log path at config-test time, and
+# the /mcp location logs to /var/log/fapd/, so a container without that
+# directory fails `nginx -t` on a config that is fine on the box.
 rsync -az --delete -e "ssh ${SSH_OPTS[*]}" \
   deploy/vps/nginx/ "${VPS}:${REMOTE_DIR}/.nginx-candidate/"
 ssh "${SSH_OPTS[@]}" "$VPS" \
-  "sudo docker run --rm -v '${REMOTE_DIR}/.nginx-candidate:/etc/nginx/conf.d:ro' \
+  "mkdir -p '${REMOTE_DIR}/logs' && sudo docker run --rm \
+   -v '${REMOTE_DIR}/.nginx-candidate:/etc/nginx/conf.d:ro' \
+   -v '${REMOTE_DIR}/logs:/var/log/fapd' \
    nginx:1.30-alpine nginx -t"
 
 echo "==> [2/4] rsync bundle (deploy/vps/) and repo export (backend build context)"
@@ -56,8 +61,18 @@ rsync -az --delete \
   ./ "${VPS}:${REMOTE_DIR}/repo/"
 
 echo "==> [3/4] build + up on the box"
+# The MCP service (agent-discovery Phase 4B; docs/mcp-server.md) builds
+# from repo/packages/static-mcp and runs as fapd-mcp with NO PUBLISHED
+# PORT: Docker-published ports bypass ufw, and a port would also skip
+# TLS, the edge rate limit and the security headers. It is reachable
+# only from fapd-web over the internal fapd_mcp network; `docker port
+# fapd-mcp` must print nothing (OPS-GUIDE). Never add `ports:` to it.
+# logs/ is the /mcp access-log bind mount (compose); it is created
+# here, not by Docker, so it is owned by the deploy user and the bundle
+# rsync's exclude (SR-3) keeps it across deploys.
 ssh "${SSH_OPTS[@]}" "$VPS" \
-  "cd '$REMOTE_DIR' && sudo docker compose --profile backend build backend \
+  "cd '$REMOTE_DIR' && mkdir -p logs \
+   && sudo docker compose --profile backend build backend mcp \
    && sudo docker compose --profile backend up -d \
    && sudo docker compose ps --format '{{.Name}} {{.Status}}'"
 
@@ -100,6 +115,17 @@ curl -fsSI https://fapd.info | head -1
 # 8288 Link header on the front page (agent-discovery plan §8.1/§8.3).
 curl -fsS -o /dev/null -w '%{http_code} %{content_type}\n' https://fapd.info/.well-known/api-catalog
 curl -fsSI https://fapd.info/ | grep -i '^link:'
+# The MCP service answers through the edge: a modern server/discover
+# POST (MCP 2026-07-28) must return 200 and serverInfo.name
+# info.fapd/fapd (master plan §8.4). Prints "<status> <name>".
+curl -sS -o /tmp/fapd-mcp-discover.json -w '%{http_code} ' -X POST https://fapd.info/mcp \
+  -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
+  -H 'MCP-Protocol-Version: 2026-07-28' -H 'Mcp-Method: server/discover' \
+  -d '{"jsonrpc":"2.0","id":"deploy","method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"deploy.sh","version":"1"},"io.modelcontextprotocol/clientCapabilities":{}}}}'
+uv run python -c "import json; d = json.load(open('/tmp/fapd-mcp-discover.json')); print(d.get('result', {}).get('_meta', {}).get('io.modelcontextprotocol/serverInfo', {}).get('name', d.get('error')))"
+rm -f /tmp/fapd-mcp-discover.json
 ssh "${SSH_OPTS[@]}" "$VPS" \
   "sudo docker ps --format '{{.Names}}\t{{.Status}}' | grep fapd"
+ssh "${SSH_OPTS[@]}" "$VPS" \
+  "test -z \"\$(sudo docker port fapd-mcp)\" && echo 'fapd-mcp: no published port (ok)' || echo 'fapd-mcp: PUBLISHED PORT FOUND — investigate'"
 echo "==> deploy complete — run the health check again in ~5 minutes"

@@ -38,7 +38,19 @@ source of truth. This skill never writes or restarts anything.
    only that no inference was available, never why (GUIDE §6 r15).
 4. If asked about the VPS or after a deploy: the OPS-GUIDE **VPS**
    block (curl 200s, container statuses, fapd-web networks ==
-   `fapd_edge` only, cert expiry).
+   `fapd_edge` + `fapd_mcp`, cert expiry).
+4b. **The MCP service** (OPS-GUIDE "The MCP service"; **pending deploy**
+   until Phase 5 of the agent-discovery plan — before that, report the
+   block as not applicable, not as failing). Read-only, all of it:
+   `fapd-mcp` container `Up … (healthy)`; `docker port fapd-mcp` prints
+   **nothing** (any output is a finding: a published port bypasses
+   ufw); `fapd-mcp` networks == exactly `fapd_mcp`; a modern
+   `server/discover` POST to `https://fapd.info/mcp` returns 200 with
+   `serverInfo.name` `info.fapd/fapd`; `HEAD /mcp` is 405. After
+   checkpoint C-6: `fail2ban-client status fapd-mcp` reports the jail
+   AND `iptables -S DOCKER-USER` contains `f2b-fapd-mcp` — a jail
+   without a chain bans nothing. Never unban, restart, or stop anything
+   from this skill; the unban command in OPS-GUIDE is the operator's.
 5. **Verify/report**: state each check's actual observed value against
    its expectation; flag anomalies — never summarize unchecked items as
    fine. If a check could not run, say so and why; an unrunnable check

@@ -18,13 +18,26 @@
 # WARNING names it — so the same script is honest before and after
 # Phases 1–2 merge. favicon.ico is never planted (row 18 is SKIP until
 # Phase 1 builds it).
+#
+# Phase 4B (rows M1–M17): the fapd-mcp image is built from
+# packages/static-mcp and run beside the web container the way
+# production runs it — a second, --internal throwaway network shared by
+# the two, no published port, read-only rootfs, uid 10001, all
+# capabilities dropped, the dev manifest (deploy/dev/mcp) so 127.0.0.1
+# passes the Host check — and the /mcp access log lands in a temp
+# directory mounted at /var/log/fapd (nginx opens every access_log at
+# config time, so the mount is what lets `nginx -t` pass at all).
 set -u
 cd "$(dirname "$0")/../../.."   # repo root (nginx -> vps -> deploy -> root)
 
 NAME=fapd-web-rehearsal
+MCP=fapd-mcp-rehearsal
+NET_EDGE=fapd-rehearsal-edge     # web + the published test port
+NET_MCP=fapd-rehearsal-mcp       # --internal: web + mcp, nothing else
 PORT=18080
 BASE="http://127.0.0.1:${PORT}"
 IMAGE=nginx:1.30-alpine          # the web service's pin; bump together
+MCP_IMAGE=fapd-mcp:rehearsal     # built here from packages/static-mcp
 
 PASSES=0; FAILS=(); SKIPS=(); WARNINGS=0
 ok()   { PASSES=$((PASSES + 1)); echo "  PASS  $1"; }
@@ -36,7 +49,8 @@ verdict() { if [ "$2" = 1 ]; then ok "$1"; else fail "$1"; fi; }
 
 TMP=""
 cleanup() {
-  docker rm -f "$NAME" >/dev/null 2>&1 || true
+  docker rm -f "$NAME" "$MCP" >/dev/null 2>&1 || true
+  docker network rm "$NET_EDGE" "$NET_MCP" >/dev/null 2>&1 || true
   [ -n "$TMP" ] && rm -rf "$TMP"
 }
 trap cleanup EXIT
@@ -50,10 +64,15 @@ done
 docker info >/dev/null 2>&1 || { echo "  docker daemon not reachable"; echo "FAILURE: preconditions"; exit 1; }
 [ -f pyproject.toml ] && [ -f deploy/vps/nginx/default.conf ] \
   || { echo "  not at the repo root"; echo "FAILURE: preconditions"; exit 1; }
-if docker ps -a --format '{{.Names}}' | grep -qx "$NAME"; then
-  echo "  removing a stale $NAME from an earlier run"
-  docker rm -f "$NAME" >/dev/null
-fi
+for stale in "$NAME" "$MCP"; do
+  if docker ps -a --format '{{.Names}}' | grep -qx "$stale"; then
+    echo "  removing a stale $stale from an earlier run"
+    docker rm -f "$stale" >/dev/null
+  fi
+done
+docker network rm "$NET_EDGE" "$NET_MCP" >/dev/null 2>&1 || true
+[ -f deploy/dev/mcp/fapd.manifest.json ] && [ -f packages/static-mcp/Dockerfile ] \
+  || { echo "  missing the dev manifest or the static-mcp Dockerfile"; echo "FAILURE: preconditions"; exit 1; }
 echo "  ok"
 
 echo "== 2. fixture site (real renderer into a temp dir) =="
@@ -85,13 +104,35 @@ if [ ! -e "$SITE/$DATE.md" ]; then
 fi
 plant "robots.txt"   "User-agent: *"
 plant "digests.json" "$(printf '{"stand_in": true, "pad": "%s"}' "$(head -c 1200 /dev/zero | tr '\0' x)")"
+# Phase 4C builds the two MCP signposts; planted until it merges.
+plant "_signpost/mcp-method.json"      '{"status": "method not allowed", "see": "/agents.html#mcp"}'
+plant "_signpost/mcp-unavailable.json" '{"status": "mcp unavailable", "see": "/llms.txt"}'
 SKILL=$(cd "$SITE/.well-known/agent-skills" && ls -d */ | head -1 | tr -d /)
+mkdir -p "$TMP/logs"
 
-echo "== 3. throwaway container: $IMAGE, this directory as /etc/nginx/conf.d =="
-docker run --rm -d --name "$NAME" -p "127.0.0.1:${PORT}:80" \
+echo "== 3. throwaway containers: $IMAGE + $MCP_IMAGE on two throwaway networks =="
+docker network create "$NET_EDGE" >/dev/null || { echo "FAILURE: network"; exit 1; }
+docker network create --internal "$NET_MCP" >/dev/null || { echo "FAILURE: network"; exit 1; }
+docker build -q -t "$MCP_IMAGE" packages/static-mcp >/dev/null \
+  || { echo "  docker build of the static-mcp image failed"; echo "FAILURE: mcp image"; exit 1; }
+# The same hardening flags the compose service carries (pinned there by
+# tests/test_dev_stack.py); M11 reads them back from docker inspect.
+docker run -d --name "$MCP" --network "$NET_MCP" --network-alias fapd-mcp \
+  --read-only --user 10001:10001 --cap-drop ALL --security-opt no-new-privileges:true \
+  --pids-limit 64 \
+  -v "$SITE:/srv/site:ro" -v "$PWD/deploy/dev/mcp:/etc/static-mcp:ro" \
+  "$MCP_IMAGE" --manifest /etc/static-mcp/fapd.manifest.json >/dev/null \
+  || { echo "  docker run (mcp) failed"; echo "FAILURE: mcp container"; exit 1; }
+docker run --rm -d --name "$NAME" --network "$NET_EDGE" -p "127.0.0.1:${PORT}:80" \
   -v "$PWD/deploy/vps/nginx:/etc/nginx/conf.d:ro" \
-  -v "$SITE:/usr/share/nginx/html:ro" "$IMAGE" >/dev/null \
+  -v "$SITE:/usr/share/nginx/html:ro" \
+  -v "$TMP/logs:/var/log/fapd" "$IMAGE" >/dev/null \
   || { echo "  docker run failed"; echo "FAILURE: container"; exit 1; }
+docker network connect "$NET_MCP" "$NAME" || { echo "FAILURE: network connect"; exit 1; }
+for _ in $(seq 1 50); do
+  docker exec "$MCP" python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=1)" >/dev/null 2>&1 && break
+  sleep 0.2
+done
 TEST_OUT=$(docker exec "$NAME" nginx -t 2>&1)
 echo "$TEST_OUT" | sed 's/^/  /'
 verdict "0  nginx -t succeeds" "$(echo "$TEST_OUT" | grep -q 'test is successful' && echo 1 || echo 0)"
@@ -213,6 +254,142 @@ if [ -n "$SRC" ] && [ -e "$SITE/sources/$SRC.md" ]; then
 else
   skip "24 /sources/<id>.html negotiation — no sources/<id>.md twin in the fixture (Phase 2 builds them)"
 fi
+
+echo "== 4b. the MCP rows (phase 4 file §B.4, M1–M17) =="
+# mcp_post <body> [curl args…]: a JSON POST to /mcp through the web container.
+mcp_post() { local body=$1; shift; get /mcp -X POST -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' --data-binary "$body" "$@"; }
+# pycheck '<python expression over b (the decoded body)>' -> 1 or 0
+pycheck() { uv run python -c "import json,sys; b=json.load(open(sys.argv[1])); print(1 if ($1) else 0)" "$B" 2>/dev/null || echo 0; }
+META='"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"rehearse","version":"1"},"io.modelcontextprotocol/clientCapabilities":{}}'
+MODERN_H=(-H 'MCP-Protocol-Version: 2026-07-28')
+MCP_REQ=0                        # every request that reaches /mcp (for M16)
+
+mcp_post "{\"jsonrpc\":\"2.0\",\"id\":\"m1\",\"method\":\"server/discover\",\"params\":{$META}}" \
+  "${MODERN_H[@]}" -H 'Mcp-Method: server/discover'; MCP_REQ=$((MCP_REQ + 1))
+verdict "M1 modern server/discover -> 200, supportedVersions has 2026-07-28, serverInfo info.fapd/fapd" \
+  "$([ "$STATUS" = 200 ] && [ "$(pycheck "'2026-07-28' in b['result']['supportedVersions'] and b['result']['_meta']['io.modelcontextprotocol/serverInfo']['name'] == 'info.fapd/fapd'")" = 1 ] && echo 1 || echo 0)"
+
+mcp_post '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"rehearse","version":"1"}}}'; MCP_REQ=$((MCP_REQ + 1))
+verdict "M2 legacy initialize 2025-06-18 -> 200, protocolVersion echoed, no Mcp-Session-Id" \
+  "$([ "$STATUS" = 200 ] && [ "$(pycheck "b['result']['protocolVersion'] == '2025-06-18'")" = 1 ] && [ -z "$(hdr mcp-session-id)" ] && echo 1 || echo 0)"
+
+mcp_post "{\"jsonrpc\":\"2.0\",\"id\":\"m3\",\"method\":\"tools/call\",\"params\":{\"name\":\"get_digest\",\"arguments\":{\"date\":\"$DATE\"},$META}}" \
+  "${MODERN_H[@]}" -H 'Mcp-Method: tools/call' -H 'Mcp-Name: get_digest'; MCP_REQ=$((MCP_REQ + 1))
+uv run python -c "import json,sys; b=json.load(open(sys.argv[1])); open(sys.argv[2],'w').write(b['result']['content'][1]['text'])" "$B" "$TMP/m3.md" 2>/dev/null || : > "$TMP/m3.md"
+verdict "M3 modern tools/call get_digest $DATE -> 200, text after the preamble == digests/$DATE.md" \
+  "$([ "$STATUS" = 200 ] && cmp -s "$TMP/m3.md" "digests/$DATE.md" && echo 1 || echo 0)"
+
+get /mcp; MCP_REQ=$((MCP_REQ + 1))
+verdict "M4 GET /mcp -> 405, JSON signpost body" \
+  "$([ "$STATUS" = 405 ] && has "$(hdr content-type)" application/json && grep -q '"see"' "$B" && echo 1 || echo 0)"
+
+head -c 102400 /dev/zero | tr '\0' x > "$TMP/big.json"
+get /mcp -X POST -H 'Content-Type: application/json' --data-binary "@$TMP/big.json"; MCP_REQ=$((MCP_REQ + 1))
+verdict "M5 POST /mcp with a 100 KB body -> 413" "$([ "$STATUS" = 413 ] && echo 1 || echo 0)"
+
+mcp_post "{\"jsonrpc\":\"2.0\",\"id\":\"m6\",\"method\":\"server/discover\",\"params\":{$META}}" \
+  "${MODERN_H[@]}" -H 'Mcp-Method: server/discover' -H 'Origin: https://evil.example'; MCP_REQ=$((MCP_REQ + 1))
+verdict "M6 POST /mcp with Origin: https://evil.example -> 403" "$([ "$STATUS" = 403 ] && echo 1 || echo 0)"
+
+n429=0
+for _ in $(seq 1 60); do
+  mcp_post '{"jsonrpc":"2.0","method":"notifications/initialized"}' -H 'X-Real-IP: 203.0.113.8'
+  [ "$STATUS" = 429 ] && n429=$((n429 + 1))
+done
+MCP_REQ=$((MCP_REQ + 60))
+verdict "M8 60 rapid POSTs from one X-Real-IP -> some 429s (got $n429)" "$([ "$n429" -gt 0 ] && echo 1 || echo 0)"
+
+if [ -e "$SITE/mcp/server-card" ]; then
+  get /mcp/server-card
+  verdict "M9 GET /mcp/server-card -> 200 application/mcp-server-card+json" \
+    "$([ "$STATUS" = 200 ] && has "$(hdr content-type)" application/mcp-server-card+json && echo 1 || echo 0)"
+else
+  skip "M9 GET /mcp/server-card — not in the fixture (Phase 4C builds it); not planted by rule"
+fi
+
+if docker exec "$MCP" python -c "import urllib.request; urllib.request.urlopen('https://example.com', timeout=3)" >/dev/null 2>&1; then
+  verdict "M10 outbound request from inside fapd-mcp fails (no egress)" 0
+else
+  verdict "M10 outbound request from inside fapd-mcp fails (no egress)" 1
+fi
+
+INSPECT=$(docker inspect "$MCP" --format '{{.HostConfig.ReadonlyRootfs}} {{.Config.User}} {{.HostConfig.CapDrop}} ports={{len .NetworkSettings.Ports}}')
+verdict "M11 docker inspect fapd-mcp: ReadonlyRootfs true, user 10001, CapDrop ALL, no port bindings ($INSPECT)" \
+  "$(echo "$INSPECT" | grep -q '^true 10001:10001 \[ALL\] ports=0$' && echo 1 || echo 0)"
+
+get /mcp -X POST -H 'Content-Type: text/plain' --data-binary '{"jsonrpc":"2.0","id":1,"method":"ping"}'; MCP_REQ=$((MCP_REQ + 1))
+verdict "M12 POST /mcp with Content-Type: text/plain -> 415 from nginx" "$([ "$STATUS" = 415 ] && echo 1 || echo 0)"
+
+mcp_post "{\"jsonrpc\":\"2.0\",\"id\":\"m13\",\"method\":\"server/discover\",\"params\":{$META}}" \
+  "${MODERN_H[@]}" -H 'Mcp-Method: server/discover' -H 'Host: evil.example'; MCP_REQ=$((MCP_REQ + 1))
+verdict "M13 POST /mcp with Host: evil.example -> 403 from the service, JSON-RPC error without id" \
+  "$([ "$STATUS" = 403 ] && [ "$(pycheck "'error' in b and 'id' not in b")" = 1 ] && echo 1 || echo 0)"
+
+m14=1
+DEEP="$(printf '[%.0s' $(seq 1 40))$(printf ']%.0s' $(seq 1 40))"
+for body in "$DEEP" '{"jsonrpc":"2.0","id":1,"method":"ping","params":{"x":NaN}}' \
+            '[{"jsonrpc":"2.0","id":1,"method":"ping"}]' \
+            "{\"jsonrpc\":\"2.0\",\"id\":\"$(head -c 200 /dev/zero | tr '\0' i)\",\"method\":\"ping\"}"; do
+  mcp_post "$body"; MCP_REQ=$((MCP_REQ + 1))
+  { [ "$STATUS" = 400 ] && [ "$(pycheck "b.get('jsonrpc') == '2.0' and 'error' in b")" = 1 ]; } || m14=0
+done
+verdict "M14 40-deep nesting, NaN, batch array, 200-char id -> 400 each, well-formed JSON-RPC, no 5xx" "$m14"
+
+# 12 connections held open in the location (headers complete, body pending)
+# from one address, then one more: limit_conn 10 answers the extra with 429.
+uv run python - "$PORT" "$TMP/m15.ready" "$TMP/m15.go" <<'PY' &
+import socket, sys, time, os
+port, ready, go = int(sys.argv[1]), sys.argv[2], sys.argv[3]
+socks = []
+for _ in range(12):
+    s = socket.create_connection(("127.0.0.1", port), timeout=30)
+    s.sendall(b"POST /mcp HTTP/1.1\r\nHost: 127.0.0.1\r\nX-Real-IP: 203.0.113.15\r\n"
+              b"Content-Type: application/json\r\nContent-Length: 200\r\n\r\n{")
+    socks.append(s)
+open(ready, "w").close()
+for _ in range(300):
+    if os.path.exists(go):
+        break
+    time.sleep(0.1)
+for s in socks:
+    s.close()
+PY
+for _ in $(seq 1 100); do [ -e "$TMP/m15.ready" ] && break; sleep 0.1; done
+sleep 0.5
+mcp_post '{"jsonrpc":"2.0","method":"notifications/initialized"}' -H 'X-Real-IP: 203.0.113.15'
+: > "$TMP/m15.go"; wait
+MCP_REQ=$((MCP_REQ + 13))
+verdict "M15 12 held-open connections from one address, then one more -> 429 (limit_conn)" \
+  "$([ "$STATUS" = 429 ] && echo 1 || echo 0)"
+
+LOGF="$TMP/logs/mcp-access.log"
+docker stop "$MCP" >/dev/null
+mcp_post "{\"jsonrpc\":\"2.0\",\"id\":\"m7\",\"method\":\"server/discover\",\"params\":{$META}}" \
+  "${MODERN_H[@]}" -H 'Mcp-Method: server/discover'; s7=$STATUS; b7=$(grep -c '"see"' "$B"); MCP_REQ=$((MCP_REQ + 1))
+get /; s7b=$STATUS
+verdict "M7 mcp container stopped: POST /mcp -> 503 with the mcp-unavailable signpost; GET / still 200" \
+  "$([ "$s7" = 503 ] && [ "$b7" -gt 0 ] && [ "$s7b" = 200 ] && echo 1 || echo 0)"
+
+LINES=$(wc -l < "$LOGF" | tr -d ' ')
+BAD=$(grep -vcE '^[0-9a-fA-F.:]+ - \[[^]]+\] "[A-Z]+ /mcp HTTP/1\.[01]" [0-9]{3} ' "$LOGF" || true)
+verdict "M16 /mcp access log: $LINES lines (>= $MCP_REQ requests), first field an address, no bodies, one line per request" \
+  "$([ "$LINES" -ge "$MCP_REQ" ] && [ "$BAD" = 0 ] && ! grep -q 'jsonrpc' "$LOGF" && grep -q '^203\.0\.113\.8 ' "$LOGF" && echo 1 || echo 0)"
+
+M17=$(uv run python - "$LOGF" deploy/vps/fail2ban/filter.d/fapd-mcp.conf <<'PY'
+import re, sys
+log, conf = sys.argv[1], sys.argv[2]
+pat = next(l.split("=", 1)[1].strip() for l in open(conf) if l.startswith("failregex"))
+rx = re.compile(pat.replace("<HOST>", r"(?:::f{4,6}:)?(?P<host>[\w\-.:^_]*\w)"))  # as tests/test_fail2ban_filter.py
+lines = open(log).read().splitlines()
+hits = [l for l in lines if rx.search(l)]
+want = [l for l in lines if re.search(r'" (400|403|405|413|415|429) ', l)]
+never = [l for l in hits if re.search(r'" (200|202|404) ', l)]
+print(1 if hits and hits == want and not never else 0, len(hits), len(lines))
+PY
+)
+verdict "M17 fail2ban filter over the log matches exactly the 400/403/405/413/415/429 lines, none of the 200/202/404 ($M17)" \
+  "$(echo "$M17" | grep -q '^1 ' && echo 1 || echo 0)"
 
 echo "== 5. verdict =="
 echo "  passes: $PASSES  fails: ${#FAILS[@]}  skips: ${#SKIPS[@]}  warnings: $WARNINGS"

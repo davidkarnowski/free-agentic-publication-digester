@@ -20,7 +20,12 @@ services:
     container_name: fapd-web
     restart: unless-stopped
     expose: ["80"]                # private network only — never published
-    networks: [fapd_edge]
+    # fapd_mcp (agent-discovery Phase 4B): the second internal network,
+    # shared only with fapd-mcp, so /mcp can be proxied to a container the
+    # edge cannot reach. Both networks are internal: still zero egress.
+    # No depends_on: mcp — the site must start without the MCP service
+    # (the /mcp location uses a variable upstream and answers 503).
+    networks: [fapd_edge, fapd_mcp]
     volumes:
       # The site hand-off: the backend writes /app/site into this volume;
       # web serves it read-only. A volume, never a socket — the two
@@ -33,6 +38,13 @@ services:
       # Config-only deploys reload in place (deploy.sh: nginx -t, then
       # nginx -s reload); the mount itself recreates the container once.
       - ./nginx:/etc/nginx/conf.d:ro
+      # The /mcp access log for the host fail2ban jail (security review
+      # §4): first field is the true client address. Only this one log
+      # lands here — nginx's default logs still go to stdout/stderr.
+      # deploy.sh creates the directory (mkdir -p) before `up -d` and its
+      # bundle rsync excludes it (SR-3); rotation is the logrotate snippet
+      # installed with the jail (deploy/vps/fail2ban/).
+      - ./logs:/var/log/fapd:rw
     # Bounds + rotation (review D18/D19/R4): this is a shared VPS — a
     # runaway container must be contained, and an unrotated log must not
     # fill the disk. Values copied from the dev stack, where the block
@@ -109,12 +121,44 @@ services:
       retries: 3
       start_period: 10m
 
+  mcp:
+    # Read-only, no-inference MCP service (GUIDE §2a rule 4's one bounded
+    # exception, 2026-09-13; docs/mcp-server.md). The generic static-mcp
+    # package (packages/static-mcp) with FAPD's manifest. Reachable ONLY
+    # from fapd-web over the internal fapd_mcp network: no published
+    # port (Docker-published ports bypass ufw), no egress, no write
+    # access anywhere. The healthcheck lives in the package's Dockerfile
+    # (GET /healthz) and is deliberately not repeated here.
+    build:
+      context: ./repo/packages/static-mcp
+    image: fapd-mcp:latest
+    container_name: fapd-mcp
+    restart: unless-stopped
+    command: ["--manifest", "/etc/static-mcp/fapd.manifest.json"]
+    networks: [fapd_mcp]
+    volumes:
+      - fapd-site:/srv/site:ro
+      - ./mcp:/etc/static-mcp:ro     # directory mount (inode rule)
+    read_only: true
+    user: "10001:10001"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "3" }
+
 networks:
   fapd_edge:
     external: true
   fapd_backend:
     driver: bridge                # egress-only by construction: no member
                                   # publishes ports; nothing else joins it
+  fapd_mcp:
+    driver: bridge
+    internal: true                # no default route: zero egress for both members
 
 volumes:
   fapd-site:

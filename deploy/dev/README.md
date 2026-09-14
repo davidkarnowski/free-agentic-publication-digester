@@ -31,6 +31,19 @@ site-volume handoff, and the same two post-up render commands deploy.sh
 runs on the box (F-009: the site volume seeds from the image only on
 first mount, so rendering is always explicit).
 
+## The MCP service in dev
+
+`docker compose up -d web mcp` (or `dev-up.sh`, which brings `web` up;
+add `mcp` to try the endpoint) runs the same `static-mcp` image recipe
+production runs (`packages/static-mcp`, built from the staged `repo/`)
+as `fapd-dev-mcp`, with the same hardening (read-only rootfs, uid 10001,
+no capabilities, no published port, an `internal` network shared only
+with `web`) and the dev manifest (`deploy/dev/mcp/`, which differs from
+production's in `allowed_hosts` only). `http://localhost:8080/mcp` then
+goes through the real `location = /mcp` in the shared nginx config.
+The `/mcp` access log lands in the `fapd-dev-logs` volume (nothing reads
+it in dev; the fail2ban jail is host-only). Guide: `docs/mcp-server.md`.
+
 ## Seeding (why the data comes from the VPS)
 
 The laptop's own `data/` cannot reproduce production — at the time this

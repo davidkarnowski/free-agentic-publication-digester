@@ -204,15 +204,87 @@ def test_every_include_names_an_existing_snippet():
         assert inc.endswith(".inc"), f"{inc}: a .conf would be loaded twice"
 
 
-# 5. Phase 4B insertion points ---------------------------------------------
+# 5. Phase 4B: the /mcp transport gate (security review §3 stage L0) -------
 
-def test_phase_4b_insertion_markers_present():
+def _mcp_location():
+    m = re.search(r"^    location = /mcp \{\n(.*?)^    \}\n", _conf(), re.DOTALL | re.MULTILINE)
+    assert m, "location = /mcp block not found"
+    return _live(m.group(1))
+
+
+def test_phase_4b_insertion_markers_were_replaced():
     conf = _conf()
-    assert "(PHASE-4B-HTTP-INSERTION-POINT)" in conf
-    assert "(PHASE-4B-SERVER-INSERTION-POINT)" in conf
-    # the server marker sits inside the server block, before its close
-    assert conf.index("(PHASE-4B-HTTP-INSERTION-POINT)") < conf.index("server {")
-    assert conf.index("server {") < conf.index("(PHASE-4B-SERVER-INSERTION-POINT)")
+    assert "PHASE-4B-HTTP-INSERTION-POINT" not in conf
+    assert "PHASE-4B-SERVER-INSERTION-POINT" not in conf
+    assert conf.index("log_format fapd_mcp") < conf.index("server {")
+    assert conf.index("server {") < conf.index("location = /mcp {")
+
+
+def test_mcp_location_is_post_only_with_the_content_type_gate_and_body_cap():
+    loc = _mcp_location()
+    assert "if ($request_method !~ ^POST$) { return 405; }" in loc
+    assert 'if ($content_type !~* "^application/json") { return 415; }' in loc     # SR-5
+    assert "client_max_body_size 64k;" in loc
+    assert "error_page 405 /_signpost/mcp-method.json;" in loc
+    assert "error_page 415 /_signpost/mcp-method.json;" in loc
+
+
+def test_mcp_location_limits_requests_and_connections_on_the_phase_3_zones():
+    loc = _mcp_location()
+    assert re.search(r"limit_req\s+zone=fapd_mcp\s+burst=20 nodelay;", loc)
+    assert re.search(r"limit_conn\s+fapd_conn\s+10;", loc)                          # SR-2
+    assert "limit_req_status  429;" in loc and "limit_conn_status 429;" in loc
+    live = _live(_conf())
+    assert "zone=fapd_mcp:" in live and "zone=fapd_conn:" in live               # declared (Phase 3)
+
+
+def test_mcp_location_proxies_through_a_variable_upstream_without_replay():
+    loc = _mcp_location()
+    assert "resolver 127.0.0.11 valid=10s ipv6=off;" in loc
+    assert "set $fapd_mcp_upstream http://fapd-mcp:8080;" in loc
+    assert "proxy_pass $fapd_mcp_upstream;" in loc                       # a variable: nginx starts without mcp
+    assert "proxy_request_buffering on;" in loc                          # SR-6
+    assert "proxy_next_upstream off;" in loc                             # SR-6
+    assert "proxy_http_version 1.1;" in loc and 'proxy_set_header Connection "";' in loc
+    assert "proxy_set_header Host $host;" in loc
+    for t in ("proxy_connect_timeout 2s;", "proxy_send_timeout 10s;", "proxy_read_timeout 15s;"):
+        assert t in loc, t
+    assert 'add_header Cache-Control "no-store" always;' in loc
+    # no static `upstream name { … }` block anywhere: a missing fapd-mcp
+    # would then stop fapd-web (the edge's static upstream) from starting
+    assert not re.search(r"^\s*upstream\s+\S+\s*\{", _live(_conf()), re.MULTILINE)
+
+
+def test_mcp_error_pages_signpost_only_nginx_generated_502_and_504():
+    """SR-7: the service's own 4xx/503 bodies are JSON-RPC errors the
+    client must see, so proxy_intercept_errors stays off everywhere and
+    only an unreachable upstream (502/504) becomes the 503 signpost."""
+    loc = _mcp_location()
+    assert "error_page 502 504 =503 /_signpost/mcp-unavailable.json;" in loc
+    # 503 never appears as a SOURCE status (left of `=`): the service's own
+    # concurrency 503 must reach the client as the JSON-RPC body it sent
+    assert not re.search(r"error_page\s[^;=]*\b503\b", loc)
+    assert "proxy_intercept_errors" not in _live(_conf())
+
+
+def test_mcp_access_log_first_field_is_the_true_client_address():
+    """Security review §4: a ban keyed on $remote_addr would target the
+    edge proxy's internal address. The format starts with $fapd_client
+    (X-Real-IP, falling back to the peer), carries no body, and the
+    location writes it to the bind-mounted path the jail reads."""
+    live = _live(_conf())
+    m = re.search(r"log_format fapd_mcp '([^']*)'", live)
+    assert m and m.group(1).startswith("$fapd_client - [$time_local]")
+    fmt = "".join(re.findall(r"'([^']*)'", live[m.start():live.index(";", m.start())]))
+    assert "$request_body" not in fmt and "$args" not in fmt
+    assert '"$request_method $uri $server_protocol"' in fmt and "$status" in fmt
+    assert "access_log /var/log/fapd/mcp-access.log fapd_mcp;" in _mcp_location()
+
+
+def test_mcp_and_server_card_are_separate_locations():
+    live = _live(_conf())
+    assert "location = /mcp {" in live and "location = /mcp/server-card {" in live
+    assert "include /etc/nginx/conf.d/fapd-cors.inc;" not in _mcp_location()   # D6: no CORS on /mcp
 
 
 # 6. the edge owns the security headers ------------------------------------
@@ -273,6 +345,48 @@ def test_deploy_sh_gates_reloads_and_verifies_the_config():
     assert "grep -i '^link:'" in verify
 
 
+def test_deploy_sh_builds_the_mcp_service_creates_the_log_dir_and_verifies_discover():
+    """Phase 4B (phase file §B.5): ruff covers packages/, the build line
+    names mcp, logs/ exists before the syntax gate's container and before
+    `up -d` (nginx opens the access_log path at config-test time), the
+    verify step speaks MCP through the edge, and no port is published."""
+    sh = DEPLOY_SH.read_text(encoding="utf-8")
+    assert "uv run ruff check src/ scripts/ tests/ packages/" in sh
+    gate = sh[sh.index("[1b/4]"):sh.index("[2/4]")]
+    assert "mkdir -p '${REMOTE_DIR}/logs'" in gate
+    assert "-v '${REMOTE_DIR}/logs:/var/log/fapd'" in gate
+    build = sh[sh.index("[3/4]"):sh.index("[4/4]")]
+    assert "mkdir -p logs" in build
+    assert build.index("mkdir -p logs") < build.index("up -d")
+    assert "build backend mcp" in build
+    assert "Docker-published ports bypass ufw" in build
+    verify = sh[sh.index("[4/4] verify"):]
+    assert "https://fapd.info/mcp" in verify and "server/discover" in verify
+    assert "MCP-Protocol-Version: 2026-07-28" in verify
+    assert "serverInfo" in verify
+    assert "docker port fapd-mcp" in verify
+
+
+def test_rehearsal_runs_the_mcp_rows_on_an_internal_throwaway_network():
+    """rehearse.sh (phase file §B.4): the fapd-mcp image beside the web
+    container, an --internal network for the pair, the same hardening
+    flags compose pins, the logs mount nginx -t needs, and rows M1–M17."""
+    sh = (NGINX / "rehearse.sh").read_text(encoding="utf-8")
+    assert "docker network create --internal" in sh
+    assert "--network-alias fapd-mcp" in sh
+    assert "-v \"$TMP/logs:/var/log/fapd\"" in sh
+    for flag in ("--read-only", "--user 10001:10001", "--cap-drop ALL",
+                 "--security-opt no-new-privileges:true"):
+        assert flag in sh, flag
+    assert "deploy/dev/mcp:/etc/static-mcp:ro" in sh
+    assert "docker build" in sh and "packages/static-mcp" in sh
+    for row in [f"M{n} " for n in range(1, 18)]:
+        assert row in sh, row
+    assert "_signpost/mcp-method.json" in sh and "_signpost/mcp-unavailable.json" in sh
+    assert "filter.d/fapd-mcp.conf" in sh                       # M17 reads the real filter
+
+
 def test_shell_scripts_parse():
-    for script in (DEPLOY_SH, NGINX / "rehearse.sh"):
+    for script in (DEPLOY_SH, NGINX / "rehearse.sh",
+                   PROJECT_ROOT / "scripts" / "staged" / "2026-09-14-install-fapd-mcp-jail.sh"):
         subprocess.run(["bash", "-n", str(script)], check=True)

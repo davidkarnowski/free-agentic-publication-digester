@@ -10,11 +10,11 @@ gzip off, no content types for the discovery documents.
 
 | File | Role |
 |---|---|
-| `default.conf` | The server. `map`s and limit zones sit in http context (the image's `nginx.conf` includes `conf.d/*.conf` inside `http {}`). Carries the two `PHASE-4B-…-INSERTION-POINT` markers where the `/mcp` proxy lands. |
+| `default.conf` | The server. `map`s and limit zones sit in http context (the image's `nginx.conf` includes `conf.d/*.conf` inside `http {}`). Since Phase 4B it also carries `location = /mcp`, the stage-L0 transport gate in front of `fapd-mcp` (POST only, JSON only, 64 KiB, `limit_req` + `limit_conn`, variable upstream, 502/504 → 503 signpost) and the `fapd_mcp` access-log format whose first field is the true client address. That log goes to `/var/log/fapd/mcp-access.log`, a bind mount — and because nginx opens every `access_log` at config-test time, `nginx -t` needs the directory mounted (deploy.sh's gate and `rehearse.sh` both do). |
 | `fapd-discovery-headers.inc` | The RFC 8288 `Link` header (master plan §8.3, verbatim) and `Vary: Accept`. Included by the `.html` and `.md` locations. |
 | `fapd-cors.inc` | `Access-Control-Allow-Origin: *` (ruling D6) — machine-readable files only, never `/mcp`. |
 | `fapd-static-methods.inc` | GET/HEAD only on static paths, 405 otherwise. Every location includes it itself: rewrite-module directives are not inherited by nested locations. |
-| `rehearse.sh` | The local proof: fixture site from the real renderer, the pinned image in a throwaway container, the §3.5 request matrix; ends in `SUCCESS` or `FAILURE: <rows>`. Never touches the VPS. |
+| `rehearse.sh` | The local proof: fixture site from the real renderer, the pinned image in a throwaway container, the §3.5 request matrix, and (Phase 4B, rows M1–M17) the `fapd-mcp` image built from `packages/static-mcp` beside it on an `--internal` throwaway network; ends in `SUCCESS` or `FAILURE: <rows>`. Never touches the VPS. |
 
 nginx loads only `*.conf` from this directory; the snippets are `*.inc`
 so they are not loaded a second time at http level.

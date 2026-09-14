@@ -1,0 +1,139 @@
+{
+  "manifest_version": 1,
+  "server": {
+    "name": "info.fapd/fapd",
+    "title": "Free Agentic Publication Digester",
+    "version": "1.0.0",
+    "description": "Cited daily digests of official US federal publications. Read-only; no inference.",
+    "websiteUrl": "https://fapd.info/agents.html",
+    "repository": {
+      "url": "https://github.com/davidkarnowski/free-agentic-publication-digester",
+      "source": "github",
+      "subfolder": "packages/static-mcp"
+    },
+    "instructions": "The Free Agentic Publication Digester publishes a validated daily digest of official United States federal publications. Congressional, executive and judicial items are selected by mechanical, party-blind rules, and every item cites its official source. This service returns published files verbatim; no model writes its responses. Dated digests are the record. The live day (get_live_day) is preliminary and changes until the end-of-day gates freeze it. Lines labeled FAPD-AI are the project's model-written restatements. For factual claims, cite the official source linked on each item, and credit FAPD for the aggregation (CC BY 4.0)."
+  },
+  "public_base_url": "https://fapd.info",
+  "endpoint_path": "/mcp",
+  "protocol_versions": {"modern": ["2026-07-28"], "legacy": ["2025-11-25", "2025-06-18"]},
+  "http": {
+    "allowed_hosts": ["fapd.info", "www.fapd.info"],
+    "allowed_origins": ["https://fapd.info", "https://www.fapd.info"],
+    "allow_missing_origin": true,
+    "max_body_bytes": 65536,
+    "max_concurrency": 16,
+    "request_timeout_seconds": 10
+  },
+  "limits": {"max_file_bytes": 16777216, "max_result_bytes": 524288},
+  "cache": {"ttl_ms": 300000, "scope": "public"},
+  "params": {
+    "date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "description": "A publication day, YYYY-MM-DD."},
+    "source_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,62}$", "description": "A source id from list_sources (for example govinfo-crec)."},
+    "collection": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{1,15}$", "description": "Keep only items of one collection (for example CREC, BILLS, FR, USCOURTS, PLAW, AGENCYPR)."},
+    "offset": {"type": "integer", "minimum": 0, "maximum": 10000, "default": 0, "description": "Items to skip before the page starts."},
+    "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 50, "description": "Items per page."},
+    "include_backfill": {"type": "boolean", "default": false, "description": "Also return items the publisher dates to an earlier day (flagged is_backfill). Excluded by default, as on the human page."}
+  },
+  "resources": [
+    {"uri": "https://fapd.info/llms.txt", "name": "agent-guide", "title": "Agent guide (llms.txt)", "description": "The plain-text guide to every published surface, for agents.", "mimeType": "text/plain", "file": "llms.txt"},
+    {"uri": "https://fapd.info/agents.md", "name": "agents-page", "title": "For agents (Markdown)", "description": "The Markdown twin of the agents page: surfaces, conventions, what the site does not offer.", "mimeType": "text/markdown", "file": "agents.md"},
+    {"uri": "https://fapd.info/auth.md", "name": "auth", "title": "Authentication policy", "description": "States that no authentication exists or is needed.", "mimeType": "text/markdown", "file": "auth.md"},
+    {"uri": "https://fapd.info/digests.json", "name": "digest-index", "title": "Digest index", "description": "Every published digest: date, page URL, canonical Markdown path, teaser.", "mimeType": "application/json", "file": "digests.json"},
+    {"uri": "https://fapd.info/sources.json", "name": "source-directory", "title": "Source directory", "description": "The source registry with this project's own ingestion statistics; not a measurement of any agency.", "mimeType": "application/json", "file": "sources.json"}
+  ],
+  "resource_templates": [
+    {"uriTemplate": "https://fapd.info/{date}.md", "name": "digest", "title": "Digest for a day", "description": "The canonical digest Markdown for a published day, verbatim.", "mimeType": "text/markdown", "file": "{date}.md", "params": ["date"]},
+    {"uriTemplate": "https://fapd.info/day/{date}.json", "name": "day-view", "title": "Frozen day view", "description": "The frozen observed listing for a finished day; the dated digest remains the record.", "mimeType": "application/json", "file": "day/{date}.json", "params": ["date"]},
+    {"uriTemplate": "https://fapd.info/sources/{source_id}.md", "name": "source-page", "title": "Source page", "description": "One source's page in Markdown: what it is, how we ingest it, and our own statistics.", "mimeType": "text/markdown", "file": "sources/{source_id}.md", "params": ["source_id"]}
+  ],
+  "tools": [
+    {
+      "name": "list_digests",
+      "title": "List published digests",
+      "description": "Lists published digest days, newest first: date, page URL, canonical Markdown path and teaser.",
+      "params": {"offset": {"ref": "offset"}, "limit": {"ref": "limit", "maximum": 60, "default": 14}},
+      "handler": {"kind": "json_file", "file": "digests.json", "select": "digests",
+                  "envelope": ["title"], "fields": ["date", "html", "canonical_markdown", "teaser"],
+                  "page": {"offset": "offset", "limit": "limit"},
+                  "not_found": "The digest index is not available."}
+    },
+    {
+      "name": "get_digest",
+      "title": "Get a digest",
+      "description": "Returns the canonical Markdown digest for a published day, verbatim, after a one-paragraph disclosure.",
+      "params": {"date": {"ref": "date", "required": true}},
+      "preamble": "Canonical digest Markdown from fapd.info, returned verbatim (CC BY 4.0). Text labeled FAPD-AI is model-written restatement; cite each item's official source for claims.",
+      "handler": {"kind": "text_file", "file": "{date}.md", "mime_type": "text/markdown",
+                  "not_found": "No digest was published for {date}. Call list_digests for published dates; weekends and federal holidays often have none."}
+    },
+    {
+      "name": "get_live_day",
+      "title": "Get the live day (preliminary)",
+      "description": "Returns today's PRELIMINARY observed items with the day's disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection.",
+      "params": {"offset": {"ref": "offset"}, "limit": {"ref": "limit"}, "include_backfill": {"ref": "include_backfill"}, "collection": {"ref": "collection"}},
+      "preamble": "PRELIMINARY: observed so far today; items may change until the end-of-day digest freezes the record.",
+      "handler": {"kind": "json_file", "file": "today.json", "select": "items",
+                  "envelope": ["date", "disclosure", "canonical_record", "labels", "counts", "day_context", "backfill_count", "corroborated_count", "pending_llm", "last_observed_at"],
+                  "filters": [
+                    {"param": "include_backfill", "when": false, "exclude_where": {"field": "is_backfill", "equals": true}},
+                    {"param": "collection", "match_field": "collection"}
+                  ],
+                  "page": {"offset": "offset", "limit": "limit"},
+                  "not_found": "The live day is not available."}
+    },
+    {
+      "name": "list_day_views",
+      "title": "List frozen day views",
+      "description": "Lists the days that have a frozen observed listing, newest first.",
+      "params": {"offset": {"ref": "offset"}, "limit": {"ref": "limit", "maximum": 366, "default": 30}},
+      "handler": {"kind": "file_listing", "glob": "day/*.json",
+                  "name_pattern": "^(?P<key>[0-9]{4}-[0-9]{2}-[0-9]{2})\\.json$",
+                  "order": "desc", "page": {"offset": "offset", "limit": "limit"}}
+    },
+    {
+      "name": "get_day_listing",
+      "title": "Get a frozen day listing",
+      "description": "Returns a finished day's frozen observed listing with its disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection.",
+      "params": {"date": {"ref": "date", "required": true}, "offset": {"ref": "offset"}, "limit": {"ref": "limit"}, "include_backfill": {"ref": "include_backfill"}, "collection": {"ref": "collection"}},
+      "preamble": "Frozen observed listing for a finished day. The dated digest remains the record.",
+      "handler": {"kind": "json_file", "file": "day/{date}.json", "select": "items",
+                  "envelope": ["date", "disclosure", "canonical_record", "labels", "counts", "day_context", "backfill_count", "corroborated_count", "pending_llm", "last_observed_at", "frozen", "reconstructed_on"],
+                  "filters": [
+                    {"param": "include_backfill", "when": false, "exclude_where": {"field": "is_backfill", "equals": true}},
+                    {"param": "collection", "match_field": "collection"}
+                  ],
+                  "page": {"offset": "offset", "limit": "limit"},
+                  "not_found": "No frozen day view exists for {date}; call list_day_views."}
+    },
+    {
+      "name": "list_sources",
+      "title": "List sources",
+      "description": "Lists the source directory with this project's ingestion statistics and health labels for each source.",
+      "params": {"offset": {"ref": "offset"}, "limit": {"ref": "limit", "maximum": 200, "default": 50}},
+      "preamble": "Describes this project's ingestion of each source, not any agency's performance.",
+      "handler": {"kind": "json_file", "file": "sources.json", "select": "sources",
+                  "envelope": ["title", "scope", "measurement", "window"],
+                  "fields": ["id", "name", "description", "method", "page", "status", "health", "health_reason", "measured", "branch", "type", "tier", "last_item_date"],
+                  "page": {"offset": "offset", "limit": "limit"},
+                  "not_found": "The source directory is not available."}
+    },
+    {
+      "name": "get_source",
+      "title": "Get a source",
+      "description": "Returns one source's full record: registry entry, ingestion statistics, health and daily activity.",
+      "params": {"source_id": {"ref": "source_id", "required": true}},
+      "preamble": "Describes this project's ingestion of each source, not any agency's performance.",
+      "handler": {"kind": "json_file", "file": "sources.json", "select": "sources",
+                  "find": {"field": "id", "param": "source_id"},
+                  "envelope": ["scope", "measurement"],
+                  "not_found": "No source has the id {source_id}. Call list_sources for the directory."}
+    },
+    {
+      "name": "get_agent_guide",
+      "title": "Get the agent guide",
+      "description": "Returns llms.txt: the plain-text guide to every published surface.",
+      "handler": {"kind": "text_file", "file": "llms.txt", "mime_type": "text/plain",
+                  "not_found": "The agent guide is not available."}
+    }
+  ]
+}

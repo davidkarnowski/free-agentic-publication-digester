@@ -6,7 +6,7 @@ per-phase files listed in §6 carry the executable detail; this file
 carries the why, the rulings, the contracts that let phases run in
 parallel, the working protocol every agent follows, and the status table.
 Shape follows [plan-task-template.md](plan-task-template.md). Last
-reviewed: 2026-09-13.*
+reviewed: 2026-09-14.*
 
 > **Any agent picking this up:** read this whole file, then your phase
 > file, then your section file (`docs/agents/<section>.md`), then start
@@ -391,8 +391,8 @@ file**. A drift test fails if they differ.
 | 2 | **done 2026-09-13** (7 criteria met; 19 tests; digest twins byte-identical) | see git log: "site: every page with a Markdown form…" | `research/agent-logs/agent-discovery-phase2-20260913.md` | 2026-09-13 |
 | 3 | **done 2026-09-13** (rehearsal 24 pass / 0 fail / 2 explained skips; 41 static tests) | see git log: "ops: fapd-web gets a repo-managed…" | `research/agent-logs/agent-discovery-phase3-20260913.md` | 2026-09-13 |
 | 4A | **done 2026-09-13** (420 package tests; 118-payload corpus; legacy conformance scenarios pass; 2026-07-28 conformance scenarios pending the suite's alpha, re-run at Phase 5) | see git log: "mcp: static-mcp, a reusable…" | `research/agent-logs/agent-discovery-phase4a-20260913.md` | 2026-09-13 |
-| 4B | in progress (Operations agent, 2026-09-13) | — | `research/agent-logs/agent-discovery-phase4b-20260913.md` | — |
-| 4C | in progress (Publication agent, 2026-09-13) | — | `research/agent-logs/agent-discovery-phase4c-20260913.md` | — |
+| 4B | **done 2026-09-14** (B.8 #2–5 met; #1 rehearsal M-rows SKIP without Docker, re-run at Phase 5; 48 tests; real Claude Code client on 127.0.0.1) | see git log: "ops: the MCP service joins the stack…" | `research/agent-logs/agent-discovery-phase4b-20260913.md` | 2026-09-14 |
+| 4C | in progress (orchestrator, main session, 2026-09-14 — operator direction) | — | `research/agent-logs/agent-discovery-phase4c-20260913.md` | — |
 | 5 | not started | — | — | — |
 | 6 | not started | — | — | — |
 | 7 | scoped only | — | — | — |

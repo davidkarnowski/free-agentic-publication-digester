@@ -32,6 +32,22 @@ operator's private server guide — not in this public-bound repo.
   machine-readable files, signposted 404s under `/.well-known/`, and
   `server_tokens off`. The edge still owns HSTS, nosniff,
   frame-options and referrer-policy; `fapd-web` repeats none of them.
+- `fapd-mcp` (agent-discovery Phase 4B, 2026-09-14; **pending
+  deploy**) — the read-only, no-inference MCP service, GUIDE §2a rule
+  4's one bounded exception (`docs/mcp-server.md`). The generic
+  `packages/static-mcp` image with [`mcp/fapd.manifest.json`](mcp/README.md).
+  Joins ONLY `fapd_mcp`, a second `internal` network whose other member
+  is `fapd-web`, which proxies `POST /mcp` to it through a variable
+  upstream (the site starts and serves without it, answering 503 with a
+  signpost). **No published port, ever** — Docker-published ports bypass
+  `ufw`, and a port would also skip TLS, the edge rate limit and the
+  security headers. Reads the `fapd-site` volume read-only and nothing
+  else; non-root, read-only rootfs, all capabilities dropped. Abuse
+  controls: the edge's per-address limit → `fapd-web`'s `/mcp` zones
+  (429) → the service's concurrency cap (503) → a host fail2ban jail on
+  repeated rejections ([`fail2ban/`](fail2ban/README.md), installed by
+  the operator at checkpoint C-6). `fapd-web` writes the `/mcp` access
+  log to `./logs` (bind mount, excluded from the bundle rsync).
 - `fapd-backend` (live since 2026-07-30, `profiles: ["backend"]`) — the collector
   supervisor + end-of-day finalizer. Own private egress-only network;
   NOT on `fapd_edge`; no published ports; unreachable from the proxy,
@@ -69,7 +85,10 @@ What the script does, in order:
    bundle rsync swaps it in. A bad config would crash-loop `fapd-web`,
    which is the edge proxy's static upstream: an edge restart in that
    window takes the cohabitant down too. The bundle rsync's `--delete`
-   removes the candidate directory afterwards (intended).
+   removes the candidate directory afterwards (intended). Since Phase
+   4B the gate also mounts `/opt/fapd/logs` (created first): nginx
+   opens the `/mcp` access log at config-test time, so without the
+   mount a correct config fails the gate.
 2. **Bundle rsync** (`deploy/vps/` → `/opt/fapd/`) with the
    load-bearing excludes `.env`, `secrets/`, `repo/` — those exist
    only on the box, and `--delete` without them destroys the
@@ -80,13 +99,16 @@ What the script does, in order:
 3. **Repo export** (`./` → `/opt/fapd/repo/`, the backend build
    context, `.git` included for evidence commits) using the shared
    exclude list `deploy/common/repo-excludes.txt`.
-4. **Build + up**: `docker compose --profile backend build backend &&
-   --profile backend up -d`, then `nginx -t && nginx -s reload` inside
-   `fapd-web` (2026-09-13): the config is a directory mount, and compose
-   recreates a container only when its service definition changes, so
-   a config-only change is invisible to `up -d` and takes effect on the
-   reload. Verify then also curls `/.well-known/api-catalog` (expects
-   `200 application/linkset+json`) and greps the `Link` header on `/`.
+4. **Build + up**: `mkdir -p logs`, then `docker compose --profile
+   backend build backend mcp && --profile backend up -d`, then
+   `nginx -t && nginx -s reload` inside `fapd-web` (2026-09-13): the
+   config is a directory mount, and compose recreates a container only
+   when its service definition changes, so a config-only change is
+   invisible to `up -d` and takes effect on the reload. Verify then also
+   curls `/.well-known/api-catalog` (expects `200 application/linkset+json`),
+   greps the `Link` header on `/`, POSTs a modern `server/discover` to
+   `/mcp` (expects `200 info.fapd/fapd`) and checks `docker port
+   fapd-mcp` prints nothing.
 5. **Three post-up steps**, each load-bearing: in-container
    `build_site.py` (F-009 — the site volume seeds from the image on
    first mount ONLY; a rebuild does not refresh it), in-container
@@ -156,10 +178,17 @@ curl -sI https://fapd.info/ | grep -i '^link:'                       # five rels
 curl -sS -o /dev/null -w '%{http_code} %{content_type}\n' \
   https://fapd.info/.well-known/api-catalog                        # 200 application/linkset+json
 curl -sI https://fapd.info/.well-known/oauth-authorization-server | head -1   # 404 (signposted)
+curl -sI https://fapd.info/mcp | head -1                             # 405 (POST only; JSON signpost)
 ssh <box> 'sudo docker ps --format "{{.Names}}\t{{.Status}}" | grep fapd'
 ssh <box> 'sudo docker inspect fapd-web --format "{{json .NetworkSettings.Networks}}"'
-#   ^ must list fapd_edge and nothing else
+#   ^ must list fapd_edge and fapd_mcp, nothing else
+ssh <box> 'sudo docker inspect fapd-mcp --format "{{json .NetworkSettings.Networks}}"'
+#   ^ must list fapd_mcp and nothing else
+ssh <box> 'sudo docker port fapd-mcp'                                # prints NOTHING
 ```
+
+The MCP `server/discover` probe and the fail2ban jail checks are in
+`docs/ops/OPS-GUIDE.md` ("The MCP service").
 
 Run the health check again ~5 minutes after any deploy (cadence rule,
 docs/ops/OPS-GUIDE.md).

@@ -3,10 +3,10 @@
 *Never writes anything. Anything that would — restarts, deploys, config
 flips — lives behind the authorization gate in
 [AGENT-VPS-SERVICING-GUIDE.md](AGENT-VPS-SERVICING-GUIDE.md) §4.
-Last reviewed: 2026-09-13 (the fapd-web configuration became
-repo-managed — agent-discovery plan Phase 3, pending deploy: the
-discovery-surface checks and the nginx rehearsal row were added; the
-rest re-read unchanged).*
+Last reviewed: 2026-09-14 (agent-discovery Phase 4B, pending deploy:
+the MCP service checks — container, `server/discover`, the no-port
+invariant, the jail — and the manual-unban note were added; the Phase 3
+block re-read unchanged).*
 
 ## Local checks (the operator machine)
 
@@ -87,6 +87,45 @@ edge-owned header in `fapd-web` — `tests/test_web_conf.py` pins against
 it. Before any change under `deploy/vps/nginx/` reaches the box,
 `deploy/vps/nginx/rehearse.sh` runs locally and must print `SUCCESS`
 (the cadence table).
+
+### The MCP service
+
+`fapd-mcp` and `fapd-web`'s `/mcp` gate (agent-discovery Phase 4B;
+**pending deploy** as of 2026-09-14 — until Phase 5 deploys them these
+checks describe the target state, and `/mcp` answers 404 from the stock
+site). Guide: `docs/mcp-server.md`. All read-only:
+
+```sh
+deploy/vps/scripts/vps-ssh.sh 'sudo docker ps --format "{{.Names}}\t{{.Status}}" | grep fapd-mcp'
+#   ^ Up … (healthy) — the healthcheck is the package Dockerfile's GET /healthz
+deploy/vps/scripts/vps-ssh.sh 'sudo docker port fapd-mcp'
+#   ^ prints NOTHING. Any output is a finding: a published port bypasses ufw.
+deploy/vps/scripts/vps-ssh.sh 'sudo docker inspect fapd-mcp --format "{{json .NetworkSettings.Networks}}"'
+#   ^ exactly fapd_mcp, nothing else; fapd-web lists fapd_edge and fapd_mcp
+deploy/vps/scripts/vps-ssh.sh 'sudo docker logs --tail 20 fapd-mcp'  # JSON lines; no IPs, no bodies
+
+# A modern server/discover through the edge: 200 and serverInfo.name info.fapd/fapd
+curl -sS -w '\n%{http_code}\n' -X POST https://fapd.info/mcp \
+  -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
+  -H 'MCP-Protocol-Version: 2026-07-28' -H 'Mcp-Method: server/discover' \
+  -d '{"jsonrpc":"2.0","id":"health","method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"fapd-health","version":"1"},"io.modelcontextprotocol/clientCapabilities":{}}}}' \
+  | tail -c 400
+curl -sI https://fapd.info/mcp | head -1                # 405: POST only (JSON signpost body)
+
+# The fail2ban jail (after checkpoint C-6): running, WITH a chain
+deploy/vps/scripts/vps-ssh.sh 'sudo fail2ban-client status fapd-mcp'
+deploy/vps/scripts/vps-ssh.sh 'sudo iptables -S DOCKER-USER | grep -c f2b-fapd-mcp'   # >= 1
+deploy/vps/scripts/vps-ssh.sh 'sudo tail -5 /opt/fapd/logs/mcp-access.log'
+#   ^ first field is a client address (never the edge's 172.x); no request bodies
+```
+
+A 503 with the "temporarily unavailable" JSON means `fapd-mcp` is down
+while the site is up — the variable upstream working as designed; check
+the container. A jail reported by `fail2ban-client` but absent from
+`iptables -S DOCKER-USER` bans nothing (three cohabitant jails were in
+that state on 2026-09-13). **Manual unban** for a legitimate
+shared-egress client that reports being blocked is an operator-gated
+write: `sudo fail2ban-client set fapd-mcp unbanip <addr>`.
 
 ### Did the evidence reach the repository?
 
@@ -175,3 +214,5 @@ configuration working.
 | After a collector change | `collect.py --once --no-llm --no-wayback` + collector_state read | cycle integrity without token spend or archive writes |
 | Before any deploy | `deploy/dev/scripts/dev-up.sh` render against a recent VPS seed | the change seen on production-shaped data first (advisory) |
 | Before a deploy that touches `deploy/vps/nginx/` | `deploy/vps/nginx/rehearse.sh` → `SUCCESS` | a bad fapd-web config crash-loops the site and endangers the edge proxy's restart; the throwaway container proves the request matrix in ~10 s (deploy.sh repeats `nginx -t` on the box before the swap) |
+| Before a deploy that touches `deploy/vps/mcp/`, `packages/static-mcp/` or the `/mcp` location | the same `rehearse.sh` (rows M1–M17) plus `uv run pytest -q tests/test_mcp_manifest.py packages/static-mcp/tests` | the manifest is checked against a real render; the proxy path, limits, signposts, no-egress and least-privilege invariants are proven in throwaway containers |
+| After every deploy | the MCP block above, and `docker port fapd-mcp` empty | the no-port invariant is the firewall (Docker-published ports bypass ufw) |

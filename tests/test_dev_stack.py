@@ -134,13 +134,93 @@ def test_prod_compose_carries_the_container_bounds():
     """Review D18/D19/R4: the shared VPS's containers are bounded and
     their logs rotate; the backend has a liveness heartbeat. The dev
     stack modeled this block first — prod must not drift back to
-    unbounded."""
+    unbounded. The mcp service (Phase 4B) carries the same bounds; its
+    healthcheck lives in the package Dockerfile, not here."""
     compose = (DEV / ".." / "vps" / "docker-compose.yml").read_text(
         encoding="utf-8")
-    assert compose.count("mem_limit:") == 2      # web and backend
-    assert compose.count("max-size:") == 2       # log rotation on both
+    assert compose.count("mem_limit:") == 3      # web, backend, mcp
+    assert compose.count("max-size:") == 3       # log rotation on all three
     assert compose.count("healthcheck:") == 2    # web wget + backend heartbeat
     assert "collector_state" in compose          # the heartbeat reads the DB
+    dockerfile = (PROJECT_ROOT / "packages" / "static-mcp" / "Dockerfile").read_text(
+        encoding="utf-8")
+    assert "HEALTHCHECK" in dockerfile and "/healthz" in dockerfile
+
+
+# ---- the MCP service (agent-discovery Phase 4B; master plan §5 invariants) --
+
+def _compose(path):
+    import yaml
+
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+MCP_HARDENING = {
+    "read_only": True,
+    "user": "10001:10001",
+    "cap_drop": ["ALL"],
+    "security_opt": ["no-new-privileges:true"],
+    "pids_limit": 64,
+    "mem_limit": "128m",
+    "command": ["--manifest", "/etc/static-mcp/fapd.manifest.json"],
+}
+
+
+def test_prod_mcp_service_publishes_no_port_and_runs_least_privilege():
+    """Docker-published ports bypass ufw (master plan §4): fapd-mcp must be
+    reachable only from fapd-web over the internal network. Non-root,
+    read-only rootfs, no capabilities, no env, site volume read-only and
+    nothing else mounted but the manifest directory."""
+    doc = _compose(VPS / "docker-compose.yml")
+    mcp = doc["services"]["mcp"]
+    assert "ports" not in mcp and "expose" not in mcp
+    for key, value in MCP_HARDENING.items():
+        assert mcp[key] == value, key
+    assert mcp["networks"] == ["fapd_mcp"]
+    assert mcp["volumes"] == ["fapd-site:/srv/site:ro", "./mcp:/etc/static-mcp:ro"]
+    assert "env_file" not in mcp and "environment" not in mcp
+    assert mcp["build"] == {"context": "./repo/packages/static-mcp"}
+    assert mcp["container_name"] == "fapd-mcp"      # the name default.conf resolves
+    assert mcp["restart"] == "unless-stopped"
+    assert "profiles" not in mcp                    # up with the site, always
+
+
+def test_prod_networks_keep_zero_egress_and_web_bridges_exactly_two():
+    doc = _compose(VPS / "docker-compose.yml")
+    assert doc["networks"]["fapd_mcp"] == {"driver": "bridge", "internal": True}
+    web = doc["services"]["web"]
+    assert web["networks"] == ["fapd_edge", "fapd_mcp"]
+    assert "depends_on" not in web                   # the site starts without mcp
+    assert "./logs:/var/log/fapd:rw" in web["volumes"]
+    assert web["volumes"].count("./logs:/var/log/fapd:rw") == 1
+    # the backend stays off the mcp network: coupling is the site volume only
+    assert doc["services"]["backend"]["networks"] == ["fapd_backend"]
+
+
+def test_dev_compose_mirrors_the_prod_mcp_service_and_network():
+    prod = _compose(VPS / "docker-compose.yml")["services"]["mcp"]
+    dev_doc = _compose(DEV / "docker-compose.yml")
+    dev = dev_doc["services"]["mcp"]
+    for key in MCP_HARDENING:
+        assert dev[key] == prod[key], key
+    assert dev["cpus"] == prod["cpus"] and dev["logging"] == prod["logging"]
+    assert dev["volumes"] == prod["volumes"]
+    assert dev["build"] == prod["build"]              # the staged repo/ in both
+    assert "ports" not in dev and "env_file" not in dev
+    assert dev["networks"] == {"fapd_mcp": {"aliases": ["fapd-mcp"]}}
+    assert dev_doc["networks"]["fapd_mcp"] == {"driver": "bridge", "internal": True}
+    web = dev_doc["services"]["web"]
+    assert "fapd_mcp" in web["networks"] and "default" in web["networks"]
+    assert any(v.endswith(":/var/log/fapd") for v in web["volumes"])   # nginx -t opens the log path
+
+
+def test_dev_up_stages_the_package_the_dev_mcp_service_builds():
+    """dev-up.sh stages the whole tree into deploy/dev/repo/ with the shared
+    exclude list; packages/ is not excluded, so the build context exists."""
+    excl = (PROJECT_ROOT / "deploy" / "common" / "repo-excludes.txt").read_text(encoding="utf-8")
+    assert "packages" not in excl
+    up = (DEV / "scripts" / "dev-up.sh").read_text(encoding="utf-8")
+    assert 'rsync -a --delete --exclude-from deploy/common/repo-excludes.txt ./ "$DEV/repo/"' in up
 
 
 def test_dev_compose_builds_the_production_dockerfile():

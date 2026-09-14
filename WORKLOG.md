@@ -5425,3 +5425,77 @@ to be used for this testing. Phase 4B's real-client check now runs the
 service directly on 127.0.0.1 against a temp-built site; the rehearsal's
 container rows run only if a daemon is present and are otherwise
 recorded as skipped until Phase 5.
+
+## 2026-09-14 — Phase 4B lands: the MCP service is wired into the stack
+
+Resumed after the previous session was cut off twice (network, then the
+account session limit). The 4B and 4C agents had each written only the
+opening entry of their progress logs; the tree was clean, so nothing was
+lost. Operator direction this session: one sub-agent at a time, and the
+orchestrator performs Phase 4C itself once 4B is in (each fresh agent
+re-reads the whole plan set before working, which is where the tokens
+went).
+
+**Phase 4B — FAPD MCP service integration (Operations agent).** The
+generic `static-mcp` package now runs as `fapd-mcp` in the prod and dev
+compose files with FAPD's manifest: read-only root filesystem, uid
+10001, all capabilities dropped, `no-new-privileges`, the site volume
+`:ro`, the manifest directory `:ro`, no other mount, no `env_file`, no
+published port, and exactly one network, the new `internal: true`
+`fapd_mcp` shared with `fapd-web`. `fapd-web` joins that network, gains
+the `./logs:/var/log/fapd` bind mount for the `/mcp` access log, and
+deliberately does not `depends_on: mcp`. The two Phase 3 insertion
+points in `default.conf` are filled: the `fapd_mcp` log format whose
+first field is the true client address, and the `location = /mcp` L0
+transport gate (POST only, JSON content type, 64k body, `limit_req` +
+`limit_conn` on the Phase 3 zones with 429, buffering on,
+`proxy_next_upstream off`, variable upstream through the Docker
+resolver, 502/504 → 503 signpost, no `proxy_intercept_errors`).
+Fail2ban filter, jail and logrotate snippet under
+`deploy/vps/fail2ban/` with the staged operator-run installer
+`scripts/staged/2026-09-14-install-fapd-mcp-jail.sh` (C-6). `deploy.sh`
+builds `mcp`, creates `logs/` before `up -d`, mounts it into the
+syntax-gate container, verifies a modern `server/discover` through the
+edge, and asserts `docker port fapd-mcp` prints nothing. Rehearsal rows
+M1–M17 written. Docs: `docs/mcp-server.md` flipped to "built, pending
+deploy"; OPS-GUIDE, SERVER-GUIDE, AGENT-CVE-GUIDE and the health skill
+gained the MCP rows, all marked pending deploy.
+
+**Manifest verified against a real build**, not the plan's table: the
+backfill flag is `is_backfill` (the plan said `backfill`), `today.json`
+and `day/<date>.json` carry all ten envelope keys, `sources.json`
+records carry `status/health/health_reason/measured` (added to the
+projection), all 129 source ids match the `source_id` pattern,
+`sources.json` is 3.2 MB against the 16 MiB file cap.
+
+**Real client, no Docker (B.8 #2, per the operator's ruling):**
+`static-mcp serve` on 127.0.0.1 against a scratch-built site; Claude
+Code 2.1.270 added as an HTTP MCP client, listed as Connected, called
+`list_digests` and `get_digest` for 2026-09-04 (17 requests, all 200,
+all under 2026-07-28; the 161 KB digest result was returned whole).
+Legacy `initialize` under 2025-06-18 exercised by curl: 200, no session
+header. Scratch config removed afterwards.
+
+**Not met, disclosed:** B.8 #1 (rehearsal M-rows) is SKIP throughout —
+no Docker daemon on this machine and the dev stack is ruled out. The
+rows are written and parse; Phase 5's pre-merge checklist runs them
+before anything deploys. M9 (server card) also waits on 4C.
+
+**Deviations, accepted:** `bantime = 1h` with increment (B.10's file
+spec over B.6's "no override"); `failregex` ends in `\s` because
+ConfigParser strips the plan's trailing space (which would have let
+`4000` match `400`); the dev manifest allows `127.0.0.1` as well as
+`localhost` (differs from prod in `allowed_hosts` only, pinned); dev
+compose logs to a named volume rather than a bind mount so a dev run
+leaves no untracked directory; compose does not repeat the Dockerfile
+healthcheck. Found and fixed beyond the plan: `nginx -t` opens every
+`access_log` path, so the deploy gate and the rehearsal each needed the
+logs directory mounted or a correct config fails the syntax gate.
+
+**Before deploy, not merge:** the `/mcp` 405/415 error pages point at
+`/_signpost/mcp-method.json`, which Phase 4C builds. The branch must
+not deploy without 4C.
+
+Verified by the orchestrator: ruff clean; **1388 passed, 1 skipped**
+(+48 tests). Agent log:
+`research/agent-logs/agent-discovery-phase4b-20260913.md`.

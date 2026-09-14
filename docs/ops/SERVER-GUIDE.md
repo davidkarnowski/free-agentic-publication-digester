@@ -1,9 +1,9 @@
 # FAPD server dossier (pointer + public-safe facts)
 
-*Last reviewed: 2026-08-07 (evidence-push incident F-021: the stranded
-commit recovered, the cause fixed, connection facts brought into the
-project. Containers, networks and the public surface re-verified the same
-day; certs and firewall last checked 2026-08-05 — see the review table).*
+*Last reviewed: 2026-09-14 (agent-discovery Phase 4B: the `fapd-mcp`
+container, the `fapd_mcp` network and the fail2ban jail added as
+**pending deploy** rows; nothing on the box was touched or re-verified.
+The 2026-08-07 verification rows stand as they were.)*
 
 > **Connection facts live in the project, uncommitted (2026-08-07).**
 > Copy `deploy/vps/deploy.env.example` to `deploy/vps/deploy.env`, fill
@@ -30,7 +30,9 @@ day; certs and firewall last checked 2026-08-05 — see the review table).*
 |---|---|
 | Hosting model | Shared VPS with the operator's Spiralyst project; strict Docker-network segmentation (the cohabitant's edge proxy is the only bridge) |
 | FAPD stack path | `/opt/fapd` — source of truth [`deploy/vps/`](../../deploy/vps/) in this repo |
-| Containers | `fapd-web` (nginx, inbound-only, zero egress — external `--internal` net `fapd_edge`); `fapd-backend` **live 2026-07-30** (collector supervisor + EOD finalizer, egress-only on `fapd_fapd_backend`, no published ports, volume-coupled to web) |
+| Containers | `fapd-web` (nginx, inbound-only, zero egress — external `--internal` net `fapd_edge`; since Phase 4B also on `fapd_mcp`); `fapd-backend` **live 2026-07-30** (collector supervisor + EOD finalizer, egress-only on `fapd_fapd_backend`, no published ports, volume-coupled to web); `fapd-mcp` **pending deploy (2026-09-14)** — the read-only, no-inference MCP service (`packages/static-mcp` + `deploy/vps/mcp/`), on `fapd_mcp` only, no published port, non-root, read-only rootfs, reads the site volume read-only (`docs/mcp-server.md`) |
+| Networks | `fapd_edge` (external, `--internal`: edge proxy ↔ `fapd-web`); `fapd_fapd_backend` (egress-only bridge, backend alone); `fapd_fapd_mcp` **pending deploy** (`internal: true`, compose-managed: `fapd-web` ↔ `fapd-mcp`, zero egress) |
+| Host fail2ban | Cohabitant-owned config; FAPD adds exactly one jail, `fapd-mcp` (reads `/opt/fapd/logs/mcp-access.log`, bans in `DOCKER-USER`), installed by the operator at checkpoint C-6 — **pending** |
 | TLS | Let's Encrypt for `fapd.info` + `www`, webroot method via the shared edge proxy, auto-renewing (deploy-hook reload covers it); issued 2026-07-30 |
 | Public surface | `https://fapd.info` — the full digest site (served from the fapd-site volume since 2026-07-30) |
 | Bot git identity (live 2026-07-30) | `fapd-pipeline` with a repo-scoped deploy key, for evidence commits |
@@ -54,6 +56,8 @@ day; certs and firewall last checked 2026-08-05 — see the review table).*
 |---|---|
 | `fapd-web` runs the repo-managed config (`deploy/vps/nginx/`, directory mount): discovery content types, `Link` header, Markdown negotiation, CORS, signposted `/.well-known/` 404s, `server_tokens off` (agent-discovery Phase 3) | **pending deploy** (files landed 2026-09-13; rehearsed locally only — never verified on the box until Phase 5) |
 | `deploy.sh` syntax-gates the nginx candidate on the box before the swap and reloads `fapd-web` after `up -d`; bundle rsync excludes `logs/` (SR-3) | **pending deploy** (2026-09-13; `bash -n` and static tests only) |
+| `fapd-mcp` running: `fapd_mcp` network `internal`, no published port (`docker port fapd-mcp` empty), `ReadonlyRootfs`, user 10001, `CapDrop ALL`, no egress from inside; `fapd-web` on exactly `fapd_edge` + `fapd_mcp`; `POST /mcp` answers `server/discover` through the edge (agent-discovery Phase 4B) | **pending deploy** (files landed 2026-09-14; manifest and tools proven against a real render and a real client on the laptop; the container rehearsal rows are Phase 5's — never verified on the box until then) |
+| `fapd-mcp` fail2ban jail installed, `f2b-fapd-mcp` chain present in `DOCKER-USER`, log's first field a client address | **pending** (checkpoint C-6, operator-run `scripts/staged/2026-09-14-install-fapd-mcp-jail.sh`) |
 | **Evidence push repaired** — silently failing since the 2026-08-06 deploy; the stranded commit recovered and the cause fixed (F-021, plan P0–P3) | 2026-08-07 |
 | Connection facts reachable from this repo (`deploy.env` + `vps-ssh.sh`) | 2026-08-07 |
 | Containers healthy, `fapd-web` on exactly `fapd_edge`, site serving | 2026-08-07 |
