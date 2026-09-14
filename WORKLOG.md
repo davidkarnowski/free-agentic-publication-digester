@@ -5997,3 +5997,39 @@ now in the private host tree (4); the package stands alone with its
 README and tests (5); ruff and pytest green, CI green, fast-forward
 merges throughout (6); the blog draft is written (7) — publishing it is
 the operator's decision.
+
+## 2026-09-14 — The field-report plan, evaluated before launch
+
+The plan written earlier this evening for the outside agent's MCP field
+report was checked task by task against the code, the live service and
+the published data before any work starts (operator: "evaluate … prepare
+to launch"). Six corrections, now in the plan's §0 with evidence:
+
+- **The atomic-publish design would have broken production.** Swapping a
+  symlinked site tree fails three ways: the MCP service resolves its root
+  once at start, so every read after the first swap lands outside it; the
+  nightly evidence commit adds `site/` from the same volume, so the link
+  and build trees would enter the repository; and the live page and the
+  health refresh rewrite single files every cycle, which a tree swap
+  races. Replaced by per-file atomic writes (dot-temp plus `os.replace`),
+  which also names the real mechanism behind the report's F10: today's
+  writes truncate in place.
+- **Duplicating a digest into structured content** would put the largest
+  digest (244,712 bytes) at 498,166 bytes against the 524,288-byte result
+  cap. Structured content and output schemas stay on the tools that
+  already return JSON; payload-first ordering fixes the reported failure.
+- **`published_day` would have contradicted the glossary**: "publication
+  day" is the digest day. The field is `document_date`, GUIDE §3's words,
+  sourced from the publisher stamp or the stored issued date through a
+  join the listing query lacks.
+- The agency filter's page prose is hand-written, not generated; the
+  surface versions are 1.1.0 then 2.0.0 (result order breaks
+  position-reading clients); the digest section names and the nine
+  collection codes are now read off the code with drift tests.
+
+Confirmed along the way: Federal Register items carry the agency in
+upper case and the facets list it in lower case, so a case-insensitive
+exact match answers the report's EPA question in eight requests; both
+listing files publish `facets`. Baseline on `main` (d9bb279): 1,389
+passed, 1 skipped. Nothing launched; waiting on the operator's go for
+Wave A.
