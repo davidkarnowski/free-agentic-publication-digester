@@ -5661,3 +5661,17 @@ e6dad93 (PR #36; re-runs on this commit). Still the operator's: item 4
 (dev-stack rows, ruled out 2026-09-13 — waived unless the operator
 says otherwise), item 6 (read the agents page MCP section), C-1, then
 the fast-forward merge and "deploy".
+
+## 2026-09-14 — Checkpoints C-1, C-2 (final section) cleared; merge and deploy authorized
+
+Operator, 2026-09-14 (this session), on the four open items of the
+Phase 5 pre-merge checklist: the rendered `agents.html` MCP section
+read and **approved** (item 6); the dev-stack curl rows of §2.4
+**waived**, consistent with the 2026-09-13 ruling against using the
+local dev stack for this work (item 4); **C-1 confirmed** — the
+Hostinger edge firewall allows inbound 443 and 80, no rule exists or
+was added for any MCP port, no change made; and "commit, merge and
+deploy now" (C-3). The branch is rebased onto the current `main` (nine
+nightly evidence commits since it was cut; the branch touches no
+evidence path) so the merge is a fast-forward, CI re-runs on the
+rebased tip, and the deploy follows from `main` per Phase 5 §1.
