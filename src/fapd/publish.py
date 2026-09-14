@@ -5254,6 +5254,8 @@ def _mcp_tool_rows(manifest):
                 if key in raw:
                     spec[key] = raw[key]
             bits = [spec["type"]]
+            if spec.get("enum"):
+                bits.append("one of " + ", ".join(spec["enum"]))
             if spec["type"] == "integer":
                 bits.append(f"{spec['minimum']}…{spec['maximum']}")
             if "default" in spec:
@@ -5317,7 +5319,10 @@ def _mcp_agents_md(manifest):
          " whose body says where to look instead."),
         (f"- **Protocol versions:** {modern} (stateless; begin with"
          f" `server/discover`) and {legacy} (the `initialize` handshake,"
-         " answered without a session)."),
+         " answered without a session). A 2026-07-28 request carries the"
+         " version in `params._meta` and in the `MCP-Protocol-Version` and"
+         " `Mcp-Method` headers; a request without them is answered under"
+         " the older revisions, where `server/discover` does not exist."),
         ("- **Server card:** [`/mcp/server-card`](mcp/server-card), also at"
          " `/.well-known/mcp/server-card.json`."),
         ("- **Posture:** read-only, no inference, no writes, no accounts, no"
@@ -5358,8 +5363,9 @@ def _mcp_agents_md(manifest):
         "",
         "### What it does not do",
         "",
-        ("- No search. The tools list, page, filter on a named collection, and"
-         " fetch by date or source id. Nothing else."),
+        ("- No search. The tools list and page, filter on a collection or an"
+         " exact agency name (case ignored; the result's `facets.tags` says"
+         " what is present), and fetch by date or source id. Nothing else."),
         ("- No writes, no accounts, no sessions, no subscriptions, no prompts,"
          " no sampling, and no streaming: responses are plain JSON, never"
          " server-sent events."),

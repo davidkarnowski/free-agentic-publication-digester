@@ -1,7 +1,6 @@
 # Plan — acting on the MCP field report (2026-09-14)
 
-*Status: **evaluated and amended 2026-09-14; ready to launch on the
-operator's go** (Wave A first). Follows
+*Status: **Wave A in progress since 2026-09-14** (operator: "Begin"); Waves B and C wait. Follows
 [plan-task-template.md](plan-task-template.md). Parent:
 [plan-2026-09-13-agent-discovery.md](plan-2026-09-13-agent-discovery.md)
 (Phase 5 complete 2026-09-14). Last reviewed: 2026-09-14.*
@@ -115,8 +114,9 @@ labels did their job in the reviewer's own words.
   Editorial none. Performed in the main session (operator direction,
   2026-09-14). Package commits stay separate from FAPD commits so
   `packages/static-mcp/` remains free of project strings (pinned).
-- **Commits:** one trailer, `Co-Authored-By: Claude Opus 5 (1M context)
-  <noreply@anthropic.com>`; no session line (operator's standing rule).
+- **Commits:** one trailer, `Co-Authored-By: Claude <the model writing
+  the commit> <noreply@anthropic.com>`; no session line (operator's
+  standing rule).
 
 ## 4. Tasks
 
@@ -134,9 +134,11 @@ alternatives, risk, verification, rollback, dependencies.
   `docs/mcp-server.md`.
 - **Diff sketch:**
   - Manifest: global param `agency` — `string`, pattern
-    `^[A-Za-z0-9][A-Za-z0-9 .,'&()-]{0,119}$`, description "Keep only
-    items whose agency equals this exactly, ignoring case; use a value
-    from `facets.tags` or `items[].agency` (not a substring)".
+    `^[^\x00-\x1f\x7f]{1,120}$` (any printable characters: registry
+    source names carry an em dash and a plus sign, and the value only
+    ever feeds an equality compare, never a path), description "Keep
+    only items whose agency equals this whole value, ignoring case; take
+    it from `facets.tags` or `items[].agency`".
     `get_live_day` and `get_day_listing` gain `agency` (optional) and
     the filter `{"param": "agency", "match_field": "agency",
     "case_insensitive": true}`; both `envelope` lists gain `"facets"`.
@@ -157,7 +159,9 @@ alternatives, risk, verification, rollback, dependencies.
   An agency with no items returns `total: 0`, and `facets` tells the
   agent what is present.
 - **Verification:** package tests (case-insensitive match; flag refused
-  on `exclude_where`; flag refused on a non-string param);
+  on `exclude_where`; flag refused on a non-string param); a test that
+  every registry source name and every agency value in the fixture
+  build matches the pattern;
   `test_mcp_manifest.py` calls both tools with `agency` on the fixture
   and asserts `facets` is present; live, recorded in the WORKLOG next
   to the report's 90: the EPA question as seven `get_day_listing` calls
@@ -298,7 +302,7 @@ alternatives, risk, verification, rollback, dependencies.
   "terms": "Terms Used Today", "coverage": "Coverage Statement",
   "methodology": "Methodology"}}`. A value selects the level-2 heading
   whose text starts with the mapped prefix and returns the lines up to
-  the next heading of level 2 or higher, verbatim; `header` (null)
+  the next heading of level 2 or level 1, verbatim; `header` (null)
   returns the text before the first level-2 heading, which holds the
   Inference row. Headings inside fenced code blocks are ignored. The
   `section` parameter's schema is an enum of the map's keys (MF-8's
@@ -421,7 +425,7 @@ alternatives, risk, verification, rollback, dependencies.
 
 | Wave | Tasks | Ships as | Operator steps |
 |---|---|---|---|
-| A | MF-1, MF-8, MF-3, MF-9, MF-11 | package change + manifests; surface **1.1.0** | "deploy"; registry re-publish |
+| A | MF-1, MF-8, MF-3, MF-9, MF-11 — **built 2026-09-14** (package 0.2.0, surface 1.1.0; branch `feature/mcp-wave-a`) | package change + manifests; surface **1.1.0** | "deploy"; registry re-publish |
 | B | MF-2, MF-5, MF-6 | package change + manifests; surface **2.0.0** | VPS-testing approval (rehearsal M3 on the box); "deploy"; registry re-publish |
 | C | MF-7, MF-4, MF-10 | Publication and Operations changes; no surface version change | VPS-testing approval (rehearsal rows 1 and 23); "deploy" |
 

@@ -3,7 +3,7 @@
   "server": {
     "name": "info.fapd/fapd",
     "title": "Free Agentic Publication Digester",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Cited daily digests of official US federal publications. Read-only; no inference.",
     "websiteUrl": "https://fapd.info/agents.html",
     "repository": {
@@ -63,7 +63,18 @@
     "collection": {
       "type": "string",
       "pattern": "^[A-Z][A-Z0-9_]{1,15}$",
-      "description": "Keep only items of one collection (for example CREC, BILLS, FR, USCOURTS, PLAW, AGENCYPR)."
+      "enum": [
+        "AGENCYPR",
+        "BILLACTIONS",
+        "BILLS",
+        "CREC",
+        "FR",
+        "PLAW",
+        "PRESACT",
+        "USCOURTS",
+        "VOTES"
+      ],
+      "description": "Keep only items of one collection: AGENCYPR (agency releases), BILLACTIONS, BILLS, CREC (Congressional Record), FR (Federal Register), PLAW (enacted laws), PRESACT (presidential actions), USCOURTS (court opinions), VOTES (recorded votes)."
     },
     "offset": {
       "type": "integer",
@@ -83,6 +94,12 @@
       "type": "boolean",
       "default": false,
       "description": "Also return items the publisher dates to an earlier day (flagged is_backfill). Excluded by default, as on the human page."
+    },
+    "agency": {
+      "type": "string",
+      "pattern": "^[^\\x00-\\x1f\\x7f]{1,120}$",
+      "maxLength": 120,
+      "description": "Keep only items whose agency equals this whole value, ignoring case — not a substring. Take the value from facets.tags or items[].agency (for example Environmental Protection Agency, or a source name such as NASA News Releases)."
     }
   },
   "resources": [
@@ -218,7 +235,7 @@
     {
       "name": "get_live_day",
       "title": "Get the live day (preliminary)",
-      "description": "Returns today's PRELIMINARY observed items with the day's disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection.",
+      "description": "Returns today's PRELIMINARY observed items with the day's disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection; agency keeps one agency's items (exact name, case ignored) — facets.tags in the result lists the agencies present.",
       "params": {
         "offset": {
           "ref": "offset"
@@ -231,6 +248,9 @@
         },
         "collection": {
           "ref": "collection"
+        },
+        "agency": {
+          "ref": "agency"
         }
       },
       "preamble": "PRELIMINARY: observed so far today; items may change until the end-of-day digest freezes the record.",
@@ -248,7 +268,8 @@
           "backfill_count",
           "corroborated_count",
           "pending_llm",
-          "last_observed_at"
+          "last_observed_at",
+          "facets"
         ],
         "filters": [
           {
@@ -262,6 +283,11 @@
           {
             "param": "collection",
             "match_field": "collection"
+          },
+          {
+            "param": "agency",
+            "match_field": "agency",
+            "case_insensitive": true
           }
         ],
         "page": {
@@ -299,7 +325,7 @@
     {
       "name": "get_day_listing",
       "title": "Get a frozen day listing",
-      "description": "Returns a finished day's frozen observed listing with its disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection.",
+      "description": "Returns a finished day's frozen observed listing with its disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection; agency keeps one agency's items (exact name, case ignored) — facets.tags in the result lists the agencies present.",
       "params": {
         "date": {
           "ref": "date",
@@ -316,6 +342,9 @@
         },
         "collection": {
           "ref": "collection"
+        },
+        "agency": {
+          "ref": "agency"
         }
       },
       "preamble": "Frozen observed listing for a finished day. The dated digest remains the record.",
@@ -335,7 +364,8 @@
           "pending_llm",
           "last_observed_at",
           "frozen",
-          "reconstructed_on"
+          "reconstructed_on",
+          "facets"
         ],
         "filters": [
           {
@@ -349,6 +379,11 @@
           {
             "param": "collection",
             "match_field": "collection"
+          },
+          {
+            "param": "agency",
+            "match_field": "agency",
+            "case_insensitive": true
           }
         ],
         "page": {
@@ -361,7 +396,7 @@
     {
       "name": "list_sources",
       "title": "List sources",
-      "description": "Lists the source directory with this project's ingestion statistics and health labels for each source.",
+      "description": "Lists the source directory as a summary per source: identity, method, status and health label. get_source returns one source's full record including daily activity; the source-directory resource is the whole file.",
       "params": {
         "offset": {
           "ref": "offset"

@@ -345,7 +345,8 @@ def test_the_real_proof_line_is_well_formed_and_built(site):
 
 def test_agents_page_names_the_registry_listing_once_published(site, monkeypatch):
     raw = publish._mcp_manifest()
-    url = "https://registry.modelcontextprotocol.io/v0.1/servers/info.fapd%2Ffapd/versions/1.0.0"
+    version = raw["server"]["version"]           # the page names the version the manifest carries
+    url = f"https://registry.modelcontextprotocol.io/v0.1/servers/info.fapd%2Ffapd/versions/{version}"
     assert publish._mcp_registry_listing_url(raw) == url
     agents = (site / "agents.html").read_text(encoding="utf-8")
     assert url in agents and "official MCP Registry" in agents

@@ -6033,3 +6033,62 @@ exact match answers the report's EPA question in eight requests; both
 listing files publish `facets`. Baseline on `main` (d9bb279): 1,389
 passed, 1 skipped. Nothing launched; waiting on the operator's go for
 Wave A.
+
+## 2026-09-14 — Field-report Wave A: an agency filter, a collection enum, two dismissals
+
+Wave A of `docs/ops/plan-2026-09-14-mcp-field-report.md`, done in the
+main session (operator: "Begin"). Two commits on
+`feature/mcp-wave-a`: the generic package first, then FAPD's use of it.
+
+**Package `static-mcp` 0.2.0.** A string parameter may declare an
+`enum` (one to sixty-four unique values, each satisfying the
+parameter's own pattern, so an enum can never widen what the pattern
+allows), emitted in the input schema and enforced at stage L6 with a
+refusal that lists the allowed values — the manifest's, never the
+client's. A `match_field` filter may set `case_insensitive`: equality
+after case-folding both sides, still the whole value, never a substring
+or a pattern. A modern-only method sent in the legacy request form
+stays "not found" under the negotiated legacy revision (200, `-32601`,
+as the specification requires) but the message now names the
+2026-07-28 request form. `static-mcp describe` prints "one of …" for
+enums. 435 package tests (fourteen new; the adversarial corpus has 119
+payloads; the legacy transcript pins the new message).
+
+**FAPD surface 1.1.0.** `get_live_day` and `get_day_listing` take
+`agency` — any printable characters up to 120, compared whole and
+case-folded against each item's `agency` — and return the file's
+`facets` block, so an agent sees which agencies a day holds before
+asking. `collection` is an enum of the nine codes the pipeline can
+file (`config.COLLECTIONS` plus every adapter's collection, pinned by a
+drift test), so a guessed name is refused by name with the list instead
+of answering an empty page. `list_sources` says it is the summary and
+where the full record lives. The agents page, the MCP guide's
+regenerated tool table, and the live-day skill say the same; the guide
+carries the 1.1.0 history entry. Tests: the enum equals the code's
+set; `collection: "EPA"` → `-32602` naming the values and not echoing
+"EPA"; a swapped-case agency name matches exactly, a prefix does not,
+and `facets` travels on both listing tools; every registry source name
+(129, including one with an em dash and one with a plus sign), every
+fixture agency and a sample of real Federal Register agencies pass the
+pattern.
+
+**F3 dismissed as a bug, with evidence.** The reviewer sent
+`{"method":"server/discover","params":{"protocolVersion":"2026-07-28"}}`
+with no `_meta` and no version headers. That is a legacy-era request;
+under 2025-06-18 and 2025-11-25 the method does not exist, and
+`-32601` is the specified answer. The same method in the 2026-07-28
+form (`params._meta` with the version, client info and capabilities;
+`MCP-Protocol-Version` and `Mcp-Method` headers) answered 200 in every
+check on 2026-09-14, including the deploy script's own verify step.
+What was wrong was the message, now fixed.
+
+**F9 dismissed, with evidence.** `list_sources` with `limit: 50`
+returned 80,739 bytes: thirteen identity and health fields per source
+and no `daily_activity`. The projection the reviewer asked for has
+existed since Phase 4B; the 103 KB with hourly buckets they describe is
+the `sources.json` resource, which is the whole file by design. The
+tool's description now says so.
+
+OB-26 records the deferred cross-day `find_items` tool and the ruling
+it would need. Next: merge, then the operator's "deploy", then the
+report's EPA question live in eight requests, recorded here.

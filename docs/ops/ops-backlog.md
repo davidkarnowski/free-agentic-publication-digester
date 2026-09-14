@@ -475,3 +475,17 @@ not reusable.)*
 - **Trigger:** FAPD becoming an upstream source for another autonomous
   research system, or a reader reporting a mis-citation traced to the
   MCP path. Editorial owns the schema; Publication the surface.
+
+**OB-26 — A cross-day `find_items` tool for the MCP service**
+- **Gap:** the field report's most natural question, "what did agency X
+  publish this week", still needs one `get_day_listing` call per day
+  after the agency filter (MF-1): seven or eight requests. The report
+  proposed `find_items(from, to, collection?, agency?)` walking the
+  frozen day views server-side.
+- **Why not yet:** one request would read up to 366 published files; it
+  is a new capability under GUIDE §2a rule 4 (a filter over many stored
+  listings, still no search index, still no model), and needs its own
+  ruling, a cap (31 days per call) and a result-size story.
+- **Trigger:** an agent still needing more than ten requests for an
+  agency-week after MF-1, or a second field report asking for it.
+  Operations owns the package handler; Editorial the ruling text.

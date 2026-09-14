@@ -65,6 +65,29 @@ def _seed_backfill(conn):
     conn.commit()
 
 
+def _seed_agency_item(conn):
+    """One Federal Register notice observed on DATE with its agency set the
+    way the extractor stores it (upper case), so the agency filter has
+    something real to match: the case the field report's question needs."""
+    conn.execute("INSERT INTO packages (package_id, collection, date_issued,"
+                 " last_modified, title, first_seen_at) VALUES"
+                 " ('FR-2026-07-02', 'FR', ?, 'x', 'Federal Register 2026-07-02', 'x')",
+                 (DATE,))
+    conn.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection,"
+        " doc_type, title, text, char_count, metadata, extracted_at,"
+        " extractor_version, agency) VALUES ('FR-2026-07-02', '2026-14001', 'FR',"
+        " 'NOTICE', 'Proposed Consent Decree', 'Notice is hereby given.', 23, '{}',"
+        " 'x', 1, 'ENVIRONMENTAL PROTECTION AGENCY')")
+    conn.execute(
+        "INSERT INTO item_journal (observed_at, source_class, package_id,"
+        " granule_id, collection, source_id, digest_date, event) VALUES"
+        " (?, 'govinfo', 'FR-2026-07-02', '2026-14001', 'FR', 'govinfo-fr', ?,"
+        "  'ingested')",
+        (f"{DATE}T13:00:00Z", DATE))
+    conn.commit()
+
+
 @pytest.fixture
 def site(conn, digests, registry_root, tmp_path, monkeypatch):  # noqa: F811
     """The fixture site: build_site over the digest fixture, then the live
@@ -75,6 +98,7 @@ def site(conn, digests, registry_root, tmp_path, monkeypatch):  # noqa: F811
     publish.build_site(digests, out)
     _seed_today(conn)
     _seed_backfill(conn)
+    _seed_agency_item(conn)
     publish.build_today(conn, out_dir=out, date=DATE)
     publish.build_day(conn, DATE, out_dir=out)
     return out
@@ -117,7 +141,7 @@ def test_manifest_pins_the_identity_contract(manifest):
     s = manifest.server
     assert s.name == "info.fapd/fapd"
     assert s.title == "Free Agentic Publication Digester"
-    assert s.version == "1.0.0"
+    assert s.version == "1.1.0"          # Wave A of the field-report plan (additive inputs)
     assert s.description == ("Cited daily digests of official US federal publications."
                              " Read-only; no inference.")
     assert len(s.description) <= 100
@@ -304,3 +328,79 @@ def test_both_compose_files_mount_the_manifest_directory_this_test_validates():
         text = (PROJECT_ROOT / compose).read_text(encoding="utf-8")
         assert mount in text, compose
         assert '"/etc/static-mcp/fapd.manifest.json"' in text, compose
+
+# 4. the field-report additions (plan-2026-09-14-mcp-field-report, Wave A) --
+
+def _adapter_collections():
+    """Every collection code the pipeline can file: config.COLLECTIONS plus
+    each adapter's COLLECTION attribute (agencies.py classes; the email
+    module constant). The manifest's enum must equal this set."""
+    from fapd import agencies, config, email_sources
+
+    codes = set(config.COLLECTIONS) | {email_sources.COLLECTION}
+    for obj in vars(agencies).values():
+        if isinstance(obj, type) and isinstance(getattr(obj, "COLLECTION", None), str):
+            codes.add(obj.COLLECTION)
+    return sorted(codes)
+
+
+def test_collection_enum_equals_the_collections_the_code_can_file(manifest):
+    enum = manifest.params["collection"].enum
+    assert enum is not None
+    assert sorted(enum) == _adapter_collections() == [
+        "AGENCYPR", "BILLACTIONS", "BILLS", "CREC", "FR", "PLAW", "PRESACT", "USCOURTS", "VOTES"]
+    schema = manifest.tools_by_name["get_live_day"].input_schema
+    assert schema["properties"]["collection"]["enum"] == list(enum)
+
+
+def test_unknown_collection_is_refused_by_name_with_the_allowed_values(manifest, store):
+    status, body = _post(manifest, store, "tools/call",
+                         {"name": "get_live_day", "arguments": {"collection": "EPA"}},
+                         name="get_live_day")
+    assert status == 200 and body["error"]["code"] == -32602
+    msg = body["error"]["message"]
+    assert "collection" in msg and "AGENCYPR" in msg and "USCOURTS" in msg
+    assert "EPA" not in msg                                  # never the client's value
+
+
+def test_agency_filter_matches_the_whole_name_ignoring_case(manifest, store, site):
+    payload = json.loads((site / "today.json").read_text(encoding="utf-8"))
+    named = [i for i in payload["items"] if i.get("agency")]
+    assert named, "the fixture must carry at least one item with an agency"
+    agency = named[0]["agency"]
+    swapped = agency.swapcase()
+    assert swapped != agency
+    sc = _call(manifest, store, "get_live_day", agency=swapped,
+               include_backfill=True)["structuredContent"]
+    assert sc["total"] == len([i for i in named if i["agency"] == agency])
+    assert all(item["agency"] == agency for item in sc["items"])
+    assert "facets" in sc and "tags" in sc["facets"]          # the envelope now carries it
+    prefix = _call(manifest, store, "get_live_day", agency=agency[:-1],
+                   include_backfill=True)["structuredContent"]
+    assert prefix["total"] == 0                                # exact, not a substring
+    frozen = _call(manifest, store, "get_day_listing", date=DATE, agency=swapped,
+                   include_backfill=True)["structuredContent"]
+    assert frozen["total"] == sc["total"] and "facets" in frozen
+
+
+def test_agency_pattern_accepts_every_real_agency_name(manifest, site):
+    """The value only ever feeds an equality compare, so the pattern is
+    'any printable characters, up to 120': registry source names carry an
+    em dash and a plus sign, Federal Register agencies are upper case with
+    punctuation, and none of them may be refused."""
+    import yaml
+
+    rx = manifest.params["agency"].regex
+    registry = yaml.safe_load((PROJECT_ROOT / "sources" / "registry.yaml").read_text(encoding="utf-8"))
+    entries = registry if isinstance(registry, list) else registry.get("sources", registry)
+    names = [e.get("name") for e in (entries if isinstance(entries, list) else entries.values())
+             if isinstance(e, dict) and e.get("name")]
+    assert len(names) > 100
+    payload = json.loads((site / "today.json").read_text(encoding="utf-8"))
+    names += [i["agency"] for i in payload["items"] if i.get("agency")]
+    names += ["ENVIRONMENTAL PROTECTION AGENCY", "U.S. Attorneys News (email)",
+              "CORPORATION FOR NATIONAL AND COMMUNITY SERVICE", "GPO Bulk Data — BILLSTATUS",
+              "House Document Repository (floor + committee)", "Health & Human Services/CMS"]
+    refused = [n for n in names if not rx.fullmatch(n)]
+    assert refused == []
+    assert not rx.fullmatch("") and not rx.fullmatch("a\nb") and not rx.fullmatch("x" * 121)

@@ -54,10 +54,14 @@ record. The dated digest, frozen at the end of the day, is the record
 9. **If you speak MCP.** The read-only Model Context Protocol service at
    `https://fapd.info/mcp` offers the same listings as tools:
    `get_live_day` (step 1; it applies step 3's backfill exclusion by
-   default and takes `include_backfill` to lift it, and `collection` to
-   keep one collection), `list_day_views` (the dates that have a frozen
-   listing) and `get_day_listing` (step 7). Each answer is the published
-   file, paged; nothing is computed for you.
+   default and takes `include_backfill` to lift it, `collection` to
+   keep one collection, and `agency` to keep one agency's items — the
+   whole name, case ignored, taken from the result's `facets.tags`),
+   `list_day_views` (the dates that have a frozen listing) and
+   `get_day_listing` (step 7, same filters). For "what did agency X
+   publish this week", call `get_day_listing` once per day with
+   `agency` set. Each answer is the published file, filtered and paged;
+   nothing is computed for you.
    `https://fapd.info/agents.html#mcp` describes how to connect.
 
 ## Fields worth knowing
