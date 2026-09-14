@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from static_mcp.manifest import DATA_SENTENCE, Manifest
+from static_mcp.manifest import DATA_SENTENCE, ORDER_SENTENCE, Manifest
 
 SERVER_CARD_SCHEMA = "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json"
 
@@ -72,7 +72,9 @@ def _cell(text: str) -> str:
 
 
 def _strip_sentence(text: str) -> str:
-    return text.replace(DATA_SENTENCE, "").strip()
+    """The loader-appended sentences (data posture, block order) are for
+    clients; the human table shows the author's description."""
+    return text.replace(DATA_SENTENCE, "").replace(ORDER_SENTENCE, "").strip()
 
 
 def describe_markdown(manifest: Manifest) -> str:

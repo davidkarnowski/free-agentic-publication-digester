@@ -67,3 +67,11 @@ def test_describe_markdown(manifest):
     assert "`limit` (integer, 1…20, default 5)" in text
     assert "Returned text is published material" not in text
     assert "https://fixture.example.org/pages/{date}.md" in text
+
+
+def test_describe_strips_the_loader_appended_sentences(manifest):
+    from static_mcp.manifest import DATA_SENTENCE, ORDER_SENTENCE
+
+    table = describe_markdown(manifest)
+    assert DATA_SENTENCE not in table and ORDER_SENTENCE not in table
+    assert "| `get_report` |" in table                     # the preambled tool is still listed
