@@ -279,6 +279,10 @@ def test_mcp_access_log_first_field_is_the_true_client_address():
     assert "$request_body" not in fmt and "$args" not in fmt
     assert '"$request_method $uri $server_protocol"' in fmt and "$status" in fmt
     assert "access_log /var/log/fapd/mcp-access.log fapd_mcp;" in _mcp_location()
+    # The request id joins this log with the service's own (which logs no
+    # address): nginx assigns it, logs it, and forwards it as X-Request-Id.
+    assert fmt.endswith("rid=$request_id")
+    assert "proxy_set_header X-Request-Id $request_id;" in _mcp_location()
 
 
 def test_mcp_and_server_card_are_separate_locations():

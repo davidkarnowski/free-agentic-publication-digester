@@ -38,11 +38,13 @@ Transparency logs), like every HTTPS site's.
 the same web server logs described above. The MCP service itself logs,
 for each request, the time, the protocol method, the tool or resource
 name, the response status and size, the processing time, and the
-client's self-reported software name. It does not log your IP address,
+client's self-reported software name, and an opaque request identifier
+the web server assigns to each request so the two logs can be matched
+up. It does not log your IP address,
 the arguments you sent, or the content of any request or response. The
 web server in front of it keeps a separate access log for `/mcp`
-(address, time, method, status, size, software name; never a request
-body) used for rate limiting and to block addresses that send many
+(address, time, method, status, size, software name, the same request
+identifier; never a request body) used for rate limiting and to block addresses that send many
 rejected requests in a short time; those blocks expire on their own.
 Logs rotate on the same schedule.
 

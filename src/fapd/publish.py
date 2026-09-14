@@ -5359,8 +5359,10 @@ def _mcp_agents_md(manifest):
          " the repository."),
         ("- Privacy: the service logs the time, the protocol method, the tool"
          " or resource name, the response's status, size and processing"
-         " time, and the client's self-reported software name. It never logs"
-         " an address, an argument, or any request or response body. The web"
+         " time, the client's self-reported software name, and an opaque"
+         " request identifier the web server assigns so the two logs can be"
+         " joined. It never logs an address, an argument, or any request or"
+         " response body. The web"
          " server's own `/mcp` access log is described on the"
          " [privacy page](privacy.html)."),
         "",

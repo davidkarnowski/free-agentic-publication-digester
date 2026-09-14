@@ -57,6 +57,7 @@ RESOURCE_NAME_RE = re.compile(r"^[a-z][a-z0-9-]{0,63}$", re.ASCII)
 PARAM_NAME_RE = re.compile(r"^[a-z][a-z0-9_]{0,63}$", re.ASCII)
 PLACEHOLDER_RE = re.compile(r"\{([^{}]*)\}")
 SELECT_RE = re.compile(r"^[A-Za-z0-9_-]+(\.[A-Za-z0-9_-]+)*$", re.ASCII)
+HEADER_NAME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9-]{0,63}$")
 HOST_RE = re.compile(r"^[a-z0-9._:-]+$", re.ASCII)
 URL_RE = re.compile(r"^https?://[^\s/?#]+(?:/[^\s?#]*[^\s/?#])?$", re.ASCII)
 WEB_URL_RE = re.compile(r"^https?://[^\s/?#]+(?:/[^\s]*)?$", re.ASCII)
@@ -235,6 +236,11 @@ class HttpSettings:
     max_body_bytes: int = 65536
     max_concurrency: int = 16
     request_timeout_seconds: int = 10
+    # Name of a request header whose value the server copies into its log
+    # line as `request_id`, so a reverse proxy that assigns one (nginx's
+    # $request_id) lets its own log and this one be joined without either
+    # side logging a client address. None: the field is logged as null.
+    request_id_header: str | None = None
 
 
 @dataclass(frozen=True)
@@ -736,6 +742,7 @@ def _parse_http(raw: Any) -> HttpSettings:
             "max_body_bytes",
             "max_concurrency",
             "request_timeout_seconds",
+            "request_id_header",
         },
         {"allowed_hosts"},
         where,
@@ -752,6 +759,9 @@ def _parse_http(raw: Any) -> HttpSettings:
     for o in origins:
         if o != "null" and not re.match(r"^https?://[^\s/?#]+$", o, re.ASCII):
             raise _err(where, "allowed_origins entries must be scheme://host[:port] origins")
+    rid = raw.get("request_id_header")
+    if rid is not None and (not isinstance(rid, str) or not HEADER_NAME_RE.match(rid)):
+        raise _err(where, "request_id_header must be an HTTP header name (token characters)")
     return HttpSettings(
         allowed_hosts=frozenset(h.lower() for h in hosts),
         allowed_origins=frozenset(o.lower() for o in origins),
@@ -759,6 +769,7 @@ def _parse_http(raw: Any) -> HttpSettings:
         max_body_bytes=_int(raw, "max_body_bytes", where, default=65536, lo=1, hi=CEILING_BODY_BYTES),
         max_concurrency=_int(raw, "max_concurrency", where, default=16, lo=1, hi=CEILING_CONCURRENCY),
         request_timeout_seconds=_int(raw, "request_timeout_seconds", where, default=10, lo=1, hi=300),
+        request_id_header=rid,
     )
 
 

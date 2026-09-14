@@ -50,6 +50,9 @@ from static_mcp.manifest import Manifest
 
 _UA_CLEAN_RE = re.compile(r"[^\x20-\x7e]")
 _MAX_UA = 200
+# A proxy-assigned request id is an opaque token; anything else is logged
+# as "(invalid)" so a client cannot write free text into the log field.
+_REQUEST_ID_RE = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
 _LOG_FIELDS = (
     "ts",
     "http_method",
@@ -62,6 +65,7 @@ _LOG_FIELDS = (
     "duration_ms",
     "response_bytes",
     "user_agent",
+    "request_id",
     "event",
 )
 
@@ -170,6 +174,12 @@ class Handler(BaseHTTPRequestHandler):
     def _log(self, status: int, size: int, started: float, fields: dict[str, Any]) -> None:
         app = self.server.app
         ua = self.headers.get("User-Agent", "") or ""
+        rid_header = app.manifest.http.request_id_header
+        request_id = None
+        if rid_header:
+            raw_rid = self.headers.get(rid_header)
+            if raw_rid is not None:
+                request_id = raw_rid if _REQUEST_ID_RE.match(raw_rid) else "(invalid)"
         record = {
             "ts": app.utcnow().isoformat(timespec="milliseconds").replace("+00:00", "Z"),
             "http_method": self.command,
@@ -178,6 +188,7 @@ class Handler(BaseHTTPRequestHandler):
             "duration_ms": round((app.clock() - started) * 1000, 3),
             "response_bytes": size,
             "user_agent": _UA_CLEAN_RE.sub("", ua)[:_MAX_UA],
+            "request_id": request_id,
             **fields,
         }
         app.log(record)

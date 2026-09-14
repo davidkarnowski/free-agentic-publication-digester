@@ -159,3 +159,43 @@ def test_error_messages_never_echo_client_values(running):
         data = json.loads(body)
         assert "error" in data
         assert token not in body.decode().lower()
+
+
+# ---------------------------------------------------------- request id --
+
+
+def test_request_id_is_logged_only_when_configured_and_only_as_a_token(store):
+    """A proxy-assigned request id joins the proxy's log (which has the
+    address) with this one (which has the method) without either logging
+    the other's field. Unconfigured: null. Configured: the header's value
+    when it is an opaque token, "(invalid)" otherwise — a client must not
+    be able to write free text into the field."""
+    plain = start_server(build_manifest(), store)
+    try:
+        plain.post(modern_request("r1", "server/discover"),
+                   {**modern_headers("server/discover"), "X-Request-Id": "abc123"})
+        assert plain.logs()[-1]["request_id"] is None
+    finally:
+        plain.stop()
+    joined = start_server(build_manifest(http={"request_id_header": "X-Request-Id"}), store)
+    try:
+        joined.post(modern_request("r2", "server/discover"),
+                    {**modern_headers("server/discover"), "X-Request-Id": "7f3a9c0e-b1"})
+        assert joined.logs()[-1]["request_id"] == "7f3a9c0e-b1"
+        joined.post(modern_request("r3", "server/discover"),
+                    {**modern_headers("server/discover"), "X-Request-Id": "not a token; x=1"})
+        assert joined.logs()[-1]["request_id"] == "(invalid)"
+        joined.post(modern_request("r4", "server/discover"), modern_headers("server/discover"))
+        assert joined.logs()[-1]["request_id"] is None
+        assert "not a token" not in "\n".join(joined.log_lines)
+    finally:
+        joined.stop()
+
+
+def test_request_id_header_name_must_be_a_header_token():
+    from static_mcp.errors import ManifestError
+
+    with pytest.raises(ManifestError):
+        build_manifest(http={"request_id_header": "X Request Id"})
+    with pytest.raises(ManifestError):
+        build_manifest(http={"request_id_header": 7})

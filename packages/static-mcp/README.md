@@ -73,7 +73,8 @@ Stage L0 is your reverse proxy; L1 to L8 are this package.
 - **Logs without bodies or addresses.** One JSON line per request on
   stdout: `ts`, `http_method`, `path`, `status`, `rpc_method`, `mcp_name`,
   `era`, `protocol_version`, `duration_ms`, `response_bytes`,
-  `user_agent` (200 characters), `event`. Never logged: the client
+  `user_agent` (200 characters), `request_id` (the proxy-assigned token
+  named by `http.request_id_header`, or `null`), `event`. Never logged: the client
   address, the request body, arguments, `Authorization` or any other
   header. The path is logged only when it names the endpoint or
   `/healthz`; anything else is `(other)`. Tracebacks go to stderr and
@@ -120,6 +121,7 @@ location = /mcp {
     proxy_http_version 1.1;
     proxy_set_header Connection "";
     proxy_set_header Host $host;
+    proxy_set_header X-Request-Id $request_id;   # optional: joins the two logs
     proxy_request_buffering on;      # the service never sees a slow body
     proxy_next_upstream off;         # never replay a POST
     proxy_connect_timeout 2s;
@@ -145,18 +147,26 @@ falls back to `$remote_addr` when the header is empty):
 
 ```nginx
 log_format mcp '$client_addr - [$time_local] "$request_method $uri $server_protocol" '
-               '$status $body_bytes_sent rt=$request_time "$http_user_agent"';
+               '$status $body_bytes_sent rt=$request_time "$http_user_agent" rid=$request_id';
 ```
 
 A filter that counts transport and protocol rejections but not 404 (a
 modern client probing an unimplemented method legitimately gets
-404/`-32601`):
+404/`-32601`) and not 429 (a rate-limit hit is the proxy's limit doing
+its job; counting it bans eager honest clients and everyone behind a
+shared egress address):
 
 ```ini
 [Definition]
-failregex = ^<HOST> - \[[^\]]+\] "POST /mcp [^"]*" (400|403|405|413|415|429)
+failregex = ^<HOST> - \[[^\]]+\] "POST /mcp [^"]*" (400|403|405|413|415)\s
 ignoreregex =
 ```
+
+The `rid=$request_id` at the end of the log line, forwarded to the
+service as a header and named in the manifest as
+`http.request_id_header`, is what lets the proxy's log (which has the
+address) and the service's log (which has the method and tool) be
+joined without either logging the other's field.
 
 Keep thresholds generous (for example 20 rejections in 10 minutes) and
 bans finite: MCP clients often share egress addresses, and the proxy's
@@ -208,6 +218,7 @@ uses every handler kind.
 | `max_body_bytes` | 65536 | ceiling 1 MiB |
 | `max_concurrency` | 16 | requests in flight before 503; ceiling 64 |
 | `request_timeout_seconds` | 10 | socket timeout; 1 to 300 |
+| `request_id_header` | unset | name of a header whose value (an opaque token of up to 64 `[A-Za-z0-9._-]` characters, else `(invalid)`) is logged as `request_id`, so the reverse proxy's log and this one can be joined without either logging a client address; unset → `request_id` is logged as `null` |
 
 ### `params`
 

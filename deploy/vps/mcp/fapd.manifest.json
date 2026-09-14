@@ -22,7 +22,8 @@
     "allow_missing_origin": true,
     "max_body_bytes": 65536,
     "max_concurrency": 16,
-    "request_timeout_seconds": 10
+    "request_timeout_seconds": 10,
+    "request_id_header": "X-Request-Id"
   },
   "limits": {"max_file_bytes": 16777216, "max_result_bytes": 524288},
   "cache": {"ttl_ms": 300000, "scope": "public"},

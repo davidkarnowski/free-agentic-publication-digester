@@ -417,9 +417,11 @@ not reusable.)*
 - **Trigger:** the next fail2ban reload on the box (a config change,
   the C-6 jail install, a package upgrade), or the next time the
   verification blocks run from a new address.
-- **Fix path:** `ignoreip` in the cohabitant's jail files
-  (spiralyst-site tree, operator-applied), or a documented rule that
-  the §5.2/§5.3 probes run only from an ignored address. Our own
+- **Staged 2026-09-14 (same day):** `scripts/staged/2026-09-14-fail2ban-adjustments.sh`
+  writes a box-local `jail.d/zz-operator-ignore.local` with a
+  `[DEFAULT] ignoreip` (survives reloads; not in any repository), and
+  OPS-GUIDE now says the probes run only from an ignored address.
+  Closes when the operator has run it. Our own
   `fapd-mcp` jail file already lists loopback and the Docker ranges;
   the operator's address is a per-box fact and does not belong in the
   repository.
@@ -451,3 +453,8 @@ not reusable.)*
   count.
 - **Trigger:** the next session with `npx` available and the operator
   present; also a prerequisite for closing the plan's item 2.
+- **Done 2026-09-14 (half):** MCP Inspector CLI against production —
+  `tools/list` (eight tools) and `tools/call get_live_day` — recorded in
+  the WORKLOG; the plan's two-client requirement is met. Remaining: the
+  conformance suite's read-only server scenarios against the
+  production URL, request count recorded.

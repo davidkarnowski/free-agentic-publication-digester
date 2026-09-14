@@ -185,10 +185,14 @@ Requests pass through the normal web server access logs (see
 `docs/site/privacy.md`). The MCP service itself writes one JSON line per
 request to its container log: time, HTTP method, path, status, protocol
 method, tool or resource name, protocol era and version, duration,
-response size, and the client's self-reported User-Agent (truncated).
-**It never logs the client IP, the request body, the arguments, or any
-header beyond User-Agent.** Logs rotate at 5 MB × 3 files, like every
-FAPD container.
+response size, the client's self-reported User-Agent (truncated), and
+the request id nginx assigned (`request_id`, forwarded as
+`X-Request-Id`; since 2026-09-14). **It never logs the client IP, the
+request body, the arguments, or any header beyond User-Agent and
+X-Request-Id.** The same id ends every line of fapd-web's `/mcp` access
+log (`rid=`), so an address there and a tool name here join on it and
+neither log has to carry the other's field. Logs rotate at 5 MB × 3
+files, like every FAPD container.
 
 `fapd-web` additionally keeps a dedicated `/mcp` access log for the
 fail2ban jail (`/opt/fapd/logs/mcp-access.log`, `fapd_mcp` format):

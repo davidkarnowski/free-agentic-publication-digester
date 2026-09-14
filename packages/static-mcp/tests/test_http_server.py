@@ -189,7 +189,8 @@ def test_log_line_fields(running):
     line = running.logs()[-1]
     assert set(line) == {"ts", "http_method", "path", "status", "rpc_method", "mcp_name", "era",
                          "protocol_version", "duration_ms", "response_bytes", "user_agent",
-                         "event"}
+                         "request_id", "event"}
+    assert line["request_id"] is None                 # no request_id_header in the fixture
     assert line["http_method"] == "POST" and line["path"] == running.endpoint
     assert line["status"] == 200 and line["rpc_method"] == "tools/call"
     assert line["mcp_name"] == "about" and line["era"] == "modern"
