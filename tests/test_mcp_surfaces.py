@@ -312,3 +312,23 @@ def test_skills_name_real_tools_for_the_mcp_step():
             assert f"`{name}`" in step, (skill, name)
         for name in re.findall(r"`([a-z_]+)`", step):
             assert name in known, (skill, name)
+
+
+# ------------------------------------------------------- registry proof --
+
+
+def test_registry_proof_file_is_built_only_when_the_line_is_set(digests, tmp_path, monkeypatch):  # noqa: F811
+    monkeypatch.setattr(config, "SITE_BASE_URL", "")
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    assert not (out / ".well-known" / "mcp-registry-auth").exists()
+    line = "v=MCPv1; k=ed25519; p=AAAAC3NzaC1lZDI1NTE5AAAAIExampleOnlyNotARealKey"
+    monkeypatch.setattr(publish, "MCP_REGISTRY_AUTH_LINE", line + "  \n")
+    out2 = tmp_path / "site2"
+    publish.build_site(digests, out2)
+    proof = out2 / ".well-known" / "mcp-registry-auth"
+    assert proof.read_text(encoding="utf-8") == line + "\n"
+    # Timestamp-free and byte-stable, like every discovery document.
+    out3 = tmp_path / "site3"
+    publish.build_site(digests, out3)
+    assert (out3 / ".well-known" / "mcp-registry-auth").read_bytes() == proof.read_bytes()

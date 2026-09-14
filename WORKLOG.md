@@ -5898,3 +5898,74 @@ copies, public since the Phase 4B commit; the thresholds they carried
 are still described in prose in the MCP guide. Rewriting history would
 need a force-push to `main`, which the ruleset forbids and the
 operator has not asked for.
+
+## 2026-09-14 — The Cloudflare re-scan, the egress ruling, the post-reboot check, and what DNS can and cannot do
+
+**Cloudflare Radar re-scan** (operator's account; JSON at
+`research/Cloudflare_Access/0938d8b5-1656-47a4-ad11-17a3bad888da.json`,
+2026-09-14 18:09 UTC): **Level 4, "Agent-Integrated"**, from Level 1
+"Basic Web Presence" on 2026-09-12. Same grader as isitagentready.com,
+same per-check results. Before → after, the sixteen scored checks:
+
+| Check | 2026-09-12 | 2026-09-14 | Note |
+|---|---|---|---|
+| robots.txt | pass | pass | |
+| sitemap | pass | pass | |
+| Link headers (RFC 8288) | fail | **pass** | five relations |
+| DNS-AID | fail | fail | needs SVCB/HTTPS records the DNS host cannot publish (below) |
+| Markdown negotiation | fail | **pass** | |
+| AI crawler rules | pass | pass | wildcard |
+| Content Signals | fail | **pass** | |
+| API catalog (RFC 9727) | fail | **pass** | two APIs |
+| OAuth discovery | fail | fail | declined by design |
+| OAuth protected resource | fail | fail | declined by design |
+| auth.md | fail | fail | exists; says there is no registration — a scanner disagreement, left as it is |
+| MCP server card | fail | **pass** | |
+| A2A agent card | fail | fail | declined by design |
+| Agent Skills | fail | **pass** | four skills, v0.2.0 |
+| WebMCP | fail | fail | declined by design |
+| ARD / AI catalog | fail | **pass** | eleven resources |
+
+Web Bot Auth neutral both times (Phase 7); the five commerce checks
+neutral ("not a commerce site"). The grader's "next level" asks for an
+auth.md that advertises OAuth registration and an A2A card; neither is
+something this site operates, so Level 4 is the honest ceiling.
+
+**Egress ruling applied.** The operator took the recommendation: the
+four nginx jails now ignore Cloudflare's published ranges (v4 and v6,
+fetched 2026-09-14), through a `[DEFAULT]` that carries only two
+interpolation keys, one for the ranges and one the box-local file sets
+to the operator's address; sshd keeps the box-local list and does not
+ignore Cloudflare. Config-tested, reloaded, the 27 Cloudflare-range
+addresses the noscript jail held were released. Committed in the
+private host tree.
+
+**After the reboot** (operator, 18:16 UTC): all five containers
+healthy; fail2ban entered active in the same second as Docker, after
+it; the ban database and the firewall agree (27 nginx bans in both;
+the one extra database entry is the sshd jail, which bans through
+nftables). The `f2b-fapd-mcp` chain survived the reboot. That is the
+Spiralyst TODO §6.1 bug fixed and verified.
+
+**Phase 6, DNS: not possible at Hostinger.** Their own articles:
+DNSSEC "is not supported" for a domain pointing to Hostinger's
+nameservers, which fapd.info does (dns-parking NS); the zone editor
+supports A, AAAA, CNAME, MX, TXT, NS, SRV and CAA, not SVCB or HTTPS.
+DNS-AID needs `_agents`-namespace SVCB/HTTPS records and a DNSSEC-
+signed zone. Both would need a DNS move, which the operator ruled out
+(D5). Phase 6 closes as "not available at this DNS host", recorded in
+the plan; the two checks stay red for a stated reason.
+
+**MCP Registry (C-4), ready for the operator's key.** `static-mcp
+registry-json` produced the `server.json` (schema 2025-12-11, name
+`info.fapd/fapd`, remote `https://fapd.info/mcp`). The site now builds
+`/.well-known/mcp-registry-auth` from a constant in `publish.py`, empty
+until the operator supplies the public line; nginx serves it as
+`text/plain` without CORS; pinned by tests. The walk-through is in the
+session record and the plan.
+
+**Filed:** an outside AI agent's review of the deployed agentic layer,
+verbatim, at `research/Cloudflare_Access/outside-agent-review-2026-09-14.md`.
+Its one actionable idea — structured citation metadata beside MCP
+results so downstream agents keep the government citation, not the
+tool result, as the source — is OB-25.

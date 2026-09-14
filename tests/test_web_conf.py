@@ -393,3 +393,14 @@ def test_rehearsal_runs_the_mcp_rows_on_an_internal_throwaway_network():
 def test_shell_scripts_parse():
     for script in (DEPLOY_SH, NGINX / "rehearse.sh"):
         subprocess.run(["bash", "-n", str(script)], check=True)
+
+
+def test_registry_proof_file_is_text_plain_without_cors():
+    """/.well-known/mcp-registry-auth (master plan §8.1): text/plain, no CORS."""
+    live = _live(_conf())
+    m = re.search(r"location = /\.well-known/mcp-registry-auth \{(.*?)\}", live, re.DOTALL)
+    assert m, "no exact-match location for the registry proof file"
+    body = m.group(1)
+    assert "default_type text/plain;" in body
+    assert "fapd-static-methods.inc" in body
+    assert "fapd-cors.inc" not in body

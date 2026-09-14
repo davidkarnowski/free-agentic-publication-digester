@@ -459,3 +459,19 @@ not reusable.)*
   the WORKLOG; the plan's two-client requirement is met. Remaining: the
   conformance suite's read-only server scenarios against the
   production URL, request count recorded.
+
+**OB-25 — Structured citation metadata beside MCP results**
+- **Gap:** an outside agent's review of the deployed MCP service
+  (2026-09-14, filed in the operator's research notes) points out that
+  `get_digest` returns the digest verbatim, so a downstream agent can
+  answer from it and cite the tool result rather than the official
+  source each item links to. FAPD's rule is right (cite the official
+  source for claims, FAPD for the aggregation) but nothing makes it
+  mechanically easy.
+- **Idea:** a machine-readable citation manifest per digest (claim /
+  source_url / source_type / govinfo id / digest / selection rule /
+  generated_text flag), exposed as MCP structured content or as a
+  static file beside the Markdown — not a new tool, not inference.
+- **Trigger:** FAPD becoming an upstream source for another autonomous
+  research system, or a reader reporting a mis-citation traced to the
+  MCP path. Editorial owns the schema; Publication the surface.
