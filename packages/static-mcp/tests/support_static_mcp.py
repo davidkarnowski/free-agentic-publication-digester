@@ -12,6 +12,7 @@ import json
 import socket
 import sys
 import threading
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -115,22 +116,38 @@ class RunningServer:
         raw = body if isinstance(body, bytes) else json.dumps(body).encode("utf-8")
         h = {**BASE_HEADERS, **(headers or {})}
         h = {k: v for k, v in h.items() if v is not None}
+        before = len(self.log_lines)
         conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
         try:
             conn.request("POST", path or self.endpoint, body=raw, headers=h)
             resp = conn.getresponse()
-            return resp.status, {k.lower(): v for k, v in resp.getheaders()}, resp.read()
+            result = resp.status, {k.lower(): v for k, v in resp.getheaders()}, resp.read()
         finally:
             conn.close()
+        self._settle(before)
+        return result
 
     def request(self, method: str, path: str, headers: dict[str, str] | None = None):
+        before = len(self.log_lines)
         conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
         try:
             conn.request(method, path, headers={"Host": "localhost", **(headers or {})})
             resp = conn.getresponse()
-            return resp.status, {k.lower(): v for k, v in resp.getheaders()}, resp.read()
+            result = resp.status, {k.lower(): v for k, v in resp.getheaders()}, resp.read()
         finally:
             conn.close()
+        self._settle(before)
+        return result
+
+    def _settle(self, before: int, limit: float = 2.0) -> None:
+        """Wait for this request's log line. The server writes the response
+        and then logs, so a client can read the body before the line lands;
+        a test that inspects `logs()[-1]` right after a request would race.
+        Bounded: a request that logs nothing (there is none) returns after
+        `limit` seconds rather than hanging."""
+        deadline = time.monotonic() + limit
+        while len(self.log_lines) <= before and time.monotonic() < deadline:
+            time.sleep(0.001)
 
     def raw(self, headers: list[tuple[str, str]], body: bytes, *, method: str = "POST",
             path: str | None = None, timeout: float = 10) -> tuple[int, dict[str, str], bytes]:
@@ -138,12 +155,15 @@ class RunningServer:
         lines = [f"{method} {path or self.endpoint} HTTP/1.1"]
         lines += [f"{k}: {v}" for k, v in headers]
         head = ("\r\n".join(lines) + "\r\n\r\n").encode("latin-1")
+        before = len(self.log_lines)
         with socket.create_connection(("127.0.0.1", self.port), timeout=timeout) as sock:
             sock.sendall(head + body)
             resp = http.client.HTTPResponse(sock, method=method)
             resp.begin()
             data = resp.read()
-            return resp.status, {k.lower(): v for k, v in resp.getheaders()}, data
+            result = resp.status, {k.lower(): v for k, v in resp.getheaders()}, data
+        self._settle(before)
+        return result
 
     def logs(self) -> list[dict[str, Any]]:
         return [json.loads(line) for line in self.log_lines]
