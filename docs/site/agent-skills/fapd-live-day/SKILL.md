@@ -61,7 +61,8 @@ record. The dated digest, frozen at the end of the day, is the record
    `get_day_listing` (step 7, same filters). For "what did agency X
    publish this week", call `get_day_listing` once per day with
    `agency` set. Each answer is the published file, filtered and paged;
-   nothing is computed for you.
+   nothing is computed for you; the payload is the first content block
+   and the PRELIMINARY disclosure the last.
    `https://fapd.info/agents.html#mcp` describes how to connect.
 
 ## Fields worth knowing

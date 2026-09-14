@@ -91,11 +91,13 @@ def test_tools_and_resources_tables_match_static_mcp_describe(site):
     raw = publish._mcp_manifest()
     expected = _table_lines(describe_markdown(manifest))
     assert expected, "describe_markdown rendered no table"
-    assert _table_lines(publish._mcp_agents_md(raw)) == expected
+    # The page's question table precedes the tools table; the drift check
+    # covers the tools and resources tables, which describe generates.
+    assert _table_lines(publish._mcp_agents_md(raw).split("### Tools", 1)[1]) == expected
     # The twin carries the same rows, so an agent reading Markdown sees
     # exactly what `static-mcp describe` prints.
     twin = (site / "agents.md").read_text(encoding="utf-8")
-    assert _table_lines(twin) == expected
+    assert _table_lines(twin.split("### Tools", 1)[1]) == expected
 
 
 # --------------------------------------------------------------- AC 2 ---
@@ -157,6 +159,7 @@ def test_agents_mcp_section_is_generated_from_the_manifest(site):
     for tool in raw["tools"]:
         assert f"<code>{tool['name']}</code>" in section, tool["name"]
     for phrase in ("no inference", "No search", "no sessions", "no streaming",
+                   "payload is the first content block", "Which tool answers which question",
                    "429", "never logs an address", "mcp/server-card",
                    "docs/mcp-server.md", "packages/static-mcp"):
         assert phrase in section, phrase
@@ -172,14 +175,15 @@ def test_agents_mcp_tables_are_captioned_and_accessible(site):
     agents = (site / "agents.html").read_text(encoding="utf-8")
     tables = re.findall(r'<div class="table-scroll" role="region" tabindex="0"'
                         r'[^>]*><table>(.*?)</table></div>', agents, re.DOTALL)
-    assert len(tables) == 2, "the agents page carries exactly the two MCP tables"
+    assert len(tables) == 3, "the agents page carries exactly the three MCP tables"
     for table, caption in zip(tables, publish._MCP_TABLE_CAPTIONS, strict=True):
         assert table.startswith(f"<caption>{caption}</caption>")
         assert '<th scope="col">' in table
         assert "<th>" not in table
     # No table on the page is left bare.
-    assert agents.count("<table>") == 2
+    assert agents.count("<table>") == 3
     # The wrapper is labelled by the nearest preceding heading.
+    assert 'aria-labelledby="which-tool-answers-which-question"' in agents
     assert 'aria-labelledby="tools"' in agents
     assert 'aria-labelledby="resources"' in agents
 
@@ -299,6 +303,7 @@ def test_skills_name_real_tools_for_the_mcp_step():
     # A backticked snake_case word in the step is a tool or one of its
     # parameters; anything else is a name the service does not know.
     known = {tool["name"] for tool in raw["tools"]} | set(raw["params"])
+    known |= {v for p in raw["params"].values() for v in p.get("enum", [])}   # section names
     expected = {
         "fapd-daily-digest": {"list_digests", "get_digest"},
         "fapd-live-day": {"get_live_day", "list_day_views", "get_day_listing"},

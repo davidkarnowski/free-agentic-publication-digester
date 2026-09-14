@@ -3,7 +3,7 @@
   "server": {
     "name": "info.fapd/fapd",
     "title": "Free Agentic Publication Digester",
-    "version": "1.1.0",
+    "version": "2.0.0",
     "description": "Cited daily digests of official US federal publications. Read-only; no inference.",
     "websiteUrl": "https://fapd.info/agents.html",
     "repository": {
@@ -11,7 +11,7 @@
       "source": "github",
       "subfolder": "packages/static-mcp"
     },
-    "instructions": "The Free Agentic Publication Digester publishes a validated daily digest of official United States federal publications. Congressional, executive and judicial items are selected by mechanical, party-blind rules, and every item cites its official source. This service returns published files verbatim; no model writes its responses. Dated digests are the record. The live day (get_live_day) is preliminary and changes until the end-of-day gates freeze it. Lines labeled FAPD-AI are the project's model-written restatements. For factual claims, cite the official source linked on each item, and credit FAPD for the aggregation (CC BY 4.0)."
+    "instructions": "The Free Agentic Publication Digester publishes a validated daily digest of official United States federal publications. Congressional, executive and judicial items are selected by mechanical, party-blind rules, and every item cites its official source. This service returns published files verbatim; no model writes its responses. Dated digests are the record. The live day (get_live_day) is preliminary and changes until the end-of-day gates freeze it. Lines labeled FAPD-AI are the project's model-written restatements. For factual claims, cite the official source linked on each item, and credit FAPD for the aggregation (CC BY 4.0). The digest summarizes a rule-selected subset of the day and counts the rest; for every item an agency or collection published on a day, use get_day_listing (finished days) or get_live_day (today), with collection and agency to narrow. The digest's Coverage Statement says what was counted only and why; get_digest with section 'coverage' returns just that block."
   },
   "public_base_url": "https://fapd.info",
   "endpoint_path": "/mcp",
@@ -98,6 +98,28 @@
       "pattern": "^[^\\x00-\\x1f\\x7f]{1,120}$",
       "maxLength": 120,
       "description": "Keep only items whose agency equals this whole value, ignoring case — not a substring. Take the value from facets.tags or items[].agency (for example Environmental Protection Agency, or a source name such as NASA News Releases)."
+    },
+    "section": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]{1,16}$",
+      "enum": [
+        "header",
+        "contents",
+        "day-in-review",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "terms",
+        "coverage",
+        "methodology"
+      ],
+      "description": "One block of the digest, verbatim: header (the title and the header table with the Inference row), contents, day-in-review (when composed), 1 to 9 (the numbered sections), terms, coverage (the Coverage Statement), methodology."
     }
   },
   "resources": [
@@ -215,11 +237,14 @@
     {
       "name": "get_digest",
       "title": "Get a digest",
-      "description": "Returns the canonical Markdown digest for a published day, verbatim, after a one-paragraph disclosure.",
+      "description": "Returns the canonical Markdown digest for a published day, verbatim; with section, one heading block of it. The digest summarizes a rule-selected subset of the day and counts the rest — for every item an agency or collection published, use get_day_listing.",
       "params": {
         "date": {
           "ref": "date",
           "required": true
+        },
+        "section": {
+          "ref": "section"
         }
       },
       "preamble": "Canonical digest Markdown from fapd.info, returned verbatim (CC BY 4.0). Text labeled FAPD-AI is model-written restatement; cite each item's official source for claims.",
@@ -227,7 +252,28 @@
         "kind": "text_file",
         "file": "{date}.md",
         "mime_type": "text/markdown",
-        "not_found": "No digest was published for {date}. Call list_digests for published dates; weekends and federal holidays often have none."
+        "not_found": "No digest was published for {date}. Call list_digests for published dates; weekends and federal holidays often have none.",
+        "sections": {
+          "param": "section",
+          "level": 2,
+          "map": {
+            "header": null,
+            "contents": "Contents",
+            "day-in-review": "Day in Review",
+            "1": "1. ",
+            "2": "2. ",
+            "3": "3. ",
+            "4": "4. ",
+            "5": "5. ",
+            "6": "6. ",
+            "7": "7. ",
+            "8": "8. ",
+            "9": "9. ",
+            "terms": "Terms Used Today",
+            "coverage": "Coverage Statement",
+            "methodology": "Methodology"
+          }
+        }
       }
     },
     {
@@ -323,7 +369,7 @@
     {
       "name": "get_day_listing",
       "title": "Get a frozen day listing",
-      "description": "Returns a finished day's frozen observed listing with its disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection; agency keeps one agency's items (exact name, case ignored) — facets.tags in the result lists the agencies present.",
+      "description": "Returns a finished day's complete frozen observed listing — every item, including the ones the digest only counted — with its disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection; agency keeps one agency's items (exact name, case ignored) — facets.tags in the result lists the agencies present.",
       "params": {
         "date": {
           "ref": "date",

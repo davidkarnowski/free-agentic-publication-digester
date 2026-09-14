@@ -103,7 +103,7 @@ advertised method is not implemented").
 Every tool is read-only, idempotent and closed-world (annotations say so
 and can't be changed by configuration). The table below is the output of
 `PYTHONPATH=packages/static-mcp/src python -m static_mcp describe
---manifest deploy/vps/mcp/fapd.manifest.json` on 2026-09-14 (surface 1.1.0); regenerate
+--manifest deploy/vps/mcp/fapd.manifest.json` on 2026-09-14 (surface 2.0.0); regenerate
 it after any manifest change. Every field each tool projects or filters
 on was checked against a site the real renderer built before the
 manifest was written (`tests/test_mcp_manifest.py` repeats the check on
@@ -112,12 +112,12 @@ every run).
 | Tool | Returns | Parameters |
 |---|---|---|
 | `list_digests` | Lists published digest days, newest first: date, page URL, canonical Markdown path and teaser. | `offset` (integer, 0…10000, default 0); `limit` (integer, 1…60, default 14) |
-| `get_digest` | Returns the canonical Markdown digest for a published day, verbatim, after a one-paragraph disclosure. | `date` (string, required) |
-| `get_live_day` | Returns today's PRELIMINARY observed items with the day's disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection; agency keeps one agency's items (exact name, case ignored) — facets.tags in the result lists the agencies present. | `offset` (integer, 0…10000, default 0); `limit` (integer, 1…100, default 50); `include_backfill` (boolean, default False); `collection` (string, one of AGENCYPR, BILLACTIONS, BILLS, CREC, FR, PLAW, PRESACT, USCOURTS, VOTES); `agency` (string) |
+| `get_digest` | Returns the canonical Markdown digest for a published day, verbatim; with section, one heading block of it. The digest summarizes a rule-selected subset of the day and counts the rest — for every item an agency or collection published, use get_day_listing. The payload is the first content block; the disclosure is the last. | `date` (string, required); `section` (string, one of header, contents, day-in-review, 1, 2, 3, 4, 5, 6, 7, 8, 9, terms, coverage, methodology) |
+| `get_live_day` | Returns today's PRELIMINARY observed items with the day's disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection; agency keeps one agency's items (exact name, case ignored) — facets.tags in the result lists the agencies present. The payload is the first content block; the disclosure is the last. | `offset` (integer, 0…10000, default 0); `limit` (integer, 1…100, default 50); `include_backfill` (boolean, default False); `collection` (string, one of AGENCYPR, BILLACTIONS, BILLS, CREC, FR, PLAW, PRESACT, USCOURTS, VOTES); `agency` (string) |
 | `list_day_views` | Lists the days that have a frozen observed listing, newest first. | `offset` (integer, 0…10000, default 0); `limit` (integer, 1…366, default 30) |
-| `get_day_listing` | Returns a finished day's frozen observed listing with its disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection; agency keeps one agency's items (exact name, case ignored) — facets.tags in the result lists the agencies present. | `date` (string, required); `offset` (integer, 0…10000, default 0); `limit` (integer, 1…100, default 50); `include_backfill` (boolean, default False); `collection` (string, one of AGENCYPR, BILLACTIONS, BILLS, CREC, FR, PLAW, PRESACT, USCOURTS, VOTES); `agency` (string) |
-| `list_sources` | Lists the source directory as a summary per source: identity, method, status and health label. get_source returns one source's full record including daily activity; the source-directory resource is the whole file. | `offset` (integer, 0…10000, default 0); `limit` (integer, 1…200, default 50) |
-| `get_source` | Returns one source's full record: registry entry, ingestion statistics, health and daily activity. | `source_id` (string, required) |
+| `get_day_listing` | Returns a finished day's complete frozen observed listing — every item, including the ones the digest only counted — with its disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection; agency keeps one agency's items (exact name, case ignored) — facets.tags in the result lists the agencies present. The payload is the first content block; the disclosure is the last. | `date` (string, required); `offset` (integer, 0…10000, default 0); `limit` (integer, 1…100, default 50); `include_backfill` (boolean, default False); `collection` (string, one of AGENCYPR, BILLACTIONS, BILLS, CREC, FR, PLAW, PRESACT, USCOURTS, VOTES); `agency` (string) |
+| `list_sources` | Lists the source directory as a summary per source: identity, method, status and health label. get_source returns one source's full record including daily activity; the source-directory resource is the whole file. The payload is the first content block; the disclosure is the last. | `offset` (integer, 0…10000, default 0); `limit` (integer, 1…200, default 50) |
+| `get_source` | Returns one source's full record: registry entry, ingestion statistics, health and daily activity. The payload is the first content block; the disclosure is the last. | `source_id` (string, required) |
 | `get_agent_guide` | Returns llms.txt: the plain-text guide to every published surface. | — |
 
 | Resource | URI | Type |
@@ -157,13 +157,27 @@ Limits as configured: body 64 KiB, 16 concurrent requests, file 16 MiB
 (a heavy day's JSON has measured 3.7 MB), result 512 KiB with disclosed
 truncation, socket timeout 10 s, cache hints `ttlMs` 300000 / `public`.
 
-**The disclosures travel.** `get_digest` and `get_day_listing` start
-with a statement that the text is the published file, that FAPD-AI lines
-are model-written restatements, and that factual claims should cite each
-item's official source. `get_live_day` starts with PRELIMINARY. Every
-tool that reads `sources.json` states that its statistics describe our
-ingestion. The server's `instructions` repeat the citation and
-record-versus-preliminary rules.
+**The disclosures travel — last, since 2.0.0.** `get_digest` and
+`get_day_listing` end with a statement that the text is the published
+file, that FAPD-AI lines are model-written restatements, and that
+factual claims should cite each item's official source; `get_live_day`
+ends with PRELIMINARY; every tool that reads the source directory says
+its statistics describe our ingestion. **The payload is always the
+first content block**, and every tool with a disclosure says so at the
+end of its description. (Until 2.0.0 the disclosure came first, and an
+outside agent's script that read only the first block reported the
+digests as empty — field report, 2026-09-14.) Tools that return JSON
+(`list_digests`, the day and source tools) also carry the value in
+`structuredContent` and declare an `outputSchema` for it; the text
+tools return content only, because a digest doubled would sit against
+the 512 KiB result cap. `get_digest` takes `section` to return one
+heading block verbatim (`header` is the title and header table with
+the Inference row; `coverage` the Coverage Statement; `1`–`9` the
+numbered sections; the enum lists them all), which keeps a busy day's
+215 KB digest out of a request that wanted one table. The server's
+`instructions` and the `get_digest` and `get_day_listing` descriptions
+steer the reader: the digest summarizes a rule-selected subset and
+counts the rest; the day listings hold every item.
 
 ## 5. Connecting a client
 
@@ -349,3 +363,13 @@ own governance allows an endpoint at all.
   Package 0.2.0 (enum parameters, case-insensitive field match). The
   registry listing is re-published as 1.1.0 by the operator after the
   deploy.
+- 2026-09-14 (night), **surface 2.0.0** — Wave B of the field-report
+  plan: the payload is the first content block of every result and the
+  disclosure the last (a breaking change for clients that read by
+  position, hence the major version; rehearsal row M3 and the manifest
+  tests moved with it); `outputSchema` on the tools that return JSON;
+  `get_digest` gains `section` (an enum of the digest's blocks, sliced
+  verbatim by heading); the instructions and two descriptions say which
+  surface answers which question, and the agents page carries a
+  "Which tool answers which question" table. Package 0.3.0. Registry
+  re-published as 2.0.0 by the operator after the deploy.

@@ -141,7 +141,7 @@ def test_manifest_pins_the_identity_contract(manifest):
     s = manifest.server
     assert s.name == "info.fapd/fapd"
     assert s.title == "Free Agentic Publication Digester"
-    assert s.version == "1.1.0"          # Wave A of the field-report plan (additive inputs)
+    assert s.version == "2.0.0"          # Wave B: result order changed (payload first)
     assert s.description == ("Cited daily digests of official US federal publications."
                              " Read-only; no inference.")
     assert len(s.description) <= 100
@@ -206,7 +206,10 @@ def test_every_tool_answers_without_error_and_with_its_preamble(manifest, store)
         assert result["isError"] is False, (tool.name, result)
         assert result["content"][0]["type"] == "text"
         if tool.name in expected_preamble:
-            assert result["content"][0]["text"].startswith(expected_preamble[tool.name]), tool.name
+            # Since 2.0.0 the disclosure is the LAST block; the payload is first.
+            assert result["content"][-1]["text"].startswith(expected_preamble[tool.name]), tool.name
+            assert not result["content"][0]["text"].startswith(expected_preamble[tool.name]), tool.name
+            assert "The payload is the first content block" in tool.description, tool.name
         else:
             assert tool.preamble is None, tool.name
 
@@ -225,7 +228,8 @@ def test_list_digests_pages_the_index_with_the_projected_fields(manifest, store)
 
 def test_get_digest_returns_the_canonical_markdown_byte_for_byte(manifest, store, digests):  # noqa: F811
     result = _call(manifest, store, "get_digest", date=DIGEST_DATE)
-    assert result["content"][1]["text"] == (digests / f"{DIGEST_DATE}.md").read_text(encoding="utf-8")
+    assert result["content"][0]["text"] == (digests / f"{DIGEST_DATE}.md").read_text(encoding="utf-8")
+    assert "structuredContent" not in result            # text tools: content only (no doubled text)
 
 
 def test_get_digest_for_a_missing_day_is_a_tool_error_not_a_protocol_error(manifest, store):
@@ -404,3 +408,71 @@ def test_agency_pattern_accepts_every_real_agency_name(manifest, site):
     refused = [n for n in names if not rx.fullmatch(n)]
     assert refused == []
     assert not rx.fullmatch("") and not rx.fullmatch("a\nb") and not rx.fullmatch("x" * 121)
+
+
+# 5. Wave B: sections, schemas, guidance -------------------------------------
+
+_SECTION_KEYS = ["header", "contents", "day-in-review", "1", "2", "3", "4", "5", "6", "7", "8",
+                 "9", "terms", "coverage", "methodology"]
+
+
+def test_section_map_matches_the_renderer_headings(manifest):
+    """The digest's level-2 headings are an interface now: every mapped
+    prefix must appear in a real digest (the newest committed one that
+    has a Day in Review), or a renamed section breaks the build here
+    rather than for an agent."""
+    sections = manifest.tools_by_name["get_digest"].handler["sections"]
+    assert sections["level"] == 2 and list(sections["map"]) == _SECTION_KEYS
+    assert manifest.params["section"].enum == tuple(_SECTION_KEYS)
+    real = sorted((PROJECT_ROOT / "digests").glob("????-??-??.md"))
+    with_review = [p for p in real if "\n## Day in Review" in p.read_text(encoding="utf-8")]
+    assert with_review, "no committed digest carries a Day in Review"
+    text = with_review[-1].read_text(encoding="utf-8")
+    headings = [line[3:] for line in text.splitlines() if line.startswith("## ")]
+    for key, prefix in sections["map"].items():
+        if prefix is None:
+            continue
+        assert any(h.startswith(prefix) for h in headings), (key, prefix, with_review[-1].name)
+
+
+def test_get_digest_section_returns_one_block_verbatim(manifest, store, digests):  # noqa: F811
+    whole = (digests / f"{DIGEST_DATE}.md").read_text(encoding="utf-8")
+    header = _call(manifest, store, "get_digest", date=DIGEST_DATE, section="header")
+    assert header["isError"] is False
+    head = header["content"][0]["text"]
+    assert head.startswith("# ") and "\n## " not in head and whole.startswith(head)
+    assert header["content"][-1]["text"].startswith("Canonical digest Markdown")   # preamble last
+    if "\n## Coverage Statement" in whole:
+        cov = _call(manifest, store, "get_digest", date=DIGEST_DATE, section="coverage")
+        block = cov["content"][0]["text"]
+        assert block.startswith("## Coverage Statement") and block in whole
+    absent = _call(manifest, store, "get_digest", date=DIGEST_DATE, section="day-in-review")
+    if "\n## Day in Review" not in whole:
+        assert absent["isError"] is True and "present:" in absent["content"][0]["text"]
+    status, body = _post(manifest, store, "tools/call",
+                         {"name": "get_digest", "arguments": {"date": DIGEST_DATE, "section": "annex"}},
+                         name="get_digest")
+    assert status == 200 and body["error"]["code"] == -32602 and "coverage" in body["error"]["message"]
+
+
+def test_output_schemas_are_declared_for_the_structured_tools_only(manifest, store):
+    structured = {"list_digests", "get_live_day", "list_day_views", "get_day_listing",
+                  "list_sources", "get_source"}
+    for tool in manifest.tools:
+        definition = tool.definition()
+        assert ("outputSchema" in definition) == (tool.name in structured), tool.name
+    listing = _call(manifest, store, "get_day_listing", date=DATE)
+    schema = manifest.tools_by_name["get_day_listing"].output_schema
+    for key in schema["required"]:
+        assert key in listing["structuredContent"], key
+    one = _call(manifest, store, "get_source",
+                source_id=_call(manifest, store, "list_sources")["structuredContent"]["items"][0]["id"])
+    assert "item" in one["structuredContent"]
+    assert manifest.tools_by_name["get_source"].output_schema["required"] == ["item"]
+
+
+def test_instructions_steer_from_the_digest_to_the_day_listing(manifest):
+    text = manifest.server.instructions
+    assert "counts the rest" in text and "get_day_listing" in text and "Coverage Statement" in text
+    assert "counts the rest" in manifest.tools_by_name["get_digest"].description
+    assert "only counted" in manifest.tools_by_name["get_day_listing"].description

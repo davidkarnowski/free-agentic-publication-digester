@@ -276,8 +276,8 @@ verdict "M2 legacy initialize 2025-06-18 -> 200, protocolVersion echoed, no Mcp-
 
 mcp_post "{\"jsonrpc\":\"2.0\",\"id\":\"m3\",\"method\":\"tools/call\",\"params\":{\"name\":\"get_digest\",\"arguments\":{\"date\":\"$DATE\"},$META}}" \
   "${MODERN_H[@]}" -H 'Mcp-Method: tools/call' -H 'Mcp-Name: get_digest'; MCP_REQ=$((MCP_REQ + 1))
-uv run python -c "import json,sys; b=json.load(open(sys.argv[1])); open(sys.argv[2],'w').write(b['result']['content'][1]['text'])" "$B" "$TMP/m3.md" 2>/dev/null || : > "$TMP/m3.md"
-verdict "M3 modern tools/call get_digest $DATE -> 200, text after the preamble == digests/$DATE.md" \
+uv run python -c "import json,sys; b=json.load(open(sys.argv[1])); open(sys.argv[2],'w').write(b['result']['content'][0]['text'])" "$B" "$TMP/m3.md" 2>/dev/null || : > "$TMP/m3.md"
+verdict "M3 modern tools/call get_digest $DATE -> 200, first content block == digests/$DATE.md (the preamble is last since 2.0.0)" \
   "$([ "$STATUS" = 200 ] && cmp -s "$TMP/m3.md" "digests/$DATE.md" && echo 1 || echo 0)"
 
 get /mcp; MCP_REQ=$((MCP_REQ + 1))

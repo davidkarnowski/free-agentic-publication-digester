@@ -6127,3 +6127,57 @@ returned. Definition of done, item 1, met.
 Next: the operator re-publishes the registry listing as 1.1.0
 (`secrets/mcp-registry/server.json` regenerated); Wave B on the
 operator's go.
+
+## 2026-09-14 — Field-report Wave B: payload first, output schemas, digest sections, guidance
+
+Wave B of `docs/ops/plan-2026-09-14-mcp-field-report.md`, main session
+(operator: "Go, VPS testing approved"). Three commits on
+`feature/mcp-wave-b`: the package twice, then FAPD.
+
+**Package `static-mcp` 0.3.0.** The payload is now the first content
+block of every result and the preamble (a disclosure) the last, for all
+four handler kinds; the loader appends a sentence saying so to the
+description of every tool that has a preamble, the way it already
+appends the data-posture sentence, and `describe` strips both from the
+human table. Tools whose handlers produce JSON (`json_file`,
+`file_listing`) declare an `outputSchema` generated from the handler's
+shape — the keys that are always there required, the file's own
+envelope keys allowed; text tools declare none and carry no duplicated
+text, because the largest digest doubled would sit within 26 KB of the
+result cap. A `text_file` handler may declare `sections`: an
+enum-valued parameter selects one heading block verbatim (from the
+heading of the configured level whose title starts with the mapped
+prefix to the next heading of the same or a shallower level; a null
+value is the text before the first heading; fenced code is ignored; an
+absent section is a tool error naming the sections present). 442
+package tests.
+
+**FAPD surface 2.0.0** (major: the order change breaks any client that
+reads results by position — our own rehearsal row M3 did). `get_digest`
+takes `section`, an enum of the digest's fifteen blocks (`header` is
+the title and header table with the Inference row; `contents`;
+`day-in-review`; `1`–`9`; `terms`; `coverage`; `methodology`), sliced
+verbatim by level-2 heading; a drift test finds every mapped prefix in
+the newest committed digest that has a Day in Review, so a renamed
+section fails the build. The server's instructions and the `get_digest`
+and `get_day_listing` descriptions now say which surface answers which
+question — the digest summarizes a rule-selected subset and counts the
+rest; the day listings hold every item — and the agents page carries a
+captioned "Which tool answers which question" table ahead of the tools
+table. Both MCP-aware skills say the same. The MCP guide's disclosure
+paragraph, tool table and history are current.
+
+**Verified:** ruff clean; full suite **1,419 passed, 1 skipped**; the
+rehearsal on the box from a scratch copy of the branch (VPS testing
+approved): **SUCCESS, 42 pass, 0 fail, 1 skip** — M3 reads the first
+block and matches `digests/2026-09-13.md` byte for byte; M17 skipped
+because the private host tree's filter copy is not synced to the box
+(the live filter was proven by `fail2ban-regex` at C-6). A chain
+mistake worth recording: a package commit made while the scratch copy
+was still syncing left that copy's `.git` inconsistent, so the first
+attempt stopped at an informational `git log`; the re-run copies the
+tree without `.git`, which the rehearsal never needed.
+
+Next: merge; the operator's "deploy"; then the live checks the plan
+lists for this wave (MCP Inspector with an `isError` result against the
+declared schemas; Claude Code) and the registry re-publish as 2.0.0.

@@ -65,9 +65,15 @@ page is not.
 9. **If you speak MCP.** The same two files are tools on the read-only
    Model Context Protocol service at `https://fapd.info/mcp`:
    `list_digests` returns the index (step 1) and `get_digest` returns
-   the canonical Markdown for a date (step 3), verbatim, with the same
-   citation rule stated in its preamble. `https://fapd.info/agents.html#mcp`
-   describes how to connect and what the service does not do.
+   the canonical Markdown for a date (step 3), verbatim; the payload is
+   the first content block and the citation disclosure the last.
+   `get_digest` with `section` (for example `coverage`, `header`, or a
+   section number) returns one block instead of the whole file. Remember
+   that the digest summarizes a rule-selected subset and counts the rest:
+   for every item an agency or collection published, use
+   `get_day_listing` with `collection` or `agency`.
+   `https://fapd.info/agents.html#mcp` describes how to connect and what
+   the service does not do.
 
 ## What not to conclude
 
