@@ -40,7 +40,7 @@ sends, and a way to ask for a page in a format a model reads cheaply.
 Cloudflare's figures, from
 [the post that introduced the grade](https://blog.cloudflare.com/agent-readiness/),
 show how new this is. Among the top 200,000 domains, 78% had a
-robots.txt. Four percent had Content Signals. Fewer than 4% offered
+robots.txt. Four percent had Content Signals. Just 3.9% offered
 Markdown to agents that asked. Fewer than 15 sites in the whole set
 published an MCP server card or an API catalog. Our gap in one
 sentence: We had written for agents, but only for agents that already
