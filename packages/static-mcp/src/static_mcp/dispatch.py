@@ -114,11 +114,29 @@ def _check_params(env: Envelope) -> dict[str, Any]:
 
 def _not_found_method(ctx: Context, env: Envelope, manifest: Manifest) -> Rejection:
     status = 404 if ctx.era == MODERN else 200
+    message = "Method not found"
+    data = {"supported": manifest.all_versions} if env.method == "initialize" else None
+    if (
+        ctx.era != MODERN
+        and env.method in MODERN_METHODS - LEGACY_METHODS
+        and manifest.modern_versions
+    ):
+        # A modern-only method sent in the legacy request form (no _meta,
+        # no version headers). The answer is still "not found" under the
+        # negotiated legacy revision — the spec is clear — but the message
+        # names the form the client needs instead of a dead end.
+        message = (
+            f"{env.method} exists under {', '.join(manifest.modern_versions)} only: send"
+            " params._meta with io.modelcontextprotocol/protocolVersion, clientInfo and"
+            " clientCapabilities, and the MCP-Protocol-Version and Mcp-Method headers;"
+            " a request without them is answered under the older revisions"
+        )
+        data = {"supported": manifest.all_versions}
     return Rejection(
         status,
         METHOD_NOT_FOUND,
-        "Method not found",
-        data={"supported": manifest.all_versions} if env.method == "initialize" else None,
+        message,
+        data=data,
         rpc_id=env.rpc_id,
         stage="L5",
     )

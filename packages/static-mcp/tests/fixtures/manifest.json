@@ -6,81 +6,222 @@
     "version": "1.2.3",
     "description": "Read-only access to a small fixture site. No inference.",
     "websiteUrl": "https://fixture.example.org/",
-    "repository": {"url": "https://github.com/example/fixture", "source": "github", "subfolder": "site"},
+    "repository": {
+      "url": "https://github.com/example/fixture",
+      "source": "github",
+      "subfolder": "site"
+    },
     "instructions": "Use list_pages to find dates, then get_page to read one."
   },
   "public_base_url": "https://fixture.example.org",
   "endpoint_path": "/mcp",
-  "protocol_versions": {"modern": ["2026-07-28"], "legacy": ["2025-11-25", "2025-06-18"]},
+  "protocol_versions": {
+    "modern": [
+      "2026-07-28"
+    ],
+    "legacy": [
+      "2025-11-25",
+      "2025-06-18"
+    ]
+  },
   "http": {
-    "allowed_hosts": ["fixture.example.org", "localhost", "127.0.0.1"],
-    "allowed_origins": ["https://fixture.example.org"],
+    "allowed_hosts": [
+      "fixture.example.org",
+      "localhost",
+      "127.0.0.1"
+    ],
+    "allowed_origins": [
+      "https://fixture.example.org"
+    ],
     "allow_missing_origin": true,
     "max_body_bytes": 65536,
     "max_concurrency": 4,
     "request_timeout_seconds": 5
   },
-  "limits": {"max_file_bytes": 1048576, "max_result_bytes": 65536},
-  "cache": {"ttl_ms": 60000, "scope": "public"},
+  "limits": {
+    "max_file_bytes": 1048576,
+    "max_result_bytes": 65536
+  },
+  "cache": {
+    "ttl_ms": 60000,
+    "scope": "public"
+  },
   "params": {
-    "date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "description": "A date, YYYY-MM-DD."},
-    "slug": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,62}$", "description": "An entry slug."},
-    "kind": {"type": "string", "pattern": "^(note|page)$", "description": "An entry kind."},
-    "offset": {"type": "integer", "minimum": 0, "maximum": 10000, "default": 0, "description": "Items to skip."},
-    "limit": {"type": "integer", "minimum": 1, "maximum": 50, "default": 10, "description": "Items per page."},
-    "include_drafts": {"type": "boolean", "default": false, "description": "Include draft entries."}
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "description": "A date, YYYY-MM-DD."
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+      "description": "An entry slug."
+    },
+    "kind": {
+      "type": "string",
+      "pattern": "^[a-z]{1,16}$",
+      "enum": [
+        "note",
+        "page"
+      ],
+      "description": "An entry kind."
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10000,
+      "default": 0,
+      "description": "Items to skip."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50,
+      "default": 10,
+      "description": "Items per page."
+    },
+    "include_drafts": {
+      "type": "boolean",
+      "default": false,
+      "description": "Include draft entries."
+    }
   },
   "resources": [
-    {"uri": "https://fixture.example.org/guide.txt", "name": "guide", "title": "Guide", "description": "The site guide.", "mimeType": "text/plain", "file": "guide.txt"},
-    {"uri": "https://fixture.example.org/index.json", "name": "index", "title": "Index", "description": "The entry index.", "mimeType": "application/json", "file": "index.json"}
+    {
+      "uri": "https://fixture.example.org/guide.txt",
+      "name": "guide",
+      "title": "Guide",
+      "description": "The site guide.",
+      "mimeType": "text/plain",
+      "file": "guide.txt"
+    },
+    {
+      "uri": "https://fixture.example.org/index.json",
+      "name": "index",
+      "title": "Index",
+      "description": "The entry index.",
+      "mimeType": "application/json",
+      "file": "index.json"
+    }
   ],
   "resource_templates": [
-    {"uriTemplate": "https://fixture.example.org/pages/{date}.md", "name": "page", "title": "Page", "description": "A dated page.", "mimeType": "text/markdown", "file": "pages/{date}.md", "params": ["date"]},
-    {"uriTemplate": "https://fixture.example.org/notes/{slug}.md", "name": "note", "title": "Note", "description": "A note.", "mimeType": "text/markdown", "file": "notes/{slug}.md", "params": ["slug"]}
+    {
+      "uriTemplate": "https://fixture.example.org/pages/{date}.md",
+      "name": "page",
+      "title": "Page",
+      "description": "A dated page.",
+      "mimeType": "text/markdown",
+      "file": "pages/{date}.md",
+      "params": [
+        "date"
+      ]
+    },
+    {
+      "uriTemplate": "https://fixture.example.org/notes/{slug}.md",
+      "name": "note",
+      "title": "Note",
+      "description": "A note.",
+      "mimeType": "text/markdown",
+      "file": "notes/{slug}.md",
+      "params": [
+        "slug"
+      ]
+    }
   ],
   "tools": [
     {
       "name": "about",
       "title": "About this server",
       "description": "Returns a fixed pointer to the documentation.",
-      "handler": {"kind": "static_text", "text": "See https://fixture.example.org/ for documentation."}
+      "handler": {
+        "kind": "static_text",
+        "text": "See https://fixture.example.org/ for documentation."
+      }
     },
     {
       "name": "get_page",
       "title": "Get a page",
       "description": "Returns the Markdown page for a date.",
-      "params": {"date": {"ref": "date", "required": true}},
+      "params": {
+        "date": {
+          "ref": "date",
+          "required": true
+        }
+      },
       "preamble": "Page text follows verbatim.",
-      "handler": {"kind": "text_file", "file": "pages/{date}.md", "mime_type": "text/markdown", "not_found": "No page exists for {date}. Call list_pages for available dates."}
+      "handler": {
+        "kind": "text_file",
+        "file": "pages/{date}.md",
+        "mime_type": "text/markdown",
+        "not_found": "No page exists for {date}. Call list_pages for available dates."
+      }
     },
     {
       "name": "get_note",
       "title": "Get a note",
       "description": "Returns a note by slug.",
-      "params": {"slug": {"ref": "slug", "required": true}},
-      "handler": {"kind": "text_file", "file": "notes/{slug}.md", "mime_type": "text/markdown", "not_found": "No note named {slug}."}
+      "params": {
+        "slug": {
+          "ref": "slug",
+          "required": true
+        }
+      },
+      "handler": {
+        "kind": "text_file",
+        "file": "notes/{slug}.md",
+        "mime_type": "text/markdown",
+        "not_found": "No note named {slug}."
+      }
     },
     {
       "name": "list_entries",
       "title": "List entries",
       "description": "Lists index entries, newest first, excluding drafts by default.",
       "params": {
-        "offset": {"ref": "offset"},
-        "limit": {"ref": "limit"},
-        "include_drafts": {"ref": "include_drafts"},
-        "kind": {"ref": "kind"}
+        "offset": {
+          "ref": "offset"
+        },
+        "limit": {
+          "ref": "limit"
+        },
+        "include_drafts": {
+          "ref": "include_drafts"
+        },
+        "kind": {
+          "ref": "kind"
+        }
       },
       "handler": {
         "kind": "json_file",
         "file": "index.json",
         "select": "entries",
-        "envelope": ["title", "generated"],
-        "fields": ["slug", "kind", "title"],
-        "filters": [
-          {"param": "include_drafts", "when": false, "exclude_where": {"field": "draft", "equals": true}},
-          {"param": "kind", "match_field": "kind"}
+        "envelope": [
+          "title",
+          "generated"
         ],
-        "page": {"offset": "offset", "limit": "limit"},
+        "fields": [
+          "slug",
+          "kind",
+          "title"
+        ],
+        "filters": [
+          {
+            "param": "include_drafts",
+            "when": false,
+            "exclude_where": {
+              "field": "draft",
+              "equals": true
+            }
+          },
+          {
+            "param": "kind",
+            "match_field": "kind"
+          }
+        ],
+        "page": {
+          "offset": "offset",
+          "limit": "limit"
+        },
         "order": "desc",
         "not_found": "The index is not available."
       }
@@ -89,13 +230,23 @@
       "name": "get_entry",
       "title": "Get an entry",
       "description": "Returns one index entry by slug.",
-      "params": {"slug": {"ref": "slug", "required": true}},
+      "params": {
+        "slug": {
+          "ref": "slug",
+          "required": true
+        }
+      },
       "handler": {
         "kind": "json_file",
         "file": "index.json",
         "select": "entries",
-        "envelope": ["title"],
-        "find": {"field": "slug", "param": "slug"},
+        "envelope": [
+          "title"
+        ],
+        "find": {
+          "field": "slug",
+          "param": "slug"
+        },
         "not_found": "No entry named {slug}."
       }
     },
@@ -103,37 +254,70 @@
       "name": "get_index",
       "title": "Get the whole index",
       "description": "Returns the entire index document.",
-      "handler": {"kind": "json_file", "file": "index.json", "not_found": "The index is not available."}
+      "handler": {
+        "kind": "json_file",
+        "file": "index.json",
+        "not_found": "The index is not available."
+      }
     },
     {
       "name": "get_meta",
       "title": "Get index metadata",
       "description": "Returns the nested metadata object of the index.",
-      "handler": {"kind": "json_file", "file": "index.json", "select": "meta.nested", "not_found": "No metadata."}
+      "handler": {
+        "kind": "json_file",
+        "file": "index.json",
+        "select": "meta.nested",
+        "not_found": "No metadata."
+      }
     },
     {
       "name": "list_pages",
       "title": "List pages",
       "description": "Lists the dates that have a page, newest first.",
-      "params": {"offset": {"ref": "offset"}, "limit": {"ref": "limit", "maximum": 20, "default": 5}},
+      "params": {
+        "offset": {
+          "ref": "offset"
+        },
+        "limit": {
+          "ref": "limit",
+          "maximum": 20,
+          "default": 5
+        }
+      },
       "handler": {
         "kind": "file_listing",
         "glob": "pages/*.md",
         "name_pattern": "^(?P<key>[0-9]{4}-[0-9]{2}-[0-9]{2})\\.md$",
         "order": "desc",
-        "page": {"offset": "offset", "limit": "limit"}
+        "page": {
+          "offset": "offset",
+          "limit": "limit"
+        }
       }
     },
     {
       "name": "get_big",
       "title": "Get the big document",
       "description": "Returns the generated big document, paged.",
-      "params": {"offset": {"ref": "offset"}, "limit": {"ref": "limit", "maximum": 5000, "default": 5000}},
+      "params": {
+        "offset": {
+          "ref": "offset"
+        },
+        "limit": {
+          "ref": "limit",
+          "maximum": 5000,
+          "default": 5000
+        }
+      },
       "handler": {
         "kind": "json_file",
         "file": "big.json",
         "select": "rows",
-        "page": {"offset": "offset", "limit": "limit"},
+        "page": {
+          "offset": "offset",
+          "limit": "limit"
+        },
         "not_found": "No big document."
       }
     }

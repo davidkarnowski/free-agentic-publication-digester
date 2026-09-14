@@ -185,7 +185,8 @@ def test_input_schema_shape(manifest):
         "type": "integer", "description": "Items per page.", "minimum": 1, "maximum": 50,
         "default": 10,
     }
-    assert schema["properties"]["kind"]["pattern"] == "^(note|page)$"
+    assert schema["properties"]["kind"]["pattern"] == "^[a-z]{1,16}$"
+    assert schema["properties"]["kind"]["enum"] == ["note", "page"]   # the closed set
     assert schema["properties"]["include_drafts"] == {
         "type": "boolean", "description": "Include draft entries.", "default": False,
     }
@@ -252,3 +253,81 @@ def test_match_template_never_touches_paths(manifest):
     note = manifest.templates[1]
     assert match_template(note, "https://fixture.example.org/notes/..%2f.md") is None
     assert match_template(note, "https://fixture.example.org/notes/alpha.md") == {"slug": "alpha"}
+
+
+# ---------------------------------------------------------------- enum ---
+
+
+def _kind(**over):
+    base = {"type": "string", "pattern": "^[a-z]{1,16}$", "description": "k"}
+    return {**base, **over}
+
+
+def test_enum_is_emitted_in_the_input_schema_and_enforced_at_l6():
+    m = build_manifest(params={"kind": _kind(enum=["note", "page"])})
+    tool = m.tools_by_name["list_entries"]
+    assert tool.input_schema["properties"]["kind"]["enum"] == ["note", "page"]
+    assert validate_arguments(tool, {"kind": "note"})["kind"] == "note"
+    with pytest.raises(Rejection) as exc:
+        validate_arguments(tool, {"kind": "draft"})        # matches the pattern, not the enum
+    assert exc.value.code == -32602
+    assert "kind" in exc.value.message and "note, page" in exc.value.message
+    assert "draft" not in exc.value.message                 # never the client's value
+
+
+def test_enum_carries_through_a_ref_and_may_not_be_widened():
+    m = build_manifest(params={"kind": _kind(enum=["note"])})
+    assert m.tools_by_name["list_entries"].params["kind"].spec.enum == ("note",)
+    m2 = build_manifest(params={"kind": _kind()})
+    assert m2.tools_by_name["list_entries"].params["kind"].spec.enum is None
+    assert "enum" not in m2.tools_by_name["list_entries"].input_schema["properties"]["kind"]
+
+
+@pytest.mark.parametrize(
+    "kind, fragment",
+    [
+        (_kind(enum=[]), "non-empty"),
+        (_kind(enum=["note", "note"]), "unique"),
+        (_kind(enum=["Note"]), "own rules"),                 # violates the pattern
+        (_kind(enum=["note"], default="page"), "default"),   # default outside the enum
+        (_kind(enum="note"), "non-empty list"),
+        (_kind(enum=["a"] * 65), "at most 64"),
+    ],
+)
+def test_enum_rejecting_cases(kind, fragment):
+    with pytest.raises(ManifestError) as exc:
+        build_manifest(params={"kind": kind})
+    assert fragment in str(exc.value)
+
+
+def test_enum_is_only_for_strings():
+    with pytest.raises(ManifestError, match="only valid for string"):
+        build_manifest(params={"offset": {"type": "integer", "minimum": 0, "maximum": 9,
+                                          "description": "o", "enum": ["1"]}})
+    with pytest.raises(ManifestError, match="not valid for boolean"):
+        build_manifest(params={"include_drafts": {"type": "boolean", "description": "d",
+                                                  "enum": ["true"]}})
+
+
+# --------------------------------------------------- case_insensitive ---
+
+
+def _entries_tool_with(filters):
+    tool = next(t for t in manifest_dict()["tools"] if t["name"] == "list_entries")
+    tool = json.loads(json.dumps(tool))
+    tool["handler"]["filters"] = filters
+    return tool
+
+
+def test_case_insensitive_is_accepted_on_match_field_only():
+    ok = _entries_tool_with([{"param": "kind", "match_field": "kind", "case_insensitive": True}])
+    others = [t for t in manifest_dict()["tools"] if t["name"] != "list_entries"]
+    m = build_manifest(tools=others + [ok])
+    assert m.tools_by_name["list_entries"].handler["filters"][0]["case_insensitive"] is True
+    with pytest.raises(ManifestError, match="unknown key"):
+        build_manifest(tools=others + [_entries_tool_with(
+            [{"param": "include_drafts", "when": False, "case_insensitive": True,
+              "exclude_where": {"field": "draft", "equals": True}}])])
+    with pytest.raises(ManifestError, match="boolean"):
+        build_manifest(tools=others + [_entries_tool_with(
+            [{"param": "kind", "match_field": "kind", "case_insensitive": "yes"}])])

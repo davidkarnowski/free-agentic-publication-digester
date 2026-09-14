@@ -49,7 +49,7 @@ Stage L0 is your reverse proxy; L1 to L8 are this package.
 | **L3 JSON-RPC envelope** | `validate.py` | a single object (an array is "batching is not supported"); `jsonrpc == "2.0"`; `method` matches `^[a-z][a-zA-Z0-9_/]{0,63}$`; `id` absent (notification), a string of at most 128 characters, or an integer within ±2^53 — floats, booleans, `null`, objects and arrays are rejected and never echoed; `params` absent or an object; no other top-level keys; `params._meta`, if present, an object of at most 64 keys named per the specification's `_meta` rules and at most 8 KiB serialized; only `io.modelcontextprotocol/*` keys are read | 400, `-32600`, `"id": null` |
 | **L4 protocol** | `protocol.py` | era classification; version support (400 `-32022` with `data.supported`); the required `clientCapabilities` on modern requests (400 `-32602`); header/body mirror for `MCP-Protocol-Version`, `Mcp-Method`, `Mcp-Name` (the `=?base64?…?=` sentinel decoded and checked as UTF-8 without control characters) (400 `-32020`); unknown modern method (404 `-32601`) | as listed |
 | **L5 method params** | `dispatch.py` | a per-method allow-list of `params` keys; `tools/call.name` matches the tool-name pattern and names a declared tool; `arguments` is an object; `resources/read.uri` is a string of at most 2,048 characters that equals a declared resource URI or matches a template's compiled regex (built from the parameters' own patterns). A URI is never treated as a path | `-32602` |
-| **L6 arguments** | `manifest.py` | unknown argument; wrong JSON type (booleans must be JSON booleans, integers must be integers, no coercion); `re.fullmatch` with `re.ASCII` against the anchored pattern; string length at most 256 unless the manifest sets a lower `maxLength`; integer bounds; then defaults | `-32602` naming the parameter, never echoing its value |
+| **L6 arguments** | `manifest.py` | unknown argument; wrong JSON type (booleans must be JSON booleans, integers must be integers, no coercion); `re.fullmatch` with `re.ASCII` against the anchored pattern; string length at most 256 unless the manifest sets a lower `maxLength`; membership of the parameter's `enum` when it declares one (the message lists the allowed values, which are the manifest's); integer bounds; then defaults | `-32602` naming the parameter, never echoing its value |
 | **L7 file containment** | `handlers.py` | template substitution only with validated values; `resolve(strict=True)`; `is_relative_to(root)` after symlink resolution; regular file; size cap | a `not_found` tool result for a missing file; `-32603` and a logged `security.path_escape` event for a containment failure, with no path in the message |
 | **L8 output** | `dispatch.py`, `handlers.py` | results assembled from Python objects and serialized once; `max_result_bytes` enforced with disclosed truncation; client-sent strings never interpolated into error messages; log fields are manifest values or validated method names, JSON-encoded | — |
 
@@ -226,7 +226,7 @@ Each entry is `{"type": …, "description": …}` plus, by type:
 
 | Type | Required keys | Optional keys | Rules |
 |---|---|---|---|
-| `string` | `pattern` | `maxLength` (≤ 256), `default` | `pattern` must start with `^` and end with `$`; it is compiled with `re.ASCII` and matched with `fullmatch`. A string parameter used in a file template or URI template must not match `/`, `a/b`, `..`, `.x` or `a\b` — the loader proves it against those probes and rejects the manifest otherwise |
+| `string` | `pattern` | `maxLength` (≤ 256), `default`, `enum` (1–64 unique strings, each satisfying the pattern; emitted in the input schema; a value outside it is refused at L6 with a message that lists the allowed values — the manifest's, never the client's) | `pattern` must start with `^` and end with `$`; it is compiled with `re.ASCII` and matched with `fullmatch`. A string parameter used in a file template or URI template must not match `/`, `a/b`, `..`, `.x` or `a\b` — the loader proves it against those probes and rejects the manifest otherwise |
 | `integer` | `minimum`, `maximum` | `default` | bounds within ±2^53 |
 | `boolean` | — | `default` | — |
 
@@ -288,8 +288,12 @@ placeholders for the tool's own parameters.
 
 - `{"param": "<boolean param>", "when": false, "exclude_where": {"field": "<f>", "equals": <json>}}`
   — when the argument equals `when`, drop items whose `field` equals the value.
-- `{"param": "<string param>", "match_field": "<f>"}` — when the argument
-  is present, keep only items whose `field` equals it.
+- `{"param": "<string param>", "match_field": "<f>", "case_insensitive": false}` — when the argument
+  is present, keep only items whose `field` equals it. With
+  `case_insensitive` true, equality is checked after `casefold()` on both
+  sides — still an exact match of the whole value, never a substring or
+  a pattern. Pair it with an `enum` or a published facet list so a client
+  can see the values it may send.
 
 That is the whole query language: no free-text search, no client-supplied
 regex, no sorting by a client-chosen field.

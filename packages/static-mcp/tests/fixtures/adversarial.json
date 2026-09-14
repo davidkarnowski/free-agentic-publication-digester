@@ -1,126 +1,1896 @@
 [
-  {"name": "L1 missing Content-Length", "stage": "L1", "headers": {"Content-Length": null}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 411, "code": -32600}},
-  {"name": "L1 Content-Length over cap", "stage": "L1", "headers": {"Content-Length": "70000"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 413, "code": -32600}},
-  {"name": "L1 Content-Length not a number", "stage": "L1", "headers": {"Content-Length": "abc"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L1 content type json-patch", "stage": "L1", "headers": {"Content-Type": "application/json-patch+json"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 415, "code": -32600}},
-  {"name": "L1 content type text/json", "stage": "L1", "headers": {"Content-Type": "text/json"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 415, "code": -32600}},
-  {"name": "L1 content type missing", "stage": "L1", "headers": {"Content-Type": null}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 415, "code": -32600}},
-  {"name": "L1 content type wrong charset", "stage": "L1", "headers": {"Content-Type": "application/json; charset=latin-1"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 415, "code": -32600}},
-  {"name": "L1 content type extra parameter", "stage": "L1", "headers": {"Content-Type": "application/json; boundary=x"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 415, "code": -32600}},
-  {"name": "L1 Accept text/html only", "stage": "L1", "headers": {"Accept": "text/html"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 406, "code": -32600}},
-  {"name": "L1 Accept json with q=0", "stage": "L1", "headers": {"Accept": "application/json;q=0, text/event-stream"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 406, "code": -32600}},
-  {"name": "L1 foreign Host", "stage": "L1", "headers": {"Host": "evil.example"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 403, "code": -32600}},
-  {"name": "L1 Host missing", "stage": "L1", "headers": {"Host": null}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 403, "code": -32600}},
-  {"name": "L1 Host lookalike", "stage": "L1", "headers": {"Host": "localhost.evil.example"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 403, "code": -32600}},
-  {"name": "L1 foreign Origin", "stage": "L1", "headers": {"Origin": "https://evil.example"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 403, "code": -32600}},
-  {"name": "L1 Origin null", "stage": "L1", "headers": {"Origin": "null"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 403, "code": -32600}},
-  {"name": "L1 Origin http scheme of allowed host", "stage": "L1", "headers": {"Origin": "http://fixture.example.org"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 403, "code": -32600}},
-  {"name": "L1 Mcp-Name 1025 bytes", "stage": "L1", "headers": {"Mcp-Name": {"repeat": "a", "count": 1025}}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 400, "code": -32020}},
-  {"name": "L1 Mcp-Method with CRLF", "stage": "L1", "http": false, "headers": {"Mcp-Method": "ping\r\nX-Injected: 1"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 400, "code": -32020}},
-  {"name": "L1 Mcp-Method non-ASCII", "stage": "L1", "headers": {"Mcp-Method": "péng"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 400, "code": -32020}},
-  {"name": "L1 Mcp-Name with tab", "stage": "L1", "headers": {"Mcp-Name": "a\tb"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 400, "code": -32020}},
-  {"name": "L1 Mcp-Param header with control char", "stage": "L1", "headers": {"Mcp-Param-Region": "us\u0001"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping"}, "expect": {"status": 400, "code": -32020}},
-
-  {"name": "L2 invalid UTF-8", "stage": "L2", "body_hex": "7b22fffe7d", "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 overlong UTF-8 in string", "stage": "L2", "body_gen": {"kind": "overlong"}, "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 40-deep nesting", "stage": "L2", "body_gen": {"kind": "nested", "depth": 40}, "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 40-deep nesting of objects", "stage": "L2", "body_gen": {"kind": "nested_objects", "depth": 40}, "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 NaN", "stage": "L2", "body_text": "{\"jsonrpc\":\"2.0\",\"id\":NaN,\"method\":\"ping\"}", "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 Infinity", "stage": "L2", "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\",\"params\":{\"x\":Infinity}}", "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 -Infinity", "stage": "L2", "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\",\"params\":{\"x\":-Infinity}}", "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 25-digit integer", "stage": "L2", "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1234567890123456789012345,\"method\":\"ping\"}", "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 overflowing float", "stage": "L2", "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\",\"params\":{\"x\":1e400}}", "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 duplicate keys", "stage": "L2", "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"id\":2,\"method\":\"ping\"}", "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 NUL in string", "stage": "L2", "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\",\"params\":{\"x\":\"a\\u0000b\"}}", "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 control character in string", "stage": "L2", "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\",\"params\":{\"x\":\"a\\u001bb\"}}", "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 control character in key", "stage": "L2", "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\",\"params\":{\"a\\u0007\":1}}", "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 9 KiB string", "stage": "L2", "body_gen": {"kind": "long_string", "chars": 9216}, "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 300-key object", "stage": "L2", "body_gen": {"kind": "big_object", "keys": 300}, "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 1025-item array", "stage": "L2", "body_gen": {"kind": "long_array", "items": 1025}, "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 empty body", "stage": "L2", "body_text": "", "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 truncated JSON", "stage": "L2", "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"meth", "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 trailing garbage", "stage": "L2", "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\"} x", "expect": {"status": 400, "code": -32700}},
-  {"name": "L2 UTF-8 BOM", "stage": "L2", "body_hex": "efbbbf7b226a736f6e727063223a22322e30222c226964223a312c226d6574686f64223a2270696e67227d", "expect": {"status": 400, "code": -32700}},
-
-  {"name": "L3 batch array", "stage": "L3", "body": [{"jsonrpc": "2.0", "id": 1, "method": "ping"}], "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 top-level string", "stage": "L3", "body": "ping", "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 top-level number", "stage": "L3", "body": 42, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 jsonrpc 1.0", "stage": "L3", "body": {"jsonrpc": "1.0", "id": 1, "method": "ping"}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 jsonrpc missing", "stage": "L3", "body": {"id": 1, "method": "ping"}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 id float", "stage": "L3", "body": {"jsonrpc": "2.0", "id": 1.5, "method": "ping"}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 id true", "stage": "L3", "body": {"jsonrpc": "2.0", "id": true, "method": "ping"}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 id object", "stage": "L3", "body": {"jsonrpc": "2.0", "id": {}, "method": "ping"}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 id array", "stage": "L3", "body": {"jsonrpc": "2.0", "id": [], "method": "ping"}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 id null", "stage": "L3", "body": {"jsonrpc": "2.0", "id": null, "method": "ping"}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 id 129-char string", "stage": "L3", "body_gen": {"kind": "long_id", "chars": 129}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 id 2^54", "stage": "L3", "body": {"jsonrpc": "2.0", "id": 18014398509481984, "method": "ping"}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 extra top-level key", "stage": "L3", "body": {"jsonrpc": "2.0", "id": 1, "method": "ping", "extra": 1}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 params as array", "stage": "L3", "body": {"jsonrpc": "2.0", "id": 1, "method": "ping", "params": [1]}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 params as string", "stage": "L3", "body": {"jsonrpc": "2.0", "id": 1, "method": "ping", "params": "x"}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 method with space", "stage": "L3", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools list"}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 method 70 chars", "stage": "L3", "body_gen": {"kind": "long_method", "chars": 70}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 method missing", "stage": "L3", "body": {"jsonrpc": "2.0", "id": 1}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 method not a string", "stage": "L3", "body": {"jsonrpc": "2.0", "id": 1, "method": 5}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 method uppercase start", "stage": "L3", "body": {"jsonrpc": "2.0", "id": 1, "method": "Ping"}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 _meta 65 keys", "stage": "L3", "body_gen": {"kind": "meta_keys", "count": 65}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 _meta key with space", "stage": "L3", "body": {"jsonrpc": "2.0", "id": 1, "method": "ping", "params": {"_meta": {"bad key": 1}}}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 _meta key with bare slash prefix", "stage": "L3", "body": {"jsonrpc": "2.0", "id": 1, "method": "ping", "params": {"_meta": {"/x": 1}}}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 _meta key with label ending in hyphen", "stage": "L3", "body": {"jsonrpc": "2.0", "id": 1, "method": "ping", "params": {"_meta": {"com.example-/x": 1}}}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L3 _meta not an object", "stage": "L3", "body": {"jsonrpc": "2.0", "id": 1, "method": "ping", "params": {"_meta": [1]}}, "expect": {"status": 400, "code": -32600}},
-
-  {"name": "L4 unsupported modern version", "stage": "L4", "headers": {"MCP-Protocol-Version": "2025-03-26", "Mcp-Method": "server/discover"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "server/discover", "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": "2025-03-26", "io.modelcontextprotocol/clientCapabilities": {}}}}, "expect": {"status": 400, "code": -32022}},
-  {"name": "L4 legacy version named in modern _meta", "stage": "L4", "headers": {"MCP-Protocol-Version": "2025-11-25", "Mcp-Method": "server/discover"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "server/discover", "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": "2025-11-25", "io.modelcontextprotocol/clientCapabilities": {}}}}, "expect": {"status": 400, "code": -32022}},
-  {"name": "L4 protocolVersion not a string", "stage": "L4", "headers": {"MCP-Protocol-Version": "2026-07-28", "Mcp-Method": "server/discover"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "server/discover", "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": 2026, "io.modelcontextprotocol/clientCapabilities": {}}}}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L4 missing MCP-Protocol-Version header", "stage": "L4", "headers": {"Mcp-Method": "server/discover"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "server/discover", "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientCapabilities": {}}}}, "expect": {"status": 400, "code": -32020}},
-  {"name": "L4 Mcp-Method mismatch", "stage": "L4", "headers": {"MCP-Protocol-Version": "2026-07-28", "Mcp-Method": "tools/list"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "server/discover", "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientCapabilities": {}}}}, "expect": {"status": 400, "code": -32020}},
-  {"name": "L4 tools/call missing Mcp-Name", "stage": "L4", "headers": {"MCP-Protocol-Version": "2026-07-28", "Mcp-Method": "tools/call"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "about", "arguments": {}, "_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientCapabilities": {}}}}, "expect": {"status": 400, "code": -32020}},
-  {"name": "L4 Mcp-Name mismatch", "stage": "L4", "headers": {"MCP-Protocol-Version": "2026-07-28", "Mcp-Method": "tools/call", "Mcp-Name": "get_page"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "about", "arguments": {}, "_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientCapabilities": {}}}}, "expect": {"status": 400, "code": -32020}},
-  {"name": "L4 Mcp-Name undecodable sentinel", "stage": "L4", "headers": {"MCP-Protocol-Version": "2026-07-28", "Mcp-Method": "tools/call", "Mcp-Name": "=?base64?%%%?="}, "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "about", "arguments": {}, "_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientCapabilities": {}}}}, "expect": {"status": 400, "code": -32020}},
-  {"name": "L4 resources/read Mcp-Name mismatch", "stage": "L4", "headers": {"MCP-Protocol-Version": "2026-07-28", "Mcp-Method": "resources/read", "Mcp-Name": "https://fixture.example.org/index.json"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "resources/read", "params": {"uri": "https://fixture.example.org/guide.txt", "_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientCapabilities": {}}}}, "expect": {"status": 400, "code": -32020}},
-  {"name": "L4 missing clientCapabilities", "stage": "L4", "headers": {"MCP-Protocol-Version": "2026-07-28", "Mcp-Method": "server/discover"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "server/discover", "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28"}}}, "expect": {"status": 400, "code": -32602}},
-  {"name": "L4 clientCapabilities not an object", "stage": "L4", "headers": {"MCP-Protocol-Version": "2026-07-28", "Mcp-Method": "server/discover"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "server/discover", "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientCapabilities": "all"}}}, "expect": {"status": 400, "code": -32602}},
-  {"name": "L4 modern header without _meta", "stage": "L4", "headers": {"MCP-Protocol-Version": "2026-07-28"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, "expect": {"status": 400, "code": -32020}},
-  {"name": "L4 unsupported legacy header version", "stage": "L4", "headers": {"MCP-Protocol-Version": "2024-11-05"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, "expect": {"status": 400, "code": -32600}},
-  {"name": "L4 modern initialize", "stage": "L4", "headers": {"MCP-Protocol-Version": "2026-07-28", "Mcp-Method": "initialize"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2026-07-28", "_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientCapabilities": {}}}}, "expect": {"status": 404, "code": -32601}},
-  {"name": "L4 modern ping", "stage": "L4", "headers": {"MCP-Protocol-Version": "2026-07-28", "Mcp-Method": "ping"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "ping", "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientCapabilities": {}}}}, "expect": {"status": 404, "code": -32601}},
-  {"name": "L4 modern subscriptions/listen", "stage": "L4", "headers": {"MCP-Protocol-Version": "2026-07-28", "Mcp-Method": "subscriptions/listen"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "subscriptions/listen", "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientCapabilities": {}}}}, "expect": {"status": 404, "code": -32601}},
-  {"name": "L4 legacy prompts/list", "stage": "L4", "headers": {}, "body": {"jsonrpc": "2.0", "id": 1, "method": "prompts/list"}, "expect": {"status": 200, "code": -32601}},
-
-  {"name": "L5 unknown tool", "stage": "L5", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "delete_everything", "arguments": {}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L5 tool name not a string", "stage": "L5", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": 7, "arguments": {}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L5 tool name 300 chars", "stage": "L5", "body_gen": {"kind": "long_name", "chars": 300}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L5 tool name with traversal", "stage": "L5", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "../get_page", "arguments": {}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L5 arguments as string", "stage": "L5", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_page", "arguments": "date=2026-01-01"}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L5 arguments as array", "stage": "L5", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_page", "arguments": ["2026-01-01"]}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L5 unexpected params key", "stage": "L5", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "about", "arguments": {}, "path": "/etc/passwd"}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L5 tools/list with cursor", "stage": "L5", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {"cursor": "abc"}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L5 resources/read file URI (modern)", "stage": "L5", "headers": {"MCP-Protocol-Version": "2026-07-28", "Mcp-Method": "resources/read", "Mcp-Name": "file:///etc/passwd"}, "body": {"jsonrpc": "2.0", "id": 1, "method": "resources/read", "params": {"uri": "file:///etc/passwd", "_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientCapabilities": {}}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L5 resources/read file URI (legacy)", "stage": "L5", "body": {"jsonrpc": "2.0", "id": 1, "method": "resources/read", "params": {"uri": "file:///etc/passwd"}}, "expect": {"status": 200, "code": -32002}},
-  {"name": "L5 resources/read template with traversal in param", "stage": "L5", "body": {"jsonrpc": "2.0", "id": 1, "method": "resources/read", "params": {"uri": "https://fixture.example.org/pages/../../notes/alpha.md"}}, "expect": {"status": 200, "code": -32002}},
-  {"name": "L5 resources/read template with encoded traversal", "stage": "L5", "body": {"jsonrpc": "2.0", "id": 1, "method": "resources/read", "params": {"uri": "https://fixture.example.org/notes/%2e%2e%2f%2e%2e%2foutside.md"}}, "expect": {"status": 200, "code": -32002}},
-  {"name": "L5 resources/read 3000-char URI", "stage": "L5", "body_gen": {"kind": "long_uri", "chars": 3000}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L5 resources/read uri not a string", "stage": "L5", "body": {"jsonrpc": "2.0", "id": 1, "method": "resources/read", "params": {"uri": ["https://fixture.example.org/guide.txt"]}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L5 resources/read uri missing", "stage": "L5", "body": {"jsonrpc": "2.0", "id": 1, "method": "resources/read", "params": {}}, "expect": {"status": 200, "code": -32602}},
-
-  {"name": "L6 unknown argument", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_page", "arguments": {"date": "2026-01-01", "path": "../x"}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 wrong type integer for string", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_page", "arguments": {"date": 20260101}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 string true for boolean", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "list_entries", "arguments": {"include_drafts": "true"}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 float 1.0 for integer", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "list_entries", "arguments": {"limit": 1.0}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 boolean for integer", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "list_entries", "arguments": {"limit": true}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 Unicode digits", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_page", "arguments": {"date": "٢٠٢٦-٠٩-٠٤"}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 traversal ../", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_note", "arguments": {"slug": "../guide"}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 traversal ..\\", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_note", "arguments": {"slug": "..\\guide"}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 traversal %2e%2e/", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_note", "arguments": {"slug": "%2e%2e/guide"}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 traversal ....//", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_note", "arguments": {"slug": "....//guide"}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 absolute path", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_note", "arguments": {"slug": "/etc/passwd"}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 leading dot", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_page", "arguments": {"date": ".2026-01-01"}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 300-char string", "stage": "L6", "body_gen": {"kind": "long_arg", "chars": 300}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 limit zero", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "list_entries", "arguments": {"limit": 0}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 limit over maximum", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "list_entries", "arguments": {"limit": 51}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 negative offset", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "list_entries", "arguments": {"offset": -1}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 missing required argument", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_page", "arguments": {}}}, "expect": {"status": 200, "code": -32602}},
-  {"name": "L6 newline inside argument", "stage": "L6", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_note", "arguments": {"slug": "alpha\nbeta"}}}, "expect": {"status": 200, "code": -32602}},
-
-  {"name": "L7 symlink target through a valid slug", "stage": "L7", "body": {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_note", "arguments": {"slug": "escape"}}}, "expect": {"status": 200, "code": -32603, "event": "security.path_escape"}},
-  {"name": "L7 symlink target through a template URI", "stage": "L7", "body": {"jsonrpc": "2.0", "id": 1, "method": "resources/read", "params": {"uri": "https://fixture.example.org/pages/2026-02-02.md"}}, "expect": {"status": 200, "code": -32603, "event": "security.path_escape"}}
+ {
+  "name": "L1 missing Content-Length",
+  "stage": "L1",
+  "headers": {
+   "Content-Length": null
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 411,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 Content-Length over cap",
+  "stage": "L1",
+  "headers": {
+   "Content-Length": "70000"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 413,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 Content-Length not a number",
+  "stage": "L1",
+  "headers": {
+   "Content-Length": "abc"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 content type json-patch",
+  "stage": "L1",
+  "headers": {
+   "Content-Type": "application/json-patch+json"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 415,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 content type text/json",
+  "stage": "L1",
+  "headers": {
+   "Content-Type": "text/json"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 415,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 content type missing",
+  "stage": "L1",
+  "headers": {
+   "Content-Type": null
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 415,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 content type wrong charset",
+  "stage": "L1",
+  "headers": {
+   "Content-Type": "application/json; charset=latin-1"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 415,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 content type extra parameter",
+  "stage": "L1",
+  "headers": {
+   "Content-Type": "application/json; boundary=x"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 415,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 Accept text/html only",
+  "stage": "L1",
+  "headers": {
+   "Accept": "text/html"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 406,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 Accept json with q=0",
+  "stage": "L1",
+  "headers": {
+   "Accept": "application/json;q=0, text/event-stream"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 406,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 foreign Host",
+  "stage": "L1",
+  "headers": {
+   "Host": "evil.example"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 403,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 Host missing",
+  "stage": "L1",
+  "headers": {
+   "Host": null
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 403,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 Host lookalike",
+  "stage": "L1",
+  "headers": {
+   "Host": "localhost.evil.example"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 403,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 foreign Origin",
+  "stage": "L1",
+  "headers": {
+   "Origin": "https://evil.example"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 403,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 Origin null",
+  "stage": "L1",
+  "headers": {
+   "Origin": "null"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 403,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 Origin http scheme of allowed host",
+  "stage": "L1",
+  "headers": {
+   "Origin": "http://fixture.example.org"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 403,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L1 Mcp-Name 1025 bytes",
+  "stage": "L1",
+  "headers": {
+   "Mcp-Name": {
+    "repeat": "a",
+    "count": 1025
+   }
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32020
+  }
+ },
+ {
+  "name": "L1 Mcp-Method with CRLF",
+  "stage": "L1",
+  "http": false,
+  "headers": {
+   "Mcp-Method": "ping\r\nX-Injected: 1"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32020
+  }
+ },
+ {
+  "name": "L1 Mcp-Method non-ASCII",
+  "stage": "L1",
+  "headers": {
+   "Mcp-Method": "péng"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32020
+  }
+ },
+ {
+  "name": "L1 Mcp-Name with tab",
+  "stage": "L1",
+  "headers": {
+   "Mcp-Name": "a\tb"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32020
+  }
+ },
+ {
+  "name": "L1 Mcp-Param header with control char",
+  "stage": "L1",
+  "headers": {
+   "Mcp-Param-Region": "us\u0001"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32020
+  }
+ },
+ {
+  "name": "L2 invalid UTF-8",
+  "stage": "L2",
+  "body_hex": "7b22fffe7d",
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 overlong UTF-8 in string",
+  "stage": "L2",
+  "body_gen": {
+   "kind": "overlong"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 40-deep nesting",
+  "stage": "L2",
+  "body_gen": {
+   "kind": "nested",
+   "depth": 40
+  },
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 40-deep nesting of objects",
+  "stage": "L2",
+  "body_gen": {
+   "kind": "nested_objects",
+   "depth": 40
+  },
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 NaN",
+  "stage": "L2",
+  "body_text": "{\"jsonrpc\":\"2.0\",\"id\":NaN,\"method\":\"ping\"}",
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 Infinity",
+  "stage": "L2",
+  "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\",\"params\":{\"x\":Infinity}}",
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 -Infinity",
+  "stage": "L2",
+  "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\",\"params\":{\"x\":-Infinity}}",
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 25-digit integer",
+  "stage": "L2",
+  "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1234567890123456789012345,\"method\":\"ping\"}",
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 overflowing float",
+  "stage": "L2",
+  "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\",\"params\":{\"x\":1e400}}",
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 duplicate keys",
+  "stage": "L2",
+  "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"id\":2,\"method\":\"ping\"}",
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 NUL in string",
+  "stage": "L2",
+  "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\",\"params\":{\"x\":\"a\\u0000b\"}}",
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 control character in string",
+  "stage": "L2",
+  "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\",\"params\":{\"x\":\"a\\u001bb\"}}",
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 control character in key",
+  "stage": "L2",
+  "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\",\"params\":{\"a\\u0007\":1}}",
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 9 KiB string",
+  "stage": "L2",
+  "body_gen": {
+   "kind": "long_string",
+   "chars": 9216
+  },
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 300-key object",
+  "stage": "L2",
+  "body_gen": {
+   "kind": "big_object",
+   "keys": 300
+  },
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 1025-item array",
+  "stage": "L2",
+  "body_gen": {
+   "kind": "long_array",
+   "items": 1025
+  },
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 empty body",
+  "stage": "L2",
+  "body_text": "",
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 truncated JSON",
+  "stage": "L2",
+  "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"meth",
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 trailing garbage",
+  "stage": "L2",
+  "body_text": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\"} x",
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L2 UTF-8 BOM",
+  "stage": "L2",
+  "body_hex": "efbbbf7b226a736f6e727063223a22322e30222c226964223a312c226d6574686f64223a2270696e67227d",
+  "expect": {
+   "status": 400,
+   "code": -32700
+  }
+ },
+ {
+  "name": "L3 batch array",
+  "stage": "L3",
+  "body": [
+   {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "ping"
+   }
+  ],
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 top-level string",
+  "stage": "L3",
+  "body": "ping",
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 top-level number",
+  "stage": "L3",
+  "body": 42,
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 jsonrpc 1.0",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "1.0",
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 jsonrpc missing",
+  "stage": "L3",
+  "body": {
+   "id": 1,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 id float",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1.5,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 id true",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": true,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 id object",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": {},
+   "method": "ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 id array",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": [],
+   "method": "ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 id null",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": null,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 id 129-char string",
+  "stage": "L3",
+  "body_gen": {
+   "kind": "long_id",
+   "chars": 129
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 id 2^54",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 18014398509481984,
+   "method": "ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 extra top-level key",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping",
+   "extra": 1
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 params as array",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping",
+   "params": [
+    1
+   ]
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 params as string",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping",
+   "params": "x"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 method with space",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools list"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 method 70 chars",
+  "stage": "L3",
+  "body_gen": {
+   "kind": "long_method",
+   "chars": 70
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 method missing",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 method not a string",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": 5
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 method uppercase start",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "Ping"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 _meta 65 keys",
+  "stage": "L3",
+  "body_gen": {
+   "kind": "meta_keys",
+   "count": 65
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 _meta key with space",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping",
+   "params": {
+    "_meta": {
+     "bad key": 1
+    }
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 _meta key with bare slash prefix",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping",
+   "params": {
+    "_meta": {
+     "/x": 1
+    }
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 _meta key with label ending in hyphen",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping",
+   "params": {
+    "_meta": {
+     "com.example-/x": 1
+    }
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L3 _meta not an object",
+  "stage": "L3",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping",
+   "params": {
+    "_meta": [
+     1
+    ]
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L4 unsupported modern version",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2025-03-26",
+   "Mcp-Method": "server/discover"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "server/discover",
+   "params": {
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": "2025-03-26",
+     "io.modelcontextprotocol/clientCapabilities": {}
+    }
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32022
+  }
+ },
+ {
+  "name": "L4 legacy version named in modern _meta",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2025-11-25",
+   "Mcp-Method": "server/discover"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "server/discover",
+   "params": {
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": "2025-11-25",
+     "io.modelcontextprotocol/clientCapabilities": {}
+    }
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32022
+  }
+ },
+ {
+  "name": "L4 protocolVersion not a string",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2026-07-28",
+   "Mcp-Method": "server/discover"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "server/discover",
+   "params": {
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": 2026,
+     "io.modelcontextprotocol/clientCapabilities": {}
+    }
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L4 missing MCP-Protocol-Version header",
+  "stage": "L4",
+  "headers": {
+   "Mcp-Method": "server/discover"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "server/discover",
+   "params": {
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+     "io.modelcontextprotocol/clientCapabilities": {}
+    }
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32020
+  }
+ },
+ {
+  "name": "L4 Mcp-Method mismatch",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2026-07-28",
+   "Mcp-Method": "tools/list"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "server/discover",
+   "params": {
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+     "io.modelcontextprotocol/clientCapabilities": {}
+    }
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32020
+  }
+ },
+ {
+  "name": "L4 tools/call missing Mcp-Name",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2026-07-28",
+   "Mcp-Method": "tools/call"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "about",
+    "arguments": {},
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+     "io.modelcontextprotocol/clientCapabilities": {}
+    }
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32020
+  }
+ },
+ {
+  "name": "L4 Mcp-Name mismatch",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2026-07-28",
+   "Mcp-Method": "tools/call",
+   "Mcp-Name": "get_page"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "about",
+    "arguments": {},
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+     "io.modelcontextprotocol/clientCapabilities": {}
+    }
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32020
+  }
+ },
+ {
+  "name": "L4 Mcp-Name undecodable sentinel",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2026-07-28",
+   "Mcp-Method": "tools/call",
+   "Mcp-Name": "=?base64?%%%?="
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "about",
+    "arguments": {},
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+     "io.modelcontextprotocol/clientCapabilities": {}
+    }
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32020
+  }
+ },
+ {
+  "name": "L4 resources/read Mcp-Name mismatch",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2026-07-28",
+   "Mcp-Method": "resources/read",
+   "Mcp-Name": "https://fixture.example.org/index.json"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "resources/read",
+   "params": {
+    "uri": "https://fixture.example.org/guide.txt",
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+     "io.modelcontextprotocol/clientCapabilities": {}
+    }
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32020
+  }
+ },
+ {
+  "name": "L4 missing clientCapabilities",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2026-07-28",
+   "Mcp-Method": "server/discover"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "server/discover",
+   "params": {
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": "2026-07-28"
+    }
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L4 clientCapabilities not an object",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2026-07-28",
+   "Mcp-Method": "server/discover"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "server/discover",
+   "params": {
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+     "io.modelcontextprotocol/clientCapabilities": "all"
+    }
+   }
+  },
+  "expect": {
+   "status": 400,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L4 modern header without _meta",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2026-07-28"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/list"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32020
+  }
+ },
+ {
+  "name": "L4 unsupported legacy header version",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2024-11-05"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/list"
+  },
+  "expect": {
+   "status": 400,
+   "code": -32600
+  }
+ },
+ {
+  "name": "L4 modern initialize",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2026-07-28",
+   "Mcp-Method": "initialize"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "initialize",
+   "params": {
+    "protocolVersion": "2026-07-28",
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+     "io.modelcontextprotocol/clientCapabilities": {}
+    }
+   }
+  },
+  "expect": {
+   "status": 404,
+   "code": -32601
+  }
+ },
+ {
+  "name": "L4 modern ping",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2026-07-28",
+   "Mcp-Method": "ping"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "ping",
+   "params": {
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+     "io.modelcontextprotocol/clientCapabilities": {}
+    }
+   }
+  },
+  "expect": {
+   "status": 404,
+   "code": -32601
+  }
+ },
+ {
+  "name": "L4 modern subscriptions/listen",
+  "stage": "L4",
+  "headers": {
+   "MCP-Protocol-Version": "2026-07-28",
+   "Mcp-Method": "subscriptions/listen"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "subscriptions/listen",
+   "params": {
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+     "io.modelcontextprotocol/clientCapabilities": {}
+    }
+   }
+  },
+  "expect": {
+   "status": 404,
+   "code": -32601
+  }
+ },
+ {
+  "name": "L4 legacy prompts/list",
+  "stage": "L4",
+  "headers": {},
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "prompts/list"
+  },
+  "expect": {
+   "status": 200,
+   "code": -32601
+  }
+ },
+ {
+  "name": "L5 unknown tool",
+  "stage": "L5",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "delete_everything",
+    "arguments": {}
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L5 tool name not a string",
+  "stage": "L5",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": 7,
+    "arguments": {}
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L5 tool name 300 chars",
+  "stage": "L5",
+  "body_gen": {
+   "kind": "long_name",
+   "chars": 300
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L5 tool name with traversal",
+  "stage": "L5",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "../get_page",
+    "arguments": {}
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L5 arguments as string",
+  "stage": "L5",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "get_page",
+    "arguments": "date=2026-01-01"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L5 arguments as array",
+  "stage": "L5",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "get_page",
+    "arguments": [
+     "2026-01-01"
+    ]
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L5 unexpected params key",
+  "stage": "L5",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "about",
+    "arguments": {},
+    "path": "/etc/passwd"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L5 tools/list with cursor",
+  "stage": "L5",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/list",
+   "params": {
+    "cursor": "abc"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L5 resources/read file URI (modern)",
+  "stage": "L5",
+  "headers": {
+   "MCP-Protocol-Version": "2026-07-28",
+   "Mcp-Method": "resources/read",
+   "Mcp-Name": "file:///etc/passwd"
+  },
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "resources/read",
+   "params": {
+    "uri": "file:///etc/passwd",
+    "_meta": {
+     "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+     "io.modelcontextprotocol/clientCapabilities": {}
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L5 resources/read file URI (legacy)",
+  "stage": "L5",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "resources/read",
+   "params": {
+    "uri": "file:///etc/passwd"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32002
+  }
+ },
+ {
+  "name": "L5 resources/read template with traversal in param",
+  "stage": "L5",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "resources/read",
+   "params": {
+    "uri": "https://fixture.example.org/pages/../../notes/alpha.md"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32002
+  }
+ },
+ {
+  "name": "L5 resources/read template with encoded traversal",
+  "stage": "L5",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "resources/read",
+   "params": {
+    "uri": "https://fixture.example.org/notes/%2e%2e%2f%2e%2e%2foutside.md"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32002
+  }
+ },
+ {
+  "name": "L5 resources/read 3000-char URI",
+  "stage": "L5",
+  "body_gen": {
+   "kind": "long_uri",
+   "chars": 3000
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L5 resources/read uri not a string",
+  "stage": "L5",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "resources/read",
+   "params": {
+    "uri": [
+     "https://fixture.example.org/guide.txt"
+    ]
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L5 resources/read uri missing",
+  "stage": "L5",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "resources/read",
+   "params": {}
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 unknown argument",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "get_page",
+    "arguments": {
+     "date": "2026-01-01",
+     "path": "../x"
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 wrong type integer for string",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "get_page",
+    "arguments": {
+     "date": 20260101
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 string true for boolean",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "list_entries",
+    "arguments": {
+     "include_drafts": "true"
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 float 1.0 for integer",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "list_entries",
+    "arguments": {
+     "limit": 1.0
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 boolean for integer",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "list_entries",
+    "arguments": {
+     "limit": true
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 Unicode digits",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "get_page",
+    "arguments": {
+     "date": "٢٠٢٦-٠٩-٠٤"
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 traversal ../",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "get_note",
+    "arguments": {
+     "slug": "../guide"
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 traversal ..\\",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "get_note",
+    "arguments": {
+     "slug": "..\\guide"
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 traversal %2e%2e/",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "get_note",
+    "arguments": {
+     "slug": "%2e%2e/guide"
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 traversal ....//",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "get_note",
+    "arguments": {
+     "slug": "....//guide"
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 absolute path",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "get_note",
+    "arguments": {
+     "slug": "/etc/passwd"
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 leading dot",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "get_page",
+    "arguments": {
+     "date": ".2026-01-01"
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 300-char string",
+  "stage": "L6",
+  "body_gen": {
+   "kind": "long_arg",
+   "chars": 300
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 limit zero",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "list_entries",
+    "arguments": {
+     "limit": 0
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 limit over maximum",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "list_entries",
+    "arguments": {
+     "limit": 51
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 negative offset",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "list_entries",
+    "arguments": {
+     "offset": -1
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 missing required argument",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "get_page",
+    "arguments": {}
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L6 newline inside argument",
+  "stage": "L6",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "get_note",
+    "arguments": {
+     "slug": "alpha\nbeta"
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ },
+ {
+  "name": "L7 symlink target through a valid slug",
+  "stage": "L7",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "tools/call",
+   "params": {
+    "name": "get_note",
+    "arguments": {
+     "slug": "escape"
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32603,
+   "event": "security.path_escape"
+  }
+ },
+ {
+  "name": "L7 symlink target through a template URI",
+  "stage": "L7",
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 1,
+   "method": "resources/read",
+   "params": {
+    "uri": "https://fixture.example.org/pages/2026-02-02.md"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32603,
+   "event": "security.path_escape"
+  }
+ },
+ {
+  "name": "L6 enum member refused (value matches the pattern, not the enum)",
+  "stage": "L6",
+  "headers": {},
+  "body": {
+   "jsonrpc": "2.0",
+   "id": 61,
+   "method": "tools/call",
+   "params": {
+    "name": "list_entries",
+    "arguments": {
+     "kind": "draft"
+    }
+   }
+  },
+  "expect": {
+   "status": 200,
+   "code": -32602
+  }
+ }
 ]

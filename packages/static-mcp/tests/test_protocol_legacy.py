@@ -111,3 +111,14 @@ def test_no_session_state_between_requests(manifest, store):
     status, body, _ = in_process(manifest, store, legacy_request(11, "tools/list"),
                                  {"Mcp-Session-Id": "whatever", "Last-Event-ID": "3"})
     assert status == 200 and "tools" in body["result"]
+
+
+def test_modern_only_method_in_the_legacy_form_names_the_request_form(manifest, store):
+    """server/discover sent without _meta and the version headers is a
+    legacy-era request, under which the method does not exist (still
+    200 / -32601); the message says which form the client needs."""
+    status, body, _ = in_process(manifest, store, legacy_request(11, "server/discover"))
+    assert status == 200 and body["error"]["code"] == -32601 and body["id"] == 11
+    msg = body["error"]["message"]
+    assert "params._meta" in msg and "MCP-Protocol-Version" in msg and "2026-07-28" in msg
+    assert body["error"]["data"]["supported"] == manifest.all_versions

@@ -173,3 +173,27 @@ def test_resolve_stops_traversal_absolute_and_symlink(store, tmp_path):
 def test_symlink_inside_root_is_allowed(store):
     (store.root / "notes" / "link.md").symlink_to(store.root / "notes" / "alpha.md")
     assert store.read_text("notes/link.md").startswith("# Alpha")
+
+
+def test_match_field_case_insensitive_is_exact_equality_after_casefold(site, store, manifest):
+    """The flag folds case on both sides; it never becomes a substring or a
+    pattern match, and a non-string field never matches."""
+    from support_static_mcp import manifest_dict
+
+    from static_mcp.manifest import parse_manifest
+
+    data = manifest_dict()
+    data["params"]["kind"] = {"type": "string", "pattern": "^[A-Za-z]{1,16}$",
+                              "description": "k"}
+    tool = next(t for t in data["tools"] if t["name"] == "list_entries")
+    tool["handler"]["filters"] = [{"param": "kind", "match_field": "kind",
+                                   "case_insensitive": True}]
+    folded = parse_manifest(data)
+    folded_store = Store(site, folded.limits)
+    notes = call(folded_store, folded, "list_entries", kind="NOTE", include_drafts=True)
+    assert notes.structured["total"] > 0
+    assert all(item["kind"] == "note" for item in notes.structured["items"])
+    assert call(folded_store, folded, "list_entries", kind="Not",
+                include_drafts=True).structured["total"] == 0          # not a prefix match
+    strict = call(store, manifest, "list_entries", kind="note", include_drafts=True)
+    assert strict.structured["total"] == notes.structured["total"]

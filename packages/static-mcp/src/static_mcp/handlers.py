@@ -187,6 +187,15 @@ def _apply_filters(items: list[Any], filters: list[dict[str, Any]], args: dict[s
                     for it in items
                     if not (isinstance(it, dict) and it.get(f["field"]) == f["equals"])
                 ]
+        elif f.get("case_insensitive") and isinstance(arg, str):  # match_field, folded
+            wanted = arg.casefold()
+            items = [
+                it
+                for it in items
+                if isinstance(it, dict)
+                and isinstance(it.get(f["field"]), str)
+                and it[f["field"]].casefold() == wanted
+            ]
         else:  # match_field
             items = [it for it in items if isinstance(it, dict) and it.get(f["field"]) == arg]
     return items

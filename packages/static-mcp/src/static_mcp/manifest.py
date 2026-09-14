@@ -48,6 +48,7 @@ CEILING_BODY_BYTES = 1 << 20
 CEILING_CONCURRENCY = 64
 CEILING_RESULT_BYTES = 4 << 20
 CEILING_FILE_BYTES = 64 << 20
+MAX_ENUM_VALUES = 64
 DEFAULT_MAX_STRING_LENGTH = 256
 MAX_DESCRIPTION_CHARS = 100
 
@@ -125,6 +126,10 @@ class ParamSpec:
     maximum: int | None = None
     max_length: int = DEFAULT_MAX_STRING_LENGTH
     default: Any = _NO_DEFAULT
+    # A closed set of accepted values (strings only). Emitted in the input
+    # schema, enforced at L6 with a message that lists the values — they
+    # are the manifest's, never the client's.
+    enum: tuple[str, ...] | None = None
 
     @property
     def has_default(self) -> bool:
@@ -135,6 +140,8 @@ class ParamSpec:
         if self.type == "string":
             out["pattern"] = self.pattern
             out["maxLength"] = self.max_length
+            if self.enum:
+                out["enum"] = list(self.enum)
         if self.type == "integer":
             out["minimum"] = self.minimum
             out["maximum"] = self.maximum
@@ -378,7 +385,7 @@ def _parse_param(name: str, raw: Mapping[str, Any], where: str) -> ParamSpec:
         raise _err(where, "parameter name must match ^[a-z][a-z0-9_]{0,63}$")
     _require_keys(
         raw,
-        {"type", "pattern", "description", "minimum", "maximum", "default", "maxLength"},
+        {"type", "pattern", "description", "minimum", "maximum", "default", "maxLength", "enum"},
         {"type", "description"},
         where,
     )
@@ -402,14 +409,19 @@ def _parse_param(name: str, raw: Mapping[str, Any], where: str) -> ParamSpec:
             raw, "maxLength", where, default=DEFAULT_MAX_STRING_LENGTH, lo=1,
             hi=DEFAULT_MAX_STRING_LENGTH,
         )
+        enum = _parse_enum(raw.get("enum"), regex, max_length, where)
         if default is not _NO_DEFAULT and (
-            not isinstance(default, str) or not regex.fullmatch(default)
+            not isinstance(default, str)
+            or not regex.fullmatch(default)
+            or (enum is not None and default not in enum)
         ):
             raise _err(where, "default does not satisfy the parameter's own rules")
-        return ParamSpec(name, "string", description, pattern, regex, None, None, max_length, default)
+        return ParamSpec(
+            name, "string", description, pattern, regex, None, None, max_length, default, enum
+        )
 
     if ptype == "integer":
-        for key in ("pattern", "maxLength"):
+        for key in ("pattern", "maxLength", "enum"):
             if key in raw:
                 raise _err(where, f"{key} is only valid for string parameters")
         if "minimum" not in raw or "maximum" not in raw:
@@ -425,7 +437,7 @@ def _parse_param(name: str, raw: Mapping[str, Any], where: str) -> ParamSpec:
         return ParamSpec(name, "integer", description, None, None, lo, hi, 0, default)
 
     if ptype == "boolean":
-        for key in ("pattern", "maxLength", "minimum", "maximum"):
+        for key in ("pattern", "maxLength", "minimum", "maximum", "enum"):
             if key in raw:
                 raise _err(where, f"{key} is not valid for boolean parameters")
         if default is not _NO_DEFAULT and not isinstance(default, bool):
@@ -433,6 +445,29 @@ def _parse_param(name: str, raw: Mapping[str, Any], where: str) -> ParamSpec:
         return ParamSpec(name, "boolean", description, None, None, None, None, 0, default)
 
     raise _err(where, "type must be one of string, integer, boolean")
+
+
+def _parse_enum(
+    raw: Any, regex: re.Pattern[str], max_length: int, where: str
+) -> tuple[str, ...] | None:
+    """A string parameter's closed value set: 1–64 unique strings, each
+    satisfying the parameter's own pattern and length (so the enum can
+    never widen what the pattern allows)."""
+    if raw is None:
+        return None
+    if (
+        not isinstance(raw, list)
+        or not raw
+        or len(raw) > MAX_ENUM_VALUES
+        or not all(isinstance(v, str) for v in raw)
+    ):
+        raise _err(where, f"enum must be a non-empty list of at most {MAX_ENUM_VALUES} strings")
+    if len(set(raw)) != len(raw):
+        raise _err(where, "enum values must be unique")
+    for value in raw:
+        if len(value) > max_length or not regex.fullmatch(value):
+            raise _err(where, "every enum value must satisfy the parameter's own rules")
+    return tuple(raw)
 
 
 def _prove_path_safe(spec: ParamSpec, where: str) -> None:
@@ -465,12 +500,16 @@ def _resolve_tool_param(
             merged["maximum"] = base.maximum
         if base.has_default:
             merged["default"] = base.default
+        if base.enum is not None:
+            merged["enum"] = list(base.enum)
         for key in ("default", "minimum", "maximum", "description"):
             if key in raw:
                 merged[key] = raw[key]
         spec = _parse_param(name, merged, where)
     else:
-        allowed = {"type", "pattern", "description", "minimum", "maximum", "default", "maxLength"}
+        allowed = {
+            "type", "pattern", "description", "minimum", "maximum", "default", "maxLength", "enum",
+        }
         _require_keys(raw, allowed | {"required"}, {"type", "description"}, where)
         spec = _parse_param(name, {k: v for k, v in raw.items() if k != "required"}, where)
     required = _bool(raw, "required", where, default=False)
@@ -543,10 +582,21 @@ def _parse_filters(raw: Any, params: Mapping[str, ToolParam], where: str) -> lis
                 }
             )
         elif "match_field" in f:
-            _require_keys(f, {"param", "match_field"}, {"param", "match_field"}, w)
+            _require_keys(
+                f, {"param", "match_field", "case_insensitive"}, {"param", "match_field"}, w
+            )
             if spec.type != "string":
                 raise _err(w, "a match_field filter needs a string parameter")
-            out.append({"kind": "match_field", "param": pname, "field": _str(f, "match_field", w)})
+            out.append(
+                {
+                    "kind": "match_field",
+                    "param": pname,
+                    "field": _str(f, "match_field", w),
+                    # Equality after casefold() on both sides; still an exact
+                    # match, never a substring or a pattern.
+                    "case_insensitive": _bool(f, "case_insensitive", w, default=False),
+                }
+            )
         else:
             raise _err(w, "must be an exclude_where or a match_field filter")
     return out
@@ -1038,6 +1088,10 @@ def validate_value(spec: ParamSpec, value: Any) -> None:
     assert spec.regex is not None
     if not spec.regex.fullmatch(value):
         raise _invalid_params(f"Invalid argument {spec.name}: does not match the required pattern")
+    if spec.enum is not None and value not in spec.enum:
+        raise _invalid_params(
+            f"Invalid argument {spec.name}: must be one of {', '.join(spec.enum)}"
+        )
 
 
 def validate_arguments(tool: ToolSpec, arguments: Any) -> dict[str, Any]:

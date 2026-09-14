@@ -94,6 +94,8 @@ def describe_markdown(manifest: Manifest) -> str:
         for name, p in tool.params.items():
             spec = p.spec
             bits = [spec.type]
+            if spec.enum:
+                bits.append("one of " + ", ".join(spec.enum))
             if spec.type == "integer":
                 bits.append(f"{spec.minimum}…{spec.maximum}")
             if spec.has_default:
