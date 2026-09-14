@@ -437,6 +437,11 @@ file**. A drift test fails if they differ.
 
 ## 13. Change log of this plan
 
+- 2026-09-14 (night): follow-up plan written from an outside agent's
+  end-to-end field report of the live service —
+  [plan-2026-09-14-mcp-field-report.md](plan-2026-09-14-mcp-field-report.md)
+  (ten findings, eight valid, two dismissed with evidence; not started).
+
 - 2026-09-14 (evening): operator ruling — **security configuration is
   not published.** The fail2ban jail, filter, logrotate snippet and the
   two host scripts left this repository for the operator's private host
