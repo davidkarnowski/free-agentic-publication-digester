@@ -6092,3 +6092,38 @@ tool's description now says so.
 OB-26 records the deferred cross-day `find_items` tool and the ruling
 it would need. Next: merge, then the operator's "deploy", then the
 report's EPA question live in eight requests, recorded here.
+
+## 2026-09-14 — Wave A deployed: the report's question in eight requests
+
+Operator: "Deploy". `main` at 6c76115, `deploy.sh` exit 0 (service
+image rebuilt for package 0.2.0, manifest 1.1.0 shipped, site rebuilt,
+`fapd-web` reloaded, verify block green, no published port).
+
+**Live, from outside, after the deploy:**
+
+- The server card and `initialize` report **1.1.0**; `tools/list`
+  carries the nine-value `collection` enum and the `agency` parameter.
+- `collection: "EPA"` → `-32602`: "Invalid argument collection: must be
+  one of AGENCYPR, BILLACTIONS, BILLS, CREC, FR, PLAW, PRESACT,
+  USCOURTS, VOTES". The reviewer's value is not echoed.
+- The reviewer's exact `server/discover` request (legacy form) → 200,
+  `-32601`, and the message now names the 2026-07-28 request form with
+  `data.supported` listing the three versions.
+- The agents page carries the enum in its tools table, the filtering
+  sentence, and the request-form note.
+
+**The report's question, "what did EPA publish this week", re-run
+against production with the new filter:** one `get_day_listing` per
+day for 2026-09-07 through 2026-09-13 with `agency` set to the facet's
+lower-case spelling, plus one `get_live_day` — **8 requests, 120,042
+bytes (117 KB), 23 Environmental Protection Agency items**, all Federal
+Register notices: 1 on 09-08, 10 on 09-09, 2 on 09-10, 5 on 09-11, 5 on
+the live day; none on the weekend. The reviewer's run on the same
+question: about 90 requests, 12 MB, 23 items. Same answer, one
+eleventh of the requests, one hundredth of the bytes. The live result
+carried `facets`, and its EPA facet read 5, matching the items
+returned. Definition of done, item 1, met.
+
+Next: the operator re-publishes the registry listing as 1.1.0
+(`secrets/mcp-registry/server.json` regenerated); Wave B on the
+operator's go.

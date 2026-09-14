@@ -425,7 +425,7 @@ alternatives, risk, verification, rollback, dependencies.
 
 | Wave | Tasks | Ships as | Operator steps |
 |---|---|---|---|
-| A | MF-1, MF-8, MF-3, MF-9, MF-11 — **built 2026-09-14** (package 0.2.0, surface 1.1.0; branch `feature/mcp-wave-a`) | package change + manifests; surface **1.1.0** | "deploy"; registry re-publish |
+| A | MF-1, MF-8, MF-3, MF-9, MF-11 — **deployed 2026-09-14** (package 0.2.0, surface 1.1.0, main 6c76115; the EPA question live in 8 requests / 117 KB, 23 items — DoD 1 met) | package change + manifests; surface **1.1.0** | "deploy"; registry re-publish |
 | B | MF-2, MF-5, MF-6 | package change + manifests; surface **2.0.0** | VPS-testing approval (rehearsal M3 on the box); "deploy"; registry re-publish |
 | C | MF-7, MF-4, MF-10 | Publication and Operations changes; no surface version change | VPS-testing approval (rehearsal rows 1 and 23); "deploy" |
 
