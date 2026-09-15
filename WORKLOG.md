@@ -6181,3 +6181,66 @@ tree without `.git`, which the rehearsal never needed.
 Next: merge; the operator's "deploy"; then the live checks the plan
 lists for this wave (MCP Inspector with an `isError` result against the
 declared schemas; Claude Code) and the registry re-publish as 2.0.0.
+
+## 2026-09-15 — Wave B deployed: 2.0.0 live, and a validating client accepts an error result
+
+Operator: "Deploy wave B". `main` at cecee83 (code tip 24790b0 plus
+three docs commits), `deploy.sh` started 02:33 UTC, exit 0 at 02:41:
+service image rebuilt for package 0.3.0, manifest 2.0.0 shipped, site
+rebuilt (49 digest pages), `fapd-web` reloaded, verify block green, no
+published port. The deploy fell in the collector's agency-loop window:
+the backend logged ten `database is locked` retries in the one minute
+of its restart (02:38, the whitehouse.gov and federal-reserve loops,
+each retried after the base interval) and none after; 62 INFO lines
+in the next fifteen minutes, PLAW watermark advancing. Same shape as
+the Wave A deploy; not a finding beyond the minute.
+
+**Live, from outside, after the deploy (eleven requests):**
+
+- `initialize` (2025-06-18 form) and the server card report **2.0.0**.
+- `tools/list`: eight tools; `outputSchema` on the six that return
+  JSON (`list_digests`, `get_live_day`, `list_day_views`,
+  `get_day_listing`, `list_sources`, `get_source`), none on
+  `get_digest` and `get_agent_guide`. `get_digest` carries `section`
+  with the fifteen-value enum, and its description ends with the
+  order sentence.
+- `get_digest` for 2026-09-13: two blocks; `content[0]` is the digest
+  (13,619 characters, beginning `# Daily Digest — 2026-09-13`),
+  `content[1]` the 168-character disclosure.
+- `get_digest` with `section: "coverage"`: 2,136 bytes, beginning
+  `## Coverage Statement`.
+- `get_live_day` with `collection: "USCOURTS"`: `structuredContent`
+  present with `facets`, fifty items in the page.
+- **The MF-2 open question, answered.** `get_day_listing` for
+  2020-01-01 returns `{content, isError: true}` and no
+  `structuredContent`, under a declared `outputSchema`. MCP Inspector's
+  CLI (the current npm release, run through `npx`) printed the result
+  verbatim and then `{"error":{"code":"tool_is_error","message":"Tool
+  'get_day_listing' returned isError:true."}}`, exit 0 — it reports the
+  tool error and raises no schema complaint about the missing
+  structured content. The same client behaves the same on `get_digest`
+  for 2026-07-04 (no digest, no schema). Recorded either way, as the
+  plan asked: a schema-validating client does not reject our error
+  shape.
+- Claude Code 2.1.272, from a scratch directory: `claude mcp add
+  --transport http fapd-prod https://fapd.info/mcp` → "Connected"; one
+  `get_digest` call (`section: "coverage"`) answered with the section;
+  the registration removed afterwards. The service's access log shows
+  the two requests with their request ids (`rid=`), the nginx-to-service
+  join from the security follow-through working in production.
+- Five minutes on: all three containers healthy, `fapd-mcp` on the
+  `fapd_mcp` network only, no published port, `HEAD /mcp` 405, the
+  `fapd-mcp` jail present with its chain (five failures counted since
+  the jail was installed, none banned). An unrelated client calling
+  itself `mcp-checker/1.0` probed `/mcp` three minutes after the
+  deploy and got a 200.
+
+**Open:** the agents page already links the registry's 2.0.0 listing
+(the URL is built from the manifest version), and that URL answers 404
+until the operator re-publishes — `secrets/README.md` has the
+procedure; `secrets/mcp-registry/server.json` is at 2.0.0. The
+registry lists 1.0.0 and 1.1.0 (latest) at the time of writing.
+
+Next: the operator's registry re-publish; Wave C on the operator's go
+with VPS-testing approval; separately, the operator's request to group
+same-case court documents on the live listing.

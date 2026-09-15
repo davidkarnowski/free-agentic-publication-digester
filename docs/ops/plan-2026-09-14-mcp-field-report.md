@@ -1,11 +1,12 @@
 # Plan — acting on the MCP field report (2026-09-14)
 
-*Status (2026-09-14, end of day): **Wave A deployed; Wave B merged and
-NOT deployed; Wave C not started.** §7 says exactly what a resuming agent
+*Status (2026-09-15, 02:50 UTC): **Waves A and B deployed (the live
+service is 2.0.0); the registry re-publish as 2.0.0 is the operator's
+open step; Wave C not started.** §7 says exactly what a resuming agent
 does next. Follows
 [plan-task-template.md](plan-task-template.md). Parent:
 [plan-2026-09-13-agent-discovery.md](plan-2026-09-13-agent-discovery.md)
-(Phase 5 complete 2026-09-14). Last reviewed: 2026-09-14.*
+(Phase 5 complete 2026-09-14). Last reviewed: 2026-09-15.*
 
 ## 0. Pre-launch evaluation (2026-09-14)
 
@@ -428,7 +429,7 @@ alternatives, risk, verification, rollback, dependencies.
 | Wave | Tasks | Ships as | Operator steps |
 |---|---|---|---|
 | A | MF-1, MF-8, MF-3, MF-9, MF-11 — **deployed 2026-09-14** (package 0.2.0, surface 1.1.0, main 6c76115; the EPA question live in 8 requests / 117 KB, 23 items — DoD 1 met) | package change + manifests; surface **1.1.0** | "deploy"; registry re-publish |
-| B | MF-2, MF-5, MF-6 — **built 2026-09-14** (package 0.3.0, surface 2.0.0; rehearsal on the box 42/0/1, M3 green; branch `feature/mcp-wave-b`) | package change + manifests; surface **2.0.0** | "deploy"; registry re-publish |
+| B | MF-2, MF-5, MF-6 — **deployed 2026-09-15 02:41 UTC** (package 0.3.0, surface 2.0.0, main cecee83; rehearsal on the box 42/0/1 before merge; live checks green, the MF-2 question answered: MCP Inspector accepts an `isError` result under a declared schema — DoD 2, 3, 4, 7 met once the registry lists 2.0.0) | package change + manifests; surface **2.0.0** | "deploy" (done); registry re-publish (open) |
 | C | MF-7, MF-4, MF-10 | Publication and Operations changes; no surface version change | VPS-testing approval (rehearsal rows 1 and 23); "deploy" |
 
 Each wave: branch (`feature/mcp-wave-a` and so on) → tests → PR → CI →
@@ -466,38 +467,26 @@ mention "Wave A" and "Wave B".
 1.1.0; the registry lists 1.1.0). Records: WORKLOG "Field-report Wave A"
 and "Wave A deployed".
 
-**Done, merged, not deployed:** Wave B (main 24790b0; package 0.3.0;
-surface 2.0.0). Verified before merge: full suite 1,419 passed; the
-rehearsal on the box 42 pass / 0 fail / 1 skip with row M3 green.
-Records: WORKLOG "Field-report Wave B". Nothing on the box has changed
-since Wave A's deploy; the live service is still 1.1.0.
+**Done and deployed:** Wave B (main 24790b0, deployed from cecee83 on
+2026-09-15 at 02:41 UTC; package 0.3.0; surface 2.0.0). Verified
+before merge: full suite 1,419 passed; the rehearsal on the box 42
+pass / 0 fail / 1 skip with row M3 green. Verified live after the
+deploy (WORKLOG "Wave B deployed"): `initialize` and the card report
+2.0.0; `outputSchema` on the six JSON tools and on neither text tool;
+`get_digest` returns the digest as `content[0]` and the disclosure
+last; `section: "coverage"` returns 2.1 KB; MCP Inspector's CLI
+accepts an `isError` result under a declared `outputSchema` (it
+reports `tool_is_error` and raises no schema complaint — the MF-2
+question, closed); Claude Code connects and calls `get_digest`.
 
-**To finish Wave B, in order:**
-
-1. The operator says "deploy" (CLAUDE.md §13; not between 03:30 and
-   06:00 UTC). Run `deploy/vps/scripts/deploy.sh` from a clean `main`.
-2. Live checks from outside, kept to a dozen requests: `initialize` and
-   the server card report 2.0.0; `tools/list` shows `outputSchema` on
-   the six JSON tools and none on `get_digest`/`get_agent_guide`; a
-   `get_digest` call returns the digest as `content[0]` and the
-   disclosure last; `get_digest` with `section: "coverage"` returns a
-   few kilobytes; one `isError` result (a missing date) is accepted by
-   a client that validates output schemas — MCP Inspector's CLI
-   (`npx -y @modelcontextprotocol/inspector --cli https://fapd.info/mcp
-   --transport http --method tools/call --tool-name get_digest
-   --tool-arg date=2026-07-04`) is the client to try, and what it does
-   with an error result under a declared schema is the open question
-   the plan flagged (MF-2 risk); record the observed behavior either
-   way. Claude Code: `claude mcp add --transport http fapd-prod
-   https://fapd.info/mcp` in a scratch directory, one `get_digest`
-   call, then `claude mcp remove fapd-prod -s local`.
-3. The operator re-publishes the registry listing as 2.0.0:
-   `secrets/README.md` (operator-only, git-ignored) holds the
-   procedure; `secrets/mcp-registry/server.json` was regenerated at
-   2.0.0 on 2026-09-14. Verify:
-   `curl -s "https://registry.modelcontextprotocol.io/v0.1/servers?search=info.fapd/fapd"`
-   shows 2.0.0 as latest.
-4. WORKLOG entry with the observed values; §5's Wave B row → deployed.
+**The one open Wave B step:** the operator re-publishes the registry
+listing as 2.0.0 — `secrets/README.md` (operator-only, git-ignored)
+holds the procedure and `secrets/mcp-registry/server.json` is already
+at 2.0.0. Until then the agents page's registry link (built from the
+manifest version) answers 404. Verify with
+`curl -s "https://registry.modelcontextprotocol.io/v0.1/servers?search=info.fapd/fapd"`
+showing 2.0.0 as latest, then note the time in `secrets/README.md`'s
+history line and in the WORKLOG.
 
 **Wave C, not started.** MF-7, MF-4, MF-10 as specified in §4, plus:
 - It needs the operator's go and, while the laptop's Docker daemon is
