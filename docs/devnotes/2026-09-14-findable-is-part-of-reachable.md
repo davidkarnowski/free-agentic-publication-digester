@@ -222,34 +222,16 @@ offer. That last one is the difference between "we chose not to" and
 
 *The Sept. 14 report from Cloudflare's [URL Scanner](https://radar.cloudflare.com/scan): 63 out of 100, Level 4.*
 
-## The first real reader
-
-The same evening, an outside coding agent used the service end to end
-with no prior knowledge of the project. It found the honesty labels
-doing their job and the transport painless. It also found the cost.
-Answering one ordinary question, "what did EPA publish this week," took
-about 90 requests and 12 MB, because the tools could filter by document
-type but not by agency. By the next morning the tools took an agency
-name, and the same question took eight requests and 117 KB to find the
-same 23 items. The agent's other findings were handled the same day,
-including two it got wrong, which are on the record with the evidence.
-
-Deploy day had its comedy. The first thing the new security posture did
-was ban its own operator, because our own checklist sends a probe the
-server's long-standing intrusion rules treat as an attack. The rules
-were right; the checklist learned. The rest of that day's lessons live
-in the project's work log, where they belong.
-
 ## What is next
 
 Our crawler, the other half of this project, will sign its requests
 under Web Bot Auth so the sites we fetch from can verify who is
-knocking. And the outside reader left one idea worth taking seriously:
-citation data beside each MCP result, so a downstream agent keeps the
-official government source as its citation rather than the tool that
-handed it over.
+knocking. And one idea from an outside agent that tested the service is
+worth taking seriously: citation data beside each MCP result, so a
+downstream agent keeps the official government source as its citation
+rather than the tool that handed it over.
 
-That reader's summary is the one we would choose ourselves: The
+That agent's summary is the one we would choose ourselves: The
 publication is the product, and protocols are interchangeable ways to
 reach it. An agent that never speaks MCP can still find everything here
 on its own now. That was the point of the two days, and it is what
