@@ -128,6 +128,17 @@ docs/accessibility.md → this file.
   2026-07-30) — bounded by `MAX_FILTER_KEYWORDS`, not truncated below
   it. (`MIN_FILTER_ITEMS` gates whether the bar renders at all —
   shipped 2026-08-02; per-keyword truncation remains forbidden.)
+- The live listing and the frozen day views fold the documents of one
+  court case, observed in one hour, into one entry (operator,
+  2026-09-14; `publish._TODAY_CASE_COLLECTIONS`, `_today_hour_entries`,
+  `_today_case_row`). The rule is govinfo's own package identity —
+  never a title match — and it names its collections, because a
+  granule-level package is a case only for USCOURTS (an FR package is
+  the day's issue). The hour is the boundary on purpose (an hour
+  heading is a promise about every row under it). Presentation only:
+  today.json, the day JSON and the facets keep every document, and the
+  page's prose says so. Do not extend it to another collection, or
+  across hours, without the operator.
 
 ## Code expectations
 

@@ -2931,3 +2931,175 @@ def test_no_rendered_string_hard_codes_the_clock():
         if clock.search(text)
     ]
     assert offenders == []
+
+
+# ------------------------------------ same-case grouping (2026-09-14) --
+
+
+def _seed_case(conn, package_id, stamps, *, title="Doe v. Roe",
+               collection="USCOURTS", doc_type="DISTRICT"):
+    """One govinfo package with one granule per stamp, each journaled at
+    its stamp: a court case and the documents filed in it, the shape
+    govinfo gives USCOURTS. Granule ids follow govinfo's `-0`, `-1`…"""
+    from conftest import DATE
+
+    conn.execute(
+        "INSERT OR IGNORE INTO packages (package_id, collection, date_issued,"
+        " last_modified, title, first_seen_at) VALUES (?, ?, ?, 'x', ?, 'x')",
+        (package_id, collection, DATE, title))
+    for n, stamp in enumerate(stamps):
+        gid = f"{package_id}-{n}"
+        conn.execute(
+            "INSERT INTO extracted_texts (package_id, granule_id, collection,"
+            " doc_type, title, text, char_count, metadata, extracted_at,"
+            " extractor_version) VALUES (?, ?, ?, ?, ?, 'The court ordered.',"
+            " 18, '{}', 'x', 1)",
+            (package_id, gid, collection, doc_type, title))
+        conn.execute(
+            "INSERT INTO item_journal (observed_at, source_class, package_id,"
+            " granule_id, collection, source_id, digest_date, event) VALUES"
+            " (?, 'govinfo', ?, ?, ?, NULL, ?, 'ingested')",
+            (stamp, package_id, gid, collection, DATE))
+    conn.commit()
+
+
+def _case_entry(page, package_id):
+    """The rendered entry for one case group, `<li …today-case…>` through
+    the end of its <details>."""
+    m = re.search(
+        r'<li class="today-item today-case[^"]*">(?:(?!</details>).)*'
+        + re.escape(package_id) + r'(?:(?!</details>).)*</details>', page, re.DOTALL)
+    assert m, f"no case entry for {package_id}"
+    return m.group()
+
+
+def test_today_groups_the_documents_of_one_court_case(conn, tmp_path):
+    """Operator, 2026-09-14: forty rows in a row reading the same case
+    name. The documents of one govinfo package (one case) observed in
+    the same hour fold into one entry — the case name linking the case
+    record, the count in a native <details> summary, every document
+    inside with its own link and stamp — while a one-document case
+    stays a plain row and the machine surface keeps every document."""
+    import json
+
+    from conftest import DATE
+
+    _seed_today(conn)
+    case = "USCOURTS-caed-2_17-cr-00209"
+    _seed_case(conn, case, [f"{DATE}T14:00:03Z", f"{DATE}T14:00:02Z",
+                            f"{DATE}T14:00:01Z"])
+    _seed_case(conn, "USCOURTS-flsd-1_26-cv-22223", [f"{DATE}T14:00:00Z"],
+               title="Solo v. Case")
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+
+    assert page.count('class="today-item today-case') == 1
+    assert page.count('<details class="case-docs">') == 1
+    entry = _case_entry(page, case)
+    assert "<summary>3 documents in this case</summary>" in entry
+    # The case name links the case's own record (the package page), not
+    # one document of it; the documents keep their granule links.
+    assert f'<a href="https://www.govinfo.gov/app/details/{case}"' in entry
+    for n in range(3):
+        assert f'/app/details/{case}/{case}-{n}"' in entry
+    assert f"{case} / {case}-1" in entry           # the citation, per row
+    assert entry.count('<li class="today-item k-') == 3
+    # Tags are the case's, shown once; the inner rows carry none.
+    assert entry.count('class="today-chips"') == 1
+    assert 'class="today-item today-case k-judicial k-court-opinion"' in entry
+    # Newest first inside the group, as everywhere.
+    assert entry.index(f"{case}-0") < entry.index(f"{case}-2")
+    # A one-document case is a plain row linking its one document (the
+    # link carries the external-link announcement like every other).
+    assert re.search(r'USCOURTS-flsd-1_26-cv-22223-0"[^>]*>Solo v\. Case', page)
+    # Nothing folds in the machine surface.
+    data = json.loads((tmp_path / "today.json").read_text())
+    assert sum(1 for i in data["items"] if i["package_id"] == case) == 3
+    assert len(data["items"]) == 6
+    # …and the page says what it did and where the documents are.
+    assert "Court documents are grouped by case." in page
+    assert "today.json lists every document separately" in page
+
+
+def test_today_case_grouping_stops_at_the_hour(conn, tmp_path):
+    """An hour heading is a promise about every row under it, so a case
+    that gained a document in a later hour is listed again there rather
+    than pulled into the earlier entry. Stamps: 15:10Z is 11 AM on the
+    publication clock, 14:00Z is 10 AM."""
+    from conftest import DATE
+
+    _seed_today(conn)
+    case = "USCOURTS-nysd-1_26-cv-00001"
+    _seed_case(conn, case, [f"{DATE}T15:10:00Z", f"{DATE}T14:00:02Z",
+                            f"{DATE}T14:00:01Z"])
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+
+    assert page.count('class="today-item today-case') == 1
+    assert "<summary>2 documents in this case</summary>" in page
+    assert "3 documents in this case" not in page
+    entry = _case_entry(page, case)
+    assert f"{case}-0" not in entry                 # the 11 AM document
+    # The later document is its own row under its own hour, ahead of
+    # the group (newest first), and links its granule like any row.
+    assert re.search(rf'/app/details/{case}/{case}-0"[^>]*>Doe v\. Roe', page)
+    assert page.index(f"{case}-0") < page.index("today-case")
+
+
+def test_today_never_groups_a_federal_register_issue(conn, tmp_path):
+    """A granule-level package is a case only where the rule says so
+    (`_TODAY_CASE_COLLECTIONS`): an FR package is the day's issue and
+    its granules are unrelated documents, so two of them observed in the
+    same hour stay two rows."""
+    from conftest import DATE
+
+    _seed_today(conn)
+    _seed_case(conn, "FR-2026-07-23", [f"{DATE}T14:00:02Z", f"{DATE}T14:00:01Z"],
+               title="A notice", collection="FR", doc_type="NOTICE")
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text()
+    assert "today-case" not in page
+    assert page.count("FR-2026-07-23 / FR-2026-07-23-") == 2
+
+
+def test_day_view_applies_the_same_case_grouping(conn, tmp_path, monkeypatch):
+    """The frozen day view renders through the same loop, so it groups
+    the same way, says so in its intro, and its JSON keeps every
+    document."""
+    import json
+
+    from conftest import DATE
+
+    from fapd import config as _config
+
+    monkeypatch.setattr(_config, "DIGEST_DIR", tmp_path / "no-digests")
+    _seed_today(conn)
+    case = "USCOURTS-caed-2_17-cr-00209"
+    _seed_case(conn, case, [f"{DATE}T14:00:02Z", f"{DATE}T14:00:01Z"])
+    publish.build_day(conn, DATE, out_dir=tmp_path)
+    page = (tmp_path / "day" / f"{DATE}.html").read_text()
+    assert page.count('class="today-item today-case') == 1
+    assert "<summary>2 documents in this case</summary>" in page
+    assert "Documents from one court case observed in the same hour" in page
+    data = json.loads((tmp_path / "day" / f"{DATE}.json").read_text())
+    assert sum(1 for i in data["items"] if i["package_id"] == case) == 2
+
+
+def test_today_hour_entries_is_the_one_grouping_rule():
+    """The rule in isolation: same collection, same package, within the
+    bucket handed in — placed where the newest member fell; anything
+    outside the named collections stays alone; a package-less row never
+    groups."""
+    rows = [
+        {"collection": "USCOURTS", "package_id": "A"},
+        {"collection": "FR", "package_id": "F"},
+        {"collection": "USCOURTS", "package_id": "B"},
+        {"collection": "FR", "package_id": "F"},
+        {"collection": "USCOURTS", "package_id": "A"},
+        {"collection": "AGENCYPR", "package_id": ""},
+        {"collection": "AGENCYPR", "package_id": ""},
+    ]
+    entries = publish._today_hour_entries(rows)
+    shape = [(e[0]["collection"], e[0]["package_id"], len(e)) for e in entries]
+    assert shape == [("USCOURTS", "A", 2), ("FR", "F", 1), ("USCOURTS", "B", 1),
+                     ("FR", "F", 1), ("AGENCYPR", "", 1), ("AGENCYPR", "", 1)]

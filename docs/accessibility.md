@@ -1278,6 +1278,62 @@ width and, here, answered the wrong half of the problem.
 
 ---
 
+### A11Y-24 — Info — new pattern: the live listing's case groups
+
+**Status: opened and closed at build, 2026-09-15** (doctrine §8: a new
+pattern is not done without an entry). Inspection and computed values
+only — not assistive-technology verified (operator ruling 2026-09-05).
+Pinned by `test_case_group_summary_is_text_only`,
+`test_case_group_summary_meets_the_target_size_floor` and
+`test_case_group_rows_count_once_in_the_shown_counter`.
+
+**Where:** `publish._today_case_row`, `_today_hour_entries`; the live
+page and the frozen day views.
+
+The operator asked (2026-09-14) that the documents of one court case
+stop repeating the case name down the live stream — forty rows for one
+case that day. The ladder (doctrine §1) stops at rung 2: a native
+`<details>`, closed, holding the case's documents under a `<summary>`
+that reads "N documents in this case". No script, and the open state is
+real DOM state.
+
+Decisions, and what each protects:
+
+- **The summary is text only.** A `<summary>` is a control; the case's
+  link and the filter chips (which are `<label>`s when the day offers
+  the filter) sit in the entry above it, where every other entry keeps
+  them, so no control nests inside a control (4.1.2; keyboard reach of
+  nested interactive content is inconsistent across browsers).
+- **The accessible name is the visible text, count first** (2.5.3).
+- **The native marker stays.** The affordance is the triangle plus the
+  accent colour, never the colour alone (1.4.1). Summary text is
+  `--accent` on `--bg`: **8.51:1** light, **8.24:1** dark (§4.1).
+- **Target size**, computed (§4.2): `0.9rem × 1.5 + 2 × 0.15rem` =
+  **26.4 CSS px**, a full-width block, over the 24 px floor (2.5.8).
+- **Forced colours:** the existing `summary:focus-visible` rule covers
+  it; no new boundary or state marker was drawn.
+- **The shown-counter counts an entry once.** The inner rows live in
+  `.case-list`, outside the `.today-list > .today-item` counter scope,
+  because a counter cannot see into a closed `<details>` — the count
+  would otherwise change when a reader opened one. The count line now
+  says "entries shown".
+- **Reflow:** the inner rows reuse `.today-item`, so the 40 rem
+  breakpoint stacks them the same way; no new fixed width.
+
+Known limits, disclosed:
+
+- **Print shows the case entry and its count, not its documents.** A
+  closed `<details>` prints closed and CSS cannot open one. The count
+  is on the page and every document is in today.json; the print
+  safeguard for filtered subsets (§4) is unchanged.
+- **A case that gains a document in a later hour is listed again
+  there.** Deliberate: an hour heading is a promise about every row
+  under it.
+- **Focus order:** a closed group's document links are out of the tab
+  order until opened, which is the A11Y-04 property, not a defect.
+
+---
+
 ## 4. What is already right
 
 Stated because a remediation pass should not undo any of it.

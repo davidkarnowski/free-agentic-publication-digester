@@ -131,6 +131,7 @@ rather than guessed.
 | Inline SVG charts | `publish._svg_bar_chart`, `_svg_sparkline`; pattern in `docs/accessibility.md` §4a | the SVG is decorative duplication and is hidden from assistive technology; the same series ships as a real `.vh` table with a caption and one row per day |
 | Native `<audio>` + visible download | `publish.render_audio_player` | an alternate modality that needs no player script and can be taken away and used elsewhere |
 | Print rules | `@media print` | a filtered subset must never print as though it were the whole day |
+| Native `<details>` case groups | `publish._today_case_row` | the documents of one court case, observed in one hour, as one entry: the count is the summary's whole text (no link or label inside a control), the case's link is in the title above it, the native marker stays so the affordance is never colour alone, and the inner rows sit outside the shown-counter's scope (A11Y-24) |
 
 ---
 

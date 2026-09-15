@@ -342,3 +342,67 @@ def test_the_archive_renders_only_months_that_have_digests(site):
     # A gap of DAYS inside a month we do cover still renders: 2026-07-03
     # sits between two published days and is shown as "no digest".
     assert 'class="cal-none' in archive
+
+
+# ---------------------------------------------------------------------------
+# The live listing's case groups (A11Y-24, 2026-09-15)
+# ---------------------------------------------------------------------------
+
+
+def _seed_case_group(conn):
+    """A two-document court case journaled in one hour, plus the two
+    standing live-page items."""
+    from conftest import DATE
+    from test_publish import _seed_case, _seed_today
+
+    _seed_today(conn)
+    _seed_case(conn, "USCOURTS-caed-2_17-cr-00209",
+               [f"{DATE}T14:00:02Z", f"{DATE}T14:00:01Z"])
+
+
+def test_case_group_summary_is_text_only(conn, tmp_path):
+    """Doctrine §1 rung 2 and SC 4.1.2: a <summary> is a control, and a
+    link or a filter label inside it would be a control inside a
+    control — reachable by keyboard in some browsers and not others.
+    The case's link lives in the entry's title, above the summary, and
+    the summary's accessible name is exactly its visible text, which
+    begins with the count (2.5.3, label in name)."""
+    from conftest import DATE
+
+    _seed_case_group(conn)
+    publish.build_today(conn, out_dir=tmp_path, date=DATE)
+    page = (tmp_path / "today.html").read_text(encoding="utf-8")
+    summaries = re.findall(r'<details class="case-docs"><summary>(.*?)</summary>',
+                           page, re.DOTALL)
+    assert summaries == ["2 documents in this case"]
+    entry = re.search(r'<li class="today-item today-case.*?<details', page,
+                      re.DOTALL).group()
+    assert 'href="https://www.govinfo.gov/app/details/USCOURTS-caed-2_17-cr-00209"' in entry
+
+
+def test_case_group_summary_meets_the_target_size_floor():
+    """Doctrine §4.2, computed from the declared box: font-size ×
+    line-height + vertical padding, in CSS px at the 16 px root, must
+    clear SC 2.5.8's 24 px floor. The summary is a full-width block, so
+    its height is the target's short side."""
+    rule = re.search(r"\.case-docs > summary \{([^}]*)\}", publish._STYLE)
+    assert rule, "the case-group summary has no rule of its own"
+    body = rule.group(1)
+    size = float(re.search(r"font-size: ([\d.]+)rem", body).group(1)) * 16
+    lh = float(re.search(r"line-height: ([\d.]+);", body).group(1))
+    pad = float(re.search(r"padding: ([\d.]+)rem 0", body).group(1)) * 16
+    assert size * lh + 2 * pad >= 24, (size, lh, pad)
+    # The native disclosure marker is not hidden: the affordance is
+    # never the accent colour alone (SC 1.4.1).
+    assert "list-style: none" not in body
+    assert "::-webkit-details-marker" not in publish._STYLE.split(".case-docs")[-1].split("}")[0]
+
+
+def test_case_group_rows_count_once_in_the_shown_counter():
+    """The shown-counter is scoped to `.today-list > .today-item`; the
+    rows inside a case sit in `.case-list`, so an entry counts once
+    whether the <details> is open or closed (a counter cannot see into
+    a closed one), and the count line says "entries", not "items"."""
+    assert ".today-list > .today-item { counter-increment: shown; }" in publish._STYLE
+    assert ".case-list > .today-item { counter-increment" not in publish._STYLE
+    assert 'content: counter(shown) " entries shown."' in publish._STYLE

@@ -132,7 +132,10 @@ anyway: the supervisor pauses collector workers during finalization
 - Data contract: mechanical counts + per-item rows (title, source,
   citation, official/FAPD-AI summary if present, `observed_at`), one
   chronological stream with ET hour headings (2026-08-02) — not digest
-  sections; `pending_llm` shown as "N item(s) awaiting an FAPD-AI
+  sections; within an hour the documents of one court case (one
+  USCOURTS package) fold into one entry with a native `<details>`
+  (2026-09-15, `publish._TODAY_CASE_COLLECTIONS`; presentation only —
+  today.json keeps every document); `pending_llm` shown as "N item(s) awaiting an FAPD-AI
   summary." (label renamed from "model summary" 2026-08-07, operator;
   the page names both labels in prose so the rename stays a disclosure)
 - The §3 dating rule applied live: items the publisher dates on another

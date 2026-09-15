@@ -6244,3 +6244,64 @@ registry lists 1.0.0 and 1.1.0 (latest) at the time of writing.
 Next: the operator's registry re-publish; Wave C on the operator's go
 with VPS-testing approval; separately, the operator's request to group
 same-case court documents on the live listing.
+
+## 2026-09-15 — The live listing folds a court case into one entry
+
+Operator, 2026-09-14, from the live page: "there are multiple
+publications under the same name and I believe we should visibly group
+these using rules that ensure they are the same court case … a
+title/listing detail of how many associated publications, then if
+clicked, expands to full listing." Branch `feature/today-case-groups`.
+
+**The rule.** A govinfo USCOURTS package is one court case — the court
+and docket number are the id — and its granules are the documents
+filed in it, so "same package" is the publisher's own statement that
+two documents belong to one case; the rule matches nothing on names and
+infers nothing. It names its collections (`_TODAY_CASE_COLLECTIONS`,
+USCOURTS only) because a granule-level package is a case nowhere else:
+the day's one multi-granule FR package is the issue, its 156 granules
+unrelated documents. Measured on the live 2026-09-14 page before the
+change: 777 items, 407 of them court documents from 92 cases, 48 cases
+with more than one document (one with forty), every case's documents
+contiguous in the stream and inside one hour, titles identical within
+every case — 315 rows of the stream repeating a case name.
+
+**The presentation** (doctrine §1, rung 2 — a native element): within
+an hour's list, the documents of one case become one `.today-case`
+entry where the newest of them fell — the case name linking the case's
+own record (the package page), the case's tags, the package citation,
+and a closed `<details>` whose summary reads "N documents in this
+case"; inside, each document is a standard row (stamp, granule link,
+citation, summary or opening) without the chips, which are the case's
+and shown once. The hour is the boundary on purpose: an hour heading is
+a promise about every row under it, so a case that gains a document in
+a later hour is listed again there. A one-document case is a plain row.
+The frozen day views render through the same loop and group the same
+way. Presentation only, under GUIDE §5's mechanical license: today.json
+and the day JSON keep every document, the facets count documents, and
+both pages say so in their prose. The shown-counter now counts entries
+(the inner rows sit outside its scope — a CSS counter cannot see into
+a closed `<details>`) and its line says "entries shown".
+
+**Access** (A11Y-24, opened and closed at build): the summary is text
+only — the case's link and the filter labels sit in the entry above it,
+so no control nests inside a control; the accessible name is the
+visible text, count first; the native marker stays (never colour
+alone); summary text is `--accent` on `--bg` at 8.51:1 light / 8.24:1
+dark; the summary box computes to 26.4 CSS px, over the 24 px floor.
+Disclosed limits: a closed group prints closed (the count prints, the
+documents are in today.json); inspection and computed values only, no
+assistive-technology verification claimed. Doctrine §3 gained the
+pattern row; `docs/agents/publication.md` carries the rule's boundaries
+(not another collection, not across hours, without the operator).
+
+**Verified:** ruff clean; full suite **1,427 passed, 1 skipped** (eight
+new tests: the group, the hour boundary, the FR non-case, the day
+view, the rule in isolation, and three access pins). A static preview
+built from the live today.json (400 documents → 114 entries, 43 case
+groups) is at `research/blog-preview/site/today-groups-preview.html`
+for the operator's eye; it is not the live page.
+
+Next: PR, CI, fast-forward; deploy on the operator's word (a CSS change
+rides the site build the deploy runs). Also open: the registry
+re-publish as 2.0.0 (operator), Wave C (go pending), the blog verdict.

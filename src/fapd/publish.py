@@ -683,6 +683,19 @@ li.source-note a { color: var(--muted); }
   font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
   text-transform: uppercase; color: var(--muted);
 }
+/* A court case as one entry: its documents sit in a native <details>,
+   closed until opened. The native marker stays, so the affordance is
+   never color alone; the summary's box is 0.9rem × 1.5 + 2 × 0.15rem
+   = 26.4 CSS px tall, over the 24 px floor (SC 2.5.8). The inner rows
+   reuse .today-item and get their own list class so the shown-counter
+   (scoped to .today-list) counts the case once. */
+.case-docs { margin: 0.25rem 0 0; }
+.case-docs > summary {
+  cursor: pointer; color: var(--accent); font-size: 0.9rem;
+  line-height: 1.5; padding: 0.15rem 0;
+}
+.case-list { list-style: none; padding-left: 0; margin: 0.2rem 0 0; }
+.case-list > .today-item { padding: 0.35rem 0; }
 /* The collapsed how-it-works explainer. */
 .today-about { margin: 0.6rem 0; }
 .today-about summary {
@@ -801,7 +814,9 @@ h2.filter-lead {
 .filter-count {
   margin: 0.5rem 0 0; font-size: 0.8rem; color: var(--muted);
 }
-.filter-count::after { content: counter(shown) " item(s) shown."; }
+/* "Entries", not "items": a case group is one entry holding several
+   documents, and the counter cannot see inside a closed <details>. */
+.filter-count::after { content: counter(shown) " entries shown."; }
 /* Always visible (was display:none until a box was checked): the escape
    hatch the bar's own prose promises must exist before it is needed. */
 .filter-clear {
@@ -4123,6 +4138,22 @@ _TODAY_COLLECTION_LABELS = {
     "BILLACTIONS": "Bill action",
 }
 
+# Same-case grouping on the listing pages (operator, 2026-09-14). A
+# govinfo USCOURTS package IS one court case — the court and the docket
+# number are the id (USCOURTS-caed-2_17-cr-00209) — and its granules
+# are the documents filed in that case, so "same package" is the
+# publisher's own statement that two documents belong to one case: no
+# title matching, no inference, nothing this project decides. Live on
+# 2026-09-14: 407 court documents from 92 cases, 48 of them with more
+# than one document, one case with forty — 315 rows of the stream said
+# the same case name over and over. The rule names the collections it
+# applies to because a granule-level package is not a case anywhere
+# else: an FR package is the day's issue and its granules are unrelated
+# documents. Presentation only (GUIDE §5): every document stays its own
+# item in today.json and the day JSON, the facets count documents, and
+# the page says so.
+_TODAY_CASE_COLLECTIONS = {"USCOURTS": "documents in this case"}
+
 
 # Mechanical per-item metadata (zero LLM). Branch by collection; document
 # type expanded into plain words; channel from the journal source class.
@@ -4290,26 +4321,36 @@ def _today_display_title(item):
     return _truncate(_display_title(raw))
 
 
-def _today_item_row(item, filterable=()):
+def _today_observed_html(stamp):
+    """The observation stamp of a listing row. A bare clock reading
+    followed by two letters says nothing about what the number is, and
+    the distinction this project cares about most — observation time,
+    not publication time — was nowhere in the markup (1.3.1, A11Y-14).
+    The abbreviation stays visible and is spoken in full
+    (`_clock_suffix`, the one pattern for every surface)."""
+    if not stamp:
+        return ""
+    return (f'<time class="utc" datetime="{html.escape(stamp)}">'
+            f'<span class="vh">Observed at </span>'
+            f"{html.escape(_publication_clock(stamp))}"
+            f"{_clock_suffix()}</time>")
+
+
+def _today_item_row(item, filterable=(), chips=True):
+    """One document as one row. `chips=False` is the row inside a case
+    group: the tags are the case's, shown once on the group entry, and
+    forty copies of "judicial · court opinion" would be the vertical
+    space the group exists to give back."""
     title = _today_display_title(item)
     gran = item["granule_id"]
     cite = item["package_id"] + (f" / {gran}" if gran else "")
-    stamp = item["observed_at"] or ""
-    # A bare clock reading followed by two letters says nothing about
-    # what the number is, and the distinction this project cares about
-    # most — observation time, not publication time — was nowhere in the
-    # markup (1.3.1, A11Y-14). The abbreviation stays visible and is
-    # spoken in full (`_clock_suffix`, the one pattern for every surface).
-    observed = (f'<time class="utc" datetime="{html.escape(stamp)}">'
-                f'<span class="vh">Observed at </span>'
-                f"{html.escape(_publication_clock(stamp))}"
-                f"{_clock_suffix()}</time>"
-                if stamp else "")
+    observed = _today_observed_html(item["observed_at"] or "")
     url = _today_official_url(item)
     title_html = (f'<a href="{html.escape(url)}">{html.escape(title)}</a>'
                   if url else html.escape(title))
-    chips = "".join(_entry_tag_chip(t, filterable)
-                    for t in _today_item_tags(item))
+    chips_html = ("".join(_entry_tag_chip(t, filterable)
+                          for t in _today_item_tags(item))
+                  if chips else "")
 
     coll_label = _TODAY_COLLECTION_LABELS.get(
         item["collection"], item["collection"] or "publication")
@@ -4363,13 +4404,77 @@ def _today_item_row(item, filterable=()):
     # time sits in its own grid column; everything else is wrapped so the
     # two-column layout is real alignment, not an approximated margin.
     keys = " ".join(f"k-{_slug(t)}" for t in _today_item_tags(item))
+    chips_span = (f' <span class="today-chips">{chips_html}</span>'
+                  if chips else "")
     return (
         f'<li class="today-item {keys}">'
         f'<span class="today-time">{observed}</span>'
         f'<div class="today-body">'
+        f"<strong>{title_html}</strong>{chips_span}"
+        f'<div class="today-item-meta">{meta}</div>{body}</div></li>'
+    )
+
+
+def _today_hour_entries(bucket):
+    """One hour's stream entries, in stream order. A document stays its
+    own entry unless its collection is one where a package is a case
+    (`_TODAY_CASE_COLLECTIONS`); then every document of that case
+    observed in this hour joins one entry, placed where the newest of
+    them fell. The hour is the boundary on purpose: an entry under the
+    "2 PM" heading may not hold a document observed at 4 PM, so a case
+    that gained a document later in the day is listed again there, and
+    each row inside a group carries its own stamp regardless. Returns a
+    list of lists; a lone document is a list of one."""
+    entries = []
+    groups = {}
+    for item in bucket:
+        if item["collection"] in _TODAY_CASE_COLLECTIONS and item["package_id"]:
+            key = (item["collection"], item["package_id"])
+            if key in groups:
+                groups[key].append(item)
+                continue
+            groups[key] = [item]
+            entries.append(groups[key])
+        else:
+            entries.append([item])
+    return entries
+
+
+def _today_case_row(items, filterable=()):
+    """One court case as one entry: the case name (linking the case's
+    own record, the govinfo package page), the case's tags, the package
+    citation, and a native <details> holding the documents — closed, so
+    a forty-document case costs the stream one row until a reader opens
+    it. Doctrine §1: rung 2, a native element; nothing scripted, and the
+    open state is real DOM state. The <summary> is text only — no link,
+    no chip — because a summary is a control and a control inside a
+    control is reachable by nobody's keyboard reliably; the case's link
+    sits above it, in the title, where every other entry keeps its link.
+    The count in the summary is the group's one computed value, and the
+    same count is one query over today.json (package_id)."""
+    lead = items[0]
+    title = _today_display_title(lead)
+    observed = _today_observed_html(lead["observed_at"] or "")
+    url = f"https://www.govinfo.gov/app/details/{lead['package_id']}"
+    title_html = f'<a href="{html.escape(url)}">{html.escape(title)}</a>'
+    tags = list(dict.fromkeys(t for i in items for t in _today_item_tags(i)))
+    chips = "".join(_entry_tag_chip(t, filterable) for t in tags)
+    keys = " ".join(f"k-{_slug(t)}" for t in tags)
+    coll_label = _TODAY_COLLECTION_LABELS.get(
+        lead["collection"], lead["collection"] or "publication")
+    meta = html.escape(" · ".join(
+        [coll_label, _today_channel_label(lead), lead["package_id"]]))
+    noun = _TODAY_CASE_COLLECTIONS[lead["collection"]]
+    docs = "".join(_today_item_row(i, filterable, chips=False) for i in items)
+    return (
+        f'<li class="today-item today-case {keys}">'
+        f'<span class="today-time">{observed}</span>'
+        f'<div class="today-body">'
         f"<strong>{title_html}</strong> "
         f'<span class="today-chips">{chips}</span>'
-        f'<div class="today-item-meta">{meta}</div>{body}</div></li>'
+        f'<div class="today-item-meta">{meta}</div>'
+        f'<details class="case-docs"><summary>{len(items)} {noun}</summary>'
+        f'<ul class="case-list">{docs}</ul></details></div></li>'
     )
 
 
@@ -4765,6 +4870,15 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
         "ours, not the government\u2019s. Those tags are clickable: selecting one here or in the "
         "filter bar narrows the stream to matching entries, and picking "
         "several narrows to entries carrying all of them.</p>"
+        "<p><strong>Court documents are grouped by case.</strong> When "
+        "several documents from one court case arrive in the same hour, "
+        "they are listed as one entry \u2014 the case name, its tags, and a "
+        "line saying how many documents arrived \u2014 that opens to the full "
+        "list, each document with its own time and link. The grouping "
+        "follows govinfo\u2019s own case identifier (the package), never a "
+        "match on names, and a case that gains a document in a later hour "
+        "is listed again there. today.json lists every document "
+        "separately.</p>"
         "<p><strong>About the dates and times on this page.</strong> A "
         f"publication day here runs on <strong>{_clock_label} in "
         f"{_clock_place}</strong> — the clock the publishers themselves "
@@ -4803,7 +4917,11 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
         intro = (
             "<p>Official federal publications as our collectors observed "
             "them through this day, newest first. Times are shown in "
-            f"{_clock_label} ({_clock_place}). This listing does not update."
+            f"{_clock_label} ({_clock_place}). Documents from one court "
+            "case observed in the same hour are listed as one entry that "
+            "opens to the full list (grouped by govinfo’s case "
+            "identifier, never by name); the day’s JSON lists every "
+            "document separately. This listing does not update."
             f"{digest_link}</p>")
     # The federal working calendar explains a quiet stream before a
     # reader (or an agent reading today.json) wonders if the pipeline is
@@ -4906,18 +5024,32 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
         # lists. Known limit, accepted: an hour heading stays visible
         # when a filter hides its whole group — CSS cannot know — while
         # the count line stays truthful.
+        # Within an hour, the documents of one court case fold into one
+        # entry (`_today_hour_entries`; the rule and its reasons sit on
+        # `_TODAY_CASE_COLLECTIONS`).
         stream = []
         current_hour = object()
+        bucket = []
+
+        def flush():
+            for entry in _today_hour_entries(bucket):
+                stream.append(_today_case_row(entry, filterable)
+                              if len(entry) > 1
+                              else _today_item_row(entry[0], filterable))
+            bucket.clear()
+
         for i in status["items"]:
             hour = _publication_hour_label(i["observed_at"] or "")
             if hour != current_hour:
                 if stream:
+                    flush()
                     stream.append("</ul>")
                 if hour:
                     stream.append(f'<h3 class="today-hour">{hour}</h3>')
                 stream.append('<ul class="today-list">')
                 current_hour = hour
-            stream.append(_today_item_row(i, filterable))
+            bucket.append(i)
+        flush()
         stream.append("</ul>")
         form_action = "today.html" if live else f"day/{date}.html"
         parts.append(
