@@ -1,6 +1,8 @@
 # Plan — acting on the MCP field report (2026-09-14)
 
-*Status: **Wave A in progress since 2026-09-14** (operator: "Begin"); Waves B and C wait. Follows
+*Status (2026-09-14, end of day): **Wave A deployed; Wave B merged and
+NOT deployed; Wave C not started.** §7 says exactly what a resuming agent
+does next. Follows
 [plan-task-template.md](plan-task-template.md). Parent:
 [plan-2026-09-13-agent-discovery.md](plan-2026-09-13-agent-discovery.md)
 (Phase 5 complete 2026-09-14). Last reviewed: 2026-09-14.*
@@ -452,15 +454,86 @@ carries the F3 and F9 dismissals with evidence.
    test and the static scan.
 9. F3 and F9 dismissed in the WORKLOG with evidence; OB-26 recorded.
 
-## 7. Launch readiness (2026-09-14)
+## 7. State on pickup (2026-09-14, end of day)
 
-- `main` clean at d9bb279; baseline 1,389 passed, 1 skipped.
-- Progress log: `research/agent-logs/mcp-field-report-orchestrator-20260914.md`
-  (gitignored), START entry written; resume from its `NEXT:`.
-- Performed in the main session; no sub-agents.
-- Waiting on the operator: the go for Wave A. Later: "deploy" per wave,
-  VPS-testing approval for Waves B and C while the laptop's Docker is
-  down, the registry re-publish after Waves A and B.
+Everything below is in the tracked tree; the progress log
+(`research/agent-logs/mcp-field-report-orchestrator-20260914.md`) is
+git-ignored and exists only on the founder's machine, so do not depend
+on it. Read this section, then the WORKLOG entries dated 2026-09-14 that
+mention "Wave A" and "Wave B".
+
+**Done and deployed:** Wave A (main 6c76115; package 0.2.0; surface
+1.1.0; the registry lists 1.1.0). Records: WORKLOG "Field-report Wave A"
+and "Wave A deployed".
+
+**Done, merged, not deployed:** Wave B (main 24790b0; package 0.3.0;
+surface 2.0.0). Verified before merge: full suite 1,419 passed; the
+rehearsal on the box 42 pass / 0 fail / 1 skip with row M3 green.
+Records: WORKLOG "Field-report Wave B". Nothing on the box has changed
+since Wave A's deploy; the live service is still 1.1.0.
+
+**To finish Wave B, in order:**
+
+1. The operator says "deploy" (CLAUDE.md §13; not between 03:30 and
+   06:00 UTC). Run `deploy/vps/scripts/deploy.sh` from a clean `main`.
+2. Live checks from outside, kept to a dozen requests: `initialize` and
+   the server card report 2.0.0; `tools/list` shows `outputSchema` on
+   the six JSON tools and none on `get_digest`/`get_agent_guide`; a
+   `get_digest` call returns the digest as `content[0]` and the
+   disclosure last; `get_digest` with `section: "coverage"` returns a
+   few kilobytes; one `isError` result (a missing date) is accepted by
+   a client that validates output schemas — MCP Inspector's CLI
+   (`npx -y @modelcontextprotocol/inspector --cli https://fapd.info/mcp
+   --transport http --method tools/call --tool-name get_digest
+   --tool-arg date=2026-07-04`) is the client to try, and what it does
+   with an error result under a declared schema is the open question
+   the plan flagged (MF-2 risk); record the observed behavior either
+   way. Claude Code: `claude mcp add --transport http fapd-prod
+   https://fapd.info/mcp` in a scratch directory, one `get_digest`
+   call, then `claude mcp remove fapd-prod -s local`.
+3. The operator re-publishes the registry listing as 2.0.0:
+   `secrets/README.md` (operator-only, git-ignored) holds the
+   procedure; `secrets/mcp-registry/server.json` was regenerated at
+   2.0.0 on 2026-09-14. Verify:
+   `curl -s "https://registry.modelcontextprotocol.io/v0.1/servers?search=info.fapd/fapd"`
+   shows 2.0.0 as latest.
+4. WORKLOG entry with the observed values; §5's Wave B row → deployed.
+
+**Wave C, not started.** MF-7, MF-4, MF-10 as specified in §4, plus:
+- It needs the operator's go and, while the laptop's Docker daemon is
+  down, the operator's VPS-testing approval for the rehearsal. The
+  rehearsal runs on the box from a scratch copy of the tree with two
+  shims (a `docker` wrapper adding `sudo`; a `uv` wrapper that runs the
+  backend image's `/app/.venv/bin/python` as the operator's uid with the
+  scratch tree first on the Python path) — `docs/ops/ops-backlog.md`
+  OB-23 and the WORKLOG entry "Phase 5 pre-merge: the rehearsal passes
+  on the box" describe it; copy the tree with `--exclude '/.git/'` (the
+  rehearsal never needs it) and never commit while the copy is in
+  flight. Set `FAPD_F2B_FILTER` to a copy of the private jail filter
+  if row M17 should run; otherwise it records a SKIP by design.
+- MF-7 changes the `Link` header contract: amend the parent plan's §8.3
+  in its own commit first, then the nginx include and the head links in
+  the same commit as the test that pins their equality.
+- MF-10 is Publication-only after the §0 redesign (per-file atomic
+  writes); its rehearsal rows are 1 and 23 (nginx serves the swapped
+  files) plus a full health pass after deploy.
+- No surface version change in Wave C (the manifest is untouched), so
+  no registry re-publish.
+
+**Also in flight, same day, not part of this plan:** the devnote
+`docs/devnotes/2026-09-14-findable-is-part-of-reachable.md` is a
+reviewed draft awaiting the operator's verdict; it is not on the
+site's allowlist (`publish._BLOG_POSTS`). Publishing it is one line
+there plus a deploy.
+
+**Standing rules for whoever picks this up:** package commits separate
+from FAPD commits (the package must stay free of project strings —
+pinned); commit trailer `Co-Authored-By: Claude <model> <noreply@anthropic.com>`
+only, no session line; CI runs on pull requests and `main` only, so
+open a PR for the check and merge by fast-forward; nothing touches the
+VPS without the operator's word for that specific action; security
+configuration lives in the operator's private host tree, never in this
+repository.
 
 ## 8. Change log of this plan
 
@@ -474,3 +547,7 @@ carries the F3 and F9 dismissals with evidence.
   section slugs and collection codes read off the code; Wave E folded
   into Wave C; launch readiness added.
 - 2026-09-14: written from the verified findings; not started.
+- 2026-09-14 (end of day): §7 rewritten as "State on pickup" for a cold
+  resume — Wave A deployed, Wave B merged and undeployed with its finish
+  steps listed, Wave C prerequisites and the on-box rehearsal method,
+  standing rules; status header updated.
