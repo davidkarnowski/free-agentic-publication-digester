@@ -6305,3 +6305,38 @@ for the operator's eye; it is not the live page.
 Next: PR, CI, fast-forward; deploy on the operator's word (a CSS change
 rides the site build the deploy runs). Also open: the registry
 re-publish as 2.0.0 (operator), Wave C (go pending), the blog verdict.
+
+## 2026-09-15 — Case grouping deployed: 719 items, 404 entries
+
+Operator: "I like the grouping, Deploy it. Save Wave C and the blog
+for afterward and only on my go." `main` at ab38f30, clean and current;
+`deploy.sh` 03:05–03:12 UTC, exit 0, inside the window (the finalizer's
+03:30–06:00 UTC quiet hours were twenty minutes off): backend image
+rebuilt, site rebuilt with the new `style.css`, `fapd-web` reloaded,
+verify block green, no published port. The backend logged five
+`database is locked` retries in its restart minute (03:10) and none
+after — the same shape as the two deploys before it.
+
+**Live, 03:11:47 UTC, the first render on the new code:**
+
+- today.html: **719 items → 404 entries** — 48 case groups holding 363
+  documents (the largest, forty) and 356 plain rows. Every group's
+  summary reads "N documents in this case"; the "Court documents are
+  grouped by case" paragraph is in the explainer; `style.css` carries
+  the summary rule and the "entries shown" count line.
+- today.json: unchanged in shape and count — 777 observations, which
+  is the page's 719 plus the 11 flagged backfill and the 47
+  corroborated second-channel copies the page lists once, as before.
+  `counts` still says `USCOURTS/DISTRICT: 407`.
+- The frozen day views already on the site (through 2026-09-13) keep
+  their un-grouped markup: only the end-of-day finalizer and the
+  backfill script build them, and a site build does not touch them.
+  The first grouped day view is 2026-09-14's, built by tonight's
+  finalizer.
+- Five minutes on: containers healthy, `HEAD /mcp` 405, the `fapd-mcp`
+  jail at zero failed and zero banned, no lock retries after the
+  restart minute.
+
+Standing order from the operator with this deploy: **Wave C and the
+blog wait for his explicit go.** Also still open on his side: the
+registry re-publish as 2.0.0.
