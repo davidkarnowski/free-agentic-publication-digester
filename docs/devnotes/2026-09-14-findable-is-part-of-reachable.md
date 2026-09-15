@@ -153,8 +153,11 @@ The [access page](agents.html#mcp) describes the tools and what the
 service will not do; the [server card](mcp/server-card) is where
 clients start; the service is listed in the
 [official MCP registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=info.fapd/fapd)
-under the `info.fapd` namespace, proved by a public key the site
-serves. The private half never left the founder's machine. The design
+as `info.fapd/fapd`. That is not a typo: The registry names servers by
+their domain reversed, the way software packages are named, so
+`fapd.info` becomes the `info.fapd` namespace. The registry accepted it
+because a public key the site serves proves we control the domain; the
+private half never left the founder's machine. The design
 is written up in the repository's
 [MCP guide](https://github.com/davidkarnowski/free-agentic-publication-digester/blob/main/docs/mcp-server.md).
 
