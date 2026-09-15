@@ -1,0 +1,175 @@
+{
+ "externalDocs": {
+  "description": "Access for AI agents",
+  "url": "https://fapd.info/agents.html"
+ },
+ "info": {
+  "description": "Every path here is a static file served by HTTP GET. There is no authentication, no account, and no request body (see /auth.md). Content is licensed CC BY 4.0; quoted official government text within it is public domain (17 U.S.C. \u00a7 105). The dated digests are the record; today.json is a PRELIMINARY live view that may change until the end-of-day gates freeze the day. For a factual claim, cite the official source each item links to; cite FAPD for the aggregation. sources.json describes our own ingestion and is never government publication.",
+  "license": {
+   "identifier": "CC-BY-4.0",
+   "name": "CC BY 4.0"
+  },
+  "title": "Free Agentic Publication Digester \u2014 static read API",
+  "version": "1.0.0"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/day/{date}.json": {
+   "get": {
+    "description": "today.json's shape and labels for a finished publication day, frozen at end of day (or reconstructed from the stored observation journal, disclosed in place). A date before the journal began answers available: false. The dated digest remains the record.",
+    "operationId": "getDay",
+    "parameters": [
+     {
+      "description": "a publication day, YYYY-MM-DD",
+      "in": "path",
+      "name": "date",
+      "required": true,
+      "schema": {
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "https://fapd.info/schema/day.schema.json"
+        }
+       }
+      },
+      "description": "the file"
+     },
+     "404": {
+      "description": "no file exists for that date"
+     }
+    },
+    "summary": "A finished day's frozen observed listing"
+   }
+  },
+  "/digests.json": {
+   "get": {
+    "description": "The complete enumeration of published digest days, newest first, each with its HTML URL, the path of its canonical Markdown in the public repository, and a teaser.",
+    "operationId": "listDigests",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "https://fapd.info/schema/digests.schema.json"
+        }
+       }
+      },
+      "description": "the file"
+     }
+    },
+    "summary": "Every published digest"
+   }
+  },
+  "/feed.xml": {
+   "get": {
+    "description": "The twenty most recent digest days as an Atom feed, for change discovery.",
+    "operationId": "getFeed",
+    "responses": {
+     "200": {
+      "content": {
+       "application/atom+xml": {}
+      },
+      "description": "the file"
+     }
+    },
+    "summary": "Atom feed of digests"
+   }
+  },
+  "/llms.txt": {
+   "get": {
+    "description": "Where everything is and how to read it faithfully.",
+    "operationId": "getLlmsTxt",
+    "responses": {
+     "200": {
+      "content": {
+       "text/plain": {}
+      },
+      "description": "the file"
+     }
+    },
+    "summary": "Guide for AI agents"
+   }
+  },
+  "/sources.json": {
+   "get": {
+    "description": "Every source the pipeline ingests, plans to ingest, or found unavailable, with the statistics of OUR ingestion and the thresholds behind every health label. Not part of the official record.",
+    "operationId": "listSources",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "https://fapd.info/schema/sources.schema.json"
+        }
+       }
+      },
+      "description": "the file"
+     }
+    },
+    "summary": "Source directory and ingestion statistics"
+   }
+  },
+  "/today.json": {
+   "get": {
+    "description": "Every item observed so far for the current publication day. PRELIMINARY: items may change until the end-of-day gates freeze the dated digest. Filter on is_backfill=false for the day's own news, drop items carrying duplicate_of to match the human listing, and read day_context before calling a day quiet.",
+    "operationId": "getToday",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "https://fapd.info/schema/today.schema.json"
+        }
+       }
+      },
+      "description": "the file"
+     }
+    },
+    "summary": "The live publication day (PRELIMINARY)"
+   }
+  },
+  "/{date}.md": {
+   "get": {
+    "description": "The dated digest as canonical Markdown \u2014 the record, byte-identical to digests/<date>.md in the public repository. Read the header's Inference row and the Coverage Statement before citing.",
+    "operationId": "getDigestMarkdown",
+    "parameters": [
+     {
+      "description": "a publication day, YYYY-MM-DD",
+      "in": "path",
+      "name": "date",
+      "required": true,
+      "schema": {
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "text/markdown": {}
+      },
+      "description": "the file"
+     },
+     "404": {
+      "description": "no file exists for that date"
+     }
+    },
+    "summary": "The canonical digest Markdown"
+   }
+  }
+ },
+ "security": [],
+ "servers": [
+  {
+   "url": "https://fapd.info"
+  }
+ ]
+}

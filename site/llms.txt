@@ -4,11 +4,24 @@
 > ingestion as well as human reading: see /agents.html.
 
 ## Core
-- [Latest digest](https://fapd.info/2026-09-13.html)
+- [Latest digest](https://fapd.info/2026-09-14.html)
 - [All digests (index)](https://fapd.info/index.html) (the home page lists the 7 most recent days and links the archive; it is NOT a complete enumeration — digests.json is)
 - [Digest archive](https://fapd.info/archive.html) — every published day as a calendar of links, one page per year (https://fapd.info/archive/YYYY.html for earlier years). Human navigation; agents should read digests.json instead.
 - [Machine-readable digest index](https://fapd.info/digests.json)
 - [Atom feed of digests](https://fapd.info/feed.xml)
+- [API catalog (RFC 9727)](https://fapd.info/.well-known/api-catalog) and [OpenAPI description](https://fapd.info/openapi.json)
+- [AI catalog](https://fapd.info/.well-known/ai-catalog.json)
+- [Agent skills](https://fapd.info/.well-known/agent-skills/index.json) — step-by-step instructions for reading and citing the digest
+- [MCP service](https://fapd.info/agents.html#mcp) — read-only, no inference: https://fapd.info/mcp
+  - list_digests — Lists published digest days, newest first: date, page URL, canonical Markdown path and teaser.
+  - get_digest — Returns the canonical Markdown digest for a published day, verbatim; with section, one heading block of it. The digest summarizes a rule-selected subset of the day and counts the rest — for every item an agency or collection published, use get_day_listing.
+  - get_live_day — Returns today's PRELIMINARY observed items with the day's disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection; agency keeps one agency's items (exact name, case ignored) — facets.tags in the result lists the agencies present.
+  - list_day_views — Lists the days that have a frozen observed listing, newest first.
+  - get_day_listing — Returns a finished day's complete frozen observed listing — every item, including the ones the digest only counted — with its disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection; agency keeps one agency's items (exact name, case ignored) — facets.tags in the result lists the agencies present.
+  - list_sources — Lists the source directory as a summary per source: identity, method, status and health label. get_source returns one source's full record including daily activity; the source-directory resource is the whole file.
+  - get_source — Returns one source's full record: registry entry, ingestion statistics, health and daily activity.
+  - get_agent_guide — Returns llms.txt: the plain-text guide to every published surface.
+- [auth.md](https://fapd.info/auth.md) — no authentication exists
 - [Today — live in-progress day, PRELIMINARY](https://fapd.info/today.html) (also /today.json, whose `facets.tags` gives keyword counts and whose items carry the same tags for client-side filtering. READ THE FLAGS: items[] includes entries the human page excludes — filter on is_backfill=false for the day's own news (backfill_count states how many are excluded), and check day_context (null on federal business days; a weekend/holiday object explains a quiet stream). Items may change until the end-of-day gates freeze the dated digest)
 - [Source guide — what we ingest and why](https://fapd.info/sources.html)
 - Per-source pages: https://fapd.info/sources/<source-id>.html — one page per registry entry (active, planned, and unavailable alike): identity, ingestion method and politeness posture, measured statistics at 24-hour / 14-day / all-time windows with day-by-day charts, health label history, and — where stored — model-written orientation and assessment blocks, labeled as such. Source ids are listed in /sources.json.
@@ -36,3 +49,5 @@
   Publication Digester'); quoted official government text is public
   domain. For factual claims, cite the underlying official source
   each item links to; cite FAPD for the aggregation.
+- Markdown: append .md to a digest URL (/<YYYY-MM-DD>.md is the canonical record), or send Accept: text/markdown.
+- Declined protocols (OAuth, A2A, WebMCP, payments) and why: https://fapd.info/agents.html

@@ -1,0 +1,59 @@
+{
+ "$id": "https://fapd.info/schema/digests.schema.json",
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "description": "The complete enumeration of published digest days, newest first. The dated digests are the record; this index enumerates them and nothing else.",
+ "properties": {
+  "agent_guide": {
+   "type": "string"
+  },
+  "digests": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "canonical_markdown": {
+      "description": "path of the canonical Markdown in the public repository (digests/<date>.md)",
+      "type": "string"
+     },
+     "date": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "type": "string"
+     },
+     "html": {
+      "type": "string"
+     },
+     "teaser": {
+      "description": "the opening of the Day in Review, which is model-generated prose; never official text",
+      "type": [
+       "string",
+       "null"
+      ]
+     }
+    },
+    "required": [
+     "date",
+     "html",
+     "canonical_markdown",
+     "teaser"
+    ],
+    "type": "object"
+   },
+   "type": "array"
+  },
+  "generated": {
+   "description": "UTC stamp of the site build",
+   "type": "string"
+  },
+  "title": {
+   "type": "string"
+  }
+ },
+ "required": [
+  "title",
+  "generated",
+  "agent_guide",
+  "digests"
+ ],
+ "title": "digests.json \u2014 every published digest",
+ "type": "object"
+}

@@ -1,0 +1,33 @@
+{
+ "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+ "skills": [
+  {
+   "description": "Find and read the Free Agentic Publication Digester's validated daily digest of official US federal publications for a given date, and cite it correctly.",
+   "digest": "sha256:140452600cd3dbf0a4a7175d654a9e5de636efe886b03fa146df9df4eabdf304",
+   "name": "fapd-daily-digest",
+   "type": "skill-md",
+   "url": "https://fapd.info/.well-known/agent-skills/fapd-daily-digest/SKILL.md"
+  },
+  {
+   "description": "Read the in-progress federal publication day from today.json, or a finished day's frozen listing, without mistaking preliminary or backfilled items for the day's news.",
+   "digest": "sha256:90e5ef35993c3cc4937b47f91ec2cadd2ebe9cf5333d0bb0939d2233f6ce27af",
+   "name": "fapd-live-day",
+   "type": "skill-md",
+   "url": "https://fapd.info/.well-known/agent-skills/fapd-live-day/SKILL.md"
+  },
+  {
+   "description": "Understand which federal sources the digest covers, which are planned or unavailable, and how to read its ingestion statistics.",
+   "digest": "sha256:01a9f39d3ed8918d2fff6b75e447927d4c2925ea70a61dd570559a284954cff4",
+   "name": "fapd-source-coverage",
+   "type": "skill-md",
+   "url": "https://fapd.info/.well-known/agent-skills/fapd-source-coverage/SKILL.md"
+  },
+  {
+   "description": "Check a Free Agentic Publication Digester digest against its public repository history and provenance manifests.",
+   "digest": "sha256:80a0507a9d3fba5f0a30d44ed07204a7b75a4a8728177b421a81506c271ed67f",
+   "name": "fapd-verify-the-record",
+   "type": "skill-md",
+   "url": "https://fapd.info/.well-known/agent-skills/fapd-verify-the-record/SKILL.md"
+  }
+ ]
+}

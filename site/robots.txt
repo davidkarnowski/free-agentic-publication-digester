@@ -6,9 +6,18 @@
 #   LLM guide:    /llms.txt
 #   Machine index: /digests.json   Atom: /feed.xml
 #   Source stats:  /sources.json  (our ingestion, not the record)
+#   API catalog:  /.well-known/api-catalog   OpenAPI: /openapi.json
+#   AI catalog:   /.well-known/ai-catalog.json
+#   Agent skills: /.well-known/agent-skills/index.json
+#   MCP:          /mcp  (read-only, no inference; see /agents.html)
+#   Auth:         /auth.md  (there is none)
 # /today.html is a PRELIMINARY live view; the dated digests are
 # the record.
+# Content signals (https://contentsignals.org/): search, AI input
+# and AI training are all welcome. CC BY 4.0 attribution applies.
 User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 Sitemap: https://fapd.info/sitemap.xml
+Agentmap: https://fapd.info/.well-known/ai-catalog.json

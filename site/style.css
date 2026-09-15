@@ -598,6 +598,19 @@ li.source-note a { color: var(--muted); }
   font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
   text-transform: uppercase; color: var(--muted);
 }
+/* A court case as one entry: its documents sit in a native <details>,
+   closed until opened. The native marker stays, so the affordance is
+   never color alone; the summary's box is 0.9rem × 1.5 + 2 × 0.15rem
+   = 26.4 CSS px tall, over the 24 px floor (SC 2.5.8). The inner rows
+   reuse .today-item and get their own list class so the shown-counter
+   (scoped to .today-list) counts the case once. */
+.case-docs { margin: 0.25rem 0 0; }
+.case-docs > summary {
+  cursor: pointer; color: var(--accent); font-size: 0.9rem;
+  line-height: 1.5; padding: 0.15rem 0;
+}
+.case-list { list-style: none; padding-left: 0; margin: 0.2rem 0 0; }
+.case-list > .today-item { padding: 0.35rem 0; }
 /* The collapsed how-it-works explainer. */
 .today-about { margin: 0.6rem 0; }
 .today-about summary {
@@ -716,7 +729,9 @@ h2.filter-lead {
 .filter-count {
   margin: 0.5rem 0 0; font-size: 0.8rem; color: var(--muted);
 }
-.filter-count::after { content: counter(shown) " item(s) shown."; }
+/* "Entries", not "items": a case group is one entry holding several
+   documents, and the counter cannot see inside a closed <details>. */
+.filter-count::after { content: counter(shown) " entries shown."; }
 /* Always visible (was display:none until a box was checked): the escape
    hatch the bar's own prose promises must exist before it is needed. */
 .filter-clear {

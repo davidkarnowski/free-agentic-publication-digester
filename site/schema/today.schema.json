@@ -1,0 +1,239 @@
+{
+ "$id": "https://fapd.info/schema/today.schema.json",
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "description": "Every item our collectors observed for the current publication day, newest first. Preliminary until the end-of-day gates freeze the dated digest, which is the record. Additive change only.",
+ "properties": {
+  "backfill_count": {
+   "type": "integer"
+  },
+  "backfill_note": {
+   "type": "string"
+  },
+  "canonical_record": {
+   "type": "string"
+  },
+  "corroborated_count": {
+   "type": "integer"
+  },
+  "counts": {
+   "additionalProperties": true,
+   "description": "whole-day observation counts by collection/doc_type, backfill included",
+   "type": "object"
+  },
+  "date": {
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+   "type": "string"
+  },
+  "day_context": {
+   "additionalProperties": true,
+   "description": "null on federal business days; on weekends/federal holidays an object {kind, name, note} explaining why the stream may be short",
+   "type": [
+    "object",
+    "null"
+   ]
+  },
+  "disclosure": {
+   "type": "string"
+  },
+  "facets": {
+   "additionalProperties": true,
+   "description": "tags: keyword -> item count; note: how to filter client-side",
+   "type": "object"
+  },
+  "generated": {
+   "description": "UTC stamp of this render",
+   "type": "string"
+  },
+  "items": {
+   "description": "ALL observed items including backfill \u2014 filter on is_backfill=false to match the human page's listing",
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "agency": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "channel": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "channel_label": {
+      "type": "string"
+     },
+     "claimed_day": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "claimed_published_at": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "collection": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "corroborated_by": {
+      "description": "on a listed item: the OTHER ingestion channels the same document (same canonical URL) arrived through \u2014 independent receipt, not a content judgment",
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "dkim_result": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "doc_type": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "duplicate_of": {
+      "description": "on a non-listed item: the package_id of the listed twin; the human pages show that one entry, marked corroborated \u2014 filter these out to match the human listing",
+      "type": "string"
+     },
+     "granule_id": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "inclusion_rule": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "is_backfill": {
+      "description": "true = the publisher dates this item on another day (claimed_day); not part of this day's news",
+      "type": "boolean"
+     },
+     "observed_at": {
+      "description": "UTC stamp of first observation",
+      "type": "string"
+     },
+     "official_url": {
+      "description": "the item's own captured URL, or the govinfo details page for govinfo collections; null for an email bulletin with no URL",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "opening_verbatim": {
+      "description": "first ~240 chars of the official text, unedited",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "package_id": {
+      "type": "string"
+     },
+     "source_class": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "source_id": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "summary": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "summary_method": {
+      "description": "official = agency/GPO text; llm = model-generated, labeled",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "tags": {
+      "description": "mechanical (branch, document type, agency); no model-generated item tags yet",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "title": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "url": {
+      "type": [
+       "string",
+       "null"
+      ]
+     }
+    },
+    "required": [
+     "package_id",
+     "observed_at",
+     "official_url",
+     "channel_label",
+     "tags",
+     "is_backfill",
+     "opening_verbatim"
+    ],
+    "type": "object"
+   },
+   "type": "array"
+  },
+  "labels": {
+   "additionalProperties": true,
+   "description": "the honesty disclosures for this file, keyed by the field each explains \u2014 the same text as this schema's descriptions",
+   "type": "object"
+  },
+  "last_observed_at": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "pending_llm": {
+   "description": "items awaiting a model layer; additive, not an error count",
+   "type": "integer"
+  }
+ },
+ "required": [
+  "date",
+  "generated",
+  "disclosure",
+  "canonical_record",
+  "labels",
+  "counts",
+  "day_context",
+  "backfill_count",
+  "corroborated_count",
+  "backfill_note",
+  "facets",
+  "pending_llm",
+  "last_observed_at",
+  "items"
+ ],
+ "title": "today.json \u2014 the live, PRELIMINARY publication day",
+ "type": "object"
+}

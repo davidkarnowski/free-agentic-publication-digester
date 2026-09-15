@@ -1,0 +1,48 @@
+{
+ "linkset": [
+  {
+   "anchor": "https://fapd.info/",
+   "describedby": [
+    {
+     "href": "https://fapd.info/.well-known/ai-catalog.json",
+     "type": "application/ai-catalog+json"
+    }
+   ],
+   "service-desc": [
+    {
+     "href": "https://fapd.info/openapi.json",
+     "type": "application/vnd.oai.openapi+json"
+    }
+   ],
+   "service-doc": [
+    {
+     "href": "https://fapd.info/agents.html",
+     "type": "text/html"
+    },
+    {
+     "href": "https://fapd.info/llms.txt",
+     "type": "text/plain"
+    },
+    {
+     "href": "https://fapd.info/auth.md",
+     "type": "text/markdown"
+    }
+   ]
+  },
+  {
+   "anchor": "https://fapd.info/mcp",
+   "service-desc": [
+    {
+     "href": "https://fapd.info/mcp/server-card",
+     "type": "application/mcp-server-card+json"
+    }
+   ],
+   "service-doc": [
+    {
+     "href": "https://fapd.info/agents.html#mcp",
+     "type": "text/html"
+    }
+   ]
+  }
+ ]
+}

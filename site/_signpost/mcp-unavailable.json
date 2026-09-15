@@ -1,0 +1,10 @@
+{
+ "explanation": "The MCP service is temporarily unavailable. Every file it serves is also published statically; start at https://fapd.info/llms.txt.",
+ "start_here": [
+  "https://fapd.info/llms.txt",
+  "https://fapd.info/digests.json",
+  "https://fapd.info/.well-known/api-catalog",
+  "https://fapd.info/agents.html#mcp"
+ ],
+ "status": "unavailable"
+}

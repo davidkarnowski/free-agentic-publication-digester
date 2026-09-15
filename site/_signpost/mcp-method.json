@@ -1,0 +1,6 @@
+{
+ "agent_guide": "https://fapd.info/agents.html#mcp",
+ "explanation": "This endpoint accepts JSON-RPC 2.0 POST requests with a JSON body from Model Context Protocol clients, and nothing else. How to connect, the tools, and the limits are described at https://fapd.info/agents.html#mcp.",
+ "server_card": "https://fapd.info/mcp/server-card",
+ "status": "not accepted"
+}

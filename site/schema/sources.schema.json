@@ -1,0 +1,136 @@
+{
+ "$id": "https://fapd.info/schema/sources.schema.json",
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "description": "The registry plus the same mechanical statistics and health labels as sources.html, with the thresholds that produced them. Not part of the official record; never cite as government publication.",
+ "properties": {
+  "available": {
+   "description": "false when the statistics could not be computed; see unavailable_reason",
+   "type": "boolean"
+  },
+  "canonical": {
+   "type": "string"
+  },
+  "clock": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "generated": {
+   "type": "string"
+  },
+  "health_labels": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "human_page": {
+   "type": "string"
+  },
+  "measurement": {
+   "type": "string"
+  },
+  "scope": {
+   "description": "describes OUR ingestion, not any agency \u2014 the file's own words",
+   "type": "string"
+  },
+  "sources": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "added": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "type": "string"
+     },
+     "card": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "health": {
+      "description": "computed from the numbers beside it with the thresholds in this file; a statement about our ingestion, not about the publisher",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "id": {
+      "type": "string"
+     },
+     "measured": {
+      "description": "true only for active sources; every other entry carries no statistics",
+      "type": "boolean"
+     },
+     "method": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "notes": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "page": {
+      "type": "string"
+     },
+     "status": {
+      "description": "active, planned, unavailable (a refusal kept as a record), or evaluated-excluded",
+      "type": "string"
+     },
+     "urls": {
+      "additionalProperties": true,
+      "type": "object"
+     }
+    },
+    "required": [
+     "id",
+     "name",
+     "description",
+     "method",
+     "urls",
+     "added",
+     "card",
+     "page"
+    ],
+    "type": "object"
+   },
+   "type": "array"
+  },
+  "summary": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "thresholds": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": {
+   "type": "string"
+  },
+  "unavailable_reason": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "window": {
+   "additionalProperties": true,
+   "type": "object"
+  }
+ },
+ "required": [
+  "title",
+  "generated",
+  "canonical",
+  "human_page",
+  "available",
+  "scope",
+  "clock",
+  "measurement",
+  "sources"
+ ],
+ "title": "sources.json \u2014 source directory and ingestion statistics",
+ "type": "object"
+}

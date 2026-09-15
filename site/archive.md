@@ -1,0 +1,70 @@
+<!-- Markdown twin of https://fapd.info/archive.html · Free Agentic Publication Digester -->
+> This is the Markdown form of https://fapd.info/archive.html. Content is licensed CC BY 4.0
+> (credit "FAPD — Free Agentic Publication Digester"); quoted official government
+> text is public domain. For factual claims, cite the official source each item
+> links to. Canonical source: `digests/` in https://github.com/davidkarnowski/free-agentic-publication-digester.
+
+# Digest archive — 2026
+
+Every daily digest, by date. The digest for a day is the canonical record of what the federal government published that day.
+
+## July 2026
+
+- [2026-07-27](2026-07-27.md)
+- [2026-07-28](2026-07-28.md)
+- [2026-07-29](2026-07-29.md)
+- [2026-07-30](2026-07-30.md)
+- [2026-07-31](2026-07-31.md)
+
+## August 2026
+
+- [2026-08-01](2026-08-01.md)
+- [2026-08-02](2026-08-02.md)
+- [2026-08-03](2026-08-03.md)
+- [2026-08-04](2026-08-04.md)
+- [2026-08-05](2026-08-05.md)
+- [2026-08-06](2026-08-06.md)
+- [2026-08-07](2026-08-07.md)
+- [2026-08-08](2026-08-08.md)
+- [2026-08-09](2026-08-09.md)
+- [2026-08-10](2026-08-10.md)
+- [2026-08-11](2026-08-11.md)
+- [2026-08-12](2026-08-12.md)
+- [2026-08-13](2026-08-13.md)
+- [2026-08-14](2026-08-14.md)
+- [2026-08-15](2026-08-15.md)
+- [2026-08-16](2026-08-16.md)
+- [2026-08-17](2026-08-17.md)
+- [2026-08-18](2026-08-18.md)
+- [2026-08-19](2026-08-19.md)
+- [2026-08-20](2026-08-20.md)
+- [2026-08-21](2026-08-21.md)
+- [2026-08-22](2026-08-22.md)
+- [2026-08-23](2026-08-23.md)
+- [2026-08-24](2026-08-24.md)
+- [2026-08-25](2026-08-25.md)
+- [2026-08-26](2026-08-26.md)
+- [2026-08-27](2026-08-27.md)
+- [2026-08-28](2026-08-28.md)
+- [2026-08-29](2026-08-29.md)
+- [2026-08-30](2026-08-30.md)
+- [2026-08-31](2026-08-31.md)
+
+## September 2026
+
+- [2026-09-01](2026-09-01.md)
+- [2026-09-02](2026-09-02.md)
+- [2026-09-03](2026-09-03.md)
+- [2026-09-04](2026-09-04.md)
+- [2026-09-05](2026-09-05.md)
+- [2026-09-06](2026-09-06.md)
+- [2026-09-07](2026-09-07.md)
+- [2026-09-08](2026-09-08.md)
+- [2026-09-09](2026-09-09.md)
+- [2026-09-10](2026-09-10.md)
+- [2026-09-11](2026-09-11.md)
+- [2026-09-12](2026-09-12.md)
+- [2026-09-13](2026-09-13.md)
+- [2026-09-14](2026-09-14.md)
+
+The complete machine-readable index is digests.json, and every digest is also published as Markdown in the public repository: https://github.com/davidkarnowski/free-agentic-publication-digester

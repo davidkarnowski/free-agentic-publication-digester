@@ -1,0 +1,183 @@
+{
+ "entries": [
+  {
+   "description": "Read-only Model Context Protocol service answering only from the published static files. No inference, no writes, no sessions, no accounts.",
+   "displayName": "FAPD MCP service",
+   "identifier": "urn:air:fapd.info:mcp:fapd",
+   "representativeQueries": [
+    "list the most recent federal publication digests",
+    "get the digest for 2026-09-04",
+    "what did the Federal Register publish yesterday"
+   ],
+   "tags": [
+    "mcp",
+    "federal",
+    "digest",
+    "read-only"
+   ],
+   "type": "application/mcp-server-card+json",
+   "url": "https://fapd.info/mcp/server-card"
+  },
+  {
+   "description": "RFC 9727 catalog of the static read files, with an OpenAPI 3.1 description and JSON Schemas.",
+   "displayName": "Static read API catalog",
+   "identifier": "urn:air:fapd.info:api:static-read-api",
+   "representativeQueries": [
+    "machine-readable index of daily federal digests",
+    "OpenAPI description of the FAPD files"
+   ],
+   "tags": [
+    "api-catalog",
+    "openapi",
+    "json-schema"
+   ],
+   "type": "application/linkset+json",
+   "url": "https://fapd.info/.well-known/api-catalog"
+  },
+  {
+   "description": "Every published digest day with its HTML URL, canonical Markdown path and teaser. The dated digests are the record.",
+   "displayName": "Digest index",
+   "identifier": "urn:air:fapd.info:data:digest-index",
+   "representativeQueries": [
+    "which dates have a published federal digest",
+    "teaser for each daily digest"
+   ],
+   "tags": [
+    "digest",
+    "index",
+    "federal"
+   ],
+   "type": "application/json",
+   "url": "https://fapd.info/digests.json"
+  },
+  {
+   "description": "Every item observed so far for the current publication day, with honesty labels. Preliminary until the dated digest freezes.",
+   "displayName": "Live day (PRELIMINARY)",
+   "identifier": "urn:air:fapd.info:data:live-day",
+   "representativeQueries": [
+    "federal publications observed so far today",
+    "preliminary list of today's Congressional Record items"
+   ],
+   "tags": [
+    "live",
+    "preliminary",
+    "federal"
+   ],
+   "type": "application/json",
+   "url": "https://fapd.info/today.json"
+  },
+  {
+   "description": "Every source the pipeline ingests, plans to ingest, or found unavailable, with the statistics of our own ingestion. Not government publication.",
+   "displayName": "Source directory",
+   "identifier": "urn:air:fapd.info:data:source-directory",
+   "representativeQueries": [
+    "which federal sources does the digest ingest",
+    "sources that are unavailable to automated clients"
+   ],
+   "tags": [
+    "sources",
+    "ingestion",
+    "statistics"
+   ],
+   "type": "application/json",
+   "url": "https://fapd.info/sources.json"
+  },
+  {
+   "description": "The most recent digest days as an Atom feed, for change discovery.",
+   "displayName": "Atom feed of digests",
+   "identifier": "urn:air:fapd.info:feed:digests",
+   "representativeQueries": [
+    "subscribe to new daily federal digests",
+    "Atom feed of the most recent digest days"
+   ],
+   "tags": [
+    "atom",
+    "feed",
+    "digest"
+   ],
+   "type": "application/atom+xml",
+   "url": "https://fapd.info/feed.xml"
+  },
+  {
+   "description": "Where everything is and how to read it faithfully.",
+   "displayName": "Guide for AI agents (llms.txt)",
+   "identifier": "urn:air:fapd.info:guide:llms",
+   "representativeQueries": [
+    "how should an AI agent use fapd.info",
+    "where are the machine-readable files on fapd.info"
+   ],
+   "tags": [
+    "llms-txt",
+    "guide"
+   ],
+   "type": "text/plain",
+   "url": "https://fapd.info/llms.txt"
+  },
+  {
+   "description": "Find and read the Free Agentic Publication Digester's validated daily digest of official US federal publications for a given date, and cite it correctly.",
+   "displayName": "Agent skill: fapd-daily-digest",
+   "identifier": "urn:air:fapd.info:skill:fapd-daily-digest",
+   "representativeQueries": [
+    "read the federal publication digest for a given date",
+    "how to cite a FAPD digest item correctly"
+   ],
+   "tags": [
+    "agent-skill",
+    "instructions"
+   ],
+   "type": "application/agent-skills+md",
+   "url": "https://fapd.info/.well-known/agent-skills/fapd-daily-digest/SKILL.md"
+  },
+  {
+   "description": "Read the in-progress federal publication day from today.json, or a finished day's frozen listing, without mistaking preliminary or backfilled items for the day's news.",
+   "displayName": "Agent skill: fapd-live-day",
+   "identifier": "urn:air:fapd.info:skill:fapd-live-day",
+   "representativeQueries": [
+    "what federal documents have been observed so far today",
+    "read a frozen day listing without counting backfill as news"
+   ],
+   "tags": [
+    "agent-skill",
+    "instructions"
+   ],
+   "type": "application/agent-skills+md",
+   "url": "https://fapd.info/.well-known/agent-skills/fapd-live-day/SKILL.md"
+  },
+  {
+   "description": "Understand which federal sources the digest covers, which are planned or unavailable, and how to read its ingestion statistics.",
+   "displayName": "Agent skill: fapd-source-coverage",
+   "identifier": "urn:air:fapd.info:skill:fapd-source-coverage",
+   "representativeQueries": [
+    "which federal sources does the digest ingest and which are unavailable",
+    "how to read the digest's source health labels"
+   ],
+   "tags": [
+    "agent-skill",
+    "instructions"
+   ],
+   "type": "application/agent-skills+md",
+   "url": "https://fapd.info/.well-known/agent-skills/fapd-source-coverage/SKILL.md"
+  },
+  {
+   "description": "Check a Free Agentic Publication Digester digest against its public repository history and provenance manifests.",
+   "displayName": "Agent skill: fapd-verify-the-record",
+   "identifier": "urn:air:fapd.info:skill:fapd-verify-the-record",
+   "representativeQueries": [
+    "verify a digest file against the public repository history",
+    "what a provenance manifest hash proves"
+   ],
+   "tags": [
+    "agent-skill",
+    "instructions"
+   ],
+   "type": "application/agent-skills+md",
+   "url": "https://fapd.info/.well-known/agent-skills/fapd-verify-the-record/SKILL.md"
+  }
+ ],
+ "host": {
+  "displayName": "Free Agentic Publication Digester",
+  "documentationUrl": "https://fapd.info/agents.html",
+  "identifier": "fapd.info"
+ },
+ "specVersion": "1.0"
+}

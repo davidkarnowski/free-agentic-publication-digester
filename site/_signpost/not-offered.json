@@ -1,0 +1,12 @@
+{
+ "declined_protocols": "https://fapd.info/agents.html",
+ "explanation": "fapd.info does not operate this protocol. The site publishes official US federal publication digests as static files, a read-only MCP service at /mcp, and the discovery documents listed below. Nothing here requires authentication or payment.",
+ "start_here": [
+  "https://fapd.info/llms.txt",
+  "https://fapd.info/.well-known/api-catalog",
+  "https://fapd.info/.well-known/ai-catalog.json",
+  "https://fapd.info/agents.html",
+  "https://fapd.info/auth.md"
+ ],
+ "status": "not offered"
+}

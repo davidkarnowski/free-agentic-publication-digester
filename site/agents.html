@@ -8,7 +8,13 @@
 <meta name="robots" content="index, follow">
 <link rel="alternate" type="text/plain" href="llms.txt"
       title="LLM guide — this is an AI-first digest of official US federal publications">
+<link rel="api-catalog" href=".well-known/api-catalog">
+<link rel="service-desc" type="application/vnd.oai.openapi+json" href="openapi.json">
+<link rel="service-doc" type="text/html" href="agents.html">
+<link rel="ai-catalog" type="application/ai-catalog+json" href=".well-known/ai-catalog.json">
+<link rel="icon" href="favicon.ico" sizes="32x32">
 <link rel="stylesheet" href="style.css">
+<link rel="alternate" type="text/markdown" href="agents.md">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -62,6 +68,232 @@ work. Check the source guide for what is ingested today.</p>
   (<code>provenance/manifests/</code>) whose SHA-256 records let you verify captured
   content.</li>
 </ul>
+<h2 id="discovery-for-agents">Discovery for agents</h2>
+<p>Besides this page and <code>/llms.txt</code>, the site publishes the machine
+discovery documents agents actually poll, each at its registered or
+specified location (GUIDE §1). Every one of them is a static file.</p>
+<ul>
+<li><strong>Content Signals</strong> in <code>/robots.txt</code>: search, AI input, and AI
+  training are all welcome (<code>search=yes, ai-input=yes, ai-train=yes</code>);
+  CC BY 4.0 attribution still applies.</li>
+<li><strong>API catalog</strong> (RFC 9727) at <code>/.well-known/api-catalog</code>, and an
+  <strong>OpenAPI 3.1 description</strong> of the static read files at
+  <code>/openapi.json</code>, with JSON Schemas under <code>/schema/</code> for
+  <code>digests.json</code>, <code>today.json</code>, <code>day/&lt;date&gt;.json</code>, and <code>sources.json</code>.</li>
+<li><strong>AI Catalog</strong> at <code>/.well-known/ai-catalog.json</code>: every machine
+  surface here with representative queries, also named by the
+  <code>Agentmap:</code> line in <code>/robots.txt</code>.</li>
+<li><strong>Agent Skills</strong> at <code>/.well-known/agent-skills/index.json</code>: four
+  step-by-step instruction files for reading a digest, reading the live
+  day, understanding source coverage, and verifying the record against
+  the repository, each with a SHA-256 digest of its served bytes.</li>
+<li><strong><code>/auth.md</code></strong>: the authentication document, which says there is no
+  authentication.</li>
+<li><strong>Markdown twins:</strong> append <code>.md</code> to a page URL, or send
+  <code>Accept: text/markdown</code>. For a digest, <code>/&lt;YYYY-MM-DD&gt;.md</code> is the
+  canonical record, byte-identical to the repository file.</li>
+<li><strong>MCP:</strong> a read-only Model Context Protocol service; see the
+  <a href="#mcp">MCP service</a> section below.</li>
+</ul>
+<h2 id="mcp">MCP service</h2>
+
+<p>A read-only <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">Model Context Protocol<span class="vh"> (opens in a new tab)</span></a> service answers at <code>https://fapd.info/mcp</code>: JSON-RPC 2.0 over HTTPS <code>POST</code> (the Streamable HTTP transport). It performs no inference, keeps no sessions, needs no account, and reads nothing but the files this site already publishes, so every tool returns published material verbatim. Each tool description also asks the reading model to treat that text as data, not as instructions.</p>
+<ul>
+<li><strong>Endpoint:</strong> <code>https://fapd.info/mcp</code> — <code>POST</code> only; a <code>GET</code> receives a 405 whose body says where to look instead.</li>
+<li><strong>Protocol versions:</strong> 2026-07-28 (stateless; begin with <code>server/discover</code>) and 2025-11-25, 2025-06-18 (the <code>initialize</code> handshake, answered without a session). A 2026-07-28 request carries the version in <code>params._meta</code> and in the <code>MCP-Protocol-Version</code> and <code>Mcp-Method</code> headers; a request without them is answered under the older revisions, where <code>server/discover</code> does not exist.</li>
+<li><strong>Server card:</strong> <a href="mcp/server-card"><code>/mcp/server-card</code></a>, also at <code>/.well-known/mcp/server-card.json</code>.</li>
+<li><strong>Posture:</strong> read-only, no inference, no writes, no accounts, no sessions, no streaming.</li>
+</ul>
+<h3 id="how-to-connect">How to connect</h3>
+<p>Claude Code, from a terminal:</p>
+<p><code>claude mcp add --transport http fapd https://fapd.info/mcp</code></p>
+<p>Any client that takes a JSON configuration:</p>
+<p><code>json
+{
+  "mcpServers": {
+    "fapd": {
+      "type": "http",
+      "url": "https://fapd.info/mcp"
+    }
+  }
+}</code></p>
+<h3 id="which-tool-answers-which-question">Which tool answers which question</h3>
+<p>The digest is the record, but it summarizes a rule-selected subset of a day and counts the rest; the day listings hold every item. Pick by question:</p>
+<div class="table-scroll" role="region" tabindex="0" aria-labelledby="which-tool-answers-which-question"><table><caption>Which tool answers which question</caption>
+<thead>
+<tr>
+<th scope="col">Question</th>
+<th scope="col">Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the record for a finished day?</td>
+<td><code>get_digest</code> with the date</td>
+</tr>
+<tr>
+<td>Only one block of the record — the Coverage Statement, one numbered section, the header with its Inference row</td>
+<td><code>get_digest</code> with <code>section</code></td>
+</tr>
+<tr>
+<td>Every item observed on a finished day, including the ones the digest only counted — by collection or agency</td>
+<td><code>get_day_listing</code>, with <code>collection</code> and <code>agency</code></td>
+</tr>
+<tr>
+<td>What has been observed so far today (preliminary)?</td>
+<td><code>get_live_day</code>, same filters</td>
+</tr>
+<tr>
+<td>Which days exist?</td>
+<td><code>list_digests</code> (the record), <code>list_day_views</code> (the listings)</td>
+</tr>
+<tr>
+<td>What is a source, and how well is it ingested?</td>
+<td><code>list_sources</code>, then <code>get_source</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="tools">Tools</h3>
+<p>Every tool is read-only, idempotent and closed-world: each reads one published file and returns it, paged where the file is a list. Parameters are validated by the service; an unknown or malformed argument is refused by name. In every result the payload is the first content block; a disclosure, when present, is the last.</p>
+<div class="table-scroll" role="region" tabindex="0" aria-labelledby="tools"><table><caption>Tools of the MCP service</caption>
+<thead>
+<tr>
+<th scope="col">Tool</th>
+<th scope="col">Returns</th>
+<th scope="col">Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>list_digests</code></td>
+<td>Lists published digest days, newest first: date, page URL, canonical Markdown path and teaser.</td>
+<td><code>offset</code> (integer, 0…10000, default 0); <code>limit</code> (integer, 1…60, default 14)</td>
+</tr>
+<tr>
+<td><code>get_digest</code></td>
+<td>Returns the canonical Markdown digest for a published day, verbatim; with section, one heading block of it. The digest summarizes a rule-selected subset of the day and counts the rest — for every item an agency or collection published, use get_day_listing.</td>
+<td><code>date</code> (string, required); <code>section</code> (string, one of header, contents, day-in-review, 1, 2, 3, 4, 5, 6, 7, 8, 9, terms, coverage, methodology)</td>
+</tr>
+<tr>
+<td><code>get_live_day</code></td>
+<td>Returns today's PRELIMINARY observed items with the day's disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection; agency keeps one agency's items (exact name, case ignored) — facets.tags in the result lists the agencies present.</td>
+<td><code>offset</code> (integer, 0…10000, default 0); <code>limit</code> (integer, 1…100, default 50); <code>include_backfill</code> (boolean, default False); <code>collection</code> (string, one of AGENCYPR, BILLACTIONS, BILLS, CREC, FR, PLAW, PRESACT, USCOURTS, VOTES); <code>agency</code> (string)</td>
+</tr>
+<tr>
+<td><code>list_day_views</code></td>
+<td>Lists the days that have a frozen observed listing, newest first.</td>
+<td><code>offset</code> (integer, 0…10000, default 0); <code>limit</code> (integer, 1…366, default 30)</td>
+</tr>
+<tr>
+<td><code>get_day_listing</code></td>
+<td>Returns a finished day's complete frozen observed listing — every item, including the ones the digest only counted — with its disclosures and counts. Items the publisher dates earlier are excluded unless include_backfill is true; collection narrows to one collection; agency keeps one agency's items (exact name, case ignored) — facets.tags in the result lists the agencies present.</td>
+<td><code>date</code> (string, required); <code>offset</code> (integer, 0…10000, default 0); <code>limit</code> (integer, 1…100, default 50); <code>include_backfill</code> (boolean, default False); <code>collection</code> (string, one of AGENCYPR, BILLACTIONS, BILLS, CREC, FR, PLAW, PRESACT, USCOURTS, VOTES); <code>agency</code> (string)</td>
+</tr>
+<tr>
+<td><code>list_sources</code></td>
+<td>Lists the source directory as a summary per source: identity, method, status and health label. get_source returns one source's full record including daily activity; the source-directory resource is the whole file.</td>
+<td><code>offset</code> (integer, 0…10000, default 0); <code>limit</code> (integer, 1…200, default 50)</td>
+</tr>
+<tr>
+<td><code>get_source</code></td>
+<td>Returns one source's full record: registry entry, ingestion statistics, health and daily activity.</td>
+<td><code>source_id</code> (string, required)</td>
+</tr>
+<tr>
+<td><code>get_agent_guide</code></td>
+<td>Returns llms.txt: the plain-text guide to every published surface.</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="resources">Resources</h3>
+<p>The same files are also exposed as MCP resources, by URL:</p>
+<div class="table-scroll" role="region" tabindex="0" aria-labelledby="resources"><table><caption>Resources of the MCP service</caption>
+<thead>
+<tr>
+<th scope="col">Resource</th>
+<th scope="col">URI</th>
+<th scope="col">Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent guide (llms.txt)</td>
+<td><code>https://fapd.info/llms.txt</code></td>
+<td><code>text/plain</code></td>
+</tr>
+<tr>
+<td>For agents (Markdown)</td>
+<td><code>https://fapd.info/agents.md</code></td>
+<td><code>text/markdown</code></td>
+</tr>
+<tr>
+<td>Authentication policy</td>
+<td><code>https://fapd.info/auth.md</code></td>
+<td><code>text/markdown</code></td>
+</tr>
+<tr>
+<td>Digest index</td>
+<td><code>https://fapd.info/digests.json</code></td>
+<td><code>application/json</code></td>
+</tr>
+<tr>
+<td>Source directory</td>
+<td><code>https://fapd.info/sources.json</code></td>
+<td><code>application/json</code></td>
+</tr>
+<tr>
+<td>Digest for a day (template)</td>
+<td><code>https://fapd.info/{date}.md</code></td>
+<td><code>text/markdown</code></td>
+</tr>
+<tr>
+<td>Frozen day view (template)</td>
+<td><code>https://fapd.info/day/{date}.json</code></td>
+<td><code>application/json</code></td>
+</tr>
+<tr>
+<td>Source page (template)</td>
+<td><code>https://fapd.info/sources/{source_id}.md</code></td>
+<td><code>text/markdown</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="what-it-does-not-do">What it does not do</h3>
+<ul>
+<li>No search. The tools list and page, filter on a collection or an exact agency name (case ignored; the result's <code>facets.tags</code> says what is present), and fetch by date or source id. Nothing else.</li>
+<li>No writes, no accounts, no sessions, no subscriptions, no prompts, no sampling, and no streaming: responses are plain JSON, never server-sent events.</li>
+<li>No inference. No model runs anywhere in the service; text labeled FAPD-AI in a digest was written when the digest was, not when you asked.</li>
+</ul>
+<h3 id="limits-and-courtesy">Limits and courtesy</h3>
+<ul>
+<li>A request body is capped at 64 KiB and a result at 512 KiB; a page that would exceed the result cap is shortened and says so, so ask for a smaller <code>limit</code> or page with <code>offset</code>.</li>
+<li>The web server in front of the service applies a per-address rate limit and a cap on open connections, answering 429 past them. An address that sends many rejected requests in a short time is blocked for a while; the block expires on its own. If that ever catches a legitimate client, it is a defect: report it through the repository.</li>
+<li>Privacy: the service logs the time, the protocol method, the tool or resource name, the response's status, size and processing time, the client's self-reported software name, and an opaque request identifier the web server assigns so the two logs can be joined. It never logs an address, an argument, or any request or response body. The web server's own <code>/mcp</code> access log is described on the <a href="privacy.html">privacy page</a>.</li>
+</ul>
+<h3 id="where-to-read-more">Where to read more</h3>
+<ul>
+<li>How the service is built and run: <a href="https://github.com/davidkarnowski/free-agentic-publication-digester/blob/main/docs/mcp-server.md" target="_blank" rel="noopener noreferrer"><code>docs/mcp-server.md</code><span class="vh"> (opens in a new tab)</span></a> in the repository.</li>
+<li>The generic server behind it, reusable with a manifest of your own: <a href="https://github.com/davidkarnowski/free-agentic-publication-digester/tree/main/packages/static-mcp" target="_blank" rel="noopener noreferrer"><code>packages/static-mcp</code><span class="vh"> (opens in a new tab)</span></a>.</li>
+<li>Listed in the official MCP Registry as <code>info.fapd/fapd</code> (since 2026-09-14): <a href="https://registry.modelcontextprotocol.io/v0.1/servers/info.fapd%2Ffapd/versions/2.0.0" target="_blank" rel="noopener noreferrer">https://registry.modelcontextprotocol.io/v0.1/servers/info.fapd%2Ffapd/versions/2.0.0<span class="vh"> (opens in a new tab)</span></a>.</li>
+</ul>
+<h2 id="protocols-this-site-does-not-offer-and-why">Protocols this site does not offer, and why</h2>
+<p>We publish no metadata for a capability we do not operate (GUIDE §1).
+The protocols below are declined on purpose, with the reason stated.</p>
+<ul>
+<li><strong>OAuth / OpenID Connect discovery, OAuth protected-resource
+  metadata:</strong> nothing here is protected, so there is no authorization
+  server to describe. See <code>/auth.md</code>.</li>
+<li><strong>A2A agent card:</strong> FAPD publishes a record; it is not an agent that
+  accepts tasks.</li>
+<li><strong>WebMCP:</strong> it would need a second script in every page. The site
+  keeps exactly one (GUIDE §2a), and everything WebMCP would offer is
+  already available as files, Markdown, and MCP.</li>
+<li><strong>Payment protocols (x402, MPP, UCP, ACP, AP2):</strong> everything here is
+  free.</li>
+</ul>
+<p>Requests to those protocols' well-known locations receive a 404 whose
+body points here.</p>
 <h2 id="how-to-read-it-faithfully">How to read it faithfully</h2>
 <ul>
 <li>Text in item summaries marked as official (Federal Register SUMMARY
@@ -80,8 +312,9 @@ work. Check the source guide for what is ingested today.</p>
   summarized and under which rule — absence here is always explicit.</li>
 </ul>
 <h2 id="courtesy">Courtesy</h2>
-<p>Everything is static — no auth, no rate limiting, and nothing an
-agent needs to execute. We ask
+<p>Everything is static except the read-only MCP service — no
+authentication, nothing an agent needs to execute, and a generous
+per-address rate limit that protects the shared server. We ask
 visiting agents the same courtesy our own crawler practices on government
 sites: identify honestly and use conditional requests. Fetching every
 page daily is entirely fine.</p>
@@ -95,7 +328,7 @@ official source each item links to; cite FAPD for the aggregation and
 summaries. The pipeline's code is Apache-2.0.</p>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-09-14T04:17:03Z (UTC). Canonical source:
+  <p>Generated 2026-09-15T04:05:16Z (UTC). Canonical source:
   <code>GUIDE.md §1 (dual audience)</code> in the
   <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in

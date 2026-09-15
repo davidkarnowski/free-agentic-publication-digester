@@ -1,0 +1,24 @@
+{
+ "$schema": "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
+ "description": "Cited daily digests of official US federal publications. Read-only; no inference.",
+ "name": "info.fapd/fapd",
+ "remotes": [
+  {
+   "supportedProtocolVersions": [
+    "2026-07-28",
+    "2025-11-25",
+    "2025-06-18"
+   ],
+   "type": "streamable-http",
+   "url": "https://fapd.info/mcp"
+  }
+ ],
+ "repository": {
+  "source": "github",
+  "subfolder": "packages/static-mcp",
+  "url": "https://github.com/davidkarnowski/free-agentic-publication-digester"
+ },
+ "title": "Free Agentic Publication Digester",
+ "version": "2.0.0",
+ "websiteUrl": "https://fapd.info/agents.html"
+}
