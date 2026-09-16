@@ -64,7 +64,7 @@ Not ingested: the registry status of this source is planned. Ingestion statistic
 
 ### All time
 
-- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 2,235 request(s) · 2,228 answered · 7 returned no content
+- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 2,288 request(s) · 2,281 answered · 7 returned no content
 
 This host serves 2 registered sources, so these figures are host-wide.
 
@@ -76,7 +76,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.whitehouse.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-17 | 0 | 53 | 42 |
 | 2026-08-18 | 0 | 54 | 56 |
 | 2026-08-19 | 0 | 47 | 46 |
 | 2026-08-20 | 0 | 68 | 72 |
@@ -105,4 +104,5 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-12 | 0 | 55 | 63 |
 | 2026-09-13 | 0 | 51 | 44 |
 | 2026-09-14 | 0 | 58 | 140 |
-| 2026-09-15 | 0 | 2 | 42 |
+| 2026-09-15 | 0 | 53 | 46 |
+| 2026-09-16 | 0 | 2 | 44 |

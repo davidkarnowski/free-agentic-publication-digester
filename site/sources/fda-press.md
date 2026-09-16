@@ -6,7 +6,7 @@
 
 # FDA Press Announcements
 
-active · ingestion health: quiet · Executive · Tier 2 · RSS feed · Department of Health and Human Services
+active · ingestion health: delivering · Executive · Tier 2 · RSS feed · Department of Health and Human Services
 
 Official site: https://www.fda.gov/news-events/fda-newsroom/press-announcements · All sources: [sources.md](../sources.md)
 
@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-09-04, 11 days ago (quiet past 7 days).
+**delivering** — 6 item(s) in the last 14 days; most recent 2026-09-15; 0 of 356 request(s) to www.fda.gov returned no content.
 
-This label has held since 2026-09-12T04:19:13Z (UTC) and was last re-checked 2026-09-15T03:50:21Z (UTC).
+This label has held since 2026-09-15T14:20:47Z (UTC) and was last re-checked 2026-09-16T04:00:04Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,24 +62,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 31 request(s) (31 answered, 0 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 5 in 14 days (0.36 per day) · most recent 2026-09-04 |
-| Content length | 6,090 characters average, 6,248 median (shortest 5,196, longest 6,665) |
+| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-09-15 |
+| Content length | 6,393 characters average, 6,380 median (shortest 5,196, longest 7,905) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.fda.gov | 356 request(s) · 355 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.3% returned no content |
+| Our requests to www.fda.gov | 356 request(s) · 356 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-09-15T04:00:52.651+00:00 UTC.
+last answered request 2026-09-16T04:14:24.008+00:00 UTC.
 
-Most recent item 2026-09-04, 11 days ago (quiet past 7 days).
+6 item(s) in the last 14 days; most recent 2026-09-15; 0 of 356 request(s) to www.fda.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fda.gov, all time (since 2026-07-30):** 1,404 request(s) · 1,403 answered · 1 returned no content
+- **Our requests to www.fda.gov, all time (since 2026-07-30):** 1,431 request(s) · 1,430 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -89,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fda.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-17 | 0 | 27 | 189 |
 | 2026-08-18 | 1 | 29 | 292 |
 | 2026-08-19 | 2 | 26 | 188 |
 | 2026-08-20 | 0 | 34 | 412 |
@@ -118,12 +117,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-12 | 0 | 28 | 266 |
 | 2026-09-13 | 0 | 25 | 285 |
 | 2026-09-14 | 0 | 30 | 310 |
-| 2026-09-15 | 0 | 1 | 218 |
+| 2026-09-15 | 1 | 27 | 175 |
+| 2026-09-16 | 0 | 1 | 111 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The FDA press RSS feed continues reaching our client with strong reliability—354 of 355 requests answered over the measurement window. We observe item delivery at 0.36 per day over 14 days, continuing the decline from 0.71 per day in the previous assessment. The most recent item is dated 2026-09-04, with no new deliveries in the 8 days since. We retrieve full article text from each item's linked page; extracted text ranges from 5,196 to 6,665 characters, averaging 6,090 characters. The feed itself provides teasers of approximately 230 characters per item. Polling maintains a consistent hourly cadence throughout the measurement period; one request on 2026-09-02 returned no content, with all others succeeding. The parallel email-based FDA source continues to operate alongside this web channel.
+We poll the FDA press announcements RSS feed and retrieve full article text from each item's linked page. The feed delivers teasers of approximately 230 characters; extracted text from articles ranges from 5,196 to 7,905 characters, with a median of 6,380 characters. Over the past 14 days, we observed 6 items at a rate of 0.43 per day, an increase from the previous measurement's 0.36 per day. The most recent item dates to September 15, representing a resumption of deliveries after an 8-day quiet period noted in the prior assessment. Our polling requests achieved a 100% success rate, with all 356 requests to www.fda.gov returning content, improving from the prior period when one request returned no content. Polling maintains a consistent hourly cadence throughout the measurement window. An associated email-based FDA source continues to operate in parallel.
 
-_Model-written assessment of our own ingestion, generated 2026-09-12 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-09-16 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -58,7 +58,7 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 **delivering** — 3 item(s) in the last 14 days; most recent 2026-09-11; 15 of 355 request(s) to www.federalreserve.gov returned no content.
 
-This label has held since 2026-09-04T15:32:05Z (UTC) and was last re-checked 2026-09-15T03:50:21Z (UTC).
+This label has held since 2026-09-04T15:32:05Z (UTC) and was last re-checked 2026-09-16T04:00:04Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,7 +68,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 30 request(s) (29 answered, 1 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (24 answered, 1 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -79,13 +79,13 @@ Last 24 hours: 30 request(s) (29 answered, 1 returned no content) · no items in
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.federalreserve.gov | 355 request(s) · 340 answered · 15 declined (4xx) · 0 server declined (5xx) · 0 no response — 4.2% returned no content |
 
-last answered request 2026-09-15T04:00:52.333+00:00 UTC.
+last answered request 2026-09-16T04:14:23.811+00:00 UTC.
 
 3 item(s) in the last 14 days; most recent 2026-09-11; 15 of 355 request(s) to www.federalreserve.gov returned no content.
 
 ### All time
 
-- **Our requests to www.federalreserve.gov, all time (since 2026-07-30):** 1,402 request(s) · 1,323 answered · 79 returned no content
+- **Our requests to www.federalreserve.gov, all time (since 2026-07-30):** 1,428 request(s) · 1,348 answered · 80 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.federalreserve.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-17 | 0 | 27 | 252 |
 | 2026-08-18 | 0 | 28 | 125 |
 | 2026-08-19 | 1 | 25 | 103 |
 | 2026-08-20 | 3 | 37 | 162 |
@@ -124,7 +123,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-12 | 0 | 29 | 151 |
 | 2026-09-13 | 0 | 27 | 215 |
 | 2026-09-14 | 0 | 29 | 245 |
-| 2026-09-15 | 0 | 1 | 126 |
+| 2026-09-15 | 0 | 26 | 102 |
+| 2026-09-16 | 0 | 1 | 142 |
 
 ## Our ingestion assessment
 

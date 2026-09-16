@@ -6,7 +6,7 @@
 
 # White House Executive Orders
 
-active · ingestion health: delivering · Executive · Tier 1 · RSS feed · Executive Office of the President
+active · ingestion health: quiet · Executive · Tier 1 · RSS feed · Executive Office of the President
 
 Official site: https://www.whitehouse.gov/presidential-actions/executive-orders/ · All sources: [sources.md](../sources.md)
 
@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 4 item(s) in the last 14 days; most recent 2026-09-08; 7 of 708 request(s) to www.whitehouse.gov returned no content.
+**quiet** — Most recent item 2026-09-08, 8 days ago (quiet past 7 days).
 
-This label has held since 2026-09-04T20:34:18Z (UTC) and was last re-checked 2026-09-15T03:50:21Z (UTC).
+This label has held since 2026-09-16T04:00:04Z (UTC) and was last re-checked 2026-09-16T04:00:04Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,7 +71,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 60 request(s) (60 answered, 0 returned no content) · no items ingested
+Last 24 hours: 51 request(s) (51 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -80,15 +80,15 @@ Last 24 hours: 60 request(s) (60 answered, 0 returned no content) · no items in
 | Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-09-08 |
 | Content length | 9,798 characters average, 10,206 median (shortest 7,916, longest 10,864) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.whitehouse.gov | 708 request(s) · 701 answered · 0 declined (4xx) · 0 server declined (5xx) · 7 no response — 1.0% returned no content |
+| Our requests to www.whitehouse.gov | 705 request(s) · 703 answered · 0 declined (4xx) · 0 server declined (5xx) · 2 no response — 0.3% returned no content |
 
-last answered request 2026-09-15T04:00:53.206+00:00 UTC; this host serves 2 registered sources, so these figures are host-wide.
+last answered request 2026-09-16T04:14:24.662+00:00 UTC; this host serves 2 registered sources, so these figures are host-wide.
 
-4 item(s) in the last 14 days; most recent 2026-09-08; 7 of 708 request(s) to www.whitehouse.gov returned no content.
+Most recent item 2026-09-08, 8 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 2,235 request(s) · 2,228 answered · 7 returned no content
+- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 2,288 request(s) · 2,281 answered · 7 returned no content
 
 This host serves 2 registered sources, so these figures are host-wide.
 
@@ -100,7 +100,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.whitehouse.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-17 | 0 | 53 | 42 |
 | 2026-08-18 | 0 | 54 | 56 |
 | 2026-08-19 | 0 | 47 | 46 |
 | 2026-08-20 | 0 | 68 | 72 |
@@ -129,12 +128,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-12 | 0 | 55 | 63 |
 | 2026-09-13 | 0 | 51 | 44 |
 | 2026-09-14 | 0 | 58 | 140 |
-| 2026-09-15 | 0 | 2 | 42 |
+| 2026-09-15 | 0 | 53 | 46 |
+| 2026-09-16 | 0 | 2 | 44 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We poll the executive-orders RSS feed and fetch full order text from each item's page. The feed caps at 30 items but reaches further back in time than the parent presidential actions feed. Over 14 days, 5 items arrived at 0.36 per day, an increase from a single item in the previous 14-day window. Individual items average 12,039 characters of extracted content. Our requests to www.whitehouse.gov achieved a 1.0% error rate across 698 attempts, with 7 no-content responses; prior measurement showed 100% success. The most recent item was published on 2026-09-04.
+We poll the executive-orders RSS feed and retrieve full text from each order's linked page. The feed caps at 30 items but reaches substantially further back in time than the parent presidential actions feed, spanning approximately five months of history. Over the past 14 days, we observed 4 new items at a rate of 0.29 per day, a slight decrease from 0.36 per day in the previous measurement period. Extracted text ranges from 7,916 to 10,864 characters, with an average of 9,798 characters—notably shorter than the previous average of 12,039 characters. Our polling requests to www.whitehouse.gov achieved a success rate of 99.7%, with 703 of 705 requests answered; only 2 requests returned no content. The most recent item dates to September 8, placing this source in a quiet period over the past week. Request volume and hourly cadence have remained stable throughout the measurement window.
 
-_Model-written assessment of our own ingestion, generated 2026-09-05 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-09-16 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
