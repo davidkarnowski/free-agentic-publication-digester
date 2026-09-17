@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**degraded** — 4254 of 22265 request(s) to api.govinfo.gov returned no content (19.1%, at or above the 10% mark).
+**degraded** — 4034 of 21920 request(s) to api.govinfo.gov returned no content (18.4%, at or above the 10% mark).
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-16T04:00:04Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-17T03:58:34Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,23 +69,23 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 1,715 request(s) (1,503 answered, 212 returned no content) · 121 item(s) ingested
+Last 24 hours: 2,211 request(s) (1,820 answered, 391 returned no content) · 104 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 898 in 14 days (64.14 per day) · most recent 2026-09-15 |
-| Content length | 13,991 characters average, 6,130 median (shortest 694, longest 795,487) |
-| Our requests to api.govinfo.gov | 22,265 request(s) · 18,011 answered · 1 declined (4xx) · 4,253 server declined (5xx) · 0 no response — 19.1% returned no content |
+| Items ingested | 894 in 14 days (63.86 per day) · most recent 2026-09-16 |
+| Content length | 14,386 characters average, 6,066 median (shortest 594, longest 795,487) |
+| Our requests to api.govinfo.gov | 21,920 request(s) · 17,886 answered · 1 declined (4xx) · 4,033 server declined (5xx) · 0 no response — 18.4% returned no content |
 
-last answered request 2026-09-16T04:14:23.212+00:00 UTC; this host serves 5 registered sources, so these figures are host-wide.
+last answered request 2026-09-17T04:25:06.403+00:00 UTC; this host serves 5 registered sources, so these figures are host-wide.
 
-4254 of 22265 request(s) to api.govinfo.gov returned no content (19.1%, at or above the 10% mark).
+4034 of 21920 request(s) to api.govinfo.gov returned no content (18.4%, at or above the 10% mark).
 
 ### All time
 
-- **Our requests to api.govinfo.gov, all time (since 2026-07-30):** 104,203 request(s) · 78,765 answered · 25,438 returned no content
+- **Our requests to api.govinfo.gov, all time (since 2026-07-30):** 106,478 request(s) · 80,638 answered · 25,840 returned no content
 
 This host serves 5 registered sources, so these figures are host-wide.
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to api.govinfo.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-18 | 74 | 1598 | 660 |
 | 2026-08-19 | 87 | 3986 | 680 |
 | 2026-08-20 | 108 | 2954 | 594 |
 | 2026-08-21 | 116 | 2575 | 641 |
@@ -126,7 +125,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-13 | 0 | 1408 | 576 |
 | 2026-09-14 | 156 | 780 | 843 |
 | 2026-09-15 | 121 | 1504 | 812 |
-| 2026-09-16 | 0 | 221 | 683 |
+| 2026-09-16 | 104 | 2266 | 580 |
+| 2026-09-17 | 0 | 230 | 660 |
 
 ## Our ingestion assessment
 

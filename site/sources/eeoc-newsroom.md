@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 5 item(s) in the last 14 days; most recent 2026-09-15; 0 of 351 request(s) to www.eeoc.gov returned no content.
+**delivering** — 7 item(s) in the last 14 days; most recent 2026-09-16; 0 of 351 request(s) to www.eeoc.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-16T04:00:04Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-17T03:58:34Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -63,24 +63,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 5 in 14 days (0.36 per day) · most recent 2026-09-15 |
-| Content length | 634 characters average, 621 median (shortest 596, longest 712) |
+| Items ingested | 7 in 14 days (0.5 per day) · most recent 2026-09-16 |
+| Content length | 623 characters average, 618 median (shortest 573, longest 712) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to www.eeoc.gov | 351 request(s) · 351 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-09-16T04:14:24.033+00:00 UTC.
+last answered request 2026-09-17T04:25:07.374+00:00 UTC.
 
-5 item(s) in the last 14 days; most recent 2026-09-15; 0 of 351 request(s) to www.eeoc.gov returned no content.
+7 item(s) in the last 14 days; most recent 2026-09-16; 0 of 351 request(s) to www.eeoc.gov returned no content.
 
 ### All time
 
-- **Our requests to www.eeoc.gov, all time (since 2026-08-01):** 1,351 request(s) · 1,346 answered · 5 returned no content
+- **Our requests to www.eeoc.gov, all time (since 2026-08-01):** 1,377 request(s) · 1,372 answered · 5 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -90,7 +90,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.eeoc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-18 | 0 | 28 | 327 |
 | 2026-08-19 | 0 | 24 | 351 |
 | 2026-08-20 | 1 | 37 | 1215 |
 | 2026-08-21 | 3 | 30 | 290 |
@@ -119,7 +118,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-13 | 0 | 26 | 315 |
 | 2026-09-14 | 1 | 28 | 422 |
 | 2026-09-15 | 1 | 27 | 260 |
-| 2026-09-16 | 0 | 1 | 261 |
+| 2026-09-16 | 2 | 26 | 322 |
+| 2026-09-17 | 0 | 1 | 300 |
 
 ## Our ingestion assessment
 
