@@ -54,6 +54,12 @@ Coordinates come from `deploy/vps/deploy.env` (gitignored — copy
 command below carries a host. Network egress may need the tool sandbox
 disabled.
 
+- **Clean up every process you start on the box before you finish.** Agent SSH sessions can drop
+  and leave their commands running (e.g. `docker logs` readers, which keep `dockerd` spinning at
+  full CPU; this caused a provider CPU warning on 2026-09-18). Before ending a session, list yours
+  with `ps -eo pid,ppid,etime,args | grep -E '[d]ocker (compose )?logs|[t]ail -f'` and `sudo kill`
+  anything left over. Wrap long-running reads in `timeout 20` so they can't outlive the session.
+
 ```sh
 curl -sI https://fapd.info | head -1                 # HTTP/2 200
 
@@ -103,7 +109,7 @@ deploy/vps/scripts/vps-ssh.sh 'sudo docker port fapd-mcp'
 #   ^ prints NOTHING. Any output is a finding: a published port bypasses ufw.
 deploy/vps/scripts/vps-ssh.sh 'sudo docker inspect fapd-mcp --format "{{json .NetworkSettings.Networks}}"'
 #   ^ exactly fapd_mcp, nothing else; fapd-web lists fapd_edge and fapd_mcp
-deploy/vps/scripts/vps-ssh.sh 'sudo docker logs --tail 20 fapd-mcp'  # JSON lines; no IPs, no bodies
+deploy/vps/scripts/vps-ssh.sh 'sudo timeout 20 docker logs --tail 20 fapd-mcp'  # JSON lines; no IPs, no bodies
 
 # A modern server/discover through the edge: 200 and serverInfo.name info.fapd/fapd
 curl -sS -w '\n%{http_code}\n' -X POST https://fapd.info/mcp \

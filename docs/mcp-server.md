@@ -228,7 +228,7 @@ client address, time, method and path, status, size, request time,
 User-Agent — never a body or argument. Rotated daily, kept 7 days.
 
 ```sh
-deploy/vps/scripts/vps-ssh.sh 'sudo docker logs --tail 50 fapd-mcp'     # read-only
+deploy/vps/scripts/vps-ssh.sh 'sudo timeout 20 docker logs --tail 50 fapd-mcp'     # read-only
 deploy/vps/scripts/vps-ssh.sh 'sudo tail -20 /opt/fapd/logs/mcp-access.log'
 ```
 

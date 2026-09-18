@@ -398,6 +398,11 @@ live in `.claude/agents/fapd-*.md` (tracked).
   the VPS", or by naming the script). Never inferred from a generic
   "looks good" or a previous deploy. Local edits and local commits are
   not gated — only the VPS side is.
+- **Clean up every process you start on the box before you finish.** Agent SSH sessions can drop
+  and leave their commands running (e.g. `docker logs` readers, which keep `dockerd` spinning at
+  full CPU; this caused a provider CPU warning on 2026-09-18). Before ending a session, list yours
+  with `ps -eo pid,ppid,etime,args | grep -E '[d]ocker (compose )?logs|[t]ail -f'` and `sudo kill`
+  anything left over. Wrap long-running reads in `timeout 20` so they can't outlive the session.
 - Plans that touch production or governing docs follow
   `docs/ops/plan-task-template.md`.
 
