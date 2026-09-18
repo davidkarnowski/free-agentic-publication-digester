@@ -522,14 +522,20 @@ not reusable.)*
   any further ceiling rise, and it is the direction GUIDE §4 actually
   prefers: fewer requests, never faster retries.
 
-**OB-28 — The frozen day listing is built before the collectors journal what the finalizer ingested**
-- **Gap:** `item_journal` is written by post-cycle reconciliation in the
-  collector (`collect.journal_new`), and the collectors are paused for
-  the whole finalizer run. The finalizer downloads and extracts the
-  queued packages at stage 1 and 2, then builds the frozen day view at
-  stage 4b — before anything it just ingested has been journaled. Those
-  rows land on the first collector cycle afterwards, by which time the
-  page is written and never rebuilt. Measured:
+**OB-28 — The frozen day listing is built before the collector has recorded what the finalizer downloaded**
+- **Gap, stated in sequence.** The day listing page is built from one
+  table, `item_journal`. Only the collector writes rows into that table,
+  and the collector writes them at the end of each of its own cycles
+  (`collect.journal_new`). The collector is paused for the entire
+  end-of-day finalizer run. The finalizer downloads and extracts packages
+  in its first two stages, and then builds the frozen day page at stage
+  4b. At the moment the finalizer builds that page, the collector has not
+  run since before the finalizer started, so no row exists yet for any
+  package the finalizer just downloaded. The collector resumes after the
+  finalizer exits and writes those rows then, but nothing rebuilds the
+  page afterwards. The result is a finished page that is missing
+  documents the pipeline had already downloaded and extracted minutes
+  earlier. Measured:
 
   | day | journal rows for the day | present at build | never shown |
   |---|---|---|---|
@@ -537,14 +543,27 @@ not reusable.)*
   | 2026-09-16 | 2,004 | 1,602 | 20% |
   | 2026-09-17 | 1,642 | 1,281 | 22% |
 
-  The published listing for 2026-09-17 shows 1,133 items. It is not a
-  dating fault: `digest_date` is correct on every one of those rows.
-- **Idea:** journal inside the finalizer before stage 4b, so the day
-  view sees what the run just ingested. One call, no new concept, no
-  request-rate effect. The alternative — rebuilding the day view on the
-  next morning's first cycle — would also surface items the frozen
-  digest does not carry (137 bill actions for 2026-09-17), which is the
-  GUIDE §5 frozen-day supersession question and needs a ruling first.
-- **Trigger:** now — the operator called the content loss the first
-  thing to address, 2026-09-18. Operations owns the ordering;
-  Publication the page.
+  The published listing for 2026-09-17 shows 1,133 items. This is not a
+  dating fault. Every one of the missing rows carries the correct
+  `digest_date`. The rows simply did not exist yet when the page was
+  written.
+- **Fix:** have the finalizer write the journal rows itself, immediately
+  after its extract stage and before it builds the day page at stage 4b.
+  This is one call to the function the collector already uses. It adds
+  no new concept, makes no HTTP request, and changes no dating rule.
+- **The other option, and why it needs a ruling first.** The day page
+  could instead be rebuilt on the following morning's first collector
+  cycle, once every row has landed. That version of the page would be
+  more complete than the one built at stage 4b, but it would also show
+  documents the frozen digest for that day does not contain. For
+  2026-09-17 that difference is 137 bill actions, which Congress.gov
+  publishes the morning after the day they belong to. Publishing a
+  listing that disagrees with its own frozen digest is the GUIDE §5
+  supersession question, and the operator decides it, not the code.
+- **Note after the 2026-09-18 pacing change (OB-27):** raising the
+  download cap should make the queue rare, which makes this gap rare. It
+  does not close the gap. Any night the collector misses a cycle, or a
+  burst outruns even the new ceiling, reproduces it exactly.
+- **Trigger:** now. The operator called the content loss the first thing
+  to address on 2026-09-18. Operations owns the stage ordering;
+  Publication owns the page.
