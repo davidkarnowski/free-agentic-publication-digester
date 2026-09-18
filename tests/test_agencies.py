@@ -982,3 +982,104 @@ def test_parse_feed_categories_default_empty():
       <description>d</description></item></channel></rss>"""
     _fmt, items = probe.parse_feed(body)
     assert items[0]["categories"] == []
+
+
+# ------------------------------------ the Wayback hold (2026-09-18) --
+
+
+class _NoNetwork:
+    """A session that fails the test if anything reaches it."""
+
+    def get(self, url, **kwargs):
+        raise AssertionError(f"a request was made while paused: {url}")
+
+    def close(self):
+        pass
+
+
+class _SaveResp(Resp):
+    """A session-level response: unlike the module's client-level fakes,
+    this one passes through HttpClient, which calls raise_for_status."""
+
+    def raise_for_status(self):
+        return None
+
+
+class _OneSave:
+    def __init__(self):
+        self.calls = []
+
+    def get(self, url, **kwargs):
+        self.calls.append(url)
+        return _SaveResp(b"", headers={
+            "Content-Location": "/web/20260918000000/https://x.gov/a"}, url=url)
+
+    def close(self):
+        pass
+
+
+def _wayback(tmp_path, session):
+    return agencies.WaybackClient(db_path=tmp_path / "fetch_log.db",
+                                  session=session, sleep=lambda *_: None)
+
+
+def test_wayback_submissions_are_paused_and_spend_nothing(tmp_path, monkeypatch):
+    """The hold the operator called for on 2026-09-18. The gate sits on
+    save(), the only method that reaches the Archive, so a client built
+    by any entry point — supervisor, finalizer, or the manual ingest
+    script — is covered; there is no second flag to forget.
+
+    The assertion that matters is the fetch log. A paused submission must
+    make no request at all, so it writes no attempt row and consumes no
+    slot of the daily budget. Returning None from a request that still
+    went out would relieve nobody."""
+    monkeypatch.setattr(config, "WAYBACK_ENABLED", False)
+    agencies.WaybackClient._pause_announced = False
+    with _wayback(tmp_path, _NoNetwork()) as wb:
+        assert wb.save("https://x.gov/a") is None
+        assert wb.save("https://x.gov/b") is None
+        logged = wb._db.execute(
+            "SELECT COUNT(*) FROM fetch_log WHERE client = 'wayback'"
+        ).fetchone()[0]
+    assert logged == 0
+
+
+def test_wayback_resumes_when_the_hold_is_lifted(tmp_path, monkeypatch):
+    """FAPD_WAYBACK_ENABLED=1 restores the previous behavior exactly: one
+    Save-Page-Now request per URL, snapshot URL back from
+    Content-Location. The pause must be a gate, not a removal."""
+    monkeypatch.setattr(config, "WAYBACK_ENABLED", True)
+    session = _OneSave()
+    with _wayback(tmp_path, session) as wb:
+        got = wb.save("https://x.gov/a")
+    assert session.calls == ["https://web.archive.org/save/https://x.gov/a"]
+    assert got == "https://web.archive.org/web/20260918000000/https://x.gov/a"
+
+
+def test_the_wayback_pause_is_announced_once_not_per_url(tmp_path, monkeypatch,
+                                                         caplog):
+    """A pause that logs on every skipped URL buries the day's real log
+    lines — the agency poll alone offers hundreds of URLs."""
+    monkeypatch.setattr(config, "WAYBACK_ENABLED", False)
+    agencies.WaybackClient._pause_announced = False
+    with caplog.at_level("INFO", logger="fapd.agencies"), \
+            _wayback(tmp_path, _NoNetwork()) as wb:
+        for n in range(25):
+            wb.save(f"https://x.gov/{n}")
+    assert sum("submissions are paused" in r.message for r in caplog.records) == 1
+
+
+def test_the_published_pages_disclose_the_wayback_pause():
+    """CLAUDE.md §13: prose that overclaims what the code does is a
+    defect. While submissions are gated off, the public methods page and
+    PROVENANCE.md must both say so — and when someone lifts the gate,
+    this test tells them which pages to correct."""
+    root = pathlib.Path(config.PROJECT_ROOT)
+    pages = {rel: (root / rel).read_text(encoding="utf-8")
+             for rel in ("docs/site/methods.md", "PROVENANCE.md")}
+    for rel, text in pages.items():
+        says_paused = "submissions are paused" in text.lower()
+        if config.WAYBACK_ENABLED:
+            assert not says_paused, f"{rel} still announces a pause that is over"
+        else:
+            assert says_paused, f"{rel} does not disclose the wayback pause"

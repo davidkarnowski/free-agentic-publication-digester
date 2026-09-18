@@ -1274,12 +1274,30 @@ class WaybackClient(HttpClient):
 
     CLIENT_NAME = "wayback"
     SAVE_BASE = "https://web.archive.org/save/"
+    # One line per process when the hold is on, not one per skipped URL: a
+    # pause that logs 700 times a day is a pause nobody can read past.
+    _pause_announced = False
 
     def _daily_budget(self):
         return config.MAX_WAYBACK_REQUESTS_PER_DAY
 
     def save(self, url):
-        """Submit a URL; returns the snapshot URL or None. Never raises."""
+        """Submit a URL; returns the snapshot URL or None. Never raises.
+
+        Returns None without making a request while submissions are paused
+        (config.WAYBACK_ENABLED, 2026-09-18). The gate lives here rather
+        than at the factories because this is the only method that reaches
+        the Archive: a client built directly by a script cannot route
+        around it, and None is the value poll_source already reads as "no
+        corroboration this time"."""
+        if not config.WAYBACK_ENABLED:
+            if not WaybackClient._pause_announced:
+                WaybackClient._pause_announced = True
+                logger.info(
+                    "wayback: submissions are paused (config.WAYBACK_ENABLED"
+                    " is off); captures are recorded without a Save-Page-Now"
+                    " second witness. Set FAPD_WAYBACK_ENABLED=1 to resume.")
+            return None
         try:
             resp = self.get(self.SAVE_BASE + url)
         except Exception as exc:  # noqa: BLE001 — corroboration is best-effort

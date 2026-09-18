@@ -27,6 +27,16 @@ For content-bearing responses we store:
 - where enabled, the URL of an independent Wayback Machine snapshot of the
   same page.
 
+**Wayback submissions are paused (2026-09-18).** Save-Page-Now traffic is
+gated off in `config.WAYBACK_ENABLED` while we ask the Internet Archive
+whether they want our submissions: they have said publicly that automated
+traffic is straining them, and every request we sent after 2026-09-13
+failed. Captures recorded during the pause carry no `wayback_url`, and the
+"independent corroboration" claim below does not apply to them. Captures
+recorded before it keep their snapshot URLs and remain verifiable. The
+hash chain and git history are unaffected — they never depended on the
+Archive.
+
 Each daily manifest's header contains the SHA-256 of the most recent
 earlier manifest on file, forming a chain. Honest scope of that chain,
 stated precisely: it proves a retained middle manifest was not altered

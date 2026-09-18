@@ -489,3 +489,56 @@ not reusable.)*
 - **Trigger:** an agent still needing more than ten requests for an
   agency-week after MF-1, or a second field report asking for it.
   Operations owns the package handler; Editorial the ruling text.
+
+**OB-27 — The court-opinion download cap leaves a queue at midnight, and the finalizer pays for it**
+- **Gap:** USCOURTS packages arrive in a late-evening burst — on
+  2026-09-17, 492 packages between 4 p.m. and 9 p.m. Eastern, 202 of
+  them in one hour. The collector downloads at most 50 per collection
+  per 30-minute cycle (`collect.GovinfoWorker.cycle`,
+  `sync.sync_collection(max_downloads=50)`), so a burst outruns it and a
+  queue survives to midnight. The finalizer then spends its own sync
+  stage draining that queue: 1,056 seconds on 2026-09-17, which is 76%
+  of the whole digest run, and it still left 130 queued
+  ("USCOURTS: download cap 50 limits this run to 50 of 130 queued").
+- **Not a budget problem.** The daily govinfo allowance is 6,000 and we
+  used 2,388 that day; the hourly ceiling is 500 and the busiest hour
+  was 394. The cap and the 30-minute cadence are what bind, not GUIDE
+  §4's limits.
+- **Idea:** raise the per-cycle download cap, or shorten the govinfo
+  cadence during the evening window when USCOURTS publishes, so the
+  queue is empty before the day closes. Either is a pacing change and
+  therefore the operator's (GUIDE §4), even though neither raises a
+  budget. Whatever is chosen should be measured against the hourly
+  ceiling, not just the daily one.
+- **Why it matters beyond speed:** this queue is also the cause of
+  OB-28. Fixing it fixes both.
+- **Trigger:** now — the operator raised it on 2026-09-18 after the
+  digest-latency review. Acquisition owns the pacing; Operations the
+  measurement.
+
+**OB-28 — The frozen day listing is built before the collectors journal what the finalizer ingested**
+- **Gap:** `item_journal` is written by post-cycle reconciliation in the
+  collector (`collect.journal_new`), and the collectors are paused for
+  the whole finalizer run. The finalizer downloads and extracts the
+  queued packages at stage 1 and 2, then builds the frozen day view at
+  stage 4b — before anything it just ingested has been journaled. Those
+  rows land on the first collector cycle afterwards, by which time the
+  page is written and never rebuilt. Measured:
+
+  | day | journal rows for the day | present at build | never shown |
+  |---|---|---|---|
+  | 2026-09-15 | 2,164 | 1,771 | 18% |
+  | 2026-09-16 | 2,004 | 1,602 | 20% |
+  | 2026-09-17 | 1,642 | 1,281 | 22% |
+
+  The published listing for 2026-09-17 shows 1,133 items. It is not a
+  dating fault: `digest_date` is correct on every one of those rows.
+- **Idea:** journal inside the finalizer before stage 4b, so the day
+  view sees what the run just ingested. One call, no new concept, no
+  request-rate effect. The alternative — rebuilding the day view on the
+  next morning's first cycle — would also surface items the frozen
+  digest does not carry (137 bill actions for 2026-09-17), which is the
+  GUIDE §5 frozen-day supersession question and needs a ruling first.
+- **Trigger:** now — the operator called the content loss the first
+  thing to address, 2026-09-18. Operations owns the ordering;
+  Publication the page.

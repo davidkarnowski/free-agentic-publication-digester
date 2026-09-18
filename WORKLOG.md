@@ -6340,3 +6340,82 @@ after — the same shape as the two deploys before it.
 Standing order from the operator with this deploy: **Wave C and the
 blog wait for his explicit go.** Also still open on his side: the
 registry re-publish as 2.0.0.
+
+## 2026-09-18 — Wayback submissions held, and one queue explains three problems
+
+Two pieces of work from the operator's review of the end-of-day reports:
+a hold on Save-Page-Now submissions, and a diagnosis of why the frozen
+day listings lose content. They turned out to be unrelated in cause and
+identical in shape: we were spending effort on work that arrived too
+late to be worth anything.
+
+**The Wayback hold** (operator: "put a temporary hold on all wayback
+machine requests"). `config.WAYBACK_ENABLED` defaults off; the gate is
+`WaybackClient.save()`, the only method that reaches the Archive, so it
+holds for the supervisor, the finalizer and the manual ingest script
+alike rather than living on the one script that carries `--no-wayback`.
+A paused submission makes no request at all, writes no fetch-log row and
+spends no budget slot, which is the property the test asserts. The pause
+announces itself once per process, not once per skipped URL.
+
+Why, in our own numbers: 1,699 submissions since 2026-07-28 across 756
+distinct URLs produced 571 snapshots, and **every request since
+2026-09-13 has failed** — 330 HTTP 500s, 329 429s, 223 connection
+errors, and zero successes in six days. Our client retries five times
+with backoff, correct against a publisher's API and wrong against a
+service returning 500 because it is overloaded, so recent days were
+close to pure amplification at 59 requests a day for nothing. The
+Archive has also said publicly that automated submissions are straining
+it. Stopping costs us nothing load-bearing: Wayback corroboration is
+best-effort and never blocking (GUIDE §7), captures already recorded
+keep their snapshot URLs, and the manifest hash chain and git history,
+which are the primary witnesses, never depended on the Archive.
+
+Both published claims now carry the pause with its date —
+`docs/site/methods.md` and `PROVENANCE.md` — and a test fails if the
+gate and the pages disagree in either direction, naming the pages to fix
+when someone lifts it. The outreach packet for the Internet Archive,
+with the full request history, the source address and a draft note, is
+in the operator's gitignored tree; it is correspondence and a server
+address, so it does not belong in a public repository. **Not deployed:
+the box keeps submitting until it is.**
+
+**The content loss, diagnosed.** Court opinions arrive in a late-evening
+burst: 492 packages on 2026-09-17 between 4 p.m. and 9 p.m. Eastern, 202
+of them in a single hour. The collector downloads at most 50 per
+collection per 30-minute cycle, so the burst outruns it and a queue
+survives to midnight. The finalizer's own sync stage then drains that
+queue, which is where the digest's wall time goes: **1,056 seconds of a
+1,388-second run, 76% of it**, and it still left 130 queued. This is not
+a budget problem. The daily govinfo allowance is 6,000 and we spent
+2,388; the hourly ceiling is 500 and the busiest hour was 394. The
+per-cycle cap and the cadence bind, not GUIDE §4.
+
+That queue then causes the missing listing content. `item_journal` is
+written by post-cycle reconciliation in the collector, and the
+collectors are paused for the entire finalizer run. So the packages the
+finalizer downloads and extracts at stages 1 and 2 are not journaled
+when the frozen day view is built at stage 4b; those rows land on the
+first collector cycle afterwards, and the page is never rebuilt.
+
+| day | journal rows | present at build | never shown |
+|---|---|---|---|
+| 2026-09-15 | 2,164 | 1,771 | 18% |
+| 2026-09-16 | 2,004 | 1,602 | 20% |
+| 2026-09-17 | 1,642 | 1,281 | 22% |
+
+The dating is correct on every one of those rows. The published listing
+for 2026-09-17 shows 1,133 items.
+
+Recorded as OB-27 (the cap and cadence, a pacing change and therefore
+the operator's under GUIDE §4) and OB-28 (journal inside the finalizer
+before stage 4b, no request-rate effect). Fixing OB-27 shortens the
+digest to a few minutes and empties the queue; fixing OB-28 makes the
+listing whole even when a queue survives. Neither is built — the
+operator asked for the diagnosis first.
+
+**Verified:** ruff clean; full suite 1,431 passed, 1 skipped.
+
+Next: the operator's word to deploy the hold; then OB-27 and OB-28 on
+his go. Still open from earlier: the registry re-publish as 2.0.0, Wave
+C, and the blog verdict.

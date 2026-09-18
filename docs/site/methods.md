@@ -140,6 +140,17 @@ triggers a Wayback Machine snapshot as an independent second witness. A
 source's claimed publication date and the time we first observed the
 document are always stored separately, never conflated.
 
+**Wayback submissions are paused as of Sept. 18, 2026.** The Internet
+Archive is a volunteer-funded public good, it has said publicly that
+automated submissions are straining it, and every submission we sent
+after Sept. 13 failed. We have stopped rather than keep retrying, and we
+have written to ask whether they want our traffic at all. Captures made
+during the pause carry no Wayback URL. Everything else is unchanged:
+captures already recorded keep their snapshots, and the manifest hash
+chain and the public git history, which are the primary witnesses, do
+not depend on the Archive. This page will say so when submissions
+resume.
+
 **What the hashes prove — and don't.** A hash proves what was served to
 our identified client, from our network position, at that time — not
 what every visitor saw. Our timestamps are ordered by git history and

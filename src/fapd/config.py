@@ -109,6 +109,28 @@ EOD_BUDGET_RESERVE_FRACTION = 0.15
 NORMALIZER_VERSION = 1
 # Wayback Save-Page-Now corroboration budget (its own tiny bucket).
 MAX_WAYBACK_REQUESTS_PER_DAY = 100
+# Save-Page-Now submissions are PAUSED (operator, 2026-09-18), pending an
+# approach to the Internet Archive explaining who we are and asking whether
+# they want our traffic at all. Two reasons, and the second is ours to fix:
+# the Archive has been saying publicly that automated submissions are
+# hurting them, and our own numbers say we are taking without getting —
+# 1,699 submissions since 2026-07-28 produced 571 snapshots, and every
+# single request since 2026-09-13 has failed (HTTP 500, then 429). A failed
+# submission also walks the five-step retry ladder, so each one costs the
+# Archive five requests, not one.
+#
+# Nothing load-bearing stops. Wayback corroboration is best-effort and
+# never blocking (GUIDE §7); captures already recorded keep their snapshot
+# URLs and stay verifiable; the manifest hash chain and git history, which
+# are the primary witnesses, are untouched. What is lost is a second
+# witness on NEW captures, and PROVENANCE.md and the published methods page
+# now say so with this date.
+#
+# Set FAPD_WAYBACK_ENABLED=1 to resume. Do that only after the Archive has
+# been asked and has answered. The gate is WaybackClient.save(), so it
+# holds for every entry point — supervisor, finalizer, and the manual
+# ingest script alike — not just the one script that carries --no-wayback.
+WAYBACK_ENABLED = os.environ.get("FAPD_WAYBACK_ENABLED", "") == "1"
 LLM_LEDGER_DB = DATA_DIR / "llm_ledger.db"
 
 # GUIDE §6 rule 6: tiered models — cheap map tier, strong compose tier.
