@@ -6,7 +6,7 @@
 
 # U.S. Courts News
 
-active · ingestion health: quiet · Judicial · Tier 2 · RSS feed · Administrative Office of the U.S. Courts
+active · ingestion health: delivering · Judicial · Tier 2 · RSS feed · Administrative Office of the U.S. Courts
 
 Official site: https://www.uscourts.gov/data-news/judiciary-news · All sources: [sources.md](../sources.md)
 
@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-09-09, 8 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-09-17; 1 of 354 request(s) to news.uscourts.gov returned no content.
 
-This label has held since 2026-09-09T12:42:17Z (UTC) and was last re-checked 2026-09-17T03:58:34Z (UTC).
+This label has held since 2026-09-17T17:40:18Z (UTC) and was last re-checked 2026-09-18T03:55:01Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,24 +70,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-09-09 |
-| Content length | 18,341 characters average, 18,341 median (shortest 18,341, longest 18,341) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-09-17 |
+| Content length | 20,842 characters average, 20,842 median (shortest 18,341, longest 23,342) |
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to news.uscourts.gov | 354 request(s) · 353 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.3% returned no content |
 
-last answered request 2026-09-17T04:25:07.792+00:00 UTC.
+last answered request 2026-09-18T04:20:15.828+00:00 UTC.
 
-Most recent item 2026-09-09, 8 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-09-17; 1 of 354 request(s) to news.uscourts.gov returned no content.
 
 ### All time
 
-- **Our requests to news.uscourts.gov, all time (since 2026-07-30):** 1,439 request(s) · 1,438 answered · 1 returned no content
+- **Our requests to news.uscourts.gov, all time (since 2026-07-30):** 1,465 request(s) · 1,464 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to news.uscourts.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-19 | 0 | 24 | 400 |
 | 2026-08-20 | 0 | 34 | 512 |
 | 2026-08-21 | 0 | 29 | 349 |
 | 2026-08-22 | 0 | 30 | 408 |
@@ -126,12 +125,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-14 | 0 | 30 | 606 |
 | 2026-09-15 | 0 | 27 | 1062 |
 | 2026-09-16 | 0 | 26 | 359 |
-| 2026-09-17 | 0 | 1 | 410 |
+| 2026-09-17 | 1 | 26 | 390 |
+| 2026-09-18 | 0 | 1 | 315 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The U.S. Courts News RSS feed carries judiciary administration announcements and delivers extracted full-text articles from news.uscourts.gov. All 349 requests to the feed succeeded without error. Over the 14-day measurement window, 1 item arrived on 2026-09-09, continuing the source's sparse publication rate of 0.07 items per day. The single extracted article measured 18,341 characters. The most recent delivery represents a return after an extended prior gap; the previous assessment recorded the most recent item on 2026-08-27, reflecting the source's intermittent publication schedule typical of judiciary administration updates.
+The U.S. Courts News RSS feed continues delivering judiciary administration announcements via RSS. Over the 14-day measurement window, two items arrived on 2026-09-09 and 2026-09-17, bringing the average to 0.14 items per day—a doubling of the previous 0.07 items per day rate. Extracted full-text articles from news.uscourts.gov averaged 20,842 characters. Of 354 total requests to the feed, 353 succeeded; one request returned no content, yielding a 0.3% error rate—a minor departure from the zero-error rate recorded in the previous assessment. One hour (2026-09-12 16:00 UTC) recorded a transient error during otherwise consistent daily polling across the measurement period. The source's intermittent publication schedule persists, consistent with typical judiciary administration announcement patterns.
 
-_Model-written assessment of our own ingestion, generated 2026-09-10 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-09-18 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

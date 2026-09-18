@@ -2,6 +2,12 @@
  "agent_guide": "agents.html",
  "digests": [
   {
+   "canonical_markdown": "digests/2026-09-17.md",
+   "date": "2026-09-17",
+   "html": "https://fapd.info/2026-09-17.html",
+   "teaser": "The House passed 29 measures to engrossment and reported one, while the Senate reported 54 bills and introduced one;"
+  },
+  {
    "canonical_markdown": "digests/2026-09-16.md",
    "date": "2026-09-16",
    "html": "https://fapd.info/2026-09-16.html",
@@ -314,6 +320,6 @@
    "teaser": "The House introduced 44 bills, 7 with published texts, on topics including offshore oil and gas whistleblower protections, youth mental health and social media, infant formula contaminants, school nutrition, education, trade and manufacturing, occupational safety, and fishing practices, each referred to committee."
   }
  ],
- "generated": "2026-09-17T04:32:39Z",
+ "generated": "2026-09-18T04:25:46Z",
  "title": "Free Agentic Publication Digester \u2014 Daily Federal Digest"
 }

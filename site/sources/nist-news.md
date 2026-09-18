@@ -58,7 +58,7 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 **delivering** — 3 item(s) in the last 14 days; most recent 2026-09-15; 1 of 353 request(s) to www.nist.gov returned no content.
 
-This label has held since 2026-09-10T14:45:25Z (UTC) and was last re-checked 2026-09-17T03:58:34Z (UTC).
+This label has held since 2026-09-10T14:45:25Z (UTC) and was last re-checked 2026-09-18T03:55:01Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,7 +68,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -79,13 +79,13 @@ Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items in
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.nist.gov | 353 request(s) · 352 answered · 1 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.3% returned no content |
 
-last answered request 2026-09-17T04:25:07.444+00:00 UTC.
+last answered request 2026-09-18T04:20:15.900+00:00 UTC.
 
 3 item(s) in the last 14 days; most recent 2026-09-15; 1 of 353 request(s) to www.nist.gov returned no content.
 
 ### All time
 
-- **Our requests to www.nist.gov, all time (since 2026-07-30):** 1,446 request(s) · 1,440 answered · 6 returned no content
+- **Our requests to www.nist.gov, all time (since 2026-07-30):** 1,472 request(s) · 1,466 answered · 6 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nist.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-19 | 0 | 24 | 169 |
 | 2026-08-20 | 0 | 34 | 250 |
 | 2026-08-21 | 0 | 30 | 147 |
 | 2026-08-22 | 0 | 30 | 119 |
@@ -124,7 +123,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-14 | 0 | 28 | 327 |
 | 2026-09-15 | 2 | 28 | 124 |
 | 2026-09-16 | 0 | 27 | 165 |
-| 2026-09-17 | 0 | 1 | 119 |
+| 2026-09-17 | 0 | 26 | 146 |
+| 2026-09-18 | 0 | 1 | 398 |
 
 ## Our ingestion assessment
 
