@@ -6492,3 +6492,91 @@ Internet Archive.
 Also done: the Internet Archive outreach packet moved from the operator
 secrets directory to `research/internet-archive/`, which is gitignored,
 at the operator's request.
+
+## 2026-09-18 — The Wayback hold and the new collection cap are deployed
+
+Operator: "We have unpublished changes that need to make it to the
+VPS. Deploy." `main` was at 7eb3699, clean and level with
+`origin/main`, with CI green on the three commits since the last
+deploy: d540c9b (the Wayback hold), 84cee0f (the per-cycle download cap
+and the hourly govinfo ceiling) and 7eb3699 (the OB-28 rewrite).
+`deploy.sh` ran 14:19:49–14:24:53 UTC and exited 0. The test gate passed
+1,434 tests with 1 skipped. Both images were rebuilt, and `fapd-backend`
+and `fapd-mcp` were recreated at 14:22:47. `fapd-web` was not recreated;
+deploy.sh reloaded it in place. The site was rebuilt, the verify block
+was green, and `fapd-mcp` has no published port.
+
+**The earlier attempt failed on the network, not on the code.** The
+previous session ran `deploy.sh` three times between 13:57 and 14:12
+UTC. The operator's connection at the time dropped any SSH upload of
+roughly 20 MB or more with `client_loop: ssh_packet_write_poll: ...
+Result too large`: test uploads of 1, 5 and 10 MB went through, and
+uploads of 20 and 25 MB failed. Small commands were unaffected. The repo
+export needed 51 MB because the backend build context carries `.git` and
+the committed `site/`, and the four nightly evidence commits since the
+2026-09-15 deploy had rewritten 446 site files (39 MB). Two runs died in
+that rsync. The session then seeded the export with a throttled rsync
+(`--partial --bwlimit=800`, the same exclude list), which completed. The
+third run got as far as exporting the backend image and was cancelled
+when that session stopped at about 14:12 UTC; the Docker daemon logged
+`error writing config blob: ... context canceled` at 14:14:24. None of
+the three runs recreated a container, so production ran the 2026-09-15
+image throughout and the site stayed up.
+
+**This run sent almost nothing.** A dry run beforehand showed one 17 KB
+file to transfer (`.git/FETCH_HEAD`) plus a 486 KB file list. The three
+sshd sessions that the failed runs had left on the box (an rsync
+receiver and two upload probes, each waiting on a connection the
+operator's machine had dropped) were gone by the post-deploy check;
+sshd closed them on its own.
+
+**Live, verified in the container and through the edge:**
+
+- `config.WAYBACK_ENABLED` is False and `FAPD_WAYBACK_ENABLED` is unset
+  in the container. `GOVINFO_DOWNLOADS_PER_CYCLE` is 350 and
+  `MAX_GOVINFO_REQUESTS_PER_HOUR` is 800. The image was baked at 7eb3699
+  with the SSH origin.
+- The fetch log holds ten Save-Page-Now requests from earlier today on
+  the old code, five in the 05 UTC hour and five in the 13 UTC hour, and
+  none since the restart. The pause notice was logged once, at 14:22:58.
+  A NASA release captured at 14:23 was recorded without a Wayback
+  submission.
+- The public Methods page reads "Wayback submissions are paused as of
+  Sept. 18, 2026."
+- Every collector worker completed a cycle within a minute of the
+  restart with zero consecutive errors. The govinfo worker's first cycle
+  on the new cap finished at 14:23:47.
+- Four minutes on (14:26 UTC), all three containers were healthy. The
+  backend log since the restart held no traceback, warning, error or
+  `database is locked` line; the previous deploy logged five lock
+  retries in its restart minute. The `fapd-mcp` jail stood at zero
+  currently failed and zero banned, with its DOCKER-USER rule present.
+  The edge served one `Link` header, one HSTS header, the api-catalog
+  with a 200, and a 405 to `HEAD /mcp`.
+
+**What tonight should show.** Tonight's evening burst of court opinions
+is the first under the 350 cap. If the change works, the collectors
+drain that queue before midnight, the finalizer's sync stage stops
+spending most of its run on downloads (76% of the run in the OB-27
+diagnosis), and the 2026-09-18 day view carries the rows it used to
+lose. The insight report for 2026-09-18 and that day view's row count
+are the checks. OB-28 stays open, because a missed collector cycle
+still reproduces the gap.
+
+**The upload size, for the record.** The operator asked the earlier
+session why a small code change needed a large upload, and that session
+stopped before it answered. The backend build context is the whole
+working tree, `.git` and the committed `site/` included, and each
+nightly evidence commit rewrites between 268 and 431 site files. A
+deploy after a few days therefore moves tens of megabytes for a few
+kilobytes of code. In production the image's `site/` only seeds an
+empty `fapd-site` volume and supplies `site/assets/` to
+`static_assets/`; the volume is what serves. Whether the export should
+leave `site/` out is the operator's decision, and nothing was changed
+here.
+
+Next: read the 2026-09-18 insight report and day view for the cap's
+effect. Still open: the Internet Archive's answer before any resume
+(and, before resuming, removing the five-step retry against the save
+endpoint), OB-28, the registry re-publish as 2.0.0, Wave C, and the
+blog verdict.
