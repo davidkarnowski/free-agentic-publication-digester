@@ -619,3 +619,64 @@ def test_unknown_zone_labels_derive_from_the_city():
     assert config.publication_tz_names("Asia/Tokyo") == (
         "Tokyo time", "JST", "Tokyo")               # fixed JST is kept
     assert config.publication_tz_names("Asia/Ho_Chi_Minh")[0] == "Ho Chi Minh time"
+
+
+# ------------------- the 2026-09-18 pacing amendment (GUIDE §4) --
+
+# api.data.gov, the shared GSA service govinfo runs on, documents this
+# many requests per hour per key and answers 429 above it. It is the
+# publisher's number, not ours, so it is written here as a constant the
+# tests reason against rather than buried in a comparison.
+PUBLISHER_HOURLY_ALLOWANCE = 1000
+
+# The highest demand ever recorded in one 30-minute collector cycle in
+# steady-state operation, measured on 2026-09-12 at 02:00 UTC. The five
+# cycles behind it were 304, 259, 254, 236 and 225 packages.
+OBSERVED_PEAK_PACKAGES_PER_CYCLE = 346
+
+
+def test_the_download_cap_covers_the_busiest_cycle_we_have_seen():
+    """GUIDE §4, amended 2026-09-18. The old cap of 50 packages per
+    collection per cycle was smaller than a single evening's court
+    filings, so a queue survived every night and the day's listing was
+    written without it.
+
+    The cap must therefore sit above observed demand. When it does, the
+    hourly ceiling is what governs the pace, and that ceiling is derived
+    from the publisher's own stated limit rather than from a number we
+    picked before we had traffic to measure.
+    """
+    assert config.GOVINFO_DOWNLOADS_PER_CYCLE >= OBSERVED_PEAK_PACKAGES_PER_CYCLE
+
+
+def test_the_hourly_ceiling_stays_well_inside_the_publisher_allowance():
+    """We are guests on public infrastructure, and the amendment that
+    raised this ceiling did not change that. The ceiling may rise to meet
+    real demand, but it must keep a visible margin below the rate the
+    publisher documents, because the margin is what absorbs a retry burst
+    we did not plan for.
+    """
+    ceiling = config.MAX_GOVINFO_REQUESTS_PER_HOUR
+    assert ceiling <= 0.8 * PUBLISHER_HOURLY_ALLOWANCE
+    # A ceiling that no longer admits the busiest cycle would reinstate
+    # the defect this amendment removed, one level up. At the measured
+    # cost of 2.68 requests per package, the ceiling must clear a full
+    # peak cycle inside a single hour.
+    requests_for_a_peak_cycle = OBSERVED_PEAK_PACKAGES_PER_CYCLE * 2.68
+    assert ceiling >= requests_for_a_peak_cycle * 0.85
+
+
+def test_the_collector_and_the_finalizer_share_one_download_cap():
+    """The finalizer used to carry its own literal of 100. Two numbers
+    for one policy is how the collector and the finalizer come to
+    disagree about how much of a day may be collected, so both now read
+    the same constant and a reviewer has one place to look.
+    """
+    import pathlib
+
+    root = pathlib.Path(config.PROJECT_ROOT)
+    for rel in ("src/fapd/collect.py", "scripts/run_pipeline.py"):
+        text = (root / rel).read_text(encoding="utf-8")
+        assert "config.GOVINFO_DOWNLOADS_PER_CYCLE" in text, rel
+        assert "max_downloads=50" not in text, rel
+        assert "max_downloads=100" not in text, rel

@@ -1092,6 +1092,62 @@ discipline:
   have been unbounded, in the same direction as the standing rule, not
   against it.
 
+  **Amended 2026-09-18 (operator-authorized, on evidence) — collect a
+  document when it is observed, not in bulk at midnight.** The hourly
+  govinfo ceiling rises from 500 to **800 requests/hour**, and the
+  per-cycle download cap rises from 50 to **350 packages per collection
+  per cycle** (`config.GOVINFO_DOWNLOADS_PER_CYCLE`).
+
+  The operator's ruling, which is the reason for the change: a cap of our
+  own choosing was costing the digest its completeness, and completeness
+  is the point of the project. "If we have the ability to download and
+  capture the source then we should do so at the time that it is
+  observed, not as a bulk process at midnight."
+
+  The evidence, recorded because a budget change is not made on
+  preference:
+
+  - Federal courts publish in an evening burst, not evenly. On
+    2026-09-17, 492 USCOURTS packages were first seen between 4 p.m. and
+    9 p.m. Eastern, 202 of them within a single hour. The highest demand
+    ever seen in one 30-minute cycle in steady-state operation is **346
+    packages** (2026-09-12, 02:00 UTC); the next five are 304, 259, 254,
+    236 and 225.
+  - A package download costs **2.68 requests** measured over 458
+    packages, or 2.06 without the retries the publisher's own 503s
+    provoke. The old cap of 50 therefore allowed about 100 packages an
+    hour against a burst of 202, so a queue survived every evening.
+  - The queue was not a budget problem. On 2026-09-17 we spent 2,388 of
+    6,000 daily requests and the busiest hour reached 394 of the then
+    500 ceiling. **Our own cap, not the publisher's limit, was the
+    binding constraint**, and that is the defect this amendment fixes.
+  - api.data.gov documents **1,000 requests per hour per key** and
+    answers 429 above it. In **110,304 govinfo requests** across the
+    project's life we have received **zero 429s of any kind**, including
+    one hour that reached 714 requests on 2026-07-31. The new ceiling is
+    80% of the documented allowance, leaving 200 requests an hour of
+    margin.
+
+  **The principle this settles.** The limit that binds us should be
+  derived from the publisher's stated threshold, not from an internal
+  number chosen before we had traffic to measure. The per-cycle cap
+  stays, because an unbounded queue drain is a request-volume bomb on a
+  listing surge, but it is now set above observed demand so that the
+  hourly ceiling is what actually governs. A cap that silently truncates
+  the record is worse than no cap, because the reader cannot see what it
+  removed.
+
+  **What this amendment does not do.** It does not raise the per-second
+  pace, which stays at 1 request/second sustained per host. It does not
+  weaken any crawl-delay. It does not change the daily cap of 6,000, which
+  is not the binding constraint and is not approached. It does not exempt
+  anyone from the hourly ceiling, the finalizer included. It does not
+  change the rule that failed attempts count against the budget, and it
+  does not license faster retries: the answer to a 503 is still fewer
+  requests. On the contrary, the 503 retry cost on the USCOURTS `/zip`
+  endpoint (297 of 755 calls on 2026-09-18) is recorded separately as an
+  operational item and remains the next reduction to make.
+
   **Agency class raised 500 -> 1,500/day (amended 2026-07-31,
   operator-authorised).** The condition set was "as long as we aren't
   violating any bot/server restraints set by source servers", so the

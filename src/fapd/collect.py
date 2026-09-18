@@ -413,7 +413,9 @@ class GovinfoWorker(Worker):
         stats = {}
         with self.sup.govinfo_factory() as client:
             for collection in config.COLLECTIONS:
-                s = sync.sync_collection(client, conn, collection, max_downloads=50)
+                s = sync.sync_collection(
+                    client, conn, collection,
+                    max_downloads=config.GOVINFO_DOWNLOADS_PER_CYCLE)
                 stats[collection] = {"listed": s["listed"], "downloaded": s["downloaded"]}
         ex = extract.run(conn)
         stats["extracted"] = ex["records"]

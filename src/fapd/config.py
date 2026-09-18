@@ -98,7 +98,30 @@ MAX_AGENCY_REQUESTS_PER_DAY = 3000
 # half of what the key permits, enforced from the fetch log so it holds
 # across processes, and it is what makes a larger DAILY budget safe: the day
 # can grow without any hour approaching the publisher's stated limit.
-MAX_GOVINFO_REQUESTS_PER_HOUR = 500
+# Raised 500 -> 800 on 2026-09-18 (operator-authorised, GUIDE §4 amended
+# with the evidence). api.data.gov documents 1,000 requests per hour per
+# key; in 110,304 govinfo requests across the project's life we have had
+# zero 429s, including one hour that reached 714. This is 80% of the
+# documented allowance and is now the limit that actually governs — the
+# per-cycle download cap below was binding before it, which cost the
+# digest content it had already been told about.
+MAX_GOVINFO_REQUESTS_PER_HOUR = 800
+# Packages one collector cycle may download per collection. Raised 50 ->
+# 350 on 2026-09-18 with the ceiling above. Federal courts publish in an
+# evening burst: the highest demand ever seen in one 30-minute cycle is
+# 346 packages (2026-09-12), against a cap of 50 that allowed about 100 an
+# hour. The queue that left behind survived to midnight, where the
+# finalizer drained it in bulk — 76% of the digest's wall time — and the
+# day's listing was written before those rows were journaled, so a fifth
+# of each day never appeared on the page at all.
+#
+# The cap is deliberately kept rather than removed: an unbounded drain is
+# a request-volume bomb on a listing surge (USCOURTS listed 9,401 packages
+# in one window during the first sync). It is simply set above observed
+# demand, so MAX_GOVINFO_REQUESTS_PER_HOUR is what binds. A cycle that
+# wants more than the ceiling allows is paced into the next one, which is
+# hours before the day closes.
+GOVINFO_DOWNLOADS_PER_CYCLE = 350
 # Reserved for the end-of-day finalizer. Collectors stop at this fraction of
 # the daily budget; only the finalizer may spend the remainder. On
 # 2026-07-30 the collectors spent all 2,000 govinfo requests on backlog and

@@ -504,17 +504,23 @@ not reusable.)*
   used 2,388 that day; the hourly ceiling is 500 and the busiest hour
   was 394. The cap and the 30-minute cadence are what bind, not GUIDE
   §4's limits.
-- **Idea:** raise the per-cycle download cap, or shorten the govinfo
-  cadence during the evening window when USCOURTS publishes, so the
-  queue is empty before the day closes. Either is a pacing change and
-  therefore the operator's (GUIDE §4), even though neither raises a
-  budget. Whatever is chosen should be measured against the hourly
-  ceiling, not just the daily one.
-- **Why it matters beyond speed:** this queue is also the cause of
-  OB-28. Fixing it fixes both.
-- **Trigger:** now — the operator raised it on 2026-09-18 after the
-  digest-latency review. Acquisition owns the pacing; Operations the
-  measurement.
+- **Resolved 2026-09-18** (operator-authorized; GUIDE §4 amended with
+  the evidence first). The per-cycle cap is now
+  `config.GOVINFO_DOWNLOADS_PER_CYCLE` at 350, above the highest demand
+  ever recorded in one cycle (346 packages, 2026-09-12), and the hourly
+  ceiling rose from 500 to 800, which is 80% of the 1,000/hour
+  api.data.gov documents. The collector and the finalizer read the same
+  constant, so the finalizer's own literal of 100 is gone. The operator's
+  ruling: a document should be captured when it is observed, not in bulk
+  at midnight, and a cap of our own choosing must not be what costs the
+  digest its completeness. Zero 429s in 110,304 lifetime govinfo
+  requests, including one hour that reached 714. **Awaiting deploy.**
+- **Still open, and the next reduction to make:** the USCOURTS `/zip`
+  503 retry cost recorded as OB-16. On 2026-09-18, 297 of 755 zip calls
+  returned 503 and 284 requests were retries, so about a quarter of the
+  govinfo traffic buys nothing. Fixing that recovers more headroom than
+  any further ceiling rise, and it is the direction GUIDE §4 actually
+  prefers: fewer requests, never faster retries.
 
 **OB-28 — The frozen day listing is built before the collectors journal what the finalizer ingested**
 - **Gap:** `item_journal` is written by post-cycle reconciliation in the

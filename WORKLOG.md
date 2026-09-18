@@ -6419,3 +6419,76 @@ operator asked for the diagnosis first.
 Next: the operator's word to deploy the hold; then OB-27 and OB-28 on
 his go. Still open from earlier: the registry re-publish as 2.0.0, Wave
 C, and the blog verdict.
+
+## 2026-09-18 — The cap that was costing us the record
+
+Operator ruling, and the reason for everything below: "These limits and
+download caps are breaking one of the most important parts of the
+project, which is to provide as full a digest as possible of what the
+federal government is publishing. If we have the ability to download and
+capture the source then we should do so at the time that it is observed,
+not as a bulk process at midnight." Our own limits may change; the
+publisher's stated thresholds are the boundary.
+
+GUIDE §4 amended first, with the evidence, then the code.
+
+**What changed.** The per-cycle download cap rises from 50 to 350
+packages per collection, as `config.GOVINFO_DOWNLOADS_PER_CYCLE`. The
+hourly govinfo ceiling rises from 500 to 800 requests. The collector and
+the end-of-day finalizer now read the same constant, so the finalizer's
+separate literal of 100 is gone.
+
+**How 350 was chosen.** It is the highest demand ever recorded in a
+single 30-minute cycle in steady-state operation: 346 packages on
+2026-09-12 at 02:00 UTC, with the next five cycles at 304, 259, 254, 236
+and 225. The July figures are larger still, up to 9,401 in one window,
+but those are the first sync pulling history and are not demand. The cap
+is kept rather than removed for exactly that reason: an unbounded drain
+is a request-volume bomb on a listing surge. It is simply set above real
+demand so that it stops being the thing that binds.
+
+**How 800 was chosen.** api.data.gov documents 1,000 requests per hour
+per key and answers 429 above it. Across 110,304 govinfo requests in the
+project's life we have received zero 429s of any kind, including one
+hour that reached 714 on 2026-07-31. 800 is 80% of the documented
+allowance and leaves 200 requests an hour of margin for a retry burst we
+did not plan for. A peak cycle costs about 927 requests at the measured
+2.68 requests per package, so a burst now clears inside roughly one
+hour instead of surviving to midnight.
+
+**What this fixes, measured.** The old cap allowed about 100 packages an
+hour. Federal courts publish in an evening burst: 492 USCOURTS packages
+on 2026-09-17 between 4 p.m. and 9 p.m. Eastern, 202 of them in one
+hour. The queue that could not be drained survived to midnight, where
+the finalizer spent 1,056 seconds of a 1,388-second run draining it, and
+the day's listing was written two stages later without the rows that
+work produced. The queue was never a budget problem: 2,388 of 6,000
+daily requests spent, busiest hour 394 of the then 500 ceiling. **Our own
+cap, not the publisher's limit, was the binding constraint.**
+
+**What did not change.** The per-second pace stays at 1 request/second
+sustained per host. No crawl-delay is weakened. The daily cap stays at
+6,000 and is nowhere near binding. Nothing is exempt from the hourly
+ceiling, the finalizer included. Failed attempts still count against the
+budget, and the answer to a 503 is still fewer requests, not faster
+retries.
+
+**The next reduction, and it is the better one.** On 2026-09-18, 297 of
+755 USCOURTS `/zip` calls returned 503 and 284 requests were retries, so
+roughly a quarter of govinfo traffic buys nothing. Recovering that is
+worth more than any further ceiling rise and runs with GUIDE §4 rather
+than against it. Recorded against OB-16.
+
+**Verified:** ruff clean; full suite 1,434 passed, 1 skipped. Three new
+tests pin the policy: the cap covers the busiest observed cycle, the
+ceiling keeps a margin below the publisher's documented rate and still
+clears a peak cycle within the hour, and no second download literal
+survives anywhere.
+
+**Not deployed.** This and the Wayback hold both take effect on the next
+deploy. Until then the box runs the old cap and still submits to the
+Internet Archive.
+
+Also done: the Internet Archive outreach packet moved from the operator
+secrets directory to `research/internet-archive/`, which is gitignored,
+at the operator's request.

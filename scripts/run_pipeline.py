@@ -74,7 +74,16 @@ def stage_sync(conn):
     with GovinfoClient(reserve_exempt=True) as client:
         for collection in config.COLLECTIONS:
             try:
-                stats = sync_collection(client, conn, collection, max_downloads=100)
+                # The same cap the collector uses (2026-09-18). This stage
+                # is a top-up, and after the cap rise it should usually
+                # find an empty queue: the collector is meant to have
+                # downloaded the day as it was observed. It stays a
+                # backstop for the night a cycle is missed, and a queue
+                # it does drain is now sized by the hourly ceiling rather
+                # than by a number smaller than a single evening's burst.
+                stats = sync_collection(
+                    client, conn, collection,
+                    max_downloads=config.GOVINFO_DOWNLOADS_PER_CYCLE)
             except BudgetExceededError as exc:
                 print(f"   {collection:9} SKIPPED — {exc}", flush=True)
                 continue
