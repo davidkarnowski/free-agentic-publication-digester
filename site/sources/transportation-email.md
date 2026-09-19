@@ -76,7 +76,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-08-20 | 0 |
 | 2026-08-21 | 0 |
 | 2026-08-22 | 0 |
 | 2026-08-23 | 0 |
@@ -105,4 +104,5 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-15 | 0 |
 | 2026-09-16 | 0 |
 | 2026-09-17 | 0 |
-| 2026-09-18 | 0 |
+| 2026-09-18 | 1 |
+| 2026-09-19 | 0 |

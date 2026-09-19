@@ -51,15 +51,15 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 | Channel | govinfo collection |
 | Method | govinfo collections API delta sync |
 | Poll cadence | about every 30 minutes while the collector runs |
-| Request budget | the govinfo class: at most 6,000 requests per day and 500 per hour, counted from the fetch log (failed requests count too); collectors stop at 85% so the end-of-day finalizer always has headroom |
+| Request budget | the govinfo class: at most 6,000 requests per day and 800 per hour, counted from the fetch log (failed requests count too); collectors stop at 85% so the end-of-day finalizer always has headroom |
 | Politeness | keyed govinfo API access; every request is logged before it is made and identified as fapd/0.1 (Free Agentic Publication Digester; +https://fapd.info/bot.html; contact: hustleyourcity@gmail.com) |
 | Capture and hash | captured raw content is hashed (SHA-256) into the day's committed provenance manifest, hash-chained day to day (PROVENANCE.md) |
 
 ## Ingestion health
 
-**degraded** — 3946 of 21982 request(s) to api.govinfo.gov returned no content (18.0%, at or above the 10% mark).
+**degraded** — 3849 of 22572 request(s) to api.govinfo.gov returned no content (17.1%, at or above the 10% mark).
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-18T03:55:01Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-19T03:52:51Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,23 +69,23 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 2,395 request(s) (1,896 answered, 499 returned no content) · 72 item(s) ingested
+Last 24 hours: 2,479 request(s) (2,069 answered, 410 returned no content) · 114 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 883 in 14 days (63.07 per day) · most recent 2026-09-17 |
-| Content length | 14,051 characters average, 6,115 median (shortest 594, longest 344,103) |
-| Our requests to api.govinfo.gov | 21,982 request(s) · 18,036 answered · 1 declined (4xx) · 3,945 server declined (5xx) · 0 no response — 18.0% returned no content |
+| Items ingested | 997 in 14 days (71.21 per day) · most recent 2026-09-18 |
+| Content length | 16,770 characters average, 6,160 median (shortest 594, longest 732,996) |
+| Our requests to api.govinfo.gov | 22,572 request(s) · 18,723 answered · 0 declined (4xx) · 3,849 server declined (5xx) · 0 no response — 17.1% returned no content |
 
-last answered request 2026-09-18T04:20:14.521+00:00 UTC; this host serves 5 registered sources, so these figures are host-wide.
+last answered request 2026-09-19T04:05:45.835+00:00 UTC; this host serves 5 registered sources, so these figures are host-wide.
 
-3946 of 21982 request(s) to api.govinfo.gov returned no content (18.0%, at or above the 10% mark).
+3849 of 22572 request(s) to api.govinfo.gov returned no content (17.1%, at or above the 10% mark).
 
 ### All time
 
-- **Our requests to api.govinfo.gov, all time (since 2026-07-30):** 108,867 request(s) · 82,528 answered · 26,339 returned no content
+- **Our requests to api.govinfo.gov, all time (since 2026-07-30):** 111,295 request(s) · 84,563 answered · 26,732 returned no content
 
 This host serves 5 registered sources, so these figures are host-wide.
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to api.govinfo.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-20 | 108 | 2954 | 594 |
 | 2026-08-21 | 116 | 2575 | 641 |
 | 2026-08-22 | 0 | 2230 | 527 |
 | 2026-08-23 | 0 | 2174 | 685 |
@@ -126,7 +125,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-15 | 121 | 1504 | 812 |
 | 2026-09-16 | 104 | 2266 | 580 |
 | 2026-09-17 | 72 | 2387 | 608 |
-| 2026-09-18 | 0 | 232 | 561 |
+| 2026-09-18 | 114 | 2655 | 746 |
+| 2026-09-19 | 0 | 5 | 200 |
 
 ## Our ingestion assessment
 

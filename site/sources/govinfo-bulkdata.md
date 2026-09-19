@@ -48,7 +48,7 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 |---|---|
 | Channel | govinfo collection |
 | Method | bulk XML for historical backfill |
-| Request budget | the govinfo class: at most 6,000 requests per day and 500 per hour, counted from the fetch log (failed requests count too); collectors stop at 85% so the end-of-day finalizer always has headroom |
+| Request budget | the govinfo class: at most 6,000 requests per day and 800 per hour, counted from the fetch log (failed requests count too); collectors stop at 85% so the end-of-day finalizer always has headroom |
 | Politeness | keyed govinfo API access; every request is logged before it is made and identified as fapd/0.1 (Free Agentic Publication Digester; +https://fapd.info/bot.html; contact: hustleyourcity@gmail.com) |
 | Capture and hash | captured raw content is hashed (SHA-256) into the day's committed provenance manifest, hash-chained day to day (PROVENANCE.md) |
 
@@ -64,7 +64,7 @@ Not ingested: the registry status of this source is planned. Ingestion statistic
 
 ### All time
 
-- **Our requests to api.govinfo.gov, all time (since 2026-07-30):** 108,867 request(s) · 82,528 answered · 26,339 returned no content
+- **Our requests to api.govinfo.gov, all time (since 2026-07-30):** 111,295 request(s) · 84,563 answered · 26,732 returned no content
 
 This host serves 5 registered sources, so these figures are host-wide.
 
@@ -76,7 +76,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to api.govinfo.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-20 | 0 | 2954 | 594 |
 | 2026-08-21 | 0 | 2575 | 641 |
 | 2026-08-22 | 0 | 2230 | 527 |
 | 2026-08-23 | 0 | 2174 | 685 |
@@ -105,4 +104,5 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-15 | 0 | 1504 | 812 |
 | 2026-09-16 | 0 | 2266 | 580 |
 | 2026-09-17 | 0 | 2387 | 608 |
-| 2026-09-18 | 0 | 232 | 561 |
+| 2026-09-18 | 0 | 2655 | 746 |
+| 2026-09-19 | 0 | 5 | 200 |
