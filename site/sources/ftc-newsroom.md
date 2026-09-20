@@ -56,7 +56,7 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 **delivering** — 8 item(s) in the last 14 days; most recent 2026-09-17; 0 of 353 request(s) to www.ftc.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-19T03:52:51Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-20T03:51:20Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -66,7 +66,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -77,13 +77,13 @@ Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · no items in
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.ftc.gov | 353 request(s) · 353 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-09-19T04:05:46.510+00:00 UTC.
+last answered request 2026-09-20T04:04:35.366+00:00 UTC.
 
 8 item(s) in the last 14 days; most recent 2026-09-17; 0 of 353 request(s) to www.ftc.gov returned no content.
 
 ### All time
 
-- **Our requests to www.ftc.gov, all time (since 2026-07-30):** 1,520 request(s) · 1,515 answered · 5 returned no content
+- **Our requests to www.ftc.gov, all time (since 2026-07-30):** 1,546 request(s) · 1,541 answered · 5 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.ftc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-21 | 1 | 31 | 256 |
 | 2026-08-22 | 0 | 29 | 259 |
 | 2026-08-23 | 0 | 30 | 255 |
 | 2026-08-24 | 1 | 29 | 276 |
@@ -122,7 +121,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-16 | 1 | 28 | 230 |
 | 2026-09-17 | 3 | 29 | 261 |
 | 2026-09-18 | 0 | 26 | 276 |
-| 2026-09-19 | 0 | 1 | 269 |
+| 2026-09-19 | 0 | 26 | 238 |
+| 2026-09-20 | 0 | 1 | 249 |
 
 ## Our ingestion assessment
 

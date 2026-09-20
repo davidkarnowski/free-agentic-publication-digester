@@ -2,6 +2,12 @@
  "agent_guide": "agents.html",
  "digests": [
   {
+   "canonical_markdown": "digests/2026-09-19.md",
+   "date": "2026-09-19",
+   "html": "https://fapd.info/2026-09-19.html",
+   "teaser": "The digest carries eleven Congressional Record documents observed on this publication day: six Daily Digest items and five covering Senate proceedings."
+  },
+  {
    "canonical_markdown": "digests/2026-09-18.md",
    "date": "2026-09-18",
    "html": "https://fapd.info/2026-09-18.html",
@@ -326,6 +332,6 @@
    "teaser": "The House introduced 44 bills, 7 with published texts, on topics including offshore oil and gas whistleblower protections, youth mental health and social media, infant formula contaminants, school nutrition, education, trade and manufacturing, occupational safety, and fishing practices, each referred to committee."
   }
  ],
- "generated": "2026-09-19T04:11:29Z",
+ "generated": "2026-09-20T04:07:49Z",
  "title": "Free Agentic Publication Digester \u2014 Daily Federal Digest"
 }
