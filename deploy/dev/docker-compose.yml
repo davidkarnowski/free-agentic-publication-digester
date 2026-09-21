@@ -43,7 +43,11 @@ services:
     cpus: 0.5
     logging:
       driver: json-file
-      options: { max-size: "5m", max-file: "3" }
+      # Mirrors prod (deploy/vps/docker-compose.yml), raised 2026-09-21.
+      # tests/test_dev_stack.py pins the two together on purpose — the
+      # dev stack exists to reproduce prod, and a logging difference is
+      # exactly the kind of drift that makes a local repro lie.
+      options: { max-size: "10m", max-file: "6" }
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
       interval: 10s
@@ -75,7 +79,11 @@ services:
     cpus: 1.0
     logging:
       driver: json-file
-      options: { max-size: "5m", max-file: "3" }
+      # Mirrors prod (deploy/vps/docker-compose.yml), raised 2026-09-21.
+      # tests/test_dev_stack.py pins the two together on purpose — the
+      # dev stack exists to reproduce prod, and a logging difference is
+      # exactly the kind of drift that makes a local repro lie.
+      options: { max-size: "10m", max-file: "6" }
 
   # Opt-in live collection: ONE serial cycle (run_once), mechanical
   # only, no archive writes. Never the supervisor daemon (the pause/
@@ -97,7 +105,11 @@ services:
     cpus: 1.0
     logging:
       driver: json-file
-      options: { max-size: "5m", max-file: "3" }
+      # Mirrors prod (deploy/vps/docker-compose.yml), raised 2026-09-21.
+      # tests/test_dev_stack.py pins the two together on purpose — the
+      # dev stack exists to reproduce prod, and a logging difference is
+      # exactly the kind of drift that makes a local repro lie.
+      options: { max-size: "10m", max-file: "6" }
 
   # Mirrors production's mcp service (agent-discovery Phase 4B): the same
   # image recipe, manifest layout, hardening and internal network, so
@@ -127,7 +139,11 @@ services:
     cpus: 0.5
     logging:
       driver: json-file
-      options: { max-size: "5m", max-file: "3" }
+      # Mirrors prod (deploy/vps/docker-compose.yml), raised 2026-09-21.
+      # tests/test_dev_stack.py pins the two together on purpose — the
+      # dev stack exists to reproduce prod, and a logging difference is
+      # exactly the kind of drift that makes a local repro lie.
+      options: { max-size: "10m", max-file: "6" }
 
 networks:
   fapd_mcp:

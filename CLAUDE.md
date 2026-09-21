@@ -93,8 +93,9 @@ change.
 ## 7. Common commands
 
 ```sh
+scripts/preflight.sh                          # THE GATE (lint + full suite)
 uv run pytest -q                              # full suite
-uv run ruff check src/ scripts/ tests/        # lint
+uv run ruff check src/ scripts/ tests/        # lint (preflight also does packages/)
 uv run python scripts/run_pipeline.py         # full daily run (EOD finalizer)
 uv run python scripts/run_pipeline.py --no-llm # same, mechanical only (GUIDE §6 r15)
 uv run python scripts/digest.py --date D      # (re)render one digest (--no-llm: stored rows only)
@@ -110,15 +111,26 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
 ## 8. Branching & commits
 
 - **main is sacred — for code** (GUIDE §10, verbatim): work on
-  `feature/…`, `bug/…`, `arch/…`; CI green before fast-forward merge.
-  **Enforced by a GitHub ruleset since 2026-08-27** (`main: CI green,
-  no force-push, no deletion`, id 21668661): a push to `main` must carry
-  a passing `test` check on its tip commit, force-pushes and deletion
-  are refused for everyone including the owner, and the **only bypass
-  is the `fapd-pipeline` deploy key** — the nightly evidence commit has
-  no CI run before it pushes. Removing that bypass silently breaks the
-  evidence push (the F-019/F-021 class); an emergency push without CI
-  means editing the ruleset in Settings, not working around it.
+  `feature/…`, `bug/…`, `arch/…`; **`scripts/preflight.sh` green before
+  fast-forward merge.**
+- **The gate moved off GitHub on 2026-09-21** (operator). GitHub Actions
+  CI was retired and the repository is now a remote for storage; the
+  ruleset (id 21668661) was renamed `main: no force-push, no deletion`
+  and its `required_status_checks` rule removed — **it had to be, or no
+  one could push to `main` again**, since the required `test` check
+  would never appear. What survives is deliberate: force-pushes and
+  deletion are still refused for everyone including the owner, and the
+  **only bypass is the `fapd-pipeline` deploy key** (the nightly
+  evidence commit runs no checks before it pushes; removing that bypass
+  silently breaks the evidence push — the F-019/F-021 class).
+  **Be honest about what changed.** The old gate was enforcement: the
+  server refused an untested push. The new one is discipline:
+  `scripts/preflight.sh` runs the same three steps the workflow ran
+  (`uv sync`, `ruff check src/ scripts/ tests/ packages/`, `pytest -q`)
+  and nothing compels you to run it. Run it immediately before the
+  push, not an hour earlier — the drift it was written after was a
+  compose edit that landed after a green suite and broke a dev/prod
+  parity test that had passed minutes before.
   About to edit code on `main`? **STOP and confirm a branch name with
   the operator.** Check `git rev-parse --abbrev-ref HEAD` at task start.
 - **Evidence exemption:** `digests/`, `provenance/`, `site/`,
