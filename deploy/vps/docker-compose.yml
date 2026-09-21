@@ -53,7 +53,14 @@ services:
     cpus: 0.5
     logging:
       driver: json-file
-      options: { max-size: "5m", max-file: "3" }
+      # 60 MB per container, raised from 15 MB on 2026-09-21 (operator:
+      # "longer-kept logs, two months, all parts of the stack"). Docker's
+      # json-file driver bounds by SIZE, not age, so the number is chosen
+      # from measured write rates: fapd-web is the loudest at ~0.7 MB/day
+      # (its own healthcheck is most of it), so 60 MB is ~85 days; the
+      # backend and mcp are far quieter. The FILE logs under
+      # /opt/fapd/logs are the ones bounded by time (60 days, logrotate).
+      options: { max-size: "10m", max-file: "6" }
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
       interval: 10s
@@ -108,7 +115,14 @@ services:
     cpus: 1.0
     logging:
       driver: json-file
-      options: { max-size: "5m", max-file: "3" }
+      # 60 MB per container, raised from 15 MB on 2026-09-21 (operator:
+      # "longer-kept logs, two months, all parts of the stack"). Docker's
+      # json-file driver bounds by SIZE, not age, so the number is chosen
+      # from measured write rates: fapd-web is the loudest at ~0.7 MB/day
+      # (its own healthcheck is most of it), so 60 MB is ~85 days; the
+      # backend and mcp are far quieter. The FILE logs under
+      # /opt/fapd/logs are the ones bounded by time (60 days, logrotate).
+      options: { max-size: "10m", max-file: "6" }
     # Liveness = the supervisor's own heartbeat: some worker recorded a
     # cycle within 2h (the fastest worker cycles every ~10–20 min even
     # fully backed off, so 2h of silence means the loop is wedged — the
@@ -148,7 +162,14 @@ services:
     cpus: 0.5
     logging:
       driver: json-file
-      options: { max-size: "5m", max-file: "3" }
+      # 60 MB per container, raised from 15 MB on 2026-09-21 (operator:
+      # "longer-kept logs, two months, all parts of the stack"). Docker's
+      # json-file driver bounds by SIZE, not age, so the number is chosen
+      # from measured write rates: fapd-web is the loudest at ~0.7 MB/day
+      # (its own healthcheck is most of it), so 60 MB is ~85 days; the
+      # backend and mcp are far quieter. The FILE logs under
+      # /opt/fapd/logs are the ones bounded by time (60 days, logrotate).
+      options: { max-size: "10m", max-file: "6" }
 
 networks:
   fapd_edge:
