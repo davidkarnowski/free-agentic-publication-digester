@@ -265,6 +265,22 @@ TAG_PROMPT_VERSION = 2
 # Developer-insight suggestions (§3a): dev-facing surface, one cheap-tier
 # call per EOD over the run's own metrics — never document content.
 INSIGHT_PROMPT_VERSION = 1
+
+#: The nightly security sweep (host-side, read-only) writes one JSON
+#: file; the insight report renders it. The path is a bind mount the
+#: backend sees read-only — the finalizer must never be able to edit the
+#: evidence it reports on.
+SECURITY_SWEEP_PATH = os.environ.get(
+    "FAPD_SECURITY_SWEEP_PATH", "/app/security/security-sweep.json")
+
+#: A sweep older than this is reported as "did not run", never rendered
+#: as if it were today's. This is the F-021 shape: a green report
+#: describing a run that never happened is worse than no report.
+SECURITY_SWEEP_STALE_HOURS = int(
+    os.environ.get("FAPD_SECURITY_SWEEP_STALE_HOURS", "26"))
+
+#: Bumping this regenerates the security summary layer only.
+SECURITY_PROMPT_VERSION = 1
 # Source-page surfaces (§3a, 2026-08-03): assessment = our measured
 # ingestion relationship, refreshed at 30 days or on a health-label
 # change; description = what the source is, regenerated only when its

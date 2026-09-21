@@ -193,7 +193,7 @@ def gather(conn, date, *, fetch_db=None, ledger_db=None, now=None):
     return m
 
 
-def render_report(metrics, suggestions=None):
+def render_report(metrics, suggestions=None, security=None):
     """Deterministic Markdown from the metrics dict. Suggestions, when
     present, render under an explicit model-output label (GUIDE §2)."""
     L = [f"# Operations report — digest {metrics['digest_date']}", "",
@@ -248,6 +248,10 @@ def render_report(metrics, suggestions=None):
     L += [f"| {c['worker']} | {c['last_ok_at'] or '—'} |"
           f" {c['consecutive_errors']} |" for c in metrics["collectors"]]
 
+    if security is not None:
+        L += render_security(security.get("sweep"), security.get("problem"),
+                             security.get("summary"))
+
     if suggestions is not None:
         L += ["", "## Suggested next steps", "",
               ("*The list below is model output (insight prompt v"
@@ -259,6 +263,154 @@ def render_report(metrics, suggestions=None):
 
     L += ["", f"*Generated {utc_now_iso()}.*", ""]
     return "\n".join(L)
+
+
+_SECURITY_PROMPT = """Below is a machine-generated security sweep of a
+static-site VPS. Every number in it was computed by a script and every
+verdict was decided by a fixed threshold before you saw it.
+
+Rules:
+- Do NOT recount, re-classify, or re-rank anything. The verdicts are
+  already decided.
+- Do NOT speculate about causes you cannot see in this data.
+- At most 150 words.
+- Say whether anything changed that a human must act on today, name the
+  single most important item, and say plainly if the answer is nothing.
+- If "escalate" is true, lead with it.
+
+Output: plain prose. No markdown headings, no bullet list, no JSON.
+
+=== SWEEP ===
+{sweep}
+"""
+
+
+def read_sweep(path=None, *, now=None):
+    """Read the nightly security sweep. Returns (sweep_dict, problem).
+
+    Exactly one of the two is None. `problem` is a human-readable reason
+    the sweep is unusable, and it is rendered in the report verbatim —
+    a missing or stale sweep must be *visible*, never silent.
+
+    The staleness check is the point of this function. A sweep file that
+    stopped being written would otherwise sit on disk reporting a clean
+    bill of health forever, which is exactly the F-021 failure: a green
+    report describing a run that never happened.
+    """
+    path = path or config.SECURITY_SWEEP_PATH
+    try:
+        with open(path) as fh:
+            sweep = json.load(fh)
+    except FileNotFoundError:
+        return None, f"no sweep file at {path} — the host timer did not run"
+    except (OSError, ValueError) as exc:
+        return None, f"sweep file at {path} is unreadable: {exc}"
+
+    stamp = sweep.get("generated_utc")
+    if not stamp:
+        return None, "sweep file carries no generated_utc — cannot trust its age"
+    try:
+        generated = dt.datetime.fromisoformat(stamp)
+    except ValueError:
+        return None, f"sweep file has an unparseable generated_utc: {stamp!r}"
+    if generated.tzinfo is None:
+        generated = generated.replace(tzinfo=dt.UTC)
+
+    now = now or dt.datetime.now(dt.UTC)
+    age = now - generated
+    if age > dt.timedelta(hours=config.SECURITY_SWEEP_STALE_HOURS):
+        hours = age.total_seconds() / 3600
+        return None, (f"sweep is {hours:.0f}h old (generated {stamp}), past the "
+                      f"{config.SECURITY_SWEEP_STALE_HOURS}h limit — treat as DID NOT RUN")
+    return sweep, None
+
+
+def render_security(sweep, problem=None, summary=None):
+    """The security section. Entirely mechanical; `summary` is prose and
+    the section is complete without it."""
+    L = ["", "## Security sweep", ""]
+    if problem:
+        L += [f"**The sweep is unavailable: {problem}.**", "",
+              "No security state is reported for this day. This line is",
+              "deliberately loud: an absent sweep is a gap in the record,",
+              "not a clean result.", ""]
+        return L
+
+    v = sweep.get("verdicts", [])
+    if sweep.get("escalate"):
+        crit = [x for x in v if x.get("severity") == "critical"]
+        L += ["> **ESCALATE — " + str(len(crit)) + " critical finding(s).**",
+              "> " + "; ".join(x["detail"] for x in crit), ""]
+
+    probing = sweep.get("probing", {})
+    L += [(f"Window: {sweep.get('window_hours', '?')}h to "
+           f"{sweep.get('generated_utc', '?')}."), "",
+          "| measure | value |", "|---|---|",
+          f"| probe requests | {probing.get('events', 0)} |",
+          f"| distinct probing addresses | {probing.get('distinct_ips', 0)} |",
+          f"| correlated campaign findings | {len(probing.get('findings', []))} |",
+          (f"| **probe paths served a 2xx** | "
+           f"**{sweep.get('refusals', {}).get('probes_served_2xx', 0)}** |"),
+          (f"| failed SSH attempts | {sweep.get('auth', {}).get('failed_ssh', 0)}"
+           f" from {sweep.get('auth', {}).get('failed_ssh_distinct_ips', 0)} address(es) |"),
+          (f"| host security packages pending | "
+           f"{sweep.get('patch', {}).get('host_security_pending', 0)} |"),
+          (f"| containers not healthy | "
+           f"{sweep.get('integrity', {}).get('unhealthy', 0)} |")]
+
+    fam = probing.get("by_family") or {}
+    if fam:
+        L += ["", "Probe families seen: "
+              + ", ".join(f"{k} ({n})" for k, n in sorted(fam.items(), key=lambda x: -x[1]))
+              + "."]
+
+    if v:
+        L += ["", "| severity | finding | detail |", "|---|---|---|"]
+        L += [f"| {x['severity']} | `{x['key']}` | {x['detail']} |" for x in v]
+    else:
+        L += ["", "No verdict tripped a threshold."]
+
+    tls = sweep.get("tls") or []
+    if tls:
+        L += ["", "Certificates: "
+              + "; ".join(f"{c['cert']} {c['days']}d" for c in tls) + "."]
+
+    if sweep.get("stage_errors"):
+        L += ["", "*Sweep stages that errored (their figures are missing, not zero): "
+              + "; ".join(sweep["stage_errors"]) + ".*"]
+
+    thresholds = sweep.get("thresholds", {})
+    if thresholds:
+        L += ["", "*Verdicts were computed against: "
+              + ", ".join(f"{k}={val}" for k, val in sorted(thresholds.items())) + ".*"]
+
+    if summary:
+        L += ["", (f"*Model summary (security prompt v"
+                   f"{config.SECURITY_PROMPT_VERSION}), over the classified"
+                   f" sweep above; it decides nothing.*"), "", summary]
+    else:
+        L += ["", "*(no inference available; the mechanical findings above are complete)*"]
+    return L
+
+
+def summarize_security(llm, sweep):
+    """One cheap-tier call over the already-classified sweep. Returns a
+    string, or None if the call fails — the section never depends on it.
+
+    The payload is trimmed first: address lists and full path samples
+    are evidence for a human reading the JSON, not context a summariser
+    needs, and they are the only unbounded fields in the file."""
+    trimmed = json.loads(json.dumps(sweep))
+    for f in trimmed.get("probing", {}).get("findings", []):
+        f.pop("sample_paths", None)
+        if isinstance(f.get("ips"), list):
+            f["ips"] = f["ips"][:5]
+    trimmed.get("auth", {}).pop("accepted_from", None)
+    result = llm.complete(
+        _SECURITY_PROMPT.format(sweep=json.dumps(trimmed, indent=1)),
+        purpose="security:summary", model=config.MAP_MODEL,
+        package_id=f"SEC-{sweep.get('generated_utc', '')[:10]}")
+    return (result["text"] or "").strip() or None
 
 
 def suggest(llm, metrics):
@@ -280,7 +432,8 @@ def suggest(llm, metrics):
     return [s.strip() for s in parsed if isinstance(s, str) and s.strip()][:5]
 
 
-def run(conn, llm, date, *, out_dir=None, fetch_db=None, ledger_db=None):
+def run(conn, llm, date, *, out_dir=None, fetch_db=None, ledger_db=None,
+        sweep_path=None):
     """Gather, optionally suggest (llm=None skips the call), write
     provenance/runs/insight-<date>.md. Returns the path."""
     metrics = gather(conn, date, fetch_db=fetch_db, ledger_db=ledger_db)
@@ -300,10 +453,26 @@ def run(conn, llm, date, *, out_dir=None, fetch_db=None, ledger_db=None):
                 "insight: suggestions call failed (%s) — writing the"
                 " mechanical report without them", exc)
             suggestions = []
+    # The security sweep is produced on the HOST by a systemd timer at
+    # 03:40 UTC and read here through a read-only bind mount. It is
+    # gathered after the suggestions call so that a provider outage
+    # cannot cost us the security section too: read_sweep touches no
+    # provider, and render_security is complete without prose.
+    sweep, problem = read_sweep(sweep_path)
+    security = {"sweep": sweep, "problem": problem, "summary": None}
+    if sweep is not None and llm is not None:
+        try:
+            security["summary"] = summarize_security(llm, sweep)
+        except LLMError as exc:
+            logger.warning(
+                "insight: security summary call failed (%s) — the mechanical"
+                " findings are unaffected", exc)
+
     out_dir = out_dir or (config.PROJECT_ROOT / "provenance" / "runs")
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"insight-{date}.md"
-    path.write_text(render_report(metrics, suggestions), encoding="utf-8")
-    logger.info("insight report written: %s (%d suggestion(s))",
-                path, len(suggestions or []))
+    path.write_text(render_report(metrics, suggestions, security), encoding="utf-8")
+    logger.info("insight report written: %s (%d suggestion(s), security: %s)",
+                path, len(suggestions or []),
+                problem or f"{len(sweep.get('verdicts', []))} verdict(s)")
     return path

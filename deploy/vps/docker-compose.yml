@@ -108,6 +108,13 @@ services:
       - fapd-digests:/app/digests
       - fapd-provenance:/app/provenance
       - ./secrets:/app/secrets:ro # deploy key for evidence pushes (0600, root-owned dir)
+      # The nightly security sweep runs on the HOST (systemd timer,
+      # 03:40 UTC) and writes one JSON file here. READ-ONLY is the
+      # point: the finalizer reports on this evidence and must never be
+      # able to edit it. insight.py checks the file's own generated_utc
+      # and renders "did not run" rather than inheriting a stale clean
+      # bill of health.
+      - ./logs:/app/security:ro
     # Bounds + rotation (review D18/D19/R4), values from the dev stack's
     # tested block. The 1g ceiling is also D18's blast-radius limit: this
     # container parses network XML with the stdlib parser.
