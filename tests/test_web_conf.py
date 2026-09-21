@@ -260,9 +260,19 @@ def test_mcp_location_is_post_only_with_the_content_type_gate_and_body_cap():
 
 
 def test_mcp_location_limits_requests_and_connections_on_the_phase_3_zones():
+    """Asserts the SHAPE of the /mcp limits, not their values.
+
+    This test used to pin the exact burst and connection numbers. The config
+    they described was public until 2026-09-21, and its values were then
+    rotated so the copy in git history no longer matches the live control
+    surface. A test that pinned the new numbers would republish them in this
+    public repository and undo that. So it checks what must stay true — a
+    request limit with a burst and nodelay, and a connection limit, both on
+    the declared zones — and leaves the numbers to the private config.
+    """
     loc = _mcp_location()
-    assert re.search(r"limit_req\s+zone=fapd_mcp\s+burst=20 nodelay;", loc)
-    assert re.search(r"limit_conn\s+fapd_conn\s+10;", loc)                          # SR-2
+    assert re.search(r"limit_req\s+zone=fapd_mcp\s+burst=\d+\s+nodelay;", loc)
+    assert re.search(r"limit_conn\s+fapd_conn\s+\d+;", loc)                         # SR-2
     assert "limit_req_status  429;" in loc and "limit_conn_status 429;" in loc
     live = _live(_conf())
     assert "zone=fapd_mcp:" in live and "zone=fapd_conn:" in live               # declared (Phase 3)
