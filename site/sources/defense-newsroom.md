@@ -59,7 +59,7 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 **delivering** — 25 item(s) in the last 14 days; most recent 2026-09-19; 15 of 345 request(s) to www.defense.gov returned no content.
 
-This label has held since 2026-08-11T18:00:02Z (UTC) and was last re-checked 2026-09-20T03:51:20Z (UTC).
+This label has held since 2026-08-11T18:00:02Z (UTC) and was last re-checked 2026-09-21T03:47:52Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,7 +69,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (23 answered, 3 returned no content) · 1 item(s) ingested
+Last 24 hours: 27 request(s) (26 answered, 1 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -80,13 +80,13 @@ Last 24 hours: 26 request(s) (23 answered, 3 returned no content) · 1 item(s) i
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to www.defense.gov | 345 request(s) · 330 answered · 15 declined (4xx) · 0 server declined (5xx) · 0 no response — 4.3% returned no content |
 
-last answered request 2026-09-20T04:04:35.543+00:00 UTC.
+last answered request 2026-09-21T04:01:54.771+00:00 UTC.
 
 25 item(s) in the last 14 days; most recent 2026-09-19; 15 of 345 request(s) to www.defense.gov returned no content.
 
 ### All time
 
-- **Our requests to www.defense.gov, all time (since 2026-07-30):** 1,520 request(s) · 1,430 answered · 90 returned no content
+- **Our requests to www.defense.gov, all time (since 2026-07-30):** 1,546 request(s) · 1,455 answered · 91 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.defense.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-22 | 0 | 30 | 551 |
 | 2026-08-23 | 0 | 29 | 363 |
 | 2026-08-24 | 2 | 28 | 439 |
 | 2026-08-25 | 1 | 26 | 342 |
@@ -125,7 +124,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-17 | 3 | 27 | 380 |
 | 2026-09-18 | 3 | 26 | 682 |
 | 2026-09-19 | 1 | 26 | 401 |
-| 2026-09-20 | 0 | 1 | 460 |
+| 2026-09-20 | 0 | 26 | 351 |
+| 2026-09-21 | 0 | 1 | 626 |
 
 ## Our ingestion assessment
 

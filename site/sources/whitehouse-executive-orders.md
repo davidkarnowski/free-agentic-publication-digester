@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-09-18; 0 of 700 request(s) to www.whitehouse.gov returned no content.
+**delivering** — 6 item(s) in the last 14 days; most recent 2026-09-18; 0 of 701 request(s) to www.whitehouse.gov returned no content.
 
-This label has held since 2026-09-16T21:29:37Z (UTC) and was last re-checked 2026-09-20T03:51:20Z (UTC).
+This label has held since 2026-09-16T21:29:37Z (UTC) and was last re-checked 2026-09-21T03:47:52Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,7 +71,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 49 request(s) (49 answered, 0 returned no content) · no items ingested
+Last 24 hours: 55 request(s) (55 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -80,15 +80,15 @@ Last 24 hours: 49 request(s) (49 answered, 0 returned no content) · no items in
 | Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-09-18 |
 | Content length | 11,977 characters average, 11,384 median (shortest 7,916, longest 18,838) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.whitehouse.gov | 700 request(s) · 700 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.whitehouse.gov | 701 request(s) · 701 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-09-20T04:04:36.332+00:00 UTC; this host serves 2 registered sources, so these figures are host-wide.
+last answered request 2026-09-21T04:01:55.334+00:00 UTC; this host serves 2 registered sources, so these figures are host-wide.
 
-6 item(s) in the last 14 days; most recent 2026-09-18; 0 of 700 request(s) to www.whitehouse.gov returned no content.
+6 item(s) in the last 14 days; most recent 2026-09-18; 0 of 701 request(s) to www.whitehouse.gov returned no content.
 
 ### All time
 
-- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 2,505 request(s) · 2,498 answered · 7 returned no content
+- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 2,558 request(s) · 2,551 answered · 7 returned no content
 
 This host serves 2 registered sources, so these figures are host-wide.
 
@@ -100,7 +100,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.whitehouse.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-22 | 0 | 59 | 42 |
 | 2026-08-23 | 0 | 57 | 46 |
 | 2026-08-24 | 0 | 55 | 64 |
 | 2026-08-25 | 0 | 52 | 40 |
@@ -129,7 +128,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-17 | 2 | 56 | 69 |
 | 2026-09-18 | 1 | 54 | 81 |
 | 2026-09-19 | 0 | 51 | 42 |
-| 2026-09-20 | 0 | 2 | 39 |
+| 2026-09-20 | 0 | 53 | 40 |
+| 2026-09-21 | 0 | 2 | 35 |
 
 ## Our ingestion assessment
 
