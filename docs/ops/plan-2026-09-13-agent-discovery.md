@@ -1,5 +1,11 @@
 # Plan — agent discovery and a no-inference MCP service (2026-09-13)
 
+> **2026-09-21 — `deploy/vps/nginx/` moved out of this repository.** Operator ruling:
+> the fapd-web nginx config carries probe-refusal rules that state exactly what is and
+> is not refused, and this repository is public. It now lives in the operator's private
+> host tree and is mounted on the box from `/opt/edge/fapd-web`. References to
+> `deploy/vps/nginx/` below are historical; git history retains the old config.
+
 *Master plan. Status: **in execution on branch `feature/agent-discovery`
 (operator go 2026-09-13; see the §10 status table). Nothing deployed.** The
 per-phase files listed in §6 carry the executable detail; this file

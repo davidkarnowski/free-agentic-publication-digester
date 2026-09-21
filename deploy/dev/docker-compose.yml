@@ -30,10 +30,14 @@ services:
     networks: [default, fapd_mcp]   # default keeps the published port reachable
     volumes:
       - fapd-site:/usr/share/nginx/html:ro
-      # The same repo-managed nginx config production runs (agent-
-      # discovery plan Phase 3) — a directory mount, same reason as
-      # prod. Relative to this file's directory (--project-directory).
-      - ../vps/nginx:/etc/nginx/conf.d:ro
+      # The same nginx config production runs — a directory mount, same
+      # reason as prod. Since 2026-09-21 it lives in the operator's private
+      # host tree, not in this public repo, so a dev run needs a
+      # checkout of the operator's private host tree: set FAPD_NGINX_DIR to its fapd-web/ directory.
+      # The :? makes compose refuse to start with a clear message rather
+      # than mount an empty directory and serve nginx's default page, which
+      # would look like it worked.
+      - ${FAPD_NGINX_DIR:?set FAPD_NGINX_DIR to the private host tree's fapd-web/ — the config left this public repo on 2026-09-21}:/etc/nginx/conf.d:ro
       # The /mcp access log (Phase 4B). nginx opens the path at config
       # time, so the directory must exist; a named volume here rather than
       # prod's ./logs bind mount, so a dev run leaves no stray directory

@@ -32,12 +32,16 @@ services:
       # containers share no network. Docker seeds an empty volume from the
       # backend image's baked site/ on first mount.
       - fapd-site:/usr/share/nginx/html:ro
-      # Repo-managed server config (agent-discovery plan Phase 3). A
-      # DIRECTORY mount on purpose: rsync replaces files with new inodes,
-      # which a single-file bind mount would never see (2026-07-30).
-      # Config-only deploys reload in place (deploy.sh: nginx -t, then
-      # nginx -s reload); the mount itself recreates the container once.
-      - ./nginx:/etc/nginx/conf.d:ro
+      # Server config, owned by the EDGE, not by this repo (2026-09-21).
+      # It moved to the operator's private host tree and is deployed
+      # from there to /opt/edge/fapd-web. This repository is public; the
+      # config carries probe-refusal rules that say exactly what is and is
+      # not refused, which is not something to publish.
+      #
+      # Still a DIRECTORY mount, for the original reason: rsync replaces
+      # files with new inodes, which a single-file bind mount never sees
+      # (2026-07-30).
+      - /opt/edge/fapd-web:/etc/nginx/conf.d:ro
       # The /mcp access log for the host fail2ban jail (security review
       # §4): first field is the true client address. Only this one log
       # lands here — nginx's default logs still go to stdout/stderr.

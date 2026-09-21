@@ -1,7 +1,22 @@
-"""Static checks on the repo-managed fapd-web nginx configuration
-(deploy/vps/nginx/) — agent-discovery plan Phase 3, task AD-11.
+"""Static checks on the fapd-web nginx configuration — agent-discovery
+plan Phase 3, task AD-11.
 
-No Docker here: the live proof is deploy/vps/nginx/rehearse.sh. These
+The config left this repository on 2026-09-21: it moved to the operator's
+operator's private host tree, because it carries probe-refusal rules that state
+exactly what is and is not refused, and this repository is public.
+
+These tests were NOT deleted with it. They pin real invariants that a
+later edit could quietly drop, and they are just as useful run against
+the config wherever it now lives. Point FAPD_NGINX_DIR at a checkout of the
+operator's private host tree's fapd-web/ and they all run:
+
+    FAPD_NGINX_DIR=<private-host-tree>/fapd-web uv run pytest -q tests/test_web_conf.py
+
+With the variable unset — the normal case in this public repo, and in
+any clone that has no access to the private tree — every test in this
+file skips, so the suite stays green without the config present.
+
+No Docker here: the live proof is the private host tree's fapd-web/rehearse.sh. These
 tests pin what the config PROMISES — the master plan's §8.1 content
 types, the §8.3 Link contract (in parity with the page head), the §8.2
 negotiation table, the security-review findings SR-1..SR-4, the two
@@ -13,6 +28,7 @@ and the twin-pattern agreement); Phase 5's checklist requires zero skips
 in this file, so a skip cannot survive to a deploy.
 """
 
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -22,8 +38,22 @@ import pytest
 from fapd import publish
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-NGINX = PROJECT_ROOT / "deploy" / "vps" / "nginx"
+
+# The config is no longer in this repo (see the module docstring). Resolve it
+# from the environment; skip the whole module when it is not available rather
+# than fail, so a public clone's suite is green without the private tree.
+_ENV_DIR = os.environ.get("FAPD_NGINX_DIR")
+NGINX = Path(_ENV_DIR).expanduser() if _ENV_DIR else PROJECT_ROOT / "deploy" / "vps" / "nginx"
 CONF = NGINX / "default.conf"
+
+pytestmark = pytest.mark.skipif(
+    not CONF.is_file(),
+    reason=(
+        "fapd-web nginx config not present: it moved to the operator's "
+        "private host tree on 2026-09-21. Set FAPD_NGINX_DIR=<private-host-tree>/fapd-web to run "
+        "these checks against it."
+    ),
+)
 HEADERS_INC = NGINX / "fapd-discovery-headers.inc"
 DEPLOY_SH = PROJECT_ROOT / "deploy" / "vps" / "scripts" / "deploy.sh"
 
@@ -332,15 +362,28 @@ def test_markdown_q0_is_not_negotiated(accept, wants):
 
 # 9. deploy.sh: the gate, the exclude, the reload, the verify -------------
 
-def test_deploy_sh_gates_reloads_and_verifies_the_config():
+def test_deploy_sh_no_longer_ships_or_reloads_the_nginx_config():
+    """The inverse of what this test asserted before 2026-09-21.
+
+    The config moved to the operator's private host tree, so this deploy must not
+    push it, test it, or reload it. Each of these would now be actively
+    wrong rather than merely dead: the candidate rsync sourced
+    deploy/vps/nginx/, which no longer exists, so it would push an EMPTY
+    directory over the live config and take fapd.info down; and a reload
+    would apply a config this repo never saw. Asserted as absences so the
+    old blocks cannot quietly return.
+    """
     sh = DEPLOY_SH.read_text(encoding="utf-8")
-    gate, bundle, up, reload_ = (sh.index("[1b/4] nginx config syntax gate"),
-                                 sh.index("[2/4] rsync bundle"),
-                                 sh.index("up -d"),
-                                 sh.index("nginx -s reload"))
-    assert gate < bundle < up < reload_
-    assert ".nginx-candidate" in sh and "nginx -t" in sh[gate:bundle]
-    assert "sudo docker exec fapd-web nginx -t && sudo docker exec fapd-web nginx -s reload" in sh
+    # Strip comments first: the point is that nothing EXECUTES against the
+    # old path, not that the script may never mention it. The comments that
+    # explain why these blocks were removed are the main defence against
+    # someone helpfully restoring them.
+    code = "\n".join(
+        ln for ln in sh.splitlines() if not ln.lstrip().startswith("#")
+    )
+    assert ".nginx-candidate" not in code
+    assert "nginx -s reload" not in code
+    assert "deploy/vps/nginx/" not in code
     # SR-3: the bundle rsync excludes the host log directory
     bundle_cmd = re.search(r"rsync -az --delete --exclude '\.DS_Store'.*?deploy/vps/ \"\$\{VPS\}", sh, re.DOTALL)
     assert bundle_cmd and "--exclude 'logs/'" in bundle_cmd.group(0)
@@ -351,14 +394,16 @@ def test_deploy_sh_gates_reloads_and_verifies_the_config():
 
 def test_deploy_sh_builds_the_mcp_service_creates_the_log_dir_and_verifies_discover():
     """Phase 4B (phase file §B.5): ruff covers packages/, the build line
-    names mcp, logs/ exists before the syntax gate's container and before
-    `up -d` (nginx opens the access_log path at config-test time), the
+    names mcp, logs/ exists before `up -d` (fapd-web mounts it at
+    /var/log/fapd, and nginx opens every access_log path at startup), the
     verify step speaks MCP through the edge, and no port is published."""
     sh = DEPLOY_SH.read_text(encoding="utf-8")
     assert "uv run ruff check src/ scripts/ tests/ packages/" in sh
-    gate = sh[sh.index("[1b/4]"):sh.index("[2/4]")]
-    assert "mkdir -p '${REMOTE_DIR}/logs'" in gate
-    assert "-v '${REMOTE_DIR}/logs:/var/log/fapd'" in gate
+    # The [1b/4] gate's own `mkdir -p` and logs mount went with the nginx
+    # config in 2026-09-21. The [3/4] assertions below are what actually
+    # guarantee logs/ exists before `up -d`, which fapd-web still needs for
+    # its ./logs:/var/log/fapd mount — so this invariant survives the move
+    # rather than being dropped with the gate.
     build = sh[sh.index("[3/4]"):sh.index("[4/4]")]
     assert "mkdir -p logs" in build
     assert build.index("mkdir -p logs") < build.index("up -d")

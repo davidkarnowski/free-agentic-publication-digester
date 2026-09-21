@@ -16,24 +16,11 @@ echo "==> [1/4] test gate"
 uv run ruff check src/ scripts/ tests/ packages/
 uv run pytest -q
 
-echo "==> [1b/4] nginx config syntax gate (on the box, throwaway container)"
-# A bad fapd-web config crash-loops the site, and the edge proxy names
-# fapd-web as a static upstream, so an edge restart during that window
-# would take the cohabitant down too. Test the candidate BEFORE it is
-# swapped in. The config has no static upstreams, so -t needs no network.
-# The bundle rsync's --delete below removes .nginx-candidate/ afterwards
-# (it is not in the source tree), which is intended. Same image pin as
-# the web service — bump both together. The logs/ mount is load-bearing
-# (Phase 4B): nginx opens every access_log path at config-test time, and
-# the /mcp location logs to /var/log/fapd/, so a container without that
-# directory fails `nginx -t` on a config that is fine on the box.
-rsync -az --delete -e "ssh ${SSH_OPTS[*]}" \
-  deploy/vps/nginx/ "${VPS}:${REMOTE_DIR}/.nginx-candidate/"
-ssh "${SSH_OPTS[@]}" "$VPS" \
-  "mkdir -p '${REMOTE_DIR}/logs' && sudo docker run --rm \
-   -v '${REMOTE_DIR}/.nginx-candidate:/etc/nginx/conf.d:ro' \
-   -v '${REMOTE_DIR}/logs:/var/log/fapd' \
-   nginx:1.30-alpine nginx -t"
+# [1b/4] the nginx config syntax gate lived here until 2026-09-21. fapd-web's
+# config moved to the operator's private host tree, so this deploy no
+# longer ships it and cannot meaningfully test it: rsyncing a candidate from
+# deploy/vps/nginx/ would push an empty directory over the live config.
+# The gate moved with the config; the private host tree deploys it and tests it there.
 
 echo "==> [2/4] rsync bundle (deploy/vps/) and repo export (backend build context)"
 # The excludes are load-bearing: .env, secrets/, and repo/ exist ONLY on
@@ -76,12 +63,10 @@ ssh "${SSH_OPTS[@]}" "$VPS" \
    && sudo docker compose --profile backend up -d \
    && sudo docker compose ps --format '{{.Name}} {{.Status}}'"
 
-# fapd-web's config is a directory mount (deploy/vps/nginx/), so compose
-# recreates the container only when the SERVICE definition changes — a
-# config-only change is invisible to `up -d`. Reload in place instead;
-# -t first so a reload never applies what the [1b/4] gate did not see.
-ssh "${SSH_OPTS[@]}" "$VPS" \
-  "sudo docker exec fapd-web nginx -t && sudo docker exec fapd-web nginx -s reload"
+# The fapd-web config reload also moved to the operator's private host tree (2026-09-21). Reloading
+# it from here would apply a config this repo no longer has and never tested.
+# If you changed fapd-web's config, you changed it in the operator's private host tree — deploy it
+# from there.
 
 # The fapd-site volume is seeded from the image only when EMPTY — an image
 # rebuild does not refresh it (F-009). Rebuild the site in-container so

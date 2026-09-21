@@ -1,5 +1,11 @@
 # Orchestration — dispatching section agents
 
+> **2026-09-21 — `deploy/vps/nginx/` moved out of this repository.** Operator ruling:
+> the fapd-web nginx config carries probe-refusal rules that state exactly what is and
+> is not refused, and this repository is public. It now lives in the operator's private
+> host tree and is mounted on the box from `/opt/edge/fapd-web`. References to
+> `deploy/vps/nginx/` below are historical; git history retains the old config.
+
 How the main session (the orchestrator) hands work to section agents and
 integrates what comes back. Modeled on a pattern proven in the operator's
 Spiralyst project; adapted to one repo and Task-tool launches.
@@ -30,7 +36,7 @@ for the duration of its task).
 | Corpus & Provenance | `src/fapd/db.py`, `extract.py`, `graphics.py`, `provenance.py`, `src/fapd/parsers/*` · `docs/schema.md`, `PROVENANCE.md` |
 | Editorial | `src/fapd/rules.py`, `analyze.py`, `compose.py`, `tags.py`, `insight.py`, `llm.py`, `finalize.py`, `inference.py`, `tts.py` |
 | Publication | `src/fapd/report.py`, `publish.py`, `fedcal.py` · `digests/TEMPLATE.md`, `static_assets/` · `docs/accessibility.md`, `docs/accessibility-doctrine.md`, `docs/site/*` (incl. `docs/site/agent-skills/*`, the SKILL.md sources) |
-| Operations | `src/fapd/collect.py`, `health.py` · `scripts/run_pipeline.py`, `scripts/collect.py`, `scripts/audit.py` · `deploy/vps/*` (incl. `deploy/vps/nginx/*`, `deploy/vps/mcp/*`; host fail2ban config is in the operator's private host tree, not here), `deploy/dev/mcp/*` · `packages/static-mcp/*` (the generic MCP package, its tests and Dockerfile; built by a general-purpose agent in Phase 4A of the agent-discovery plan, owned by Operations afterwards) · `docs/ops/*`, `docs/continuous-ingestion.md`, `docs/mcp-server.md` · `.claude/skills/fapd-health/*` (read-only health commands) |
+| Operations | `src/fapd/collect.py`, `health.py` · `scripts/run_pipeline.py`, `scripts/collect.py`, `scripts/audit.py` · `deploy/vps/*` (incl. `deploy/vps/mcp/*`; the fapd-web nginx config — moved out 2026-09-21 — and the host fail2ban config are both in the operator's private host tree, not here), `deploy/dev/mcp/*` · `packages/static-mcp/*` (the generic MCP package, its tests and Dockerfile; built by a general-purpose agent in Phase 4A of the agent-discovery plan, owned by Operations afterwards) · `docs/ops/*`, `docs/continuous-ingestion.md`, `docs/mcp-server.md` · `.claude/skills/fapd-health/*` (read-only health commands) |
 
 **Shared resources — orchestrator-owned. No section agent edits these;
 the exit report carries the exact desired diff instead:**
