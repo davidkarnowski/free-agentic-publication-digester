@@ -351,8 +351,16 @@ def render_security(sweep, problem=None, summary=None):
           f"| correlated campaign findings | {len(probing.get('findings', []))} |",
           (f"| **probe paths served a 2xx** | "
            f"**{sweep.get('refusals', {}).get('probes_served_2xx', 0)}** |"),
-          (f"| failed SSH attempts | {sweep.get('auth', {}).get('failed_ssh', 0)}"
+          (f"| failed SSH attempts (window) | "
+           f"{sweep.get('auth', {}).get('failed_ssh', 0)}"
            f" from {sweep.get('auth', {}).get('failed_ssh_distinct_ips', 0)} address(es) |"),
+          # All-time is context, not the window's number, and is labeled
+          # so it can never be read as one. The first render conflated
+          # them and reported a day with no failures as having 54.
+          (f"| failed SSH attempts (retained) | "
+           f"{sweep.get('auth', {}).get('failed_ssh_alltime', 0)}"
+           f" from {sweep.get('auth', {}).get('failed_ssh_alltime_distinct_ips', 0)}"
+           f" address(es) |"),
           (f"| host security packages pending | "
            f"{sweep.get('patch', {}).get('host_security_pending', 0)} |"),
           (f"| containers not healthy | "

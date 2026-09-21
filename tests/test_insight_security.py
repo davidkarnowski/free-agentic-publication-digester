@@ -28,6 +28,7 @@ def _sweep(**over):
         "jails": [{"jail": "nginx-ai-probe", "currently_banned": 0,
                    "total_banned": 0, "has_chain": 1}],
         "auth": {"failed_ssh": 3, "failed_ssh_distinct_ips": 1,
+                 "failed_ssh_alltime": 54, "failed_ssh_alltime_distinct_ips": 29,
                  "usernames_tried": "postgres", "accepted_from": "198.51.100.7"},
         "patch": {"host_security_pending": 0, "base_images": []},
         "integrity": {"containers": "fapd-web", "unhealthy": 0,
@@ -116,6 +117,14 @@ def test_escalation_leads_the_section():
     out = "\n".join(insight.render_security(s))
     assert out.index("ESCALATE") < out.index("| measure | value |")
     assert "**2**" in out  # the served-2xx count is bolded because it matters
+
+
+def test_window_and_alltime_ssh_counts_are_labeled_separately():
+    """The first real render reported a day with zero failed logins as
+    having 54, by counting all of btmp under a 24h heading."""
+    out = "\n".join(insight.render_security(_sweep()))
+    assert "failed SSH attempts (window) | 3 from 1 address(es)" in out
+    assert "failed SSH attempts (retained) | 54 from 29 address(es)" in out
 
 
 def test_thresholds_are_stated_with_the_verdicts():
