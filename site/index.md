@@ -14,13 +14,13 @@ An automated, citation-bound, opinion-agnostic daily digest of official United S
 
 ## The last 7 days
 
+- [Daily Digest — 2026-09-21](2026-09-21.md) — No congressional floor proceedings or recorded votes appear in this digest.
 - [Daily Digest — 2026-09-20](2026-09-20.md) — The digest carries four agency press releases as the executive and regulatory record observed for the day;
 - [Daily Digest — 2026-09-19](2026-09-19.md) — The digest carries eleven Congressional Record documents observed on this publication day: six Daily Digest items and five covering Senate proceedings.
 - [Daily Digest — 2026-09-18](2026-09-18.md) — The Senate confirmed Kasdin Miller Mitchell of Texas as United States District Judge for the Northern District of Texas by a vote of 49-45, following a 49-47 cloture vote on the nomination, and resumed consideration of S.
 - [Daily Digest — 2026-09-17](2026-09-17.md) — The House passed 29 measures to engrossment and reported one, while the Senate reported 54 bills and introduced one;
 - [Daily Digest — 2026-09-16](2026-09-16.md) — The House recorded two roll call votes: 216-211 on H.J.
 - [Daily Digest — 2026-09-15](2026-09-15.md) — The House agreed to two measures by recorded vote, approving H.R.
-- [Daily Digest — 2026-09-14](2026-09-14.md) — The digest carries one recorded roll call vote from the congressional floor.
 
 ## Earlier days
 
