@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 4 item(s) in the last 14 days; most recent 2026-09-18, delivered by email.
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-09-18, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-22T03:47:41Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-23T03:59:19Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,13 +73,13 @@ Last 24 hours: no items ingested
 
 | Measure | Value |
 |---|---|
-| Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-09-18 |
-| Content length | 375 characters average, 313 median (shortest 137, longest 736) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-09-18 |
+| Content length | 453 characters average, 453 median (shortest 170, longest 736) |
 | Delivery mode | email-full — the bulletin carried the full item text |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-4 item(s) in the last 14 days; most recent 2026-09-18, delivered by email.
+2 item(s) in the last 14 days; most recent 2026-09-18, delivered by email.
 
 ### All time
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-08-24 | 1 |
 | 2026-08-25 | 0 |
 | 2026-08-26 | 0 |
 | 2026-08-27 | 0 |
@@ -121,6 +120,7 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-20 | 0 |
 | 2026-09-21 | 0 |
 | 2026-09-22 | 0 |
+| 2026-09-23 | 0 |
 
 ## Our ingestion assessment
 
