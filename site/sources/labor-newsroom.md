@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-09-23; 6 of 353 request(s) to www.dol.gov returned no content.
+**delivering** — 8 item(s) in the last 14 days; most recent 2026-09-24; 8 of 356 request(s) to www.dol.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-24T03:57:29Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-25T03:53:38Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -66,24 +66,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 29 request(s) (26 answered, 3 returned no content) · 3 item(s) ingested
+Last 24 hours: 29 request(s) (27 answered, 2 returned no content) · 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-09-23 |
-| Content length | 1,710 characters average, 1,901 median (shortest 337, longest 2,792) |
+| Items ingested | 8 in 14 days (0.57 per day) · most recent 2026-09-24 |
+| Content length | 1,747 characters average, 1,901 median (shortest 337, longest 3,254) |
 | Delivery mode | feed-fallback — the feed's summary, used because the article page could not be read |
-| Our requests to www.dol.gov | 353 request(s) · 347 answered · 6 declined (4xx) · 0 server declined (5xx) · 0 no response — 1.7% returned no content |
+| Our requests to www.dol.gov | 356 request(s) · 348 answered · 8 declined (4xx) · 0 server declined (5xx) · 0 no response — 2.2% returned no content |
 
-last answered request 2026-09-24T04:46:18.810+00:00 UTC.
+last answered request 2026-09-25T04:01:16.184+00:00 UTC.
 
-6 item(s) in the last 14 days; most recent 2026-09-23; 6 of 353 request(s) to www.dol.gov returned no content.
+8 item(s) in the last 14 days; most recent 2026-09-24; 8 of 356 request(s) to www.dol.gov returned no content.
 
 ### All time
 
-- **Our requests to www.dol.gov, all time (since 2026-07-30):** 1,651 request(s) · 1,630 answered · 21 returned no content
+- **Our requests to www.dol.gov, all time (since 2026-07-30):** 1,679 request(s) · 1,656 answered · 23 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.dol.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-26 | 2 | 28 | 168 |
 | 2026-08-27 | 1 | 27 | 201 |
 | 2026-08-28 | 0 | 26 | 174 |
 | 2026-08-29 | 0 | 27 | 177 |
@@ -122,7 +121,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-21 | 0 | 28 | 228 |
 | 2026-09-22 | 0 | 27 | 150 |
 | 2026-09-23 | 3 | 28 | 154 |
-| 2026-09-24 | 0 | 1 | 603 |
+| 2026-09-24 | 2 | 28 | 213 |
+| 2026-09-25 | 0 | 1 | 247 |
 
 ## Our ingestion assessment
 

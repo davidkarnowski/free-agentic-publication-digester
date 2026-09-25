@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-08-03, 52 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-08-03, 53 days ago (quiet past 7 days).
 
-This label has held since 2026-08-11T04:22:38Z (UTC) and was last re-checked 2026-09-24T03:57:29Z (UTC).
+This label has held since 2026-08-11T04:22:38Z (UTC) and was last re-checked 2026-09-25T03:53:38Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,22 +70,22 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
 | Items ingested | none in the last 14 days — most recent 2026-08-03 |
-| Our requests to www.odni.gov | 349 request(s) · 349 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.odni.gov | 348 request(s) · 348 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-09-24T04:46:19.731+00:00 UTC.
+last answered request 2026-09-25T04:01:16.870+00:00 UTC.
 
-Most recent item 2026-08-03, 52 days ago (quiet past 7 days).
+Most recent item 2026-08-03, 53 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.odni.gov, all time (since 2026-08-01):** 1,620 request(s) · 1,620 answered · 0 returned no content
+- **Our requests to www.odni.gov, all time (since 2026-08-01):** 1,646 request(s) · 1,646 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.odni.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-26 | 0 | 26 | 184 |
 | 2026-08-27 | 0 | 26 | 157 |
 | 2026-08-28 | 0 | 25 | 223 |
 | 2026-08-29 | 0 | 27 | 154 |
@@ -124,7 +123,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-21 | 0 | 29 | 174 |
 | 2026-09-22 | 0 | 27 | 142 |
 | 2026-09-23 | 0 | 25 | 235 |
-| 2026-09-24 | 0 | 1 | 138 |
+| 2026-09-24 | 0 | 26 | 144 |
+| 2026-09-25 | 0 | 1 | 88 |
 
 ## Our ingestion assessment
 

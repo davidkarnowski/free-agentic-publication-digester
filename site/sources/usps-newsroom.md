@@ -53,7 +53,7 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 **delivering** — 7 item(s) in the last 14 days; most recent 2026-09-23; 0 of 347 request(s) to about.usps.com returned no content.
 
-This label has held since 2026-09-08T15:31:58Z (UTC) and was last re-checked 2026-09-24T03:57:29Z (UTC).
+This label has held since 2026-09-08T15:31:58Z (UTC) and was last re-checked 2026-09-25T03:53:38Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -63,7 +63,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -74,13 +74,13 @@ Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) i
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to about.usps.com | 347 request(s) · 347 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-09-24T04:46:20.234+00:00 UTC.
+last answered request 2026-09-25T04:01:16.522+00:00 UTC.
 
 7 item(s) in the last 14 days; most recent 2026-09-23; 0 of 347 request(s) to about.usps.com returned no content.
 
 ### All time
 
-- **Our requests to about.usps.com, all time (since 2026-08-01):** 1,565 request(s) · 1,564 answered · 1 returned no content
+- **Our requests to about.usps.com, all time (since 2026-08-01):** 1,591 request(s) · 1,590 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -90,7 +90,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to about.usps.com | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-26 | 0 | 26 | 255 |
 | 2026-08-27 | 0 | 26 | 225 |
 | 2026-08-28 | 1 | 26 | 357 |
 | 2026-08-29 | 0 | 27 | 167 |
@@ -119,7 +118,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-21 | 0 | 28 | 315 |
 | 2026-09-22 | 1 | 27 | 199 |
 | 2026-09-23 | 1 | 25 | 374 |
-| 2026-09-24 | 0 | 1 | 1091 |
+| 2026-09-24 | 0 | 26 | 359 |
+| 2026-09-25 | 0 | 1 | 156 |
 
 ## Our ingestion assessment
 
