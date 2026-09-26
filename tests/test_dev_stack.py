@@ -94,6 +94,17 @@ def test_deploy_bundle_rsync_excludes_the_host_log_directory():
     assert sh.index("--exclude 'logs/'") < sh.index('deploy/vps/ "${VPS}:${REMOTE_DIR}/"')
 
 
+
+def test_deploy_bundle_rsync_excludes_the_host_evidence_directory():
+    """2026-09-26: /opt/fapd/evidence/ holds incident material that
+    exists only on the box. The bundle rsync's --delete tried to remove
+    it on the first deploy after it appeared and was refused only by its
+    root ownership — the F-004 class, saved by accident."""
+    sh = (VPS / "scripts" / "deploy.sh").read_text(encoding="utf-8")
+    assert "--exclude 'evidence/'" in sh
+    assert (sh.index("--exclude 'evidence/'")
+            < sh.index('deploy/vps/ "${VPS}:${REMOTE_DIR}/"'))
+
 def _live_yaml(path):
     return "\n".join(ln for ln in path.read_text(encoding="utf-8").splitlines()
                      if not ln.lstrip().startswith("#"))

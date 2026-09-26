@@ -6628,3 +6628,26 @@ the index Markdown twin and the MCP `list_digests` items with it.
 
 Verified: `scripts/preflight.sh` PASS. Branch `bug/teaser-sentence-split`;
 not merged, not deployed.
+
+## 2026-09-26 — The first deploy of the teaser fix stopped at the bundle rsync
+
+`deploy.sh` passed its test gate (1,423 passed, 38 skipped) and then
+exited 23 at the bundle rsync, before any build. No container was
+touched. The rsync runs `--delete` against `/opt/fapd/`. It tried to
+remove `/opt/fapd/evidence/`, where the operator keeps incident material
+that exists only on the box. The delete was refused only because that
+directory is root-owned with mode 0700. That is the F-004 class again,
+stopped by a permission that was never meant as a guard. The fix is
+`--exclude 'evidence/'` beside `.env`, `secrets/`, `repo/` and `logs/`,
+pinned by `tests/test_dev_stack.py`. The evidence directory was left
+exactly as it was. A dry run with the exclude changes only `deploy.sh`
+itself and deletes nothing.
+
+Two smaller things, found and fixed on the way. The repo export on the
+box (`/opt/fapd/repo/`, the backend build context) had 1,201 root-owned
+files dated 2026-09-21. Two root-owned asset directories refused new
+files, which would also have stopped the deploy at exit 23. The
+directory is a staging copy that no running container reads, so it was
+handed back to the deploy user with `chown -R`. The export was also
+seeded first with a throttled rsync, per the 2026-09-18 note, because
+the operator machine was on the constrained link again.

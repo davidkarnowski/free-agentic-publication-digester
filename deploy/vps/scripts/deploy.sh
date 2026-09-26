@@ -29,10 +29,14 @@ echo "==> [2/4] rsync bundle (deploy/vps/) and repo export (backend build contex
 # (security review SR-3): Phase 4B of the agent-discovery plan bind-mounts
 # /opt/fapd/logs/ into fapd-web for the /mcp access log that fail2ban
 # reads; without the exclude, --delete erases the host log directory on
-# every deploy — the F-004 class again.
+# every deploy — the F-004 class again. evidence/ joined 2026-09-26:
+# the operator preserves incident material under /opt/fapd/evidence/
+# on the box, and nothing in deploy/vps/ mirrors it. The first deploy
+# after it appeared tried to delete it and was refused only because the
+# directory is root-owned 0700 — a permission accident is not a guard.
 rsync -az --delete --exclude '.DS_Store' \
   --exclude '.env' --exclude 'secrets/' --exclude 'repo/' \
-  --exclude 'deploy.env' --exclude 'logs/' \
+  --exclude 'deploy.env' --exclude 'logs/' --exclude 'evidence/' \
   -e "ssh ${SSH_OPTS[*]}" \
   deploy/vps/ "${VPS}:${REMOTE_DIR}/"
 # The backend image bakes the tested working tree INCLUDING .git — the
