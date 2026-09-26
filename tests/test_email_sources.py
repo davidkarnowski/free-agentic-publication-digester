@@ -120,6 +120,23 @@ class FakeMailbox:
         self.bodies_fetched.append(uid)
         return self.messages[uid]
 
+    # filing seam: off unless a test sets file_to
+    file_to = ""
+
+    def file_messages(self, uids, dest):
+        self.filed.setdefault(dest, []).extend(uids)
+        return len(uids)
+
+    @property
+    def filed(self):
+        return self.__dict__.setdefault("_filed", {})
+
+    def all_uids(self):
+        return sorted(self.messages)
+
+    def headers_many(self, uids):
+        return {u: self.headers(u) for u in uids}
+
 
 def no_dkim(raw):
     return {"result": "pass", "domain": "public.govdelivery.com",
@@ -372,3 +389,149 @@ def test_generic_link_titles_never_become_items():
 def test_digest_still_splits_when_date_markers_present():
     msg = email.message_from_bytes(MULTI, policy=email.policy.default)
     assert len(email_sources.parse_bulletin(msg)) == 2
+
+
+# ------------------------------------------------------------------ filing --
+
+ADMIN = MULTI.replace(b"Subject: U.S. Attorneys News News Update",
+                      b"Subject: Welcome New User")
+
+
+def test_filing_off_by_default_touches_nothing(conn):
+    box = FakeMailbox([PERSONAL, MULTI, ADMIN])
+    results = email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=no_dkim)
+    assert box.filed == {}
+    assert results[0]["filed"] == 0
+
+
+def test_filing_moves_handled_registered_mail_only(conn):
+    box = FakeMailbox([PERSONAL, MULTI, ADMIN])
+    box.file_to = "FAPD"
+    results = email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=no_dkim)
+    assert box.filed == {"FAPD/Ingested": [2], "FAPD/Admin": [3]}  # UID 1 is personal
+    assert results[0]["filed"] == 2
+
+
+def test_filing_happens_after_the_watermark_is_committed(conn):
+    box = FakeMailbox([MULTI])
+    box.file_to = "FAPD"
+    seen = []
+
+    def recording(uids, dest):
+        seen.append(conn.execute("SELECT last_uid FROM mailbox_state").fetchone()[0])
+        return len(uids)
+
+    box.file_messages = recording
+    email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=no_dkim)
+    assert seen == [1]  # evidence durable before the mailbox is touched
+
+
+def test_failed_message_stays_in_inbox(conn):
+    box = FakeMailbox([b"From: usattorneys@public.govdelivery.com\n\nnot a bulletin",
+                       MULTI])
+    box.file_to = "FAPD"
+
+    def exploding(raw):
+        if b"not a bulletin" in raw:
+            raise ValueError("boom")
+        return no_dkim(raw)
+
+    email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=exploding)
+    assert box.filed == {"FAPD/Ingested": [2]}
+
+
+def test_filing_failure_never_fails_the_poll(conn):
+    box = FakeMailbox([MULTI])
+    box.file_to = "FAPD"
+
+    def broken(uids, dest):
+        raise OSError("connection reset")
+
+    box.file_messages = broken
+    results = email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=no_dkim)
+    assert results[0]["items"] == 2 and results[0]["filed"] == 0
+    assert conn.execute("SELECT last_uid FROM mailbox_state").fetchone()[0] == 1
+
+
+def test_sweep_plan_respects_ceiling_and_allowlist():
+    box = FakeMailbox([PERSONAL, MULTI, ADMIN, SINGLE, MULTI])
+    plan, ignored = email_sources.sweep_plan(box, [entry()], through_uid=4)
+    assert plan == {"Ingested": [(2, "usattorneys-email")],
+                    "Admin": [(3, "usattorneys-email")]}
+    assert ignored == 2  # PERSONAL and the unregistered USPS OIG sender
+    assert box.bodies_fetched == []  # headers only
+
+
+class FakeImap:
+    """Records imaplib calls for MailboxClient.file_messages."""
+
+    def __init__(self, move=True, folders=()):
+        self.calls = []
+        self.move = move
+        self.folders = set(folders)
+
+    def capability(self):
+        return "OK", [b"IMAP4rev1 UIDPLUS" + (b" MOVE" if self.move else b"")]
+
+    def list(self, ref, name):
+        self.calls.append(("LIST", name))
+        return "OK", [b"(x)"] if name.strip('"') in self.folders else [None]
+
+    def create(self, name):
+        self.calls.append(("CREATE", name))
+        self.folders.add(name.strip('"'))
+        return "OK", [b"done"]
+
+    def select(self, folder, readonly=False):
+        self.calls.append(("SELECT", folder, readonly))
+        return "OK", [b"1"]
+
+    def uid(self, command, *args):
+        self.calls.append((command,) + args)
+        return "OK", [b"done"]
+
+
+def _client(imap):
+    client = email_sources.MailboxClient(host="h", user="u", password="p",
+                                         file_to="FAPD")
+    client._box = imap
+    return client
+
+
+def test_file_messages_marks_read_then_moves_and_returns_to_readonly():
+    imap = FakeImap()
+    assert _client(imap).file_messages([7, 5, 7], "FAPD/Ingested") == 2
+    assert ("CREATE", '"FAPD/Ingested"') in imap.calls
+    writes = [c for c in imap.calls if c[0] in ("SELECT", "STORE", "MOVE")]
+    assert writes == [("SELECT", "INBOX", False),
+                      ("STORE", "5,7", "+FLAGS.SILENT", r"(\Seen)"),
+                      ("MOVE", "5,7", '"FAPD/Ingested"'),
+                      ("SELECT", "INBOX", True)]
+
+
+def test_file_messages_without_move_files_nothing():
+    imap = FakeImap(move=False)
+    assert _client(imap).file_messages([5], "FAPD/Ingested") == 0
+    assert imap.calls == []  # never reselected read-write, never emulated
+
+
+def test_file_messages_chunks_large_batches():
+    imap = FakeImap(folders={"FAPD/Ingested"})
+    assert _client(imap).file_messages(range(1, 451), "FAPD/Ingested") == 450
+    assert sum(1 for c in imap.calls if c[0] == "MOVE") == 3
+    assert not any(c[0] == "CREATE" for c in imap.calls)
+
+
+def test_mailbox_write_surface_is_mark_read_and_move_only():
+    """Audit: the client may SEARCH/FETCH/STORE/MOVE by UID and nothing else;
+    STORE only ever adds \\Seen; no delete, expunge or copy exists."""
+    import inspect
+    import re
+    src = inspect.getsource(email_sources)
+    assert set(re.findall(r'_box\.uid\(\s*"(\w+)"', src)) <= {
+        "SEARCH", "FETCH", "STORE", "MOVE"}
+    assert re.findall(r'"[+-]?FLAGS[\w.]*"', src) == ['"+FLAGS.SILENT"']
+    assert re.findall(r'r"\(\\\w+\)"', src) == [r'r"(\Seen)"']
+    for banned in (".expunge(", ".delete(", ".store(", '"COPY"', '"EXPUNGE"',
+                   "-FLAGS"):
+        assert banned not in src

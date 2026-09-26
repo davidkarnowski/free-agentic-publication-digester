@@ -525,6 +525,13 @@ TTS_VOICE = os.environ.get("TTS_VOICE", "nova")
 IMAP_HOST = os.environ.get("IMAP_HOST", "")
 IMAP_USER = os.environ.get("IMAP_USER", "")
 IMAP_PASSWORD = os.environ.get("IMAP_PASSWORD", "")
+# Post-ingest filing (docs/email-sources.md §3a). Unset: the mailbox is never
+# written — today's read-only behavior. Set (e.g. "FAPD"): registered-sender
+# mail the poll has handled is marked read and moved out of INBOX into
+# "<prefix>/Ingested" or "<prefix>/Admin". Set it ONLY where the production
+# database lives: the poll reads INBOX alone, so a second host filing mail
+# would hide it from the worker that owns the watermark.
+IMAP_FILE_TO = os.environ.get("IMAP_FILE_TO", "").strip()
 # The +URL is the crawler-transparency page (docs/site/bot.md) — the
 # standard convention so a sec-ops reader of a server log lands on the
 # explanation in one step.

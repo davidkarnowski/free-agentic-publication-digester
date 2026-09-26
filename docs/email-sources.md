@@ -82,6 +82,44 @@ not the last.
   convenience buffer, not the archive — once a message is captured and
   recorded, mailbox retention is an operational choice.
 
+## 3a. Filing handled mail out of the inbox (opt-in, added 2026-09-26)
+
+Bulletins accumulate in the polled folder. With `IMAP_FILE_TO` set (e.g. `FAPD`), each poll ends by
+**marking read and moving** the registered-sender messages it handled
+out of INBOX: bulletins to `<prefix>/Ingested`, subscription
+administrivia to `<prefix>/Admin` (on Gmail these are nested labels; the
+message stays in All Mail). Unset, the mailbox is never written.
+
+The rules, pinned by tests in `tests/test_email_sources.py`:
+
+- **Evidence first.** Filing runs after the captures and the UID
+  watermark are committed; the raw message is the record and the
+  mailbox is a buffer (§3), so moving it loses nothing.
+- **Only what the allowlist already matched.** The decision is the same
+  header check that gates download — From address against the registry,
+  Subject against the administrivia pattern. Unregistered mail is never
+  touched; neither is a registered message whose processing failed (it
+  stays in INBOX, visible).
+- **One write verb.** `UID STORE +FLAGS.SILENT (\Seen)` then
+  `UID MOVE` (RFC 6851). No delete, no expunge, no COPY-and-delete
+  emulation: a server without MOVE gets nothing filed, because on Gmail
+  the emulation can land mail in Trash.
+- **Housekeeping never fails ingestion.** A filing error is logged and
+  the message stays in INBOX; the poll's results carry a per-source
+  `filed` count.
+- **One filing host.** The poll reads INBOX only, so mail moved before
+  a poll reaches it is hidden from ingestion. Set `IMAP_FILE_TO` only
+  where the production database lives.
+
+State and local government bulletins the mailbox receives are not
+ingested; a mailbox filter outside the collector files them to
+`<prefix>/State_Sources`.
+
+`scripts/file_mailbox.py` sweeps the backlog that predates filing with
+the same header-only rules (dry run by default, `--apply` to write),
+bounded by the database's watermark — or an explicit `--through-uid`
+that must never exceed the production watermark.
+
 ## 4. Subscribing (a one-time manual pass, by design)
 
 Subscription is a **manual, per-publisher web flow** — and that is the

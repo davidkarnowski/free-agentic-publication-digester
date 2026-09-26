@@ -155,7 +155,8 @@ this cert too).
 `/opt/fapd/.env` is read by compose (`env_file`) and is the only place
 provider choices live on the box. Keys, all documented in the repo's
 `.env.example`: `GOVINFO_API_KEY`, `CONTACT_EMAIL`, `IMAP_*` (mailbox
-ingest), `SITE_BASE_URL`, `FAPD_EVIDENCE_PUSH=1`, and the inference
+ingest; `IMAP_FILE_TO` turns on post-ingest filing — set it here and
+nowhere else, docs/email-sources.md §3a), `SITE_BASE_URL`, `FAPD_EVIDENCE_PUSH=1`, and the inference
 block — `LLM_BACKEND` (`cli` / `api` / `gemini` / `none`), with
 `CLAUDE_CODE_OAUTH_TOKEN` for `cli`, `ANTHROPIC_API_KEY` for `api`,
 `GOOGLE_GEMINI_API_KEY` for `gemini`; `OPENAI_API_KEY` is deliberately

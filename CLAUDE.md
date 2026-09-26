@@ -685,3 +685,14 @@ live in `.claude/agents/fapd-*.md` (tracked).
   address; corrected in the build), and found three existing nginx
   fail2ban jails with no packet-filter chain (repair scheduled, AD-16).
   Plan: `docs/ops/plan-2026-09-13-agent-discovery.md` and its phase files.
+
+- **2026-09-26** — **The project mailbox may file what it has ingested**
+  (operator). The read-only mailbox posture gains one opt-in write: with `IMAP_FILE_TO` set, each poll marks read and MOVEs the
+  registered-sender messages it handled into `<prefix>/Ingested` or
+  `<prefix>/Admin`, after the captures and watermark commit. Unregistered
+  mail and failed messages are never touched; no delete, expunge or
+  COPY-emulation exists (pinned by an audit test). Set only on the host
+  that owns the production database — the poll reads INBOX alone, so a
+  second filer would hide mail from ingestion. The backlog is swept once
+  by `scripts/file_mailbox.py`, header-only and deterministic, bounded by
+  the production watermark (docs/email-sources.md §3a).

@@ -13,6 +13,13 @@ Rules enforced in code (GUIDE §3; docs/email-sources.md):
   registered `type: email` source has its body left on the server, never
   downloaded and never parsed. Personal mail in a shared mailbox is
   untouched by construction.
+- **The only mailbox write is post-ingest filing, and it is opt-in**
+  (`config.IMAP_FILE_TO`; docs/email-sources.md §3a). Unset, the mailbox is
+  never modified. Set, a registered-sender message the poll has already
+  handled — after the watermark is committed — is marked read and moved out
+  of INBOX into ``<prefix>/Ingested`` or ``<prefix>/Admin``. Never a delete,
+  never an expunge, never unregistered mail, never a message whose
+  processing failed (it stays in INBOX where the operator will see it).
 - **The raw RFC-5322 bytes are the capture** — content-addressed and
   hashed exactly like a web capture. Email is immutable once sent, so
   `change_kind` is expected to be `new`; the shared machinery is reused
@@ -332,21 +339,38 @@ def _fetch_dkim_key(selector, domain):
 # Mailbox access
 # --------------------------------------------------------------------------
 
+# Subfolders (Gmail: nested labels) under the IMAP_FILE_TO prefix.
+FILED_INGESTED = "Ingested"
+FILED_ADMIN = "Admin"
+# UIDs per STORE/MOVE command — keeps command lines well under server limits
+# when the one-time sweep files thousands of messages.
+_FILE_CHUNK = 200
+
+
+def _quote_mailbox(name):
+    return '"' + name.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
 class MailboxClient:
-    """Read-only IMAP access to the project mailbox.
+    """IMAP access to the project mailbox — read-only unless filing is on.
 
     The folder is selected `readonly` and every fetch uses BODY.PEEK, so
-    nothing on the server is modified or marked seen — our own processed
-    watermark lives in the database, not in the mailbox's flags."""
+    reading never modifies the server or marks anything seen — our own
+    processed watermark lives in the database, not in the mailbox's flags.
+    `file_messages` is the one write path, used only when `file_to` is set
+    (default `config.IMAP_FILE_TO`); it reselects read-write for exactly
+    one mark-read-and-MOVE and drops straight back to read-only."""
 
     def __init__(self, host=None, user=None, password=None, folder="INBOX",
-                 sleep=time.sleep):
+                 sleep=time.sleep, file_to=None):
         self.host = host or config.IMAP_HOST
         self.user = user or config.IMAP_USER
         self.password = password or config.IMAP_PASSWORD
         self.folder = folder
+        self.file_to = config.IMAP_FILE_TO if file_to is None else file_to
         self._sleep = sleep
         self._box = None
+        self._known_folders = set()
 
     def __enter__(self):
         self.connect()
@@ -396,6 +420,74 @@ class MailboxClient:
         if not data or not data[0]:
             return None
         return data[0][1]
+
+    def all_uids(self):
+        _status, data = self._box.uid("SEARCH", None, "ALL")
+        return [int(u) for u in (data[0] or b"").split()]
+
+    def headers_many(self, uids, chunk=500):
+        """{uid: From/Subject headers} for many messages in few round trips —
+        the one-time sweep's read. Envelope only; no body leaves the server."""
+        out, uids = {}, sorted(int(u) for u in uids)
+        for at in range(0, len(uids), chunk):
+            uid_set = ",".join(str(u) for u in uids[at:at + chunk])
+            _status, data = self._box.uid(
+                "FETCH", uid_set, "(BODY.PEEK[HEADER.FIELDS (FROM SUBJECT)])")
+            for part in data or []:
+                if not isinstance(part, tuple):
+                    continue
+                m = re.search(rb"UID (\d+)", part[0])
+                if m:
+                    out[int(m.group(1))] = email.message_from_bytes(
+                        part[1], policy=email.policy.default)
+        return out
+
+    def supports_move(self):
+        _status, data = self._box.capability()
+        return b"MOVE" in (data[0] or b"").upper().split()
+
+    def _ensure_folder(self, name):
+        if name in self._known_folders:
+            return
+        _status, data = self._box.list('""', _quote_mailbox(name))
+        if not data or data[0] is None:
+            status, data = self._box.create(_quote_mailbox(name))
+            if status != "OK":
+                raise imaplib.IMAP4.error(f"CREATE {name}: {data!r}")
+            logger.info("mailbox: created folder %s", name)
+        self._known_folders.add(name)
+
+    def file_messages(self, uids, dest):
+        """Mark read and MOVE (RFC 6851) out of the polled folder. Returns
+        the number filed.
+
+        MOVE only: without it the answer is to file nothing, never the
+        COPY + \\Deleted + EXPUNGE emulation — on Gmail that path can send a
+        message to Trash depending on account settings."""
+        uids = sorted({int(u) for u in uids})
+        if not uids:
+            return 0
+        if not self.supports_move():
+            logger.warning("mailbox: server lacks MOVE — %d message(s) left in %s",
+                           len(uids), self.folder)
+            return 0
+        self._ensure_folder(dest)
+        self._box.select(self.folder, readonly=False)
+        filed = 0
+        try:
+            for at in range(0, len(uids), _FILE_CHUNK):
+                uid_set = ",".join(str(u) for u in uids[at:at + _FILE_CHUNK])
+                status, data = self._box.uid("STORE", uid_set, "+FLAGS.SILENT",
+                                             r"(\Seen)")
+                if status != "OK":
+                    raise imaplib.IMAP4.error(f"STORE: {data!r}")
+                status, data = self._box.uid("MOVE", uid_set, _quote_mailbox(dest))
+                if status != "OK":
+                    raise imaplib.IMAP4.error(f"MOVE: {data!r}")
+                filed += len(uids[at:at + _FILE_CHUNK])
+        finally:
+            self._box.select(self.folder, readonly=True)
+        return filed
 
 
 def _state(conn, mailbox):
@@ -582,6 +674,7 @@ def poll_mailbox(client, conn, entries, *, limit=None, dkim_verifier=verify_dkim
                 len(uids), last_uid, len(allow))
 
     per_source, ignored, highest = {}, 0, last_uid
+    to_file = {FILED_INGESTED: [], FILED_ADMIN: []}
     for uid in uids:
         head = client.headers(uid)
         if head is None:
@@ -609,16 +702,75 @@ def poll_mailbox(client, conn, entries, *, limit=None, dkim_verifier=verify_dkim
         stats["duplicates"] += result["duplicates"]
         stats["administrative"] += result["administrative"]
         highest = max(highest, uid)
+        sub = FILED_ADMIN if result["administrative"] else FILED_INGESTED
+        to_file[sub].append((uid, entry["id"]))
         logger.info("%s: UID %s -> %d item(s)", entry["id"], uid, result["items"])
 
     _save_state(conn, mailbox, highest, validity)
     provenance.export_manifest(conn)
+    # Filing runs only after the watermark and captures are committed: the
+    # evidence is durable before the mailbox is touched.
+    _file_handled(client, to_file, per_source)
     results = sorted(per_source.values(), key=lambda s: s["id"])
     logger.info("mailbox: %d ignored (sender not registered; body never fetched)",
                 ignored)
     return results
 
 
+def filing_folder(head, allow):
+    """Where a message is filed, judged on headers alone: the registry
+    allowlist on the From address, the administrivia pattern on Subject.
+    None means not ours — it is never touched. Deterministic; no body, no
+    model."""
+    entry = allow.get(_from_address(head))
+    if entry is None:
+        return None, None
+    return (FILED_ADMIN if is_administrative(head) else FILED_INGESTED), entry
+
+
+def sweep_plan(client, entries, through_uid):
+    """The one-time backlog sweep (scripts/file_mailbox.py): which messages
+    at or below `through_uid` would be filed where. Returns
+    ({subfolder: [(uid, source_id)]}, ignored_count).
+
+    The ceiling is the safety rule: the poll reads INBOX only, so filing a
+    message it has not reached yet would hide it from ingestion."""
+    allow = _sender_map(entries)
+    uids = [u for u in client.all_uids() if u <= int(through_uid)]
+    plan, ignored = {FILED_INGESTED: [], FILED_ADMIN: []}, 0
+    for uid, head in sorted(client.headers_many(uids).items()):
+        sub, entry = filing_folder(head, allow)
+        if sub is None:
+            ignored += 1
+            continue
+        plan[sub].append((uid, entry["id"]))
+    return plan, ignored
+
+
+def _file_handled(client, to_file, per_source):
+    """Mark read and move the messages this poll handled. A filing failure
+    is logged and never fails the poll — the watermark has already passed
+    those messages, so they simply stay in INBOX (scripts/file_mailbox.py
+    sweeps them later)."""
+    prefix = getattr(client, "file_to", "")
+    if not prefix:
+        return
+    for sub, pairs in to_file.items():
+        if not pairs:
+            continue
+        dest = f"{prefix}/{sub}"
+        try:
+            filed = client.file_messages([uid for uid, _ in pairs], dest)
+        except Exception as exc:  # noqa: BLE001 — filing is housekeeping
+            logger.warning("mailbox: filing %d message(s) to %s failed: %r",
+                           len(pairs), dest, exc)
+            continue
+        if filed == len(pairs):
+            for _uid, source_id in pairs:
+                per_source[source_id]["filed"] += 1
+        logger.info("mailbox: filed %d message(s) to %s", filed, dest)
+
+
 def _blank(source_id):
     return {"id": source_id, "messages": 0, "items": 0, "duplicates": 0,
-            "administrative": 0, "errors": 0}
+            "administrative": 0, "errors": 0, "filed": 0}
