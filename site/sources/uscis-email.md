@@ -6,7 +6,7 @@
 
 # USCIS Updates (email)
 
-active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Homeland Security (USCIS)
+active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Homeland Security (USCIS)
 
 Official site: https://www.uscis.gov/newsroom · All sources: [sources.md](../sources.md)
 
@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 1 item(s) in the last 14 days; most recent 2026-09-18, delivered by email.
+**quiet** — Most recent item 2026-09-18, 8 days ago (quiet past 7 days).
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-25T03:53:38Z (UTC).
+This label has held since 2026-09-26T04:03:22Z (UTC) and was last re-checked 2026-09-26T04:03:22Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -79,7 +79,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-1 item(s) in the last 14 days; most recent 2026-09-18, delivered by email.
+Most recent item 2026-09-18, 8 days ago (quiet past 7 days).
 
 ### All time
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-08-27 | 0 |
 | 2026-08-28 | 0 |
 | 2026-08-29 | 0 |
 | 2026-08-30 | 0 |
@@ -121,11 +120,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-23 | 0 |
 | 2026-09-24 | 0 |
 | 2026-09-25 | 0 |
+| 2026-09-26 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-USCIS policy updates arrive via email from messages.dhs.gov with full text, carrying policy-manual updates, form revisions, filing-fee changes, and processing announcements. The source delivered 5 items over 14 days through 2026-09-04, averaging 0.36 per day—a fivefold increase from the 0.07 items per day observed through 2026-08-04. Despite the proportional growth, absolute volume remains low. Text ranged from 170 to 2,789 characters with a median of 356. Delivery has been reliable with no consecutive failures. Additional DHS departmental and ICE subscriptions remain awaiting email confirmation.
+The USCIS Updates source delivers policy updates via email bulletins to the project mailbox, with content arriving from uscis@messages.dhs.gov. These bulletins carry the full item text and are DKIM-verified and archived. Over the past 14 days, we observed 1 new item, averaging 0.07 items per day. This represents a decrease from the 0.36 items per day reported in the previous assessment. The most recent item was delivered on 2026-09-18, resulting in 8 days since the last delivery and a current "quiet" health status. The single item observed in this period measured 170 characters, while the previous assessment noted items ranging from 170 to 2,789 characters. As an email source, there are no polling requests to report, and the collector recorded no consecutive errors.
 
-_Model-written assessment of our own ingestion, generated 2026-09-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-09-26 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

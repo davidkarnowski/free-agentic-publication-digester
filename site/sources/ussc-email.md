@@ -71,37 +71,4 @@ Bulletins from this source are delivered to the project mailbox, so there are no
 
 ### Last 30 days, day by day
 
-Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publication day the digests use; the stored request stamps remain UTC.
-
-| Day | Items ingested |
-|---|---|
-| 2026-08-27 | 1 |
-| 2026-08-28 | 0 |
-| 2026-08-29 | 0 |
-| 2026-08-30 | 0 |
-| 2026-08-31 | 0 |
-| 2026-09-01 | 0 |
-| 2026-09-02 | 0 |
-| 2026-09-03 | 0 |
-| 2026-09-04 | 0 |
-| 2026-09-05 | 0 |
-| 2026-09-06 | 0 |
-| 2026-09-07 | 0 |
-| 2026-09-08 | 0 |
-| 2026-09-09 | 0 |
-| 2026-09-10 | 0 |
-| 2026-09-11 | 0 |
-| 2026-09-12 | 0 |
-| 2026-09-13 | 0 |
-| 2026-09-14 | 0 |
-| 2026-09-15 | 0 |
-| 2026-09-16 | 0 |
-| 2026-09-17 | 0 |
-| 2026-09-18 | 0 |
-| 2026-09-19 | 0 |
-| 2026-09-20 | 0 |
-| 2026-09-21 | 0 |
-| 2026-09-22 | 0 |
-| 2026-09-23 | 0 |
-| 2026-09-24 | 0 |
-| 2026-09-25 | 0 |
+No requests and no items were recorded in the last 30 days, so there is nothing to chart.
