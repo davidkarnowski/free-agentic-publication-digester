@@ -6651,3 +6651,28 @@ directory is a staging copy that no running container reads, so it was
 handed back to the deploy user with `chown -R`. The export was also
 seeded first with a throttled rsync, per the 2026-09-18 note, because
 the operator machine was on the constrained link again.
+
+## 2026-09-26 — Mailbox filing, the EPA sender correction, and twelve email sources
+
+The project mailbox gains one opt-in write (commit "email: file handled
+mail out of the inbox"). With `IMAP_FILE_TO` set, each poll marks read and
+moves the registered-sender messages it handled into `<prefix>/Ingested`
+or `<prefix>/Admin`, after the captures and the watermark commit. The
+backlog was swept once with `scripts/file_mailbox.py`, header-only and
+bounded by the production watermark, which was read from the VPS database.
+
+The sweep turned up a misattribution. `epa-email` was registered on the
+address that sent the subscription confirmation, but EPA's press bulletins
+arrive from `epapress@govdelivery.epa.gov`. None had ever been ingested,
+and the source sat at `planned` with "no bulletin observed". The sender is
+added. Ingestion starts with the first poll after deploy, and there is no
+backfill: the missed bulletins stay out of their days' digests (operator).
+
+Twelve subscriptions the mailbox was already receiving are registered as
+`planned` email sources: TIGTA, DOT OIG, BTS, BJS, Census, APHIS, USDA
+Rural Development, AMS, ARS, DOE CMEI, the CDFI Fund, and E-Verify.
+There is no backfill here either. Outreach, training and campaign lists
+stay unregistered, and so do the subscriptions whose confirmation expired.
+State and local bulletins are filed by a mailbox filter and not ingested.
+
+Verified: `scripts/preflight.sh` PASS. Deployed the same evening.

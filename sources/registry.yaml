@@ -1716,7 +1716,9 @@
   parent_org: Environmental Protection Agency
   description: "The Environmental Protection Agency administers federal environmental law. Its bulletins carry news releases on enforcement settlements, permit and rule announcements, grant awards, and regional actions affecting specific communities."
   type: email
-  sender: epa.admin@govdelivery.epa.gov
+  sender:
+    - epa.admin@govdelivery.epa.gov
+    - epapress@govdelivery.epa.gov
   tier: 1
   urls:
     home: https://www.epa.gov/newsreleases
@@ -1724,7 +1726,7 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender epa.admin@govdelivery.epa.gov). Sibling of epa-newsroom, whose web path robots.txt disallows — the first working input for this agency. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
+  notes: "Subscribed and confirmed 2026-07-29 (sender epa.admin@govdelivery.epa.gov). Sibling of epa-newsroom, whose web path robots.txt disallows — the first working input for this agency. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin. Correction 2026-09-26: the subscription's bulletins arrive from epapress@govdelivery.epa.gov, not the confirming address, so none had been ingested; the sender was added and ingestion starts with the first poll after deploy. Earlier bulletins are not backfilled."
 
 - id: agriculture-email
   adapter: govdelivery
@@ -2002,3 +2004,213 @@
   status: planned
   added: "2026-07-29"
   notes: "Subscribed and confirmed 2026-07-29 (sender hudoig@info.hudoig.gov). The signup page returns HTTP 403 to our identified client; recorded as observed, not evaded. Partial coverage for the department: hud-newsroom returns HTTP 403 to our identified client and the HUD-NEWS-L press listserv signup did not complete — the IG stream is oversight material, not the department's own announcements. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin. Gate-3 coverage evaluation (2026-07-31, from live delivery): 1 bulletin -> 1 item on 2026-07-30, mode email-full (avg 852 chars). DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage. Gate-3 coverage evaluation (2026-07-31, from live delivery): 4 bulletins -> 4 items on 2026-07-30, mode email-full (avg 1,602 chars). DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage. Gate-3 coverage evaluation (2026-07-31, from live delivery): 1 bulletin -> 1 item on 2026-07-31, mode email-full (avg 757 chars); the web channel is separately active but degraded. DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage. Gate-3 coverage evaluation (2026-07-31, from live delivery): 4 bulletins -> 4 items across 2026-07-30/31, mode email-full (avg 2,234 chars); SSA's web newsroom refuses our client, so this is the agency's only working path. DKIM verified with the key archived; the bulletin stream is the subscription's own measure of coverage."
+
+- id: tigta-email
+  adapter: govdelivery
+  name: Treasury Inspector General for Tax Administration (email)
+  branch: executive
+  parent_org: Department of the Treasury, Treasury Inspector General for Tax Administration
+  description: "The Treasury Inspector General for Tax Administration audits and investigates the Internal Revenue Service. Its bulletins announce audit and inspection reports on IRS programs, payments, and enforcement."
+  type: email
+  sender: tigta@service.govdelivery.com
+  tier: 3
+  urls:
+    home: https://www.tigta.gov/
+    signup: https://public.govdelivery.com/accounts/USTREASTIGTA/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender tigta@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+
+- id: dot-oig-email
+  adapter: govdelivery
+  name: DOT Inspector General (email)
+  branch: executive
+  parent_org: Department of Transportation, Office of Inspector General
+  description: "The Department of Transportation's Office of Inspector General audits and investigates the department's programs. Its bulletins announce audit reports, audits initiated, and investigative results."
+  type: email
+  sender: news@updates.oig.dot.gov
+  tier: 3
+  urls:
+    home: https://www.oig.dot.gov/
+    signup: https://public.govdelivery.com/accounts/USDOTOIG/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender news@updates.oig.dot.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+
+- id: bts-email
+  adapter: govdelivery
+  name: Bureau of Transportation Statistics (email)
+  branch: executive
+  parent_org: Department of Transportation, Bureau of Transportation Statistics
+  description: "The Bureau of Transportation Statistics is the Department of Transportation's statistical agency. Its bulletins announce data releases on freight, fuel prices, travel, and transportation economics."
+  type: email
+  sender: btsnews@info.dot.gov
+  tier: 2
+  urls:
+    home: https://www.bts.gov/
+    signup: https://public.govdelivery.com/accounts/USDOT/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender btsnews@info.dot.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+
+- id: bjs-email
+  adapter: govdelivery
+  name: Bureau of Justice Statistics (email)
+  branch: executive
+  parent_org: Department of Justice, Office of Justice Programs, Bureau of Justice Statistics
+  description: "The Bureau of Justice Statistics is the Justice Department's statistical agency. Its bulletins announce statistical reports, data releases, and funding opportunities."
+  type: email
+  sender: juststats@public.govdelivery.com
+  tier: 2
+  urls:
+    home: https://bjs.ojp.gov/
+    signup: https://public.govdelivery.com/accounts/USDOJOJP_COMMS/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender juststats@public.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+
+- id: census-email
+  adapter: govdelivery
+  name: Census Bureau (email)
+  branch: executive
+  parent_org: Department of Commerce, U.S. Census Bureau
+  description: "The Census Bureau conducts the decennial census and the government's principal demographic and economic surveys. Its bulletins announce data releases, release schedules, and survey operations."
+  type: email
+  sender: census@subscriptions.census.gov
+  tier: 2
+  urls:
+    home: https://www.census.gov/newsroom.html
+    signup: https://public.govdelivery.com/accounts/USCENSUS/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender census@subscriptions.census.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Sibling of census-newsroom; cross-channel dedup keeps the first-recorded copy."
+
+- id: aphis-email
+  adapter: govdelivery
+  name: Animal and Plant Health Inspection Service (email)
+  branch: executive
+  parent_org: Department of Agriculture, Animal and Plant Health Inspection Service
+  description: "The Animal and Plant Health Inspection Service protects U.S. agriculture from animal and plant pests and diseases. Its stakeholder bulletins carry regulatory actions, emergency notifications, and program announcements."
+  type: email
+  sender: aphis@subscribers.usda.gov
+  tier: 2
+  urls:
+    home: https://www.aphis.usda.gov/
+    signup: https://public.govdelivery.com/accounts/USDAAPHIS/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender aphis@subscribers.usda.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+
+- id: usda-rd-email
+  adapter: govdelivery
+  name: USDA Rural Development (email)
+  branch: executive
+  parent_org: Department of Agriculture, Rural Development
+  description: "USDA Rural Development finances housing, utilities, and business development in rural areas. Its bulletins carry news releases on program funding, rules, and leadership."
+  type: email
+  sender:
+    - ruraldevelopment@public.govdelivery.com
+    - oearuraldevelopment@public.govdelivery.com
+    - rd.oea.legaffairs@public.govdelivery.com
+  tier: 2
+  urls:
+    home: https://www.rd.usda.gov/
+    signup: https://public.govdelivery.com/accounts/USDARD/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender ruraldevelopment@public.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+
+- id: usda-ams-email
+  adapter: govdelivery
+  name: Agricultural Marketing Service (email)
+  branch: executive
+  parent_org: Department of Agriculture, Agricultural Marketing Service
+  description: "The Agricultural Marketing Service administers marketing programs, grading standards, and the National Organic Program. Its bulletins carry program announcements and notices."
+  type: email
+  sender: usdaams@public.govdelivery.com
+  tier: 3
+  urls:
+    home: https://www.ams.usda.gov/
+    signup: https://public.govdelivery.com/accounts/USDAAMS/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender usdaams@public.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+
+- id: usda-ars-email
+  adapter: govdelivery
+  name: Agricultural Research Service (email)
+  branch: executive
+  parent_org: Department of Agriculture, Agricultural Research Service
+  description: "The Agricultural Research Service is USDA's in-house research agency. Its news service bulletins report research findings."
+  type: email
+  sender: usda-ars-comms@subscribers.usda.gov
+  tier: 3
+  urls:
+    home: https://www.ars.usda.gov/
+    signup: https://public.govdelivery.com/accounts/USDAARS/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender usda-ars-comms@subscribers.usda.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+
+- id: doe-cmei-email
+  adapter: govdelivery
+  name: DOE Critical Minerals and Energy Innovation (email)
+  branch: executive
+  parent_org: Department of Energy, Office of Critical Minerals and Energy Innovation
+  description: "The Department of Energy's Office of Critical Minerals and Energy Innovation funds critical-minerals and energy technology programs. Its bulletins carry program launches, funding opportunities, and office updates."
+  type: email
+  sender:
+    - cmei-news@service.govdelivery.com
+    - cmei@service.govdelivery.com
+    - cmei-funding@service.govdelivery.com
+  tier: 3
+  urls:
+    home: https://www.energy.gov/
+    signup: https://public.govdelivery.com/accounts/USEERE/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender cmei-news@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Sibling of energy-newsroom."
+
+- id: cdfi-fund-email
+  adapter: govdelivery
+  name: CDFI Fund (email)
+  branch: executive
+  parent_org: Department of the Treasury, Community Development Financial Institutions Fund
+  description: "The Community Development Financial Institutions Fund certifies and funds community lenders and administers the New Markets Tax Credit. Its bulletins carry policy updates, award announcements, and program data releases."
+  type: email
+  sender: cdfifund@service.govdelivery.com
+  tier: 3
+  urls:
+    home: https://www.cdfifund.gov/
+    signup: https://public.govdelivery.com/accounts/USTREASCDFI/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender cdfifund@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+
+- id: e-verify-email
+  adapter: govdelivery
+  name: E-Verify (email)
+  branch: executive
+  parent_org: Department of Homeland Security, U.S. Citizenship and Immigration Services
+  description: "E-Verify is the USCIS program employers use to confirm employment eligibility. Its bulletins carry program updates, including changes to work-authorization documents such as Temporary Protected Status terminations."
+  type: email
+  sender: e-verify.uscis@messages.dhs.gov
+  tier: 3
+  urls:
+    home: https://www.e-verify.gov/
+    signup: https://public.govdelivery.com/accounts/USDHSCISEVERIFY/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender e-verify.uscis@messages.dhs.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
