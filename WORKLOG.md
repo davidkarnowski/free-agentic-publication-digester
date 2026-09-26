@@ -6580,3 +6580,51 @@ effect. Still open: the Internet Archive's answer before any resume
 (and, before resuming, removing the five-step retry against the save
 endpoint), OB-28, the registry re-publish as 2.0.0, Wave C, and the
 blog verdict.
+
+## 2026-09-26 — Health check; index teasers stop at a bill number no longer
+
+**The overnight digest.** The 2026-09-25 digest finalized at 04:16–04:30
+UTC, and the evidence commit `eb0288b8` reached `origin/main` at 04:30
+(stranded commits 0, push error NULL, attempts 0). Every model layer ran.
+All of them ran on Gemini (`gemini-2.5-flash`), not the CLI. The CLI
+backend has refused every call since 2026-09-24 15:52 UTC with "Your
+organization has disabled Claude subscription access for Claude Code".
+This is the 2026-08-14 refusal again. Each finalizer call spent the
+three zero-billed attempts on the CLI, tripped the breaker, and made the
+GUIDE §6 r7 one-hop failover to Gemini. The failover did its job on
+09-25 and 09-26 (18 Gemini calls in the 09-26 finalizer, no errors),
+and `day_inference.backend` names Gemini alone for both days. The 09-24
+map layer is recorded `failed`. The continuous analyze worker has no
+fallback, by design, so it sits paused on `provider` during the day, and
+the day's map and plain layers run only in the finalizer's hour. Nothing
+was changed. Restoring the CLI, or making Gemini the primary, is the
+operator's call; the free tier's ~20-request quota is the constraint
+that starved August.
+
+**The truncated teaser.** The index card for 2026-09-25 read "The Senate
+resumed consideration of S." `publish._teaser` took everything up to the
+first `.` or `;` followed by whitespace. That rule ended the "sentence"
+at every bill designator. A sweep of all 61 committed digests found six
+cut at a designator ("S." on 09-18 and 09-25, "H.R." on 07-28, 08-12
+and 09-15, "H.J." on 09-16), one at "President Donald J." (08-17), and
+five ending on a dangling semicolon clause (08-03, 08-13, 08-29, 09-17,
+09-20). All of them came from the site's first build (2026-07-26); the
+semicolon split was pinned by a test.
+
+The fix is `_first_sentence`. A period ends the teaser unless it closes
+an abbreviation: a single letter, a dotted initialism (U.S., H.R.,
+H.J.), or a listed form (Con., Res., No., v., Mr., the months and so
+on). A period followed by a lowercase word never ends it, and a
+semicolon never does. The splitter errs long on purpose. "…in the U.S.
+The Senate…" yields two sentences, which read whole; the old error
+published half a clause. `_post_teaser` (the blog index) shares it. With
+the fix, all twelve affected cards read correctly and no other card
+changed. The longest teaser is now 515 characters (09-18), because the
+model wrote that opening sentence long. A cap would bring the truncation
+back, so length stays a compose-prompt matter (GUIDE §3a) if it is
+wanted at all. Frozen digests are untouched: the teaser is derived at
+site build, so the next build corrects every card, and the Atom feed,
+the index Markdown twin and the MCP `list_digests` items with it.
+
+Verified: `scripts/preflight.sh` PASS. Branch `bug/teaser-sentence-split`;
+not merged, not deployed.

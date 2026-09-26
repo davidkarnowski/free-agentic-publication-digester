@@ -210,7 +210,48 @@ def test_index_teasers_newest_first(digests, tmp_path):
     assert index.index("2026-07-02") < index.index("2026-07-01")  # newest first
     assert "Quiet day." in index  # first sentence only
     assert "Nothing else happened" not in index
-    assert "The House passed two measures by recorded vote;" in index
+    # a semicolon joins clauses, it does not end the teaser (2026-09-26)
+    assert ("The House passed two measures by recorded vote; the Senate "
+            "confirmed one nomination.</p>") in index
+    assert "The Federal Register carried 40 documents." not in index
+
+
+# Real Day in Review openings the old `(?<=[.;])\s` split cut short
+# (2026-09-26): each case is the teaser it should have produced, and the
+# text that followed it in the paragraph.
+_WHOLE_FIRST_SENTENCES = [
+    (('The Senate resumed consideration of S. 4668, the "PROTECT COLLEGE SPORTS'
+      ' ACT OF 2026," and H. Con. Res. 89 regarding U.S. Armed Forces.'),
+     "The Senate passed S. 3257."),
+    ("The House passed two energy measures by recorded vote: H.R. 3109, 230-176.",
+     "The Senate adjourned."),
+    ("The House recorded two roll call votes: 216-211 on H.J. Res. 210.",
+     "Nothing else."),
+    ("Proclamation 11054, issued by President Donald J. Trump, designates August.",
+     "More."),
+    ("In *United States v. Koehler Oberkirch GmbH et al.* the court ruled.",
+     "Then more."),
+    ("The digest carries four agency press releases for the day; no rules appear.",
+     "The judicial record follows."),
+    ("Did the Senate vote?", "It did not."),
+    ("A paragraph with no terminal punctuation", ""),
+]
+
+
+@pytest.mark.parametrize("expected, rest", _WHOLE_FIRST_SENTENCES)
+def test_teaser_is_a_whole_first_sentence(expected, rest):
+    para = f"{expected} {rest}".strip()
+    md = f"# Daily Digest — 2026-09-25\n\n## Day in Review\n\n{para}\n"
+    assert publish._teaser(md) == expected
+
+
+def test_teaser_errs_long_at_an_abbreviation_that_ends_a_sentence():
+    # "U.S." genuinely ends the first sentence here; the teaser runs on
+    # rather than risk the "consideration of S." failure.
+    md = ("## Day in Review\n\nTroops returned to the U.S. The Senate "
+          "adjourned. Nothing else.\n")
+    assert publish._teaser(md) == ("Troops returned to the U.S. The Senate "
+                                   "adjourned.")
 
 
 def test_rebuild_is_idempotent(digests, tmp_path):

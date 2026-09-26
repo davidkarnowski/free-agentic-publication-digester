@@ -1187,6 +1187,57 @@ def _digest_files(digest_dir):
     )
 
 
+# A candidate sentence end: terminal punctuation, any closing quote or
+# bracket, then whitespace. Whether it IS an end is `_first_sentence`'s
+# call — a bare `.` followed by a space was the whole test until
+# 2026-09-26, and it cut four index teasers at a bill designator ("The
+# Senate resumed consideration of S.", 2026-09-18 and -25; "H.R." on
+# 08-12, "H.J." on 09-16).
+_SENTENCE_END_RE = re.compile(r"[.!?][\"'”’)\]*_]*(?=\s)")
+# Abbreviations the Day in Review carries mid-sentence: bill and
+# resolution designators, case and court forms, titles, months. Single
+# letters ("S.", "H.") and dotted initialisms ("U.S.", "H.R.", "e.g.")
+# are recognised by shape in `_is_abbreviation` and need no entry here.
+_TEASER_ABBREVIATIONS = frozenset({
+    "con.", "res.", "amdt.", "doc.", "rept.", "pub.", "stat.", "sec.",
+    "no.", "nos.", "v.", "vs.", "al.", "cir.", "ct.", "app.", "supp.",
+    "fed.", "reg.", "dept.", "inc.", "corp.", "co.", "ltd.", "jr.", "sr.",
+    "st.", "mr.", "mrs.", "ms.", "dr.", "sen.", "sens.", "rep.", "reps.",
+    "gov.", "gen.", "lt.", "col.", "capt.", "sgt.", "adm.", "jan.", "feb.",
+    "apr.", "aug.", "sept.", "sep.", "oct.", "nov.", "dec.",
+})
+_DOTTED_INITIALISM_RE = re.compile(r"^(?:[A-Za-z]{1,3}\.){2,}$")
+
+
+def _is_abbreviation(word):
+    """True when `word` (ending in its period) is an abbreviation rather
+    than the last word of a sentence."""
+    word = word.lstrip("\"'“‘([*_")
+    return (bool(re.fullmatch(r"[A-Za-z]\.", word))
+            or bool(_DOTTED_INITIALISM_RE.match(word))
+            or word.lower() in _TEASER_ABBREVIATIONS)
+
+
+def _first_sentence(para):
+    """The first sentence of `para`, or all of it when no sentence end is
+    found. Errs long, never short: an abbreviation that genuinely ends a
+    sentence ("…in the U.S. The Senate…") yields a two-sentence teaser,
+    which reads whole; the opposite error published "consideration of S."
+    A semicolon never ends the teaser — it did until 2026-09-26, and five
+    index cards ended on a dangling clause."""
+    for match in _SENTENCE_END_RE.finditer(para):
+        head = para[:match.end()]
+        if match.group(0)[0] == ".":
+            word = para[:match.start() + 1].rsplit(None, 1)[-1]
+            if _is_abbreviation(word):
+                continue
+        following = para[match.end():].lstrip()[:1]
+        if following and following.islower():
+            continue
+        return head
+    return para
+
+
 def _teaser(md_text):
     """First sentence of the Day in Review, for index cards."""
     match = _TEASER_RE.search(md_text)
@@ -1194,8 +1245,7 @@ def _teaser(md_text):
         return None
     rest = md_text[match.end():].strip()
     para = rest.split("\n\n", 1)[0].replace("\n", " ").strip()
-    sentence = re.split(r"(?<=[.;])\s", para, maxsplit=1)[0]
-    return sentence or None
+    return _first_sentence(para) or None
 
 
 _PLAIN_LI_RE = re.compile(r"<li><em>In plain terms:</em>\s*(.*?)</li>", re.DOTALL)
@@ -3457,7 +3507,7 @@ def _post_teaser(md_text):
         para = " ".join(block.split())
         if not para or para[0] in "#*_>-|":
             continue
-        return re.split(r"(?<=[.;])\s", para, maxsplit=1)[0] or None
+        return _first_sentence(para) or None
     return None
 
 
