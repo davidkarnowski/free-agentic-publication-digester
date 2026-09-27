@@ -1726,7 +1726,7 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender epa.admin@govdelivery.epa.gov). Sibling of epa-newsroom, whose web path robots.txt disallows — the first working input for this agency. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin. Correction 2026-09-26: the subscription's bulletins arrive from epapress@govdelivery.epa.gov, not the confirming address, so none had been ingested; the sender was added and ingestion starts with the first poll after deploy. Earlier bulletins are not backfilled."
+  notes: "Subscribed and confirmed 2026-07-29 (sender epa.admin@govdelivery.epa.gov). Sibling of epa-newsroom, whose web path robots.txt disallows — the first working input for this agency. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin. Correction 2026-09-26: the subscription's bulletins arrive from epapress@govdelivery.epa.gov, not the confirming address, so none had been ingested; the sender was added and ingestion starts with the first poll after deploy. Earlier bulletins are not backfilled. EPA's Federal Register documents arrive separately through the FR collection; a press release about a rule and the rule itself are distinct documents and are both listed."
 
 - id: agriculture-email
   adapter: govdelivery
@@ -2020,7 +2020,7 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender tigta@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender tigta@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: oversight-gov, treasury-email, treasury-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
 
 - id: dot-oig-email
   adapter: govdelivery
@@ -2037,7 +2037,7 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender news@updates.oig.dot.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender news@updates.oig.dot.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: oversight-gov, transportation-email, transportation-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
 
 - id: bts-email
   adapter: govdelivery
@@ -2054,7 +2054,7 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender btsnews@info.dot.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender btsnews@info.dot.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: transportation-email, transportation-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
 
 - id: bjs-email
   adapter: govdelivery
@@ -2071,7 +2071,7 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender juststats@public.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender juststats@public.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: justice-email, justice-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
 
 - id: census-email
   adapter: govdelivery
@@ -2088,7 +2088,7 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender census@subscriptions.census.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Sibling of census-newsroom; cross-channel dedup keeps the first-recorded copy."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender census@subscriptions.census.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: census-newsroom, commerce-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
 
 - id: aphis-email
   adapter: govdelivery
@@ -2105,7 +2105,7 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender aphis@subscribers.usda.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender aphis@subscribers.usda.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: agriculture-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
 
 - id: usda-rd-email
   adapter: govdelivery
@@ -2125,7 +2125,7 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender ruraldevelopment@public.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender ruraldevelopment@public.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: agriculture-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
 
 - id: usda-ams-email
   adapter: govdelivery
@@ -2142,7 +2142,7 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender usdaams@public.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender usdaams@public.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: agriculture-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
 
 - id: usda-ars-email
   adapter: govdelivery
@@ -2159,7 +2159,7 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender usda-ars-comms@subscribers.usda.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender usda-ars-comms@subscribers.usda.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: agriculture-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
 
 - id: doe-cmei-email
   adapter: govdelivery
@@ -2179,7 +2179,7 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender cmei-news@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Sibling of energy-newsroom."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender cmei-news@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: energy-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
 
 - id: cdfi-fund-email
   adapter: govdelivery
@@ -2196,7 +2196,7 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender cdfifund@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender cdfifund@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: treasury-email, treasury-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
 
 - id: e-verify-email
   adapter: govdelivery
@@ -2213,4 +2213,237 @@
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
   status: planned
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender e-verify.uscis@messages.dhs.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender e-verify.uscis@messages.dhs.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: uscis-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+
+- id: loc-email
+  adapter: govdelivery
+  name: Library of Congress (email)
+  branch: legislative
+  parent_org: Library of Congress
+  description: "The Library of Congress is the research library of Congress and the home of the U.S. Copyright Office. Its bulletins carry announcements, acquisitions, programs, and events."
+  type: email
+  sender: loc@service.govdelivery.com
+  tier: 3
+  urls:
+    home: https://www.loc.gov/
+    signup: https://public.govdelivery.com/accounts/USLOC/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender loc@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+
+- id: nifa-email
+  adapter: govdelivery
+  name: National Institute of Food and Agriculture (email)
+  branch: executive
+  parent_org: Department of Agriculture, National Institute of Food and Agriculture
+  description: "The National Institute of Food and Agriculture funds agricultural research, education, and extension. Its weekly update carries grant programs, funding opportunities, and agency news."
+  type: email
+  sender: usda.nifa@public.govdelivery.com
+  tier: 3
+  urls:
+    home: https://www.nifa.usda.gov/
+    signup: https://public.govdelivery.com/accounts/USDANIFA/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender usda.nifa@public.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: agriculture-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+
+- id: ttb-email
+  adapter: govdelivery
+  name: Alcohol and Tobacco Tax and Trade Bureau (email)
+  branch: executive
+  parent_org: Department of the Treasury, Alcohol and Tobacco Tax and Trade Bureau
+  description: "The Alcohol and Tobacco Tax and Trade Bureau collects federal excise taxes on alcohol, tobacco, firearms, and ammunition and regulates alcohol labeling and trade. Its weekly newsletter carries regulatory and guidance updates."
+  type: email
+  sender: usttb@public.govdelivery.com
+  tier: 3
+  urls:
+    home: https://www.ttb.gov/
+    signup: https://public.govdelivery.com/accounts/USTTB/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender usttb@public.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: treasury-email, treasury-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+
+- id: hhs-owh-email
+  adapter: govdelivery
+  name: HHS Office on Women's Health (email)
+  branch: executive
+  parent_org: Department of Health and Human Services, Office on Women's Health
+  description: "The Office on Women's Health coordinates women's health policy within the Department of Health and Human Services. Its bulletins carry press releases and program announcements."
+  type: email
+  sender: owh@service.govdelivery.com
+  tier: 3
+  urls:
+    home: https://womenshealth.gov/
+    signup: https://public.govdelivery.com/accounts/USOPHSOWH/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender owh@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+
+- id: ojp-email
+  adapter: govdelivery
+  name: Office of Justice Programs (email)
+  branch: executive
+  parent_org: Department of Justice, Office of Justice Programs
+  description: "The Office of Justice Programs administers the Justice Department's grant programs, including the Office for Victims of Crime. Its bulletins carry funding opportunities and grant program notices."
+  type: email
+  sender:
+    - newsfromovc@public.govdelivery.com
+    - fundingnews@public.govdelivery.com
+    - ojp_comms@public.govdelivery.com
+  tier: 3
+  urls:
+    home: https://www.ojp.gov/
+    signup: https://public.govdelivery.com/accounts/USDOJOJP_COMMS/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender newsfromovc@public.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: justice-email, justice-newsroom, bjs-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+
+- id: cops-email
+  adapter: govdelivery
+  name: DOJ COPS Office (email)
+  branch: executive
+  parent_org: Department of Justice, Office of Community Oriented Policing Services
+  description: "The Office of Community Oriented Policing Services funds and supports community policing. Its bulletins carry grant announcements, solicitations, and published standards and resources."
+  type: email
+  sender:
+    - copsdonotreply@service.govdelivery.com
+    - copsusdoj@service.govdelivery.com
+  tier: 3
+  urls:
+    home: https://cops.usdoj.gov/
+    signup: https://public.govdelivery.com/accounts/USDOJCOPS/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender copsdonotreply@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: justice-email, justice-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+
+- id: doe-indian-energy-email
+  adapter: govdelivery
+  name: DOE Office of Indian Energy (email)
+  branch: executive
+  parent_org: Department of Energy, Office of Indian Energy Policy and Programs
+  description: "The Department of Energy's Office of Indian Energy funds and supports tribal energy development. Its bulletins carry funding opportunities, grant results, and program updates."
+  type: email
+  sender: indianenergy@public.govdelivery.com
+  tier: 3
+  urls:
+    home: https://www.energy.gov/indianenergy
+    signup: https://public.govdelivery.com/accounts/USDOEIE/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender indianenergy@public.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: energy-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+
+- id: fta-email
+  adapter: govdelivery
+  name: Federal Transit Administration (email)
+  branch: executive
+  parent_org: Department of Transportation, Federal Transit Administration
+  description: "The Federal Transit Administration funds and oversees public transportation. Its bulletins carry safety advisories, program notices, and funding announcements."
+  type: email
+  sender: usdotfta@info.dot.gov
+  tier: 3
+  urls:
+    home: https://www.transit.dot.gov/
+    signup: https://public.govdelivery.com/accounts/USDOTFTA/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender usdotfta@info.dot.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: transportation-email, transportation-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+
+- id: fns-email
+  adapter: govdelivery
+  name: Food and Nutrition Service (email)
+  branch: executive
+  parent_org: Department of Agriculture, Food and Nutrition Service
+  description: "The Food and Nutrition Service administers SNAP, school meals, and WIC. Its bulletins carry program announcements and initiatives."
+  type: email
+  sender: usda.fna@service.govdelivery.com
+  tier: 3
+  urls:
+    home: https://www.fns.usda.gov/
+    signup: https://public.govdelivery.com/accounts/USFNS/subscriber/new
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender usda.fna@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: agriculture-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+
+- id: fiscal-service-email
+  name: Bureau of the Fiscal Service (email)
+  branch: executive
+  parent_org: Department of the Treasury, Bureau of the Fiscal Service
+  description: "The Bureau of the Fiscal Service manages federal payments, collections, borrowing, and government-wide accounting. Its media-relations mail carries the bureau's press releases."
+  type: email
+  sender: media-relations@fiscal.treasury.gov
+  tier: 3
+  urls:
+    home: https://www.fiscal.treasury.gov/
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender media-relations@fiscal.treasury.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: treasury-email, treasury-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+
+- id: fhwa-email
+  name: Federal Highway Administration (email)
+  branch: executive
+  parent_org: Department of Transportation, Federal Highway Administration
+  description: "The Federal Highway Administration funds and oversees the national highway system. Its bulletins carry program notices and announcements."
+  type: email
+  sender: usdotfhwa@info.dot.gov
+  tier: 3
+  urls:
+    home: https://highways.dot.gov/
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender usdotfhwa@info.dot.gov); no bulletin observed as of registration (2026-09-26). Registered so the first bulletin is attributed on arrival; activate on first parsed bulletin. Related entries that can publish the same news: transportation-email, transportation-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+
+- id: fra-email
+  name: Federal Railroad Administration (email)
+  branch: executive
+  parent_org: Department of Transportation, Federal Railroad Administration
+  description: "The Federal Railroad Administration regulates railroad safety and funds rail programs. Its bulletins carry safety and program announcements."
+  type: email
+  sender: usdotfra@info.dot.gov
+  tier: 3
+  urls:
+    home: https://railroads.dot.gov/
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender usdotfra@info.dot.gov); no bulletin observed as of registration (2026-09-26). Registered so the first bulletin is attributed on arrival; activate on first parsed bulletin. Related entries that can publish the same news: transportation-email, transportation-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+
+- id: marad-email
+  name: Maritime Administration (email)
+  branch: executive
+  parent_org: Department of Transportation, Maritime Administration
+  description: "The Maritime Administration supports the U.S. merchant marine, ports, and shipbuilding. Its bulletins carry program and funding announcements."
+  type: email
+  sender: marad@info.dot.gov
+  tier: 3
+  urls:
+    home: https://www.maritime.dot.gov/
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender marad@info.dot.gov); no bulletin observed as of registration (2026-09-26). Registered so the first bulletin is attributed on arrival; activate on first parsed bulletin. Related entries that can publish the same news: transportation-email, transportation-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+
+- id: commerce-email
+  name: Department of Commerce (email)
+  branch: executive
+  parent_org: Department of Commerce
+  description: "The Department of Commerce promotes trade, economic development, and technology, and houses the Census Bureau, NOAA, and NIST. Its communications bulletins carry departmental announcements."
+  type: email
+  sender: communications@updates.doc.gov
+  tier: 2
+  urls:
+    home: https://www.commerce.gov/news
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: planned
+  added: "2026-09-26"
+  notes: "Subscription confirmed through the publisher's own signup flow (sender communications@updates.doc.gov); no bulletin observed as of registration (2026-09-26). Registered so the first bulletin is attributed on arrival; activate on first parsed bulletin. Related entries that can publish the same news: commerce-newsroom, census-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule. commerce-newsroom's web refusal stands."

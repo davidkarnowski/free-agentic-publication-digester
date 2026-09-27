@@ -6676,3 +6676,35 @@ stay unregistered, and so do the subscriptions whose confirmation expired.
 State and local bulletins are filed by a mailbox filter and not ingested.
 
 Verified: `scripts/preflight.sh` PASS. Deployed the same evening.
+
+## 2026-09-26 (evening) — The junk folder, the mailbox log, and a second source batch
+
+The collector reads the junk folder too, under the GUIDE §3 carve-out
+ruled the same evening. A registered sender's mail there is ingested only
+on a DKIM signature that verifies and aligns with the sender's domain.
+Everything else stays in place and is counted as refused. Before the code
+shipped, the rule was checked against the Spam folder: every registered
+bulletin found there passed, each signed by its sender's own domain. Those
+bulletins were then filed out of Spam without being ingested (no backfill,
+operator).
+
+`mailbox_messages` now records what the poll did with every registered
+sender's message, and with government list mail from unregistered
+senders; personal mail is never recorded. It feeds a mailbox line on each
+email source's page and a clearer health reason for a subscription that
+has only sent confirmations. It also feeds a Mailbox section in the
+nightly insight report, which flags misclassification the night it
+happens (counts and registry ids only). Planned email sources are now
+counted as measured. They were always ingested, and their pages had said
+otherwise.
+
+Fourteen more subscriptions are registered as `planned`: Library of
+Congress, NIFA, TTB, HHS OWH, OJP, DOJ COPS, DOE Indian Energy, FTA, FNS
+and the Fiscal Service, plus FHWA, FRA, MARAD and Commerce, which are
+subscribed but have sent no bulletin yet. Every new email entry now names
+the existing entries that can publish the same news. A measurement over
+30 days found no document listed on two digest days, and all 970
+email+web pairs merged correctly. FAS GAIN is skipped (operator). The
+expired subscriptions will be redone as a separate task.
+
+Verified: `scripts/preflight.sh` PASS. Deployed before the 2026-09-26 EOD.
