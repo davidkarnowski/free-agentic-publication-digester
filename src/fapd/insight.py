@@ -467,6 +467,13 @@ def read_sweep(path=None, *, now=None):
     return sweep, None
 
 
+def _by_host(counts):
+    """' (host: n, …)' for a per-host breakdown, or '' when there is none."""
+    if not counts:
+        return ""
+    return " (" + ", ".join(f"{h}: {n}" for h, n in sorted(counts.items())) + ")"
+
+
 def render_security(sweep, problem=None, summary=None):
     """The security section. Entirely mechanical; `summary` is prose and
     the section is complete without it."""
@@ -492,7 +499,13 @@ def render_security(sweep, problem=None, summary=None):
           f"| distinct probing addresses | {probing.get('distinct_ips', 0)} |",
           f"| correlated campaign findings | {len(probing.get('findings', []))} |",
           (f"| **probe paths served a 2xx** | "
-           f"**{sweep.get('refusals', {}).get('probes_served_2xx', 0)}** |"),
+           f"**{sweep.get('refusals', {}).get('probes_served_2xx', 0)}**"
+           f"{_by_host(sweep.get('refusals', {}).get('probes_served_2xx_by_host'))} |"),
+          # 2026-09-27: a single-page app answering every unknown path with
+          # its own index page is not a probe being served. The sweep
+          # classifies it separately; shown so the count stays visible.
+          (f"| probe paths answered by an app's own index page |"
+           f" {sweep.get('refusals', {}).get('probes_app_fallback', 0)} |"),
           (f"| failed SSH attempts (window) | "
            f"{sweep.get('auth', {}).get('failed_ssh', 0)}"
            f" from {sweep.get('auth', {}).get('failed_ssh_distinct_ips', 0)} address(es) |"),

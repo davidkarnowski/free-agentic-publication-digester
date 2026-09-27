@@ -192,3 +192,17 @@ def test_accepted_from_is_not_sent_to_the_model():
 @pytest.mark.parametrize("text", ["", "   "])
 def test_empty_model_reply_becomes_none(text):
     assert insight.summarize_security(_StubLLM(text), _sweep()) is None
+
+
+def test_served_probes_are_attributed_and_app_fallbacks_shown():
+    """2026-09-27: the sweep attributes a served probe to its site and counts
+    a single-page app's index-page answers apart (the botmural.live false
+    positive). Both render; neither hides the other."""
+    sweep = {"window_hours": 24, "generated_utc": "t", "verdicts": [],
+             "probing": {}, "auth": {},
+             "refusals": {"by_status": {}, "probes_served_2xx": 1,
+                          "probes_served_2xx_by_host": {"spiralyst.com": 1},
+                          "probes_app_fallback": 76}}
+    text = "\n".join(insight.render_security(sweep))
+    assert "**1** (spiralyst.com: 1)" in text
+    assert "| probe paths answered by an app's own index page | 76 |" in text
