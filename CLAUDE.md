@@ -732,3 +732,16 @@ live in `.claude/agents/fapd-*.md` (tracked).
   and their pages wrongly said "not ingested"); and the nightly insight
   report gains a Mailbox section that flags misclassification — counts
   and registry ids only, because that report is committed publicly.
+
+- **2026-09-27** — **fapd.info keeps minimal logs, for security only**
+  (operator). A site that gives the public access to government
+  publications does not collect more access data than security needs.
+  Usage curiosity does not justify a log: no page-level access log in
+  `fapd-web`, and no readership or usage reporting built from any access
+  log, the nightly insight report included. The edge log may grow only
+  in fields with a named security use (tenant attribution, fault versus
+  refusal, cross-log incident correlation). The public privacy page must
+  list exactly what is recorded, and its purpose sentence ("security
+  monitoring and abuse prevention") stays as it is. A proposal to measure
+  readership is a proposal to change this ruling, and goes to the
+  operator as one.
