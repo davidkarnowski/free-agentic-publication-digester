@@ -50,7 +50,7 @@ GUIDE.md §1–§2.
 | Site | static HTML, no framework — `publish.py` renders it; exactly one script (the live page's local-time snippet, code-standards §2 r10); machine discovery documents under `/.well-known/`, `openapi.json`, `auth.md`, Markdown twins by content negotiation (agent-discovery plan, 2026-09-13) |
 | MCP | stdlib-only `static-mcp` package (`packages/static-mcp/`, generic and reusable) with FAPD's manifest in `deploy/vps/mcp/`; container `fapd-mcp` behind `fapd-web` at `/mcp`, no host port, no inference; dual-era MCP 2026-07-28 + legacy 2025-11-25/2025-06-18 without sessions (`docs/mcp-server.md`) |
 | Lint/tests | ruff (line 100), pytest (740+ tests; bare `pytest` collects `tests/` only via pyproject `testpaths` — the dev stack's staged repo copy would otherwise double-collect), CI on push/PR |
-| LLM | pluggable backends: `claude` CLI (default; production again since 2026-08-24) / Anthropic API (`LLM_BACKEND=api`) / Google Gemini (`LLM_BACKEND=gemini`, `GOOGLE_GEMINI_API_KEY`; production 2026-08-15..24) / none (`LLM_BACKEND=none`, GUIDE §6 r15); tier aliases resolved per backend via `config.LLM_MODELS`; an unknown value is an error, not the CLI. `LLM_BACKEND_FALLBACK` is the one-hop failover (GUIDE §6 r7, 2026-09-05), **finalizer-only** |
+| LLM | pluggable backends: `claude` CLI (default; production again since 2026-08-24) / Anthropic API (`LLM_BACKEND=api`) / Google Gemini (`LLM_BACKEND=gemini`, `GOOGLE_GEMINI_API_KEY`; production 2026-08-15..24) / none (`LLM_BACKEND=none`, GUIDE §6 r15); tier aliases resolved per backend via `config.LLM_MODELS`; an unknown value is an error, not the CLI. `LLM_BACKEND_FALLBACK` is the one-hop failover (GUIDE §6 r7, 2026-09-05; every caller since 2026-09-27, the collector within a ledger-counted reserve) |
 
 ## 4. Repository layout
 
@@ -304,20 +304,21 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   "improve" the disclosure with error text, and do not make an
   `LLMError` fatal to the finalizer again — that is what left ten days
   unpushed in August 2026.
-- **Provider failover is finalizer-only, and that asymmetry is the
-  design** (GUIDE §6 r7, 2026-09-05). `scripts/run_pipeline.py` and
-  `scripts/digest.py` pass `config.LLM_BACKEND_FALLBACK` to their
-  `LLMClient`; `collect.Supervisor._default_llm()` deliberately does
-  not, so the continuous `AnalyzeWorker` keeps r15's breaker-and-pause.
-  It looks like an oversight and is not: a free-tier fallback carries
-  ~20 requests a day, the all-day map/plain load is 30–60, and the
-  measured finalizer hour is 4–11 — so a fallback wired into the
-  collector is spent by mid-morning and gone at 04:00, which is exactly
-  the August 2026 starvation r15 records. Widening it needs a quota
-  reserve of its own (the §4 collector/finalizer 85% pattern), not a
-  one-line change. Two invariants inside the hop: it **re-resolves the
-  model tier** for the new backend, and attribution stays **plural**
-  (`backends_used` → `day_inference.backend` = `cli, gemini`).
+- **Provider failover reaches every caller, but the collector only
+  within its reserve, and that asymmetry is the design** (GUIDE §6 r7,
+  2026-09-05, amended 2026-09-27). The finalizer (`run_pipeline.py`,
+  `digest.py`) passes `config.LLM_BACKEND_FALLBACK` uncapped;
+  `collect.Supervisor._default_llm()` passes it with
+  `fallback_budget=config.collector_fallback_budget()`. The reserve is
+  the whole safety argument: a free-tier fallback carries ~20 requests a
+  day, the all-day map/plain load is 30–60, and the measured finalizer
+  hour is 4–11 — an uncapped collector spends the fallback by
+  mid-morning and it is gone at 04:00, the August 2026 starvation r15
+  records. Do not remove the cap or count it any way but from the ledger
+  (failed calls included). Two invariants inside the hop: it
+  **re-resolves the model tier** for the new backend, and attribution
+  stays **plural** (`backends_used` → `day_inference.backend` =
+  `cli, gemini`).
 - **The mailbox's junk folder is held to a stricter rule than the inbox,
   on purpose** (GUIDE §3, amended 2026-09-26). Inbox mail failing DKIM is
   ingested and labeled; junk-folder mail from a registered sender must
@@ -745,3 +746,14 @@ live in `.claude/agents/fapd-*.md` (tracked).
   monitoring and abuse prevention") stays as it is. A proposal to measure
   readership is a proposal to change this ruling, and goes to the
   operator as one.
+- **2026-09-27** — **Failover for every inference caller, behind a
+  finalizer reserve** (operator; GUIDE §6 r7 amended). The CLI refused
+  every call for 36 hours (2026-09-24 23:22 to 09-26 11:00 UTC; the
+  subscription was paused pending payment). The finalizer failed over;
+  the continuous analyze layer, finalizer-only by the 2026-09-05 ruling,
+  paused. It now fails over too, capped at `LLM_FALLBACK_COLLECTOR_SHARE`
+  (0.5) of `LLM_FALLBACK_DAILY_CALLS` (20, the Gemini free tier) per
+  rolling 24 h, counted from the ledger; the finalizer is uncapped. The
+  insight report gains a Provider availability block so an outage reads
+  as a span, not five error lines
+  (`docs/ops/plan-2026-09-27-inference-fallback.md`).

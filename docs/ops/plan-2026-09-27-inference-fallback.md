@@ -1,6 +1,7 @@
 # Plan 2026-09-27 — Gemini fallback for every inference caller
 
-*Draft for operator approval. Follows docs/ops/plan-task-template.md.
+*Approved 2026-09-27 and implemented (T1–T4; T5 waits for a paid tier).
+Follows docs/ops/plan-task-template.md.
 Touches GUIDE §6 r7 and CLAUDE.md §9 ("provider failover is
 finalizer-only"), so T1 is a GUIDE amendment and precedes the code.*
 

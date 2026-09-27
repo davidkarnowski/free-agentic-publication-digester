@@ -1523,6 +1523,25 @@ of the code, not of operator discipline.
    exhausted the ladder and tripped the breaker, so compose, sections
    and tags were skipped and the digest published with no Day in Review.
    The limit reset at 04:40 — four minutes after the finalizer stopped.
+   *Amended 2026-09-27 (operator): every caller, behind a reserve.*
+   Failover now applies to every caller that makes model calls — the
+   finalizer, and the continuous analyze layer — with one asymmetry
+   that protects the day's last hour. A caller that is not the finalizer
+   may spend at most a set share of the fallback's daily call allowance
+   (`LLM_FALLBACK_COLLECTOR_SHARE` of `LLM_FALLBACK_DAILY_CALLS`, rolling
+   24 hours), counted from the token ledger — the §4 budget pattern: the
+   count holds across processes and restarts, and failed calls count
+   because they spent the provider's allowance. At the share it does not
+   hop, or stops on the fallback, and pauses under rule 15 exactly as
+   before; the rest of the allowance is the finalizer's, which is never
+   capped. The hop is still one hop, still explicit and logged, still
+   attributed per provider. Each continuous cycle starts a fresh client,
+   so it tries the primary first and returns to it on its own once the
+   primary answers. *Incident this answers:* from 2026-09-24 23:22 to
+   2026-09-26 11:00 UTC the CLI refused every call (the subscription was
+   paused pending payment); the finalizer failed over as designed, but
+   the continuous layer had no fallback and summarized almost nothing
+   for a day and a half. Share 0 restores the finalizer-only scope.
 8. **Measure first, then cap.** The token ledger (rule 7) runs from the
    analysis layer's very first call, but **no hard cap is enforced until
    real test runs establish a measured baseline** — capping against
