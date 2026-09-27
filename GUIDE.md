@@ -765,6 +765,18 @@ channels refuse identified clients (see
   which does not apply to email (GovDelivery's bulletin archives are
   login-walled). Messages that fail DKIM are still ingested but marked
   `dkim: fail` and excluded from any tamper-evidence claims.
+  *Amended 2026-09-26 (operator): the junk folder.* The collector also
+  reads the provider's junk folder, because providers file real
+  bulletins there (found the same day: registered senders' bulletins
+  sat in Spam, never ingested). There, a message from a registered
+  sender is ingested only when its DKIM signature verifies **and** the
+  signing domain shares the sender's organizational domain; anything
+  else is left where the provider put it, not stored, and counted as
+  refused. The junk folder is read from the present forward, never
+  backfilled. The inbox rule above is unchanged. The asymmetry is
+  deliberate: spam filtering is where forged From headers collect, and
+  "as long as we aren't letting spam through" is the condition the
+  junk folder is read on.
 - **Dating.** The message's `Date` header (and any bulletin-stated
   date) is `claimed_published_at`; receipt time is our observation.
   The §3 dating rule applies unchanged: digests list what the agency
