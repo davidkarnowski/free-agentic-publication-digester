@@ -6,7 +6,7 @@
 
 # Office of Financial Research (email)
 
-planned · Executive · Tier 3 · email bulletin · Department of the Treasury (OFR)
+planned · ingestion health: no data · Executive · Tier 3 · email bulletin · Department of the Treasury (OFR)
 
 Official site: https://www.financialresearch.gov/ · All sources: [sources.md](../sources.md)
 
@@ -50,18 +50,35 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 | Method | Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive). |
 | Adapter | govdelivery |
 | Requests | none — bulletins are delivered to the project mailbox by the agency's own subscription service |
-| Authenticity | every message's DKIM signature is checked on arrival and the result is disclosed on each item; a failing signature is labeled, never silently dropped |
+| Authenticity | every message's DKIM signature is checked on arrival and the result is disclosed on each item; in the inbox a failing signature is labeled, never silently dropped; in the junk folder, which is read too, only a message whose signature verifies and matches the sender's domain is accepted, and the rest are refused and counted |
 | Capture and hash | captured raw content is hashed (SHA-256) into the day's committed provenance manifest, hash-chained day to day (PROVENANCE.md) |
 
 ## Ingestion health
 
-Not ingested: the registry status of this source is planned.
+**no data** — No bulletin recorded from this source in the last 180 days.
+
+This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-09-27T03:49:31Z (UTC).
+
+Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
 ## Ingestion statistics
 
 These figures describe this project's ingestion of this source — items we recorded and requests we made — and nothing else. They are not a measurement of the publisher.
 
-Not ingested: the registry status of this source is planned. Ingestion statistics are measured for active sources only.
+### Last 24 hours
+
+Last 24 hours: no items ingested
+
+### Last 14 days
+
+| Measure | Value |
+|---|---|
+| Items ingested | none in the last 14 days — none recorded in the lookback period |
+| Mailbox | no message from this sender in the last 14 days |
+
+Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
+
+No bulletin recorded from this source in the last 180 days.
 
 ### All time
 
@@ -70,3 +87,11 @@ Bulletins from this source are delivered to the project mailbox, so there are no
 ### Last 30 days, day by day
 
 No requests and no items were recorded in the last 30 days, so there is nothing to chart.
+
+## Our ingestion assessment
+
+**Model-written ingestion assessment**
+
+The Office of Financial Research subscription has been confirmed and active since late July 2026, but we have recorded no bulletins from this sender over the available measurement window. The email adapter is operating without error, polling continuously. Ingestion will begin upon receipt of the first bulletin from this source.
+
+_Model-written assessment of our own ingestion, generated 2026-09-27 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._

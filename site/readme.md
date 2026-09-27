@@ -29,10 +29,11 @@ is always current; it derives them from the registry at build time.)
 
 - **Live site:** https://fapd.info — served from a Docker stack on a
   VPS; GitHub holds the repository, CI, and the integrity record.
-- **Source registry:** 129 sources — 45 active (19 web feeds, 15 email
-  bulletins, 5 govinfo collections, 4 listing-page sources, 1 chamber
-  XML index, 1 API source), 62 planned, 20 recorded unavailable,
-  2 evaluated and excluded. Every entry now has its own page at
+- **Source registry (updated 2026-09-26):** 155 sources — 45 active (19
+  web feeds, 15 email bulletins, 5 govinfo collections, 4 listing-page
+  sources, 1 chamber XML index, 1 API source), 88 planned (41 of them
+  email subscriptions, which are read and ingested while planned), 20
+  recorded unavailable, 2 evaluated and excluded. Every entry now has its own page at
   `/sources/<id>.html` — statistics, method, health history, and
   labeled model-written orientation.
 - **Latest digest:** [2026-08-02](2026-08-02.html); digests
@@ -149,10 +150,16 @@ access to what they already publish for the public. Coverage grows by
 doors opening — never by evasion.
 
 That effort produced its first result in July 2026, and the channel has
-grown since: **15 agencies now deliver by email — among them agencies whose
-web channels refuse us now have a working input path through their own
-email bulletins** — Treasury, USDA, EPA, SSA, DOT, FAA, NHTSA, DEA,
-ATF, the Coast Guard, and HUD's Inspector General. The blocked web
+grown since: **15 email sources are active, and agencies whose web
+channels refuse us have a working input path through their own email
+bulletins** — Treasury, USDA, SSA and DEA among them. Subscriptions to
+EPA, DOT, FAA, NHTSA, ATF, the Coast Guard and HUD's Inspector General
+are registered too, and they are ingested as soon as they deliver. A
+2026-09-26 audit of the mailbox found EPA's bulletins arriving from an
+address the registry did not list, and several others sent only
+subscription notices, so those entries are planned rather than claimed.
+The audit also registered 26 more subscriptions and started reading the
+mailbox's junk folder behind a DKIM check. The blocked web
 entries stay in the registry exactly as they were; the email entries
 sit beside them as siblings. A refusal recorded is never quietly
 erased by a success elsewhere.

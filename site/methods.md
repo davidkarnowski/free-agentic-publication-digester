@@ -75,7 +75,14 @@ fixed order and record which rung they stand on:
    arrives is ingested; what it links to on a site that refuses our
    client is not fetched. Where a web source is blocked and an email
    subscription exists, both are registered — the email entry as a
-   sibling, the refusal left standing on the record.
+   sibling, the refusal left standing on the record. A planned email
+   subscription is read like an active one; it becomes active after a
+   dated coverage evaluation. The mailbox's junk folder is read too, but
+   there a message is accepted only when its DKIM signature verifies and
+   matches the sender's domain, because spam filtering is where forged
+   senders collect. Handled bulletins are filed out of the inbox, and
+   state and local government bulletins the mailbox receives are filed
+   separately and not ingested.
 4. **Never** browser impersonation, script execution, or any access the
    source refuses to identified clients. Parsing structured data a
    server sent us (for example, JSON-LD embedded in a page) is

@@ -52,14 +52,14 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 | Adapter | govdelivery |
 | Poll cadence | the project mailbox is read about every 15 minutes |
 | Requests | none — bulletins are delivered to the project mailbox by the agency's own subscription service |
-| Authenticity | every message's DKIM signature is checked on arrival and the result is disclosed on each item; a failing signature is labeled, never silently dropped |
+| Authenticity | every message's DKIM signature is checked on arrival and the result is disclosed on each item; in the inbox a failing signature is labeled, never silently dropped; in the junk folder, which is read too, only a message whose signature verifies and matches the sender's domain is accepted, and the rest are refused and counted |
 | Capture and hash | captured raw content is hashed (SHA-256) into the day's committed provenance manifest, hash-chained day to day (PROVENANCE.md) |
 
 ## Ingestion health
 
-**delivering** — 402 item(s) in the last 14 days; most recent 2026-09-25, delivered by email.
+**delivering** — 402 item(s) in the last 14 days; most recent 2026-09-26, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-26T04:03:22Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-27T03:49:31Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,19 +69,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 33 item(s) ingested
+Last 24 hours: no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 402 in 14 days (28.71 per day) · most recent 2026-09-25 |
+| Items ingested | 402 in 14 days (28.71 per day) · most recent 2026-09-26 |
 | Content length | 342 characters average, 310 median (shortest 37, longest 2,873) |
 | Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | no message from this sender in the last 14 days |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-402 item(s) in the last 14 days; most recent 2026-09-25, delivered by email.
+402 item(s) in the last 14 days; most recent 2026-09-26, delivered by email.
 
 ### All time
 
@@ -93,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-08-28 | 32 |
 | 2026-08-29 | 0 |
 | 2026-08-30 | 0 |
 | 2026-08-31 | 44 |
@@ -122,7 +122,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-23 | 52 |
 | 2026-09-24 | 50 |
 | 2026-09-25 | 33 |
-| 2026-09-26 | 0 |
+| 2026-09-26 | 1 |
+| 2026-09-27 | 0 |
 
 ## Our ingestion assessment
 

@@ -93,7 +93,14 @@ fixed order and record which rung they stand on:</p>
    arrives is ingested; what it links to on a site that refuses our
    client is not fetched. Where a web source is blocked and an email
    subscription exists, both are registered — the email entry as a
-   sibling, the refusal left standing on the record.</li>
+   sibling, the refusal left standing on the record. A planned email
+   subscription is read like an active one; it becomes active after a
+   dated coverage evaluation. The mailbox's junk folder is read too, but
+   there a message is accepted only when its DKIM signature verifies and
+   matches the sender's domain, because spam filtering is where forged
+   senders collect. Handled bulletins are filed out of the inbox, and
+   state and local government bulletins the mailbox receives are filed
+   separately and not ingested.</li>
 <li><strong>Never</strong> browser impersonation, script execution, or any access the
    source refuses to identified clients. Parsing structured data a
    server sent us (for example, JSON-LD embedded in a page) is
@@ -327,7 +334,7 @@ accounting independently — both strengthenings are on the published
 development backlog.</p>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-09-26T04:27:03Z (UTC). Canonical source:
+  <p>Generated 2026-09-27T04:35:02Z (UTC). Canonical source:
   <code>docs/site/methods.md</code> in the
   <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in

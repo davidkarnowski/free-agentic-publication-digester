@@ -6,7 +6,7 @@
 
 # FAA Updates (email)
 
-planned · Executive · Tier 2 · email bulletin · Department of Transportation (FAA)
+planned · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Transportation (FAA)
 
 Official site: https://www.faa.gov/newsroom · All sources: [sources.md](../sources.md)
 
@@ -53,18 +53,37 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 | Method | Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive). |
 | Adapter | govdelivery |
 | Requests | none — bulletins are delivered to the project mailbox by the agency's own subscription service |
-| Authenticity | every message's DKIM signature is checked on arrival and the result is disclosed on each item; a failing signature is labeled, never silently dropped |
+| Authenticity | every message's DKIM signature is checked on arrival and the result is disclosed on each item; in the inbox a failing signature is labeled, never silently dropped; in the junk folder, which is read too, only a message whose signature verifies and matches the sender's domain is accepted, and the rest are refused and counted |
 | Capture and hash | captured raw content is hashed (SHA-256) into the day's committed provenance manifest, hash-chained day to day (PROVENANCE.md) |
 
 ## Ingestion health
 
-Not ingested: the registry status of this source is planned.
+**delivering** — 13 item(s) in the last 14 days; most recent 2026-09-24, delivered by email.
+
+This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-09-27T03:49:31Z (UTC).
+
+Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
 ## Ingestion statistics
 
 These figures describe this project's ingestion of this source — items we recorded and requests we made — and nothing else. They are not a measurement of the publisher.
 
-Not ingested: the registry status of this source is planned. Ingestion statistics are measured for active sources only.
+### Last 24 hours
+
+Last 24 hours: no items ingested
+
+### Last 14 days
+
+| Measure | Value |
+|---|---|
+| Items ingested | 13 in 14 days (0.93 per day) · most recent 2026-09-24 |
+| Content length | 207 characters average, 175 median (shortest 121, longest 664) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | no message from this sender in the last 14 days |
+
+Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
+
+13 item(s) in the last 14 days; most recent 2026-09-24, delivered by email.
 
 ### All time
 
@@ -76,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-08-28 | 2 |
 | 2026-08-29 | 0 |
 | 2026-08-30 | 0 |
 | 2026-08-31 | 5 |
@@ -106,3 +124,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-24 | 1 |
 | 2026-09-25 | 0 |
 | 2026-09-26 | 0 |
+| 2026-09-27 | 0 |
+
+## Our ingestion assessment
+
+**Model-written ingestion assessment**
+
+The Federal Aviation Administration subscription has delivered thirteen bulletins over the fourteen-day measurement period, representing the most active planned email source. Items arrive regularly at a rate of approximately 0.93 per day, with the most recent bulletin on September 24. Bulletin content ranges from 121 to 664 characters, with a median length of 175 characters. The email adapter shows steady, error-free operation. This source is actively delivering via the govdelivery platform.
+
+_Model-written assessment of our own ingestion, generated 2026-09-27 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
