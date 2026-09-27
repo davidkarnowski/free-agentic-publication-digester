@@ -71,8 +71,8 @@ not the last.
 - **Turn spam filtering down or off for known list senders** (or add
   the bulletin domains to an allowlist). A silently spam-foldered
   bulletin is a coverage gap the coverage statement can't see. The
-  adapter should poll all folders or the provider should be configured
-  to deliver list mail to the inbox.
+  adapter also polls the provider's junk folder (§3a), under a stricter
+  rule than the inbox.
 - **`.env` keys**: `IMAP_HOST`, `IMAP_USER`, `IMAP_PASSWORD` (or a
   provider token). Never committed; the committed `.env.example`
   carries blank placeholders.
@@ -110,6 +110,21 @@ The rules, pinned by tests in `tests/test_email_sources.py`:
 - **One filing host.** The poll reads INBOX only, so mail moved before
   a poll reaches it is hidden from ingestion. Set `IMAP_FILE_TO` only
   where the production database lives.
+
+**The junk folder is polled too** (`IMAP_POLL_JUNK`, on by default;
+found by its RFC 6154 `\Junk` attribute, never by name). Providers
+spam-folder real bulletins — the 2026-09-26 sweep found registered
+senders' bulletins there that had never been ingested — and a spam
+folder deletes on its own schedule. Because a From header is trivially
+forged, junk-folder mail must clear more than the allowlist: its DKIM
+signature must verify **and** the signing domain must share the
+sender's organizational domain (DMARC relaxed alignment). Mail that
+fails is left where the provider put it, never stored, and counted as
+`refused`. Mail that passes is ingested exactly like inbox mail and
+filed out of the junk folder. The junk folder is read from the present
+forward — its first poll sets the watermark at the newest message and
+ingests nothing older. The inbox rule is unchanged: a failing signature
+there is recorded as a fact, not a reason to drop official content.
 
 State and local government bulletins the mailbox receives are not
 ingested; a mailbox filter outside the collector files them to
@@ -204,7 +219,23 @@ The adapter therefore, per message:
    said the same thing.**
 4. Ingests messages that fail verification too — marked `dkim: fail`
    and excluded from any tamper-evidence claim. A failed signature is
-   a fact worth recording, not a reason to drop official content.
+   a fact worth recording, not a reason to drop official content. The
+   one exception is the junk folder (§3a, GUIDE §3 amended 2026-09-26):
+   there a message is accepted only on a verified, domain-aligned
+   signature, because spam filtering is where forged senders collect.
+
+**Reporting (2026-09-26).** Every message from a registered sender — and
+government list mail from senders the registry does not know — gets a
+row in `mailbox_messages` (docs/schema.md) recording what the poll did
+with it. The source pages print each email source's mailbox counts
+(bulletins, subscription notices, junk-folder refusals), health tells a
+subscription that has only confirmed apart from one gone quiet, and the
+nightly insight report's Mailbox section flags misclassification:
+notice-only subscriptions, bulletins yielding no item, items without a
+URL, one document through two email sources, and government lists seen
+for the first time. The report prints counts and registry ids only;
+`scripts/file_mailbox.py --report-unregistered` shows the operator the
+addresses.
 
 ## 6. What this class is not
 

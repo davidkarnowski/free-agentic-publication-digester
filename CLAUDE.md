@@ -329,6 +329,16 @@ confirm-gate.
   (`Z` vs `+00:00` suffixes), but a new writer using a different format
   would silently break invalidation. **Confirm with the operator before
   changing any stored-timestamp format.**
+- `email_sources._url_seen_elsewhere` drops an email item at ingest when
+  the same URL was already stored from another channel ("first-recorded
+  wins"). GUIDE §3's corroboration amendment (2026-08-03) says every
+  observation stays stored and the merge is presentation only. The
+  check compares the raw, un-normalized URL string (review item D24), so
+  it rarely fires — production kept 970 email+web pairs over the 30
+  days to 2026-09-26, all merged correctly by `report.corroborate`. The
+  message capture is kept either way. **Confirm with the operator before
+  removing the drop or normalizing the comparison**: normalizing alone
+  would make the drop fire far more often, the opposite of the GUIDE.
 
 ## 11. Section agents
 
@@ -696,3 +706,19 @@ live in `.claude/agents/fapd-*.md` (tracked).
   second filer would hide mail from ingestion. The backlog is swept once
   by `scripts/file_mailbox.py`, header-only and deterministic, bounded by
   the production watermark (docs/email-sources.md §3a).
+- **2026-09-26** — **The collector reads the junk folder, behind DKIM
+  alignment** (operator: "as long as we aren't letting spam through").
+  Registered senders' bulletins were found in Gmail's Spam folder, never
+  ingested. Junk-folder mail from a registered sender is ingested only
+  when its DKIM signature verifies and the signing domain aligns with the
+  sender's organizational domain; everything else stays put, unstored,
+  counted `refused`. The inbox keeps the §3 rule (a failed signature is
+  recorded, not dropped) — the asymmetry is deliberate, because spam
+  filtering is exactly where forged From headers collect. Read from the
+  present forward, no backfill.
+  Same plan (`docs/ops/plan-2026-09-26-mailbox-reporting.md`): a
+  `mailbox_messages` log makes messages that produce no item visible;
+  planned email sources are now *measured* (they were always ingested,
+  and their pages wrongly said "not ingested"); and the nightly insight
+  report gains a Mailbox section that flags misclassification — counts
+  and registry ids only, because that report is committed publicly.

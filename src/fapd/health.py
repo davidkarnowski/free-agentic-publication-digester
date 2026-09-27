@@ -652,7 +652,7 @@ def _collect_collectors(conn):
 # ---------------------------------------------------------------------------
 
 def classify(*, items, last_item_date, days_since_item, fetch, collector,
-             is_email=False):
+             is_email=False, mailbox=None):
     """``(label, reason)`` for one source. Every branch's reason names the
     exact numbers that produced it, because the page prints those numbers
     beside the label and a reader must be able to check the work.
@@ -671,6 +671,16 @@ def classify(*, items, last_item_date, days_since_item, fetch, collector,
             f"No items recorded and no requests made in the last "
             f"{HEALTH_WINDOW_DAYS} days.")
     if is_email and not items and days_since_item is None:
+        box = mailbox or {}
+        if box.get("administrative") and not box.get("bulletins"):
+            return NO_DATA, (
+                f"Subscription confirmed ({box['administrative']} subscription "
+                f"notice(s) in the last {HEALTH_WINDOW_DAYS} days); no bulletin "
+                "received yet.")
+        if box.get("bulletins"):
+            return NO_DATA, (
+                f"{box['bulletins']} bulletin(s) received in the last "
+                f"{HEALTH_WINDOW_DAYS} days, none yielding a new item.")
         return NO_DATA, (
             f"No bulletin recorded from this source in the last "
             f"{RECENCY_LOOKBACK_DAYS} days.")
@@ -766,6 +776,7 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
         volume = _collect_volume(conn, window_start, today, recency_start)
         recent_items = _collect_recent_items(conn, recent_start, now)
         collectors = _collect_collectors(conn)
+        mailbox = _collect_mailbox(conn, fetch_lo)
     except sqlite3.Error as exc:
         logger.warning("health: pipeline query failed: %s", exc)
         return _unavailable(f"pipeline database unreadable: {exc}",
@@ -809,7 +820,7 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
             daily_items=daily_items, daily_fetch=daily_fetch,
             hourly_items=hourly_items, hourly_fetch=hourly_fetch,
             today=today, window_days=window_days,
-            fetch_available=fetch_available)
+            fetch_available=fetch_available, mailbox=mailbox)
 
     return {
         "available": True,
@@ -829,10 +840,51 @@ def source_health(entries, *, pipeline_db=None, fetch_db=None, today=None,
     }
 
 
+def is_measured(entry):
+    """True when the pipeline reads this source. An active entry always;
+    a planned EMAIL entry too — its subscription is polled and whatever
+    it delivers is ingested (the email worker reads active and planned
+    senders alike), so calling it "not ingested" would be false."""
+    return (entry["status"] == "active"
+            or (entry.get("type") == "email" and entry["status"] == "planned"))
+
+
+def _collect_mailbox(conn, since_utc):
+    """{source_id: counts} from mailbox_messages since `since_utc` — what
+    the poll did with each registered sender's mail, including messages
+    that produced no item. Empty when the table does not exist yet."""
+    out = {}
+    try:
+        rows = conn.execute(
+            "SELECT source_id, outcome, COUNT(*) AS n, MAX(observed_at) AS last"
+            " FROM mailbox_messages WHERE source_id IS NOT NULL"
+            " AND substr(observed_at, 1, 19) >= ? GROUP BY 1, 2",
+            (since_utc[:19],)).fetchall()
+    except sqlite3.OperationalError:
+        return out
+    for row in rows:
+        rec = out.setdefault(row["source_id"], {
+            "messages": 0, "bulletins": 0, "administrative": 0, "refused": 0,
+            "errors": 0, "last_message_at": None})
+        rec["messages"] += row["n"]
+        if row["outcome"] in ("ingested", "duplicate", "empty"):
+            rec["bulletins"] += row["n"]
+        elif row["outcome"] == "administrative":
+            rec["administrative"] += row["n"]
+        elif row["outcome"] == "refused":
+            rec["refused"] += row["n"]
+        elif row["outcome"] == "error":
+            rec["errors"] += row["n"]
+        if row["outcome"] != "refused":
+            rec["last_message_at"] = max(filter(None, (rec["last_message_at"],
+                                                       row["last"])), default=None)
+    return out
+
+
 def _one_source(entry, volume, hosts, collectors, host_sources, *,
                 recent_hosts, recent_items, daily_items=None, daily_fetch=None,
                 hourly_items=None, hourly_fetch=None,
-                today, window_days, fetch_available):
+                today, window_days, fetch_available, mailbox=None):
     import datetime
     key = source_key(entry)
     stats = volume.get(key, {})
@@ -888,7 +940,7 @@ def _one_source(entry, volume, hosts, collectors, host_sources, *,
         reqs = f_info["requests"]
         failed = f_info["failed"]
 
-        if entry["status"] != "active":
+        if not is_measured(entry):
             st = "unmeasured"
         elif failed > 0 or (reqs >= 5 and (failed / reqs) >= DEGRADED_ERROR_RATE):
             st = "degraded"
@@ -909,7 +961,7 @@ def _one_source(entry, volume, hosts, collectors, host_sources, *,
             h_reqs = h_f["requests"]
             h_failed = h_f["failed"]
 
-            if entry["status"] != "active":
+            if not is_measured(entry):
                 h_st = "unmeasured"
             elif h_failed > 0:
                 h_st = "err"
@@ -951,7 +1003,7 @@ def _one_source(entry, volume, hosts, collectors, host_sources, *,
         "tier": entry["tier"],
         "parent_org": entry["parent_org"],
         "identified_by": {"kind": key[0], "key": key[1]},
-        "measured": entry["status"] == "active",
+        "measured": is_measured(entry),
         "window_days": window_days,
         "items": len(chars),
         "items_per_day": round(len(chars) / window_days, 2),
@@ -965,6 +1017,11 @@ def _one_source(entry, volume, hosts, collectors, host_sources, *,
                           if modes else None),
         "fetch": fetch,
         "fetch_note": EMAIL_FETCH_NOTE if is_email else None,
+        # What the poll did with this sender's mail over the window,
+        # including messages that produced no item (docs/schema.md).
+        "mailbox": ((mailbox or {}).get(entry["id"]) or {
+            "messages": 0, "bulletins": 0, "administrative": 0, "refused": 0,
+            "errors": 0, "last_message_at": None}) if is_email else None,
         "collector": collector,
         "recent": None,
         "daily_activity": daily_activity,
@@ -1005,7 +1062,7 @@ def _one_source(entry, volume, hosts, collectors, host_sources, *,
     record["health"], record["health_reason"] = classify(
         items=record["items"], last_item_date=last_item_date,
         days_since_item=record["days_since_item"], fetch=fetch,
-        collector=collector, is_email=is_email)
+        collector=collector, is_email=is_email, mailbox=record["mailbox"])
     return record
 
 

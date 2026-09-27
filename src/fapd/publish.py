@@ -1960,7 +1960,9 @@ _STATUS_DEFS = (
     ("active", ("ingested by the pipeline today; each active entry carries a "
                 "dated coverage evaluation in its registry notes")),
     ("planned", ("registered so the coverage gap is visible; activation waits "
-                 "on the source's probe and content evaluation")),
+                 "on the source's probe and content evaluation — except an "
+                 "email subscription, which is read and ingested while planned "
+                 "and is activated by its dated coverage evaluation")),
     ("unavailable", ("the publisher's site refuses the project's "
                      "honestly-identified automated client; the refusal is "
                      "recorded as observed, never evaded, and re-checked as "
@@ -2093,6 +2095,9 @@ def _health_facts(record):
         facts.extend(_fetch_facts(record["fetch"]))
     elif record.get("fetch_note"):
         facts.append((None, record["fetch_note"]))
+    mailbox = _mailbox_sentence(record)
+    if mailbox:
+        facts.append(("Mailbox", mailbox))
     collector = record.get("collector")
     if collector and collector.get("consecutive_errors"):
         facts.append(("Collector",
@@ -2389,9 +2394,18 @@ def _sources_body(entries, health=None):
             "email (GovDelivery and similar services), delivered to a single "
             "identified project mailbox and ingested from the message body. "
             "Every message's DKIM signature is checked on arrival and the "
-            "result is disclosed on each item — a failing signature is "
-            "labeled, never silently dropped, because official content is "
-            "not discarded over a mail-infrastructure hiccup. Sender and "
+            "result is disclosed on each item. In the inbox a failing "
+            "signature is labeled, never silently dropped, because official "
+            "content is not discarded over a mail-infrastructure hiccup. The "
+            "mailbox's junk folder is read as well, and there only a message "
+            "whose signature verifies and matches the sender's domain is "
+            "accepted; the rest are refused and counted on the source's "
+            "page, because spam filtering is where forged senders collect. "
+            "Handled bulletins are filed out of the inbox; state and local "
+            "government bulletins the mailbox receives are filed separately "
+            "and not ingested. A planned email source is read like an active "
+            "one — whatever its subscription delivers is ingested — and "
+            "becomes active after a dated coverage evaluation. Sender and "
             "mailbox addresses are recorded "
             "in the registry, not republished here; where a registry note "
             "quotes one, it appears as [address withheld].</p>"),
@@ -2828,6 +2842,28 @@ def _recent_sentence(record):
             f'hours:</span> {" · ".join(bits)}</p>')
 
 
+def _mailbox_sentence(record):
+    """What the mailbox received from an email source over the health
+    window, including messages that produced no item (subscription
+    notices, junk-folder refusals). None for a non-email record."""
+    box = (record or {}).get("mailbox")
+    if box is None:
+        return None
+    days = record["window_days"]
+    if not box["messages"]:
+        return f"no message from this sender in the last {days} days"
+    bits = [f"{_n(box['bulletins'])} bulletin(s)",
+            f"{_n(box['administrative'])} subscription notice(s)"]
+    if box["refused"]:
+        bits.append(f"{_n(box['refused'])} junk-folder message(s) refused on "
+                    "a failed or unaligned DKIM signature")
+    if box["errors"]:
+        bits.append(f"{_n(box['errors'])} that could not be processed")
+    last = (box["last_message_at"] or "")[:10]
+    return (f"{', '.join(bits)} in the last {days} days"
+            + (f"; most recent message {last}" if last else ""))
+
+
 def _card_stats_block(record):
     """The compact statistics panel on a sources.html card: the 24-hour
     recent block plus the health-reason sentence. The 14-day view — and
@@ -2837,7 +2873,7 @@ def _card_stats_block(record):
     if not record["measured"]:
         return (f'<p class="src-stats src-unmeasured">'
                 f"{html.escape(record['health_reason'])} Ingestion "
-                f"statistics are shown for active sources only.</p>")
+                f"statistics are shown for sources the pipeline reads.</p>")
     parts = [_recent_sentence(record)]
     fetch = record.get("fetch")
     if fetch and fetch.get("shared_with_sources", 1) > 1:
@@ -2845,6 +2881,10 @@ def _card_stats_block(record):
             f'<p class="src-stat-label">Request figures are host-wide: '
             f"this host serves {fetch['shared_with_sources']} registered "
             "sources.</p>")
+    mailbox = _mailbox_sentence(record)
+    if mailbox:
+        parts.append(f'<p class="src-stat-label">Mailbox: '
+                     f"{html.escape(mailbox)}.</p>")
     parts.append(f'<p class="src-stat-label">'
                  f"{html.escape(record['health_reason'])}</p>")
     return f'<div class="src-stats">{"".join(parts)}</div>'
@@ -3032,8 +3072,11 @@ def _methods_rows(entry):
         rows.append(("Authenticity",
                      ("every message's DKIM signature is checked on "
                       "arrival and the result is disclosed on each item; "
-                      "a failing signature is labeled, never silently "
-                      "dropped")))
+                      "in the inbox a failing signature is labeled, never "
+                      "silently dropped; in the junk folder, which is read "
+                      "too, only a message whose signature verifies and "
+                      "matches the sender's domain is accepted, and the "
+                      "rest are refused and counted")))
     else:
         if active:
             rows.append(("Poll cadence",
@@ -3231,7 +3274,7 @@ def _source_page_body(entry, record, *, description, assessment, state,
     elif not record["measured"]:
         parts.append(f'<p class="src-stats src-unmeasured">'
                      f"{html.escape(record['health_reason'])} Ingestion "
-                     "statistics are measured for active sources only.</p>")
+                     "statistics are measured for sources the pipeline reads.</p>")
     else:
         parts.append(f"<h3>Last {health_mod.RECENT_WINDOW_HOURS} hours</h3>")
         recent = _recent_sentence(record)

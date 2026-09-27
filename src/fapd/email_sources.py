@@ -410,7 +410,8 @@ class MailboxClient:
         any message body leaves the server."""
         _status, data = self._box.uid(
             "FETCH", str(uid),
-            "(BODY.PEEK[HEADER.FIELDS (FROM DATE SUBJECT MESSAGE-ID)])")
+            "(BODY.PEEK[HEADER.FIELDS (FROM DATE SUBJECT MESSAGE-ID"
+            " LIST-UNSUBSCRIBE LIST-ID)])")
         if not data or not data[0]:
             return None
         return email.message_from_bytes(data[0][1], policy=email.policy.default)
@@ -420,6 +421,22 @@ class MailboxClient:
         if not data or not data[0]:
             return None
         return data[0][1]
+
+    def junk_folder(self):
+        """The server's junk folder by its RFC 6154 \\Junk attribute (Gmail:
+        "[Gmail]/Spam"), or None. Found by attribute, never by name."""
+        _status, data = self._box.list()
+        for line in data or []:
+            if isinstance(line, bytes) and b"\\Junk" in line.split(b")")[0]:
+                m = re.search(rb'"([^"]+)"\s*$', line) or re.search(rb"(\S+)\s*$", line)
+                if m:
+                    return m.group(1).decode()
+        return None
+
+    def use_folder(self, folder):
+        """Switch the polled folder (read-only select)."""
+        self._box.select(_quote_mailbox(folder), readonly=True)
+        self.folder = folder
 
     def all_uids(self):
         _status, data = self._box.uid("SEARCH", None, "ALL")
@@ -432,7 +449,8 @@ class MailboxClient:
         for at in range(0, len(uids), chunk):
             uid_set = ",".join(str(u) for u in uids[at:at + chunk])
             _status, data = self._box.uid(
-                "FETCH", uid_set, "(BODY.PEEK[HEADER.FIELDS (FROM SUBJECT)])")
+                "FETCH", uid_set,
+                "(BODY.PEEK[HEADER.FIELDS (FROM SUBJECT LIST-UNSUBSCRIBE LIST-ID)])")
             for part in data or []:
                 if not isinstance(part, tuple):
                     continue
@@ -599,7 +617,8 @@ def _store_item(conn, entry, item, package_id, text, mode, capture_id, dkim):
 
 def process_message(conn, entry, raw, dkim_verifier=verify_dkim):
     """Capture one bulletin and store the items it carries. Returns stats."""
-    stats = {"items": 0, "duplicates": 0, "administrative": 0}
+    stats = {"items": 0, "duplicates": 0, "administrative": 0, "no_url": 0,
+             "dkim": None}
     msg = email.message_from_bytes(raw, policy=email.policy.default)
     message_id = _clean(str(msg["message-id"] or "")) or provenance.sha256_hex(raw)
     if is_administrative(msg):
@@ -609,6 +628,7 @@ def process_message(conn, entry, raw, dkim_verifier=verify_dkim):
         return stats
 
     dkim = dkim_verifier(raw)
+    stats["dkim"] = dkim.get("result")
     doc_id = provenance.get_or_create_document(
         conn, entry["id"], message_id, item_url(msg) or message_id,
         title=_clean(str(msg["subject"] or "")),
@@ -635,6 +655,8 @@ def process_message(conn, entry, raw, dkim_verifier=verify_dkim):
         text = f"{item['title']} — {summary}".strip(" —") if summary else item["title"]
         _store_item(conn, entry, item, package_id, text, mode, capture_id, dkim)
         stats["items"] += 1
+        if not item.get("url"):
+            stats["no_url"] += 1
     return stats
 
 
@@ -648,20 +670,94 @@ def item_url(msg):
     return None
 
 
+# Government list mail (docs/schema.md `mailbox_messages`): a government
+# sender domain AND a list header. The list header is what keeps a person
+# writing from a .gov address out of the log.
+_GOV_SENDER_DOMAIN = re.compile(r"(\.gov|\.mil|(^|\.)govdelivery\.com)$", re.IGNORECASE)
+
+
+def is_government_list(head, sender):
+    domain = (sender or "").rpartition("@")[2]
+    return bool(_GOV_SENDER_DOMAIN.search(domain)
+                and (head["list-unsubscribe"] or head["list-id"]))
+
+
+def _record(conn, mailbox, validity, uid, outcome, *, source_id=None,
+            sender=None, result=None, dkim=None):
+    """One mailbox_messages row. Committed with the watermark."""
+    result = result or {}
+    conn.execute(
+        "INSERT OR REPLACE INTO mailbox_messages (mailbox, uid_validity, uid,"
+        " observed_at, source_id, sender, outcome, items, duplicates,"
+        " no_url_items, dkim) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (mailbox, validity or 0, uid, utc_now_iso(), source_id, sender, outcome,
+         result.get("items", 0), result.get("duplicates", 0),
+         result.get("no_url", 0), dkim if dkim is not None else result.get("dkim")))
+
+
+def _outcome(result):
+    if result["administrative"]:
+        return "administrative"
+    if result["items"]:
+        return "ingested"
+    return "duplicate" if result["duplicates"] else "empty"
+
+
 def poll_mailbox(client, conn, entries, *, limit=None, dkim_verifier=verify_dkim):
     """Poll the project mailbox once; returns per-source stats.
 
     Only registered senders are downloaded: the allowlist is applied to
     headers, so unregistered mail is never fetched, never parsed, and never
-    stored (docs/email-sources.md §2)."""
+    stored (docs/email-sources.md §2). The junk folder is polled after the
+    polled folder when the server has one and `config.IMAP_POLL_JUNK` is on
+    — under a stricter rule, since a From header is trivially forged."""
     allow = _sender_map(entries)
     if not allow:
         logger.info("mailbox: no registered email sources — nothing to poll")
         return []
+    per_source = _poll_folder(client, conn, allow, limit=limit,
+                              dkim_verifier=dkim_verifier)
+    junk = (client.junk_folder()
+            if config.IMAP_POLL_JUNK and hasattr(client, "junk_folder") else None)
+    if junk and junk != client.folder:
+        home = client.folder
+        client.use_folder(junk)
+        try:
+            extra = _poll_folder(client, conn, allow, limit=limit,
+                                 dkim_verifier=dkim_verifier, junk=True)
+        finally:
+            client.use_folder(home)
+        for source_id, stats in extra.items():
+            into = per_source.setdefault(source_id, _blank(source_id))
+            for key, value in stats.items():
+                if key != "id":
+                    into[key] += value
+    return sorted(per_source.values(), key=lambda s: s["id"])
 
+
+def dkim_aligned(dkim, from_addr):
+    """True when the signature verified AND the signing domain belongs to
+    the sender's organizational domain (DMARC relaxed alignment). The
+    junk-folder gate: a spoofed From address cannot produce it."""
+    def org(domain):
+        return ".".join((domain or "").lower().rstrip(".").split(".")[-2:])
+    sender_domain = (from_addr or "").rpartition("@")[2]
+    return (dkim.get("result") == "pass" and bool(dkim.get("domain"))
+            and org(dkim["domain"]) == org(sender_domain))
+
+
+def _poll_folder(client, conn, allow, *, limit, dkim_verifier, junk=False):
     mailbox = client.folder
     last_uid, saved_validity = _state(conn, mailbox)
     validity = client.uid_validity()
+    if junk and (saved_validity is None or validity != saved_validity):
+        # A junk folder is read from the present forward: its backlog is
+        # not a publication queue, and it is never backfilled.
+        start = max(client.uids_since(0), default=0)
+        _save_state(conn, mailbox, start, validity)
+        logger.info("mailbox: %s watermark set at UID %d; earlier mail not ingested",
+                    mailbox, start)
+        return {}
     if saved_validity is not None and validity != saved_validity:
         logger.warning("mailbox: UIDVALIDITY changed (%s -> %s) — rescanning from 0",
                        saved_validity, validity)
@@ -670,8 +766,8 @@ def poll_mailbox(client, conn, entries, *, limit=None, dkim_verifier=verify_dkim
     uids = client.uids_since(last_uid)
     if limit:
         uids = uids[:limit]
-    logger.info("mailbox: %d message(s) after UID %d; %d registered sender(s)",
-                len(uids), last_uid, len(allow))
+    logger.info("mailbox: %s: %d message(s) after UID %d; %d registered sender(s)",
+                mailbox, len(uids), last_uid, len(allow))
 
     per_source, ignored, highest = {}, 0, last_uid
     to_file = {FILED_INGESTED: [], FILED_ADMIN: []}
@@ -679,21 +775,39 @@ def poll_mailbox(client, conn, entries, *, limit=None, dkim_verifier=verify_dkim
         head = client.headers(uid)
         if head is None:
             continue
-        entry = allow.get(_from_address(head))
+        sender = _from_address(head)
+        entry = allow.get(sender)
         if entry is None:
             ignored += 1
             highest = max(highest, uid)
+            if is_government_list(head, sender):
+                _record(conn, mailbox, validity, uid, "unregistered", sender=sender)
             continue
         raw = client.raw(uid)
         if raw is None:
             continue
+        verifier = dkim_verifier
+        if junk:
+            dkim = dkim_verifier(raw)
+            if not dkim_aligned(dkim, sender):
+                # Left where the provider put it; not stored, not filed.
+                logger.info("%s: junk-folder UID %s refused (dkim %s, d=%s)",
+                            entry["id"], uid, dkim.get("result"), dkim.get("domain"))
+                per_source.setdefault(entry["id"], _blank(entry["id"]))["refused"] += 1
+                _record(conn, mailbox, validity, uid, "refused", source_id=entry["id"],
+                        sender=sender, dkim=dkim.get("result"))
+                highest = max(highest, uid)
+                continue
+            verifier = lambda _raw, _dkim=dkim: _dkim  # verified once above
         try:
-            result = process_message(conn, entry, raw, dkim_verifier=dkim_verifier)
+            result = process_message(conn, entry, raw, dkim_verifier=verifier)
         except Exception as exc:  # noqa: BLE001 — one bad bulletin must not
             # cost the rest of the poll; the failure is recorded, not hidden.
             logger.warning("%s: message UID %s failed: %r", entry["id"], uid, exc)
             stats = per_source.setdefault(entry["id"], _blank(entry["id"]))
             stats["errors"] += 1
+            _record(conn, mailbox, validity, uid, "error", source_id=entry["id"],
+                    sender=sender)
             highest = max(highest, uid)
             continue
         stats = per_source.setdefault(entry["id"], _blank(entry["id"]))
@@ -702,6 +816,8 @@ def poll_mailbox(client, conn, entries, *, limit=None, dkim_verifier=verify_dkim
         stats["duplicates"] += result["duplicates"]
         stats["administrative"] += result["administrative"]
         highest = max(highest, uid)
+        _record(conn, mailbox, validity, uid, _outcome(result), source_id=entry["id"],
+                sender=sender, result=result)
         sub = FILED_ADMIN if result["administrative"] else FILED_INGESTED
         to_file[sub].append((uid, entry["id"]))
         logger.info("%s: UID %s -> %d item(s)", entry["id"], uid, result["items"])
@@ -711,10 +827,9 @@ def poll_mailbox(client, conn, entries, *, limit=None, dkim_verifier=verify_dkim
     # Filing runs only after the watermark and captures are committed: the
     # evidence is durable before the mailbox is touched.
     _file_handled(client, to_file, per_source)
-    results = sorted(per_source.values(), key=lambda s: s["id"])
-    logger.info("mailbox: %d ignored (sender not registered; body never fetched)",
-                ignored)
-    return results
+    logger.info("mailbox: %s: %d ignored (sender not registered; body never fetched)",
+                mailbox, ignored)
+    return per_source
 
 
 def filing_folder(head, allow):
@@ -747,6 +862,37 @@ def sweep_plan(client, entries, through_uid):
     return plan, ignored
 
 
+def unregistered_government_lists(client, entries, folders):
+    """{sender: {"messages", "name", "subject", "account", "folders"}} for
+    government LIST mail from senders the registry does not know, across
+    `folders` — the operator's review of what to register next. Headers
+    only; printed to the operator's terminal, never stored or published."""
+    allow = _sender_map(entries)
+    home, found = client.folder, {}
+    try:
+        for folder in folders:
+            client.use_folder(folder)
+            for _uid, head in sorted(client.headers_many(client.all_uids()).items()):
+                sender = _from_address(head)
+                if sender in allow or not is_government_list(head, sender):
+                    continue
+                rec = found.setdefault(sender, {
+                    "messages": 0, "name": email.utils.parseaddr(
+                        str(head["from"] or ""))[0],
+                    "subject": "", "account": "", "folders": set()})
+                rec["messages"] += 1
+                rec["folders"].add(folder)
+                if not rec["subject"] and not is_administrative(head):
+                    rec["subject"] = _clean(str(head["subject"] or ""))[:70]
+                m = re.search(r"accounts/([A-Za-z0-9_]+)",
+                              str(head["list-unsubscribe"] or ""))
+                if m and not rec["account"]:
+                    rec["account"] = m.group(1)
+    finally:
+        client.use_folder(home)
+    return found
+
+
 def _file_handled(client, to_file, per_source):
     """Mark read and move the messages this poll handled. A filing failure
     is logged and never fails the poll — the watermark has already passed
@@ -773,4 +919,4 @@ def _file_handled(client, to_file, per_source):
 
 def _blank(source_id):
     return {"id": source_id, "messages": 0, "items": 0, "duplicates": 0,
-            "administrative": 0, "errors": 0, "filed": 0}
+            "administrative": 0, "errors": 0, "filed": 0, "refused": 0}

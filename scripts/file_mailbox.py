@@ -16,6 +16,9 @@ Usage:
   uv run python scripts/file_mailbox.py                  # dry run (default)
   uv run python scripts/file_mailbox.py --apply          # mark read + move
   uv run python scripts/file_mailbox.py --through-uid N  # explicit ceiling
+  uv run python scripts/file_mailbox.py --report-unregistered
+      # list government mailing lists the registry does not know (headers
+      # only, INBOX + <prefix>/Unregistered + the junk folder); read-only
 """
 
 import argparse
@@ -33,6 +36,8 @@ def main() -> int:
                     help="folder/label prefix (default IMAP_FILE_TO, else FAPD)")
     ap.add_argument("--through-uid", type=int,
                     help="ceiling UID (default: this database's watermark)")
+    ap.add_argument("--report-unregistered", action="store_true",
+                    help="list unregistered government list senders; read-only")
     ap.add_argument("--verbose", "-v", action="store_true")
     args = ap.parse_args()
     logging_setup.setup(verbose=args.verbose)
@@ -43,6 +48,9 @@ def main() -> int:
     entries = [e for e in load_registry()
                if e["type"] == "email" and e["status"] in ("active", "planned")
                and e.get("sender")]
+
+    if args.report_unregistered:
+        return _report_unregistered(entries, args.prefix)
 
     conn = db.connect()
     try:
@@ -87,6 +95,21 @@ def main() -> int:
         return 0
     finally:
         conn.close()
+
+
+def _report_unregistered(entries, prefix):
+    with email_sources.MailboxClient(file_to="") as client:
+        folders = ["INBOX", f"{prefix}/Unregistered"]
+        junk = client.junk_folder()
+        if junk:
+            folders.append(junk)
+        found = email_sources.unregistered_government_lists(client, entries, folders)
+    print(f"{len(found)} unregistered government list sender(s) in"
+          f" {', '.join(folders)}\n")
+    for sender, rec in sorted(found.items(), key=lambda kv: -kv[1]["messages"]):
+        print(f"{rec['messages']:4}  {sender:45} {rec['account'] or '-':16}"
+              f" {rec['name'][:34]:34} | {rec['subject'] or '(notices only)'}")
+    return 0
 
 
 if __name__ == "__main__":

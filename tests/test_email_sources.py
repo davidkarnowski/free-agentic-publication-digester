@@ -535,3 +535,188 @@ def test_mailbox_write_surface_is_mark_read_and_move_only():
     for banned in (".expunge(", ".delete(", ".store(", '"COPY"', '"EXPUNGE"',
                    "-FLAGS"):
         assert banned not in src
+
+
+# ------------------------------------------------------------- junk folder --
+
+
+class TwoFolderMailbox(FakeMailbox):
+    """INBOX plus a junk folder; `use_folder` switches which one is read."""
+
+    def __init__(self, inbox, junk, uid_validity=42):
+        super().__init__(inbox, uid_validity)
+        self.folders = {"INBOX": self.messages,
+                        "Junk": dict(enumerate(junk, start=1))}
+        self.moves = []
+
+    def junk_folder(self):
+        return "Junk"
+
+    def use_folder(self, folder):
+        self.folder = folder
+        self.messages = self.folders[folder]
+
+    def file_messages(self, uids, dest):
+        self.moves.append((self.folder, dest, list(uids)))
+        return len(uids)
+
+
+def aligned_dkim(raw):
+    return {"result": "pass", "domain": "public.govdelivery.com",
+            "selector": "s", "key_record": "k"}
+
+
+def seed_junk_watermark(conn, box):
+    email_sources._save_state(conn, "Junk", 0, box.uid_validity())
+
+
+def test_junk_folder_first_poll_starts_at_present(conn):
+    box = TwoFolderMailbox([], [MULTI, SINGLE])
+    results = email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=aligned_dkim)
+    assert results == [] and box.bodies_fetched == []  # no backfill
+    assert email_sources._state(conn, "Junk") == (2, 42)
+    assert box.folder == "INBOX"  # returned to the polled folder
+
+
+def test_junk_mail_with_aligned_dkim_is_ingested_and_filed(conn):
+    box = TwoFolderMailbox([], [PERSONAL, MULTI])
+    box.file_to = "FAPD"
+    seed_junk_watermark(conn, box)
+    results = email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=aligned_dkim)
+    assert results[0]["items"] == 2 and results[0]["refused"] == 0
+    assert box.moves == [("Junk", "FAPD/Ingested", [2])]
+    assert box.bodies_fetched == [2]  # the junk-folder personal mail is untouched
+
+
+@pytest.mark.parametrize("dkim", [
+    {"result": "fail", "domain": "public.govdelivery.com"},
+    {"result": "none", "domain": None},
+    {"result": "pass", "domain": "spammer.example"},  # verified, not aligned
+])
+def test_junk_mail_without_aligned_dkim_is_refused(conn, dkim):
+    box = TwoFolderMailbox([], [MULTI])
+    box.file_to = "FAPD"
+    seed_junk_watermark(conn, box)
+    results = email_sources.poll_mailbox(box, conn, [entry()],
+                                         dkim_verifier=lambda raw: dict(dkim))
+    assert results[0]["refused"] == 1 and results[0]["items"] == 0
+    assert conn.execute("SELECT COUNT(*) FROM packages").fetchone()[0] == 0
+    assert conn.execute("SELECT COUNT(*) FROM captures").fetchone()[0] == 0
+    assert box.moves == []  # left in the junk folder
+    assert email_sources._state(conn, "Junk")[0] == 1  # not reconsidered
+
+
+def test_inbox_keeps_record_and_ingest_on_dkim_fail(conn):
+    """The junk gate is junk-only: INBOX mail failing DKIM is still ingested
+    and marked, per GUIDE §3 (a failed signature is a fact, not a drop)."""
+    box = TwoFolderMailbox([MULTI], [])
+    fail = lambda raw: {"result": "fail", "domain": "x.example", "selector": "s",
+                        "key_record": None}
+    results = email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=fail)
+    assert results[0]["items"] == 2 and results[0]["refused"] == 0
+
+
+def test_junk_polling_can_be_turned_off(conn, monkeypatch):
+    monkeypatch.setattr(config, "IMAP_POLL_JUNK", False)
+    box = TwoFolderMailbox([], [MULTI])
+    email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=aligned_dkim)
+    assert email_sources._state(conn, "Junk") == (0, None)
+
+
+@pytest.mark.parametrize("sender,domain,ok", [
+    ("a@public.govdelivery.com", "public.govdelivery.com", True),
+    ("a@public.govdelivery.com", "govdelivery.com", True),
+    ("frb@announcements.federalreserve.gov", "announcements.federalreserve.gov", True),
+    ("a@info.dot.gov", "govdelivery.com", False),
+    ("a@info.dot.gov", "dot.gov.evil.example", False),
+])
+def test_dkim_alignment_is_organizational(sender, domain, ok):
+    assert email_sources.dkim_aligned({"result": "pass", "domain": domain}, sender) is ok
+
+
+def test_junk_folder_found_by_attribute_not_name():
+    class Listing:
+        def list(self):
+            return "OK", [b'(\\HasNoChildren) "/" "INBOX"',
+                          b'(\\HasNoChildren \\Junk) "/" "[Gmail]/Spam"']
+    client = email_sources.MailboxClient(host="h", user="u", password="p", file_to="")
+    client._box = Listing()
+    assert client.junk_folder() == "[Gmail]/Spam"
+
+
+# -------------------------------------------------------------- mailbox log --
+
+
+def _log(conn):
+    return [dict(r) for r in conn.execute(
+        "SELECT mailbox, uid, source_id, sender, outcome, items, duplicates,"
+        " no_url_items, dkim FROM mailbox_messages ORDER BY mailbox, uid")]
+
+
+LIST_GOV = b"""From: Some Agency <news@updates.example.gov>
+List-Unsubscribe: <https://public.govdelivery.com/accounts/XX/subscriber/edit>
+Subject: Agency News
+Message-ID: <l-1@example.gov>
+
+body
+"""
+
+PERSONAL_GOV = b"""From: A Person <person@example.gov>
+Subject: Re: your question
+Message-ID: <p-2@example.gov>
+
+A reply from a person, not a list.
+"""
+
+
+def test_mailbox_log_records_each_outcome(conn):
+    box = FakeMailbox([MULTI, ADMIN, b"From: usattorneys@public.govdelivery.com\n\nnot a bulletin"])
+
+    def dkim(raw):
+        if b"not a bulletin" in raw:
+            raise ValueError("boom")
+        return no_dkim(raw)
+
+    email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=dkim)
+    rows = _log(conn)
+    assert [r["outcome"] for r in rows] == ["ingested", "administrative", "error"]
+    assert rows[0]["items"] == 2 and rows[0]["dkim"] == "pass"
+    assert rows[0]["source_id"] == "usattorneys-email"
+
+
+def test_mailbox_log_duplicate_and_empty(conn):
+    box = FakeMailbox([MULTI])
+    email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=no_dkim)
+    box._uid_validity = 99  # rescan: the same bulletin again, nothing new
+    email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=no_dkim)
+    outcomes = [r["outcome"] for r in _log(conn)]
+    assert outcomes == ["ingested", "empty"]
+
+
+def test_mailbox_log_counts_items_without_url(conn):
+    box = FakeMailbox([SINGLE])
+    email_sources.poll_mailbox(
+        box, conn, [entry(id="usps-oig-email", sender="uspsoig@public.govdelivery.com")],
+        dkim_verifier=no_dkim)
+    row = _log(conn)[0]
+    assert row["items"] == 1
+    assert row["no_url_items"] == 0  # the SINGLE fixture carries its release URL
+
+
+def test_unregistered_government_lists_logged_personal_mail_never(conn):
+    box = FakeMailbox([PERSONAL, LIST_GOV, PERSONAL_GOV])
+    email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=no_dkim)
+    rows = _log(conn)
+    assert [(r["outcome"], r["sender"]) for r in rows] == [
+        ("unregistered", "news@updates.example.gov")]
+    assert box.bodies_fetched == []  # headers only for unregistered mail
+
+
+def test_junk_refusal_is_logged(conn):
+    box = TwoFolderMailbox([], [MULTI])
+    seed_junk_watermark(conn, box)
+    email_sources.poll_mailbox(box, conn, [entry()],
+                               dkim_verifier=lambda raw: {"result": "fail",
+                                                          "domain": "x.example"})
+    assert [(r["mailbox"], r["outcome"], r["dkim"]) for r in _log(conn)] == [
+        ("Junk", "refused", "fail")]

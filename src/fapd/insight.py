@@ -88,6 +88,116 @@ def _work_window(date, *, now=None):
     return (start.astimezone(dt.UTC).strftime(fmt), end.strftime(fmt))
 
 
+#: A registered email source whose mailbox rows over this many days are
+#: all subscription notices is flagged: it may be sending its bulletins
+#: from an address the registry does not list (the EPA case, 2026-09-26).
+_NOTICE_ONLY_DAYS = 14
+
+
+def gather_email(conn, start, end, entries=None):
+    """The Mailbox section's facts (plan-2026-09-26-mailbox-reporting T5).
+
+    Counts and registry ids only — this report is committed publicly, so
+    no sender address, subject, or body text appears. Unregistered
+    government lists are counted; their addresses stay in the database
+    (scripts/file_mailbox.py --report-unregistered)."""
+    if entries is None:
+        from .sources import load_registry
+        entries = load_registry()
+    email_ids = sorted(e["id"] for e in entries
+                       if e["type"] == "email" and e["status"] in ("active", "planned"))
+    out = {"available": True, "sources": [], "flags": [],
+           "unregistered": {"messages": 0, "senders": 0, "new_senders": 0},
+           "refused": 0}
+    try:
+        rows = conn.execute(
+            "SELECT source_id, outcome, COUNT(*), SUM(items), SUM(no_url_items)"
+            " FROM mailbox_messages WHERE source_id IS NOT NULL"
+            " AND substr(observed_at, 1, 19) >= ? AND substr(observed_at, 1, 19) < ?"
+            " GROUP BY 1, 2", (start, end)).fetchall()
+    except sqlite3.OperationalError:
+        return {"available": False}
+    per = {}
+    for sid, outcome, n, items, no_url in rows:
+        rec = per.setdefault(sid, {"id": sid, "ingested": 0, "administrative": 0,
+                                   "duplicate": 0, "empty": 0, "refused": 0,
+                                   "error": 0, "items": 0, "no_url_items": 0})
+        rec[outcome] = rec.get(outcome, 0) + n
+        rec["items"] += items or 0
+        rec["no_url_items"] += no_url or 0
+    out["sources"] = [per[k] for k in sorted(per)]
+    out["refused"] = sum(r["refused"] for r in out["sources"])
+
+    for rec in out["sources"]:
+        if rec["id"] not in email_ids:
+            out["flags"].append(f"{rec['id']}: mail handled for a source that is "
+                                "no longer active or planned in the registry")
+        if rec["empty"]:
+            out["flags"].append(f"{rec['id']}: {rec['empty']} bulletin(s) yielded "
+                                "no item (parser or already-ingested; check)")
+        if rec["no_url_items"]:
+            out["flags"].append(f"{rec['id']}: {rec['no_url_items']} item(s) stored "
+                                "without a URL (these can never be corroborated)")
+        if rec["refused"]:
+            out["flags"].append(f"{rec['id']}: {rec['refused']} junk-folder "
+                                "message(s) refused on DKIM")
+        if rec["error"]:
+            out["flags"].append(f"{rec['id']}: {rec['error']} message(s) failed "
+                                "processing")
+
+    # Notice-only subscriptions over a longer span than the work window.
+    lookback = conn.execute(
+        "SELECT source_id, SUM(outcome = 'administrative'), COUNT(*)"
+        " FROM mailbox_messages WHERE source_id IS NOT NULL"
+        " AND substr(observed_at, 1, 10) >= date(?, ?) GROUP BY 1",
+        (end[:10], f"-{_NOTICE_ONLY_DAYS} days")).fetchall()
+    for sid, admin, total in lookback:
+        if admin and admin == total:
+            out["flags"].append(
+                f"{sid}: only subscription notices in {_NOTICE_ONLY_DAYS} days — "
+                "bulletins may be arriving from an unregistered address")
+
+    # One document through two registered email sources: possible
+    # misattribution, or two lists syndicating one release.
+    from .report import _normalize_official_url
+    by_url = {}
+    for sid, url in conn.execute(
+            "SELECT json_extract(e.metadata, '$.source_id'),"
+            " json_extract(e.metadata, '$.url') FROM extracted_texts e"
+            " JOIN packages p USING (package_id) WHERE e.collection = 'AGENCYPR'"
+            " AND json_extract(e.metadata, '$.channel') = 'email'"
+            " AND substr(p.first_seen_at, 1, 19) >= ?"
+            " AND substr(p.first_seen_at, 1, 19) < ?", (start, end)):
+        key = _normalize_official_url(url)
+        if key:
+            by_url.setdefault(key, set()).add(sid)
+    pairs = {}
+    for sids in by_url.values():
+        if len(sids) > 1:
+            pair = " + ".join(sorted(sids))
+            pairs[pair] = pairs.get(pair, 0) + 1
+    for pair, n in sorted(pairs.items()):
+        out["flags"].append(f"{pair}: {n} document(s) arrived through both "
+                            "email sources")
+
+    msgs, senders = conn.execute(
+        "SELECT COUNT(*), COUNT(DISTINCT sender) FROM mailbox_messages"
+        " WHERE outcome = 'unregistered' AND substr(observed_at, 1, 19) >= ?"
+        " AND substr(observed_at, 1, 19) < ?", (start, end)).fetchone()
+    new = conn.execute(
+        "SELECT COUNT(*) FROM (SELECT sender FROM mailbox_messages"
+        " WHERE outcome = 'unregistered' GROUP BY sender"
+        " HAVING substr(MIN(observed_at), 1, 19) >= ?"
+        " AND substr(MIN(observed_at), 1, 19) < ?)", (start, end)).fetchone()[0]
+    out["unregistered"] = {"messages": msgs, "senders": senders, "new_senders": new}
+    if new:
+        out["flags"].append(
+            f"{new} government list sender(s) seen for the first time and not in "
+            "the registry — review with scripts/file_mailbox.py "
+            "--report-unregistered")
+    return out
+
+
 def gather(conn, date, *, fetch_db=None, ledger_db=None, now=None):
     """Mechanical metrics for the report — zero tokens. `date` is the
     digest date just finalized; request and token accounting cover the
@@ -190,6 +300,7 @@ def gather(conn, date, *, fetch_db=None, ledger_db=None, now=None):
             "SELECT worker, last_ok_at, consecutive_errors FROM collector_state"
             " ORDER BY consecutive_errors DESC, worker")
     ]
+    m["email"] = gather_email(conn, start, end)
     return m
 
 
@@ -248,6 +359,8 @@ def render_report(metrics, suggestions=None, security=None):
     L += [f"| {c['worker']} | {c['last_ok_at'] or '—'} |"
           f" {c['consecutive_errors']} |" for c in metrics["collectors"]]
 
+    L += render_email(metrics.get("email"))
+
     if security is not None:
         L += render_security(security.get("sweep"), security.get("problem"),
                              security.get("summary"))
@@ -263,6 +376,35 @@ def render_report(metrics, suggestions=None, security=None):
 
     L += ["", f"*Generated {utc_now_iso()}.*", ""]
     return "\n".join(L)
+
+
+def render_email(email):
+    """The Mailbox section. Counts and registry ids only (public report)."""
+    L = ["", "## Mailbox (work window)", ""]
+    if not email or not email.get("available"):
+        return L + ["The mailbox log is not present in this database yet."]
+    L += ["What the email poll did with each registered sender's mail,",
+          "including messages that produced no item. A duplicate is a",
+          "bulletin whose items had all arrived through another channel.", ""]
+    if email["sources"]:
+        L += [("| source | ingested | notices | duplicate | no item | refused |"
+               " errors | items | items without URL |"),
+              "|---|---|---|---|---|---|---|---|---|"]
+        L += [f"| {r['id']} | {r['ingested']} | {r['administrative']} |"
+              f" {r['duplicate']} | {r['empty']} | {r['refused']} | {r['error']} |"
+              f" {r['items']} | {r['no_url_items']} |" for r in email["sources"]]
+    else:
+        L += ["No registered sender's mail was handled in the window."]
+    u = email["unregistered"]
+    L += ["", (f"Unregistered government lists: {u['messages']} message(s) from"
+               f" {u['senders']} sender(s), {u['new_senders']} new. Addresses are"
+               " not printed here; `scripts/file_mailbox.py --report-unregistered`"
+               " lists them.")]
+    L += ["", "### Classification flags", ""]
+    clean = ("None — every handled message matched its registered source"
+             " cleanly.")
+    L += [f"- {f}" for f in email["flags"]] or [clean]
+    return L
 
 
 _SECURITY_PROMPT = """Below is a machine-generated security sweep of a

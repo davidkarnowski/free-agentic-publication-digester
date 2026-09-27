@@ -532,6 +532,10 @@ IMAP_PASSWORD = os.environ.get("IMAP_PASSWORD", "")
 # database lives: the poll reads INBOX alone, so a second host filing mail
 # would hide it from the worker that owns the watermark.
 IMAP_FILE_TO = os.environ.get("IMAP_FILE_TO", "").strip()
+# Poll the server's junk folder too (docs/email-sources.md §3a): registered
+# senders only, and only mail whose DKIM signature verifies AND aligns with
+# the sender's domain; read from the present forward, never backfilled.
+IMAP_POLL_JUNK = os.environ.get("IMAP_POLL_JUNK", "1").strip() != "0"
 # The +URL is the crawler-transparency page (docs/site/bot.md) — the
 # standard convention so a sec-ops reader of a server log lands on the
 # explanation in one step.

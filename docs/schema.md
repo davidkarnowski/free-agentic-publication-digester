@@ -579,6 +579,36 @@ conditional-GET validators (`etag`, `last_modified`) plus
 `last_polled_at` for the web poller. Both are pure watermarks: losing
 them costs re-examination, never data.
 
+### `mailbox_messages` (2026-09-26; plan-2026-09-26-mailbox-reporting)
+
+One row per mailbox message that concerns the project, keyed by
+`(mailbox, uid_validity, uid)`. It records what the poll *did*, so the
+health layer, the source pages and the nightly insight report can see
+messages that produced no item: subscription administrivia, junk-folder
+refusals, bulletins that parsed to nothing, and government lists the
+registry does not know. The poll's return value and
+`collector_state.last_result` are status lines, not this record.
+
+| column | meaning |
+|---|---|
+| `mailbox` | IMAP folder the message was read from (`INBOX`, the junk folder) |
+| `uid_validity`, `uid` | the message's identity in that folder |
+| `observed_at` | UTC stamp of the poll that handled it |
+| `source_id` | registry id; NULL for an unregistered sender |
+| `sender` | From address (registered senders, and unregistered government list mail) |
+| `outcome` | `ingested`, `administrative`, `duplicate`, `empty`, `refused`, `error`, `unregistered` |
+| `items`, `duplicates`, `no_url_items` | per-message counts from the parse |
+| `dkim` | DKIM result string (`pass`, `fail`, `none`, …); NULL when not checked |
+
+**Which messages get a row.** Every message from a registered sender.
+From an unregistered sender, only *government list mail*: a sender
+domain under `.gov`, `.mil` or `govdelivery.com` **and** a
+`List-Unsubscribe` or `List-Id` header, judged on headers alone. Personal
+mail — including a person writing from a government address — never
+produces a row. `sender` is database-only: it never renders on the site
+or in a committed report (the site withholds addresses; the insight
+report prints counts and registry ids).
+
 ## Continuous-ingestion layer (2026-07-30; docs/continuous-ingestion.md)
 
 `item_journal` — the intraday arrival journal, written by **post-cycle

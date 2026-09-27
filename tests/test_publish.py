@@ -791,7 +791,7 @@ def test_planned_sources_say_why_they_are_unmeasured(health_site):
     card = page[page.index('id="src-planned-newsroom"'):]
     card = card[:card.index("</article>")]
     assert "Not ingested: the registry status of this source is planned." in card
-    assert "shown for active sources only" in card
+    assert "shown for sources the pipeline reads" in card
     assert "tag-health-" not in card
 
 

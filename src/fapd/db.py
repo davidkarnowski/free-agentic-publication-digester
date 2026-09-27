@@ -144,6 +144,25 @@ CREATE TABLE IF NOT EXISTS mailbox_state (
     last_polled_at TEXT
 ) WITHOUT ROWID;
 
+-- One row per mailbox message that concerns the project (docs/schema.md).
+CREATE TABLE IF NOT EXISTS mailbox_messages (
+    mailbox       TEXT NOT NULL,
+    uid_validity  INTEGER NOT NULL DEFAULT 0,
+    uid           INTEGER NOT NULL,
+    observed_at   TEXT NOT NULL,
+    source_id     TEXT,
+    sender        TEXT,
+    outcome       TEXT NOT NULL CHECK (outcome IN ('ingested', 'administrative',
+                  'duplicate', 'empty', 'refused', 'error', 'unregistered')),
+    items         INTEGER NOT NULL DEFAULT 0,
+    duplicates    INTEGER NOT NULL DEFAULT 0,
+    no_url_items  INTEGER NOT NULL DEFAULT 0,
+    dkim          TEXT,
+    PRIMARY KEY (mailbox, uid_validity, uid)
+) WITHOUT ROWID;
+CREATE INDEX IF NOT EXISTS idx_mailbox_messages_observed
+    ON mailbox_messages (observed_at);
+
 CREATE TABLE IF NOT EXISTS feed_state (
     source_id     TEXT PRIMARY KEY,
     etag          TEXT,
