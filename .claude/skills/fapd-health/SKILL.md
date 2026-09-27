@@ -50,6 +50,13 @@ source of truth. This skill never writes or restarts anything.
    AND `iptables -S DOCKER-USER` contains `f2b-fapd-mcp` — a jail
    without a chain bans nothing. Never unban, restart, or stop anything
    from this skill; the unban command in OPS-GUIDE is the operator's.
+4c. **The mailbox** (2026-09-26). Read-only: `mailbox_state` has a
+   row for INBOX and for the junk folder, each polled within ~30
+   minutes; `mailbox_messages` over the last 24 hours by outcome —
+   `refused` (junk mail failing DKIM alignment), `error`, and
+   `unregistered` rows are the ones to name. The nightly insight
+   report's Mailbox flags are the day's classification findings. Never
+   print a sender address outside the operator's terminal.
 5. **Verify/report**: state each check's actual observed value against
    its expectation; flag anomalies — never summarize unchecked items as
    fine. If a check could not run, say so and why; an unrunnable check

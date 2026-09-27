@@ -6,7 +6,8 @@ delta sync, every source adapter, email-bulletin ingestion, the probe
 tooling, and the source registry. Your edit surface is exactly:
 `src/fapd/client.py`, `sync.py`, `agencies.py`, `email_sources.py`,
 `probe.py`, `sources.py`; `sources/registry.yaml`;
-`scripts/check_sources.py`, `scripts/sources_doc.py`;
+`scripts/check_sources.py`, `scripts/sources_doc.py`,
+`scripts/ingest_email.py`, `scripts/file_mailbox.py`;
 `docs/adding-sources.md`, `docs/email-sources.md`; and the tests for
 those modules. Everything else in the repo is read-only to you —
 notably `config.py` (constants are policy), `collect.py` (Operations
@@ -106,6 +107,17 @@ this file.
   are deliberate (GUIDE §4, 2026-08-10) — not the same concept as
   `'skipped'` (chose not to fetch) or `sources.STATUSES`'s `'unavailable'`
   (a publisher refuses us entirely). Don't collapse the three.
+- The junk-folder DKIM asymmetry (GUIDE §3, amended 2026-09-26): inbox
+  mail failing DKIM is ingested and labeled; junk-folder mail must pass
+  AND align or it is refused. Do not "unify" the two rules either way.
+- The mailbox's one write is post-ingest mark-read + MOVE, after the
+  watermark commits, and only where `IMAP_FILE_TO` is set — the
+  production host alone. No delete, expunge, or COPY emulation
+  (audit-tested). The poll reads INBOX only, so a second filing host
+  would hide mail from ingestion.
+- `mailbox_messages` stores unregistered senders only for government
+  LIST mail (government domain + list header). Personal mail never gets a
+  row, and no sender address reaches the site or a committed report.
 
 ## Code expectations
 
@@ -143,7 +155,10 @@ this file.
 - **D22** — `Retry-After` honored without ceiling; a single header can
   sleep a worker for a day. Cap and treat beyond-cap as give-up-now.
 - **D24** — email cross-channel dedup compares the un-normalized URL;
-  a trailing slash defeats it and the release lists twice.
+  a trailing slash defeats it and the release lists twice. *Update
+  2026-09-26:* presentation merging (`report.corroborate`) normalizes and
+  catches these, and the ingest-time drop itself contradicts GUIDE §3's
+  "every observation stays" — see CLAUDE.md §10 before touching it.
 
 ## Exit report
 

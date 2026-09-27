@@ -573,3 +573,38 @@ not reusable.)*
 - **Trigger:** now. The operator called the content loss the first thing
   to address on 2026-09-18. Operations owns the stage ordering;
   Publication owns the page.
+
+**OB-29 — Email follow-ups from the 2026-09-26 mailbox audit**
+- **Context.** On 2026-09-26 the operator's review of the project mailbox
+  found three failures, each invisible to every report. EPA's bulletins
+  were arriving from an unregistered address. Registered senders'
+  bulletins were being filed in Spam. Dozens of government lists had
+  never been registered. The fixes shipped that evening: EPA's sender
+  address, 26 registered subscriptions, junk-folder polling behind DKIM
+  alignment, post-ingest filing, the `mailbox_messages` log, and the
+  insight Mailbox section (plan-2026-09-26-mailbox-reporting). These items
+  remain.
+- **Re-subscribe the expired confirmations.** SEC, DHS, ICE and DEA
+  Diversion Control each sent "Account Request Expired". HHS News sent
+  only a confirm-your-email message. Each needs a manual pass through the
+  publisher's signup page (docs/email-sources.md §4), and then a registry
+  entry. *Trigger:* operator time for the manual pass.
+- **Coverage evaluations for the 27 planned email entries.** EPA and the
+  26 new entries are read and ingested while planned. Each is promoted to
+  active by a dated gate-3 note once its first bulletins have been
+  ingested. *Trigger:* about a week of `mailbox_messages` rows, or the
+  insight report flagging a source.
+- **`hud-oig-email`'s registry notes carry other sources' evaluations.**
+  Five gate-3 paragraphs were appended to it in July, and one of them
+  describes SSA. Attribute each one from the production data, move it to
+  its own entry, and leave HUD OIG's own evidence in place. *Trigger:*
+  the next registry pass.
+- **A transient MOVE failure is not retried.** Gmail once answered
+  "System Error (Failure)" to a MOVE, and a rerun succeeded. In the worker
+  the failure is logged and the message stays in INBOX, and nothing
+  refiles it later, because the watermark has already passed it.
+  `scripts/file_mailbox.py --through-uid <production watermark>` clears
+  the leftovers. *Trigger:* leftovers seen in INBOX, or add one retry to
+  `file_messages`.
+- **The ingest-time email drop (CLAUDE.md §10).** This needs an operator
+  ruling before anyone changes it.

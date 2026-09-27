@@ -183,6 +183,9 @@ file.
   one inclusion rule. Loosening or adding a rule is a GUIDE change.
 - `insight.py` writes a dev-facing surface (provenance/runs/) — its
   prose never enters the digest and its failure never fails the run.
+  Its Mailbox section (2026-09-26) prints counts and registry ids only:
+  the report is committed publicly, and a test fails if an email
+  address appears in it.
 - `scripts/digest.py` imports this layer lazily; keep report-only runs
   importable even when analysis modules break.
 - `PLAIN_MODEL = MAP_MODEL` — restatement is compression work, cheap

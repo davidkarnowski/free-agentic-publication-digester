@@ -41,7 +41,7 @@ things to health-check.
 |---|---|---|
 | GovinfoWorker | `sync.sync_collection(client, conn, c, max_downloads=50)` then `extract.run(conn)` | watermark delta; extract staleness-keyed |
 | AgencyHostWorker (one per `host_groups()` key) | `agencies._poll_isolated(...)` per entry (the crash-isolating wrapper around `poll_source`) | `feed_state` conditional GETs → 304s |
-| EmailWorker | `email_sources.poll_mailbox(mbox, conn, entries)` (registry filtered to configured email senders; short-circuits when IMAP is unconfigured) | `mailbox_state` UID watermark |
+| EmailWorker | `email_sources.poll_mailbox(mbox, conn, entries)` (registry filtered to configured email senders; short-circuits when IMAP is unconfigured). Reads INBOX, then the junk folder under the DKIM-alignment gate (2026-09-26); files handled mail when `IMAP_FILE_TO` is set | `mailbox_state` UID watermark per folder; `mailbox_messages` log (docs/schema.md) |
 | AnalyzeWorker | `analyze.run` / `analyze.run_plain` on trigger — dates bounded to `ANALYZE_MAX_AGE_DAYS` (§6 r13) and items past `MAX_ITEM_SUMMARY_ATTEMPTS` excluded (r14) | keyed by `(package, granule, prompt_version)` |
 | RenderWorker (§8) | `publish.build_today` on journal-watermark movement (5-min clock); `publish.refresh_sources` on its own 15-min clock | zero tokens, zero requests |
 | EODWorker (§9; only with `--eod`) | `run_pipeline.py --date <target>` as a subprocess, then the evidence commit when enabled | once per closed publication day, durable `finalized` marker |

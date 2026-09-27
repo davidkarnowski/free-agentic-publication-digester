@@ -318,6 +318,16 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   one-line change. Two invariants inside the hop: it **re-resolves the
   model tier** for the new backend, and attribution stays **plural**
   (`backends_used` → `day_inference.backend` = `cli, gemini`).
+- **The mailbox's junk folder is held to a stricter rule than the inbox,
+  on purpose** (GUIDE §3, amended 2026-09-26). Inbox mail failing DKIM is
+  ingested and labeled; junk-folder mail from a registered sender must
+  verify AND align with the sender's domain, or it is refused and
+  counted. Spam filtering is where forged From headers collect. Do not
+  unify the two rules.
+- **`IMAP_FILE_TO` is set on the production host and nowhere else.**
+  Filing moves handled mail out of INBOX, and the poll reads INBOX only,
+  so a second host filing mail (a laptop run, the dev stack) would hide
+  bulletins from the worker that owns the watermark.
 
 ## 10. Things that look intentional but are bugs
 
@@ -376,7 +386,7 @@ live in `.claude/agents/fapd-*.md` (tracked).
 | Provenance / hashes | `src/fapd/provenance.py`, `PROVENANCE.md` |
 | No-inference floor / layer outcomes | `src/fapd/finalize.py`, `inference.py` (`day_inference`), the digest's Inference row in `report.py` |
 | Narration (TTS, gated off) | `src/fapd/tts.py`; called from `compose.py` only with `OPENAI_API_KEY`; players rendered by `publish.py` — GUIDE §3a narration note |
-| Email ingestion | `src/fapd/email_sources.py`, `docs/email-sources.md` |
+| Email ingestion | `src/fapd/email_sources.py`, `docs/email-sources.md`; mailbox sweeps and the unregistered-list review: `scripts/file_mailbox.py`; the `mailbox_messages` log (`docs/schema.md`) |
 | Continuous ingestion | `src/fapd/collect.py`, `docs/continuous-ingestion.md` |
 | VPS / deploy | `deploy/vps/README.md`, `docs/ops/` |
 | Agent discovery documents (Content Signals, Link headers, API/AI catalogs, agent skills, auth.md, Markdown twins) | `publish._build_agent_surfaces`, `docs/ops/plan-2026-09-13-agent-discovery.md` |
