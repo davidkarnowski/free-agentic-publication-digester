@@ -445,3 +445,21 @@ def test_main_accepts_no_llm(monkeypatch, tmp_path):
     assert run_pipeline.main(["--date", "2026-08-24", "--no-llm"]) == 0
     assert run_pipeline.NO_LLM is True
     run_pipeline.NO_LLM = False
+
+
+def test_finalizer_client_fails_over_uncapped(monkeypatch):
+    """GUIDE §6 r7 (amended 2026-09-27): the finalizer's client — which also
+    serves source descriptions/assessments and the insight report — gets
+    the fallback with NO reserve cap; only the collector is capped."""
+    from fapd import llm
+    seen = {}
+
+    class Spy:
+        def __init__(self, **kwargs):
+            seen.update(kwargs)
+
+    monkeypatch.setattr(llm, "LLMClient", Spy)
+    monkeypatch.setattr(config, "LLM_BACKEND_FALLBACK", "gemini")
+    monkeypatch.setattr(run_pipeline, "NO_LLM", False)
+    run_pipeline.llm_client()
+    assert seen == {"fallback": "gemini"}

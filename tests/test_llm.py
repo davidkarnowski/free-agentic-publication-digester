@@ -969,3 +969,94 @@ def test_gemini_key_travels_in_a_header_not_the_url(tmp_path):
     assert "fake-gemini-key" not in call["url"]
     assert "key=" not in call["url"]
     assert call["headers"]["x-goog-api-key"] == "fake-gemini-key"
+
+
+# ---- GUIDE §6 r7 amended 2026-09-27: failover for every caller, with a
+# ---- ledger-counted reserve held for the finalizer.
+#
+# The incident: 2026-09-24 23:22 to 09-26 11:00 UTC the CLI refused every
+# call (the subscription was paused pending payment). The finalizer failed
+# over; the continuous analyze layer had no fallback and paused for 36 h.
+
+
+def _seed_gemini_calls(client, n, *, error=None, hours_ago=1):
+    ts = (dt.datetime.now(dt.UTC) - dt.timedelta(hours=hours_ago)).strftime(
+        "%Y-%m-%dT%H:%M:%S.000+00:00")
+    client._db.executemany(
+        "INSERT INTO llm_calls (ts_utc, backend, model, purpose, error)"
+        " VALUES (?, 'gemini', 'gemini-2.5-flash', 'map:batch1', ?)",
+        [(ts, error)] * n)
+    client._db.commit()
+
+
+def _collector_failover_client(tmp_path, procs, gemini_responses, budget):
+    client, calls, fake = make_failover_client(tmp_path, procs, gemini_responses)
+    client._fallback_budget = budget
+    client._sleep = lambda s: None
+    return client, calls, fake
+
+
+def test_collector_fails_over_while_under_its_reserve(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 1)
+    client, _, fake = _collector_failover_client(
+        tmp_path, [FakeProc(stdout=_session_limit_envelope(), returncode=1)],
+        [FakeGeminiResponse(json_data=gemini_json("summary"))], budget=10)
+    _seed_gemini_calls(client, 9)
+    assert client.complete("x", purpose="map:batch1")["text"] == "summary"
+    assert len(fake.calls) == 1
+
+
+def test_collector_hop_is_declined_at_its_reserve(tmp_path, monkeypatch, caplog):
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 1)
+    client, _, fake = _collector_failover_client(
+        tmp_path, [FakeProc(stdout=_session_limit_envelope(), returncode=1)],
+        [FakeGeminiResponse(json_data=gemini_json("never"))], budget=10)
+    _seed_gemini_calls(client, 10)
+    with caplog.at_level("WARNING", logger="fapd.llm"), \
+            pytest.raises(llm.ProviderUnavailableError):
+        client.complete("x", purpose="map:batch1")
+    assert fake.calls == []                          # Gemini never touched
+    assert any("failover declined" in r.getMessage() for r in caplog.records)
+
+
+def test_collector_stops_on_the_fallback_when_its_reserve_runs_out(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 1)
+    client, _, fake = _collector_failover_client(
+        tmp_path, [FakeProc(stdout=_session_limit_envelope(), returncode=1)],
+        [FakeGeminiResponse(json_data=gemini_json("one"))] * 3, budget=5)
+    _seed_gemini_calls(client, 4)
+    assert client.complete("x", purpose="map:batch1")["text"] == "one"   # the 5th
+    with pytest.raises(llm.ProviderUnavailableError):
+        client.complete("y", purpose="map:batch2")
+    assert len(fake.calls) == 1
+    # Later calls short-circuit on the tripped breaker, never reaching Gemini.
+    with pytest.raises(llm.ProviderUnavailableError):
+        client.complete("z", purpose="map:batch3")
+    assert len(fake.calls) == 1
+
+
+def test_finalizer_client_is_never_capped_by_the_collector_share(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "LLM_TRANSIENT_ATTEMPTS", 1)
+    client, _, _fake = make_failover_client(
+        tmp_path, [FakeProc(stdout=_session_limit_envelope(), returncode=1)],
+        [FakeGeminiResponse(json_data=gemini_json("compose"))])
+    client._sleep = lambda s: None
+    _seed_gemini_calls(client, 50)                   # far past any share
+    assert client.complete("x", purpose="compose:day-in-review")["text"] == "compose"
+
+
+def test_reserve_counts_real_calls_in_24h_only(tmp_path):
+    client, _, _ = make_failover_client(tmp_path, [])
+    _seed_gemini_calls(client, 3)                                   # counted
+    _seed_gemini_calls(client, 2, error="HTTP 429 quota")           # counted: spent
+    _seed_gemini_calls(client, 4, error="provider unavailable: x (short-circuit)")
+    _seed_gemini_calls(client, 6, hours_ago=25)                     # outside window
+    assert client.fallback_calls_24h("gemini") == 5
+
+
+def test_collector_budget_from_config(monkeypatch):
+    monkeypatch.setattr(config, "LLM_FALLBACK_DAILY_CALLS", 20)
+    monkeypatch.setattr(config, "LLM_FALLBACK_COLLECTOR_SHARE", 0.5)
+    assert config.collector_fallback_budget() == 10
+    monkeypatch.setattr(config, "LLM_FALLBACK_COLLECTOR_SHARE", 0)
+    assert config.collector_fallback_budget() == 0   # finalizer-only again

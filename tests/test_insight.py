@@ -216,3 +216,45 @@ def test_stage_insight_never_fails_the_run(conn, tmp_path):
     # raises through the always-failing client, the stage returns None
     # instead of raising.
     assert run_pipeline.stage_insight(conn, DATE, llm_client=Boom()) is None
+
+
+def test_provider_availability_shows_the_refusal_span():
+    """plan-2026-09-27-inference-fallback T4: an outage reads as a span per
+    backend, not as the last five error lines."""
+    providers = [
+        {"backend": "cli", "calls": 68, "billed": 11, "refused": 57,
+         "short_circuit": 0, "first_refusal": "2026-09-26T00:24:01.000+00:00",
+         "last_refusal": "2026-09-26T11:00:59.185+00:00"},
+        {"backend": "gemini", "calls": 18, "billed": 18, "refused": 0,
+         "short_circuit": 0, "first_refusal": None, "last_refusal": None}]
+    reserve = {"backend": "gemini", "daily_calls": 20, "collector_share": 0.5,
+               "collector_budget": 10, "used_24h": 18}
+    text = "\n".join(insight.render_providers(providers, reserve))
+    assert "| cli | 68 | 11 | 57 | 0 | 2026-09-26T00:24 .. 2026-09-26T11:00 |" in text
+    assert "| gemini | 18 | 18 | 0 | 0 | — |" in text
+    assert "18 call(s) in the 24 h" in text and "may use 10 (50%)" in text
+
+
+def test_provider_metrics_from_a_real_ledger(tmp_path, monkeypatch):
+    import sqlite3
+
+    from fapd import config, llm
+    monkeypatch.setattr(config, "LLM_BACKEND_FALLBACK", "gemini")
+    monkeypatch.setattr(config, "LLM_FALLBACK_DAILY_CALLS", 20)
+    monkeypatch.setattr(config, "LLM_FALLBACK_COLLECTOR_SHARE", 0.5)
+    db = sqlite3.connect(tmp_path / "ledger.db")
+    db.executescript(llm._SCHEMA)
+    rows = [("2026-09-26T00:24:00", "cli", 0, "CLI error envelope: disabled"),
+            ("2026-09-26T11:00:00", "cli", 0, "provider unavailable: x"),
+            ("2026-09-26T11:00:01", "cli", 0, "provider unavailable: x (short-circuit)"),
+            ("2026-09-26T12:00:00", "cli", 900, None),
+            ("2026-09-26T03:00:00", "gemini", 400, None)]
+    db.executemany("INSERT INTO llm_calls (ts_utc, backend, model, purpose,"
+                   " input_tokens, error) VALUES (?, ?, 'm', 'map:batch1', ?, ?)", rows)
+    out = insight._provider_metrics(db, "2026-09-26T00:00:00", "2026-09-27T00:00:00")
+    cli = next(p for p in out["providers"] if p["backend"] == "cli")
+    assert (cli["calls"], cli["billed"], cli["refused"], cli["short_circuit"]) == (4, 1, 2, 1)
+    assert cli["first_refusal"].startswith("2026-09-26T00:24")
+    assert cli["last_refusal"].startswith("2026-09-26T11:00:00")
+    assert out["fallback_reserve"]["used_24h"] == 1
+    assert out["fallback_reserve"]["collector_budget"] == 10

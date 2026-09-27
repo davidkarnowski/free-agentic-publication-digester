@@ -568,7 +568,7 @@ def backend_from_config(name=None):
 
 class LLMClient:
     def __init__(self, db_path=None, runner=None, backend=None, sleeper=None,
-                 fallback=None):
+                 fallback=None, fallback_budget=None):
         self._db_path = db_path or config.LLM_LEDGER_DB
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._db = sqlite3.connect(self._db_path)
@@ -595,6 +595,15 @@ class LLMClient:
         # providers or come back. None — the default, and every caller
         # that does not opt in — is exactly the pre-2026-09-05 behaviour.
         self._fallback = fallback
+        # The finalizer reserve (GUIDE §6 r7, amended 2026-09-27): a
+        # caller that is NOT the finalizer passes the number of fallback
+        # calls it may spend in any rolling 24 hours, counted from the
+        # ledger (every process, every restart). At or past it the hop is
+        # declined and, once on the fallback, calls stop — the rest of the
+        # fallback's daily allowance is held for the 04:00 finalizer.
+        # None (the finalizer, and every pre-amendment caller) = no cap.
+        self._fallback_budget = fallback_budget
+        self._on_fallback = False
         # Which backends actually produced a completion on this client.
         # The day's attribution reads this, not `backend`: a day served
         # by two providers must name both (r7, "attribution false").
@@ -667,6 +676,14 @@ class LLMClient:
                     " backend (%s) — staying unavailable for this run",
                     name, exc)
                 return False
+        if self._reserve_reached(candidate.name):
+            logger.warning(
+                "LLM failover declined: %s unavailable (%s) on %s, but %s has"
+                " served %d call(s) in 24h against this caller's reserve of %d"
+                " — the rest is held for the finalizer (GUIDE §6 r7)",
+                primary, reason, purpose, candidate.name,
+                self.fallback_calls_24h(candidate.name), self._fallback_budget)
+            return False
         blocked = getattr(candidate, "unavailable", None)
         if blocked:
             logger.error(
@@ -679,7 +696,24 @@ class LLMClient:
             primary, reason, purpose, candidate.name, candidate.name)
         self._backend = candidate
         self.unavailable = None
+        self._on_fallback = True
         return True
+
+    def fallback_calls_24h(self, backend_name):
+        """Calls that reached `backend_name` in the last 24 hours, from the
+        ledger. Failed calls count — a refused request still spent the
+        provider's allowance (the fetch-log budget rule). Short-circuit
+        rows never reached a provider and do not."""
+        since = (dt.datetime.now(dt.UTC) - dt.timedelta(hours=24)).strftime(
+            "%Y-%m-%dT%H:%M:%S")
+        return self._db.execute(
+            "SELECT COUNT(*) FROM llm_calls WHERE backend = ? AND ts_utc >= ?"
+            " AND COALESCE(error, '') NOT LIKE '%(short-circuit)%'",
+            (backend_name, since)).fetchone()[0]
+
+    def _reserve_reached(self, backend_name):
+        return (self._fallback_budget is not None
+                and self.fallback_calls_24h(backend_name) >= self._fallback_budget)
 
     def complete(self, prompt, *, purpose, model=None, package_id=None,
                  granule_id=None, timeout=None):
@@ -733,6 +767,15 @@ class LLMClient:
         # no fallback this loop runs exactly once and re-raises — the
         # behaviour every caller had before 2026-09-05.
         while True:
+            if self._on_fallback and self._reserve_reached(self._backend.name):
+                # Already on the fallback and the caller's share is spent:
+                # stop here, exactly as a tripped breaker stops, so the
+                # remainder stays available to the finalizer.
+                self._log(resolved, purpose, package_id, granule_id, 0, 0, 0,
+                          error="provider unavailable: fallback reserve held"
+                                " for the finalizer (short-circuit)")
+                self._trip("quota exhausted", purpose)
+                raise ProviderUnavailableError("quota exhausted")
             try:
                 return self._complete_once(prompt, resolved, purpose,
                                            package_id, granule_id, timeout)

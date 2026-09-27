@@ -1377,3 +1377,21 @@ def test_analyze_worker_pauses_on_a_provider_breaker_instead_of_failing(
         "SELECT consecutive_errors FROM collector_state WHERE worker='analyze'"
     ).fetchone()[0] == 1
     conn.close()
+
+
+def test_default_llm_fails_over_behind_the_collector_reserve(monkeypatch, tmp_path):
+    """GUIDE §6 r7 amended 2026-09-27: the continuous analyze layer gets the
+    fallback, capped at its share; the finalizer's reserve is what remains."""
+    from fapd import collect, config, llm
+    seen = {}
+
+    class Spy:
+        def __init__(self, **kwargs):
+            seen.update(kwargs)
+
+    monkeypatch.setattr(llm, "LLMClient", Spy)
+    monkeypatch.setattr(config, "LLM_BACKEND_FALLBACK", "gemini")
+    monkeypatch.setattr(config, "LLM_FALLBACK_DAILY_CALLS", 20)
+    monkeypatch.setattr(config, "LLM_FALLBACK_COLLECTOR_SHARE", 0.5)
+    collect.Supervisor._default_llm()
+    assert seen == {"fallback": "gemini", "fallback_budget": 10}

@@ -953,9 +953,15 @@ class Supervisor:
 
     @staticmethod
     def _default_llm():
-        from . import llm
+        # GUIDE §6 r7 (amended 2026-09-27): the continuous analyze layer
+        # fails over too, but only within its share of the fallback's
+        # daily allowance — the rest is the finalizer's. A fresh client
+        # per cycle means each cycle tries the primary first, so the
+        # layer returns to the CLI on its own once the CLI answers.
+        from . import config, llm
 
-        return llm.LLMClient()
+        return llm.LLMClient(fallback=config.LLM_BACKEND_FALLBACK,
+                             fallback_budget=config.collector_fallback_budget())
 
     @staticmethod
     def _default_today_builder(conn, *, date=None):

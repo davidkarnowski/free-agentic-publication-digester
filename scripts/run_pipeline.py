@@ -169,9 +169,12 @@ def llm_client():
     This is the finalizer's process (collect.EODWorker runs this script
     as a subprocess), so it is where GUIDE §6 r7's failover is switched
     on: the day's last hour is what a digest cannot be re-run to
-    recover. The continuous AnalyzeWorker builds its own client without
-    a fallback — a free-tier quota spent on all-day map/plain work would
-    not be there at 04:00, which is the August 2026 failure r15 records.
+    recover. This client serves render correction, source descriptions
+    and assessments, and the insight report, and it is NOT capped. Since
+    2026-09-27 the continuous AnalyzeWorker fails over too, but only
+    within its reserve share (config.collector_fallback_budget), so the
+    rest of a free-tier quota is still here at 04:00. Without that
+    reserve we repeat the August 2026 failure r15 records.
     """
     if NO_LLM:
         return llm.LLMClient(backend=llm.NullBackend("disabled by operator"))

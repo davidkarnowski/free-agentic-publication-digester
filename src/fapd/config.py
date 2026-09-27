@@ -164,11 +164,25 @@ LLM_LEDGER_DB = DATA_DIR / "llm_ledger.db"
 LLM_BACKEND = os.environ.get("LLM_BACKEND", "cli").strip().lower()
 # The one backend we hop to when the primary trips the per-run breaker
 # (GUIDE §6 r7 explicit failover). Unset = no failover anywhere, which is
-# the behaviour every run had before 2026-09-05. Set on the box for the
-# finalizer only: scripts/run_pipeline.py and scripts/digest.py pass it
-# to their client; the continuous AnalyzeWorker deliberately does not.
+# the behaviour every run had before 2026-09-05. Since 2026-09-27 every
+# inference caller passes it: the finalizer (run_pipeline.py, digest.py)
+# uncapped, the continuous AnalyzeWorker behind the reserve below.
 LLM_BACKEND_FALLBACK = os.environ.get(
     "LLM_BACKEND_FALLBACK", "").strip().lower() or None
+# The finalizer reserve (GUIDE §6 r7, amended 2026-09-27). Every inference
+# caller may fail over now, but callers other than the finalizer may spend
+# at most LLM_FALLBACK_COLLECTOR_SHARE of the fallback's daily call
+# allowance (rolling 24 h, counted from the ledger). The default allowance
+# is the Gemini free tier's measured ~20 requests a day (August 2026);
+# raise it in .env on a paid tier. Share 0 restores finalizer-only failover.
+LLM_FALLBACK_DAILY_CALLS = int(os.environ.get("LLM_FALLBACK_DAILY_CALLS", "20"))
+LLM_FALLBACK_COLLECTOR_SHARE = float(
+    os.environ.get("LLM_FALLBACK_COLLECTOR_SHARE", "0.5"))
+
+
+def collector_fallback_budget():
+    """Fallback calls a non-finalizer caller may spend in 24 hours."""
+    return max(0, int(LLM_FALLBACK_DAILY_CALLS * LLM_FALLBACK_COLLECTOR_SHARE))
 MAP_MODEL = "haiku"
 COMPOSE_MODEL = "opus"
 # Tier alias -> concrete model, per backend. Env-overridable so models can

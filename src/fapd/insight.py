@@ -198,6 +198,42 @@ def gather_email(conn, start, end, entries=None):
     return out
 
 
+def _provider_metrics(ldb, start, end):
+    """Per-backend availability and the fallback reserve's state (T4)."""
+    out = {"fallback_reserve": None}
+    out["providers"] = [
+        {"backend": b, "calls": n, "billed": billed or 0,
+         "refused": refused or 0, "short_circuit": sc or 0,
+         "first_refusal": first, "last_refusal": last}
+        for b, n, billed, refused, sc, first, last in ldb.execute(
+            "SELECT backend, COUNT(*),"
+            " SUM(COALESCE(input_tokens, 0) > 0),"
+            " SUM(error IS NOT NULL AND COALESCE(input_tokens, 0) = 0"
+            "     AND error NOT LIKE '%(short-circuit)%'),"
+            " SUM(error LIKE '%(short-circuit)%'),"
+            " MIN(CASE WHEN error IS NOT NULL AND COALESCE(input_tokens, 0) = 0"
+            "     AND error NOT LIKE '%(short-circuit)%' THEN ts_utc END),"
+            " MAX(CASE WHEN error IS NOT NULL AND COALESCE(input_tokens, 0) = 0"
+            "     AND error NOT LIKE '%(short-circuit)%' THEN ts_utc END)"
+            " FROM llm_calls WHERE ts_utc >= ? AND ts_utc < ?"
+            " GROUP BY 1 ORDER BY 1", (start, end))
+    ]
+    fb = config.LLM_BACKEND_FALLBACK
+    if fb:
+        since = (dt.datetime.fromisoformat(end) - dt.timedelta(hours=24)
+                 ).strftime("%Y-%m-%dT%H:%M:%S")
+        used = ldb.execute(
+            "SELECT COUNT(*) FROM llm_calls WHERE backend = ? AND ts_utc >= ?"
+            " AND ts_utc < ? AND COALESCE(error, '') NOT LIKE"
+            " '%(short-circuit)%'", (fb, since, end)).fetchone()[0]
+        out["fallback_reserve"] = {
+            "backend": fb, "daily_calls": config.LLM_FALLBACK_DAILY_CALLS,
+            "collector_share": config.LLM_FALLBACK_COLLECTOR_SHARE,
+            "collector_budget": config.collector_fallback_budget(),
+            "used_24h": used}
+    return out
+
+
 def gather(conn, date, *, fetch_db=None, ledger_db=None, now=None):
     """Mechanical metrics for the report — zero tokens. `date` is the
     digest date just finalized; request and token accounting cover the
@@ -266,6 +302,16 @@ def gather(conn, date, *, fetch_db=None, ledger_db=None, now=None):
                 " AND COALESCE(output_tokens, 0) = 0"
                 " GROUP BY 1 ORDER BY 2 DESC, 1", (start, end))
         ]
+        # Provider availability (plan-2026-09-27-inference-fallback T4). A
+        # 36-hour CLI refusal (2026-09-24/26) read as five error lines in
+        # this report; the span, per backend, is what the operator needs.
+        # A refusal is a zero-billed error that reached the provider;
+        # short-circuits are counted apart (they reached nothing).
+        try:
+            m.update(_provider_metrics(ldb, start, end))
+        except sqlite3.OperationalError:
+            # A ledger that predates the backend column (before 2026-07-30).
+            m["providers"], m["fallback_reserve"] = [], None
     finally:
         ldb.close()
 
@@ -329,6 +375,8 @@ def render_report(metrics, suggestions=None, security=None):
     L += [f"| {r['purpose']} | {r['calls']} | {r['input_tokens']:,} |"
           f" {r['output_tokens']:,} |" for r in metrics["llm"]]
 
+    L += render_providers(metrics.get("providers"), metrics.get("fallback_reserve"))
+
     L += ["", "## Errors"]
     if metrics["llm_errors"]:
         L += [""] + [f"- `{e['ts_utc']}` {e['purpose']}: {e['error']}"
@@ -376,6 +424,29 @@ def render_report(metrics, suggestions=None, security=None):
 
     L += ["", f"*Generated {utc_now_iso()}.*", ""]
     return "\n".join(L)
+
+
+def render_providers(providers, reserve):
+    """Per-backend availability over the work window, and the fallback
+    reserve's state (GUIDE §6 r7, amended 2026-09-27)."""
+    L = ["", "## Provider availability (work window)", ""]
+    if not providers:
+        return L + ["No model calls in the window."]
+    L += [("| backend | calls | billed | refused | short-circuit |"
+           " refusals from .. to (UTC) |"), "|---|---|---|---|---|---|"]
+    for p in providers:
+        span = (f"{p['first_refusal'][:16]} .. {p['last_refusal'][:16]}"
+                if p["refused"] else "—")
+        L.append(f"| {p['backend']} | {p['calls']} | {p['billed']} |"
+                 f" {p['refused']} | {p['short_circuit']} | {span} |")
+    if reserve:
+        L += ["", (f"Fallback `{reserve['backend']}`: {reserve['used_24h']} call(s)"
+                   f" in the 24 h to the window's end, of a"
+                   f" {reserve['daily_calls']}-call daily allowance; the"
+                   f" continuous analyze layer may use {reserve['collector_budget']}"
+                   f" ({reserve['collector_share']:.0%}), the rest is held for"
+                   " the finalizer.")]
+    return L
 
 
 def render_email(email):
