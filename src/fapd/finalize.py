@@ -17,7 +17,7 @@ the map layer, not the orchestration of all five.
 
 import logging
 
-from . import inference
+from . import config, inference
 from .llm import LLMError, ProviderUnavailableError
 
 logger = logging.getLogger("fapd.finalize")
@@ -41,14 +41,75 @@ def _layer_fn(name):
     }[name]
 
 
+def _had_input(conn, name, date):
+    """Whether layer `name` had anything to work from for `date` — asked
+    after the layer returns, because each layer's input is the previous
+    layer's output."""
+    from . import compose, rules
+
+    if name == "map":
+        return bool(rules.select_items(conn, date))
+    if name == "plain":
+        return conn.execute(
+            "SELECT 1 FROM summaries s JOIN packages p USING (package_id)"
+            " WHERE p.digest_day = ? AND s.prompt_version = ? LIMIT 1",
+            (date, config.PROMPT_VERSION)).fetchone() is not None
+    if name == "compose":
+        return compose.review_input(conn, date) is not None
+    return bool(compose._section_items(conn, date))  # sections, tags
+
+
+def _has_output(conn, name, date):
+    """Whether layer `name` left publishable output for `date` at the
+    current versions. Measured before this check shipped: every layer of
+    every finalized day 2026-09-14..26 had output, so it re-labels none
+    of them."""
+    if name == "map":
+        sql = ("SELECT 1 FROM summaries s JOIN packages p USING (package_id)"
+               " WHERE p.digest_day = ? AND s.prompt_version = ?")
+        args = (date, config.PROMPT_VERSION)
+    elif name == "plain":
+        sql = ("SELECT 1 FROM plain_summaries ps JOIN packages p USING (package_id)"
+               " WHERE p.digest_day = ? AND ps.plain_version = ?"
+               " AND ps.source_prompt_version = ?")
+        args = (date, config.PLAIN_PROMPT_VERSION, config.PROMPT_VERSION)
+    elif name == "compose":
+        sql = "SELECT 1 FROM day_summaries WHERE date = ? AND prompt_version = ?"
+        args = (date, config.COMPOSE_PROMPT_VERSION)
+    elif name == "sections":
+        sql = "SELECT 1 FROM section_summaries WHERE date = ? AND prompt_version = ?"
+        args = (date, config.SECTION_PROMPT_VERSION)
+    else:  # tags
+        sql = ("SELECT 1 FROM section_tags WHERE date = ? AND method = 'llm'"
+               " AND prompt_version = ?")
+        args = (date, config.TAG_PROMPT_VERSION)
+    return conn.execute(sql + " LIMIT 1", args).fetchone() is not None
+
+
+def _layer_outcome(conn, name, date):
+    """The outcome of a layer that returned without a provider error
+    (GUIDE §6 r15, amended 2026-09-28): "idle" when it had nothing to
+    work from, "ran" when it left output, "failed" when it had material
+    and left nothing publishable — today, a short Day in Review withheld
+    by its storage-time lexicon gate."""
+    if not _had_input(conn, name, date):
+        return "idle"
+    if _has_output(conn, name, date):
+        return "ran"
+    logger.warning("%s: %s layer had material but stored nothing publishable", date, name)
+    return "failed"
+
+
 def run_model_layers(conn, llm_client, date, *, record=True):
     """Attempt every model layer for `date`; never raise for a provider.
 
     Returns {"stats": {layer: stats-or-None}, "layers": {layer: outcome},
-    "status": llm_client.status()} where outcome is "ran", "skipped"
+    "status": llm_client.status()} where outcome is "ran", "idle" (it
+    returned with nothing to work from — see _layer_outcome), "skipped"
     (the provider was already known unavailable, so the layer was not
     attempted — no call, no tokens), or "failed" (the layer raised an
-    LLMError; whatever it stored before raising stays stored, rule 5).
+    LLMError, whatever it stored before raising stays stored, rule 5; or
+    it had material and stored nothing publishable).
     Anything that is not an LLMError propagates — a bug in our own code
     is still a bug, and the finalizer ladder is the right place for it.
 
@@ -68,7 +129,7 @@ def run_model_layers(conn, llm_client, date, *, record=True):
             continue
         try:
             stats[name] = _layer_fn(name)(conn, llm_client, date)
-            layers[name] = "ran"
+            layers[name] = _layer_outcome(conn, name, date)
         except ProviderUnavailableError as exc:
             layers[name] = "failed"
             stats[name] = None

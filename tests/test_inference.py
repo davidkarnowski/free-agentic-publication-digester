@@ -72,6 +72,41 @@ def test_unknown_layer_status_is_rejected(tmp_path):
         conn.close()
 
 
+def test_label_for_idle_layers():
+    """GUIDE §6 r15, amended 2026-09-28: idle is not missing, all-idle
+    has its own fixed sentence, and idle beside a skipped layer with
+    nothing ran is still a no-inference day."""
+    all_idle = {"available": True, "backend": "cli", "models": [],
+                "layers": dict.fromkeys(inference.LAYERS, "idle")}
+    assert inference.label(all_idle) == inference.NO_MODEL_WORK
+
+    quiet = {"available": True, "backend": "cli", "models": ["opus"],
+             "layers": {"map": "idle", "plain": "idle", "compose": "ran",
+                        "sections": "idle", "tags": "idle"}}
+    assert inference.label(quiet) == "model layers ran — cli/opus"
+
+    gated = {"available": False, "backend": "cli", "models": [],
+             "layers": {"map": "idle", "plain": "idle", "compose": "failed",
+                        "sections": "idle", "tags": "idle"}}
+    assert inference.label(gated) == inference.NO_INFERENCE
+    for text in (inference.NO_MODEL_WORK,):
+        for banned in ("429", "quota", "error", "fail", "exhaust", "auth"):
+            assert banned not in text.lower()
+
+
+def test_available_follows_ran_or_all_idle(tmp_path):
+    conn = _conn(tmp_path)
+    try:
+        def avail(layers):
+            return inference.record(conn, "2026-09-27", backend="cli", models=[],
+                                    layers=layers)["available"]
+        assert avail(dict.fromkeys(inference.LAYERS, "idle")) is True
+        assert avail({**dict.fromkeys(inference.LAYERS, "idle"), "compose": "ran"}) is True
+        assert avail({**dict.fromkeys(inference.LAYERS, "idle"), "compose": "skipped"}) is False
+    finally:
+        conn.close()
+
+
 def test_label_three_states_and_nothing_else():
     ran = {"available": True, "backend": "cli", "models": ["haiku", "opus"],
            "layers": dict.fromkeys(inference.LAYERS, "ran")}

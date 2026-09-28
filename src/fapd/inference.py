@@ -40,6 +40,19 @@ NO_INFERENCE = (
 )
 
 
+#: The whole disclosure for a day where every layer was idle (GUIDE §6
+#: r15, amended 2026-09-28): a fact about the day's publications, not a
+#: cause, so the no-causes ruling holds.
+NO_MODEL_WORK = (
+    "No model layer had anything to work from for this publication day."
+    " All content is source-derived or mechanically constructed."
+)
+
+#: Every outcome a layer may record. `idle` (2026-09-28): the layer had
+#: nothing to work from — not a missing layer, never listed as one.
+OUTCOMES = ("ran", "idle", "skipped", "failed")
+
+
 def _utc_now():
     return dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -47,19 +60,24 @@ def _utc_now():
 def record(conn, date, *, backend, models, layers):
     """Upsert the day's inference status and return it as `load` would.
 
-    `layers` maps each name in LAYERS to "ran" | "skipped" | "failed";
-    missing names default to "skipped" so a partial map never reads as
-    a layer that ran. `models` is any iterable of resolved model names
-    (deduplicated, sorted); `backend` may be None when no client was
-    constructed at all."""
+    `layers` maps each name in LAYERS to one of OUTCOMES; missing names
+    default to "skipped" so a partial map never reads as a layer that
+    ran. `models` is any iterable of resolved model names (deduplicated,
+    sorted); `backend` may be None when no client was constructed at all.
+
+    `available` is true when any layer ran, or when every layer was idle:
+    a day with nothing for a model to do did not lack inference. A mix of
+    idle and skipped/failed with nothing ran is a no-inference day — the
+    provider was needed and was not there."""
     status = {}
     for name in LAYERS:
         value = (layers or {}).get(name, "skipped")
-        if value not in ("ran", "skipped", "failed"):
+        if value not in OUTCOMES:
             raise ValueError(f"layer {name!r}: unknown status {value!r}")
         status[name] = value
     model_list = sorted({m for m in (models or ()) if m})
-    available = any(v == "ran" for v in status.values())
+    values = set(status.values())
+    available = "ran" in values or values == {"idle"}
     conn.execute(
         """
         INSERT INTO day_inference (date, available, backend, models, layers,
@@ -103,15 +121,19 @@ def load(conn, date):
 def label(status):
     """The digest's Inference row text for a recorded status (or None).
 
-    Three states, no others: no inference at all → NO_INFERENCE; every
-    layer ran → the attribution GUIDE §6 r7 owes; some ran → the same
-    attribution plus which layers are not available, by their reader-
-    facing names. Never a reason."""
+    Four states, no others: every layer idle → NO_MODEL_WORK; no
+    inference at all → NO_INFERENCE; every layer that had work ran → the
+    attribution GUIDE §6 r7 owes; some ran → the same attribution plus
+    which layers are not available, by their reader-facing names. An idle
+    layer is never listed: it was not missing (r15, amended 2026-09-28).
+    Never a reason."""
+    layers = (status or {}).get("layers") or {}
+    if layers and set(layers.values()) == {"idle"}:
+        return NO_MODEL_WORK
     if not status or not status.get("available"):
         return NO_INFERENCE
-    layers = status.get("layers") or {}
     missing = [LAYER_NAMES[name] for name in LAYERS
-               if layers.get(name, "skipped") != "ran"]
+               if layers.get(name, "skipped") not in ("ran", "idle")]
     attribution = status.get("backend") or "unrecorded"
     models = ", ".join(status.get("models") or ())
     if models:

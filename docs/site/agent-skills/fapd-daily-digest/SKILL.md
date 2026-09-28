@@ -35,7 +35,11 @@ page is not.
    reads "No inference was available for this publication day. All
    content is source-derived or mechanically constructed.", every line in
    the digest is official text or a mechanical listing; there is no
-   model-written prose to weigh.
+   model-written prose to weigh. When it reads "No model layer had
+   anything to work from for this publication day. All content is
+   source-derived or mechanically constructed.", the same holds, for a
+   different reason: the day's publications gave the model layers
+   nothing to do.
 5. **Read the Coverage Statement** (the section near the end). It
    reconciles, per collection, what was observed, what was summarized,
    what was counted only, and what was excluded — and names the rule for

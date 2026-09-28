@@ -6763,3 +6763,39 @@ amended first; implementation on `feature/short-day-in-review`:
 Regeneration scope: none. The feature is forward-only, and the ordinary
 Day in Review's version is unchanged. Cost: one compose-tier call on a
 quiet day. The 2026-09-27 digest stays as frozen.
+
+## 2026-09-28 — A layer with nothing to do records `idle`; deploy of both
+
+Operator: "handle this inference-row referenced issue", the CLAUDE.md
+§10 entry written earlier the same day. GUIDE §6 r15 was amended first.
+It now defines four layer outcomes (ran, idle, skipped, failed), states
+that an idle layer is never listed as missing, and adds a fixed
+sentence for a day where every layer was idle.
+
+Implementation: `finalize._layer_outcome` replaces the unconditional
+`"ran"` for a layer that returned. It asks `_had_input` and
+`_has_output`, using the same versions and tables the layers write to:
+
+| Layer | Input | Output |
+|---|---|---|
+| map | `rules.select_items` | summaries |
+| plain | summaries | plain_summaries |
+| compose | `compose.review_input` (full / short / none) | `day_summaries` |
+| sections, tags | `compose._section_items` | `section_summaries`; llm `section_tags` |
+
+`inference.record` accepts `idle`. `available` is true for ran or
+all-idle. `inference.label` gains `NO_MODEL_WORK` and leaves idle layers
+out of the missing list. The agent skill that explains the row gained
+the new sentence.
+
+Before choosing the output rule, I measured production read-only. Every
+layer of every finalized day from 2026-09-14 to 09-26 had stored
+output, so treating "material but no output" as `failed` re-labels no
+past day. 2026-09-27 had output in no layer and would have read
+all-idle.
+
+Tests: `_patch_layers` fixes the outcome of stand-in layers, which store
+nothing; the real reading is pinned against a database. The new tests
+cover an empty day (all idle), a quiet day (idle, and compose `failed`
+then `ran`), a selected-but-unsummarized item (map `failed`), the
+all-idle record and label, and idle not being listed as missing.

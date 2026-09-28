@@ -6,9 +6,11 @@ traceback out of run_pipeline.py, exit 1, three times, then a halted
 day — while the render could have proceeded on stored rows throughout.
 """
 
+import json
+
 import pytest
 
-from fapd import finalize, inference, llm
+from fapd import config, finalize, inference, llm
 
 
 class _Client:
@@ -30,13 +32,18 @@ class _Client:
         self._status["unavailable"] = reason
 
 
-def _patch_layers(monkeypatch, behaviors):
+def _patch_layers(monkeypatch, behaviors, outcomes=None):
     """behaviors: {layer: callable(conn, client, date)}; unlisted layers
-    return an empty stats dict."""
+    return an empty stats dict. The stand-in layers store nothing, so the
+    outcome of a layer that returns is fixed too: "ran" unless
+    `outcomes` says otherwise. The real input/output reading is pinned
+    against a database in the tests at the end of this file."""
     def fn_for(name):
         return behaviors.get(name, lambda conn, client, date: {name: "ok"})
 
     monkeypatch.setattr(finalize, "_layer_fn", fn_for)
+    monkeypatch.setattr(finalize, "_layer_outcome",
+                        lambda conn, name, date: (outcomes or {}).get(name, "ran"))
 
 
 def test_all_layers_run_and_are_recorded(conn, monkeypatch):
@@ -146,3 +153,80 @@ def test_a_day_with_no_prose_still_records_the_provider_that_was_asked(conn, mon
     assert row["backend"] == "cli"
     assert row["available"] is False
     assert inference.label(row) == inference.NO_INFERENCE
+
+
+# ---------------------------------------------------------------------------
+# A layer with nothing to do is not a layer that ran (GUIDE §6 r15,
+# amended 2026-09-28). The incident: on 2026-09-27 nothing passed a
+# summary rule, no model call was made for the day, and all five layers
+# were still recorded "ran" — the digest said "model layers ran — cli".
+# ---------------------------------------------------------------------------
+
+DAY = "2026-09-27"
+
+
+def _observe(conn, package_id, collection, doc_type, metadata=None):
+    conn.execute(
+        "INSERT INTO packages (package_id, collection, last_modified, first_seen_at,"
+        " date_issued, fetch_status, digest_day) VALUES (?, ?, 'x', 'x', ?, 'fetched', ?)",
+        (package_id, collection, DAY, DAY))
+    conn.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection, doc_type,"
+        " title, metadata, text, char_count, extracted_at, extractor_version)"
+        " VALUES (?, '', ?, ?, 'A title', ?, 'body', 4, 'x', 1)",
+        (package_id, collection, doc_type, json.dumps(metadata or {})))
+    conn.commit()
+
+
+def test_every_layer_idle_on_a_day_that_observed_nothing(conn):
+    for name in finalize.LAYER_ORDER:
+        assert finalize._layer_outcome(conn, name, DAY) == "idle"
+
+
+def test_a_quiet_day_is_idle_except_the_short_review(conn):
+    """District opinions only: nothing for map, plain, sections or tags;
+    the Day in Review has a quiet day to review, and ran once it stored
+    one."""
+    _observe(conn, "USCOURTS-ctd-1", "USCOURTS", "DISTRICT",
+             {"court_name": "United States District Court for the District of Connecticut"})
+    for name in ("map", "plain", "sections", "tags"):
+        assert finalize._layer_outcome(conn, name, DAY) == "idle"
+    # Material, but nothing stored: the gate withheld the short review.
+    assert finalize._layer_outcome(conn, "compose", DAY) == "failed"
+    conn.execute(
+        "INSERT INTO day_summaries (date, prompt_version, model, summary,"
+        " created_at, kind) VALUES (?, ?, 'opus', 'Short.', 'x', 'short')",
+        (DAY, config.COMPOSE_PROMPT_VERSION))
+    conn.commit()
+    assert finalize._layer_outcome(conn, "compose", DAY) == "ran"
+
+
+def test_a_selected_item_left_unsummarized_is_a_failed_map_layer(conn):
+    _observe(conn, "USCOURTS-ca2-1", "USCOURTS", "APPELLATE")
+    assert finalize._layer_outcome(conn, "map", DAY) == "failed"
+    conn.execute(
+        "INSERT INTO summaries (package_id, granule_id, prompt_version, method,"
+        " inclusion_rule, summary, created_at)"
+        " VALUES ('USCOURTS-ca2-1', '', ?, 'llm', 'USCOURTS-SEL-01', 'Affirmed.', 'x')",
+        (config.PROMPT_VERSION,))
+    conn.commit()
+    assert finalize._layer_outcome(conn, "map", DAY) == "ran"
+    # The plain layer now has material, and nothing stored yet.
+    assert finalize._layer_outcome(conn, "plain", DAY) == "failed"
+
+
+def test_an_all_idle_day_records_available_and_says_so(conn, monkeypatch):
+    _patch_layers(monkeypatch, {}, dict.fromkeys(finalize.LAYER_ORDER, "idle"))
+    finalize.run_model_layers(conn, _Client(models=(), backends_used=[]), DAY)
+    row = inference.load(conn, DAY)
+    assert row["available"] is True
+    assert inference.label(row) == inference.NO_MODEL_WORK
+
+
+def test_idle_layers_are_not_listed_as_missing(conn, monkeypatch):
+    """The quiet day with a short review: only compose ran, and the row
+    attributes it without calling the idle layers unavailable."""
+    _patch_layers(monkeypatch, {}, {"map": "idle", "plain": "idle", "compose": "ran",
+                                    "sections": "idle", "tags": "idle"})
+    finalize.run_model_layers(conn, _Client(backend="cli", models=("opus",)), DAY)
+    assert inference.label(inference.load(conn, DAY)) == "model layers ran — cli/opus"

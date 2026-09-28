@@ -351,22 +351,6 @@ confirm-gate.
   removing the drop or normalizing the comparison**: normalizing alone
   would make the drop fire far more often, the opposite of the GUIDE.
 
-- `finalize.run_model_layers` records a layer as `"ran"` whenever its
-  function returns without an LLM error, including when it had nothing
-  to do. On 2026-09-27 no document passed a summary rule, no model call
-  was made for the day, and `day_inference` still recorded all five
-  layers as `ran` with an empty `models` field. The digest's Inference
-  row read "model layers ran — cli" over a digest with no model prose,
-  and the nightly insight model misread the same record as an outage.
-  The short Day in Review (GUIDE §3a, 2026-09-28) removes the
-  reader-facing case for quiet days, because the compose layer now
-  genuinely runs on them. The record's meaning is unchanged, and a day
-  that observed nothing at all would still read "ran". A fix needs a
-  per-layer notion of "nothing was eligible", which is not the same as
-  "no prose was stored" (a layer whose items all failed also stores
-  none). **Confirm with the operator before adding a layer outcome**:
-  the Inference row's wording is an operator ruling (2026-08-24).
-
 ## 11. Section agents
 
 The system is segmented into five sections with explicit boundaries so
@@ -790,3 +774,17 @@ live in `.claude/agents/fapd-*.md` (tracked).
   behaviour: that is a missing layer, not a quiet day. The operator
   chose a model-written paragraph over a zero-token template because
   the titles give it something to say. Forward-only.
+- **2026-09-28** — **A layer with nothing to do is not a layer that
+  ran** (operator; GUIDE §6 r15 amended). `finalize._layer_outcome`
+  records `idle` when a layer had nothing to work from, and `failed`
+  when it had material but stored nothing publishable, such as a short
+  review withheld by its gate. `ran` now means output exists. An idle
+  layer is never listed as unavailable. When every layer is idle, the
+  Inference row carries one fixed sentence,
+  `inference.NO_MODEL_WORK`, which states a fact about the day and not
+  a cause. `available` is true for an all-idle day, and false for idle
+  beside skipped with nothing ran. Measured before shipping: every
+  layer of every finalized day from 2026-09-14 to 09-26 had output, so
+  no past day's label changes. 2026-09-27 would have read all-idle.
+  This briefly sat in §10 the same day and was fixed at the operator's
+  request.

@@ -527,11 +527,13 @@ item without its "In plain terms" line — presentation aid, never coverage.
 ### `day_inference` (GUIDE §6 r15 — which model layers ran, added 2026-08-24)
 
 One row per publication day, keyed by `date`: `available` (1 when at
-least one model layer ran), `backend` (the `llm` backend name that was
+least one model layer ran, or when every layer was `idle` — a day with
+nothing for a model to do is not a no-inference day), `backend` (the `llm` backend name that was
 in effect — `cli`/`api`/`gemini`/`none`), `models` (comma-joined
 resolved model names that actually produced prose that day; may be
 empty), `layers` (JSON `{"map"|"plain"|"compose"|"sections"|"tags":
-"ran"|"skipped"|"failed"}`), `recorded_at`. Written only by
+"ran"|"idle"|"skipped"|"failed"}` — `idle` since 2026-09-28, GUIDE §6
+r15: the layer had nothing to work from), `recorded_at`. Written only by
 `fapd.inference.record`, called by the finalizing run
 (`run_pipeline.stage_analyze`) after the model layers — **write-once
 per finalize, last finalize wins**: a re-finalize of the same day

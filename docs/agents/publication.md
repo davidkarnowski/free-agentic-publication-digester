@@ -114,6 +114,14 @@ docs/accessibility.md → this file.
   The coverage arithmetic is unchanged; the render stays zero-LLM and
   deterministic (`day_inference` is read, never computed at render).
 
+- **The Inference row has four states (GUIDE §6 r15, amended
+  2026-09-28).** They are: attribution; attribution with the layers
+  that are not available; `inference.NO_INFERENCE`; and
+  `inference.NO_MODEL_WORK` when every layer was `idle`. An idle layer
+  had nothing to work from and is never listed as unavailable. The
+  wording lives only in `inference.py`, so read it there, never restate
+  it here. (The "two states" in the bullet above predates the partial
+  and idle forms.)
 - **The Day in Review footnote follows `day_summaries.kind`
   (2026-09-28).** A short review (GUIDE §3a) was composed from counts
   and listed titles, not from item summaries, so its footnote says so.

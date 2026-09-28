@@ -266,6 +266,23 @@ def _compose_short(conn, llm, date):
     return {**zero, **spent, "composed": 1, "short": 1}
 
 
+def review_input(conn, date):
+    """What the Day in Review has to work from: "full" when item summaries
+    exist for the day, "short" when documents were observed and none
+    passed a summary rule (GUIDE §3a, 2026-09-28), else None — the layer
+    is idle. Read by fapd.finalize to record the layer's outcome."""
+    summarized = conn.execute(
+        "SELECT 1 FROM summaries s JOIN packages p USING (package_id)"
+        " WHERE p.digest_day = ? AND s.prompt_version = ? LIMIT 1",
+        (date, config.PROMPT_VERSION),
+    ).fetchone()
+    if summarized:
+        return "full"
+    if _mechanical_counts(conn, date) and not rules.select_items(conn, date):
+        return "short"
+    return None
+
+
 def _short_review_inputs(conn, date):
     """The short review's prompt fields, or None when nothing was observed.
 

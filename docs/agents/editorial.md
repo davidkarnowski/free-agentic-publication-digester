@@ -104,6 +104,12 @@ file.
   storage, stored as `day_summaries.kind = 'short'`, and withdrawn once
   anything passes a summary rule. Qualified-but-unsummarized is a
   missing layer, not a quiet day, so it never gets a short review.
+- **A layer with nothing to do records `idle`, not `ran` (GUIDE §6 r15,
+  amended 2026-09-28).** `finalize._layer_outcome` asks two questions
+  after a layer returns. Did it have material (`_had_input`)? Did it
+  leave output (`_has_output`)? No material means `idle`. Material but
+  no output means `failed`. Before this, 2026-09-27 read "model layers
+  ran" with no model prose anywhere.
 - **Summaries are durable and versioned.** Keyed by
   `(package, granule, prompt_version)`; reruns make zero calls; a prompt
   change bumps its version and regenerates only that layer. Plain-speak,
