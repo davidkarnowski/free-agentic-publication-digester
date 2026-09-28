@@ -250,6 +250,17 @@ def test_unknown_web_adapter_rejected(tmp_path):
     assert load_one(tmp_path, make_entry(type="rss", adapter="rss-feed-only"))
 
 
+@pytest.mark.parametrize("field", ["index_item_path", "index_exclude_path"])
+def test_index_path_hints_are_html_index_path_prefixes(tmp_path, field):
+    assert load_one(tmp_path, make_entry(type="html-index", adapter="html-index",
+                                         **{field: "/news/"}))
+    with pytest.raises(ValueError, match=f"{field}.*only valid"):
+        load_one(tmp_path, make_entry(type="rss", **{field: "/news/"}))
+    with pytest.raises(ValueError, match=f"{field}.*path prefix"):
+        load_one(tmp_path, make_entry(type="html-index", adapter="html-index",
+                                      **{field: "news/"}))
+
+
 def test_email_adapter_scoped_to_platforms(tmp_path):
     assert load_one(tmp_path, email_entry(adapter="govdelivery"))
     assert load_one(tmp_path, email_entry())  # platform unknown: adapter absent

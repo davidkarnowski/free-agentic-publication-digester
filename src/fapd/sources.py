@@ -17,7 +17,7 @@ import yaml
 
 REGISTRY_PATH = Path(__file__).resolve().parents[2] / "sources" / "registry.yaml"
 
-OPTIONAL_FIELDS = ("adapter", "sender", "index_item_path")
+OPTIONAL_FIELDS = ("adapter", "sender", "index_item_path", "index_exclude_path")
 # per-source strategy (GUIDE §3).
 # `sender`: for type: email, the confirmed From address(es) — a string or a
 # list. It is the allowlist the mailbox adapter matches against: a message
@@ -30,6 +30,11 @@ OPTIONAL_FIELDS = ("adapter", "sender", "index_item_path")
 # added so far has been "the releases live under this path, the navigation
 # does not". Anything a prefix cannot express belongs in an adapter
 # subclass, where it can be tested against captured bytes.
+# `index_exclude_path` (2026-09-28): the inverse, one URL PATH PREFIX whose
+# anchors are skipped — for a listing that mixes in documents another
+# registered source owns (whitehouse.gov/news/ carries
+# /presidential-actions/ entries the PRESACT feeds already ingest). Same
+# shape and validation as index_item_path, for the same reason.
 REQUIRED_FIELDS = (
     "id",
     "name",
@@ -151,13 +156,15 @@ def _validate(entry: dict, seen_ids: set[str], seen_senders: dict[str, str]) -> 
             _fail(entry, f"adapter {adapter!r} not in {allowed} "
                          f"for type {entry['type']!r}")
 
-    hint = entry.get("index_item_path")
-    if hint is not None:
+    for field in ("index_item_path", "index_exclude_path"):
+        hint = entry.get(field)
+        if hint is None:
+            continue
         if entry["type"] != "html-index":
-            _fail(entry, "field 'index_item_path' is only valid on type "
+            _fail(entry, f"field {field!r} is only valid on type "
                          "'html-index' entries")
         if not isinstance(hint, str) or not hint.startswith("/"):
-            _fail(entry, f"index_item_path {hint!r} must be a URL path prefix "
+            _fail(entry, f"{field} {hint!r} must be a URL path prefix "
                          f"beginning with '/'")
 
     _validate_sender(entry, seen_senders)

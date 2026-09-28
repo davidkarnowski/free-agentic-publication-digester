@@ -89,14 +89,24 @@ only when one of four things genuinely differs:
 | `fallback_text` | What to store with no article text? | Title + feed description, mode disclosed |
 | `request_params` | What query does the index fetch carry? | An API endpoint's page size and sort order — and its key, which rides here so `HttpClient` can redact it from the fetch log (GUIDE §4). Never build a key into a URL string |
 
-An adapter may read one **per-source hint** from its registry entry. The
-only one that exists is `index_item_path` (type `html-index`): a URL path
-prefix an anchor must match to count as a listing entry, for sites whose
-navigation and whose releases are otherwise indistinguishable. It is a
-prefix and not a selector expression on purpose — a query language in the
-registry would put page-structure knowledge where no test can exercise it.
-Anything a prefix cannot express belongs in an adapter subclass, tested
-against captured bytes.
+An adapter may read **per-source hints** from its registry entry. Two
+exist, both for type `html-index`, and both are single URL path prefixes:
+
+- `index_item_path` is a prefix an anchor must match to count as a
+  listing entry, for sites whose navigation and whose releases are
+  otherwise indistinguishable.
+- `index_exclude_path` (2026-09-28) is a prefix whose anchors are
+  skipped, for a listing that mixes in documents another registered
+  source already owns. whitehouse.gov/news/ lists `/presidential-actions/`
+  entries that the presidential-action feeds ingest into PRESACT. Without
+  the hint, one document would be listed in two sections by two rules.
+
+They are prefixes and not selector expressions on purpose: a query
+language in the registry would put page-structure knowledge where no test
+can exercise it. Anything a prefix cannot express belongs in an adapter
+subclass, tested against captured bytes. A hint is chosen from the live
+listing at activation and recorded in the gate-3 note with the counts
+with and without it.
 
 An adapter may also hand the loop structured, render-ready fields by
 putting a dict in `item["extra"]`; they are stored under

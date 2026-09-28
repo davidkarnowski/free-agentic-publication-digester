@@ -849,6 +849,41 @@ def test_html_index_item_path_hint_filters_to_the_release_section(index_today):
     assert none == []
 
 
+def test_html_index_exclude_hint_skips_documents_another_source_owns(monkeypatch):
+    """whitehouse.gov/news/ (captured 2026-09-28) lists a proclamation
+    beside the releases. The presidential-action feeds already ingest it
+    into PRESACT, so without the inverse hint one document would list in
+    section 6 and section 9 under two rules."""
+    monkeypatch.setattr(agencies, "publication_date", lambda: "2026-09-28")
+    url = "https://www.whitehouse.gov/news/"
+    _fmt, every = parse_fixture("whitehouse-briefing-room", url)
+    owned = [i for i in every
+             if i["link"].startswith("https://www.whitehouse.gov/presidential-actions/")]
+    # The proclamation, and the "Presidential Actions" category tag: on
+    # the full page the tag repeats in the navigation and MAX_LINK_REPEATS
+    # drops it, but this excerpt carries the listing alone. The hint
+    # covers both, which is the point of a prefix.
+    assert len(every) == 11 and len(owned) == 2
+    _fmt, kept = parse_fixture("whitehouse-briefing-room", url,
+                               index_exclude_path="/presidential-actions/")
+    assert len(kept) == 9
+    assert not any("/presidential-actions/" in i["link"] for i in kept)
+    # Every kept entry still carries the White House's own date.
+    assert all(i["claimed_date"] >= "2026-09-21" for i in kept)
+
+
+def test_html_index_item_path_hint_drops_ofac_category_links(index_today):
+    """OFAC's recent-actions entries each carry category tags that link
+    to topic pages. The registered hint keeps the dated action pages
+    (/recent-actions/YYYYMMDD) and nothing else."""
+    url = "https://ofac.treasury.gov/recent-actions"
+    _fmt, hinted = parse_fixture("ofac-recent-actions", url,
+                                 index_item_path="/recent-actions/20")
+    assert hinted
+    assert all(i["link"].startswith("https://ofac.treasury.gov/recent-actions/20")
+               for i in hinted)
+
+
 def test_html_index_identity_is_the_normalized_url(index_today):
     """These sources start with no history, so identity normalizes from the
     first poll (GUIDE §7 T5) — but the query string is kept, because some

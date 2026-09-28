@@ -957,11 +957,15 @@ class HtmlIndexAdapter(SourceAdapter):
     source later needs full text, that is a separate adapter and a
     separate budget decision, not a default.
 
-    PER-SOURCE HINT. The optional registry field `index_item_path`
+    PER-SOURCE HINTS. The optional registry field `index_item_path`
     restricts entries to anchors whose URL path starts with that string —
-    the one hint that repeatedly separates releases from the navigation
-    around them, and deliberately not a selector language. Everything else
-    is heuristic and identical across sources.
+    the hint that repeatedly separates releases from the navigation
+    around them, and deliberately not a selector language. Its inverse,
+    `index_exclude_path` (2026-09-28), drops anchors under one path prefix:
+    for a listing that mixes in documents another registered source owns
+    (whitehouse.gov/news/ lists /presidential-actions/ entries that
+    PRESACT already ingests). Both are single path prefixes. Everything
+    else is heuristic and identical across sources.
 
     IDENTITY. These sources have no ingestion history, so URLs are
     normalized freely (GUIDE §7 T5, docs/adding-sources.md): lowercased
@@ -1065,7 +1069,15 @@ class HtmlIndexAdapter(SourceAdapter):
         if parts.path.rstrip("/") == base_parts.path.rstrip("/"):
             return False  # the listing linking to itself (pagination, "current")
         hint = (self.entry.get("index_item_path") or "").strip()
-        return not hint or parts.path.startswith(hint)
+        if hint and not parts.path.startswith(hint):
+            return False
+        # The inverse hint (2026-09-28): a listing that mixes in documents
+        # another registered source already owns — whitehouse.gov/news/
+        # carries /presidential-actions/ entries the presidential-action
+        # feeds ingest into PRESACT — skips them here, so one document is
+        # never listed under two sections by two rules.
+        exclude = (self.entry.get("index_exclude_path") or "").strip()
+        return not (exclude and parts.path.startswith(exclude))
 
     def _drop_repeats(self, anchors, base):
         counts = {}
