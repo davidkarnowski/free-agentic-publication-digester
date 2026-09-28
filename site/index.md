@@ -14,13 +14,13 @@ An automated, citation-bound, opinion-agnostic daily digest of official United S
 
 ## The last 7 days
 
+- [Daily Digest — 2026-09-27](2026-09-27.md)
 - [Daily Digest — 2026-09-26](2026-09-26.md) — The digest carries 64 bill versions: 36 introduced in the Senate, 16 introduced in the House, nine agreed to in the Senate, two placed on the Senate calendar and one reported in the Senate.
 - [Daily Digest — 2026-09-25](2026-09-25.md) — The Senate resumed consideration of S. 4668, the "PROTECT COLLEGE SPORTS ACT OF 2026," and H. Con. Res. 89 regarding U.S. Armed Forces.
 - [Daily Digest — 2026-09-24](2026-09-24.md) — The digest carries 46 bills introduced in the House and 19 in the Senate, with one bill placed on the Senate calendar.
 - [Daily Digest — 2026-09-23](2026-09-23.md) — The digest carries 690 House and 527 Senate Congressional Record items, 199 Extensions of Remarks, 61 Daily Digest entries and one recorded-vote document.
 - [Daily Digest — 2026-09-22](2026-09-22.md) — The digest carries 127 House and four Senate Congressional Record items, 52 Extensions of Remarks, 12 Daily Digest entries, and two recorded votes.
 - [Daily Digest — 2026-09-21](2026-09-21.md) — No congressional floor proceedings or recorded votes appear in this digest.
-- [Daily Digest — 2026-09-20](2026-09-20.md) — The digest carries four agency press releases as the executive and regulatory record observed for the day; no rules, proposed rules, or presidential documents appear.
 
 ## Earlier days
 

@@ -52,11 +52,18 @@ reused.</p>
 </ul>
 <h2 id="the-one-thing-that-is-recorded">The one thing that is recorded</h2>
 <p>Like effectively every hosted service, the web server infrastructure
-serving this site keeps <strong>standard access logs</strong> — the requesting IP
-address, requested URL, timestamp, response code, and User-Agent — used
-solely for security monitoring and abuse prevention (for example,
-rate-limiting and intrusion detection), retained briefly under routine
-log rotation, and shared with no one. TLS certificates are issued by
+serving this site keeps <strong>standard access logs</strong>, used solely for
+security monitoring and abuse prevention (for example, rate-limiting and
+intrusion detection), and shared with no one. The full list of what each
+request records: the requesting IP address, the time, the request line
+(method, URL and protocol), the host name requested and the name given
+during the TLS handshake, the response code and size, the referring page
+the browser reports, the User-Agent, how long the response took, the
+status returned by the service behind the proxy, and an opaque request
+identifier. Requests refused as probes (for example, for files a site
+like this never serves) are also recorded separately. Logs are kept for
+60 days, then deleted by routine log rotation. No usage analytics are
+built from them, or from anything else. TLS certificates are issued by
 Let's Encrypt; certificate issuance is public by design (Certificate
 Transparency logs), like every HTTPS site's.</p>
 <p><strong>The MCP service.</strong> Requests to <code>https://fapd.info/mcp</code> pass through
@@ -71,7 +78,7 @@ web server in front of it keeps a separate access log for <code>/mcp</code>
 (address, time, method, status, size, software name, the same request
 identifier; never a request body) used for rate limiting and to block addresses that send many
 rejected requests in a short time; those blocks expire on their own.
-Logs rotate on the same schedule.</p>
+These logs are also kept for 60 days.</p>
 <p>That is the entire data story. There is nothing else to disclose.</p>
 <h2 id="licensing">Licensing</h2>
 <ul>
@@ -94,7 +101,7 @@ transparency page: <a href="bot.html">Our crawler</a>.</p>
 and in the repository metadata.</p>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-09-27T04:35:02Z (UTC). Canonical source:
+  <p>Generated 2026-09-28T04:09:55Z (UTC). Canonical source:
   <code>docs/site/privacy.md</code> in the
   <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in

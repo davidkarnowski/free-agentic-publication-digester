@@ -32,11 +32,18 @@ reused.
 ## The one thing that is recorded
 
 Like effectively every hosted service, the web server infrastructure
-serving this site keeps **standard access logs** — the requesting IP
-address, requested URL, timestamp, response code, and User-Agent — used
-solely for security monitoring and abuse prevention (for example,
-rate-limiting and intrusion detection), retained briefly under routine
-log rotation, and shared with no one. TLS certificates are issued by
+serving this site keeps **standard access logs**, used solely for
+security monitoring and abuse prevention (for example, rate-limiting and
+intrusion detection), and shared with no one. The full list of what each
+request records: the requesting IP address, the time, the request line
+(method, URL and protocol), the host name requested and the name given
+during the TLS handshake, the response code and size, the referring page
+the browser reports, the User-Agent, how long the response took, the
+status returned by the service behind the proxy, and an opaque request
+identifier. Requests refused as probes (for example, for files a site
+like this never serves) are also recorded separately. Logs are kept for
+60 days, then deleted by routine log rotation. No usage analytics are
+built from them, or from anything else. TLS certificates are issued by
 Let's Encrypt; certificate issuance is public by design (Certificate
 Transparency logs), like every HTTPS site's.
 
@@ -52,7 +59,7 @@ web server in front of it keeps a separate access log for `/mcp`
 (address, time, method, status, size, software name, the same request
 identifier; never a request body) used for rate limiting and to block addresses that send many
 rejected requests in a short time; those blocks expire on their own.
-Logs rotate on the same schedule.
+These logs are also kept for 60 days.
 
 That is the entire data story. There is nothing else to disclose.
 
