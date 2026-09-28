@@ -948,12 +948,15 @@ through these gates, each recorded in the registry entry:
 
 All LLM prompts are code, versioned, and change through procedure:
 
-- **Inventory** (amended 2026-07-30; source surfaces added 2026-08-03).
-  Seven prompt surfaces exist: the map/summarization preamble
+- **Inventory** (amended 2026-07-30; source surfaces added 2026-08-03;
+  short Day in Review added 2026-09-28).
+  Eight prompt surfaces exist: the map/summarization preamble
   (`analyze._PREAMBLE`, versioned by `PROMPT_VERSION`), the plain-speak
   restatement preamble (`analyze._PLAIN_PREAMBLE`,
   `PLAIN_PROMPT_VERSION`), the Day-in-Review compose prompt
-  (`compose._PROMPT`, `COMPOSE_PROMPT_VERSION`), the section quick-read
+  (`compose._PROMPT`, `COMPOSE_PROMPT_VERSION`), the short Day-in-Review
+  prompt below (`compose._SHORT_PROMPT`, `SHORT_REVIEW_PROMPT_VERSION`),
+  the section quick-read
   prompt (`compose._SECTION_PROMPT`, `SECTION_PROMPT_VERSION`), the
   section discovery-key prompt (`tags._TAG_PROMPT`,
   `TAG_PROMPT_VERSION`, added with §6 rule 12a), the developer-insight
@@ -962,6 +965,49 @@ All LLM prompts are code, versioned, and change through procedure:
   `SOURCE_DESC_PROMPT_VERSION`). Each layer versions independently — a
   deliberate design so iterating on one never regenerates the artifacts
   of another.
+- **Short Day in Review (added 2026-09-28, operator).** On a publication
+  day where no observed document passed a summary rule, the Day in
+  Review was absent: the compose prompt works from item summaries, and
+  there were none. On 2026-09-27, a Sunday with 225 district-court
+  opinions and five agency releases, the digest opened straight into
+  section 1, and readers expect the opening paragraph every day.
+  The short review fills that gap under these rules:
+  - **Trigger.** It is written only when the day observed at least one
+    document AND no document for the day passed a summary rule
+    (`rules.select_items` is empty). A day where documents qualified
+    but no summary was produced is not a quiet day. It is a gap, and it
+    keeps today's behaviour: no Day in Review, disclosed as a missing
+    layer.
+  - **Input.** The day's mechanical counts, district and bankruptcy
+    opinion counts by court (no case names), the `fedcal` calendar note
+    when there is one, and the titles of items the digest lists under
+    its own listing rules (AGENCYPR-SEL-01, VOTES-SEL-01,
+    BILLACTIONS-SEL-01). Every one of those items has passed a
+    mechanical rule, so §6 r4 holds, and the model sees only the title
+    the digest already prints verbatim, never a document's text. This
+    is also why the call is not the SQL query §6 r2 forbids: the model
+    writes prose from the titles, not just a restatement of counts.
+  - **Wording.** The review opens by saying it is short, because few
+    publications were observed and none met the digest's summary rules,
+    and it gives the calendar reason when there is one. It never
+    characterizes the day's publications as minor, routine or
+    insignificant, nor the opposite. Volume is a count, and
+    significance is not ours to judge (§2). It quotes titles verbatim
+    and attributes them to their publishers. One paragraph, about
+    60–110 words.
+  - **Gate.** The same banned-lexicon check the render applies is run
+    on the text **before storage**. A review that fails the check is
+    not stored, and the digest renders without a Day in Review, the
+    same as before this rule existed. A short review can never block a
+    day's publication.
+  - **Storage and label.** It is stored in the Day in Review's slot
+    (`day_summaries`, marked `kind = 'short'` with its prompt version).
+    It renders under the same heading with its own footnote stating
+    what it was composed from. It is model output, so it is ledgered
+    (`compose:short-review`), and the Inference row attributes it like
+    any other layer. If item summaries for the day appear later, the
+    ordinary Day in Review replaces it. It is forward-only: no frozen
+    day gains one retroactively.
 - **Source-page model surfaces (added 2026-08-03, operator-approved
   plan).** Two reader-facing prose layers on the per-source pages, both
   cheap-tier, batched, ledgered, restating the §2 banned list from
@@ -1000,7 +1046,7 @@ All LLM prompts are code, versioned, and change through procedure:
   after it. Each arrives with its own version constant, its own ledger
   rows, the §2 banned list restated in-prompt, the same storage-time gate
   the source-page surfaces use, and the derived-text marking §2 requires.
-  Until they exist the Inventory above stays at seven — this bullet is a
+  Until they exist the Inventory above stays at eight — this bullet is a
   commitment, not a claim.
   *Narration (noted 2026-08-24).* Text-to-speech narration of our own
   prose (`src/fapd/tts.py`, built 2026-08-18) is a model-generated
