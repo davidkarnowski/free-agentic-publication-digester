@@ -1607,3 +1607,31 @@ def test_render_is_deterministic_with_and_without_summaries(conn, tmp_path):
     bare1 = _strip_generated(report.render(conn, DATE, out_dir=tmp_path).read_text())
     bare2 = _strip_generated(report.render(conn, DATE, out_dir=tmp_path).read_text())
     assert bare1 == bare2 and bare1 != first
+
+
+def _store_day_in_review(conn, kind):
+    conn.execute(
+        "INSERT INTO day_summaries (date, prompt_version, model, summary,"
+        " created_at, kind) VALUES (?, ?, 'opus', 'A factual paragraph.', 'x', ?)",
+        (DATE, config.COMPOSE_PROMPT_VERSION, kind),
+    )
+    conn.commit()
+
+
+def test_a_short_review_does_not_claim_it_was_composed_from_summaries(conn):
+    """GUIDE §3a, amended 2026-09-28: a short review exists precisely
+    because no item summary did, so its footnote says what it WAS built
+    from."""
+    _store_day_in_review(conn, "short")
+    lines = report._day_in_review_lines(conn, DATE)
+    text = "\n".join(lines)
+    assert "## Day in Review" in text and "A factual paragraph." in text
+    assert "A short review" in text
+    assert "summarized items" not in text
+
+
+def test_an_ordinary_review_keeps_its_footnote(conn):
+    _store_day_in_review(conn, "full")
+    text = "\n".join(report._day_in_review_lines(conn, DATE))
+    assert "Composed from the summarized items below" in text
+    assert "A short review" not in text

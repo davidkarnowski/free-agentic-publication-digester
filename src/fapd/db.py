@@ -222,6 +222,8 @@ CREATE TABLE IF NOT EXISTS day_summaries (
     input_tokens   INTEGER NOT NULL DEFAULT 0,
     output_tokens  INTEGER NOT NULL DEFAULT 0,
     created_at     TEXT NOT NULL,
+    kind           TEXT NOT NULL DEFAULT 'full', -- 'full' | 'short' (GUIDE §3a, 2026-09-28)
+    kind_version   INTEGER,                   -- SHORT_REVIEW_PROMPT_VERSION for 'short'
 
     PRIMARY KEY (date, prompt_version)
 ) WITHOUT ROWID;
@@ -415,6 +417,12 @@ def connect(db_path=None):
     # rows is the deliberate one-shot scripts/migrate_digest_day.py,
     # never startup DDL.
     _ensure_columns(conn, "packages", {"digest_day": "TEXT"})
+    # The short Day in Review (GUIDE §3a, 2026-09-28) shares the Day in
+    # Review's slot; `kind` says which prompt wrote the row.
+    _ensure_columns(conn, "day_summaries", {
+        "kind": "TEXT NOT NULL DEFAULT 'full'",
+        "kind_version": "INTEGER",
+    })
     # Extraction attempt ceiling (2026-08-24, docs/schema.md): additive,
     # so no rebuild — unlike fetch_attempts, which rode the CHECK-widening
     # migration of 2026-08-10 and therefore never needed this hook.

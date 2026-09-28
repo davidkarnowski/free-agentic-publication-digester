@@ -466,6 +466,16 @@ newer than it (late-arriving Record issues must never leave the
 synthesis stale — the `substr(...,1,19)` timestamp comparison in
 `compose.py` carries the CLAUDE.md §10 confirm-gate).
 
+`day_summaries.kind` (added 2026-09-28, GUIDE §3a "Short Day in
+Review") says which prompt wrote the row: `'full'` (the default, and
+every row before the column existed) or `'short'`, the review composed
+from counts and listed titles on a day where nothing passed a summary
+rule. `kind_version` holds `SHORT_REVIEW_PROMPT_VERSION` for a short row
+and is NULL for a full one, whose version is `prompt_version`. Both
+kinds share the `(date, prompt_version)` key on purpose: the digest has
+one Day in Review slot, and a short row is replaced by the ordinary
+composition if item summaries for the day appear later.
+
 ### `summary_attempts` (GUIDE §6 r14 — the retry ceiling's memory)
 
 `(package_id, granule_id, prompt_version, layer)` → `attempts`,

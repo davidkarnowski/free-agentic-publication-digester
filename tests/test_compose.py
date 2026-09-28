@@ -238,3 +238,167 @@ def test_section_items_skip_crec_votes_and_group_by_doc_type(conn):
     assert [r["inclusion_rule"] for r in grouped["senate"]] == ["CREC-SEL-01"]
     assert "house" not in grouped  # no HOUSE doc_type seeded
     assert [r["inclusion_rule"] for r in grouped["rules"]] == ["FR-SEL-01"]
+
+
+# ---------------------------------------------------------------------------
+# The short Day in Review (GUIDE §3a, amended 2026-09-28)
+# ---------------------------------------------------------------------------
+
+QUIET = "2026-09-27"  # a Sunday: the day that prompted the rule
+
+
+def _package(c, package_id, collection, day=QUIET):
+    c.execute(
+        "INSERT INTO packages (package_id, collection, last_modified, first_seen_at,"
+        " date_issued, fetch_status, digest_day) VALUES (?, ?, 'x', 'x', ?, 'fetched', ?)",
+        (package_id, collection, day, day),
+    )
+
+
+def _text(c, package_id, granule_id, collection, doc_type, title, metadata, body="body"):
+    c.execute(
+        "INSERT INTO extracted_texts (package_id, granule_id, collection, doc_type,"
+        " title, agency, metadata, text, char_count, extracted_at, extractor_version)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'x', 1)",
+        (package_id, granule_id, collection, doc_type, title,
+         metadata.pop("agency", None), json.dumps(metadata), body, len(body)),
+    )
+
+
+@pytest.fixture
+def quiet(conn):
+    """A Sunday like 2026-09-27: district opinions (counted, never
+    summarized), one agency release the agency dated today (listed), and
+    one it dated to an earlier day (counted under AGENCYPR-EX-01, never
+    listed)."""
+    for n, court in enumerate(["District of Connecticut", "District of Connecticut",
+                               "Northern District of Texas"]):
+        pid = f"USCOURTS-d{n}-26-0000{n}"
+        _package(conn, pid, "USCOURTS")
+        _text(conn, pid, f"{pid}-0", "USCOURTS", "DISTRICT", f"Doe{n} v. Roe{n}",
+              {"court_name": f"United States District Court for the {court}"},
+              body=f"SECRET-OPINION-BODY-{n}")
+    _package(conn, "AGENCYPR-cisa-1", "AGENCYPR")
+    _text(conn, "AGENCYPR-cisa-1", "", "AGENCYPR", "PRESS",
+          "CISA Adds Two Known Exploited Vulnerabilities to Catalog",
+          {"agency": "CISA Cybersecurity Advisories",
+           "claimed_published_at": f"{QUIET}T09:00:00", "url": "https://example.gov/a"})
+    _package(conn, "AGENCYPR-va-old", "AGENCYPR")
+    _text(conn, "AGENCYPR-va-old", "", "AGENCYPR", "PRESS", "An older VA story",
+          {"agency": "VA News Releases",
+           "claimed_published_at": "2026-09-20T09:00:00", "url": "https://example.gov/b"})
+    conn.commit()
+    return conn
+
+
+def _row(c, date=QUIET):
+    return c.execute("SELECT * FROM day_summaries WHERE date = ?", (date,)).fetchone()
+
+
+def test_a_day_where_nothing_qualified_gets_a_short_review(quiet):
+    llm = FakeLLM(text="A short review today.")
+    stats = compose.compose_day(quiet, llm, QUIET)
+    assert stats["composed"] == 1 and stats["short"] == 1
+    assert len(llm.calls) == 1
+    call = llm.calls[0]
+    assert call["purpose"] == "compose:short-review"
+    assert call["model"] == config.COMPOSE_MODEL
+    row = _row(quiet)
+    assert row["kind"] == "short"
+    assert row["kind_version"] == config.SHORT_REVIEW_PROMPT_VERSION
+    assert row["prompt_version"] == config.COMPOSE_PROMPT_VERSION
+    assert compose.get_day_summary(quiet, QUIET)["kind"] == "short"
+
+
+def test_the_short_review_sees_counts_and_listed_titles_only(quiet):
+    """§6 r4: the model sees what the digest lists and counts, never an
+    excluded document's text or case name."""
+    llm = FakeLLM()
+    compose.compose_day(quiet, llm, QUIET)
+    prompt = llm.calls[0]["prompt"]
+    assert '"CISA Adds Two Known Exploited Vulnerabilities to Catalog"' in prompt
+    assert "CISA Cybersecurity Advisories" in prompt
+    # Counted under AGENCYPR-EX-01, never listed as today's news.
+    assert "An older VA story" not in prompt
+    # District opinions arrive as counts by court, nothing more.
+    assert "District of Connecticut (district): 2" in prompt
+    assert "Northern District of Texas (district): 1" in prompt
+    assert "SECRET-OPINION-BODY" not in prompt and "Doe0 v. Roe0" not in prompt
+    assert '"USCOURTS/DISTRICT": 3' in prompt
+    # The listed collection's raw count (which includes the backfill
+    # release) is not restated beside its listed titles.
+    assert "AGENCYPR/PRESS" not in prompt
+    # The Sunday is explained in fedcal's own words.
+    assert "Sunday is not a federal business day" in prompt
+
+
+def test_a_short_review_rerun_makes_no_call(quiet):
+    compose.compose_day(quiet, FakeLLM(), QUIET)
+    llm = FakeLLM()
+    stats = compose.compose_day(quiet, llm, QUIET)
+    assert stats["skipped_existing"] == 1 and not llm.calls
+
+
+def test_no_short_review_when_documents_qualified_but_went_unsummarized(quiet):
+    """An appellate opinion passed USCOURTS-SEL-01 but has no summary:
+    that is a missing layer, not a quiet day, and "nothing met the
+    summary rules" would be false."""
+    _package(quiet, "USCOURTS-ca2-26-00001", "USCOURTS")
+    _text(quiet, "USCOURTS-ca2-26-00001", "USCOURTS-ca2-26-00001-0", "USCOURTS",
+          "APPELLATE", "Smith v. Jones",
+          {"court_name": "United States Court of Appeals for the Second Circuit"})
+    quiet.commit()
+    llm = FakeLLM()
+    stats = compose.compose_day(quiet, llm, QUIET)
+    assert stats["composed"] == 0 and not llm.calls
+    assert _row(quiet) is None
+
+
+def test_a_short_review_is_withdrawn_once_something_qualifies(quiet):
+    compose.compose_day(quiet, FakeLLM(), QUIET)
+    _package(quiet, "USCOURTS-ca2-26-00001", "USCOURTS")
+    _text(quiet, "USCOURTS-ca2-26-00001", "USCOURTS-ca2-26-00001-0", "USCOURTS",
+          "APPELLATE", "Smith v. Jones",
+          {"court_name": "United States Court of Appeals for the Second Circuit"})
+    quiet.commit()
+    # Qualified but not yet summarized: the short review's claim is now
+    # false, so it goes, and nothing replaces it yet.
+    llm = FakeLLM()
+    assert compose.compose_day(quiet, llm, QUIET)["composed"] == 0
+    assert not llm.calls and _row(quiet) is None
+    # Once the summary exists, the ordinary Day in Review is composed.
+    quiet.execute(
+        "INSERT INTO summaries (package_id, granule_id, prompt_version, method, model,"
+        " inclusion_rule, summary, created_at) VALUES (?, ?, ?, 'llm', 'haiku',"
+        " 'USCOURTS-SEL-01', 'The court affirmed.', '2026-09-28T01:00:00Z')",
+        ("USCOURTS-ca2-26-00001", "USCOURTS-ca2-26-00001-0", config.PROMPT_VERSION),
+    )
+    quiet.commit()
+    llm = FakeLLM(text="Full synthesis.")
+    assert compose.compose_day(quiet, llm, QUIET)["composed"] == 1
+    assert llm.calls[0]["purpose"] == "compose:day-in-review"
+    assert _row(quiet)["kind"] == "full"
+
+
+def test_a_short_review_that_fails_the_lexicon_gate_is_not_stored(quiet):
+    """Gated before storage: a failing review is dropped and the digest
+    renders without a Day in Review, so it can never block the day."""
+    llm = FakeLLM(text="A short review of a landmark Sunday.")
+    stats = compose.compose_day(quiet, llm, QUIET)
+    assert stats["composed"] == 0 and stats["gated"] == 1
+    assert stats["input_tokens"] == 30000, "spent tokens stay visible in stats"
+    assert _row(quiet) is None
+
+
+def test_a_banned_word_inside_a_quoted_official_title_passes_the_gate(quiet):
+    """The §2 phrase-scoped exemption applies at storage exactly as at
+    render: quoting the agency's own title is not our adjective."""
+    _package(quiet, "AGENCYPR-nps-1", "AGENCYPR")
+    _text(quiet, "AGENCYPR-nps-1", "", "AGENCYPR", "PRESS",
+          "Historic Preservation Grants Announced",
+          {"agency": "NPS News Releases",
+           "claimed_published_at": f"{QUIET}T10:00:00", "url": "https://example.gov/c"})
+    quiet.commit()
+    llm = FakeLLM(text='NPS News Releases published "Historic Preservation Grants Announced."')
+    assert compose.compose_day(quiet, llm, QUIET)["composed"] == 1
+    assert _row(quiet)["kind"] == "short"

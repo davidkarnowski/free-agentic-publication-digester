@@ -2402,13 +2402,22 @@ def _day_in_review_lines(conn, date):
     day = get_day_summary(conn, date)
     if not day:
         return []
+    if day.get("kind") == "short":
+        # GUIDE §3a, amended 2026-09-28: no item summaries existed, so the
+        # footnote must not claim it was composed from them.
+        basis = ["*A short review: no document observed for this day met a",
+                 "summary rule. Composed from the day's mechanical counts and",
+                 "the titles listed below; all specifics are cited in their",
+                 "sections.*"]
+    else:
+        basis = ["*Composed from the summarized items below and the day's mechanical",
+                 "counts; all specifics are cited in their sections.*"]
     return [
         "## Day in Review",
         "",
         day["summary"].strip(),
         "",
-        "*Composed from the summarized items below and the day's mechanical",
-        "counts; all specifics are cited in their sections.*",
+        *basis,
         "",
         "---",
         "",

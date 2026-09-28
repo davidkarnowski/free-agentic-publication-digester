@@ -77,7 +77,10 @@ published, what was summarized, and what was excluded and why.
      counts (never the raw corpus), stored in day_summaries, and linted
      un-masked by the banned-lexicon validator. Two short factual
      paragraphs: congressional floor picture, then executive/regulatory
-     picture. -->
+     picture. On a day where nothing passed a summary rule, a SHORT review
+     takes this slot instead (GUIDE §3a, 2026-09-28): one paragraph from
+     the counts and the listed titles, saying it is short and why, with
+     its own footnote in place of the one below. -->
 {day_in_review_paragraphs}
 
 *Composed from the summarized items below and the day's mechanical counts;

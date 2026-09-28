@@ -24,6 +24,7 @@ PROMPTS = {
     "plain correction (composed)": (
         analyze._CORRECTION_NOTICE.format(terms="extreme") + analyze._PLAIN_PREAMBLE),
     "compose day-in-review": compose._PROMPT,
+    "compose short review": compose._SHORT_PROMPT,
     "compose section synopses": compose._SECTION_PROMPT,
     "section tags": tags._TAG_PROMPT,
     "source assessments": assess._ASSESS_PROMPT,

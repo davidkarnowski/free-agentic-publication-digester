@@ -6708,3 +6708,58 @@ email+web pairs merged correctly. FAS GAIN is skipped (operator). The
 expired subscriptions will be redone as a separate task.
 
 Verified: `scripts/preflight.sh` PASS. Deployed before the 2026-09-26 EOD.
+
+## 2026-09-28 — Health check; a short Day in Review for quiet days
+
+The VPS health check found no fault. All nine containers were healthy,
+the evidence push was clean (0 commits stranded, pushed at 04:12 UTC),
+the MCP service answered, and every collector worker was at zero
+consecutive errors. Watch items: fapd.info's certificate had 29 days
+left, with the renewal due on the next certbot run, and three Ubuntu
+security updates were pending for the next unattended-upgrades run.
+
+The security sweep's "critical" verdict (42 probe-shaped requests
+answered 2xx) was a false positive. All 42 were
+`/wp-admin/install.php` requests logged before the edge log gained its
+`host=` field at 2026-09-27 14:11 UTC. Their response sizes matched
+botmural.live's own index page exactly, so they were that site's
+single-page-app fallback. Without `host=`, the sweep could not set them
+aside as fallback. The next sweep window lies entirely after the format
+change.
+
+The operator asked why 2026-09-27 had no inference. It did have
+inference: the CLI answered every call, and the Gemini fallback was
+untouched. The day simply had nothing for a model to summarize. Its 84
+USCOURTS packages were all district courts (225 opinions, counted under
+USCOURTS-EX-01), and its five agency releases list by title only.
+Every earlier Sunday had at least one appellate or national opinion
+(8, 1 and 4 on 09-06, 09-13 and 09-20). With no summaries the compose
+layer wrote no Day in Review, yet `day_inference` recorded every layer
+as `ran` and the Inference row read "model layers ran — cli". That
+record problem is now a CLAUDE.md §10 entry. The insight model read the
+same record as an outage.
+
+Operator ruling: quiet days still get a Day in Review. GUIDE §3a was
+amended first; implementation on `feature/short-day-in-review`:
+
+- `compose._SHORT_PROMPT` (`SHORT_REVIEW_PROMPT_VERSION` 1) is the
+  eighth prompt surface.
+- It triggers only when documents were observed and
+  `rules.select_items` is empty.
+- Its inputs are the counts (listed collections left out, since their
+  titles are given), opinion counts by court, the fedcal note, and the
+  titles `report._agency_rows`, `_votes_rows` and the bill-action rows
+  list. Every title passes through the report's own dating and
+  corroboration helpers.
+- The text is checked by `report._validate_lexicon` before storage. A
+  review that fails is not stored, with its tokens still counted in the
+  stats.
+- It is stored in the Day in Review's slot with `day_summaries.kind =
+  'short'` and `kind_version` (additive columns, `_ensure_columns`).
+- Its footnote says it was built from counts and listed titles.
+- An existing short review is withdrawn once anything passes a summary
+  rule.
+
+Regeneration scope: none. The feature is forward-only, and the ordinary
+Day in Review's version is unchanged. Cost: one compose-tier call on a
+quiet day. The 2026-09-27 digest stays as frozen.

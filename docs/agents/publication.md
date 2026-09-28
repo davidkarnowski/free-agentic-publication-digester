@@ -114,6 +114,12 @@ docs/accessibility.md → this file.
   The coverage arithmetic is unchanged; the render stays zero-LLM and
   deterministic (`day_inference` is read, never computed at render).
 
+- **The Day in Review footnote follows `day_summaries.kind`
+  (2026-09-28).** A short review (GUIDE §3a) was composed from counts
+  and listed titles, not from item summaries, so its footnote says so.
+  A footnote claiming summaries on a day that had none is the kind of
+  overclaim §2 forbids.
+
 ## Things that are intentional here — do not "fix" without the operator
 
 - Empty-state sections; the append-only numbering.

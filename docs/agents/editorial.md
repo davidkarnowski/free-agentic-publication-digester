@@ -95,6 +95,15 @@ file.
 - **Official text first, at zero cost.** FR documents carrying an agency
   SUMMARY preamble are stored verbatim (`method='official'`) before any
   model runs.
+- **A quiet day still opens with a Day in Review (GUIDE §3a, amended
+  2026-09-28).** When documents were observed but `rules.select_items`
+  is empty, `compose._compose_short` writes one paragraph from counts,
+  opinion counts by court, the fedcal note, and the titles the report's
+  own listing helpers return. It gets no document text and no case
+  names (§6 r4). It is gated with `report._validate_lexicon` before
+  storage, stored as `day_summaries.kind = 'short'`, and withdrawn once
+  anything passes a summary rule. Qualified-but-unsummarized is a
+  missing layer, not a quiet day, so it never gets a short review.
 - **Summaries are durable and versioned.** Keyed by
   `(package, granule, prompt_version)`; reruns make zero calls; a prompt
   change bumps its version and regenerates only that layer. Plain-speak,

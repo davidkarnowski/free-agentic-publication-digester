@@ -351,6 +351,22 @@ confirm-gate.
   removing the drop or normalizing the comparison**: normalizing alone
   would make the drop fire far more often, the opposite of the GUIDE.
 
+- `finalize.run_model_layers` records a layer as `"ran"` whenever its
+  function returns without an LLM error, including when it had nothing
+  to do. On 2026-09-27 no document passed a summary rule, no model call
+  was made for the day, and `day_inference` still recorded all five
+  layers as `ran` with an empty `models` field. The digest's Inference
+  row read "model layers ran — cli" over a digest with no model prose,
+  and the nightly insight model misread the same record as an outage.
+  The short Day in Review (GUIDE §3a, 2026-09-28) removes the
+  reader-facing case for quiet days, because the compose layer now
+  genuinely runs on them. The record's meaning is unchanged, and a day
+  that observed nothing at all would still read "ran". A fix needs a
+  per-layer notion of "nothing was eligible", which is not the same as
+  "no prose was stored" (a layer whose items all failed also stores
+  none). **Confirm with the operator before adding a layer outcome**:
+  the Inference row's wording is an operator ruling (2026-08-24).
+
 ## 11. Section agents
 
 The system is segmented into five sections with explicit boundaries so
@@ -757,3 +773,20 @@ live in `.claude/agents/fapd-*.md` (tracked).
   insight report gains a Provider availability block so an outage reads
   as a span, not five error lines
   (`docs/ops/plan-2026-09-27-inference-fallback.md`).
+- **2026-09-28** — **A quiet day still gets a Day in Review** (operator;
+  GUIDE §3a amended). The 2026-09-27 digest, a Sunday with 225
+  district-court opinions and five agency releases, opened with no Day
+  in Review: nothing passed a summary rule, so the compose layer had no
+  summaries to work from. Readers expect the opening paragraph. A day
+  that observed documents but had none pass a summary rule now gets a
+  short review: one strong-model paragraph written from the counts,
+  opinion counts by court, the calendar note, and the titles the digest
+  lists under its own listing rules. It says it is short and why, and
+  never calls the day's publications minor or insignificant (§2). It is
+  gated for banned words before storage, so it can never block a day.
+  It is marked `kind = 'short'` in `day_summaries`, has its own
+  footnote, and is replaced by the ordinary review if summaries appear.
+  A day where documents qualified but went unsummarized keeps today's
+  behaviour: that is a missing layer, not a quiet day. The operator
+  chose a model-written paragraph over a zero-token template because
+  the titles give it something to say. Forward-only.
