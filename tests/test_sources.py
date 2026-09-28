@@ -103,7 +103,11 @@ def test_registry_seeds_expected_active_sources():
         # it — NIH links RSS from the body, not <head>), and was blocked
         # until the same day by its Drupal date format, which fell to
         # LISTED and would have published a seven-week window as today.
-        "nih-news"}
+        "nih-news",
+        # activated 2026-09-28 (operator) on first live-delivery evidence:
+        # registered 2026-09-26, each delivered its first DKIM-verified
+        # bulletin (1 bulletin -> 1 item) on the first weekday after:
+        "aphis-email", "loc-email", "tigta-email", "usda-ars-email"}
 
 
 # ------------------------------------------------------------ coverage_stats --

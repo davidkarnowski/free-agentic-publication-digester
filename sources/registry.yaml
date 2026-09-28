@@ -2018,9 +2018,9 @@
     home: https://www.tigta.gov/
     signup: https://public.govdelivery.com/accounts/USTREASTIGTA/subscriber/new
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
-  status: planned
+  status: active
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender tigta@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: oversight-gov, treasury-email, treasury-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender tigta@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation (2026-09-28, from live delivery): 1 bulletin -> 1 item on 2026-09-28 (an announcement of two new audit reports). The bulletin carries no link to a web copy, so the item cites the archived message itself. DKIM-verified with the key archived; signed by service.govdelivery.com, the delivery platform's domain, not the agency's. The inbox rule labels and ingests such mail; the same message delivered to the junk folder would be refused (GUIDE §3, 2026-09-26). One bulletin is a thin sample, and the topic selection made at signup was not recorded, so this evaluation claims no coverage relationship to the agency's full output: the bulletin stream is the subscription's own measure of coverage, observed continuously by the collector and shown on the source page. Related entries that can publish the same news: oversight-gov, treasury-email, treasury-newsroom. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
 
 - id: dot-oig-email
   adapter: govdelivery
@@ -2103,9 +2103,9 @@
     home: https://www.aphis.usda.gov/
     signup: https://public.govdelivery.com/accounts/USDAAPHIS/subscriber/new
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
-  status: planned
+  status: active
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender aphis@subscribers.usda.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: agriculture-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender aphis@subscribers.usda.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation (2026-09-28, from live delivery): 1 bulletin -> 1 item on 2026-09-28 (a stakeholder event notice, \"Reminder: Bird Biosecurity Webinar Sep 29\"). The bulletin carries no link to a web copy, so the item cites the archived message itself. DKIM-verified with the key archived; signed by subscribers.usda.gov, which aligns with the sender's domain. One bulletin is a thin sample, and the topic selection made at signup was not recorded, so this evaluation claims no coverage relationship to the agency's full output: the bulletin stream is the subscription's own measure of coverage, observed continuously by the collector and shown on the source page. Related entries that can publish the same news: agriculture-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
 
 - id: usda-rd-email
   adapter: govdelivery
@@ -2157,9 +2157,9 @@
     home: https://www.ars.usda.gov/
     signup: https://public.govdelivery.com/accounts/USDAARS/subscriber/new
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
-  status: planned
+  status: active
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender usda-ars-comms@subscribers.usda.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins. Related entries that can publish the same news: agriculture-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender usda-ars-comms@subscribers.usda.gov). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation (2026-09-28, from live delivery): 1 bulletin -> 1 item on 2026-09-28 (a research feature on precision agriculture infrastructure). The bulletin carries no link to a web copy, so the item cites the archived message itself. DKIM-verified with the key archived; signed by subscribers.usda.gov, which aligns with the sender's domain. One bulletin is a thin sample, and the topic selection made at signup was not recorded, so this evaluation claims no coverage relationship to the agency's full output: the bulletin stream is the subscription's own measure of coverage, observed continuously by the collector and shown on the source page. Related entries that can publish the same news: agriculture-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule."
 
 - id: doe-cmei-email
   adapter: govdelivery
@@ -2228,9 +2228,9 @@
     home: https://www.loc.gov/
     signup: https://public.govdelivery.com/accounts/USLOC/subscriber/new
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
-  status: planned
+  status: active
   added: "2026-09-26"
-  notes: "Subscription confirmed through the publisher's own signup flow (sender loc@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation pending first ingested bulletins."
+  notes: "Subscription confirmed through the publisher's own signup flow (sender loc@service.govdelivery.com). Bulletins were observed in the project mailbox before registration; registered 2026-09-26 and ingested from the first poll after deploy — earlier bulletins are not backfilled. Gate-3 coverage evaluation (2026-09-28, from live delivery): 1 bulletin -> 1 item on 2026-09-28 (a post on the Library's blog, blogs.loc.gov, linked from the bulletin). DKIM-verified with the key archived; signed by service.govdelivery.com, the delivery platform's domain, not the agency's. The inbox rule labels and ingests such mail; the same message delivered to the junk folder would be refused (GUIDE §3, 2026-09-26). One bulletin is a thin sample, and the topic selection made at signup was not recorded, so this evaluation claims no coverage relationship to the agency's full output: the bulletin stream is the subscription's own measure of coverage, observed continuously by the collector and shown on the source page."
 
 - id: nifa-email
   adapter: govdelivery

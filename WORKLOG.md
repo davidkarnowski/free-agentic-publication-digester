@@ -6799,3 +6799,42 @@ nothing; the real reading is pinned against a database. The new tests
 cover an empty day (all idle), a quiet day (idle, and compose `failed`
 then `ran`), a selected-but-unsummarized item (map `failed`), the
 all-idle record and label, and idle not being listed as missing.
+
+## 2026-09-28 — Four email sources activated on first delivery
+
+The operator asked whether the email sources registered on 2026-09-26
+had started delivering and were showing as active. None showed as
+active: all 26 sources from the two 09-26 batches were still `planned`.
+Four had delivered their first bulletin on 09-28, the first weekday
+after registration: APHIS, the Library of Congress, TIGTA, and USDA
+ARS. Their pages already read "ingestion health: delivering", because
+planned email sources have been measured since 09-26, and their items
+were already on /today. The label was the only thing wrong.
+
+Operator ruling: promote the new sources that are delivering. Each
+entry's "Gate-3 coverage evaluation pending" note is replaced with a
+dated evaluation from live delivery, in the IRS template's shape:
+bulletin-to-item count, what the item was, and the DKIM signer. Two
+facts from production that the evaluations disclose:
+
+- Three of the four bulletins (APHIS, TIGTA, ARS) carry no link to a
+  web copy, so their items cite the archived message.
+- The Library of Congress and TIGTA are signed by
+  `service.govdelivery.com`, the delivery platform's domain, not the
+  agency's. The inbox rule labels and ingests that mail, but the
+  junk-folder rule of 2026-09-26 would refuse it if it ever landed in
+  Spam. APHIS and ARS are signed by `subscribers.usda.gov`, which
+  aligns with the sender's domain.
+
+The topic selection made at signup was never recorded for these
+entries. The evaluations therefore claim no coverage relationship to
+the agency's full output: the bulletin stream is the measure. FAA
+(`faa-email`, planned since July, 11 items in 14 days) is delivering
+too but was not part of this batch; it stays planned pending the
+operator.
+
+The status flip is all the tracking needs. `health.is_measured` already
+covered planned email. Going active moves each card into the Active
+group, adds the poll-cadence row, and changes the status chip. The
+pinned active set in `tests/test_sources.py` gains the four, with the
+reason. `SOURCES.md` was regenerated.
