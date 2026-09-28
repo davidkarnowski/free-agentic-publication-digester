@@ -107,7 +107,20 @@ def test_registry_seeds_expected_active_sources():
         # activated 2026-09-28 (operator) on first live-delivery evidence:
         # registered 2026-09-26, each delivered its first DKIM-verified
         # bulletin (1 bulletin -> 1 item) on the first weekday after:
-        "aphis-email", "loc-email", "tigta-email", "usda-ars-email"}
+        "aphis-email", "loc-email", "tigta-email", "usda-ars-email",
+        # activated 2026-09-28 (operator) from a live probe the same day: the
+        # July blocker (the agency class held 500 requests a day) is gone at
+        # 3,000, and each listing yielded publisher-dated releases through the
+        # unchanged html-index adapter. Three carry an index_item_path hint
+        # (energy, OFAC, USCIS); the White House carries the new
+        # index_exclude_path, so its proclamations stay PRESACT's alone:
+        "whitehouse-briefing-room", "ice-newsroom", "ustr-press",
+        "fec-newsroom", "irs-newsroom", "fdic-news", "gsa-newsroom",
+        "ncua-news", "cdc-newsroom", "nsf-news", "energy-newsroom",
+        "ofac-recent-actions", "uscis-newsroom",
+        # and the FAA's bulletins: 81 DKIM-verified items since 2026-08-05,
+        # the only working channel while faa-newsroom refuses us:
+        "faa-email"}
 
 
 # ------------------------------------------------------------ coverage_stats --
@@ -146,7 +159,9 @@ def test_coverage_stats_per_tier_on_real_registry():
     # + congress-gov-api bill actions (07-31, first api source)
     # + dhs-newsroom (07-31, first tier-1 html-index source)
     # + the two whitehouse.gov presidential-action feeds (08-06)
-    assert by_tier[1].get("active", 0) == 23
+    # + energy, FEC, GSA and the White House news listing (09-28, html-index
+    #   activations from the same-day live probe)
+    assert by_tier[1].get("active", 0) == 27
 
 
 def test_coverage_stats_empty():

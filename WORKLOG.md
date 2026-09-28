@@ -6838,3 +6838,59 @@ covered planned email. Going active moves each card into the Active
 group, adds the poll-cadence row, and changes the status chip. The
 pinned active set in `tests/test_sources.py` gains the four, with the
 reason. `SOURCES.md` was regenerated.
+
+## 2026-09-28 — Fourteen sources activated; an exclude hint for index listings
+
+The operator asked which planned sources could be made active today.
+Every planned html-index source from July carried the same blocker:
+"activation awaits the operator's polling-cadence decision (the agency
+class holds 500 requests a day)". That class is now 3,000 a day (commit
+ac9ed10d), and production uses 650–720, so the blocker no longer applies.
+
+Method:
+
+1. The production adapter was run offline against the saved July
+   captures, with the date pinned to the capture day. The lookback is
+   measured from `publication_date()`, so without the pin every
+   two-month-old capture parses to nothing. Validated against DHS: 10
+   of 10, matching production.
+2. A brief live test probe followed (operator-approved "polite probe";
+   30 requests from the operator machine, outside the server's budget;
+   every host allowed us; USCIS's 10-second crawl-delay was honored).
+3. The adapter was re-run on the fresh captures.
+
+Results:
+
+| Outcome | Sources |
+|---|---|
+| Clean as-is | ICE 7, USTR 5, FEC 4, IRS 3, FDIC 2, GSA, NCUA, CDC, NSF 1 each |
+| Clean with an `index_item_path` hint | Energy `/articles/` (14 → 5), OFAC `/recent-actions/20` (5 → 3), USCIS `/newsroom/news-releases/` (6 → 2) |
+| Held for a new hint | White House `/news/`: 10 entries, one a proclamation already ingested by the PRESACT feeds |
+| No dated entry today; left planned | NLRB, CFPB |
+
+The White House fix is a new registry hint, `index_exclude_path`: one
+URL path prefix whose anchors the html-index adapter skips. It is the
+same shape and validation as `index_item_path` (a prefix, never a
+selector), documented in `docs/adding-sources.md`. It is pinned against
+a 13 KB excerpt of the probed page, which also shows the prefix covers
+the "Presidential Actions" category tag. The White House listing
+activates with it, 9 entries.
+
+Activated, with dated gate-3 notes and first-page under-coverage
+disclosed:
+- 13 web sources.
+- `faa-email`: 81 DKIM-verified items since 2026-08-05, signed by
+  `info.dot.gov`, the FAA's only working channel.
+
+FEC's note discloses that the updates listing is broader than press
+releases. Redirected listings are registered at their final URL (GSA,
+NCUA, White House). The pinned active set and the tier-1 count (23 →
+27) were updated.
+
+Found on the way and logged as OB-30:
+- The probe rewrites the committed `provenance/manifests/<today>.jsonl`
+  (reverted before commit).
+- The post-deploy database-lock burst.
+- NLRB and CFPB re-probe.
+
+OB-29's email-promotion bullet gained its progress line.

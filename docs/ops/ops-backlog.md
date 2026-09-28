@@ -593,7 +593,10 @@ not reusable.)*
   26 new entries are read and ingested while planned. Each is promoted to
   active by a dated gate-3 note once its first bulletins have been
   ingested. *Trigger:* about a week of `mailbox_messages` rows, or the
-  insight report flagging a source.
+  insight report flagging a source. *Progress 2026-09-28:* APHIS, the
+  Library of Congress, TIGTA and USDA ARS were promoted on their first
+  weekday bulletins, and `faa-email` (planned since July, 81 items) was
+  promoted with the day's web activations. 22 of the 26 remain planned.
 - **`hud-oig-email`'s registry notes carry other sources' evaluations.**
   Five gate-3 paragraphs were appended to it in July, and one of them
   describes SSA. Attribute each one from the production data, move it to
@@ -608,3 +611,33 @@ not reusable.)*
   `file_messages`.
 - **The ingest-time email drop (CLAUDE.md §10).** This needs an operator
   ruling before anyone changes it.
+
+**OB-30 — Follow-ups from the 2026-09-28 source activations**
+- **Context.** A brief live test probe on 2026-09-28 (30 requests, from
+  the operator machine, outside the server's budget — the machine is not a
+  probing host otherwise) re-checked 15 planned html-index sources whose July activation
+  had waited on a 500-request agency budget, now 3,000. Thirteen were
+  activated, with `index_item_path` hints on three and the new
+  `index_exclude_path` on the White House news listing. These items
+  remain.
+- **The probe rewrites a committed evidence file.** `probe.run` calls
+  `provenance.export_manifest(conn)` (`src/fapd/probe.py:261`), so a
+  test probe from the operator machine appends its captures to
+  `provenance/manifests/<today>.jsonl` in the working tree. That file is
+  written and hash-chained by the production pipeline. On 2026-09-28 the
+  local edit was reverted before any commit. A commit that carried it
+  would break the manifest chain and mix evidence into a code commit.
+  *Fix:* the probe exports to `data/probe/<date>/` instead, or not at
+  all. *Trigger:* before the next probe run.
+- **The first cycle after a restart can lock the database.** About five
+  minutes after the 16:06 UTC deploy, every worker ran its first cycle at
+  once, one write held the lock past the 30-second busy timeout, and six
+  workers failed in one four-second burst. Every one recovered on its
+  next cycle, and the email worker waited out its designed 2x backoff.
+  The morning deploy showed no burst at its check, and earlier
+  containers' logs are gone, so the frequency is unknown. *Fix:*
+  stagger the first cycles by worker. *Trigger:* the next burst seen
+  after a deploy.
+- **NLRB and CFPB stayed planned.** Neither listing had a dated entry
+  inside the 7-day lookback on 2026-09-28. In July each had one. *Trigger:*
+  re-probe in a week; activate if releases parse.
