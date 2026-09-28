@@ -1739,6 +1739,32 @@ of the code, not of operator discipline.
   rule 14 (per-item ceilings), and §5's freeze — the continuous analyze
   layer stops touching a day once it is finalized, so a summary is never
   paid for after the digest that would have carried it has frozen.
+  *Amended 2026-09-28 (operator): a layer with nothing to do is not a
+  layer that ran.* Until this amendment, a layer was recorded `ran`
+  whenever it returned without a provider error. On 2026-09-27 no
+  document passed a summary rule and no model call was made for the
+  day, yet all five layers read `ran` and the Inference row said "model
+  layers ran — cli" over a digest with no model prose. The nightly
+  insight model then misread the same record as an outage. There are
+  now four outcomes:
+  - `ran`: the layer had material and did its work.
+  - `idle`: the layer had nothing to work from. The map layer had no
+    rule-selected item. The plain layer had no stored summary. The Day
+    in Review had neither summaries nor a quiet day to review. The
+    section and tag layers had no section items.
+  - `skipped`: the provider was already known to be unavailable, so
+    the layer was not attempted.
+  - `failed`: the layer raised a provider error, or it had material but
+    left nothing publishable. The case that exists today is a short
+    Day in Review withheld by its storage-time gate.
+  An idle layer is never listed as unavailable. It was not missing.
+  When every layer was idle, the Inference row says so in one fixed
+  sentence: "No model layer had anything to work from for this
+  publication day. All content is source-derived or mechanically
+  constructed." That sentence is a fact about the day's publications,
+  not a cause, so the no-causes ruling above still holds. A mix of
+  `idle` and `skipped` with nothing `ran` is still a no-inference day
+  and reads as one. The provider was needed and was not there.
 
 ## 7. Provenance & Tamper-Evidence
 
