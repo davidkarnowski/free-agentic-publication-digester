@@ -6894,3 +6894,23 @@ Found on the way and logged as OB-30:
 - NLRB and CFPB re-probe.
 
 OB-29's email-promotion bullet gained its progress line.
+
+## 2026-09-28 — Blog: "Eighteen New Official Sources in the Digest"
+
+The operator asked for a short post on broadening FAPD's sources. The
+first draft leaned on operational mechanics: budgets, the test probe,
+path hints and DKIM. At the operator's direction it was rewritten around
+four things:
+- the sources themselves: what each of the eighteen agencies publishes,
+  paraphrased from the registry descriptions, minus one evaluative word
+  in OFAC's entry;
+- how their publications are used: section 6 attribution, selection by
+  existence, email and web corroboration, and White House proclamations
+  staying in section 9;
+- how a source earns active status;
+- the continuing effort: 70 sources still planned. The first revision
+  said 92, which counted the unavailable and excluded entries.
+
+It was previewed locally through the site's own blog renderer and
+stylesheet, approved, and allowlisted in `publish._BLOG_POSTS` as
+`blog-broadening-the-sources.html`, dated 2026-09-28.
