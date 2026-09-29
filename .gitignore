@@ -49,3 +49,23 @@ deploy/dev/repo/
 # export (deploy/common/repo-excludes.txt) so it is never baked into an
 # image. Only the PUBLIC proof line is in the code.
 secrets/
+
+# Operational-infrastructure docs kept off the public repository
+# (operator ruling 2026-09-29; CLAUDE.md §13 and the global "never
+# disclose infrastructure on public surfaces" rule). These name the
+# host layout, co-tenant services, and security tooling. They stay on
+# the operator's disk — untracked here, and moving to the private host
+# tree. Forward-only: git history still holds the versions committed
+# before this date, whose removal would need a force-push the main
+# ruleset refuses.
+/CLAUDE.md
+/WORKLOG.md
+/deploy/vps/README.md
+/deploy/vps/docker-compose.yml
+/docs/ops/SERVER-GUIDE.md
+/docs/ops/AGENT-CVE-GUIDE.md
+/docs/ops/findings.md
+/docs/ops/plan-2026-09-13-agent-discovery.md
+/docs/ops/plan-2026-09-13-phase5-deploy-verify.md
+/docs/ops/ops-backlog.md
+/docs/pre-publication-todo.md
