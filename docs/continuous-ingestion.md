@@ -81,8 +81,13 @@ govinfo ~30 min (`GOVINFO_POLL_INTERVAL_MIN`), agency hosts ~60 min
 (`AGENCY_POLL_INTERVAL_MIN`), mailbox ~15 min
 (`EMAIL_POLL_INTERVAL_MIN`), /today render check ~5 min
 (`TODAY_RENDER_INTERVAL_MIN`), source health ~15 min
-(`SOURCE_HEALTH_REFRESH_MIN`), EOD check every 10 min (hard-coded
-default in `_build_workers`), all jittered, and each worker's first
+(`SOURCE_HEALTH_REFRESH_MIN`), all jittered. The EOD finalizer is the
+exception: it is scheduled, not polled (2026-09-28, operator: "cron-job
+like accuracy"). It sleeps exactly to the next midnight on the
+publication clock (`EOD_ET_HOUR`, daylight saving included) plus one
+second, with no jitter and no start-up spread. Only pending work (a
+finalize retry rung, or an evidence push still owed) keeps its own
+spacing, capped at that boundary. Each other worker's first
 cycle waits a random 0–`COLLECTOR_STARTUP_SPREAD_S` (120 s) so a restart
 does not land every first cycle in the same second (2026-09-28: three
 post-deploy bursts of "database is locked"). Journal reconciliation

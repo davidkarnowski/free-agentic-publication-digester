@@ -6963,3 +6963,39 @@ poll's first write, before the validators moved.
 Four regression tests were added. Each was checked to fail on the old
 code: the journal test fails exactly as production did, waiting on
 another writer's lock.
+
+## 2026-09-28/29 — The EOD finalizer runs on the clock, not on a poll
+
+Watching the 2026-09-28 finalize live, the finalizer fired at 04:10:08Z,
+ten minutes after the day closed at 04:00Z. The EOD worker checked
+whether a day was due every ~10 minutes, jittered ±10%, so a day
+finalized anywhere up to about 11 minutes late. The start-up spread
+added earlier the same night could have delayed it by up to 2 more
+minutes. The operator: "cron-job like accuracy, not 10-minute checks."
+
+`EODWorker.wait_seconds` now sleeps exactly to `next_boundary()`: the
+next `EOD_ET_HOUR`:00 on the publication clock, built from the local
+date so both daylight-saving nights land on the local hour, plus a
+one-second margin so a slightly early wake can never find nothing due.
+It is exempt from the start-up spread (a day that closed while the
+container was down finalizes at once) and from jitter. Pending work
+keeps its own spacing, unjittered and capped at the boundary:
+- a finalize retry rung (15/60/200 min);
+- an evidence push still owed.
+
+Tests cover:
+- the boundary on an ordinary night, exactly at the boundary, and on
+  both 2026/2027 daylight-saving nights;
+- an idle wait that is exact and repeatable;
+- pending-work spacing and the cap;
+- no spread for EOD.
+
+The 2026-09-28 finalize itself was clean, and it was the first run
+under the journal fix:
+- every model layer ran; validation PASSED;
+- evidence commit aba9c1ce pushed at 04:22:25Z;
+- no lock errors through the pause and resume.
+
+Three new sources' model-written descriptions (FDIC, NCUA, NSF) fell
+under the 200-word floor and were not stored. The gate worked; they
+regenerate on a later run.

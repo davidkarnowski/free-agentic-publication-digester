@@ -1445,3 +1445,71 @@ def test_default_llm_fails_over_behind_the_collector_reserve(monkeypatch, tmp_pa
     monkeypatch.setattr(config, "LLM_FALLBACK_COLLECTOR_SHARE", 0.5)
     collect.Supervisor._default_llm()
     assert seen == {"fallback": "gemini", "fallback_budget": 10}
+
+
+# ------------------------------------ the EOD finalizer runs on the clock --
+# Operator, 2026-09-28: "cron-job like accuracy, not 10-minute checks". The
+# polled worker fired 2026-09-28's finalizer at 04:10:08Z, ten minutes after
+# the day closed at 04:00Z.
+
+def _utc(stamp):
+    return dt.datetime.fromisoformat(stamp).replace(tzinfo=dt.UTC)
+
+
+def test_the_next_boundary_is_midnight_on_the_publication_clock(monkeypatch):
+    monkeypatch.setattr(config, "EOD_ET_HOUR", 0)
+    nb = collect.EODWorker.next_boundary
+    # 23:50 EDT on Sep 28 -> 00:00 EDT Sep 29 = 04:00Z
+    assert nb(_utc("2026-09-29T03:50:00")) == _utc("2026-09-29T04:00:00")
+    # exactly on the boundary -> the NEXT one, never "now"
+    assert nb(_utc("2026-09-29T04:00:00")) == _utc("2026-09-30T04:00:00")
+    # the fall-back night: midnight EST on Nov 2 is 05:00Z, not 04:00Z
+    assert nb(_utc("2026-11-02T03:30:00")) == _utc("2026-11-02T05:00:00")
+    # the spring-forward day (2027-03-14): the midnight that opens it is
+    # still EST (05:00Z); the midnight that closes it is EDT (04:00Z)
+    assert nb(_utc("2027-03-14T04:30:00")) == _utc("2027-03-14T05:00:00")
+    assert nb(_utc("2027-03-15T03:30:00")) == _utc("2027-03-15T04:00:00")
+
+
+def _set_eod_row(conn, **cols):
+    base = {"worker": "eod", "finalized_date": "2026-09-27",
+            "evidence_pushed_at": "2026-09-28T04:12:35Z"}
+    base.update(cols)
+    keys = ", ".join(base)
+    conn.execute(f"INSERT OR REPLACE INTO collector_state ({keys})"
+                 f" VALUES ({', '.join('?' for _ in base)})", tuple(base.values()))
+    conn.commit()
+
+
+def test_an_idle_eod_worker_sleeps_exactly_to_the_boundary(conn, monkeypatch):
+    monkeypatch.setattr(config, "EOD_ET_HOUR", 0)
+    _set_eod_row(conn)
+    worker = collect.EODWorker(object(), 10)
+    wait = worker.wait_seconds(conn, 10, now=_utc("2026-09-29T02:00:00"))
+    assert wait == 2 * 3600 + collect.EODWorker.BOUNDARY_MARGIN_S
+    # no ±10% jitter: the same answer every time
+    assert wait == worker.wait_seconds(conn, 10, now=_utc("2026-09-29T02:00:00"))
+
+
+def test_pending_eod_work_keeps_its_spacing_but_never_passes_the_boundary(
+        conn, monkeypatch):
+    monkeypatch.setattr(config, "EOD_ET_HOUR", 0)
+    monkeypatch.setattr(config, "EVIDENCE_PUSH", True)
+    worker = collect.EODWorker(object(), 10)
+    # a finalize retry rung (15 min) well before the boundary
+    _set_eod_row(conn, finalize_target="2026-09-28", finalize_attempts=1)
+    assert worker.wait_seconds(conn, 15, now=_utc("2026-09-29T05:00:00")) == 15 * 60
+    # an evidence push still owed, two minutes before the next boundary
+    _set_eod_row(conn, finalize_target=None, finalize_attempts=0,
+             evidence_push_error="exit 1", evidence_push_attempts=1)
+    assert worker.wait_seconds(conn, 10, now=_utc("2026-09-30T03:58:00")) == \
+        120 + collect.EODWorker.BOUNDARY_MARGIN_S
+
+
+def test_the_eod_worker_is_not_spread_at_start_up(tmp_path, monkeypatch):
+    """A day that closed while the container was down finalizes at once;
+    the other workers keep their spread."""
+    sup, _ = make_supervisor(tmp_path, monkeypatch)
+    monkeypatch.setattr(config, "COLLECTOR_STARTUP_SPREAD_S", 120)
+    assert collect.EODWorker(sup, 10).startup_spread_s() == 0
+    assert collect.EmailWorker(sup, 5).startup_spread_s() == 120

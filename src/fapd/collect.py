@@ -367,6 +367,16 @@ class Worker:
         """Current interval; subclasses apply budget backpressure here."""
         return self.base_interval_min
 
+    def startup_spread_s(self):
+        """Seconds to spread this worker's first cycle over (see loop)."""
+        return config.COLLECTOR_STARTUP_SPREAD_S
+
+    def wait_seconds(self, conn, minutes, now=None):
+        """How long to sleep after a cycle: the interval, jittered ±10% so
+        worker clocks don't align into bursts. The EOD worker overrides
+        this with an exact schedule."""
+        return minutes * 60 * random.uniform(0.9, 1.1)
+
     def run_cycle(self):
         cycle_id = uuid.uuid4().hex[:12]
         try:
@@ -412,7 +422,7 @@ class Worker:
         # in the same second, and 41 first cycles landing together is what
         # queued the journal writes past the busy timeout after each deploy.
         # The steady-state ±10% jitter below keeps them apart afterwards.
-        spread = config.COLLECTOR_STARTUP_SPREAD_S
+        spread = self.startup_spread_s()
         if spread > 0:
             stop_event.wait(random.uniform(0, spread))
         while not stop_event.is_set():
@@ -434,14 +444,14 @@ class Worker:
                     streak = errors["consecutive_errors"] if errors else 0
                     minutes = self.interval_min(conn) * (
                         2 ** min(streak, 3) if self.backoff_on_errors else 1)
+                    seconds = self.wait_seconds(conn, minutes)
                 finally:
                     conn.close()
             except Exception as exc:  # noqa: BLE001 — see above
                 logger.error("%s: loop iteration failed: %r — retrying after"
                              " the base interval", self.name, exc)
-                minutes = self.base_interval_min
-            # jitter ±10% so worker clocks don't align into bursts
-            stop_event.wait(minutes * 60 * random.uniform(0.9, 1.1))
+                seconds = self.base_interval_min * 60 * random.uniform(0.9, 1.1)
+            stop_event.wait(seconds)
 
 
 class GovinfoWorker(Worker):
@@ -671,6 +681,62 @@ class EODWorker(Worker):
 
     name = "eod"
     backoff_on_errors = False
+
+    #: Woken this long after the boundary, never before it: Event.wait can
+    #: return a hair early, and a wake at 23:59:59.9 would find nothing due
+    #: and sleep a whole day.
+    BOUNDARY_MARGIN_S = 1.0
+
+    def startup_spread_s(self):
+        # A day that closed while the container was down finalizes at once.
+        return 0
+
+    @staticmethod
+    def next_boundary(now):
+        """The next instant the publication clock reads EOD_ET_HOUR:00:00,
+        strictly after `now` (an aware datetime). Built from the local
+        date, so a daylight-saving night lands on the local hour."""
+        tz = config.PUBLICATION_TZ
+        local = now.astimezone(tz)
+        day = local.date()
+        candidate = dt.datetime(day.year, day.month, day.day,
+                                config.EOD_ET_HOUR, tzinfo=tz)
+        if candidate <= local:
+            day = day + dt.timedelta(days=1)
+            candidate = dt.datetime(day.year, day.month, day.day,
+                                    config.EOD_ET_HOUR, tzinfo=tz)
+        return candidate.astimezone(dt.UTC)
+
+    def wait_seconds(self, conn, minutes, now=None):
+        """Cron-like, not polled (operator, 2026-09-28). Until then the
+        worker checked every ~10 minutes, jittered, so a day that closed
+        at midnight Eastern finalized anywhere up to ~11 minutes later
+        (04:10:08Z for 2026-09-28). Now it sleeps exactly to the next day
+        boundary. Pending work — a finalize retry rung or an evidence push
+        still owed — keeps its own spacing, unjittered, and is capped at
+        the boundary so it can never make the next day late."""
+        now = now or dt.datetime.now(dt.UTC)
+        to_boundary = ((self.next_boundary(now) - now).total_seconds()
+                       + self.BOUNDARY_MARGIN_S)
+        if self._work_pending(conn):
+            return min(minutes * 60, to_boundary)
+        return to_boundary
+
+    def _work_pending(self, conn):
+        row = conn.execute(
+            "SELECT finalize_target, finalize_attempts, finalized_date,"
+            " evidence_pushed_at, evidence_push_error, evidence_push_attempts"
+            " FROM collector_state WHERE worker = 'eod'").fetchone()
+        if not row:
+            return False
+        if row["finalize_target"] and row["finalize_attempts"]:
+            return row["finalize_attempts"] < config.EOD_MAX_FINALIZE_ATTEMPTS
+        if not config.EVIDENCE_PUSH:
+            return False
+        owed = (row["evidence_push_error"]
+                or (row["finalized_date"] and not row["evidence_pushed_at"]))
+        return bool(owed) and (row["evidence_push_attempts"]
+                               < config.EVIDENCE_PUSH_MAX_ATTEMPTS)
 
     def interval_min(self, conn):
         row = conn.execute(
