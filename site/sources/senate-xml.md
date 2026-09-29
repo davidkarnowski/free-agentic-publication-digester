@@ -61,9 +61,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 12 item(s) in the last 14 days; most recent 2026-09-24; 0 of 357 request(s) to www.senate.gov returned no content.
+**delivering** — 15 item(s) in the last 14 days; most recent 2026-09-28; 0 of 362 request(s) to www.senate.gov returned no content.
 
-This label has held since 2026-09-15T00:13:06Z (UTC) and was last re-checked 2026-09-28T03:57:50Z (UTC).
+This label has held since 2026-09-15T00:13:06Z (UTC) and was last re-checked 2026-09-29T04:08:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,24 +73,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 28 request(s) (28 answered, 0 returned no content) · no items ingested
+Last 24 hours: 34 request(s) (34 answered, 0 returned no content) · 6 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 12 in 14 days (0.86 per day) · most recent 2026-09-24 |
-| Content length | 2,075 characters average, 2,064 median (shortest 1,873, longest 2,373) |
+| Items ingested | 15 in 14 days (1.07 per day) · most recent 2026-09-28 |
+| Content length | 1,884 characters average, 2,050 median (shortest 166, longest 2,115) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.senate.gov | 357 request(s) · 357 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.senate.gov | 362 request(s) · 362 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-09-28T04:08:17.397+00:00 UTC.
+last answered request 2026-09-29T04:10:14.939+00:00 UTC.
 
-12 item(s) in the last 14 days; most recent 2026-09-24; 0 of 357 request(s) to www.senate.gov returned no content.
+15 item(s) in the last 14 days; most recent 2026-09-28; 0 of 362 request(s) to www.senate.gov returned no content.
 
 ### All time
 
-- **Our requests to www.senate.gov, all time (since 2026-08-01):** 1,701 request(s) · 1,701 answered · 0 returned no content
+- **Our requests to www.senate.gov, all time (since 2026-08-01):** 1,735 request(s) · 1,735 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -100,7 +100,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.senate.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-30 | 0 | 26 | 323 |
 | 2026-08-31 | 0 | 26 | 241 |
 | 2026-09-01 | 0 | 26 | 297 |
 | 2026-09-02 | 0 | 26 | 277 |
@@ -129,7 +128,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-25 | 0 | 26 | 193 |
 | 2026-09-26 | 0 | 28 | 210 |
 | 2026-09-27 | 0 | 27 | 205 |
-| 2026-09-28 | 0 | 1 | 199 |
+| 2026-09-28 | 6 | 34 | 214 |
+| 2026-09-29 | 0 | 1 | 424 |
 
 ## Our ingestion assessment
 

@@ -6,7 +6,7 @@
 
 # USTR Press Releases
 
-planned · Executive · Tier 2 · HTML index · Executive Office of the President
+active · ingestion health: delivering · Executive · Tier 2 · HTML index · Executive Office of the President
 
 Official site: https://ustr.gov/about-us/policy-offices/press-office/press-releases · All sources: [sources.md](../sources.md)
 
@@ -16,15 +16,15 @@ The Office of the United States Trade Representative, in the Executive Office of
 
 **Model-written orientation**
 
-The Office of the United States Trade Representative, in the Executive Office of the President, negotiates trade agreements and represents the U.S. in trade disputes and negotiations.
+U.S. Trade Representative press releases on trade agreements, negotiations, enforcement, and tariff actions.
 
-The Office of the United States Trade Representative (USTR) is an agency within the Executive Office of the President responsible for developing and coordinating U.S. international trade policy. Created by statute, USTR represents the United States in trade negotiations with foreign governments, manages ongoing trade relationships and agreements, and leads U.S. trade enforcement efforts. The office is headed by the U.S. Trade Representative, a cabinet-level official who serves as the president's principal trade advisor.
+The Office of the United States Trade Representative, located within the Executive Office of the President, is responsible for developing and implementing U.S. trade policy. The USTR leads negotiations on bilateral and multilateral trade agreements, represents the United States in trade dispute proceedings, manages tariff policy and trade remedies, enforces U.S. trade rights under existing agreements, and advises the President on trade matters. The USTR is one of the primary policy bodies shaping U.S. international economic relations.
 
-USTR's responsibilities encompass bilateral and multilateral trade negotiations, administration of existing trade agreements, and enforcement of U.S. rights under those agreements. The office negotiates tariff schedules, rules of origin, and other trade terms; manages trade remedy investigations and proceedings such as antidumping and countervailing duty cases; and represents U.S. interests in dispute-settlement mechanisms. USTR also coordinates trade policy with other federal agencies and Congress, and engages with U.S. stakeholders including businesses, labor, environmental, and consumer groups.
+The USTR's press-release index is the official channel for announcing trade policy decisions, negotiations, and enforcement actions. Readers will find press releases on the initiation, progress, and conclusion of trade negotiations with other countries, announcements of new trade agreements or modifications to existing arrangements, statements on tariff actions and trade remedies, notices of trade dispute proceedings and resolutions, enforcement actions against perceived trade violations by other countries, personnel announcements, and policy statements on trade-related matters. The USTR typically publishes a few items per week through this channel.
 
-In this digest, you will see USTR press releases announcing new negotiations or trade-agreement proposals, outcomes of completed negotiations or agreement signings, tariff actions and trade remedy determinations, updates on ongoing disputes, and statements on trade policy priorities. The releases address trade between the U.S. and individual countries, as well as matters affecting multiple trade partners. USTR's public releases inform American businesses, workers, and trading partners of significant trade developments and policy decisions.
+Materials in this feed serve businesses engaged in international trade and export, trading partners and foreign governments, trade-law and customs professionals, industry associations, media covering trade policy, and the public interested in U.S. foreign economic policy and international commerce.
 
-_Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It may draw on general knowledge of public institutions and is not official-record content._
+_Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It may draw on general knowledge of public institutions and is not official-record content._
 
 ## Identity and registry record
 
@@ -34,36 +34,101 @@ _Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It 
 | Agency / parent organization | Executive Office of the President |
 | Branch | executive |
 | Type | HTML index |
-| Status | planned |
+| Status | active |
 | Tier | 2 |
 | URL (home) | https://ustr.gov/about-us/policy-offices/press-office/press-releases |
+| URL (index) | https://ustr.gov/about-us/policy-offices/press-office/press-releases |
 | Registered | 2026-07-26 |
-| Registry notes | Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Phase 5, 2026-07-31: the html-index adapter now exists and was run against this source's captured index bytes. Against the 2026-07-31 capture it reads listing has 459 article link(s); 1 dated inside the 7-day lookback, 366 dated outside it, 91 skipped for no readable date, and the entries it lists carry the publisher's own dates. Activation awaits the operator's polling-cadence decision (the agency class holds 500 requests a day). Probed 2026-08-06: the Drupal Views convention <index-path>/feed.xml — confirmed working on nih-news and tsa-press — returns 404 here. Recorded as a negative so the next reader does not repeat the guess: on this registry, mining a source's own captured page for feed links finds feeds, and guessing platform conventions does not (14 of 14 candidates 404'd). |
+| Registry notes | Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Phase 5, 2026-07-31: the html-index adapter now exists and was run against this source's captured index bytes. Against the 2026-07-31 capture it reads listing has 459 article link(s); 1 dated inside the 7-day lookback, 366 dated outside it, 91 skipped for no readable date, and the entries it lists carry the publisher's own dates. Activation awaits the operator's polling-cadence decision (the agency class holds 500 requests a day). Probed 2026-08-06: the Drupal Views convention <index-path>/feed.xml — confirmed working on nih-news and tsa-press — returns 404 here. Recorded as a negative so the next reader does not repeat the guess: on this registry, mining a source's own captured page for feed links finds feeds, and guessing platform conventions does not (14 of 14 candidates 404'd). Probed live 2026-09-28 from the operator machine as a brief test, outside the server's budget (identified client, robots allows). ACTIVATED 2026-09-28 with the html-index adapter. Gate 3: 5 entries dated inside the 7-day lookback (2026-09-21..27), all press releases with USTR's own dates. Under-coverage: the listing's first page only, so more new entries between two hourly polls than the page holds would not be seen; entries the parser cannot date are dropped, never observation-dated. |
 
 ## How we ingest it
 
 | Term | Description |
 |---|---|
 | Channel | HTML index |
-| Method | HTML index diff via AgencyClient (pending content evaluation) |
+| Method | html-index adapter via AgencyClient — one listing fetch per poll, no article fetches (mode feed-only). |
+| Adapter | html-index |
+| Poll cadence | about every 60 minutes while the collector runs |
 | Request budget | the agency class: at most 3,000 requests per day shared across every agency web source, counted from the fetch log (failed requests count too) |
 | Politeness | robots.txt is honored as observed — including each host's crawl-delay, exactly — and every request identifies itself as fapd/0.1 (Free Agentic Publication Digester; +https://fapd.info/bot.html; contact: hustleyourcity@gmail.com); a refusal is recorded, never evaded |
 | Capture and hash | captured raw content is hashed (SHA-256) into the day's committed provenance manifest, hash-chained day to day (PROVENANCE.md) |
 
 ## Ingestion health
 
-Not ingested: the registry status of this source is planned.
+**delivering** — 6 item(s) in the last 14 days; most recent 2026-09-28; 0 of 13 request(s) to ustr.gov returned no content.
+
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-09-29T04:08:42Z (UTC).
+
+Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
 ## Ingestion statistics
 
 These figures describe this project's ingestion of this source — items we recorded and requests we made — and nothing else. They are not a measurement of the publisher.
 
-Not ingested: the registry status of this source is planned. Ingestion statistics are measured for active sources only.
+### Last 24 hours
+
+Last 24 hours: 13 request(s) (13 answered, 0 returned no content) · 6 item(s) ingested
+
+### Last 14 days
+
+| Measure | Value |
+|---|---|
+| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-09-28 |
+| Content length | 122 characters average, 128 median (shortest 97, longest 141) |
+| Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
+| Our requests to ustr.gov | 13 request(s) · 13 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+
+last answered request 2026-09-29T04:10:14.036+00:00 UTC.
+
+6 item(s) in the last 14 days; most recent 2026-09-28; 0 of 13 request(s) to ustr.gov returned no content.
 
 ### All time
 
-No requests to ustr.gov are recorded in the request log.
+- **Our requests to ustr.gov, all time (since 2026-09-28):** 13 request(s) · 13 answered · 0 returned no content
+
+Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
 ### Last 30 days, day by day
 
-No requests and no items were recorded in the last 30 days, so there is nothing to chart.
+Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publication day the digests use; the stored request stamps remain UTC.
+
+| Day | Items ingested | Requests to ustr.gov | Mean response time (ms) |
+|---|---|---|---|
+| 2026-08-31 | 0 | 0 | — |
+| 2026-09-01 | 0 | 0 | — |
+| 2026-09-02 | 0 | 0 | — |
+| 2026-09-03 | 0 | 0 | — |
+| 2026-09-04 | 0 | 0 | — |
+| 2026-09-05 | 0 | 0 | — |
+| 2026-09-06 | 0 | 0 | — |
+| 2026-09-07 | 0 | 0 | — |
+| 2026-09-08 | 0 | 0 | — |
+| 2026-09-09 | 0 | 0 | — |
+| 2026-09-10 | 0 | 0 | — |
+| 2026-09-11 | 0 | 0 | — |
+| 2026-09-12 | 0 | 0 | — |
+| 2026-09-13 | 0 | 0 | — |
+| 2026-09-14 | 0 | 0 | — |
+| 2026-09-15 | 0 | 0 | — |
+| 2026-09-16 | 0 | 0 | — |
+| 2026-09-17 | 0 | 0 | — |
+| 2026-09-18 | 0 | 0 | — |
+| 2026-09-19 | 0 | 0 | — |
+| 2026-09-20 | 0 | 0 | — |
+| 2026-09-21 | 0 | 0 | — |
+| 2026-09-22 | 0 | 0 | — |
+| 2026-09-23 | 0 | 0 | — |
+| 2026-09-24 | 0 | 0 | — |
+| 2026-09-25 | 0 | 0 | — |
+| 2026-09-26 | 0 | 0 | — |
+| 2026-09-27 | 0 | 0 | — |
+| 2026-09-28 | 6 | 11 | 140 |
+| 2026-09-29 | 0 | 2 | 72 |
+
+## Our ingestion assessment
+
+**Model-written ingestion assessment**
+
+Activated with the html-index adapter in late September. The USTR press-release listing yields items carrying the publisher's own dates. We observed 6 items over 14 days. All 13 requests to ustr.gov succeeded with no failures. The listing displays the first page only, so any entries published between two polls that exceed the page size would not be seen. Entries lacking readable dates are dropped and never observation-dated. No machine-readable feeds are advertised on this source.
+
+_Model-written assessment of our own ingestion, generated 2026-09-29 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._

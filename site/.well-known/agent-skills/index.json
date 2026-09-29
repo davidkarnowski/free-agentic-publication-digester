@@ -3,7 +3,7 @@
  "skills": [
   {
    "description": "Find and read the Free Agentic Publication Digester's validated daily digest of official US federal publications for a given date, and cite it correctly.",
-   "digest": "sha256:140452600cd3dbf0a4a7175d654a9e5de636efe886b03fa146df9df4eabdf304",
+   "digest": "sha256:9c67dec8032a76ba8c7526d006583ed6719e71b8ed058689a67d5d584b0c8b88",
    "name": "fapd-daily-digest",
    "type": "skill-md",
    "url": "https://fapd.info/.well-known/agent-skills/fapd-daily-digest/SKILL.md"
