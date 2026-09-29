@@ -3,6 +3,7 @@
 import datetime as dt
 import json
 import pathlib
+import sqlite3
 
 import pytest
 
@@ -87,6 +88,53 @@ def test_full_ingest_chain(env):
     doc = env.execute("SELECT * FROM documents").fetchone()
     assert doc["claimed_published_at"].startswith("Mon, 27 Jul")
     assert doc["first_seen_at"] != doc["claimed_published_at"]
+
+
+def _stored_etag(conn, source_id="gao-reports"):
+    row = conn.execute("SELECT etag FROM feed_state WHERE source_id = ?",
+                       (source_id,)).fetchone()
+    return row["etag"] if row else None
+
+
+def test_validators_are_stored_only_after_the_items_are(env, monkeypatch):
+    """Review D10 (fixed 2026-09-28): a crash partway through the items must
+    not leave the feed's ETag stored, or the next poll's 304 hides the items
+    that were never handled. The next poll fetches in full and finishes."""
+    client, wb = FakeAgency(), FakeWayback()
+    real_store = agencies._store_item
+    calls = []
+
+    def store_then_fail(*args, **kwargs):
+        calls.append(1)
+        if len(calls) == 2:
+            raise sqlite3.OperationalError("database is locked")
+        return real_store(*args, **kwargs)
+
+    monkeypatch.setattr(agencies, "_store_item", store_then_fail)
+    stats = agencies._poll_isolated(client, wb, env, entry())
+    assert stats["feed_status"] == "crash"
+    assert _stored_etag(env) is None, "validators must not outlive a crash"
+    assert not env.in_transaction, "the crashed poll left no write open"
+
+    monkeypatch.setattr(agencies, "_store_item", real_store)
+    stats2 = agencies.poll_source(client, wb, env, entry())
+    assert client.calls[-1]["headers"] is None or \
+        "If-None-Match" not in client.calls[-1]["headers"]
+    assert stats2["new_items"] == 1, "the item the crash cost is taken now"
+    assert env.execute("SELECT COUNT(*) FROM packages").fetchone()[0] == 2
+    assert _stored_etag(env) == '"e1"'
+
+
+def test_an_unparsable_response_leaves_no_validators(env):
+    """D10's original shape: a parse failure behind a stored ETag was
+    silenced by healthy-looking 304s until the publisher changed the feed."""
+    client = FakeAgency(feed=b"<html>not a feed</html>",
+                        feed_headers={"Content-Type": "text/html", "ETag": '"e1"'})
+    stats = agencies.poll_source(client, FakeWayback(), env, entry())
+    assert stats["feed_status"] == "unparsable"
+    assert _stored_etag(env) is None
+    row = env.execute("SELECT last_polled_at FROM feed_state").fetchone()
+    assert row and row["last_polled_at"], "the poll itself is still stamped"
 
 
 def test_second_poll_dedupes_and_uses_conditional_get(env):

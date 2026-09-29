@@ -1273,6 +1273,56 @@ def test_run_cycle_survives_a_connect_failure(tmp_path, monkeypatch, caplog):
     assert "could not open the database" in caplog.text
 
 
+def test_journal_new_takes_no_write_lock_when_nothing_is_new(tmp_path):
+    """The 2026-09-28 bursts: journal_new held the write lock for its whole
+    scan, every cycle, and ~35 workers finishing their first cycles
+    together queued past the busy timeout. With nothing to journal it must
+    not need the lock at all — here another writer holds it throughout."""
+    from fapd import db
+
+    path = tmp_path / "fapd.db"
+    conn = install_digest_day_default(db.connect(path))
+    seed_corpus(conn)
+    collect.journal_new(conn, "govinfo", "c0")        # journal the corpus
+    holder = sqlite3.connect(path)
+    holder.execute("BEGIN IMMEDIATE")                 # another worker's write
+    conn.execute("PRAGMA busy_timeout = 50")
+    try:
+        assert collect.journal_new(conn, "govinfo", "c1") == 0
+        assert collect.journal_new(conn, "agency", "c1") == 0
+    finally:
+        holder.rollback()
+        holder.close()
+        conn.close()
+
+
+def test_the_first_cycle_waits_a_random_share_of_the_spread(tmp_path, monkeypatch):
+    """Worker threads all start together; each first cycle is delayed by
+    uniform(0, COLLECTOR_STARTUP_SPREAD_S) so a restart does not land them
+    in the same second."""
+    import threading
+
+    sup, _ = make_supervisor(tmp_path, monkeypatch)
+    worker = collect.EmailWorker(sup, 5)
+    stop, waits = threading.Event(), []
+
+    def run_once():
+        stop.set()
+        return {}
+
+    monkeypatch.setattr(worker, "run_cycle", run_once)
+    monkeypatch.setattr(stop, "wait", lambda seconds: waits.append(seconds))
+    monkeypatch.setattr(config, "COLLECTOR_STARTUP_SPREAD_S", 120)
+    monkeypatch.setattr(collect.random, "uniform", lambda a, b: (a + b) / 2)
+    worker.loop(stop)
+    assert waits[0] == 60, "the first wait is the start-up spread"
+
+    stop.clear(); waits.clear()
+    monkeypatch.setattr(config, "COLLECTOR_STARTUP_SPREAD_S", 0)
+    worker.loop(stop)
+    assert waits[0] != 0 and waits[0] > 60, "spread 0: straight to the cycle"
+
+
 def test_loop_survives_anything_and_keeps_going(tmp_path, monkeypatch, caplog):
     """The 2026-08-25 shape: an exception on the first iteration must not
     end the thread — the next iteration runs after the base interval."""

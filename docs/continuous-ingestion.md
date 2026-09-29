@@ -82,7 +82,13 @@ govinfo ~30 min (`GOVINFO_POLL_INTERVAL_MIN`), agency hosts ~60 min
 (`EMAIL_POLL_INTERVAL_MIN`), /today render check ~5 min
 (`TODAY_RENDER_INTERVAL_MIN`), source health ~15 min
 (`SOURCE_HEALTH_REFRESH_MIN`), EOD check every 10 min (hard-coded
-default in `_build_workers`), all jittered. **Backpressure:** past 70%
+default in `_build_workers`), all jittered, and each worker's first
+cycle waits a random 0–`COLLECTOR_STARTUP_SPREAD_S` (120 s) so a restart
+does not land every first cycle in the same second (2026-09-28: three
+post-deploy bursts of "database is locked"). Journal reconciliation
+(`journal_new`, `journal_model_events`) reads its candidates first and
+writes only new rows, so it holds the write lock only when there is
+something to journal. **Backpressure:** past 70%
 of the AGENCY class's daily budget its host workers double their
 interval for the rest of the UTC day — the other classes reserve EOD
 headroom via the 15% finalizer reserve instead; extending backpressure

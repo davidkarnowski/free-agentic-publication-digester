@@ -110,6 +110,18 @@ gates → docs/code-standards.md → this file.
   with capped exponential backoff. A worker must never kill the
   supervisor.
 
+- **A write lock held through a scan is a lock held for everyone
+  (2026-09-28).** Journal reconciliation was an `INSERT ... SELECT` over a
+  class's whole history, run by every worker after every cycle. Spread
+  out, that was invisible. After each deploy, about 35 host workers
+  finished their first cycles together, queued those scans on the write
+  lock, and the unlucky ones passed the 30-second busy timeout. SQLite
+  does not queue waiting writers fairly. The pattern to keep: read the
+  candidates first (a WAL read takes no write lock), and write only when
+  there is something to write. First cycles are spread over
+  `COLLECTOR_STARTUP_SPREAD_S`. A crashed poll rolls back before the host
+  worker's next source.
+
 ## Things that are intentional here — do not "fix" without the operator
 
 - `EOD_ET_HOUR = 0` with the target computed as the *previous*

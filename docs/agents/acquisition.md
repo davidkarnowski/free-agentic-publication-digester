@@ -145,7 +145,11 @@ this file.
 - **D9** — `_package_id` truncates SHA-256 to 32 bits; a collision
   silently drops a release. Fix needs an id migration or versioned
   prefix, not a bare width change.
-- **D10** — ETag/Last-Modified stored *before* parse; a parse failure
+- **D10** — **Done 2026-09-28** (`bug/collector-db-locking`):
+  `poll_source` stores validators through `_record_poll` only after
+  the response is fully handled; a 304 or an unparsable response
+  stamps the poll time alone. Original filing: ETag/Last-Modified
+  stored *before* parse; a parse failure
   permanently silences a source behind healthy-looking 304s.
 - **D16** — the pacing clock is per-client, not per-host; safe only by
   `host_groups` convention. Key `_last_request_at` by host.

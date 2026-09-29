@@ -6914,3 +6914,52 @@ four things:
 It was previewed locally through the site's own blog renderer and
 stylesheet, approved, and allowlisted in `publish._BLOG_POSTS` as
 `blog-broadening-the-sources.html`, dated 2026-09-28.
+
+## 2026-09-28 — The post-deploy "database is locked" bursts, found and fixed
+
+Each of the day's three deploys was followed by a burst of `database is
+locked` within a minute of the backend starting. The burst grew each
+time: 6 errors at 16:11, 2 at 18:44, then 23 at 22:45, which left four
+worker streaks (govinfo, email, and the CISA and CDC host workers).
+Every worker recovered on its next cycle.
+
+**Locating it.** `HttpClient.get` writes its `fetch_log.db` row before
+it prints the `GET … ->` line. Each failed poll printed that line at
+about 22:45:24 and crashed about 30 s later. So the statement that timed
+out was the poll's next one, the `feed_state` write to `fapd.db`. The
+email worker, which never touches `fetch_log.db`, failed the same way.
+
+Ruled out:
+- WAL recovery: no `-wal` file persists between cycles.
+- Model calls: none in the ledger near any restart.
+- The site build: it only reads.
+- Long transactions in `sync.py` and `poll_source`: each commits before
+  its network calls.
+
+**The holder.** `journal_new` is an `INSERT … SELECT` over a class's
+whole history, and every worker runs it after every cycle. Timed
+read-only on production, warm: govinfo 0.12 s, agency 0.39 s, email
+0.32 s. It held the write lock for the whole scan. About 35 host workers
+finishing their first cycles together queued those scans, and SQLite's
+unfair wakeups pushed the unlucky writers past the 30 s busy timeout.
+
+**Fixed four ways.**
+1. `journal_new` and `journal_model_events` read their candidates first
+   (a WAL read takes no write lock) and `INSERT OR IGNORE` only new
+   rows.
+2. A random 0–`COLLECTOR_STARTUP_SPREAD_S` (120 s) wait before each
+   worker's first cycle.
+3. `_poll_isolated` rolls the connection back after a crash, so no
+   write outlives it into the host worker's next source.
+4. Review D10: `poll_source` stores the feed's ETag and Last-Modified
+   only after the response is fully handled. Before this, a crash or
+   parse failure after the validators were stored made the next poll a
+   304 that skipped the unhandled items until the feed changed. That is
+   the real way content could be lost.
+
+**Content.** None was lost in the three bursts: each failed at the
+poll's first write, before the validators moved.
+
+Four regression tests were added. Each was checked to fail on the old
+code: the journal test fails exactly as production did, waiting on
+another writer's lock.

@@ -62,58 +62,91 @@ def journal_new(conn, source_class, cycle_id):
     journaled. Reconciliation by observation — zero changes to the
     collection functions. Returns rows inserted."""
     where = _CLASS_WHERE[source_class]
-    cur = conn.execute(
+    # Read first, write only what is new (2026-09-28). This used to be one
+    # INSERT ... SELECT, which holds the pipeline database's write lock for
+    # the whole scan of the class's history (0.1-0.4 s warm, and growing).
+    # Every collector runs it at the end of every cycle; spread out, that
+    # never mattered, but after a restart ~35 host workers finished their
+    # first cycles within seconds and queued their scans behind one another
+    # on the write lock — SQLite does not queue waiters fairly, so the
+    # unlucky ones passed the 30 s busy timeout and failed ("database is
+    # locked", three bursts on 2026-09-28). A plain SELECT takes no write
+    # lock under WAL; the write below happens only when there is something
+    # to journal, and INSERT OR IGNORE on the (package_id, granule_id,
+    # event) key makes a race between two workers harmless.
+    rows = conn.execute(
         f"""
-        INSERT INTO item_journal (observed_at, source_class, package_id,
-            granule_id, collection, source_id, digest_date, event, cycle_id)
-        SELECT COALESCE(e.extracted_at, ?), ?, e.package_id, e.granule_id,
-               e.collection, json_extract(e.metadata, '$.source_id'),
-               COALESCE(p.digest_day, p.date_issued), 'ingested', ?
+        SELECT e.extracted_at, e.package_id, e.granule_id, e.collection,
+               json_extract(e.metadata, '$.source_id'),
+               COALESCE(p.digest_day, p.date_issued)
         FROM extracted_texts e JOIN packages p USING (package_id)
         WHERE {where}
           AND NOT EXISTS (SELECT 1 FROM item_journal j
                           WHERE j.package_id = e.package_id
                             AND j.granule_id = e.granule_id
                             AND j.event = 'ingested')
-        """,
-        (utc_now_iso(), source_class, cycle_id),
+        """
+    ).fetchall()
+    if not rows:
+        return 0
+    now = utc_now_iso()
+    before = conn.total_changes
+    conn.executemany(
+        "INSERT OR IGNORE INTO item_journal (observed_at, source_class,"
+        " package_id, granule_id, collection, source_id, digest_date, event,"
+        " cycle_id) VALUES (?, ?, ?, ?, ?, ?, ?, 'ingested', ?)",
+        [(r[0] or now, source_class, r[1], r[2], r[3], r[4], r[5], cycle_id)
+         for r in rows],
     )
     conn.commit()
-    if cur.rowcount:
+    inserted = conn.total_changes - before
+    if inserted:
         logger.info("journal: %d new %s item(s) [cycle %s]",
-                    cur.rowcount, source_class, cycle_id)
-    return cur.rowcount
+                    inserted, source_class, cycle_id)
+    return inserted
 
 
 def journal_model_events(conn, cycle_id):
     """Insert 'summarized'/'plain' journal rows for model outputs not yet
     journaled (fired after an analyze cycle). Returns total inserted."""
-    total = 0
+    # Read first, write only what is new — the journal_new reasoning
+    # (2026-09-28): two INSERT ... SELECT scans in one transaction held the
+    # write lock through both.
+    rows = []
     for event, table, version_col, version in (
         ("summarized", "summaries", "prompt_version", config.PROMPT_VERSION),
         ("plain", "plain_summaries", "plain_version", config.PLAIN_PROMPT_VERSION),
     ):
-        cur = conn.execute(
-            f"""
-            INSERT INTO item_journal (observed_at, source_class, package_id,
-                granule_id, collection, source_id, digest_date, event, cycle_id)
-            SELECT s.created_at, COALESCE(ij.source_class, 'govinfo'),
-                   s.package_id, s.granule_id, ij.collection, ij.source_id,
-                   ij.digest_date, ?, ?
-            FROM {table} s
-            LEFT JOIN item_journal ij ON ij.package_id = s.package_id
-                 AND ij.granule_id = s.granule_id AND ij.event = 'ingested'
-            WHERE s.{version_col} = ?
-              AND NOT EXISTS (SELECT 1 FROM item_journal j
-                              WHERE j.package_id = s.package_id
-                                AND j.granule_id = s.granule_id
-                                AND j.event = ?)
-            """,
-            (event, cycle_id, version, event),
-        )
-        total += cur.rowcount
+        rows += [
+            (r[0], r[1], r[2], r[3], r[4], r[5], r[6], event, cycle_id)
+            for r in conn.execute(
+                f"""
+                SELECT s.created_at, COALESCE(ij.source_class, 'govinfo'),
+                       s.package_id, s.granule_id, ij.collection, ij.source_id,
+                       ij.digest_date
+                FROM {table} s
+                LEFT JOIN item_journal ij ON ij.package_id = s.package_id
+                     AND ij.granule_id = s.granule_id AND ij.event = 'ingested'
+                WHERE s.{version_col} = ?
+                  AND NOT EXISTS (SELECT 1 FROM item_journal j
+                                  WHERE j.package_id = s.package_id
+                                    AND j.granule_id = s.granule_id
+                                    AND j.event = ?)
+                """,
+                (version, event),
+            )
+        ]
+    if not rows:
+        return 0
+    before = conn.total_changes
+    conn.executemany(
+        "INSERT OR IGNORE INTO item_journal (observed_at, source_class,"
+        " package_id, granule_id, collection, source_id, digest_date, event,"
+        " cycle_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        rows,
+    )
     conn.commit()
-    return total
+    return conn.total_changes - before
 
 
 # ---------------------------------------------------------------------------
@@ -375,6 +408,13 @@ class Worker:
             conn.close()
 
     def loop(self, stop_event):
+        # Spread the first cycles (2026-09-28): every worker thread starts
+        # in the same second, and 41 first cycles landing together is what
+        # queued the journal writes past the busy timeout after each deploy.
+        # The steady-state ±10% jitter below keeps them apart afterwards.
+        spread = config.COLLECTOR_STARTUP_SPREAD_S
+        if spread > 0:
+            stop_event.wait(random.uniform(0, spread))
         while not stop_event.is_set():
             if self.sup.pause_event.is_set() and self.name != "eod":
                 # The EOD finalizer holds the floor (docs §7 serialization);

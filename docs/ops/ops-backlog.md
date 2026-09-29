@@ -637,7 +637,25 @@ not reusable.)*
   The morning deploy showed no burst at its check, and earlier
   containers' logs are gone, so the frequency is unknown. *Fix:*
   stagger the first cycles by worker. *Trigger:* the next burst seen
-  after a deploy.
+  after a deploy. **Resolved 2026-09-28 (`bug/collector-db-locking`).**
+  The burst recurred after both later deploys: 2 errors at 18:44, then
+  23 at 22:45, with four worker streaks. Timing located the lock on
+  `fapd.db`: the client writes its `fetch_log.db` row before printing the
+  `GET` line, and the statement that then waited 30 s was the poll's
+  `feed_state` write. The holder was journal reconciliation. `journal_new`
+  was an `INSERT ... SELECT` over each class's whole history, run by
+  every worker after every cycle, and it held the write lock for the full
+  scan (0.1–0.4 s warm). About 35 host workers finishing their first
+  cycles together queued those scans past the busy timeout. Fixed four
+  ways:
+  - journal reads first and writes only new rows (`INSERT OR IGNORE`);
+    the same change was made to `journal_model_events`;
+  - a random 0–120 s start-up spread per worker;
+  - `_poll_isolated` rolls back after a crash;
+  - feed validators are stored only after the items (review D10).
+
+  No content was lost in the three bursts: each failed on the poll's
+  first write, before the feed validators moved.
 - **NLRB and CFPB stayed planned.** Neither listing had a dated entry
   inside the 7-day lookback on 2026-09-28. In July each had one. *Trigger:*
   re-probe in a week; activate if releases parse.

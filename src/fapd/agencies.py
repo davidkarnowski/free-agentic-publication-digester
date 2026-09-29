@@ -1436,23 +1436,23 @@ def poll_source(client, wayback, conn, entry):
         stats["errors"] += 1
         return stats
 
-    conn.execute(
-        "INSERT INTO feed_state (source_id, etag, last_modified, last_polled_at)"
-        " VALUES (?, ?, ?, ?) ON CONFLICT(source_id) DO UPDATE SET"
-        " etag = COALESCE(excluded.etag, feed_state.etag),"
-        " last_modified = COALESCE(excluded.last_modified, feed_state.last_modified),"
-        " last_polled_at = excluded.last_polled_at",
-        (entry["id"], resp.headers.get("ETag"),
-         resp.headers.get("Last-Modified"), utc_now_iso()),
-    )
-    conn.commit()
-
+    # The feed's validators (ETag, Last-Modified) are what make the next
+    # poll a cheap 304 — so they are stored only once this response has
+    # been fully handled (review D10, fixed 2026-09-28). Stored up front,
+    # as they were until then, a parse failure or a crash partway through
+    # the items left the validators pointing at a response we never
+    # finished, and the next poll's 304 skipped the unhandled items until
+    # the publisher changed the feed again. Now an unparsed or crashed
+    # response is simply fetched in full next time; items already stored
+    # are skipped by _already_ingested, so nothing is taken twice.
     if resp.status_code == 304:
+        _record_poll(conn, entry, resp)
         stats["feed_status"] = "not-modified"
         return stats
     fmt, items = adapter.items(resp.content or b"",
                                resp.headers.get("Content-Type"))
     if fmt is None:
+        _record_poll(conn, entry, None)  # polled, but no validators to trust
         stats["feed_status"] = "unparsable"
         stats["errors"] += 1
         return stats
@@ -1528,10 +1528,28 @@ def poll_source(client, wayback, conn, entry):
         stats["new_items"] += 1
         logger.info("%s: [%d/%d] ingested %r (%s)", entry["id"], position,
                     len(pending), item["title"][:70], mode_used)
+    _record_poll(conn, entry, resp)
     logger.info("%s: done — %d new, %d articles fetched, %d wayback, %d errors",
                 entry["id"], stats["new_items"], stats["articles_fetched"],
                 stats["wayback_submitted"], stats["errors"])
     return stats
+
+
+def _record_poll(conn, entry, resp):
+    """Stamp the poll in feed_state, with `resp`'s validators when the
+    response was fully handled (None stores the time alone — COALESCE keeps
+    whatever validators were already trusted)."""
+    headers = resp.headers if resp is not None else {}
+    conn.execute(
+        "INSERT INTO feed_state (source_id, etag, last_modified, last_polled_at)"
+        " VALUES (?, ?, ?, ?) ON CONFLICT(source_id) DO UPDATE SET"
+        " etag = COALESCE(excluded.etag, feed_state.etag),"
+        " last_modified = COALESCE(excluded.last_modified, feed_state.last_modified),"
+        " last_polled_at = excluded.last_polled_at",
+        (entry["id"], headers.get("ETag"), headers.get("Last-Modified"),
+         utc_now_iso()),
+    )
+    conn.commit()
 
 
 def _poll_isolated(client, wayback, conn, entry):
@@ -1539,6 +1557,14 @@ def _poll_isolated(client, wayback, conn, entry):
     try:
         return poll_source(client, wayback, conn, entry)
     except Exception as exc:  # noqa: BLE001
+        # The host worker polls its next source on this same connection. A
+        # write left open by the crash would hold the database's write lock
+        # through that source's request and crawl-delay (2026-09-28), so
+        # discard it here; everything poll_source finished was committed.
+        try:
+            conn.rollback()
+        except Exception as rb_exc:  # noqa: BLE001 — isolation must not raise
+            logger.warning("%s: rollback after crash failed: %r", entry["id"], rb_exc)
         logger.warning("%s: poll crashed: %r", entry["id"], exc)
         return {"id": entry["id"], "feed_status": "crash", "new_items": 0,
                 "articles_fetched": 0, "wayback_submitted": 0, "errors": 1}

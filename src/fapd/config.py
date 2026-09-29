@@ -373,6 +373,11 @@ COLLECTIONS = ("CREC", "BILLS", "FR", "USCOURTS", "PLAW")
 
 # Continuous ingestion (GUIDE §4/§6 r12 amendments 2026-07-30;
 # docs/continuous-ingestion.md §4-§5). Intervals are minutes, jittered.
+# Collector start-up spread (2026-09-28): each worker waits a random
+# 0..N seconds before its first cycle, so a restart does not land 41 first
+# cycles in the same second (the database-lock bursts after the day's
+# deploys). Set 0 to disable (tests, one-shot runs do not use the loop).
+COLLECTOR_STARTUP_SPREAD_S = int(os.environ.get("FAPD_COLLECTOR_STARTUP_SPREAD_S", "120"))
 GOVINFO_POLL_INTERVAL_MIN = 30
 AGENCY_POLL_INTERVAL_MIN = 60
 EMAIL_POLL_INTERVAL_MIN = 15
