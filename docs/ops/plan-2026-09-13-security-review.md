@@ -38,7 +38,7 @@ first one left implicit or missing:
 6. **An operations hazard found on the way:** the bundle rsync's
    `--delete` would erase a host log directory on every deploy unless
    it's excluded (the F-004 class). (Phase 3/5)
-7. **A pre-existing finding on the box, cohabitant-owned:** three of
+7. **A pre-existing finding on the box, in the operator's private host tree:** three of
    the five nginx fail2ban jails have no iptables chain, so their bans
    may not be applied. Raised to the operator; not ours to change.
 
@@ -129,8 +129,8 @@ with the nginx rate limit as the primary control.** Reasoning:
   twenty strikes in four seconds and an hour's ban. The jail is for
   protocol abuse; speed is the limit zone's business.
 - **Which log:** the jail needs the *real* client address. The edge's
-  own access log (cohabitant-owned) has it, but adding filters there
-  means editing the cohabitant's tree. Instead, `fapd-web` writes a
+  own access log (in the private host tree) has it, but adding filters there
+  means editing the private host tree. Instead, `fapd-web` writes a
   dedicated access log for `/mcp` to a bind-mounted host directory,
   in a format whose **first field is `$http_x_real_ip`** (the edge sets
   it from the true remote address). Using `$remote_addr` there would
@@ -145,11 +145,11 @@ with the nginx rate limit as the primary control.** Reasoning:
   2026-09-14 — operator ruling: security configuration is applied to
   the box directly and never published); the installer there copies
   them into `/etc/fail2ban/` and reloads. Host fail2ban config
-  is shared with the cohabitant, so the script only *adds* files, and
+  is in the operator's private host tree, so the script only *adds* files, and
   the operator runs it (checkpoint C-6). Verification: `fail2ban-client
   status fapd-mcp` and an `f2b-fapd-mcp` chain in `iptables -S DOCKER-USER`.
 
-**Pre-existing finding to raise (cohabitant-owned, not ours to fix):**
+**Pre-existing finding to raise (in the private host tree, not ours to fix):**
 `iptables -S DOCKER-USER` on 2026-09-13 shows chains only for
 `nginx-bad-request` and `nginx-noscript`. The `nginx-botsearch`,
 `nginx-http-auth` and `nginx-limit-req` jails are running but have no

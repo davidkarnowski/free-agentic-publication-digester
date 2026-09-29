@@ -454,7 +454,7 @@ pages).
    no auth, no rate limiting, and nothing an agent needs to execute." with
    "Everything is static except the read-only MCP service — no
    authentication, nothing an agent needs to execute, and a generous
-   per-address rate limit that protects the shared server."
+   per-address rate limit that protects the server."
 
 **`llms.txt` changes** (`_build_agent_surfaces` lines list):
 - In `## Core`, after the Atom feed line, add:

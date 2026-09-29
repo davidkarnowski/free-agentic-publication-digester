@@ -222,7 +222,7 @@ git grep -n -i -E "no endpoint|accepts no input|exposes no endpoint|nothing to e
 | `CLAUDE.md` §9 (~215) and §14 2026-09-05 entry (~585) | same | Phase 0 | §9 per §2.3. **The §14 entry is dated history: leave it.** |
 | `docs/accessibility-doctrine.md` (~286) | "no endpoint of our own" | Phase 4C (Publication owns the file) | name the `/mcp` exception, keep the argument |
 | `docs/agents/publication.md` (~70) | "One script, no endpoint…" | Phase 0 | §2.4 |
-| `src/fapd/publish.py` `_AGENTS_MD` "Courtesy" (~4593) | "no auth, no rate limiting, and nothing an agent needs to execute" | Phase 1 AD-8 | "no authentication; a generous per-address rate limit protects the shared server; nothing an agent needs to execute" |
+| `src/fapd/publish.py` `_AGENTS_MD` "Courtesy" (~4593) | "no auth, no rate limiting, and nothing an agent needs to execute" | Phase 1 AD-8 | "no authentication; a generous per-address rate limit protects the server; nothing an agent needs to execute" |
 | `docs/site/privacy.md` | "Nothing on this site collects, transmits, or retains anything you type or click." / logs paragraph | Phase 4C | add what `/mcp` logs (method, tool name, status, timing; never request bodies or arguments) |
 | `docs/devnotes/2026-09-05-built-to-be-reachable.md` | "The site accepts no input…" | **not changed** | a dated, published post; the new post (blog notes) explains the change |
 

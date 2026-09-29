@@ -970,7 +970,7 @@ filter    = fapd-mcp
 banaction = iptables-allports
 chain     = DOCKER-USER
 # Thresholds are explicit here rather than inherited from [DEFAULT], which
-# is the cohabitant's to change: 20 rejected requests in 10 minutes → 1 h,
+# is the operator's private host tree's to change: 20 rejected requests in 10 minutes → 1 h,
 # doubling on each repeat up to 1 day, never a permanent ban (shared-egress
 # clients must be able to come back).
 maxretry  = 20

@@ -33,8 +33,8 @@ project:
 
 ## Update 2026-07-30 (evening): hosting resolved — production host, Docker stack
 
-Same-day development: `fapd.info` now points at the VPS the operator
-already runs for another project, and the **placeholder site is live
+Same-day development: `fapd.info` now points at the operator's VPS,
+and the **placeholder site is live
 over HTTPS** (Let's Encrypt, webroot method, auto-renewing). Decisions
 this resolves and reshapes:
 

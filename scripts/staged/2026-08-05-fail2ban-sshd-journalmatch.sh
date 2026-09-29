@@ -17,7 +17,7 @@
 # Scope: the jail's detection only. Not changed here: `mode = normal`
 # (aggressive would also catch banner/kex probes but bans legitimate
 # users on transient disconnects), bantime, maxretry, or any other jail.
-# This box is shared with the cohabiting project; only [sshd] is touched.
+# Only the [sshd] jail is touched.
 #
 # Blast radius: fail2ban reload. Worst case is a malformed jail.local,
 # which the preconditions and the config test below are there to catch;

@@ -405,6 +405,20 @@ live in `.claude/agents/fapd-*.md` (tracked).
   about the production host live in the operator's private tree, not here.
   A repository this public documents itself: prose that overclaims what
   the code does is a defect (see the 2026-08-02 doc audit).
+- **The public repo never reveals infrastructure or personal details
+  (standing rule, 2026-09-29).** Nothing in any tracked file — code,
+  docs, comments, tests, or the site content `src/fapd/publish.py`
+  renders — may indicate that the VPS is shared with, co-located beside,
+  or cohabited by any other project, or name a co-tenant service. Never
+  expose infra specifics either: the hosting provider, IP addresses,
+  ports, the container/proxy/network layout, security-tool
+  configuration, or host paths presented as another party's; nor
+  personal or device paths (`/Users/...`, a laptop home directory,
+  personal email). Say what the service does for its users, never where
+  or beside what it runs. Host-and-hardening dossier facts live in the
+  operator's private tree. When you edit or add to any tracked file,
+  sweep the result for these before you commit — a general request to
+  improve a file is never license to disclose them.
 - **Never propose raising request budgets, loosening validation gates,
   or evading an access refusal to fix a symptom** — these are GUIDE
   changes, made by the operator, or they don't happen.

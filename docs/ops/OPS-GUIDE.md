@@ -135,7 +135,7 @@ deploy/vps/scripts/vps-ssh.sh 'sudo tail -5 /opt/fapd/logs/mcp-access.log'
 A 503 with the "temporarily unavailable" JSON means `fapd-mcp` is down
 while the site is up — the variable upstream working as designed; check
 the container. A jail reported by `fail2ban-client` but absent from
-`iptables -S DOCKER-USER` bans nothing (three cohabitant jails were in
+`iptables -S DOCKER-USER` bans nothing (three pre-existing nginx jails were in
 that state on 2026-09-13). **Manual unban** for a legitimate
 shared-egress client that reports being blocked is an operator-gated
 write: `sudo fail2ban-client set fapd-mcp unbanip <addr>`.

@@ -147,6 +147,6 @@ servicing guide forbids removing them without your say-so.
 
 STILL OPEN — operator decision: ROTATE THE GOVINFO KEY. This made the
 stored copies unreadable; it did not invalidate the key itself, and the
-key was in plaintext logs on a shared box. Rotation is a new key in
+key was in plaintext logs on the box. Rotation is a new key in
 GOVINFO_API_KEY in /opt/fapd/.env plus a backend recreate.
 EOT

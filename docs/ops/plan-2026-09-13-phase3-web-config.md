@@ -76,10 +76,10 @@ rehearsal (it isn't the VPS).
   changes. The first deploy (new mount) recreates it. Later config-only
   deploys need `nginx -t` + `nginx -s reload`, which is why deploy.sh
   changes (§3.4).
-- **The cohabitant risk:** the edge names `fapd-web` as a static
+- **The edge risk:** the edge names `fapd-web` as a static
   upstream. If `fapd-web` crash-loops on a bad config, fapd.info goes
   down, and if the edge restarts while `fapd-web` is gone, the edge
-  itself fails to start, taking the cohabitant's site with it. That's why
+  itself fails to start, taking the edge proxy down with it. That's why
   the syntax check runs on the box **before** the new files are swapped
   in (§3.4).
 
@@ -99,7 +99,7 @@ deviation. **Don't** weaken a requirement to make a test pass.
 # /etc/nginx/conf.d/ in deploy/vps and deploy/dev. Loaded inside the
 # image's http{} block, so map/limit_req_zone below are http-context.
 #
-# The edge proxy (cohabitant) terminates TLS and adds HSTS, nosniff,
+# The edge proxy terminates TLS and adds HSTS, nosniff,
 # frame-options and referrer-policy: do not repeat them here.
 
 # ---- Markdown content negotiation (master plan §8.2) -------------------
@@ -353,7 +353,7 @@ style):
    echo "==> [1b/4] nginx config syntax gate (on the box, throwaway container)"
    # A bad fapd-web config crash-loops the site, and the edge proxy names
    # fapd-web as a static upstream, so an edge restart during that window
-   # would take the cohabitant down too. Test the candidate BEFORE it is
+   # would take the edge proxy down too. Test the candidate BEFORE it is
    # swapped in. The config has no static upstreams, so -t needs no network.
    rsync -az --delete -e "ssh ${SSH_OPTS[*]}" \
      deploy/vps/nginx/ "${VPS}:${REMOTE_DIR}/.nginx-candidate/"

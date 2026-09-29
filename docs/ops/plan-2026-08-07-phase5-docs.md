@@ -47,7 +47,7 @@ deploy/vps/scripts/vps-ssh.sh 'sudo docker exec fapd-backend python -c "…"' \
 - Replace the "read the sibling project's guide for connection facts"
   instruction with the in-project mechanism: `deploy/vps/deploy.env` +
   `vps-ssh.sh`. Keep the private-dossier pointer for the *human* box facts
-  (quirks, cohabitation, fail2ban) that do not belong in a public repo.
+  (quirks, infrastructure, fail2ban) that do not belong in a public repo.
 - Add review-table rows dated 2026-08-07: containers/segmentation
   re-verified, cert unchanged (expires 2026-10-28), **evidence push repaired**
   (was: silently failing since the 2026-08-06 deploy).
