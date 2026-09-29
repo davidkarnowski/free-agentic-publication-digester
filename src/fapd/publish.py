@@ -3533,6 +3533,7 @@ _BLOG_DIR = ("docs", "devnotes")
 
 # (source filename in docs/devnotes/, url slug, publication date)
 _BLOG_POSTS = (
+    ("2026-09-29-america-gov.md", "america-gov", "2026-09-29"),
     ("2026-09-28-broadening-the-sources.md", "broadening-the-sources", "2026-09-28"),
     ("2026-09-05-built-to-be-reachable.md", "reachable", "2026-09-05"),
     ("2026-08-16-a-guest-note-from-gemini.md", "gemini-guest", "2026-08-16"),
