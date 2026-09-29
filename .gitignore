@@ -69,3 +69,10 @@ secrets/
 /docs/ops/plan-2026-09-13-phase5-deploy-verify.md
 /docs/ops/ops-backlog.md
 /docs/pre-publication-todo.md
+# Second batch of infra-referencing docs untracked (operator, 2026-09-29,
+# same ruling): they name the shared-host architecture in review notes and
+# an ops plan. On disk, moving to the private tree; forward-only.
+/docs/agents/orchestration.md
+/docs/ops/plan-2026-08-06-phase7-logs.md
+/docs/code-review-2026-08-02.md
+/docs/code-review-2026-08-02-amended.md
