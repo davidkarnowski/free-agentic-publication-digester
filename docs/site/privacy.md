@@ -20,8 +20,15 @@ reused.
   is a plain HTML form whose state never leaves your browser: it is not
   submitted, not stored, and not readable by us. Nothing on these pages
   collects, transmits, or retains anything you type or click.
-- **No third-party requests.** Pages load no external fonts, scripts,
-  images, or embeds — your visit talks to this server and no one else.
+- **No third-party requests, with one exception on the blog.** The
+  digest, the live page, and every other page load no external fonts,
+  scripts, images, or embeds; your visit to them talks to this server
+  and no one else. Blog posts are editorial, and a post may embed an
+  official government video (for example a White House stream on
+  YouTube), always beside a plain link to the same source. Viewing a
+  post that carries such an embed loads it from that provider, so for
+  that one post your browser also contacts the provider; follow the link
+  instead if you would rather it did not.
 
 ## The one thing that is recorded
 

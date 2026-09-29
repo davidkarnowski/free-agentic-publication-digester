@@ -268,19 +268,31 @@ section governs all three.
   project does not ship them.
 
 - **The published site accepts no input, exposes no endpoint of its own,
-  and loads no third-party asset — with one bounded exception.** No
+  and loads no third-party asset — with two bounded exceptions.** No
   login, no server-side search, no submitting form, no comment field, no
-  analytics, no hosted fonts, no content delivery network, no embedded
-  third-party player. Choosing among static files by a request's
-  `Accept` header, and adding response headers to a GET, are neither
-  input nor an endpoint. **The exception (operator ruling, 2026-09-13)
-  is the MCP service at `/mcp`**: it reads a JSON-RPC request and answers
-  only from the published static files, mounted read-only. It calls no
-  model, makes no outbound connection, writes nothing, issues no
-  credential, keeps no session, and runs with no privilege. Any widening
-  of that exception (a write, a search index, a model call, an outbound
-  request, an account) is a new ruling under the next rule, not an
-  implementation detail.
+  analytics, no hosted fonts, no content delivery network, and — outside
+  the blog — no embedded third-party player. Choosing among static files
+  by a request's `Accept` header, and adding response headers to a GET,
+  are neither input nor an endpoint. **The first exception (operator
+  ruling, 2026-09-13) is the MCP service at `/mcp`**: it reads a JSON-RPC
+  request and answers only from the published static files, mounted
+  read-only. It calls no model, makes no outbound connection, writes
+  nothing, issues no credential, keeps no session, and runs with no
+  privilege. Any widening of that exception (a write, a search index, a
+  model call, an outbound request, an account) is a new ruling under the
+  next rule, not an implementation detail.
+  **The second exception (operator ruling, 2026-09-29) is an editorial
+  embed on a blog post.** The blog is commentary, not the digest and not
+  the official record, and a post may embed official third-party media —
+  for example an official US-government video stream — from an
+  allowlisted host, always beside a plain link to the same source so the
+  post is complete without the embed. The exception is scoped to blog
+  post pages (`blog-<slug>.html`); the digest, the live page, and every
+  other page still load no third-party asset, and a blog post still
+  hotlinks no external image, script, font, or stylesheet. Because
+  viewing such a post contacts the embed's provider, the privacy page
+  states exactly which pages this affects; the no-third-party guarantee
+  for the digest and every non-blog page is unchanged.
 
 - **The access rule and the security rule are the same rule, and neither
   justification may be traded away for the other.** The two preceding

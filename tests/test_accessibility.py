@@ -85,15 +85,34 @@ _SUBRESOURCE_RE = re.compile(
     r"""\s*=\s*["'](?P<url>[^"']+)["']""", re.IGNORECASE)
 
 
+# GUIDE §2a rule 4, second bounded exception (operator, 2026-09-29): a
+# blog post is editorial and may embed official third-party media from an
+# allowlisted host, always beside a plain link. Scoped to blog-<slug>.html
+# post pages and to these embed URL prefixes; every other page, and any
+# other host on a blog page, still loads nothing external.
+_BLOG_EMBED_PREFIXES = (
+    "https://www.youtube.com/embed/",
+    "https://www.youtube-nocookie.com/embed/",
+)
+
+
+def _is_blog_post_page(name):
+    return name.startswith("blog-") and name.endswith(".html") and name != "blog.html"
+
+
 def test_no_page_loads_a_third_party_resource(site):
     """GUIDE §2a rule 4. Outbound *links* to official sources are the
-    product; a loaded subresource is a dependency, and we have none —
-    no fonts, no CDN, no analytics, no embedded player."""
+    product; a loaded subresource is a dependency, and every page has
+    none (no fonts, no CDN, no analytics, no embedded player) save the one
+    bounded blog exception: an official embed on a post page, allowlisted
+    by host and always beside a plain link."""
     for name, text in _pages(site):
         for match in _SUBRESOURCE_RE.finditer(text):
             url = match.group("url")
-            assert not url.lower().startswith(("http://", "https://", "//")), (
-                f"{name} loads an external subresource: {url}")
+            if not url.lower().startswith(("http://", "https://", "//")):
+                continue
+            allowed = _is_blog_post_page(name) and url.startswith(_BLOG_EMBED_PREFIXES)
+            assert allowed, f"{name} loads an external subresource: {url}"
 
 
 # ---------------------------------------------------------------------------
