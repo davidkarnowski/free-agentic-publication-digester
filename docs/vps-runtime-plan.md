@@ -31,7 +31,7 @@ project:
   lives in our own committed artifacts, never in platform logs — that
   conclusion from the GH-native deliberation stands unchanged.
 
-## Update 2026-07-30 (evening): hosting resolved — shared VPS, Docker stack
+## Update 2026-07-30 (evening): hosting resolved — production host, Docker stack
 
 Same-day development: `fapd.info` now points at the VPS the operator
 already runs for another project, and the **placeholder site is live
@@ -47,7 +47,7 @@ this resolves and reshapes:
   finalizer; egress-only on its own private network, no published
   ports, unreachable from anything public). Backend hands the built
   site to web through a read-only named volume — never a socket.
-- **Traffic sorting** happens in the cohabiting project's edge proxy,
+- **Traffic sorting** happens in the edge proxy,
   which terminates TLS for both hostnames and is the only container
   bridging the two projects' networks. The proxy bundle and the box
   dossier live in the operator's private tree, not this repo.

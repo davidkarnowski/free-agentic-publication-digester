@@ -51,7 +51,7 @@ if [[ "$PENDING" -lt 1 ]]; then
 fi
 echo "  $PENDING linux-* package(s) pending at ${WANT_ABI}"
 
-for c in fapd-web fapd-backend spiralyst-proxy spiralyst-static; do
+for c in fapd-web fapd-backend edge-proxy edge-static; do
     pol=$(sudo docker inspect "$c" --format '{{.HostConfig.RestartPolicy.Name}}' 2>/dev/null)
     if [[ "$pol" != "unless-stopped" && "$pol" != "always" ]]; then
         fail "container $c has restart policy '$pol' — would NOT survive reboot"

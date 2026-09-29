@@ -24,7 +24,7 @@
 #     (bash, libcap2, libaudit, base-files, tzdata ride along: binNMUs
 #      and data updates, no CVE content — verified in the changelogs.)
 #
-#   fapd-web + the two cohabitant nginx containers (Alpine 3.24)
+#   fapd-web and the edge nginx (Alpine 3.24)
 #     libuuid   2.42.1-r0 -> 2.42.3-r1       CVE-2026-78408 + the
 #                                            util-linux 2.42.3 set
 #     xz-libs   5.8.3-r0  -> 5.8.4-r0        GHSA-5qpq-xqfv-j9pg (High,
@@ -65,10 +65,10 @@
 #     chain of both filter and nat tables and no ebtables module is
 #     loaded at all.
 #
-# NOT IN THIS SCRIPT: spiralyst-proxy and spiralyst-static. They run the
+# NOT IN THIS SCRIPT: edge-proxy and edge-static. They run the
 # same Alpine base and carry the identical libuuid/xz/nginx rows, and
 # the proxy TERMINATES TLS for fapd.info — the more exposed of the two.
-# They are the cohabitant's, deployed from the operator's private tree.
+# They are deployed from the operator's private tree.
 # Our half is not the whole bump; the parity step is run separately the
 # same day.
 #
@@ -160,4 +160,4 @@ curl -sI https://fapd.info/mcp | head -1
 echo
 echo "Expected: HTTP/2 200 / 200 / HTTP/2 405."
 echo "Then re-run the OPS-GUIDE VPS block, and again ~5 minutes later"
-echo "(cadence rule). Remember the cohabitant parity step."
+echo "(cadence rule). Remember the edge parity step."

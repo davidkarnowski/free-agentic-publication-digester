@@ -25,11 +25,11 @@
 # (CVE-2026-75803, -63076, -63074, -63072, -54874, CVE-2025-27587) —
 # they are unfixed upstream of us, not something this script closes.
 #
-# NOT in this script: spiralyst-proxy. It runs the same Alpine 3.24 /
+# NOT in this script: edge-proxy. It runs the same Alpine 3.24 /
 # libssl3 3.5.7-r0 and it is the container that actually terminates TLS
 # for fapd.info, so it is the MORE exposed of the two — but it is the
-# cohabitant's edge proxy, owned by the operator's spiralyst-site tree at
-# /opt/spiralyst. The nginx pin in docker-compose.yml says "bump both
+# the edge proxy, owned by the operator's private-host tree at
+# /opt/edge. The nginx pin in docker-compose.yml says "bump both
 # together during CVE sweeps, never just one": this script does our half
 # and the parity is not complete until the proxy's own deploy runs.
 #
@@ -150,7 +150,7 @@ cat <<'EOT'
 SUCCESS: base images refreshed and the stack recreated.
 
 Still open, deliberately:
-  * spiralyst-proxy is unchanged and still on libssl3 3.5.7-r0. It
+  * edge-proxy is unchanged and still on libssl3 3.5.7-r0. It
     terminates TLS for fapd.info. Parity is NOT complete until its own
     repo deploys the same bump.
   * Six OpenSSL CVEs remain unfixed in Debian trixie at 3.5.7-1~deb13u2.

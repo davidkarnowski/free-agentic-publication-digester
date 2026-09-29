@@ -146,7 +146,7 @@ def test_dev_env_example_defuses_the_prod_defaults():
 
 
 def test_prod_compose_carries_the_container_bounds():
-    """Review D18/D19/R4: the shared VPS's containers are bounded and
+    """Review D18/D19/R4: the host's containers are bounded and
     their logs rotate; the backend has a liveness heartbeat. The dev
     stack modeled this block first — prod must not drift back to
     unbounded. The mcp service (Phase 4B) carries the same bounds; its
