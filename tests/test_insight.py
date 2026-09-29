@@ -128,6 +128,61 @@ def test_malformed_suggestions_degrade_to_mechanical_report(conn, tmp_path):
     assert "# Operations report" in text
 
 
+def test_security_sweep_is_private_not_in_the_public_report(conn, tmp_path):
+    """CLAUDE.md §13, operator ruling 2026-09-29: the host security sweep
+    is recorded privately on the server, never in the public insight
+    report under provenance/runs/. The public report keeps only a neutral
+    pointer that leaks no VPS security posture; the private file carries
+    the full sweep."""
+    fetch_db, ledger_db = seed_ops(conn, tmp_path)
+    sweep = {
+        "generated_utc": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
+        "window_hours": 24,
+        "thresholds": {"tls_warn_days": 21, "campaign_min_ips": 3},
+        "probing": {"events": 51, "distinct_ips": 20, "by_family": {}, "findings": []},
+        "refusals": {"by_status": {}, "probes_served_2xx": 0},
+        "auth": {"failed_ssh": 3, "failed_ssh_distinct_ips": 1,
+                 "failed_ssh_alltime": 54, "failed_ssh_alltime_distinct_ips": 29},
+        "patch": {"host_security_pending": 3},
+        "integrity": {"unhealthy": 0},
+        "tls": [{"cert": "fapd.info", "days": 29}, {"cert": "other.example", "days": 81}],
+        "verdicts": [], "escalate": False, "stage_errors": [],
+    }
+    sweep_path = tmp_path / "security-sweep.json"
+    sweep_path.write_text(json.dumps(sweep))
+    sec_dir = tmp_path / "ops-security"
+
+    path = insight.run(conn, None, DATE, out_dir=tmp_path / "runs",
+                       fetch_db=fetch_db, ledger_db=ledger_db,
+                       sweep_path=sweep_path, security_dir=sec_dir)
+
+    public = path.read_text()
+    for leak in ("tls_warn_days", "campaign_min_ips", "host security packages",
+                 "failed SSH", "other.example", "probe requests"):
+        assert leak not in public, f"public report leaked {leak!r}"
+    assert "recorded privately" in public
+
+    private = (sec_dir / f"security-{DATE}.md").read_text()
+    assert "Security sweep (private)" in private
+    assert "host security packages pending | 3" in private
+    assert "failed SSH attempts (window) | 3" in private
+    assert "tls_warn_days=21" in private
+    assert "other.example 81d" in private
+
+
+def test_a_missing_sweep_stays_loud_in_the_private_file(conn, tmp_path):
+    """The F-021 shape survives the move: a sweep that did not run is a
+    visible gap in the PRIVATE report, not a silent clean bill."""
+    fetch_db, ledger_db = seed_ops(conn, tmp_path)
+    sec_dir = tmp_path / "ops-security"
+    insight.run(conn, None, DATE, out_dir=tmp_path / "runs",
+                fetch_db=fetch_db, ledger_db=ledger_db,
+                sweep_path=tmp_path / "nope.json", security_dir=sec_dir)
+    private = (sec_dir / f"security-{DATE}.md").read_text()
+    assert "unavailable" in private
+    assert "gap in the record" in private
+
+
 def test_suggest_caps_at_five_and_drops_nonstrings():
     fake = FakeLLM(reply=json.dumps(["a", "b", "c", "d", "e", "f", 7, "  "]))
     got = insight.suggest(fake, {"digest_date": DATE})

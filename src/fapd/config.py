@@ -299,6 +299,16 @@ SECURITY_SWEEP_STALE_HOURS = int(
 
 #: Bumping this regenerates the security summary layer only.
 SECURITY_PROMPT_VERSION = 1
+
+#: The rendered security section is PRIVATE (CLAUDE.md §13: operational
+#: security posture — certificates, host patch state, authentication-
+#: failure counts, detection thresholds — is not public-repository
+#: content, operator ruling 2026-09-29). The finalizer writes it here, a
+#: gitignored, host-durable directory the evidence commit never stages,
+#: kept apart from the public insight report under provenance/runs/. An
+#: operator can point this at a bind-mounted host path via the env var.
+INSIGHT_SECURITY_DIR = Path(os.environ.get(
+    "FAPD_INSIGHT_SECURITY_DIR", str(DATA_DIR / "ops-security")))
 # Source-page surfaces (§3a, 2026-08-03): assessment = our measured
 # ingestion relationship, refreshed at 30 days or on a health-label
 # change; description = what the source is, regenerated only when its
