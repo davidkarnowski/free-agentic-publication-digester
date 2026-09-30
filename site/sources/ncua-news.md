@@ -16,17 +16,21 @@ The National Credit Union Administration charters and supervises federal credit 
 
 **Model-written orientation**
 
-The National Credit Union Administration charters and supervises federal credit unions and insures member deposits; its press releases cover supervision, conservatorships, and board actions.
+The National Credit Union Administration charters and supervises federal credit unions and insures share deposits. Its press-release index carries announcements on supervision, conservatorships, and board actions.
 
-The National Credit Union Administration is an independent agency established in 1970 to regulate federal credit unions and administer the National Credit Union Share Insurance Fund, which protects member deposits at federally insured credit unions. The NCUA charters federal credit unions, supervises their operations, and exercises regulatory authority over credit union capital, lending, and member protections.
+The National Credit Union Administration (NCUA) is an independent agency that charters, regulates, and supervises federal credit unions and operates the National Credit Union Share Insurance Fund. Credit unions are member-owned, nonprofit financial institutions that provide banking services—deposits, loans, and related financial products—to their members.
 
-NCUA press releases announce supervisory and regulatory actions taken by the agency, including enforcement actions, examinations, and supervisory guidance issued to credit unions. The agency also announces actions related to credit union failures or conservatorships, through which the NCUA either facilitates merger of a failing credit union or manages its liquidation. Readers will encounter announcements of supervision policy changes, guidance on regulatory compliance, and actions taken against credit unions in response to safety and soundness concerns.
+The NCUA was established in 1970 and operates as the federal regulator of the credit union system. Its regulatory authority covers credit unions chartered by the NCUA (federal credit unions) and state-chartered credit unions that are federally insured. The agency supervises approximately nine thousand credit unions with tens of millions of members nationwide.
 
-The NCUA Board makes policy decisions affecting the credit union system through formal board actions, which are announced in press releases. These include decisions on capital requirements, insurance fund assessments, regulatory rule changes, and system-wide policy initiatives. Personnel announcements, updates on NCUA operations, and notices of rulemaking activity also appear in the agency's press releases.
+The NCUA's core functions parallel those of the FDIC in the banking sector. The agency provides share (deposit) insurance to credit union members, protecting accounts up to $250,000 per member per credit union. It also supervises credit unions through examination programs to assess their safety and soundness, evaluate their management, and ensure compliance with federal law. When a credit union fails or enters financial distress, the NCUA oversees resolution or conservatorship.
 
-As the federal regulator and insurer for the credit union system, the NCUA's press releases serve as the official record of agency actions and policy decisions. They constitute the primary mechanism through which the NCUA communicates supervisory expectations, policy changes, and significant regulatory actions to credit unions and the public. These announcements typically appear before compilation in official databases or regulatory registers.
+The NCUA press-release index serves as the agency's primary public communication channel. Typical press releases cover supervisory activities, conservatorships and resolutions of credit unions in distress, board actions and policy announcements, updates on the Share Insurance Fund, examination and supervisory findings, and information about regulatory changes or guidance. The index typically contains a few items per week, though frequency varies with regulatory developments and credit union industry conditions.
 
-_Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It may draw on general knowledge of public institutions and is not official-record content._
+Documents you will see from this source in the digest include releases on specific credit union events (such as conservatorships or resolutions), announcements of regulatory changes or new guidance to credit unions, reports on the agency's supervisory activities, updates on the Share Insurance Fund, notices of upcoming board meetings or comment periods for proposed rules, and agency announcements regarding credit union policy matters. These releases are dated by the NCUA and sourced through the agency's own press-release index.
+
+The NCUA is part of the Executive Branch and operates as an independent agency, coordinating with other financial regulators and the Federal Reserve System. The agency is funded through assessments on federally insured credit unions and does not use taxpayer funds.
+
+_Model-written orientation, generated 2026-09-30 by haiku, prompt version 1. It may draw on general knowledge of public institutions and is not official-record content._
 
 ## Identity and registry record
 
@@ -57,9 +61,9 @@ _Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 1 item(s) in the last 14 days; most recent 2026-09-28; 0 of 14 request(s) to ncua.gov returned no content.
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-09-28; 0 of 42 request(s) to ncua.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-09-29T04:08:42Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-09-30T03:54:28Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,7 +73,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 14 request(s) (14 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 30 request(s) (30 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -78,15 +82,15 @@ Last 24 hours: 14 request(s) (14 answered, 0 returned no content) · 1 item(s) i
 | Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-09-28 |
 | Content length | 78 characters average, 78 median (shortest 78, longest 78) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to ncua.gov | 14 request(s) · 14 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to ncua.gov | 42 request(s) · 42 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-09-29T04:10:14.084+00:00 UTC.
+last answered request 2026-09-30T04:00:12.527+00:00 UTC.
 
-1 item(s) in the last 14 days; most recent 2026-09-28; 0 of 14 request(s) to ncua.gov returned no content.
+1 item(s) in the last 14 days; most recent 2026-09-28; 0 of 42 request(s) to ncua.gov returned no content.
 
 ### All time
 
-- **Our requests to ncua.gov, all time (since 2026-09-28):** 14 request(s) · 14 answered · 0 returned no content
+- **Our requests to ncua.gov, all time (since 2026-09-28):** 42 request(s) · 42 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -96,7 +100,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to ncua.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-31 | 0 | 0 | — |
 | 2026-09-01 | 0 | 0 | — |
 | 2026-09-02 | 0 | 0 | — |
 | 2026-09-03 | 0 | 0 | — |
@@ -125,7 +128,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-26 | 0 | 0 | — |
 | 2026-09-27 | 0 | 0 | — |
 | 2026-09-28 | 1 | 12 | 404 |
-| 2026-09-29 | 0 | 2 | 321 |
+| 2026-09-29 | 0 | 29 | 344 |
+| 2026-09-30 | 0 | 1 | 338 |
 
 ## Our ingestion assessment
 

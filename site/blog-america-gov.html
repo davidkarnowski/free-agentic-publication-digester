@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Single Front Door to Government — Free Agentic Publication Digester — Daily Federal Digest</title>
+<meta name="description" content="An automated, citation-bound, opinion-agnostic daily digest of official United States government publications — congressional, executive, and judicial — built only from primary sources. Built for human readers and AI agents; agents start at /llms.txt.">
+<meta name="robots" content="index, follow">
+<link rel="alternate" type="text/plain" href="llms.txt"
+      title="LLM guide — this is an AI-first digest of official US federal publications">
+<link rel="api-catalog" href=".well-known/api-catalog">
+<link rel="service-desc" type="application/vnd.oai.openapi+json" href="openapi.json">
+<link rel="service-doc" type="text/html" href="agents.html">
+<link rel="ai-catalog" type="application/ai-catalog+json" href=".well-known/ai-catalog.json">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="stylesheet" href="style.css">
+<link rel="alternate" type="text/markdown" href="blog-america-gov.md">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+  <nav aria-label="Site">
+    <a class="brand" href="index.html"
+       aria-label="Free Agentic Publication Digester (FAPD)">FAPD<span
+       class="brand-full"> &mdash; Free Agentic Publication Digester</span></a>
+    <span class="nav-links"><a href="today.html"><span class="live-dot" aria-hidden="true"></span>Today (live)</a><a href="index.html">All digests</a><a href="sources.html">Sources</a><a href="blog.html">Blog</a><a href="about.html">About</a><a href="agents.html">For agents</a><details class="nav-more"><summary>More</summary><a href="accessibility.html">Accessibility</a><a href="ai-development.html">AI development</a><a href="bot.html">Bot</a><a href="faq.html">Faq</a><a href="methods.html">Methods</a><a href="privacy.html">Privacy</a><a href="readme.html">Readme</a></details></span>
+  </nav>
+</header>
+<main id="main" tabindex="-1">
+<article class="post"><h1 id="a-single-front-door-to-government">A Single Front Door to Government</h1><p class="post-meta">Published 2026-09-29 · commentary about the project, not part of the daily digest or the official record</p>
+<p><em>Dev notes, 2026-09-29. Written by Claude, with direction from the
+project's founder. On an executive order that takes one of this project's
+founding ideas, consolidated access to what the government does, and
+applies it across the whole federal government.</em></p>
+<p>On September 29, 2026 the President signed an executive order,
+<a href="https://www.whitehouse.gov/presidential-actions/2026/09/streamlining-access-to-government-services-through-america-gov/" target="_blank" rel="noopener noreferrer">Streamlining Access to Government Services Through America.gov<span class="vh"> (opens in a new tab)</span></a>,
+directing the government to build <a href="https://america.gov" target="_blank" rel="noopener noreferrer">America.gov<span class="vh"> (opens in a new tab)</span></a> as a
+"unified digital front door to the Federal Government." The idea is a
+single place a person can go, sign in, ask a question in plain language,
+and, where a service is available online, complete it, without first
+learning which agency owns it. The <a href="https://www.whitehouse.gov/fact-sheets/2026/09/fact-sheet-president-donald-j-trump-streamlines-access-to-government-services-through-america-gov/" target="_blank" rel="noopener noreferrer">companion fact sheet<span class="vh"> (opens in a new tab)</span></a>
+and the <a href="https://www.gsa.gov/about-gsa/newsroom/news-releases/gsa-joins-the-white-houses-national-design-studio-in-unveiling-americagov-09292026" target="_blank" rel="noopener noreferrer">General Services Administration's announcement<span class="vh"> (opens in a new tab)</span></a>
+say the site draws on information from more than 29,000 government
+websites. The White House streamed the unveiling on its official YouTube
+channel; the recording is below.</p>
+<figure class="post-figure video-embed">
+  <div class="video-frame" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:14px">
+    <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:0"
+      src="https://www.youtube.com/embed/qyJL5gKhajE"
+      title="Announcement on America.gov, from The White House (YouTube)"
+      loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen></iframe>
+  </div>
+  <figcaption><em>Announcement on America.gov</em>, from The White House's
+  official YouTube channel. If the player does not load,
+  <a href="https://www.youtube.com/watch?v=qyJL5gKhajE" target="_blank" rel="noopener noreferrer">watch it on YouTube<span class="vh"> (opens in a new tab)</span></a>.</figcaption>
+</figure>
+
+<p>This is worth a note here, because it rhymes with why this project
+exists.</p>
+<h2 id="why-a-front-door-is-worth-building">Why a front door is worth building</h2>
+<p>The Free Agentic Publication Digester began from a small, stubborn
+observation. To know what the United States federal government published
+on any given day, a person has to visit dozens of separate places: the
+Congressional Record and the Federal Register through the Government
+Publishing Office, bills and laws and court opinions each in their own
+system, and then every agency's own newsroom. No single official page
+lists it all. The digest's job is to gather that scattered record into
+one cited place, in the publishers' own words.</p>
+<p>The executive order takes the same premise, that scattered access is a
+barrier in itself, and applies it not to the <em>record</em> of what the
+government publishes but to its <em>services</em>: the forms, enrollments,
+renewals and answers a person actually needs. Doing that by executive
+action, across the whole executive branch at once, is the significant
+part. A single point of digital entry is not a new wish. What is new is a
+government directing itself to build one and naming the agencies that
+must take part.</p>
+<h2 id="what-the-order-says-it-will-be">What the order says it will be</h2>
+<p>The order and its fact sheet describe America.gov as "secure,
+intelligent, and service-oriented." A person is meant to "communicate in
+plain language" and "receive accurate answers," and, in the fact sheet's
+words, to "ask any question on America.gov and get an up-to-date answer."
+The documents credit "modern technology and Super Intelligence (SI)";
+the GSA announcement describes the same capability more plainly as
+"AI-enhanced search." Neither the order nor the fact sheet uses the term
+"large language model," but a front door that answers questions in plain
+language and completes transactions is, in plain description, an
+AI-mediated one.</p>
+<p>That is the part this project watches most closely, because it is the
+part we have opinions about the <em>method</em> of, if not the politics. The
+order itself sets the standard: it requires that the intelligence behind
+America.gov be "accurate, reliable, and transparent." Those three words
+are the whole game. An answer about a benefit, a deadline or a right is
+only as good as the source it came from, and an AI that cannot show its
+source is not transparent. It is the same discipline this digest holds
+itself to: every item we publish is quoted from, and linked to, the
+official record, and a digest that cannot cite is not published. A
+government answer service that meets that bar would be a genuinely useful
+thing.</p>
+<h2 id="not-the-only-door">Not the only door</h2>
+<p>The order is explicit that the new site is meant to be a better option,
+not the only one. It directs the government to preserve the existing
+lawful ways people already reach federal services (in person, by
+telephone, by mail, and through agencies' own digital services), so that
+America.gov, in the order's phrasing, "provides a better option but does
+not become the only option." This matters. Consolidation that quietly
+closes the older doors would trade one barrier for another; a person
+without a login, a device or reliable connectivity still has to be able
+to reach their government. Keeping the tried-and-tested channels open is
+what makes a new front door an addition rather than a gate.</p>
+<h2 id="how-it-is-meant-to-get-built">How it is meant to get built</h2>
+<p>The order does not stand up the site by fiat; it puts the work on the
+agencies. It directs the <a href="https://www.gsa.gov" target="_blank" rel="noopener noreferrer">General Services Administration<span class="vh"> (opens in a new tab)</span></a>,
+the National Design Studio and the <a href="https://www.whitehouse.gov/omb/" target="_blank" rel="noopener noreferrer">Office of Management and Budget<span class="vh"> (opens in a new tab)</span></a>
+to establish and operate America.gov, and it tells the OMB Director to
+issue implementation guidance to executive agencies. Each agency head is
+directed to identify that agency's "covered services" (public-facing
+services that serve more than 100,000 users in a 12-month period and can
+be accessed or applied for online) and to work to make them available
+through the single site, with <a href="https://login.gov" target="_blank" rel="noopener noreferrer">Login.gov<span class="vh"> (opens in a new tab)</span></a> for
+sign-in. The fact sheet carves out exceptions, including tax filing at
+the <a href="https://www.irs.gov" target="_blank" rel="noopener noreferrer">Internal Revenue Service<span class="vh"> (opens in a new tab)</span></a> and
+national-security-sensitive services. In other words, the site is only
+ever as complete as the agencies' own participation makes it. The same is
+true, in a smaller way, of this digest, whose coverage grows one verified
+source at a time.</p>
+<h2 id="a-note-on-the-domain-itself">A note on the domain itself</h2>
+<p>The address is not new. A <a href="https://get.gov" target="_blank" rel="noopener noreferrer">WHOIS<span class="vh"> (opens in a new tab)</span></a> lookup on the .gov
+registry shows that <strong>america.gov</strong> was first registered on
+<strong>November 20, 2007</strong>, back when it was the State Department's
+public-diplomacy site, and its registrant of record is still the
+<strong>Department of State</strong>. The record was last updated on
+<strong>September 23, 2026</strong>, six days before the order, and the registration
+now runs to May 20, 2027. Like every .gov domain, it is administered
+through get.gov under the Cybersecurity and Infrastructure Security
+Agency, and its contact details are redacted for privacy by registry
+policy. It is an existing government address, quietly refreshed and
+pointed at a new purpose:</p>
+<figure class="post-figure">
+  <img src="assets/america-gov/america-gov-domain.svg" width="640" height="440"
+       alt="Domain record for america.gov from the .gov WHOIS registry: registrant Department of State; created November 20, 2007; last updated September 23, 2026; registration expires May 20, 2027; registrar get.gov; status serverTransferProhibited; administered by the Cybersecurity and Infrastructure Security Agency; most contact fields redacted for privacy.">
+  <figcaption>america.gov, as it appears in the .gov domain registry.
+  Source: WHOIS via whois.nic.gov, retrieved 2026-09-29.</figcaption>
+</figure>
+
+<h2 id="where-this-project-fits">Where this project fits</h2>
+<p>This digest is not a services portal and does not aim to be one. It reads
+the government's published record and shows it, cited, for people and for
+the AI agents that increasingly read on their behalf. America.gov aims at
+something adjacent and larger: helping a person <em>act</em>, not just read. But
+the two share a premise and a risk. The premise is that access to
+government should not require knowing the government's internal map. The
+risk is that once a machine sits between a person and the record, the
+machine can quietly become the record, paraphrasing, summarizing,
+sometimes inventing, unless it is held to showing its work. This
+project's answer to that risk is the only one we trust: cite everything,
+to the primary source, every time. It is encouraging to see those three
+words, accurate, reliable and transparent, written into the order that
+builds the government's own front door. The test, as always, will be in
+what it actually links to.</p>
+<p><em>This post is commentary about the project. It is not part of the daily
+digest or the official record, and it is not an endorsement of any
+administration or policy. The executive order, fact sheet and agency
+announcements it describes are linked above so readers can check every
+statement against the source.</em></p><p class="post-back"><a href="blog.html">&larr; All posts</a></p></article>
+</main>
+<footer class="site-footer">
+  <p>Generated 2026-09-30T04:05:51Z (UTC). Canonical source:
+  <code>docs/devnotes/2026-09-29-america-gov.md</code> in the
+  <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
+  every item cites its official source; methodology in
+  <code>GUIDE.md</code> §2.</p>
+  <p>Content licensed
+  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0<span class="vh"> (opens in a new tab)</span></a> —
+  reuse with attribution to FAPD (Free Agentic Publication Digester);
+  quoted official government text is
+  public domain (17 U.S.C. § 105). Code licensed Apache-2.0.</p>
+</footer>
+</body>
+</html>

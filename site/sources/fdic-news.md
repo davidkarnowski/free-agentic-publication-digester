@@ -16,17 +16,19 @@ The Federal Deposit Insurance Corporation insures bank deposits and supervises s
 
 **Model-written orientation**
 
-The Federal Deposit Insurance Corporation insures bank deposits and supervises state-chartered banks; its press releases cover bank supervision, resolutions, and regulatory matters.
+The Federal Deposit Insurance Corporation insures bank deposits and supervises state-chartered banks. Its press-release index carries announcements on bank supervision, failures and resolutions, and rulemaking.
 
-The Federal Deposit Insurance Corporation is an independent agency established in 1933 to maintain stability and public confidence in the banking system. The FDIC insures deposits at member banks up to applicable limits and supervises state-chartered banks that are not members of the Federal Reserve System.
+The Federal Deposit Insurance Corporation (FDIC) is an independent agency that insures deposits in U.S. banks and supervises state-chartered banks that are not members of the Federal Reserve System. The FDIC was created in 1933 in response to bank failures during the Great Depression and operates as part of the federal banking regulatory framework.
 
-FDIC press releases announce actions taken in pursuit of these missions. These include announcements of bank supervision activities, supervisory findings, enforcement actions, and capital adequacy determinations for supervised banks. The FDIC also announces bank failures and resolutions, through which the agency either arranges for a failed bank's assets and liabilities to be transferred to another institution or manages the liquidation process. Readers will encounter announcements of assistance programs for failing institutions, updates on bank supervision policy, responses to changing economic conditions, and regulatory guidance issued to supervised institutions.
+The FDIC's core missions are deposit insurance and bank supervision. Deposit insurance protects depositors' accounts up to $250,000 per depositor per bank, maintaining public confidence in the banking system. The agency supervises and examines state-chartered banks to assess their safety and soundness, evaluate their management, and ensure compliance with banking laws.
 
-The agency also announces rulemaking activities, including proposed and final rules governing deposit insurance, capital requirements, lending practices, and other regulatory matters affecting banks under its supervision. Personnel announcements and updates on FDIC operations, including examination results summaries and regional office activities, appear in the press releases.
+The FDIC press-release index is the agency's primary channel for public announcements. These releases typically cover several categories of news: notifications of bank failures or conservatorships and their resolutions, including information about how deposits and other matters are being handled; announcements of new or revised regulations and supervisory guidance; reports on the agency's examination activities and focus areas; updates on the Deposit Insurance Fund; and information about the agency's programs and initiatives. The index typically contains a few items per week, though the frequency varies with regulatory activity and banking conditions.
 
-As an insurance and supervisory agency, the FDIC's press releases constitute the official record of its actions affecting member institutions and the banking system. They serve as the primary mechanism through which the FDIC communicates supervisory expectations, policy changes, and significant actions to affected banks, the financial industry, and the public. These announcements are typically the first public disclosure of FDIC supervisory or policy actions before they appear in regulatory databases or the Federal Register.
+Documents you will see from this source in the digest include press releases on specific banking events (such as the resolution of a failed bank), regulatory announcements (new rules, guidance documents, or supervisory letters), reports on examination findings, updates on the state of the banking system, and notices about the agency's public meetings or comment periods for proposed rules. These releases are dated by the FDIC and sourced through the agency's own press-release index.
 
-_Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It may draw on general knowledge of public institutions and is not official-record content._
+The FDIC is part of the Executive Branch and operates independently, though it coordinates with other banking regulators including the Federal Reserve and the Office of the Comptroller of the Currency. The agency does not charge taxpayers; it is funded through assessments on insured banks.
+
+_Model-written orientation, generated 2026-09-30 by haiku, prompt version 1. It may draw on general knowledge of public institutions and is not official-record content._
 
 ## Identity and registry record
 
@@ -57,9 +59,9 @@ _Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 2 item(s) in the last 14 days; most recent 2026-09-28; 0 of 12 request(s) to www.fdic.gov returned no content.
+**delivering** — 3 item(s) in the last 14 days; most recent 2026-09-29; 0 of 40 request(s) to www.fdic.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-09-29T04:08:42Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-09-30T03:54:28Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,24 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 12 request(s) (12 answered, 0 returned no content) · 2 item(s) ingested
+Last 24 hours: 29 request(s) (29 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-09-28 |
-| Content length | 95 characters average, 95 median (shortest 78, longest 112) |
+| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-09-29 |
+| Content length | 101 characters average, 112 median (shortest 78, longest 112) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.fdic.gov | 12 request(s) · 12 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.fdic.gov | 40 request(s) · 40 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-09-29T04:10:13.866+00:00 UTC.
+last answered request 2026-09-30T04:00:12.213+00:00 UTC.
 
-2 item(s) in the last 14 days; most recent 2026-09-28; 0 of 12 request(s) to www.fdic.gov returned no content.
+3 item(s) in the last 14 days; most recent 2026-09-29; 0 of 40 request(s) to www.fdic.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fdic.gov, all time (since 2026-09-28):** 12 request(s) · 12 answered · 0 returned no content
+- **Our requests to www.fdic.gov, all time (since 2026-09-28):** 40 request(s) · 40 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -96,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fdic.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-31 | 0 | 0 | — |
 | 2026-09-01 | 0 | 0 | — |
 | 2026-09-02 | 0 | 0 | — |
 | 2026-09-03 | 0 | 0 | — |
@@ -125,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-26 | 0 | 0 | — |
 | 2026-09-27 | 0 | 0 | — |
 | 2026-09-28 | 2 | 11 | 258 |
-| 2026-09-29 | 0 | 1 | 236 |
+| 2026-09-29 | 1 | 28 | 255 |
+| 2026-09-30 | 0 | 1 | 350 |
 
 ## Our ingestion assessment
 

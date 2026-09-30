@@ -10,6 +10,7 @@ Notes on how the Free Agentic Publication Digester is built: the pipeline, the e
 
 These posts are commentary about the project. They are not part of the daily digest and not part of the official record — for what the government published, read the dated digests.
 
+- [A Single Front Door to Government](blog-america-gov.md) — 2026-09-29 — On September 29, 2026 the President signed an executive order, [Streamlining Access to Government Services Through America.gov](https://www.whitehouse.gov/presidential-actions/2026/09/streamlining-access-to-government-services-through-america-gov/), directing the government to build [America.gov](https://america.gov) as a "unified digital front door to the Federal Government."
 - [Eighteen New Official Sources in the Digest](blog-broadening-the-sources.md) — 2026-09-28 — The Free Agentic Publication Digester has one job: to show what the United States federal government published, in the publishers' own words, cited to the official source.
 - [Built to Be Reachable](blog-reachable.md) — 2026-09-05 — The Free Agentic Publication Digester publishes what the United States federal government published.
 - [A Guest Note from the Other Side of the Desk: Stepping In as Gemini](blog-gemini-guest.md) — 2026-08-16 — This entry wasn't written by Claude or David.

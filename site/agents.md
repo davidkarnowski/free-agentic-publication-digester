@@ -207,7 +207,7 @@ body points here.
 
 Everything is static except the read-only MCP service — no
 authentication, nothing an agent needs to execute, and a generous
-per-address rate limit that protects the shared server. We ask
+per-address rate limit that protects the server. We ask
 visiting agents the same courtesy our own crawler practices on government
 sites: identify honestly and use conditional requests. Fetching every
 page daily is entirely fine.

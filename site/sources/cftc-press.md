@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 5 item(s) in the last 14 days; most recent 2026-09-25; 0 of 343 request(s) to www.cftc.gov returned no content.
+**delivering** — 5 item(s) in the last 14 days; most recent 2026-09-25; 0 of 346 request(s) to www.cftc.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-29T04:08:42Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-09-30T03:54:28Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,7 +69,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · no items ingested
+Last 24 hours: 30 request(s) (30 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -78,15 +78,15 @@ Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · no items in
 | Items ingested | 5 in 14 days (0.36 per day) · most recent 2026-09-25 |
 | Content length | 111 characters average, 108 median (shortest 70, longest 168) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.cftc.gov | 343 request(s) · 343 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.cftc.gov | 346 request(s) · 346 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-09-29T04:10:13.827+00:00 UTC.
+last answered request 2026-09-30T04:00:12.119+00:00 UTC.
 
-5 item(s) in the last 14 days; most recent 2026-09-25; 0 of 343 request(s) to www.cftc.gov returned no content.
+5 item(s) in the last 14 days; most recent 2026-09-25; 0 of 346 request(s) to www.cftc.gov returned no content.
 
 ### All time
 
-- **Our requests to www.cftc.gov, all time (since 2026-08-01):** 1,693 request(s) · 1,693 answered · 0 returned no content
+- **Our requests to www.cftc.gov, all time (since 2026-08-01):** 1,722 request(s) · 1,722 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.cftc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-31 | 1 | 26 | 75 |
 | 2026-09-01 | 1 | 26 | 59 |
 | 2026-09-02 | 2 | 26 | 77 |
 | 2026-09-03 | 0 | 26 | 63 |
@@ -125,7 +124,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-26 | 0 | 27 | 148 |
 | 2026-09-27 | 0 | 26 | 112 |
 | 2026-09-28 | 0 | 28 | 148 |
-| 2026-09-29 | 0 | 1 | 118 |
+| 2026-09-29 | 0 | 29 | 77 |
+| 2026-09-30 | 0 | 1 | 99 |
 
 ## Our ingestion assessment
 

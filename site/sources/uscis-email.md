@@ -6,7 +6,7 @@
 
 # USCIS Updates (email)
 
-active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Homeland Security (USCIS)
+active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Homeland Security (USCIS)
 
 Official site: https://www.uscis.gov/newsroom · All sources: [sources.md](../sources.md)
 
@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-09-18, 11 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-09-29, delivered by email.
 
-This label has held since 2026-09-26T04:03:22Z (UTC) and was last re-checked 2026-09-29T04:08:42Z (UTC).
+This label has held since 2026-09-29T14:03:51Z (UTC) and was last re-checked 2026-09-30T03:54:28Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,20 +67,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-09-18 |
-| Content length | 170 characters average, 170 median (shortest 170, longest 170) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-09-29 |
+| Content length | 820 characters average, 820 median (shortest 170, longest 1,471) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | no message from this sender in the last 14 days |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-09-29 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-09-18, 11 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-09-29, delivered by email.
 
 ### All time
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-08-31 | 3 |
 | 2026-09-01 | 0 |
 | 2026-09-02 | 0 |
 | 2026-09-03 | 0 |
@@ -121,12 +120,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-26 | 0 |
 | 2026-09-27 | 0 |
 | 2026-09-28 | 0 |
-| 2026-09-29 | 0 |
+| 2026-09-29 | 1 |
+| 2026-09-30 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The USCIS Updates source delivers policy updates via email bulletins to the project mailbox, with content arriving from uscis@messages.dhs.gov. These bulletins carry the full item text and are DKIM-verified and archived. Over the past 14 days, we observed 1 new item, averaging 0.07 items per day. This represents a decrease from the 0.36 items per day reported in the previous assessment. The most recent item was delivered on 2026-09-18, resulting in 8 days since the last delivery and a current "quiet" health status. The single item observed in this period measured 170 characters, while the previous assessment noted items ranging from 170 to 2,789 characters. As an email source, there are no polling requests to report, and the collector recorded no consecutive errors.
+The USCIS Updates source delivers bulletins from uscis@messages.dhs.gov via email subscription (GovDelivery) to the project mailbox. Over the past 14 days, 2 new items were observed at a rate of 0.14 items per day, improving from the prior assessment's lower observation. The most recent item was delivered on 2026-09-29, bringing content that averages 820 characters (range 170–1,471). Bulletins carry policy-manual updates, form revisions, and processing changes in full text and are DKIM-verified. The email adapter operates without errors. Health status is read from delivery recency alone, as email sources generate no polling requests.
 
-_Model-written assessment of our own ingestion, generated 2026-09-26 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-09-30 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

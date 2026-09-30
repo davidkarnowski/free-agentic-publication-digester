@@ -16,15 +16,19 @@ The National Science Foundation funds basic research across science and engineer
 
 **Model-written orientation**
 
-The National Science Foundation funds basic research in science and engineering across the United States and publishes announcements on funding opportunities and research discoveries.
+The National Science Foundation funds basic research across science and engineering. Its news index carries agency announcements on funding programs, research findings, and facilities.
 
-The National Science Foundation (NSF) is an independent agency that supports basic scientific research and science education across all fields of science and engineering except medicine. Established in 1950, NSF's mission is to promote the progress of science, advance national health and prosperity, and secure the national defense through research and education. The agency distributes billions of dollars annually in federal research funding to universities, research institutions, and individual investigators throughout the nation.
+The National Science Foundation (NSF) is an independent agency that supports fundamental research and education in science and engineering across the United States. The NSF was established in 1950 and is distinct from other federal research agencies in that it emphasizes basic research—investigations designed to advance scientific understanding—rather than applied research directed toward specific technologies or products.
 
-NSF operates through directorates covering distinct scientific domains: Biological Sciences, Computer and Information Science and Engineering, Engineering, Geosciences, Mathematical and Physical Sciences, and Social, Behavioral, and Economic Sciences. It also manages large research facilities—telescopes, supercomputers, research vessels, and observatories—that serve the broader scientific community. NSF funding supports fundamental research, graduate education, and undergraduate training, and the agency plays an important role in maintaining U.S. competitiveness in science and technology.
+The NSF operates through several directorates that fund research across disciplines: Biological Sciences, Computer and Information Science and Engineering, Engineering, Geosciences, Mathematical and Physical Sciences, and Social, Behavioral and Economic Sciences. The agency also supports science and engineering education programs at all levels, from elementary school through graduate training and workforce development. The NSF distributes billions of dollars annually in competitive grants to universities, research institutions, and investigators across the country.
 
-In this digest, you will see NSF announcements of new funding solicitations and programs, awards to major research institutions or research centers, significant research findings from NSF-supported projects, updates on facility operations or upgrades, and statements on agency initiatives. The releases span the full breadth of NSF's scientific portfolio, from biology and physics to computer science and social science. NSF's public releases serve researchers seeking funding opportunities, institutions managing research programs, and the general public interested in federally supported scientific advances.
+The NSF news index serves as the agency's primary channel for public announcements about its activities, policies, and funded research. The news section carries multiple types of content: agency announcements on new funding opportunities, changes to grant-making policies, or funding solicitations; highlights of selected research projects funded by NSF grants; announcements about NSF facilities and their activities; updates on education initiatives; and agency-wide policy or administrative announcements. The news index typically contains several items per week, though frequency varies with program announcements and research highlights.
 
-_Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It may draw on general knowledge of public institutions and is not official-record content._
+Documents you will see from this source in the digest include announcements of new funding opportunities or changes to existing programs, summaries or highlights of research projects receiving NSF support, announcements related to NSF research facilities and infrastructure, updates on science education initiatives, notices of NSF meetings or workshops, and administrative or policy announcements from the agency. The news also includes podcasts and feature articles exploring NSF-funded research and agency initiatives. These items are dated by the NSF and sourced through the agency's news index.
+
+The NSF is part of the Executive Branch and reports to the National Science and Technology Council. As an independent agency, the NSF does not duplicate other agencies' research missions and coordinates with other federal research funders including the National Institutes of Health, the Department of Energy, and the Department of Defense. The agency is funded through annual congressional appropriations and operates as a primary mechanism for federal support of academic research in the United States.
+
+_Model-written orientation, generated 2026-09-30 by haiku, prompt version 1. It may draw on general knowledge of public institutions and is not official-record content._
 
 ## Identity and registry record
 
@@ -55,9 +59,9 @@ _Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 1 item(s) in the last 14 days; most recent 2026-09-28; 0 of 13 request(s) to www.nsf.gov returned no content.
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-09-28; 0 of 41 request(s) to www.nsf.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-09-29T04:08:42Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-09-30T03:54:28Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,7 +71,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 13 request(s) (13 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 30 request(s) (30 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -76,15 +80,15 @@ Last 24 hours: 13 request(s) (13 answered, 0 returned no content) · 1 item(s) i
 | Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-09-28 |
 | Content length | 262 characters average, 262 median (shortest 262, longest 262) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.nsf.gov | 13 request(s) · 13 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.nsf.gov | 41 request(s) · 41 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-09-29T04:10:14.026+00:00 UTC.
+last answered request 2026-09-30T04:00:12.323+00:00 UTC.
 
-1 item(s) in the last 14 days; most recent 2026-09-28; 0 of 13 request(s) to www.nsf.gov returned no content.
+1 item(s) in the last 14 days; most recent 2026-09-28; 0 of 41 request(s) to www.nsf.gov returned no content.
 
 ### All time
 
-- **Our requests to www.nsf.gov, all time (since 2026-09-28):** 13 request(s) · 13 answered · 0 returned no content
+- **Our requests to www.nsf.gov, all time (since 2026-09-28):** 41 request(s) · 41 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -94,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nsf.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-08-31 | 0 | 0 | — |
 | 2026-09-01 | 0 | 0 | — |
 | 2026-09-02 | 0 | 0 | — |
 | 2026-09-03 | 0 | 0 | — |
@@ -123,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-26 | 0 | 0 | — |
 | 2026-09-27 | 0 | 0 | — |
 | 2026-09-28 | 1 | 11 | 199 |
-| 2026-09-29 | 0 | 2 | 102 |
+| 2026-09-29 | 0 | 29 | 101 |
+| 2026-09-30 | 0 | 1 | 129 |
 
 ## Our ingestion assessment
 
