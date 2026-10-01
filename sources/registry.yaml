@@ -2639,3 +2639,35 @@
   status: active
   added: "2026-10-01"
   notes: "Activated 2026-10-01 on observed delivery (operator approval). The project mailbox received Fogarty bulletins over the changeover window (e.g. 'Funding news for global health researchers') carrying grant and research news. Subscribed through NIH's own flow (sender ficinfo@subscriptions.nih.gov); exact topic selection is in the operator's subscription records, not transcribed here. DKIM recorded per message at ingest."
+
+- id: childrens-bureau-email
+  adapter: govdelivery
+  name: Children's Bureau — News From CB (email)
+  branch: executive
+  parent_org: Department of Health and Human Services (ACF / Children's Bureau)
+  description: "The Children's Bureau, within the Administration for Children and Families, oversees federal child-welfare programs including foster care, adoption, and child-abuse prevention. Its 'News From CB' bulletins carry policy news to the public — Child Welfare Policy Manual amendments, program announcements, and guidance."
+  type: email
+  sender: newsfromcb@communications.childwelfare.gov
+  tier: 2
+  urls:
+    home: https://www.acf.hhs.gov/cb
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
+  added: "2026-10-01"
+  notes: "Activated 2026-10-01 (operator approval) on observed delivery over the late-September changeover: the project mailbox received 'News From CB' bulletins (e.g. 'Amendments to the Child Welfare Policy Manual') carrying Children's Bureau policy news to the public. Distinct from the Child Welfare Information Gateway's 'My Child Welfare Librarian' resource digest (mcwl@communications.childwelfare.gov), reviewed the same day and left unregistered as specific-use reference content rather than press or news. Subscribed through the publisher's own flow; DKIM recorded per message at ingest."
+
+- id: otip-email
+  adapter: govdelivery
+  name: Office on Trafficking in Persons (email)
+  branch: executive
+  parent_org: Department of Health and Human Services (ACF / OTIP)
+  description: "The Office on Trafficking in Persons, within the Administration for Children and Families, leads federal anti-human-trafficking policy and victim-assistance programs. Its bulletins carry public announcements, grant and program news, reports, and prevention-awareness communications."
+  type: email
+  sender: otip@public.govdelivery.com
+  tier: 3
+  urls:
+    home: https://www.acf.hhs.gov/otip
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
+  added: "2026-10-01"
+  notes: "Activated 2026-10-01 (operator approval) on observed delivery over the late-September changeover. Coverage caveat: OTIP bulletins mix public news (grants, reports, policy) with prevention-awareness campaigns — the observed message was a NOPE awareness bulletin — so content is public-facing but not purely press-release, tier 3. Subscribed through the publisher's own GovDelivery flow (sender otip@public.govdelivery.com); DKIM recorded per message at ingest."

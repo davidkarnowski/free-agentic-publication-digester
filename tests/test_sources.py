@@ -128,7 +128,10 @@ def test_registry_seeds_expected_active_sources():
         # nhtsa-email gains its Traffic Safety Marketing list and activates:
         "nrcs-email", "medicare-email", "phmsa-email", "fmcsa-email",
         "nhi-email", "dot-intergov-email", "usaid-email", "selectusa-email",
-        "nih-orwh-email", "nih-fogarty-email", "nhtsa-email"}
+        "nih-orwh-email", "nih-fogarty-email", "nhtsa-email",
+        # activated 2026-10-01 (operator) from the same backlog review, public
+        # news/press channels only (the training/resource lists stayed out):
+        "childrens-bureau-email", "otip-email"}
 
 
 # ------------------------------------------------------------ coverage_stats --

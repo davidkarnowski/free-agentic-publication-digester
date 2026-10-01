@@ -22,18 +22,18 @@ so older notes quote smaller caps than apply today.*
 | Branch | Active | Planned | Excluded | Unavailable | Total |
 |---|---:|---:|---:|---:|---:|
 | Legislative | 7 | 6 | 1 | 1 | 15 |
-| Executive | 65 | 59 | 1 | 19 | 144 |
+| Executive | 67 | 59 | 1 | 19 | 146 |
 | Judicial | 2 | 3 | 0 | 0 | 5 |
 | Cross-branch | 0 | 1 | 0 | 0 | 1 |
-| **Total** | 74 | 69 | 2 | 20 | 165 |
+| **Total** | 76 | 69 | 2 | 20 | 167 |
 
-**74 of 165 sources active.**
+**76 of 167 sources active.**
 
 Per tier:
 
-- **Tier 1** (cabinet departments, top independents, legislative support agencies, the White House, and core govinfo collections): 56 of 165 registered, 27 active
-- **Tier 2** (major sub-agency newsrooms and regulator clusters): 76 of 165 registered, 39 active
-- **Tier 3** (long tail, added opportunistically): 33 of 165 registered, 8 active
+- **Tier 1** (cabinet departments, top independents, legislative support agencies, the White House, and core govinfo collections): 56 of 167 registered, 27 active
+- **Tier 2** (major sub-agency newsrooms and regulator clusters): 77 of 167 registered, 40 active
+- **Tier 3** (long tail, added opportunistically): 34 of 167 registered, 9 active
 
 ## Legislative
 
@@ -203,6 +203,8 @@ Per tier:
 | [SelectUSA (email)](https://www.trade.gov/selectusa) | Department of Commerce (International Trade Administration) | 2 | email | **ACTIVE** | Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive). | Activated 2026-10-01 on observed delivery (operator approval). SelectUSA mail arrived from two sender addresses over the changeover window (selectusa@public.govdelivery.com and selectusa@email.trade.gov), both carrying 'SelectUSA News & Updates'-style investment news; both are listed on this one ITA entry. Subscribed through ITA's own flow; exact topic selection is in the operator's subscription records, not transcribed here. DKIM recorded per message at ingest. |
 | [NIH Office of Research on Women's Health (email)](https://orwh.od.nih.gov/) | Department of Health and Human Services (NIH / ORWH) | 3 | email | **ACTIVE** | Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive). | Activated 2026-10-01 on observed delivery (operator approval). Coverage caveat: a meaningful share of ORWH mail is event and webinar invitations (e.g. 'Developing Research Common Data Elements' discussion) alongside research and funding news — mixed signal, tier 3. Subscribed through NIH's own flow (sender orwh@subscriptions.nih.gov); DKIM recorded per message at ingest. |
 | [Fogarty International Center (email)](https://www.fic.nih.gov/) | Department of Health and Human Services (NIH / FIC) | 3 | email | **ACTIVE** | Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive). | Activated 2026-10-01 on observed delivery (operator approval). The project mailbox received Fogarty bulletins over the changeover window (e.g. 'Funding news for global health researchers') carrying grant and research news. Subscribed through NIH's own flow (sender ficinfo@subscriptions.nih.gov); exact topic selection is in the operator's subscription records, not transcribed here. DKIM recorded per message at ingest. |
+| [Children's Bureau — News From CB (email)](https://www.acf.hhs.gov/cb) | Department of Health and Human Services (ACF / Children's Bureau) | 2 | email | **ACTIVE** | Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive). | Activated 2026-10-01 (operator approval) on observed delivery over the late-September changeover: the project mailbox received 'News From CB' bulletins (e.g. 'Amendments to the Child Welfare Policy Manual') carrying Children's Bureau policy news to the public. Distinct from the Child Welfare Information Gateway's 'My Child Welfare Librarian' resource digest (mcwl@communications.childwelfare.gov), reviewed the same day and left unregistered as specific-use reference content rather than press or news. Subscribed through the publisher's own flow; DKIM recorded per message at ingest. |
+| [Office on Trafficking in Persons (email)](https://www.acf.hhs.gov/otip) | Department of Health and Human Services (ACF / OTIP) | 3 | email | **ACTIVE** | Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive). | Activated 2026-10-01 (operator approval) on observed delivery over the late-September changeover. Coverage caveat: OTIP bulletins mix public news (grants, reports, policy) with prevention-awareness campaigns — the observed message was a NOPE awareness bulletin — so content is public-facing but not purely press-release, tier 3. Subscribed through the publisher's own GovDelivery flow (sender otip@public.govdelivery.com); DKIM recorded per message at ingest. |
 
 ## Judicial
 
