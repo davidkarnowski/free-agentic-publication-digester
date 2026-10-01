@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-09-29; 0 of 354 request(s) to www.sec.gov returned no content.
+**delivering** — 8 item(s) in the last 14 days; most recent 2026-09-30; 0 of 355 request(s) to www.sec.gov returned no content.
 
-This label has held since 2026-08-27T22:46:31Z (UTC) and was last re-checked 2026-09-30T03:54:28Z (UTC).
+This label has held since 2026-08-27T22:46:31Z (UTC) and was last re-checked 2026-10-01T03:53:55Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -66,24 +66,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 31 request(s) (31 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 28 request(s) (28 answered, 0 returned no content) · 3 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-09-29 |
-| Content length | 6,240 characters average, 5,988 median (shortest 5,474, longest 7,284) |
+| Items ingested | 8 in 14 days (0.57 per day) · most recent 2026-09-30 |
+| Content length | 6,164 characters average, 5,976 median (shortest 5,474, longest 7,335) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.sec.gov | 354 request(s) · 354 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.sec.gov | 355 request(s) · 355 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-09-30T04:00:11.622+00:00 UTC.
+last answered request 2026-10-01T04:00:08.337+00:00 UTC.
 
-6 item(s) in the last 14 days; most recent 2026-09-29; 0 of 354 request(s) to www.sec.gov returned no content.
+8 item(s) in the last 14 days; most recent 2026-09-30; 0 of 355 request(s) to www.sec.gov returned no content.
 
 ### All time
 
-- **Our requests to www.sec.gov, all time (since 2026-07-30):** 1,815 request(s) · 1,812 answered · 3 returned no content
+- **Our requests to www.sec.gov, all time (since 2026-07-30):** 1,843 request(s) · 1,840 answered · 3 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.sec.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-01 | 3 | 29 | 155 |
 | 2026-09-02 | 0 | 26 | 833 |
 | 2026-09-03 | 2 | 29 | 1848 |
 | 2026-09-04 | 0 | 27 | 211 |
@@ -122,7 +121,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-27 | 0 | 27 | 173 |
 | 2026-09-28 | 1 | 29 | 180 |
 | 2026-09-29 | 1 | 30 | 113 |
-| 2026-09-30 | 0 | 1 | 122 |
+| 2026-09-30 | 3 | 28 | 124 |
+| 2026-10-01 | 0 | 1 | 319 |
 
 ## Our ingestion assessment
 

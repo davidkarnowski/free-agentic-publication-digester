@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-30 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 1 item(s) in the last 14 days; most recent 2026-09-28; 0 of 41 request(s) to www.nsf.gov returned no content.
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-09-30; 0 of 67 request(s) to www.nsf.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-09-30T03:54:28Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-01T03:53:55Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,24 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 30 request(s) (30 answered, 0 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-09-28 |
-| Content length | 262 characters average, 262 median (shortest 262, longest 262) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-09-30 |
+| Content length | 217 characters average, 217 median (shortest 172, longest 262) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.nsf.gov | 41 request(s) · 41 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.nsf.gov | 67 request(s) · 67 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-09-30T04:00:12.323+00:00 UTC.
+last answered request 2026-10-01T04:00:09.918+00:00 UTC.
 
-1 item(s) in the last 14 days; most recent 2026-09-28; 0 of 41 request(s) to www.nsf.gov returned no content.
+2 item(s) in the last 14 days; most recent 2026-09-30; 0 of 67 request(s) to www.nsf.gov returned no content.
 
 ### All time
 
-- **Our requests to www.nsf.gov, all time (since 2026-09-28):** 41 request(s) · 41 answered · 0 returned no content
+- **Our requests to www.nsf.gov, all time (since 2026-09-28):** 67 request(s) · 67 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nsf.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-01 | 0 | 0 | — |
 | 2026-09-02 | 0 | 0 | — |
 | 2026-09-03 | 0 | 0 | — |
 | 2026-09-04 | 0 | 0 | — |
@@ -127,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-27 | 0 | 0 | — |
 | 2026-09-28 | 1 | 11 | 199 |
 | 2026-09-29 | 0 | 29 | 101 |
-| 2026-09-30 | 0 | 1 | 129 |
+| 2026-09-30 | 1 | 26 | 96 |
+| 2026-10-01 | 0 | 1 | 308 |
 
 ## Our ingestion assessment
 

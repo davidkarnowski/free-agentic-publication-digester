@@ -6,7 +6,7 @@
 
 # DOT Inspector General (email)
 
-planned · ingestion health: no data · Executive · Tier 3 · email bulletin · Department of Transportation, Office of Inspector General
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Transportation, Office of Inspector General
 
 Official site: https://www.oig.dot.gov/ · All sources: [sources.md](../sources.md)
 
@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**no data** — No bulletin recorded from this source in the last 180 days.
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-09-30, delivered by email.
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-09-30T03:54:28Z (UTC).
+This label has held since 2026-09-30T13:28:48Z (UTC) and was last re-checked 2026-10-01T03:53:55Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,18 +68,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — none recorded in the lookback period |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-09-30 |
+| Content length | 3,464 characters average, 3,464 median (shortest 3,464, longest 3,464) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-09-30 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-No bulletin recorded from this source in the last 180 days.
+1 item(s) in the last 14 days; most recent 2026-09-30, delivered by email.
 
 ### All time
 
@@ -87,12 +89,45 @@ Bulletins from this source are delivered to the project mailbox, so there are no
 
 ### Last 30 days, day by day
 
-No requests and no items were recorded in the last 30 days, so there is nothing to chart.
+Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publication day the digests use; the stored request stamps remain UTC.
+
+| Day | Items ingested |
+|---|---|
+| 2026-09-02 | 0 |
+| 2026-09-03 | 0 |
+| 2026-09-04 | 0 |
+| 2026-09-05 | 0 |
+| 2026-09-06 | 0 |
+| 2026-09-07 | 0 |
+| 2026-09-08 | 0 |
+| 2026-09-09 | 0 |
+| 2026-09-10 | 0 |
+| 2026-09-11 | 0 |
+| 2026-09-12 | 0 |
+| 2026-09-13 | 0 |
+| 2026-09-14 | 0 |
+| 2026-09-15 | 0 |
+| 2026-09-16 | 0 |
+| 2026-09-17 | 0 |
+| 2026-09-18 | 0 |
+| 2026-09-19 | 0 |
+| 2026-09-20 | 0 |
+| 2026-09-21 | 0 |
+| 2026-09-22 | 0 |
+| 2026-09-23 | 0 |
+| 2026-09-24 | 0 |
+| 2026-09-25 | 0 |
+| 2026-09-26 | 0 |
+| 2026-09-27 | 0 |
+| 2026-09-28 | 0 |
+| 2026-09-29 | 0 |
+| 2026-09-30 | 1 |
+| 2026-10-01 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-This source was registered on 2026-09-26 via the GovDelivery email subscription service. No bulletins have been recorded since registration. The collector has maintained stable contact with the email system through the measurement period (2026-09-21 through 2026-09-27), with no delivery errors reported. The mailbox statistics show zero messages received, zero administrative entries, and zero refused messages. Gate-3 coverage evaluation is pending first ingested bulletins. Related sources that may publish overlapping news include oversight-gov, transportation-email, and transportation-newsroom; any items that duplicate at the same URL will merge as corroboration, while the same event at different URLs will be listed separately.
+This source delivers bulletins through GovDelivery email subscription. The previous assessment from 2026-09-27 recorded zero bulletins after the 2026-09-26 registration date. As of 2026-10-01, the source has delivered one bulletin on 2026-09-30 during UTC hour 9. The bulletin contained 3,464 characters in full-text format. The collector has maintained stable mailbox access throughout with no delivery errors. No delivery pattern beyond the single observation is yet apparent. Gate-3 coverage evaluation proceeds with the first ingested bulletin. Related sources that may publish the same news include oversight-gov, transportation-email, and transportation-newsroom; items duplicated at the same URL merge as corroboration, while the same event at different URLs are listed separately.
 
-_Model-written assessment of our own ingestion, generated 2026-09-27 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-01 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
