@@ -123,8 +123,10 @@ fails is left where the provider put it, never stored, and counted as
 `refused`. Mail that passes is ingested exactly like inbox mail and
 filed out of the junk folder. The junk folder is read from the present
 forward — its first poll sets the watermark at the newest message and
-ingests nothing older. The inbox rule is unchanged: a failing signature
-there is recorded as a fact, not a reason to drop official content.
+ingests nothing older. Since 2026-10-01 the inbox is held to the same
+verify-and-align gate as the junk folder (GUIDE §3): a message whose
+signature does not verify and align is refused and recorded, never
+published.
 
 State and local government bulletins the mailbox receives are not
 ingested; a mailbox filter outside the collector files them to
@@ -217,12 +219,16 @@ The adapter therefore, per message:
    it: **DKIM proves the distributor sent these bytes on the
    publisher's behalf; it does not prove the agency's newsroom page
    said the same thing.**
-4. Ingests messages that fail verification too — marked `dkim: fail`
-   and excluded from any tamper-evidence claim. A failed signature is
-   a fact worth recording, not a reason to drop official content. The
-   one exception is the junk folder (§3a, GUIDE §3 amended 2026-09-26):
-   there a message is accepted only on a verified, domain-aligned
-   signature, because spam filtering is where forged senders collect.
+4. **Refuses** messages that do not verify-and-align (GUIDE §3, amended
+   2026-10-01). A registered sender's message is ingested only on a
+   verified DKIM signature whose signing domain aligns with the sender's
+   organizational domain; anything else is refused, recorded, and left
+   where it is, never published — a forgeable From header must not put
+   unverified content in the digest. This holds in **every** folder: the
+   junk folder was gated first (2026-09-26, because spam filtering is
+   where forged senders collect), and the inbox was unified to the same
+   rule on 2026-10-01. The archived selector key (step 2) still lets
+   anyone re-verify the stored bytes later.
 
 **Reporting (2026-09-26).** Every message from a registered sender — and
 government list mail from senders the registry does not know — gets a
@@ -236,6 +242,18 @@ URL, one document through two email sources, and government lists seen
 for the first time. The report prints counts and registry ids only;
 `scripts/file_mailbox.py --report-unregistered` shows the operator the
 addresses.
+
+A bulletin whose items the source has **already ingested** is a
+`duplicate`, not `empty` (amended 2026-10-01). The live case is
+GovDelivery *topic-list overlap*: an agency sends one release to every
+list that matches it, and the mailbox subscribes to several — DOJ is the
+clearest, re-sending each release across its topic lists, so the first
+copy ingests and the rest were being logged `empty` as if the parser had
+failed. The already-ingested items are now counted in the `duplicates`
+column and the outcome is `duplicate`; `empty` is reserved for a parse
+that genuinely yielded nothing. Subscriptions are kept deliberately
+(coverage insurance for a release that appears on only one list); the
+compute is cheap and the dedup is exact.
 
 ## 6. What this class is not
 

@@ -319,12 +319,16 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   **re-resolves the model tier** for the new backend, and attribution
   stays **plural** (`backends_used` → `day_inference.backend` =
   `cli, gemini`).
-- **The mailbox's junk folder is held to a stricter rule than the inbox,
-  on purpose** (GUIDE §3, amended 2026-09-26). Inbox mail failing DKIM is
-  ingested and labeled; junk-folder mail from a registered sender must
-  verify AND align with the sender's domain, or it is refused and
-  counted. Spam filtering is where forged From headers collect. Do not
-  unify the two rules.
+- **DKIM verify-and-align gates ingestion in every mailbox folder**
+  (GUIDE §3, amended 2026-10-01, operator). A registered sender's message
+  is stored only when its signature verifies AND the signing domain
+  aligns with the sender's organizational domain (`dkim_aligned`);
+  anything else is refused, recorded, and left in place, never published.
+  This reversed the 2026-09-26 asymmetry (the inbox used to ingest
+  DKIM-failing mail and label it; only the junk folder was gated) —
+  a forgeable From header must not put unverified content in the digest.
+  `dkim_aligned` is the single gate for both folders; never add an
+  ingestion path that stores a message without passing it.
 - **`IMAP_FILE_TO` is set on the production host and nowhere else.**
   Filing moves handled mail out of INBOX, and the poll reads INBOX only,
   so a second host filing mail (a laptop run, the dev stack) would hide

@@ -107,9 +107,16 @@ this file.
   are deliberate (GUIDE §4, 2026-08-10) — not the same concept as
   `'skipped'` (chose not to fetch) or `sources.STATUSES`'s `'unavailable'`
   (a publisher refuses us entirely). Don't collapse the three.
-- The junk-folder DKIM asymmetry (GUIDE §3, amended 2026-09-26): inbox
-  mail failing DKIM is ingested and labeled; junk-folder mail must pass
-  AND align or it is refused. Do not "unify" the two rules either way.
+- DKIM gates ingestion in every folder (GUIDE §3, amended 2026-10-01,
+  operator): a registered sender's message is stored only when its
+  signature verifies AND aligns with the sender's organizational domain
+  (`dkim_aligned`); anything else is refused and recorded, never
+  published. This replaced the 2026-09-26 asymmetry — the inbox used to
+  ingest DKIM-failing mail and label it, while only the junk folder was
+  gated; that leniency was reversed because a forgeable From header must
+  not put unverified content in the digest. `dkim_aligned` is the single
+  gate for both the inbox and the junk folder; never add an ingestion
+  path that stores a message without passing it.
 - The mailbox's one write is post-ingest mark-read + MOVE, after the
   watermark commits, and only where `IMAP_FILE_TO` is set — the
   production host alone. No delete, expunge, or COPY emulation

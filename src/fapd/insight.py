@@ -144,7 +144,7 @@ def gather_email(conn, start, end, entries=None):
                                 "no longer active or planned in the registry")
         if rec["empty"]:
             out["flags"].append(f"{rec['id']}: {rec['empty']} bulletin(s) yielded "
-                                "no item (parser or already-ingested; check)")
+                                "no item (parser extracted nothing; check)")
         if rec["no_url_items"]:
             out["flags"].append(f"{rec['id']}: {rec['no_url_items']} item(s) stored "
                                 "without a URL (these can never be corroborated)")
@@ -471,7 +471,10 @@ def render_email(email):
         return L + ["The mailbox log is not present in this database yet."]
     L += ["What the email poll did with each registered sender's mail,",
           "including messages that produced no item. A duplicate is a",
-          "bulletin whose items had all arrived through another channel.", ""]
+          "bulletin whose items had all arrived already — through another",
+          "channel, or through another of the sender's own GovDelivery lists",
+          "(topic-list overlap). 'No item' is reserved for a parse that",
+          "yielded nothing.", ""]
     if email["sources"]:
         L += [("| source | ingested | notices | duplicate | no item | refused |"
                " errors | items | items without URL |"),

@@ -606,14 +606,18 @@ def test_junk_mail_without_aligned_dkim_is_refused(conn, dkim):
     assert email_sources._state(conn, "Junk")[0] == 1  # not reconsidered
 
 
-def test_inbox_keeps_record_and_ingest_on_dkim_fail(conn):
-    """The junk gate is junk-only: INBOX mail failing DKIM is still ingested
-    and marked, per GUIDE §3 (a failed signature is a fact, not a drop)."""
+def test_inbox_dkim_fail_is_refused_not_ingested(conn):
+    """DKIM gates ingestion in every folder (operator, 2026-10-01; GUIDE §3
+    amended): INBOX mail whose signature does not verify-and-align is
+    refused and recorded, never published. Reverses the 2026-09-26 inbox
+    leniency — a forgeable From header must not put unverified content in
+    the digest."""
     box = TwoFolderMailbox([MULTI], [])
     fail = lambda raw: {"result": "fail", "domain": "x.example", "selector": "s",
                         "key_record": None}
     results = email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=fail)
-    assert results[0]["items"] == 2 and results[0]["refused"] == 0
+    assert results[0]["items"] == 0 and results[0]["refused"] == 1
+    assert [(r["mailbox"], r["outcome"]) for r in _log(conn)] == [("INBOX", "refused")]
 
 
 def test_junk_polling_can_be_turned_off(conn, monkeypatch):
@@ -684,13 +688,18 @@ def test_mailbox_log_records_each_outcome(conn):
     assert rows[0]["source_id"] == "usattorneys-email"
 
 
-def test_mailbox_log_duplicate_and_empty(conn):
+def test_mailbox_log_rescan_is_duplicate_not_empty(conn):
+    """A bulletin whose items the same source already ingested (GovDelivery
+    topic-list overlap is the live case: DOJ sends one release to every list
+    it matches) is counted as a duplicate, not 'empty'. 'empty' is reserved
+    for a parse that genuinely yielded nothing."""
     box = FakeMailbox([MULTI])
     email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=no_dkim)
     box._uid_validity = 99  # rescan: the same bulletin again, nothing new
     email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=no_dkim)
-    outcomes = [r["outcome"] for r in _log(conn)]
-    assert outcomes == ["ingested", "empty"]
+    rows = _log(conn)
+    assert [r["outcome"] for r in rows] == ["ingested", "duplicate"]
+    assert rows[1]["duplicates"] >= 1  # the re-sent items are counted, not dropped
 
 
 def test_mailbox_log_counts_items_without_url(conn):

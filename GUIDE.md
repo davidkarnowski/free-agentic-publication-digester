@@ -775,20 +775,23 @@ channels refuse identified clients (see
   bytes is cryptographic evidence that the agency's chosen distributor
   sent exactly this content — this replaces Wayback corroboration,
   which does not apply to email (GovDelivery's bulletin archives are
-  login-walled). Messages that fail DKIM are still ingested but marked
-  `dkim: fail` and excluded from any tamper-evidence claims.
-  *Amended 2026-09-26 (operator): the junk folder.* The collector also
-  reads the provider's junk folder, because providers file real
-  bulletins there (found the same day: registered senders' bulletins
-  sat in Spam, never ingested). There, a message from a registered
-  sender is ingested only when its DKIM signature verifies **and** the
-  signing domain shares the sender's organizational domain; anything
-  else is left where the provider put it, not stored, and counted as
-  refused. The junk folder is read from the present forward, never
-  backfilled. The inbox rule above is unchanged. The asymmetry is
-  deliberate: spam filtering is where forged From headers collect, and
-  "as long as we aren't letting spam through" is the condition the
-  junk folder is read on.
+  login-walled). *Amended 2026-10-01 (operator): DKIM gates ingestion.* A registered
+  sender's message is stored only when its DKIM signature verifies **and**
+  the signing domain shares the sender's organizational domain (DMARC
+  relaxed alignment); anything else is refused, recorded, and left in
+  place, never published. A From header is forgeable; a verified, aligned
+  signature is the proof the content came from the official sender, and
+  that proof is the condition for publishing it. *History:* the junk
+  folder was gated first (amended 2026-09-26) — the collector reads the
+  provider's junk folder because providers file real bulletins there
+  (found that day: registered senders' bulletins sat in Spam, never
+  ingested), and it was the first folder held to verify-and-align, while
+  the inbox still ingested DKIM-failing mail and marked it `dkim: fail`.
+  The 2026-10-01 amendment removes that asymmetry: the inbox is gated
+  too, because publishing content the signature cannot vouch for is the
+  integrity risk the gate exists to prevent. Both folders apply the one
+  rule; the junk folder is still read from the present forward, never
+  backfilled.
 - **Dating.** The message's `Date` header (and any bulletin-stated
   date) is `claimed_published_at`; receipt time is our observation.
   The §3 dating rule applies unchanged: digests list what the agency

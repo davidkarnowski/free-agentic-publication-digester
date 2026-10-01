@@ -643,6 +643,15 @@ def process_message(conn, entry, raw, dkim_verifier=verify_dkim):
         stable_id = url or f"{message_id}#{stats['items']}"
         package_id = _package_id(entry["id"], stable_id)
         if _already_ingested(conn, package_id):
+            # Already ingested by THIS source — the live case is GovDelivery
+            # topic-list overlap (DOJ sends one release to every list it
+            # matches, and the mailbox subscribes to several). Count it as a
+            # duplicate, not a silent drop: a bulletin carrying only these is
+            # a 'duplicate', never 'empty' (which is reserved for a parse that
+            # yielded nothing).
+            stats["duplicates"] += 1
+            logger.info("%s: already ingested by this source — duplicate (%s)",
+                        entry["id"], item.get("url") or item["title"][:50])
             continue
         other = _url_seen_elsewhere(conn, item.get("url"))
         if other:
@@ -786,21 +795,27 @@ def _poll_folder(client, conn, allow, *, limit, dkim_verifier, junk=False):
         raw = client.raw(uid)
         if raw is None:
             continue
-        verifier = dkim_verifier
-        if junk:
+        # DKIM gates ingestion into the DB for EVERY folder (operator,
+        # 2026-10-01; GUIDE §3 amended). A registered sender's message is
+        # stored only when its signature verifies AND the signing domain
+        # aligns with the sender's organizational domain: a From header is
+        # forgeable, a verified-and-aligned signature is the proof the
+        # content came from the official sender. Anything else is refused,
+        # recorded, and left in place — never published. Until 2026-10-01
+        # only the junk folder was gated; the inbox ingested DKIM-failing
+        # mail and merely labeled it. That asymmetry is removed.
+        try:
             dkim = dkim_verifier(raw)
             if not dkim_aligned(dkim, sender):
-                # Left where the provider put it; not stored, not filed.
-                logger.info("%s: junk-folder UID %s refused (dkim %s, d=%s)",
-                            entry["id"], uid, dkim.get("result"), dkim.get("domain"))
+                logger.info("%s: %s UID %s refused — DKIM not verified/aligned (%s, d=%s)",
+                            entry["id"], mailbox, uid, dkim.get("result"), dkim.get("domain"))
                 per_source.setdefault(entry["id"], _blank(entry["id"]))["refused"] += 1
                 _record(conn, mailbox, validity, uid, "refused", source_id=entry["id"],
                         sender=sender, dkim=dkim.get("result"))
                 highest = max(highest, uid)
                 continue
-            verifier = lambda _raw, _dkim=dkim: _dkim  # verified once above
-        try:
-            result = process_message(conn, entry, raw, dkim_verifier=verifier)
+            result = process_message(conn, entry, raw,
+                                     dkim_verifier=lambda _raw, _dkim=dkim: _dkim)
         except Exception as exc:  # noqa: BLE001 — one bad bulletin must not
             # cost the rest of the poll; the failure is recorded, not hidden.
             logger.warning("%s: message UID %s failed: %r", entry["id"], uid, exc)
