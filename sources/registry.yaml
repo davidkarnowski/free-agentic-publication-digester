@@ -1722,20 +1722,22 @@
 
 - id: nhtsa-email
   adapter: govdelivery
-  name: NHTSA Press Releases (email)
+  name: NHTSA (email)
   branch: executive
   parent_org: Department of Transportation (NHTSA)
   description: "The National Highway Traffic Safety Administration regulates vehicle safety and investigates defects. Its bulletins carry press releases, recall announcements, defect investigations, and crash-data releases — safety actions with direct consequences for vehicle owners."
   type: email
-  sender: nhtsa@service.govdelivery.com
+  sender:
+    - nhtsa@service.govdelivery.com
+    - traffic_safety_marketing@service.govdelivery.com
   tier: 2
   urls:
     home: https://www.nhtsa.gov/press-releases
     signup: https://public.govdelivery.com/accounts/USDOTNHTSA/subscriber/new
   method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
-  status: planned
+  status: active
   added: "2026-07-29"
-  notes: "Subscribed and confirmed 2026-07-29 (sender nhtsa@service.govdelivery.com). Sibling of nhtsa-press, which returns HTTP 403 to our identified client. NHTSA operates its own bulletin account rather than sharing the departmental one, giving finer topic control than expected. No bulletin observed as of the 2026-07-29 evening poll (~45-minute window); subscription confirmed, window open — activate on first parsed bulletin."
+  notes: "Subscribed and confirmed 2026-07-29 (sender nhtsa@service.govdelivery.com). Sibling of nhtsa-press, which returns HTTP 403 to our identified client. Activated 2026-10-01 (operator approval) on observed delivery: NHTSA's Traffic Safety Marketing list (traffic_safety_marketing@service.govdelivery.com) delivered to the project mailbox over the late-September changeover (e.g. 'Happening Now | Labor Day Impaired Driving Prevention Campaigns'), so both NHTSA sender lists are carried on this one entry. Coverage caveat: the press-release list (nhtsa@service.govdelivery.com) had not delivered a bulletin as of activation, and the Traffic Safety Marketing stream is campaign/awareness content, lighter signal than press releases. DKIM is recorded per message at ingest."
 
 - id: epa-email
   adapter: govdelivery
@@ -2475,3 +2477,165 @@
   status: planned
   added: "2026-09-26"
   notes: "Subscription confirmed through the publisher's own signup flow (sender communications@updates.doc.gov); no bulletin observed as of registration (2026-09-26). Registered so the first bulletin is attributed on arrival; activate on first parsed bulletin. Related entries that can publish the same news: commerce-newsroom, census-email. A copy at the same URL merges as corroboration (GUIDE §3); the same event published at a different URL is listed separately, by rule. commerce-newsroom's web refusal stands."
+
+- id: nrcs-email
+  adapter: govdelivery
+  name: USDA NRCS (email)
+  branch: executive
+  parent_org: Department of Agriculture (NRCS)
+  description: "The Natural Resources Conservation Service helps farmers, ranchers, and landowners conserve soil, water, and wildlife habitat. Its bulletins carry conservation-program announcements, funding and investment decisions, and enrollment deadlines as the agency distributes them."
+  type: email
+  sender: usdafarmers@public.govdelivery.com
+  tier: 2
+  urls:
+    home: https://www.nrcs.usda.gov/news
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
+  added: "2026-10-01"
+  notes: "Activated 2026-10-01 on observed delivery (operator approval). The project mailbox received NRCS bulletins over the late-September changeover window (e.g. 'USDA Invests $52 Million in 19 Projects to Expand Wildlife Conservation') carrying conservation-program and investment announcements. Subscribed through the publisher's own GovDelivery flow (sender usdafarmers@public.govdelivery.com); exact topic selection is in the operator's subscription records, not transcribed here. DKIM posture is recorded per message at ingest."
+
+- id: medicare-email
+  adapter: govdelivery
+  name: Medicare (email)
+  branch: executive
+  parent_org: Department of Health and Human Services (CMS)
+  description: "The Centers for Medicare & Medicaid Services administers Medicare. Its subscriber bulletins carry beneficiary-facing announcements — plan previews, enrollment periods, coverage changes, and program news — as CMS distributes them."
+  type: email
+  sender: medicare@subscriptions.medicare.gov
+  tier: 2
+  urls:
+    home: https://www.cms.gov/newsroom
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
+  added: "2026-10-01"
+  notes: "Activated 2026-10-01 on observed delivery (operator approval). The project mailbox received Medicare bulletins over the changeover window (e.g. 'Attention, preview 2027 plans now'). Subscribed through the publisher's own flow (sender medicare@subscriptions.medicare.gov); exact topic selection is in the operator's subscription records, not transcribed here. Content is beneficiary-facing program news; DKIM recorded per message at ingest."
+
+- id: phmsa-email
+  adapter: govdelivery
+  name: PHMSA (email)
+  branch: executive
+  parent_org: Department of Transportation (PHMSA)
+  description: "The Pipeline and Hazardous Materials Safety Administration regulates the safe transport of hazardous materials and the nation's pipelines. Its bulletins carry safety advisories, rulemaking notices, and program announcements."
+  type: email
+  sender: phmsa.subscriptions@info.dot.gov
+  tier: 2
+  urls:
+    home: https://www.phmsa.dot.gov/news
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
+  added: "2026-10-01"
+  notes: "Activated 2026-10-01 on observed delivery (operator approval). The project mailbox received PHMSA bulletins over the changeover window (e.g. the 'Hazardous Matters' newsletter). Subscribed through DOT's own flow (sender phmsa.subscriptions@info.dot.gov); exact topic selection is in the operator's subscription records, not transcribed here. Sibling to the departmental transportation-email, whose web newsroom refuses our client; DKIM recorded per message at ingest."
+
+- id: fmcsa-email
+  adapter: govdelivery
+  name: FMCSA (email)
+  branch: executive
+  parent_org: Department of Transportation (FMCSA)
+  description: "The Federal Motor Carrier Safety Administration regulates commercial motor-vehicle safety. Its bulletins carry safety programs, rulemaking and enforcement announcements, and awareness campaigns."
+  type: email
+  sender: usdotfmcsa@info.dot.gov
+  tier: 2
+  urls:
+    home: https://www.fmcsa.dot.gov/newsroom
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
+  added: "2026-10-01"
+  notes: "Activated 2026-10-01 on observed delivery (operator approval). The project mailbox received an FMCSA bulletin during the changeover window (e.g. 'Celebrate the Pros During National Truck Driver Appreciation Week'); low volume observed so far, mixed program and awareness content. Subscribed through DOT's own flow (sender usdotfmcsa@info.dot.gov); exact topic selection is in the operator's subscription records, not transcribed here. DKIM recorded per message at ingest."
+
+- id: nhi-email
+  adapter: govdelivery
+  name: National Highway Institute (email)
+  branch: executive
+  parent_org: Department of Transportation (FHWA / NHI)
+  description: "The National Highway Institute is the training arm of the Federal Highway Administration. Its bulletins carry course offerings and training-program announcements for the transportation workforce."
+  type: email
+  sender: nhi@info.dot.gov
+  tier: 3
+  urls:
+    home: https://www.nhi.fhwa.dot.gov/
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
+  added: "2026-10-01"
+  notes: "Activated 2026-10-01 on observed delivery (operator approval). Coverage caveat: this is a training-catalog channel (e.g. 'NHI's Lanes of Learning: Summer Edition 2026'), not a press-release stream — low digest signal, tier 3. Registered because the operator approved the DOT sub-agency set; the operator may decline it if the training content is not wanted. Subscribed through DOT's own flow (sender nhi@info.dot.gov); DKIM recorded per message at ingest."
+
+- id: dot-intergov-email
+  adapter: govdelivery
+  name: DOT Intergovernmental Affairs (email)
+  branch: executive
+  parent_org: Department of Transportation
+  description: "The Department of Transportation's Office of Intergovernmental Affairs coordinates with state, local, and tribal governments. Its bulletins carry meeting notices and coordination announcements."
+  type: email
+  sender: intergov@info.dot.gov
+  tier: 3
+  urls:
+    home: https://www.transportation.gov/
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
+  added: "2026-10-01"
+  notes: "Activated 2026-10-01 on observed delivery (operator approval). Coverage caveat: this is an HQ-office coordination channel (e.g. 'Monthly Meeting with USDOT Intergovernmental Affairs Office'), mostly meeting notices — low digest signal, tier 3. Registered because the operator approved the DOT set; may be declined if meeting notices are not wanted. Subscribed through DOT's own flow (sender intergov@info.dot.gov); DKIM recorded per message at ingest."
+
+- id: usaid-email
+  adapter: govdelivery
+  name: USAID Industry Liaison (email)
+  branch: executive
+  parent_org: U.S. Agency for International Development
+  description: "The U.S. Agency for International Development administers civilian foreign aid and development assistance. Its Industry Liaison bulletins carry procurement, partnership, and policy-guidance announcements for implementing partners."
+  type: email
+  sender: usaid-industry-liaison@subscribe.usaid.gov
+  tier: 2
+  urls:
+    home: https://www.usaid.gov/news-information
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
+  added: "2026-10-01"
+  notes: "Activated 2026-10-01 on observed delivery (operator approval). The project mailbox received a USAID bulletin during the changeover window (e.g. 'USAID Termination Settlement Negotiation and Voucher Guidance') carrying substantive policy guidance. Subscribed through USAID's own flow (sender usaid-industry-liaison@subscribe.usaid.gov); exact topic selection is in the operator's subscription records, not transcribed here. DKIM recorded per message at ingest."
+
+- id: selectusa-email
+  adapter: govdelivery
+  name: SelectUSA (email)
+  branch: executive
+  parent_org: Department of Commerce (International Trade Administration)
+  description: "SelectUSA, within the International Trade Administration, promotes business investment into the United States. Its bulletins carry investment news, program updates, and event announcements."
+  type: email
+  sender:
+    - selectusa@public.govdelivery.com
+    - selectusa@email.trade.gov
+  tier: 2
+  urls:
+    home: https://www.trade.gov/selectusa
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
+  added: "2026-10-01"
+  notes: "Activated 2026-10-01 on observed delivery (operator approval). SelectUSA mail arrived from two sender addresses over the changeover window (selectusa@public.govdelivery.com and selectusa@email.trade.gov), both carrying 'SelectUSA News & Updates'-style investment news; both are listed on this one ITA entry. Subscribed through ITA's own flow; exact topic selection is in the operator's subscription records, not transcribed here. DKIM recorded per message at ingest."
+
+- id: nih-orwh-email
+  adapter: govdelivery
+  name: NIH Office of Research on Women's Health (email)
+  branch: executive
+  parent_org: Department of Health and Human Services (NIH / ORWH)
+  description: "The NIH Office of Research on Women's Health coordinates women's-health research across the National Institutes of Health. Its bulletins carry research announcements, funding and data-standard news, and event invitations."
+  type: email
+  sender: orwh@subscriptions.nih.gov
+  tier: 3
+  urls:
+    home: https://orwh.od.nih.gov/
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
+  added: "2026-10-01"
+  notes: "Activated 2026-10-01 on observed delivery (operator approval). Coverage caveat: a meaningful share of ORWH mail is event and webinar invitations (e.g. 'Developing Research Common Data Elements' discussion) alongside research and funding news — mixed signal, tier 3. Subscribed through NIH's own flow (sender orwh@subscriptions.nih.gov); DKIM recorded per message at ingest."
+
+- id: nih-fogarty-email
+  adapter: govdelivery
+  name: Fogarty International Center (email)
+  branch: executive
+  parent_org: Department of Health and Human Services (NIH / FIC)
+  description: "The Fogarty International Center at NIH supports global-health research and researcher training. Its bulletins carry funding opportunities, research news, and program announcements in global health."
+  type: email
+  sender: ficinfo@subscriptions.nih.gov
+  tier: 3
+  urls:
+    home: https://www.fic.nih.gov/
+  method: Subscription bulletins to the project mailbox, ingested by the email adapter (src/fapd/email_sources.py; raw RFC-5322 capture, DKIM verify-and-archive).
+  status: active
+  added: "2026-10-01"
+  notes: "Activated 2026-10-01 on observed delivery (operator approval). The project mailbox received Fogarty bulletins over the changeover window (e.g. 'Funding news for global health researchers') carrying grant and research news. Subscribed through NIH's own flow (sender ficinfo@subscriptions.nih.gov); exact topic selection is in the operator's subscription records, not transcribed here. DKIM recorded per message at ingest."

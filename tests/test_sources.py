@@ -120,7 +120,15 @@ def test_registry_seeds_expected_active_sources():
         "ofac-recent-actions", "uscis-newsroom",
         # and the FAA's bulletins: 81 DKIM-verified items since 2026-08-05,
         # the only working channel while faa-newsroom refuses us:
-        "faa-email"}
+        "faa-email",
+        # activated 2026-10-01 (operator) on observed delivery over the
+        # late-September email changeover: agency bulletins arriving to the
+        # project mailbox from senders not yet registered, approved for
+        # ingestion. SelectUSA carries two sender addresses on one entry;
+        # nhtsa-email gains its Traffic Safety Marketing list and activates:
+        "nrcs-email", "medicare-email", "phmsa-email", "fmcsa-email",
+        "nhi-email", "dot-intergov-email", "usaid-email", "selectusa-email",
+        "nih-orwh-email", "nih-fogarty-email", "nhtsa-email"}
 
 
 # ------------------------------------------------------------ coverage_stats --
