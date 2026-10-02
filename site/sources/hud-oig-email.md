@@ -6,7 +6,7 @@
 
 # HUD Inspector General (email)
 
-planned · ingestion health: no data · Executive · Tier 3 · email bulletin · Department of Housing and Urban Development, Office of Inspector General
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Housing and Urban Development, Office of Inspector General
 
 Official site: https://www.hudoig.gov/newsroom · All sources: [sources.md](../sources.md)
 
@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**no data** — No bulletin recorded from this source in the last 180 days.
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-01, delivered by email.
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-10-01T03:53:55Z (UTC).
+This label has held since 2026-10-02T01:22:07Z (UTC) and was last re-checked 2026-10-02T03:48:29Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -63,18 +63,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — none recorded in the lookback period |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-01 |
+| Content length | 1,987 characters average, 1,987 median (shortest 1,987, longest 1,987) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-02 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-No bulletin recorded from this source in the last 180 days.
+1 item(s) in the last 14 days; most recent 2026-10-01, delivered by email.
 
 ### All time
 
@@ -82,12 +84,45 @@ Bulletins from this source are delivered to the project mailbox, so there are no
 
 ### Last 30 days, day by day
 
-No requests and no items were recorded in the last 30 days, so there is nothing to chart.
+Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publication day the digests use; the stored request stamps remain UTC.
+
+| Day | Items ingested |
+|---|---|
+| 2026-09-03 | 0 |
+| 2026-09-04 | 0 |
+| 2026-09-05 | 0 |
+| 2026-09-06 | 0 |
+| 2026-09-07 | 0 |
+| 2026-09-08 | 0 |
+| 2026-09-09 | 0 |
+| 2026-09-10 | 0 |
+| 2026-09-11 | 0 |
+| 2026-09-12 | 0 |
+| 2026-09-13 | 0 |
+| 2026-09-14 | 0 |
+| 2026-09-15 | 0 |
+| 2026-09-16 | 0 |
+| 2026-09-17 | 0 |
+| 2026-09-18 | 0 |
+| 2026-09-19 | 0 |
+| 2026-09-20 | 0 |
+| 2026-09-21 | 0 |
+| 2026-09-22 | 0 |
+| 2026-09-23 | 0 |
+| 2026-09-24 | 0 |
+| 2026-09-25 | 0 |
+| 2026-09-26 | 0 |
+| 2026-09-27 | 0 |
+| 2026-09-28 | 0 |
+| 2026-09-29 | 0 |
+| 2026-09-30 | 0 |
+| 2026-10-01 | 1 |
+| 2026-10-02 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-HUD Office of Inspector General audit and investigative announcements are delivered via email subscription confirmed 2026-07-29. No bulletins have been recorded in our ingestion logs during the current measurement period; the subscription remains in planned status.
+The HUD Office of Inspector General subscription delivers audit and investigative announcements to the project mailbox. One bulletin was observed in the 14-day window, delivered on 2026-10-01, measuring 1,987 characters. The email adapter is functioning without errors. This represents the first ingested bulletin from this source since subscription confirmation in July 2026. The bulletin carries the substantive content of audit reports or investigative findings. DKIM verification is applied on ingestion.
 
-_Model-written assessment of our own ingestion, generated 2026-09-27 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-02 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

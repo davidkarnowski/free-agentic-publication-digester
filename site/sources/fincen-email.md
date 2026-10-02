@@ -6,7 +6,7 @@
 
 # FinCEN Updates (email)
 
-planned · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of the Treasury (FinCEN)
+planned · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of the Treasury (FinCEN)
 
 Official site: https://www.fincen.gov/news-room · All sources: [sources.md](../sources.md)
 
@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-09-16, 15 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-01, delivered by email.
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-10-01T03:53:55Z (UTC).
+This label has held since 2026-10-01T17:51:05Z (UTC) and was last re-checked 2026-10-02T03:48:29Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,18 +68,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-09-16 |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-01 |
+| Content length | 1,128 characters average, 1,128 median (shortest 1,128, longest 1,128) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-01 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-09-16, 15 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-10-01, delivered by email.
 
 ### All time
 
@@ -91,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-02 | 2 |
 | 2026-09-03 | 1 |
 | 2026-09-04 | 1 |
 | 2026-09-05 | 0 |
@@ -120,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-28 | 0 |
 | 2026-09-29 | 0 |
 | 2026-09-30 | 0 |
-| 2026-10-01 | 0 |
+| 2026-10-01 | 1 |
+| 2026-10-02 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The subscription to FinCEN Updates has been active since late July 2026. We observed one bulletin in the measurement period, arriving on September 16. The source shows a pattern of infrequent delivery with no activity recorded over the past eleven days. Bulletins carry the full text of the alert content, averaging around 659 characters. The email adapter is functioning without errors and continues to monitor incoming messages.
+The FinCEN Updates source delivers bulletins through email subscription. One bulletin was observed in the 14-day window, delivered on 2026-10-01, measuring 1,128 characters and carrying the full text of a financial crime advisory. The email adapter is functioning without errors. The source shows sparse activity with approximately 0.07 items per day. DKIM verification is applied on ingestion and the raw message capture is archived.
 
-_Model-written assessment of our own ingestion, generated 2026-09-27 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-02 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
