@@ -170,6 +170,25 @@ this file.
   2026-09-26:* presentation merging (`report.corroborate`) normalizes and
   catches these, and the ingest-time drop itself contradicts GUIDE §3's
   "every observation stays" — see CLAUDE.md §10 before touching it.
+- **Email adapter abstraction — provider-agnostic ingestion** (added
+  2026-10-01, operator; **not started**). Make the mailbox path neutral
+  across email providers so a fork can point it at a service other than
+  Gmail (the project is explicitly fork-friendly for other jurisdictions,
+  docs/email-sources.md §7). We are close: `EmailClient` is plain IMAP
+  and the junk folder is found by its RFC 6154 `\Junk` attribute (both
+  portable), but Gmail specifics still leak in — the `[Gmail]/…` folder
+  shapes and the nested-label filing under `IMAP_FILE_TO`
+  (`<prefix>/Ingested`, `/Admin`, `/State_Sources`) assume Gmail label
+  semantics. Abstract the mailbox behind a small provider interface
+  (folder discovery, filing, junk) with Gmail as the first implementation.
+  *Deferred into this task:* the SPF/DMARC hardening — gating on the
+  **receiving provider's** `Authentication-Results` verdict (Gmail already
+  stamps `spf/dkim/dmarc=pass`, confirmed 2026-10-01) is a genuine easy
+  win, but it is tied to the trusted authserv-id (`mx.google.com`) and
+  must land as a **provider-declared, configurable** check inside the
+  abstraction, never a hardcoded Gmail parse. Hold the SPF/DMARC gate
+  until then; the durable DKIM verify-and-align gate is already
+  provider-neutral and stays as the integrity floor meanwhile.
 
 ## Exit report
 
