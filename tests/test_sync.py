@@ -329,6 +329,63 @@ def test_crec_download_inventories_granules(conn, raw_dir):
     assert pkg["download_format"] == "zip"  # CREC has no package-level XML
 
 
+def test_a_granule_listing_that_repeats_an_id_does_not_lose_the_issue(conn, raw_dir):
+    """The Federal Register issue of 2026-09-29. The publisher served
+    every request for it with a 200; its granule listing repeated one
+    granule id; the plain INSERT raised on the primary key; and the issue
+    failed that way for 48 cycles until it was marked exhausted. A whole
+    day's Federal Register was absent from the record and the digest
+    reported zero documents."""
+    client = FakeClient()
+    fr_package(client, "FR-2026-09-29", b"<FR/>")
+    client.pages["packages/FR-2026-09-29/granules"] = [
+        {"granules": [
+            {"granuleId": "2026-20001", "granuleClass": "RULE", "title": "A rule"},
+            {"granuleId": "2026-20002", "granuleClass": "NOTICE", "title": "A notice"},
+            {"granuleId": "2026-20001", "granuleClass": "RULE", "title": "A rule"},
+        ]}
+    ]
+
+    stats = sync.sync_collection(client, conn, "FR")
+
+    assert stats["downloaded"] == 1 and stats["failed"] == 0
+    row = conn.execute("SELECT fetch_status, fetch_attempts FROM packages").fetchone()
+    assert (row["fetch_status"], row["fetch_attempts"]) == ("fetched", 0)
+    ids = [r["granule_id"] for r in conn.execute(
+        "SELECT granule_id FROM granules ORDER BY granule_id")]
+    assert ids == ["2026-20001", "2026-20002"]
+
+
+def test_a_failed_refetch_leaves_the_previous_granule_inventory_alone(conn, raw_dir):
+    """Replace-on-refetch deletes before it inserts. A failure between the
+    two used to be committed by the failure record's own commit: the
+    inventory of a good package gone, or — FR-2026-09-29 — fifteen
+    half-inserted rows left behind. The replacement is all-or-nothing."""
+    client = FakeClient()
+    fr_package(client, "FR-2026-07-23", b"<FR/>")
+    client.pages["packages/FR-2026-07-23/granules"] = [
+        {"granules": [{"granuleId": "2026-10001"}, {"granuleId": "2026-10002"}]}
+    ]
+    sync.sync_collection(client, conn, "FR")
+    assert conn.execute("SELECT COUNT(*) FROM granules").fetchone()[0] == 2
+
+    # a revision arrives, and its listing carries an entry the table refuses
+    client.pages["collections/FR/"] = listing(
+        [{"packageId": "FR-2026-07-23", "lastModified": "2026-07-25T02:00:00Z",
+          "dateIssued": "2026-07-23"}])
+    client.pages["packages/FR-2026-07-23/granules"] = [
+        {"granules": [{"granuleId": "2026-10003"}, {"granuleId": None}]}
+    ]
+    stats = sync.sync_collection(client, conn, "FR")
+
+    assert stats["failed"] == 1
+    ids = [r["granule_id"] for r in conn.execute(
+        "SELECT granule_id FROM granules ORDER BY granule_id")]
+    assert ids == ["2026-10001", "2026-10002"]      # untouched, not half-replaced
+    row = conn.execute("SELECT fetch_status, fetch_attempts FROM packages").fetchone()
+    assert (row["fetch_status"], row["fetch_attempts"]) == ("failed", 1)
+
+
 def test_uscourts_fetch_policy_skips_old_cases(conn):
     # Rule USCOURTS-FETCH-01: churn on old cases is listed but not archived.
     # The window the rule enforces is measured from now(), so the in-window

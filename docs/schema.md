@@ -258,7 +258,12 @@ CREATE TABLE granules (
 - **Deletion/replacement:** if a package is re-fetched and its granule list
   changed, the sync deletes that package's granule rows and re-inserts —
   granules carry no local state worth preserving, so replace-on-refetch is
-  simpler and always correct.
+  simpler and always correct. The replacement is all-or-nothing: a
+  download that fails after the delete rolls it back, so a failed
+  re-fetch leaves the previous inventory in place. A granule id that the
+  publisher's listing repeats is stored once, first listing kept (the
+  Federal Register issue of 2026-09-29 repeated one, and until
+  2026-10-03 that failed the whole issue on the primary key).
 
 ### Indexes
 

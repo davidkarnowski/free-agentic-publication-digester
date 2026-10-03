@@ -380,6 +380,13 @@ def _download_pending(client, conn, collection, stats, max_downloads):
             )
             raise
         except Exception as exc:  # noqa: BLE001 — one bad package must not kill the run
+            # Whatever the failed download wrote and had not committed
+            # must not ride into the database on the failure record's
+            # own commit. It did: FR-2026-09-29 was left with the 15
+            # granule rows inserted before the insert failed, and a
+            # failed re-fetch of a good package would have committed the
+            # DELETE of its inventory.
+            conn.rollback()
             _record_failed_cycle(conn, item.package_id, exc, stats)
             return "failed"
         stats["downloaded"] += 1
@@ -580,18 +587,36 @@ def _maybe_fetch_graphics_pdf(client, package_id, xml_bytes, links, raw_dir):
 
 
 def _refresh_granules(client, conn, package_id):
-    # Replace-on-refetch (docs/schema.md): granule rows carry no local state.
+    """Replace-on-refetch (docs/schema.md): granule rows carry no local
+    state. Returns the number of distinct granules inventoried.
+
+    A granule id the publisher lists twice is stored once, first listing
+    kept. The listing for the Federal Register issue of 2026-09-29
+    repeated one, the plain INSERT below it raised on the primary key,
+    and the issue failed that way on every one of 48 cycles until it
+    reached the retry ceiling: a whole day's Federal Register absent
+    from the record, with every request answered 200. A repeated line in
+    a publisher's listing is not a reason to lose the publication."""
     seen_at = utc_now_iso()
-    granules = []
+    granules = {}
+    listed = 0
     for page in client.paginate(f"packages/{package_id}/granules", {"pageSize": 1000}):
-        granules.extend(page.get("granules", []))
+        for g in page.get("granules", []):
+            listed += 1
+            granules.setdefault(g["granuleId"], g)
+    if listed > len(granules):
+        logger.warning(
+            "%s: the publisher's granule listing repeated %d granule id(s);"
+            " each is stored once",
+            package_id, listed - len(granules),
+        )
     conn.execute("DELETE FROM granules WHERE package_id = ?", (package_id,))
     conn.executemany(
         "INSERT INTO granules (package_id, granule_id, granule_class, title, first_seen_at)"
         " VALUES (?, ?, ?, ?, ?)",
         [
-            (package_id, g["granuleId"], g.get("granuleClass"), g.get("title"), seen_at)
-            for g in granules
+            (package_id, granule_id, g.get("granuleClass"), g.get("title"), seen_at)
+            for granule_id, g in granules.items()
         ],
     )
     return len(granules)
