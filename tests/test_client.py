@@ -4,7 +4,12 @@ faked, and the fetch-log DB goes to a tmp path."""
 import pytest
 
 from fapd import config
-from fapd.client import BudgetExceededError, GovinfoClient, RateLimitFloorError
+from fapd.client import (
+    BudgetExceededError,
+    GovinfoClient,
+    RateLimitFloorError,
+    RetryLaterError,
+)
 
 
 class FakeResponse:
@@ -328,8 +333,8 @@ def test_collectors_stop_short_of_the_finalizer_reserve(tmp_path, monkeypatch):
 def test_hourly_ceiling_keeps_us_far_from_the_documented_limit(tmp_path,
                                                                monkeypatch):
     """api.data.gov documents 1,000 requests/hour and answers 429 above
-    it. Our ceiling is half that, enforced from the fetch log so it holds
-    across processes — it is what makes a larger daily budget safe."""
+    it. Our ceiling sits below that, enforced from the fetch log so it
+    holds across processes — it is what makes a larger daily budget safe."""
     monkeypatch.setattr(config, "MAX_GOVINFO_REQUESTS_PER_HOUR", 3)
     monkeypatch.setattr(config, "EOD_BUDGET_RESERVE_FRACTION", 0.0)
     client, _, _ = make_client(tmp_path, [FakeResponse() for _ in range(5)])
@@ -344,6 +349,143 @@ def test_hourly_ceiling_keeps_us_far_from_the_documented_limit(tmp_path,
                               sleep=lambda s: None, reserve_exempt=True)
     with pytest.raises(BudgetExceededError, match="hourly ceiling"):
         finalizer.get("collections")
+
+
+def test_collectors_leave_part_of_each_hour_to_the_finalizer(tmp_path, monkeypatch):
+    """GUIDE §4, amended 2026-10-03. On 2026-10-03 a collector cycle still
+    running when the day closed shared the hour with the finalizer; the two
+    reached the ceiling together at 04:14 UTC and the finalizer's sync
+    stopped after 113 downloads. The collectors now stop short of every
+    hour's ceiling, as they already stopped short of every day's budget.
+    The ceiling itself is the publisher's limit and still binds everyone."""
+    monkeypatch.setattr(config, "MAX_GOVINFO_REQUESTS_PER_HOUR", 10)
+    monkeypatch.setattr(config, "EOD_BUDGET_RESERVE_FRACTION", 0.2)
+    collector, _, _ = make_client(tmp_path, [FakeResponse() for _ in range(9)])
+    assert collector._effective_hourly_ceiling() == 8
+    for _ in range(8):
+        collector.get("collections")
+    with pytest.raises(BudgetExceededError, match="hourly ceiling is 8"):
+        collector.get("collections")
+
+    finalizer = GovinfoClient(db_path=tmp_path / "fetch_log.db",
+                              session=FakeSession([FakeResponse(), FakeResponse()]),
+                              sleep=lambda s: None, reserve_exempt=True)
+    assert finalizer._effective_hourly_ceiling() == 10
+    finalizer.get("collections")                          # 9th — the reserve
+    finalizer.get("collections")                          # 10th
+    with pytest.raises(BudgetExceededError, match="hourly ceiling is 10"):
+        finalizer.get("collections")                      # nobody passes it
+
+
+# ------------------------------------------------- not ready, come back --
+# GUIDE §4, amended 2026-10-03: a caller with a queue asks once and is
+# handed the wait, instead of the client sleeping through it while the
+# rest of the queue stands still.
+
+
+def test_defer_retry_asks_once_and_hands_the_wait_to_the_caller(tmp_path):
+    client, session, clock = make_client(
+        tmp_path, [FakeResponse(503, headers={"Retry-After": "30"}), FakeResponse()]
+    )
+    with pytest.raises(RetryLaterError) as excinfo:
+        client.get("packages/USCOURTS-x/zip", defer_retry=True, attempt_no=2)
+    assert excinfo.value.retry_after == 30.0     # the server's own figure
+    assert excinfo.value.status == 503
+    assert len(session.calls) == 1               # asked exactly once
+    assert 30.0 not in clock.sleeps              # and nobody slept on it
+    # the log still says which try this was
+    (attempt,) = client._db.execute("SELECT attempt FROM fetch_log").fetchone()
+    assert attempt == 2
+
+
+def test_defer_retry_without_a_retry_after_offers_our_backoff_as_the_floor(tmp_path):
+    client, _, _ = make_client(tmp_path, [FakeResponse(500)])
+    with pytest.raises(RetryLaterError) as excinfo:
+        client.get("packages/USCOURTS-x/zip", defer_retry=True, attempt_no=2)
+    assert excinfo.value.retry_after == 4.0      # the ladder's own second step
+
+
+def test_defer_retry_returns_a_ready_file_like_any_other_request(tmp_path):
+    client, session, _ = make_client(tmp_path, [FakeResponse(body=b"zip-bytes")])
+    resp = client.get("packages/USCOURTS-x/zip", defer_retry=True)
+    assert resp.content == b"zip-bytes" and len(session.calls) == 1
+
+
+def test_a_deferred_request_is_counted_like_any_other(tmp_path, monkeypatch):
+    """Deferral changes who waits, never what is counted: a "not ready"
+    answer cost the server a request, and the next one meets the ceiling."""
+    monkeypatch.setattr(config, "MAX_GOVINFO_REQUESTS_PER_HOUR", 1)
+    monkeypatch.setattr(config, "EOD_BUDGET_RESERVE_FRACTION", 0.0)
+    client, _, _ = make_client(
+        tmp_path, [FakeResponse(503, headers={"Retry-After": "30"}), FakeResponse()]
+    )
+    with pytest.raises(RetryLaterError):
+        client.get("packages/USCOURTS-x/zip", defer_retry=True)
+    with pytest.raises(BudgetExceededError, match="hourly ceiling"):
+        client.get("packages/USCOURTS-x/zip", defer_retry=True, attempt_no=2)
+
+
+def test_defer_retry_on_a_connection_failure_carries_no_key(tmp_path):
+    import requests
+
+    key = "TESTKEY-abc123"
+
+    class RaisingSession:
+        def get(self, url, params=None, headers=None, timeout=None):
+            raise requests.ConnectionError(
+                f"HTTPSConnectionPool(host='api.govinfo.gov'): url:"
+                f" /packages/x/zip?api_key={key}")
+
+        def close(self):
+            pass
+
+    clock = FakeClock()
+    client = GovinfoClient(db_path=tmp_path / "fetch_log.db",
+                           session=RaisingSession(),
+                           sleep=clock.sleep, monotonic=clock.monotonic)
+    with pytest.raises(RetryLaterError) as excinfo:
+        client.get("packages/x/zip", defer_retry=True)
+    assert key not in str(excinfo.value)
+    assert excinfo.value.status is None
+    assert excinfo.value.retry_after == 2.0      # our backoff; no server to ask
+    # the original, key and all, is not chained into any traceback
+    assert excinfo.value.__cause__ is None and excinfo.value.__suppress_context__
+    assert clock.sleeps == []
+
+
+def test_a_retry_after_longer_than_a_worker_is_held_ends_the_request(tmp_path):
+    """Review item D22. One header from one server could sleep a worker
+    for a day — and the end-of-day run waits for every host. A request to
+    stay away that long is honored by not asking again this cycle."""
+    import requests
+
+    client, session, clock = make_client(
+        tmp_path, [FakeResponse(503, headers={"Retry-After": "3600"}), FakeResponse()]
+    )
+    with pytest.raises(requests.HTTPError, match="HTTP 503"):
+        client.get("collections")
+    assert len(session.calls) == 1               # did not come back early
+    assert 3600.0 not in clock.sleeps            # and did not wait an hour
+
+
+def test_a_retry_after_the_cap_allows_is_still_waited_exactly(tmp_path):
+    cap = config.MAX_RETRY_WAIT_SECONDS
+    client, session, clock = make_client(
+        tmp_path, [FakeResponse(503, headers={"Retry-After": str(cap)}), FakeResponse()]
+    )
+    assert client.get("collections").status_code == 200
+    assert float(cap) in clock.sleeps and len(session.calls) == 2
+
+
+def test_the_clock_a_caller_schedules_on_is_the_pacing_clock(tmp_path):
+    client, _, clock = make_client(tmp_path, [])
+    clock.t = 41.5
+    assert client.monotonic() == 41.5
+    client.wait(5)
+    assert clock.sleeps == [5] and client.monotonic() == 46.5
+    client.wait(0)
+    client.wait(-3)                              # already due: no wait at all
+    assert clock.sleeps == [5]
 
 
 def test_robots_cache_survives_a_new_client(tmp_path, monkeypatch):

@@ -335,6 +335,19 @@ Per collection, one scheduled run per day (GUIDE §4):
    final failure set `'failed'` + `last_error`. Downloads that don't finish
    today are simply still pending tomorrow — the queue lives in `packages`,
    not in the watermark.
+
+   *The pass rotates (GUIDE §4, amended 2026-10-03).* The queue is read
+   in order of fewest `fetch_attempts`, then newest `date_issued`. Each
+   package is tried once; one the server says is not ready is set aside
+   while the rest are served and revisited afterwards, never sooner than
+   the server's `Retry-After`, for at most
+   `config.GOVINFO_DOWNLOAD_TRIES_PER_CYCLE` tries. A package that ends
+   the cycle unfetched after being tried counts ONE failed cycle in
+   `fetch_attempts`, however many tries it had; a package the pass never
+   reached (the cap, a budget halt, or the unavailable-source stop) is
+   not charged. Nothing about the rotation is stored: the set-aside list
+   lives for one pass, and `fetch_status`/`fetch_attempts` mean what
+   they meant before.
 6. **Advance the watermark** — only after the listing in step 3 completed
    without error: set `last_modified_watermark = max_seen` (unchanged if the
    window was empty), `last_sync_completed_at = now`,

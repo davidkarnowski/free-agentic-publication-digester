@@ -55,6 +55,20 @@ this file.
   'exhausted'`, not re-queued. This is the pattern to reach for the next
   time a source shows a chronic-but-mysterious error rate — check for a
   missing cross-cycle ceiling before assuming the server is just slow.
+- **A source that is not ready does not hold the queue (GUIDE §4,
+  amended 2026-10-03).** govinfo answers 503 + `Retry-After: 30` while
+  it builds a court opinion's ZIP — on the first request for 2,698 of
+  6,359 packages over ten days — and the client used to sleep in place
+  through every one of those waits, stopping the serial queue and every
+  collection behind it. In the publisher's outage of 2026-10-02/03 the
+  queue moved at thirty packages an hour and 66 packages missed their
+  day. `sync._download_pending` now tries a package once, sets it aside
+  when it is not ready, serves the rest, and returns no sooner than the
+  server asked; `HttpClient.get(defer_retry=True)` is the seam. The
+  lesson that nearly went the wrong way: the outage numbers alone said
+  "retries are futile, drop them", but on ordinary days the second try
+  succeeds three times in four. Measure the ordinary case before
+  designing for the incident.
 - **Cache permission, don't re-ask it.** F-007 (2026-07-31): the robots
   cache lived on the instance, the collector rebuilt the client every
   cycle, and 528 robots fetches/day were spent asking a question already
@@ -103,6 +117,15 @@ this file.
 - Bill actions are dated by the publisher; agency releases are not
   (`DATED_BY_PUBLISHER`, GUIDE §3). Do not unify the two.
 - Temporary robots disallows (5xx) are not persisted.
+- The download pass sets a not-ready package aside instead of sleeping
+  on it, orders the queue by fewest failed cycles, gives a package three
+  tries a cycle, and stops asking for earlier failures once ten second
+  chances in a row are turned down (GUIDE §4, 2026-10-03). Do not
+  "simplify" any of it back to an in-place wait, and do not make a
+  package's FIRST try count toward the unavailable-source streak: nearly
+  half of first tries are "not ready" on a healthy day.
+- Collectors stop at 85% of the hourly govinfo ceiling as well as of the
+  daily budget (same amendment); the ceiling itself binds the finalizer.
 - `MAX_PACKAGE_FETCH_ATTEMPTS = 48` and the `'exhausted'` terminal status
   are deliberate (GUIDE §4, 2026-08-10) — not the same concept as
   `'skipped'` (chose not to fetch) or `sources.STATUSES`'s `'unavailable'`
@@ -163,8 +186,15 @@ this file.
 - **D17** — the server-remaining halt (`_halt_reason`) is instance
   state and dies with the cycle; persist it like every other budget
   signal.
-- **D22** — `Retry-After` honored without ceiling; a single header can
-  sleep a worker for a day. Cap and treat beyond-cap as give-up-now.
+- **D22** — **Done 2026-10-03** (`feature/download-queue-rotation`):
+  no worker waits in place longer than `config.MAX_RETRY_WAIT_SECONDS`
+  (120 s); a longer `Retry-After` ends the request for that cycle.
+  *Still open, stated in GUIDE §4:* a `Retry-After` longer than the
+  interval between cycles is not remembered across cycles, so the next
+  cycle would ask again sooner than asked. None has ever been received;
+  persisting it belongs with D17. Original filing: `Retry-After`
+  honored without ceiling; a single header can sleep a worker for a
+  day.
 - **D24** — email cross-channel dedup compares the un-normalized URL;
   a trailing slash defeats it and the release lists twice. *Update
   2026-09-26:* presentation merging (`report.corroborate`) normalizes and

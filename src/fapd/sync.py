@@ -6,14 +6,26 @@ what's pending, and advance the watermark only after the listing completed.
 The watermark is always a server-side lastModified value, never our clock.
 A first sync (no watermark row) is date-bounded to INITIAL_SYNC_LOOKBACK_DAYS
 per GUIDE.md §4.
+
+The download pass rotates (GUIDE §4, amended 2026-10-03): a package the
+server says is not ready is set aside while the rest of the queue is
+served, and revisited afterwards, never sooner than the server asked. See
+`_download_pending`.
 """
 
 import datetime as dt
+import heapq
+import itertools
 import logging
 import re
 
 from . import config
-from .client import BudgetExceededError, RateLimitFloorError, redact_secrets
+from .client import (
+    BudgetExceededError,
+    RateLimitFloorError,
+    RetryLaterError,
+    redact_secrets,
+)
 
 logger = logging.getLogger("fapd.sync")
 
@@ -266,12 +278,62 @@ def _apply_fetch_policy(conn, collection, stats):
         )
 
 
+class _Queued:
+    """One package's place in a single download pass."""
+
+    __slots__ = ("error", "not_before", "package_id", "plan", "prior", "tries")
+
+    def __init__(self, package_id, prior):
+        self.package_id = package_id
+        self.prior = prior        # failed cycles before this one
+        self.plan = None          # the summary's answer; asked for once
+        self.tries = 0            # content requests made this cycle
+        self.not_before = 0.0     # client clock: earliest permitted return
+        self.error = None         # the last "not ready" answer
+
+    @property
+    def second_chance(self):
+        """True once the package has been turned down before, this cycle
+        or an earlier one. Only second chances say anything about whether
+        the source is available: a first try that is not ready is the
+        publisher building a file, which is ordinary."""
+        return bool(self.prior or self.tries)
+
+
 def _download_pending(client, conn, collection, stats, max_downloads):
-    # Newest first: digest-relevant days get covered before the queue tail.
+    """Download what is queued, without letting a package the server is
+    not ready to serve hold up the ones it is (GUIDE §4, amended
+    2026-10-03).
+
+    The pass has two halves. The first tries every queued package once,
+    in order: never-failed packages first, then by fewest failed cycles,
+    newest first within each. A "not ready" answer (503 with Retry-After,
+    a 429, another 5xx, or no connection) sets the package aside and the
+    pass moves on. The second half revisits what was set aside, earliest
+    permitted return first, and waits only when nothing else is left to
+    do — never returning sooner than the server asked, and never waiting
+    longer than `config.MAX_RETRY_WAIT_SECONDS` for it.
+
+    Two bounds keep an outage cheap for the publisher. A package gets at
+    most `config.GOVINFO_DOWNLOAD_TRIES_PER_CYCLE` tries a cycle. And
+    when `config.SOURCE_UNAVAILABLE_STREAK` second chances in a row are
+    turned down, the source is treated as unavailable for this cycle:
+    packages that already failed an earlier cycle are no longer tried or
+    revisited, and stay queued for the next one. A package new to this
+    cycle is never skipped for that reason — a new document always gets
+    its tries.
+
+    What a cycle costs a package is unchanged: one failed cycle counts
+    once toward `config.MAX_PACKAGE_FETCH_ATTEMPTS`, however many tries
+    it took. A package the pass never reached is not charged at all."""
+    # Fewest failed cycles first: a document nobody has asked for yet is
+    # never queued behind one that keeps failing, and when the source is
+    # down the probes rotate through the stuck set instead of hammering
+    # the same few. Newest first within a tier, as before.
     rows = conn.execute(
-        "SELECT package_id FROM packages WHERE collection = ?"
-        " AND fetch_status IN ('pending', 'failed')"
-        " ORDER BY date_issued DESC, package_id",
+        "SELECT package_id, COALESCE(fetch_attempts, 0) AS prior FROM packages"
+        " WHERE collection = ? AND fetch_status IN ('pending', 'failed')"
+        " ORDER BY COALESCE(fetch_attempts, 0), date_issued DESC, package_id",
         (collection,),
     ).fetchall()
     capped = rows if max_downloads is None else rows[: max_downloads - stats["downloaded"]]
@@ -280,11 +342,35 @@ def _download_pending(client, conn, collection, stats, max_downloads):
             "%s: download cap %s limits this run to %d of %d queued; the rest stay pending",
             collection, max_downloads, len(capped), len(rows),
         )
-    for row in capped:
-        pid = row["package_id"]
+
+    waiting = []                  # heap of (not_before, order, _Queued)
+    order = itertools.count()     # heap tie-break: first set aside, first back
+    set_aside = 0                 # packages told "not ready" at least once
+    arrived_late = 0              # of those, fetched on a later try
+    streak = 0                    # second chances in a row turned down
+
+    def attempt(item):
+        """One try at one package: 'fetched', 'not_ready' or 'failed'."""
+        nonlocal set_aside, arrived_late
         try:
-            _download_package(client, conn, collection, pid)
-            stats["downloaded"] += 1
+            if item.plan is None:
+                item.plan = _plan_download(client, collection, item.package_id)
+            item.tries += 1
+            _fetch_planned(client, conn, collection, item.package_id,
+                           item.plan, item.tries)
+        except RetryLaterError as exc:
+            item.error = exc
+            if item.tries == 1:
+                set_aside += 1
+            if item.tries >= config.GOVINFO_DOWNLOAD_TRIES_PER_CYCLE:
+                _record_failed_cycle(conn, item.package_id, exc, stats)
+                return "not_ready"
+            item.not_before = client.monotonic() + exc.retry_after
+            heapq.heappush(waiting, (item.not_before, next(order), item))
+            logger.debug(
+                "%s: not ready (try %d) — set aside for %.0fs, the queue continues",
+                item.package_id, item.tries, exc.retry_after)
+            return "not_ready"
         except (BudgetExceededError, RateLimitFloorError):
             # Budget/rate-floor: stop the whole run, leave the queue pending.
             conn.rollback()
@@ -294,48 +380,121 @@ def _download_pending(client, conn, collection, stats, max_downloads):
             )
             raise
         except Exception as exc:  # noqa: BLE001 — one bad package must not kill the run
-            # GUIDE §4, amended 2026-08-10: a per-package retry ceiling.
-            # Without this, a permanently-failing package re-entered this
-            # same query every cycle forever (the identical bug shape rule
-            # 14/MAX_ITEM_SUMMARY_ATTEMPTS already fixes for the LLM
-            # layer) -- distinct from govinfo's per-call retry/backoff
-            # (client.py), which already ran to exhaustion before this
-            # exception was ever raised.
-            row = conn.execute(
-                "SELECT fetch_attempts FROM packages WHERE package_id = ?", (pid,)
-            ).fetchone()
-            attempts = (row["fetch_attempts"] or 0) + 1
-            status = ("exhausted" if attempts >= config.MAX_PACKAGE_FETCH_ATTEMPTS
-                     else "failed")
-            conn.execute(
-                "UPDATE packages SET fetch_status = ?, last_error = ?,"
-                " fetch_attempts = ?, last_attempt_at = ? WHERE package_id = ?",
-                (status, redact_secrets(repr(exc))[:500], attempts, utc_now_iso(), pid),
-            )
-            conn.commit()
-            stats["failed"] += 1
-            if status == "exhausted":
-                stats["exhausted"] = stats.get("exhausted", 0) + 1
-            logger.warning(
-                "%s: download failed (%d/%d attempts), marked %r: %r",
-                pid, attempts, config.MAX_PACKAGE_FETCH_ATTEMPTS, status, exc,
-            )
+            _record_failed_cycle(conn, item.package_id, exc, stats)
+            return "failed"
+        stats["downloaded"] += 1
+        if item.tries > 1:
+            arrived_late += 1
+        return "fetched"
+
+    def after(streak, was_second_chance, outcome):
+        if outcome == "fetched":
+            return 0
+        if outcome == "not_ready" and was_second_chance:
+            return streak + 1
+        return streak
+
+    limit = config.SOURCE_UNAVAILABLE_STREAK
+    reached = 0
+    for row in capped:                                    # the first half
+        item = _Queued(row["package_id"], row["prior"])
+        if item.prior and streak >= limit:
+            # Everything from here on failed an earlier cycle (the order
+            # above), and the source has just turned down `limit` second
+            # chances in a row. Stop asking; none of these is charged.
+            break
+        reached += 1
+        chance = item.second_chance
+        streak = after(streak, chance, attempt(item))
+    not_tried = len(capped) - reached
+
+    not_revisited = 0
+    while waiting:                                        # the second half
+        _, _, item = heapq.heappop(waiting)
+        if item.prior and streak >= limit:
+            # Tried this cycle and turned down: that is a failed cycle.
+            _record_failed_cycle(conn, item.package_id, item.error, stats)
+            not_revisited += 1
+            continue
+        remaining = item.not_before - client.monotonic()
+        if remaining > config.MAX_RETRY_WAIT_SECONDS:
+            # The server asked for longer than a cycle holds a worker.
+            # Not asking again this cycle is how that request is honored.
+            _record_failed_cycle(conn, item.package_id, item.error, stats)
+            continue
+        client.wait(remaining)   # only now is nothing else left to do
+        streak = after(streak, True, attempt(item))
+
+    if not_tried or not_revisited:
+        stats["source_unavailable"] = True
+        logger.warning(
+            "%s: %d second chances in a row were turned down — treating the"
+            " source as unavailable for this cycle; %d package(s) that failed"
+            " an earlier cycle were not tried and %d were not revisited, all"
+            " still queued",
+            collection, limit, not_tried, not_revisited,
+        )
+    if set_aside:
+        stats["not_ready"] = set_aside
+        logger.info(
+            "%s: %d package(s) were not ready on the first try and were set"
+            " aside while the queue continued; %d arrived on a later try",
+            collection, set_aside, arrived_late,
+        )
 
 
-def _download_package(client, conn, collection, package_id):
+def _record_failed_cycle(conn, package_id, exc, stats):
+    """A package ends this cycle unfetched: count the cycle once.
+
+    GUIDE §4, amended 2026-08-10: a per-package retry ceiling. Without
+    it, a permanently-failing package re-entered the download query every
+    cycle forever (the identical bug shape rule 14 /
+    MAX_ITEM_SUMMARY_ATTEMPTS already fixes for the LLM layer). The count
+    is of cycles, not of requests: three tries in one cycle are one
+    failed cycle, exactly as five tries in the old in-place ladder were."""
+    row = conn.execute(
+        "SELECT fetch_attempts FROM packages WHERE package_id = ?", (package_id,)
+    ).fetchone()
+    attempts = (row["fetch_attempts"] or 0) + 1
+    status = ("exhausted" if attempts >= config.MAX_PACKAGE_FETCH_ATTEMPTS
+              else "failed")
+    conn.execute(
+        "UPDATE packages SET fetch_status = ?, last_error = ?,"
+        " fetch_attempts = ?, last_attempt_at = ? WHERE package_id = ?",
+        (status, redact_secrets(repr(exc))[:500], attempts, utc_now_iso(), package_id),
+    )
+    conn.commit()
+    stats["failed"] += 1
+    if status == "exhausted":
+        stats["exhausted"] = stats.get("exhausted", 0) + 1
+    logger.warning(
+        "%s: download failed (%d/%d attempts), marked %r: %r",
+        package_id, attempts, config.MAX_PACKAGE_FETCH_ATTEMPTS, status, exc,
+    )
+
+
+def _plan_download(client, collection, package_id):
+    """Ask the package's summary which file to fetch. This is everything
+    a download needs that does not have to be asked again when the file
+    itself is not ready yet: a revisit repeats one request, not two."""
     summary = client.get_json(f"packages/{package_id}/summary")
-    date_issued = summary.get("dateIssued")
     links = summary.get("download") or {}
-    url, fmt = None, None
     preference = _FORMAT_PREFERENCE_BY_COLLECTION.get(collection, _FORMAT_PREFERENCE)
     for key, ext in preference:
         if links.get(key):
-            url, fmt = links[key], ext
-            break
-    if url is None:
-        raise ValueError(f"no downloadable format among {sorted(links)}")
+            return {"summary": summary, "links": links, "url": links[key], "fmt": ext}
+    raise ValueError(f"no downloadable format among {sorted(links)}")
 
-    resp = client.get(url)
+
+def _fetch_planned(client, conn, collection, package_id, plan, attempt_no):
+    """Fetch and store one planned download. The content request is made
+    once; a "not ready" answer surfaces as RetryLaterError for
+    `_download_pending` to schedule (GUIDE §4, amended 2026-10-03)."""
+    summary, links = plan["summary"], plan["links"]
+    url, fmt = plan["url"], plan["fmt"]
+    date_issued = summary.get("dateIssued")
+
+    resp = client.get(url, defer_retry=True, attempt_no=attempt_no)
     raw_dir = config.RAW_DIR / collection / (date_issued or "unknown-date")
     raw_dir.mkdir(parents=True, exist_ok=True)
     raw_path = raw_dir / f"{package_id}.{fmt}"

@@ -41,5 +41,6 @@ report); this skill drives it. The pipeline digests the newest
   the reason shows — the digest never says.
 - `Validation: FAILED` writes nothing, by design — report the gate that
   refused, don't override (there is no override).
-- govinfo 503s with Retry-After waits are normal under load; the client
-  absorbs them.
+- govinfo 503s with Retry-After are normal: court-opinion files are
+  built on demand. The download pass sets such a package aside, keeps
+  going, and returns after the server's wait (GUIDE §4, 2026-10-03).

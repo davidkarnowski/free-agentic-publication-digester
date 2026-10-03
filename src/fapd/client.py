@@ -5,6 +5,15 @@ daily budget (counted from fetch_log.db so restarts can't reset it),
 per-attempt logging with secret redaction, Retry-After obedience (integer
 and HTTP-date forms), exponential backoff, and honest User-Agent.
 
+Two rules added 2026-10-03 (GUIDE §4 amendment of that date) keep one
+server's bad hour from holding everything behind it. A caller with a
+queue may ask with `defer_retry=True`: the request is made once, and a
+"not ready" answer comes back as `RetryLaterError` carrying the wait the
+server asked for, so the caller can serve the rest of its queue and
+return afterwards — never sooner than asked. And no worker waits in
+place longer than `config.MAX_RETRY_WAIT_SECONDS` on a server's say-so;
+a longer Retry-After is honored by not asking again this cycle.
+
 `GovinfoClient` adds govinfo specifics: api.data.gov key injection (and
 its redaction), API-base URL resolution, nextPage pagination, and the
 server-remaining halt floor.
@@ -108,6 +117,22 @@ class RobotsDisallowedError(RuntimeError):
     """robots.txt disallows this URL for our user agent (GUIDE §3)."""
 
 
+class RetryLaterError(RuntimeError):
+    """A request made with `defer_retry=True` was answered 429 or 5xx, or
+    never connected. Nothing was retried and nothing slept: the caller
+    owns the decision to come back (GUIDE §4, amended 2026-10-03).
+
+    `retry_after` is the number of seconds the server asked for in its
+    `Retry-After` header, or our own backoff when it named none. It is a
+    floor: a caller may return later than that, never sooner. `status` is
+    the HTTP status, or None when no response arrived."""
+
+    def __init__(self, message, retry_after, status=None):
+        super().__init__(message)
+        self.retry_after = float(retry_after)
+        self.status = status
+
+
 class HttpClient:
     """Shared pacing/budget/logging base. Subclasses set CLIENT_NAME and
     may override _daily_budget, _redacted_params, and _post_response."""
@@ -154,6 +179,21 @@ class HttpClient:
         if self.reserve_exempt:
             return budget
         return int(budget * (1.0 - config.EOD_BUDGET_RESERVE_FRACTION))
+
+    def _effective_hourly_ceiling(self):
+        """The hourly ceiling THIS client may spend, or None for none.
+
+        The same reserve as the daily budget, applied to the hour (GUIDE
+        §4, amended 2026-10-03). The ceiling is the publisher's limit and
+        binds everyone, the finalizer included; what is new is that the
+        collectors stop short of it, so a collector cycle running when the
+        day closes cannot leave the finalizer an empty hour. That is what
+        happened on 2026-10-03: the two reached 800 together at 04:14 UTC
+        and the finalizer's sync stopped after 113 downloads."""
+        ceiling = self._hourly_ceiling()
+        if ceiling is None or self.reserve_exempt:
+            return ceiling
+        return int(ceiling * (1.0 - config.EOD_BUDGET_RESERVE_FRACTION))
 
     def _budget_client_names(self):
         """The fetch_log `client` labels whose rows spend THIS client's
@@ -206,8 +246,22 @@ class HttpClient:
 
     # -- public API ----------------------------------------------------------
 
-    def get(self, url, params=None, headers=None, min_interval=None):
-        """GET an absolute URL. Returns a 2xx/304 Response or raises."""
+    def get(self, url, params=None, headers=None, min_interval=None,
+            defer_retry=False, attempt_no=1):
+        """GET an absolute URL. Returns a 2xx/304 Response or raises.
+
+        By default a 429/5xx or a connection failure is retried in place,
+        up to `config.MAX_ATTEMPTS` tries, waiting what the server asks.
+
+        With `defer_retry=True` the request is made exactly once and a
+        "not ready" answer raises `RetryLaterError` instead of sleeping.
+        This is for a caller that has other work queued — the wait still
+        happens, but the caller spends it on the rest of its queue.
+        `attempt_no` is then the ordinal the caller is on (1 for a first
+        try, 2 for its first return, ...), so the fetch log keeps telling the
+        truth about which try a row was. Budgets, the hourly ceiling,
+        pacing and logging apply to that one request exactly as to any
+        other: deferral changes who waits, never what is counted."""
         if self._halt_reason:
             raise RateLimitFloorError(self._halt_reason)
         qp = dict(params or {})
@@ -216,7 +270,8 @@ class HttpClient:
         if headers:
             req_headers.update(headers)
 
-        for attempt in range(1, config.MAX_ATTEMPTS + 1):
+        tries = (attempt_no,) if defer_retry else range(1, config.MAX_ATTEMPTS + 1)
+        for attempt in tries:
             self._check_daily_budget()
             self._check_hourly_ceiling()
             self._pace(min_interval)
@@ -232,6 +287,12 @@ class HttpClient:
                 # use that text for both the log and the ledger row.
                 detail = redact_secrets(repr(exc))
                 self._log(shown_url, None, 0, None, attempt, error=detail)
+                if defer_retry:
+                    # `from None`: the original carries the full URL, key
+                    # and all, and would print it in any traceback.
+                    raise RetryLaterError(
+                        f"GET {shown_url} did not connect: {detail}",
+                        self._backoff(attempt)) from None
                 if attempt == config.MAX_ATTEMPTS:
                     logger.error("GET %s failed after %d attempts: %s",
                                  shown_url, attempt, detail)
@@ -252,11 +313,30 @@ class HttpClient:
             )
 
             if resp.status_code == 429 or resp.status_code >= 500:
+                delay = self._retry_delay(resp, attempt)
+                source = "Retry-After" if "Retry-After" in resp.headers else "backoff"
+                if defer_retry:
+                    logger.debug(
+                        "GET %s: HTTP %d — not ready; the caller returns in"
+                        " %.0fs or later (%s)",
+                        shown_url, resp.status_code, delay, source)
+                    raise RetryLaterError(
+                        f"HTTP {resp.status_code} from {shown_url}",
+                        delay, status=resp.status_code)
                 if attempt == config.MAX_ATTEMPTS:
                     logger.error("GET %s: HTTP %d, out of attempts", shown_url, resp.status_code)
                     self._raise_for_status(resp)
-                delay = self._retry_delay(resp, attempt)
-                source = "Retry-After" if "Retry-After" in resp.headers else "backoff"
+                if delay > config.MAX_RETRY_WAIT_SECONDS:
+                    # Review item D22: one header must not park a worker.
+                    # Not asking again this cycle honors the request; the
+                    # worker moves on to what it can still do.
+                    logger.warning(
+                        "GET %s: HTTP %d — the server asked for %.0fs (%s),"
+                        " longer than a worker is held (%ds); giving up on"
+                        " this request for now",
+                        shown_url, resp.status_code, delay, source,
+                        config.MAX_RETRY_WAIT_SECONDS)
+                    self._raise_for_status(resp)
                 logger.warning(
                     "GET %s: HTTP %d — waiting %.0fs (%s) before retry %d/%d",
                     shown_url, resp.status_code, delay, source,
@@ -275,6 +355,18 @@ class HttpClient:
 
     def requests_today(self):
         return self._requests_since(self._utc_day_start())
+
+    def monotonic(self):
+        """The clock this client paces on. A caller that schedules its own
+        return to a server (sync's set-aside downloads) reads this one, so
+        the pacing and the schedule can never disagree — and a test drives
+        both with the single fake it already injects."""
+        return self._monotonic()
+
+    def wait(self, seconds):
+        """Sleep on this client's clock; a non-positive wait is no wait."""
+        if seconds > 0:
+            self._sleep(seconds)
 
     def close(self):
         self._db.close()
@@ -314,18 +406,18 @@ class HttpClient:
         """The per-hour ceiling for this class, or None for no ceiling."""
 
     def _check_hourly_ceiling(self):
-        ceiling = self._hourly_ceiling()
+        ceiling = self._effective_hourly_ceiling()
         if ceiling is None:
             return
         n = self.requests_last_hour()
         if n >= ceiling:
+            share = "" if self.reserve_exempt else " [collector share]"
             logger.error(
-                "hourly %s ceiling reached: %d/%d in the last 60 minutes"
-                " — refusing", self.CLIENT_NAME, n, ceiling)
+                "hourly %s ceiling reached: %d/%d in the last 60 minutes%s"
+                " — refusing", self.CLIENT_NAME, n, ceiling, share)
             raise BudgetExceededError(
                 f"{n} {self.CLIENT_NAME} requests in the last hour; the"
-                f" hourly ceiling is {ceiling} per GUIDE.md §4 (half of the"
-                " publisher's documented allowance)")
+                f" hourly ceiling is {ceiling}{share} per GUIDE.md §4")
 
     def _check_daily_budget(self):
         n = self.requests_today()
@@ -392,11 +484,11 @@ class HttpClient:
 class GovinfoClient(HttpClient):
     CLIENT_NAME = "govinfo"
 
-    def get(self, path, params=None):
+    def get(self, path, params=None, defer_retry=False, attempt_no=1):
         url = path if path.startswith("http") else f"{config.API_BASE}/{path.lstrip('/')}"
         qp = dict(params or {})
         qp["api_key"] = config.api_key()
-        return super().get(url, qp)
+        return super().get(url, qp, defer_retry=defer_retry, attempt_no=attempt_no)
 
     def get_json(self, path, params=None):
         return self.get(path, params).json()

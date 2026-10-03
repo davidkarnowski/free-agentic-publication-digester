@@ -1253,6 +1253,92 @@ discipline:
   endpoint (297 of 755 calls on 2026-09-18) is recorded separately as an
   operational item and remains the next reduction to make.
 
+  **Amended 2026-10-03 (operator-authorized, on evidence) — a source that
+  is not ready does not hold the queue.** The operator's ruling, which is
+  the reason for the change: "the reality of having dozens of FedGov
+  sites and servers as collection sources means we are likely to see
+  outages, just as any server will have some downtime. Let's ensure these
+  source outages are not actually holding other collection or digestion
+  processes," and "let's rotate through the queue smartly if one source
+  is not available when it is tried, allowing for any good and operable
+  sources to function."
+
+  The evidence, recorded because a change to how we retry is not made on
+  preference:
+
+  - govinfo builds a court opinion's ZIP on demand and answers **503 with
+    `Retry-After: 30`** until the file exists. Over the ten days to
+    2026-10-03, **2,698 of 6,359** USCOURTS packages got that answer on
+    the first request. The second request succeeded **74%** of the time;
+    the third, fourth and fifth succeeded **34%, 21% and 14%**. Every
+    `Retry-After` in the retained log is 30 seconds.
+  - The client slept in place through each of those waits, and the
+    download queue is serial. Every package that was not ready therefore
+    stopped every package behind it, and every other govinfo collection
+    as well, because one worker serves the collections in turn.
+  - On 2026-10-02/03 the publisher's file generation failed for about
+    twelve hours. First requests still succeeded two times in three, but
+    the second request succeeded **13 times in 303**. Each failing
+    package held the queue for two minutes, the queue moved at about
+    thirty packages an hour, and **1,039 requests** were retries that
+    failed again. The backlog met the end of the day; a collector cycle
+    still in flight and the finalizer shared one hour and both stopped at
+    the hourly ceiling at 04:14 UTC; and **66 packages** filed under
+    2026-10-02 arrived after its digest had frozen (750 opinions counted,
+    919 on record).
+
+  The rule, in four parts:
+
+  1. **Set aside, continue, come back.** A download is tried once. When
+     the server says the file is not ready — a 503 or 429, any other 5xx,
+     or no connection — the package is set aside and the queue continues.
+     It is revisited after the rest of the queue has been served, **never
+     sooner than the server asked**, and the worker waits only when
+     nothing else is left to do.
+  2. **Three tries per package per cycle, down from five**
+     (`config.GOVINFO_DOWNLOAD_TRIES_PER_CYCLE`). A package still not
+     ready is tried again next cycle, and a failed cycle still counts
+     once toward the 48-cycle ceiling of the 2026-08-10 amendment,
+     however many tries it took.
+  3. **An unavailable source is left alone.** A second chance is any try
+     after a package's first: a revisit, or the first try of a package
+     that failed an earlier cycle. When ten second chances in a row are
+     turned down (`config.SOURCE_UNAVAILABLE_STREAK`), packages that
+     already failed an earlier cycle are no longer tried or revisited in
+     this cycle. They stay queued, they are not charged a failed cycle
+     they did not have, and the least-tried are probed first next time,
+     because the queue is now ordered by fewest failed cycles and then
+     newest. A package new to the cycle is never skipped for this
+     reason: a new document is always asked for. On an ordinary day ten
+     refusals in a row is about one chance in a million; in the outage
+     it is what happened, and the rule turns an outage's cost to the
+     publisher from several requests for every stuck package into a
+     handful of probes per cycle.
+  4. **No worker waits in place longer than 120 seconds on a server's
+     say-so** (`config.MAX_RETRY_WAIT_SECONDS`), for any source. A longer
+     `Retry-After` is honored by not asking again in that cycle. One
+     header could otherwise have parked a worker, or the end-of-day run
+     that waits for every host, for a day.
+
+  **And the finalizer's share of the hour.** The reserve that keeps
+  collectors to 85% of a daily budget (below, added 2026-07-31) now
+  applies to the hourly govinfo ceiling as well: collectors stop at
+  **680 of 800**. The ceiling itself is unchanged and still binds the
+  finalizer. A collector that rotates can use an hour more fully than
+  one that sleeps, and the invariant of this section is that continuous
+  polling must never starve the canonical run.
+
+  **What this amendment does not do.** It does not raise the per-second
+  pace, the hourly ceiling or the daily cap, and it adds no try that the
+  old in-place ladder did not make: it makes fewer. It does not let any
+  request be repeated sooner than the server asked. It does not change
+  the rule that failed attempts count against the budget. It does not
+  change the in-place ladder for listings, summaries and agency
+  requests, except to cap the wait as part 4 says. And one limit is
+  stated rather than solved: a `Retry-After` longer than the interval
+  between cycles is honored for the rest of that cycle but is not yet
+  remembered across cycles. None has ever been received.
+
   **Agency class raised 500 -> 1,500/day (amended 2026-07-31,
   operator-authorised).** The condition set was "as long as we aren't
   violating any bot/server restraints set by source servers", so the

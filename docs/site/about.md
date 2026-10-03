@@ -116,8 +116,9 @@ repository. Access to government servers follows a policy enforced in
 code, not by operator discipline:
 
 - **Paced:** at most 1 request per second sustained, and never more
-  than 500 govinfo requests in any hour — half of what the publisher's
-  own documentation permits per key.
+  than 800 govinfo requests in any hour — 80 percent of what the
+  publisher's own documentation permits per key. The continuous
+  collectors stop at 680, so the end-of-day run always has room.
 - **Budgeted:** hard daily request caps per source class (6,000 for
   govinfo, bounded by the hourly ceiling above; 3,000 for agency sites;
   100 for archive corroboration); the client refuses to exceed them,

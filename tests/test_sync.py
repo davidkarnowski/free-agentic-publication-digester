@@ -6,7 +6,7 @@ import pytest
 from conftest import install_digest_day_default
 
 from fapd import config, db, sync
-from fapd.client import BudgetExceededError
+from fapd.client import BudgetExceededError, RetryLaterError
 
 
 class FakeClient:
@@ -18,6 +18,15 @@ class FakeClient:
         self.content_by_url = {}  # exact url -> bytes
         self.calls = []
         self.raise_on = {}  # path/url -> exception to raise
+        # Queue rotation (GUIDE §4, 2026-10-03). `not_ready[url]` is the
+        # list of Retry-After values the server answers with before the
+        # file is there; `never_ready` urls are turned down every time.
+        self.not_ready = {}
+        self.never_ready = {}  # url -> the Retry-After it always asks for
+        self.tries = []  # (url, attempt_no, defer_retry, clock) per content GET
+        self.clock = 0.0  # one fake clock: each request costs a second
+        self.waits = []
+        self.events = []  # ("get", url) and ("wait", seconds), in order
 
     def paginate(self, path, params=None):
         self.calls.append(("paginate", path))
@@ -30,17 +39,34 @@ class FakeClient:
 
     def get_json(self, path, params=None):
         self.calls.append(("get_json", path))
+        self.clock += 1.0
         self._maybe_raise(path)
         return self.json_by_path[path]
 
-    def get(self, url, params=None):
+    def get(self, url, params=None, defer_retry=False, attempt_no=1):
         self.calls.append(("get", url))
+        self.events.append(("get", url))
+        self.clock += 1.0
+        self.tries.append((url, attempt_no, defer_retry, self.clock))
         self._maybe_raise(url)
+        if url in self.never_ready:
+            raise RetryLaterError("HTTP 503", self.never_ready[url], status=503)
+        if self.not_ready.get(url):
+            raise RetryLaterError("HTTP 503", self.not_ready[url].pop(0), status=503)
 
         class R:
             content = self.content_by_url.get(url, b"<doc/>")
 
         return R()
+
+    def monotonic(self):
+        return self.clock
+
+    def wait(self, seconds):
+        if seconds > 0:
+            self.waits.append(seconds)
+            self.events.append(("wait", seconds))
+            self.clock += seconds
 
     def _maybe_raise(self, key):
         if key in self.raise_on:
@@ -680,3 +706,291 @@ def test_the_collector_and_the_finalizer_share_one_download_cap():
         assert "config.GOVINFO_DOWNLOADS_PER_CYCLE" in text, rel
         assert "max_downloads=50" not in text, rel
         assert "max_downloads=100" not in text, rel
+
+
+# ------------------------------------------------------- queue rotation --
+# GUIDE §4, amended 2026-10-03. govinfo builds a court opinion's ZIP on
+# demand and answers 503 + Retry-After until it exists. The download pass
+# used to sleep in place through that wait, so one package that was not
+# ready stopped every package behind it; in the publisher's outage of
+# 2026-10-02/03 the queue moved at about thirty packages an hour and 66
+# packages reached the day after its digest froze. The pass now sets such
+# a package aside, serves the rest, and comes back — never sooner than the
+# server asked. Every test below fails on the code before that change.
+
+
+def queued(client, pids, collection="BILLS"):
+    """List `pids` (newest first as given) and give each a summary."""
+    pkgs = [bill(pid, f"2026-07-23T{10 + i:02d}:00:00Z", date=f"2026-07-{28 - i:02d}")
+            for i, pid in enumerate(pids)]
+    client.pages[f"collections/{collection}/"] = listing(pkgs)
+    for pid in pids:
+        with_summary(client, pid)
+
+
+def content_gets(client):
+    return [url.split("/")[3] for url, *_ in client.tries]
+
+
+def test_a_package_that_is_not_ready_does_not_hold_the_queue(conn, raw_dir):
+    client = FakeClient()
+    queued(client, ["A", "B", "C"])
+    client.not_ready["https://x/A/xml"] = [30]
+
+    stats = sync.sync_collection(client, conn, "BILLS")
+
+    assert stats["downloaded"] == 3 and stats["failed"] == 0
+    assert stats["not_ready"] == 1
+    # A was set aside; B and C were served before anyone waited for A
+    assert content_gets(client) == ["A", "B", "C", "A"]
+    first_wait = client.events.index(("wait", client.waits[0]))
+    assert client.events.index(("get", "https://x/C/xml")) < first_wait
+    # the revisit repeats one request, not two: the summary is not re-asked
+    assert client.calls.count(("get_json", "packages/A/summary")) == 1
+
+
+def test_a_revisit_never_comes_sooner_than_the_server_asked(conn, raw_dir):
+    client = FakeClient()
+    queued(client, ["A", "B"])
+    client.not_ready["https://x/A/xml"] = [30]
+
+    sync.sync_collection(client, conn, "BILLS")
+
+    a_tries = [clock for url, _, _, clock in client.tries if url.endswith("/A/xml")]
+    assert len(a_tries) == 2
+    assert a_tries[1] - a_tries[0] >= 30
+    # and no longer than it has to: the time B took came off the wait
+    assert sum(client.waits) < 30
+
+
+def test_tries_per_cycle_are_bounded_and_the_cycle_counts_once(conn, raw_dir):
+    client = FakeClient()
+    queued(client, ["A"])
+    client.never_ready["https://x/A/xml"] = 30
+
+    stats = sync.sync_collection(client, conn, "BILLS")
+
+    assert [n for _, n, _, _ in client.tries] == [1, 2, 3]
+    assert len(client.tries) == config.GOVINFO_DOWNLOAD_TRIES_PER_CYCLE
+    assert all(deferred for _, _, deferred, _ in client.tries)
+    assert stats["failed"] == 1 and stats["downloaded"] == 0
+    row = conn.execute("SELECT fetch_status, fetch_attempts, last_error FROM packages").fetchone()
+    # three tries are ONE failed cycle toward MAX_PACKAGE_FETCH_ATTEMPTS
+    assert (row["fetch_status"], row["fetch_attempts"]) == ("failed", 1)
+    assert "503" in row["last_error"]
+
+
+def test_packages_never_tried_go_before_ones_that_keep_failing(conn, raw_dir):
+    client = FakeClient()
+    queued(client, ["STUCK", "NEW"])           # STUCK is the newer date
+    sync.sync_collection(client, conn, "BILLS", list_only=True)
+    conn.execute("UPDATE packages SET fetch_status = 'failed', fetch_attempts = 3"
+                 " WHERE package_id = 'STUCK'")
+    conn.commit()
+
+    sync.sync_collection(client, conn, "BILLS")
+
+    assert content_gets(client) == ["NEW", "STUCK"]
+
+
+def test_second_chances_that_keep_failing_stop_the_asking(conn, raw_dir, monkeypatch):
+    """The signal that a source is unavailable rather than still building
+    a file. Packages that already failed a cycle are asked for again only
+    while the source is granting second chances; once it has turned down
+    `SOURCE_UNAVAILABLE_STREAK` in a row the rest are left queued and are
+    not charged a failed cycle they never had."""
+    monkeypatch.setattr(config, "SOURCE_UNAVAILABLE_STREAK", 2)
+    client = FakeClient()
+    old = ["O1", "O2", "O3", "O4", "O5"]
+    queued(client, [*old, "F1", "F2"])
+    sync.sync_collection(client, conn, "BILLS", list_only=True)
+    conn.execute("UPDATE packages SET fetch_status = 'failed', fetch_attempts = 1"
+                 " WHERE package_id LIKE 'O%'")
+    conn.commit()
+    for pid in old:
+        client.never_ready[f"https://x/{pid}/xml"] = 30
+
+    stats = sync.sync_collection(client, conn, "BILLS")
+
+    # the two new packages first, then two probes of the stuck set, then stop
+    assert content_gets(client) == ["F1", "F2", "O1", "O2"]
+    assert client.waits == []                       # nobody was waited for
+    assert stats["downloaded"] == 2 and stats["failed"] == 2
+    assert stats["source_unavailable"] is True
+    attempts = dict(conn.execute(
+        "SELECT package_id, fetch_attempts FROM packages WHERE package_id LIKE 'O%'"))
+    assert attempts == {"O1": 2, "O2": 2, "O3": 1, "O4": 1, "O5": 1}
+    # and the next cycle probes the ones that have waited longest
+    client.tries.clear()
+    sync.sync_collection(client, conn, "BILLS")
+    assert content_gets(client) == ["O3", "O4"]
+
+
+def test_a_new_package_always_gets_its_tries(conn, raw_dir, monkeypatch):
+    """A document nobody has asked for yet is never skipped because older
+    ones are failing: it gets every try a cycle allows."""
+    monkeypatch.setattr(config, "SOURCE_UNAVAILABLE_STREAK", 1)
+    client = FakeClient()
+    queued(client, ["OLD", "NEW"])
+    sync.sync_collection(client, conn, "BILLS", list_only=True)
+    conn.execute("UPDATE packages SET fetch_status = 'failed', fetch_attempts = 1"
+                 " WHERE package_id = 'OLD'")
+    conn.commit()
+    client.never_ready["https://x/OLD/xml"] = 30
+    client.never_ready["https://x/NEW/xml"] = 30
+
+    sync.sync_collection(client, conn, "BILLS")
+
+    gets = content_gets(client)
+    assert gets.count("NEW") == config.GOVINFO_DOWNLOAD_TRIES_PER_CYCLE
+    assert gets.count("OLD") == 1                   # probed once, then left
+
+
+def test_a_first_try_that_is_not_ready_says_nothing_about_the_source(
+        conn, raw_dir, monkeypatch):
+    """Nearly half of all first requests for a court opinion are answered
+    "not ready" on an ordinary day. That is the publisher building a file,
+    not an outage, and it must never trip the unavailable-source stop."""
+    monkeypatch.setattr(config, "SOURCE_UNAVAILABLE_STREAK", 2)
+    client = FakeClient()
+    pids = ["A", "B", "C", "D"]
+    queued(client, pids)
+    for pid in pids:
+        client.not_ready[f"https://x/{pid}/xml"] = [30]
+
+    stats = sync.sync_collection(client, conn, "BILLS")
+
+    assert stats["downloaded"] == 4 and stats["failed"] == 0
+    assert "source_unavailable" not in stats
+    assert content_gets(client) == [*pids, *pids]
+    # the four waits overlap: about one Retry-After in all, where the old
+    # in-place ladder slept four of them end to end
+    assert sum(client.waits) <= 30
+
+
+def test_a_wait_longer_than_a_cycle_holds_is_left_for_the_next_cycle(conn, raw_dir):
+    """Review item D22: one Retry-After must not park a worker. A request
+    to stay away for an hour is honored by not coming back this cycle."""
+    client = FakeClient()
+    queued(client, ["A"])
+    client.not_ready["https://x/A/xml"] = [3600]
+
+    stats = sync.sync_collection(client, conn, "BILLS")
+
+    assert client.waits == []
+    assert content_gets(client) == ["A"]
+    assert stats["failed"] == 1
+    row = conn.execute("SELECT fetch_status, fetch_attempts FROM packages").fetchone()
+    assert (row["fetch_status"], row["fetch_attempts"]) == ("failed", 1)
+
+
+def test_a_budget_halt_during_a_revisit_preserves_the_queue(conn, raw_dir):
+    client = FakeClient()
+    queued(client, ["A", "B"])
+
+    client.not_ready["https://x/A/xml"] = [30]   # then out of budget on the way back
+    original = client.get
+
+    def get(url, params=None, defer_retry=False, attempt_no=1):
+        if url.endswith("/A/xml") and attempt_no == 2:
+            raise BudgetExceededError("hourly ceiling")
+        return original(url, params, defer_retry=defer_retry, attempt_no=attempt_no)
+
+    client.get = get
+    with pytest.raises(BudgetExceededError):
+        sync.sync_collection(client, conn, "BILLS")
+    rows = dict(conn.execute("SELECT package_id, fetch_status FROM packages"))
+    assert rows == {"A": "pending", "B": "fetched"}
+    a = conn.execute("SELECT fetch_attempts FROM packages WHERE package_id='A'").fetchone()
+    assert a["fetch_attempts"] == 0                 # a halt is not the package's failure
+
+
+def test_rotation_end_to_end_with_the_real_client(conn, raw_dir, tmp_path, monkeypatch):
+    """The same rule through the real GovinfoClient — pacing, budgets and
+    the fetch log included — over a scripted session. What the log shows
+    is what the publisher saw: A asked for once, B and C served while A's
+    file was being built, A asked for again only after its Retry-After."""
+    import json
+
+    from fapd.client import GovinfoClient
+
+    monkeypatch.setenv("GOVINFO_API_KEY", "TESTKEY-abc123")
+    base = "https://api.govinfo.gov"
+
+    class Resp:
+        def __init__(self, status=200, body=b"zip", headers=None):
+            self.status_code, self.content, self.headers = status, body, headers or {}
+
+        def json(self):
+            return json.loads(self.content)
+
+        def raise_for_status(self):
+            pass
+
+    class Clock:
+        def __init__(self):
+            self.t = 0.0
+            self.sleeps = []
+
+        def monotonic(self):
+            return self.t
+
+        def sleep(self, seconds):
+            self.sleeps.append(seconds)
+            self.t += seconds
+
+    clock = Clock()
+    pids = ["USCOURTS-a", "USCOURTS-b", "USCOURTS-c"]
+    not_ready_once = {f"{base}/packages/USCOURTS-a/zip"}
+    asked = []
+
+    class Session:
+        def get(self, url, params=None, headers=None, timeout=None):
+            asked.append((url, clock.t))
+            if "/collections/" in url:
+                return Resp(body=json.dumps({"packages": [
+                    {"packageId": pid, "lastModified": "2026-10-02T20:00:00Z",
+                     "dateIssued": f"2026-10-0{3 - i}"}
+                    for i, pid in enumerate(pids)]}).encode())
+            if url.endswith("/summary"):
+                pid = url.split("/")[-2]
+                return Resp(body=json.dumps({
+                    "dateIssued": "2026-10-02",
+                    "download": {"zipLink": f"{base}/packages/{pid}/zip"}}).encode())
+            if url in not_ready_once:
+                not_ready_once.discard(url)
+                return Resp(503, b"", {"Retry-After": "30"})
+            return Resp()
+
+        def close(self):
+            pass
+
+    with GovinfoClient(db_path=tmp_path / "fetch_log.db", session=Session(),
+                       sleep=clock.sleep, monotonic=clock.monotonic) as client:
+        stats = sync.sync_collection(client, conn, "USCOURTS")
+        log = client._db.execute(
+            "SELECT url, status, attempt FROM fetch_log WHERE url LIKE '%/zip%'"
+            " ORDER BY id").fetchall()
+
+    assert stats["downloaded"] == 3 and stats["failed"] == 0 and stats["not_ready"] == 1
+    assert [(u.split("/")[-2][-1], s, a) for u, s, a in log] == [
+        ("a", 503, 1), ("b", 200, 1), ("c", 200, 1), ("a", 200, 2)]
+    a_times = [when for url, when in asked if url.endswith("USCOURTS-a/zip")]
+    assert a_times[1] - a_times[0] >= 30          # never sooner than asked
+    assert 30.0 not in clock.sleeps               # and nobody slept the full wait
+    # the key never reaches the log, deferral or not
+    assert all("TESTKEY" not in u for u, _, _ in log)
+
+
+def test_rotation_never_asks_more_than_the_ladder_it_replaced():
+    """The amendment's promise: the same or fewer requests, never more,
+    and every server signal still honored."""
+    assert config.GOVINFO_DOWNLOAD_TRIES_PER_CYCLE <= config.MAX_ATTEMPTS
+    # The publisher's standing Retry-After is 30 seconds. A cap below it
+    # would drop every not-ready package without the revisit that succeeds
+    # three times in four.
+    assert config.MAX_RETRY_WAIT_SECONDS >= 30
+    # Low enough to act within one cycle's probes, high enough that an
+    # ordinary run of bad luck cannot reach it (0.26 ** 10 is one in a
+    # million at the measured second-chance success rate).
+    assert 5 <= config.SOURCE_UNAVAILABLE_STREAK <= 20

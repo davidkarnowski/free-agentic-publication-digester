@@ -94,11 +94,14 @@ advances only after a listing completes — a failed sync re-lists the
 same window. A first sync with no watermark is date-bounded to a 3-day
 lookback; older history is only ever acquired as a deliberate bulk-data
 backfill, never an open-ended crawl. Requests are paced at 1 per second
-under a 6,000-per-day cap, itself bounded by a 500-requests-per-hour
-ceiling — half of what the publisher's own api.data.gov documentation
-permits per key, and the constraint that actually binds. Unchanged
-content is never re-downloaded, and server signals (Retry-After, rate
-headers, 5xx backoff) are honored exactly.
+under a 6,000-per-day cap, itself bounded by an 800-requests-per-hour
+ceiling — 80 percent of what the publisher's own api.data.gov
+documentation permits per key, and the constraint that actually binds.
+Unchanged content is never re-downloaded, and server signals
+(Retry-After, rate headers, 5xx backoff) are honored exactly. When the
+publisher says a file is not ready yet, that file is set aside while
+the rest of the queue is collected, and asked for again no sooner than
+the publisher said.
 
 **Agency polling.** Agency newsrooms and report publishers are polled
 through their feeds with conditional requests (ETag / If-Modified-Since)

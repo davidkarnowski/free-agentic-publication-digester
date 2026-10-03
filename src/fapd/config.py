@@ -94,10 +94,10 @@ MAX_AGENCY_REQUESTS_PER_DAY = 3000
 
 # Hourly ceiling (GUIDE §4, added 2026-07-31). api.data.gov — the shared GSA
 # service govinfo runs on — documents 1,000 requests per hour per key and
-# answers 429 when it is exceeded. We have never seen a 429. This ceiling is
-# half of what the key permits, enforced from the fetch log so it holds
-# across processes, and it is what makes a larger DAILY budget safe: the day
-# can grow without any hour approaching the publisher's stated limit.
+# answers 429 when it is exceeded. We have never seen a 429. This ceiling
+# began as half of what the key permits, enforced from the fetch log so it
+# holds across processes, and it is what makes a larger DAILY budget safe:
+# the day can grow without any hour approaching the publisher's stated limit.
 # Raised 500 -> 800 on 2026-09-18 (operator-authorised, GUIDE §4 amended
 # with the evidence). api.data.gov documents 1,000 requests per hour per
 # key; in 110,304 govinfo requests across the project's life we have had
@@ -122,10 +122,55 @@ MAX_GOVINFO_REQUESTS_PER_HOUR = 800
 # wants more than the ceiling allows is paced into the next one, which is
 # hours before the day closes.
 GOVINFO_DOWNLOADS_PER_CYCLE = 350
+# A source that is not ready does not hold the queue (GUIDE §4, amended
+# 2026-10-03, operator-authorised on evidence). govinfo builds a court
+# opinion's ZIP on demand and answers 503 with Retry-After: 30 until the
+# file exists. Over the ten days to 2026-10-03, 2,698 of 6,359 USCOURTS
+# packages got that answer on the first request. The second request, 30
+# seconds later, succeeded 74% of the time; the third, fourth and fifth
+# succeeded 34%, 21% and 14%. The client used to sleep in place through
+# every one of those waits, so each package that was not ready stopped the
+# whole download queue behind it. In the publisher's outage of
+# 2026-10-02/03 the second request succeeded 13 times in 303, the queue
+# moved at about thirty packages an hour, and 66 packages arrived after
+# their day's digest had frozen.
+#
+# A download is now tried once, set aside when the server says it is not
+# ready, and revisited after the rest of the queue — never sooner than the
+# server asked. Three tries per package per cycle, down from five: fewer
+# requests, and the tries that carry the yield. A package still not ready
+# after them is tried again next cycle, as before.
+GOVINFO_DOWNLOAD_TRIES_PER_CYCLE = 3
+# What "unavailable" means, as distinct from "still building a file": this
+# many second chances in a row turned down. A second chance is any try
+# after the first — a revisit this cycle, or the first try of a package
+# that already failed an earlier cycle. On an ordinary day second chances
+# succeed about three times in four, so ten refusals in a row is not bad
+# luck (about one chance in a million); in the 2026-10-02/03 outage they
+# failed nineteen times in twenty. When the streak is reached the pass
+# stops for that collection and the queue waits for the next cycle, so an
+# outage costs the publisher a handful of probes per cycle instead of
+# several requests for every stuck package. A package's FIRST try never
+# counts toward the streak and is never skipped because of it: a new
+# document is always asked for once.
+SOURCE_UNAVAILABLE_STREAK = 10
+# The longest any worker waits in place because a server asked it to
+# (Retry-After). A longer request is honored by not asking again this
+# cycle. Every Retry-After on record is 30 seconds; the cap exists so that
+# one header from one server can never park a worker — or the end-of-day
+# run, which waits for every host — for an hour (review item D22).
+MAX_RETRY_WAIT_SECONDS = 120
 # Reserved for the end-of-day finalizer. Collectors stop at this fraction of
 # the daily budget; only the finalizer may spend the remainder. On
 # 2026-07-30 the collectors spent all 2,000 govinfo requests on backlog and
 # the finalizer then could not sync the day it was finalizing.
+#
+# Since 2026-10-03 the same fraction is held back from every HOUR (GUIDE §4
+# amendment of that date): collectors stop at 85% of the hourly govinfo
+# ceiling, 680 of 800. On 2026-10-03 a collector cycle still in flight
+# when the day closed shared the hour with the finalizer, the two reached
+# 800 together at 04:14 UTC, and the finalizer's sync stopped after 113
+# downloads. The ceiling itself is unchanged and still binds the finalizer.
 EOD_BUDGET_RESERVE_FRACTION = 0.15
 # GUIDE §7: bump when the text-normalization/extraction logic changes;
 # text_sha256 values are only comparable within one normalizer version.

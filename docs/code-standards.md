@@ -23,7 +23,8 @@ optional parameters are the whole pattern.**
 |---|---|
 | `LLMClient(db_path=, runner=, backend=)` | `src/fapd/llm.py` — runner fakes the CLI; backend fakes the API |
 | `CLIBackend(runner=)` / `AnthropicBackend(client=)` | `src/fapd/llm.py` |
-| `HttpClient(db_path=, session=, sleep=, monotonic=, reserve_exempt=)` | `src/fapd/client.py` — `reserve_exempt=True` marks the EOD finalizer alone (GUIDE §4 reserve); nothing else may claim it |
+| `HttpClient(db_path=, session=, sleep=, monotonic=, reserve_exempt=)` | `src/fapd/client.py` — `reserve_exempt=True` marks the EOD finalizer alone (GUIDE §4 reserve); nothing else may claim it. `monotonic()` and `wait()` expose the same injected clock to a caller that schedules its own return to a server (`sync._download_pending`), so pacing and schedule share one clock and one fake drives both |
+| `HttpClient.get(defer_retry=, attempt_no=)` | `src/fapd/client.py` — the queue seam (GUIDE §4, 2026-10-03): one request, and a "not ready" answer raised as `RetryLaterError` with the server's wait, for a caller that has other work to do meanwhile. Counting, pacing and logging are unchanged |
 | `MailboxClient(...)` + `poll_mailbox(dkim_verifier=)` | `src/fapd/email_sources.py` |
 | `run_concurrent(client_factory=, wayback_factory=, conn_factory=)` | `src/fapd/agencies.py` |
 | `Supervisor(registry=, conn_factory=, govinfo_factory=, agency_factory=, wayback_factory=, mailbox_factory=, poll=, llm_factory=, llm_enabled=, intervals=, eod_enabled=, finalizer_runner=, evidence_runner=, today_builder=, sources_builder=)` | `src/fapd/collect.py` — the full constructor; `finalizer_runner`/`evidence_runner` are the subprocess seams, `today_builder`/`sources_builder` the render seams, `wayback_factory` the dev stack's `--no-wayback` hook |
@@ -196,6 +197,11 @@ are forbidden.
   together: the site's no-script, no-endpoint posture was adopted for
   reachability and is also its attack surface, and a future change
   that argues one away is arguing away both.
+- 2026-10-03 — §1 gains the `HttpClient.get(defer_retry=, attempt_no=)`
+  row and the client's public `monotonic()`/`wait()`, added with queue
+  rotation (GUIDE §4 amendment): the download pass schedules its own
+  returns, and a schedule is a clock dependency, so it reads the clock
+  the client already has injected instead of growing a second seam.
 - 2026-08-26 — §1 gains the publication-clock row (`sync.publication_*`
   with `tz=`), added when the clock became one config knob
   (`FAPD_PUBLICATION_TZ`, GUIDE §3 amendment): a clock is a dependency

@@ -158,8 +158,19 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
 - **Failed requests count against the request budget on purpose** — a 503
   cost the server a request. Do not "fix" the budget by excluding them.
 - **Collectors see a smaller budget than the finalizer** (85%, GUIDE §4
-  reserve). A client constructed `reserve_exempt=True` is the finalizer;
-  nothing else should be.
+  reserve) — of each day's budget and, since 2026-10-03, of each hour's
+  govinfo ceiling (680 of 800). A client constructed
+  `reserve_exempt=True` is the finalizer; nothing else should be.
+- **A download that is not ready is set aside, not slept on** (GUIDE §4,
+  amended 2026-10-03). govinfo answers 503 + `Retry-After` on nearly
+  half of all first requests for a court opinion while it builds the
+  file; the pass serves the rest of the queue and returns no sooner than
+  the server asked, three tries a cycle. Ten second chances turned down
+  in a row mark the source unavailable for the cycle and earlier
+  failures are left queued, uncharged. A package's FIRST try never
+  counts toward that streak and is never skipped by it. Do not restore
+  the in-place wait: it is what let one publisher's outage hold every
+  govinfo collection and cost the 2026-10-02 digest 66 packages.
 - **The retry ceiling is per ITEM as well as per run** (GUIDE §6 r14,
   `MAX_ITEM_SUMMARY_ATTEMPTS`). The per-run ceiling alone resets every
   cycle and the collector runs analyze every 15 minutes per pending date,
@@ -823,3 +834,22 @@ live in `.claude/agents/fapd-*.md` (tracked).
   where retry and queue load can rise without breaking a limit a source
   server instructs, raise them first — the corrections section is for
   what is still missed.
+- **2026-10-03** — **A source that is not ready does not hold the queue**
+  (operator; GUIDE §4 amended). "Let's ensure these source outages are
+  not actually holding other collection or digestion processes ... let's
+  rotate through the queue smartly if one source is not available when
+  it is tried." The download pass used to sleep in place through every
+  `Retry-After`; in the publisher's outage of 2026-10-02/03 each failing
+  package held the serial queue for two minutes, 1,039 requests were
+  retries that failed again, and 66 court-opinion packages arrived after
+  their digest froze. Ten days of fetch log shaped the fix and corrected
+  its first draft: the second try after a 503 succeeds 74% of the time
+  on ordinary days and 4% in the outage, so retries are kept and moved,
+  not dropped. A package is tried once, set aside, and revisited after
+  the rest of the queue, never sooner than the server asked; three tries
+  a cycle instead of five; ten refused second chances in a row leave the
+  earlier failures queued and uncharged; no worker waits more than 120
+  seconds on a server's say-so (review item D22); and collectors stop at
+  85% of each hour's govinfo ceiling so the finalizer always has room.
+  No budget, ceiling or pace was raised, and no request comes sooner
+  than a server asked.
