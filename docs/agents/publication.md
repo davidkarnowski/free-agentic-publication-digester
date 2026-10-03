@@ -245,6 +245,45 @@ docs/accessibility.md → this file.
   (`scripts/backfill_day_views.py`), and the digest header links
   `day/<date>.html` when the journal covers the date.
 
+- **Corrections section — what a frozen digest missed, published the way
+  a newspaper prints a correction** (added 2026-10-03, operator; **not
+  started**). *Operator rulings, binding for this task:*
+  1. **A frozen digest is never re-rendered.** "Re-render of frozen
+     digests breaks the integrity cycle": the digest, its manifest and
+     its place in the hash chain are the record of what was published
+     that day. A newspaper cannot recall an issue, reprint it and
+     redistribute it; it publishes a correction, and so do we.
+  2. **What a digest missed, and how it is being corrected, is published
+     separately**, in a corrections (amendments) section of the site, in
+     plain public-facing language, not technical detail.
+  3. **Collection comes first.** Where more retrying or queueing can be
+     done without breaking any limit a source server instructs, that is
+     the fix; the corrections section is for what was still missed.
+
+  *First step, before any code (GUIDE §10):* GUIDE §5's frozen-day
+  supersession clause (amended 2026-08-05) still says a digest MAY be
+  re-rendered and republished with an amendment notice when a
+  publisher-dated collection arrives late. Ruling 1 withdraws that
+  permission; the amendment is written and ratified first. Until then
+  the permission is simply not used.
+
+  *To settle in the plan* (`docs/ops/plan-task-template.md`): where
+  corrections live and how a reader of a frozen day finds them, given
+  that the day's own digest cannot change; whether a correction is
+  itself evidence (committed, hash-chained in the manifests); how agents
+  discover corrections (feed, JSON, the MCP service, Markdown twins);
+  how a correction is detected mechanically (documents filed under a day
+  that arrived after its freeze; a package that reached the retry
+  ceiling unfetched) and worded either without model prose or behind the
+  lexicon gate; and the §2a definition of done for a new page class.
+
+  *Cases waiting for the section:* the 2026-09-29 digest reports zero
+  Federal Register documents because that day's issue was never stored
+  (a defect of ours; the publisher served it every time); the 2026-10-02
+  digest counts 750 court opinions where 919 are on record for the day —
+  66 packages finished downloading after the freeze, during hours when
+  the publisher's download service was returning errors.
+
 ## Exit report
 
 Per orchestration.md §3: files modified; shared-file diffs (exact) or

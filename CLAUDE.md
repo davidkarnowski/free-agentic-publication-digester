@@ -806,3 +806,20 @@ live in `.claude/agents/fapd-*.md` (tracked).
   no past day's label changes. 2026-09-27 would have read all-idle.
   This briefly sat in §10 the same day and was fixed at the operator's
   request.
+- **2026-10-03** — **A frozen digest is never re-rendered; corrections
+  are published separately** (operator). Two gaps surfaced the same
+  morning: the 2026-09-29 digest shows zero Federal Register documents
+  because that day's issue was never stored, and the 2026-10-02 digest
+  froze 66 court-opinion packages short while the publisher's download
+  service was returning errors. Asked whether to re-render, the operator
+  ruled no: "Re-render of frozen digests breaks the integrity cycle." A
+  newspaper cannot recall an issue and reprint it; it prints a
+  correction. What a digest missed, and how it is being corrected, will
+  be published in a corrections section of the site, in plain language.
+  The section is filed as not-started Publication work
+  (`docs/agents/publication.md`). **GUIDE §5's supersession clause
+  (2026-08-05) still permits a re-render and is amended as that task's
+  first step; until then the permission is not used.** Same ruling:
+  where retry and queue load can rise without breaking a limit a source
+  server instructs, raise them first — the corrections section is for
+  what is still missed.
