@@ -12,7 +12,7 @@ import pytest
 from conftest import install_digest_day_default
 from PIL import Image
 
-from fapd import config, db, inference, report
+from fapd import config, corroboration, db, inference, report
 
 DATE = "2026-07-23"
 CREC_PKG = "CREC-2026-07-23"
@@ -391,6 +391,46 @@ def test_judicial_if_none_line_and_coverage(conn, tmp_path):
     # still land in the excluded remainder; district + bankruptcy stay
     # counted-only. 0 + 2 + 2 == 4 units.
     assert "| USCOURTS | 4 | 4 | 0 | 2 | 2 |" in md
+
+
+def test_cross_time_corroboration_reference(conn, tmp_path):
+    """The FR presidential document, when the same instrument was
+    published earlier on the White House feed, renders a reference to
+    that prior publication and still lists in full (GUIDE §3, 2026-10-02).
+    The render is deterministic and zero-LLM; it reads the stored link."""
+    eo_body = ("the president orders that each executive agency shall review "
+               "its existing regulations and submit a written report to the "
+               "office of management and budget within ninety days describing "
+               "measures to reduce administrative burden and improve service "
+               "to the american people consistent with applicable law") * 2
+    # Make the seeded FR PRESDOCU a real duplicate of an earlier action.
+    conn.execute(
+        "UPDATE extracted_texts SET title = ?, text = ?"
+        " WHERE package_id = ? AND granule_id = '2026-66666'",
+        ("Executive Order 14321—Protecting the National Parks",
+         "executive order 14321 " + eo_body + " filed federal register",
+         FR_PKG),
+    )
+    # The earlier White House publication, three days before this digest day.
+    add_package(conn, "PRESACT-2026-07-20", "PRESACT", date="2026-07-20")
+    conn.execute(
+        "UPDATE packages SET digest_day = '2026-07-20'"
+        " WHERE package_id = 'PRESACT-2026-07-20'")
+    add_text(conn, "PRESACT-2026-07-20", "", "PRESACT", "EO",
+             title="Protecting the National Parks",
+             metadata={"url": "https://www.whitehouse.gov/eo/parks"},
+             text=eo_body, chars=len(eo_body))
+    conn.commit()
+
+    created = corroboration.record_cross_source(conn, DATE)
+    assert len(created) == 1
+
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text(encoding="utf-8")
+    assert "Corroborated across time" in md
+    assert "first published by the White House on" in md
+    assert "https://www.whitehouse.gov/eo/parks" in md
+    # Still listed in full — never suppressed (decision 2).
+    assert "Protecting the National Parks" in md
 
 
 def test_validator_rejects_unknown_citation(digest, conn):

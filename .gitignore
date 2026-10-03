@@ -73,3 +73,6 @@ secrets/
 /docs/ops/plan-2026-08-06-phase7-logs.md
 /docs/code-review-2026-08-02.md
 /docs/code-review-2026-08-02-amended.md
+
+# Local production-DB backups (never committed — public repo + prod data)
+/backups/

@@ -30,7 +30,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from . import config, fedcal, inference
+from . import config, corroboration, fedcal, inference
 from .rules import CREC_FLOOR_CHAR_THRESHOLD
 from .sync import publication_date
 
@@ -687,6 +687,33 @@ def corroborate(entries, *, url_of, is_email):
         else:
             out.append((slot, []))
     return out
+
+
+def _prior_pub_lines(item):
+    """Cross-time corroboration reference (GUIDE §3, 2026-10-02): when a
+    document first reached us through an earlier publication on another
+    channel, the later entry says so — the prior publication's source and
+    date, linked — without being suppressed (operator decision 2). The
+    stored link is read in :func:`render` via
+    :func:`corroboration.prior_links`; the frozen earlier day is never
+    touched. Same note shape as the same-day ``_corroborators`` lines."""
+    priors = item.get("_prior_publication")
+    if not priors:
+        return []
+    lines = []
+    for p in priors:
+        source = p.get("prior_source") or "another official source"
+        when = p.get("prior_date") or "an earlier day"
+        url = p.get("prior_url")
+        reference = f"[{when}]({url})" if url else when
+        lines.append(
+            f"  - Corroborated across time: the same document was first"
+            f" published by {source} on {reference}, days before the"
+            " Federal Register compiled it. Listed here as the official"
+            " record of this day — the earlier publication is referenced,"
+            " not suppressed; both observations are preserved and counted."
+        )
+    return lines
 
 
 def _agency_rows(conn, date):
@@ -1471,7 +1498,7 @@ def _fr_item_lines(item, date, out_dir, assets):
         if value:
             head += f" {label}: {_one_line(value).rstrip('.')}."
     lines = [head, *_plain_line(item), _included_line(item),
-             _source_line(package_id, granule_id)]
+             _source_line(package_id, granule_id), *_prior_pub_lines(item)]
 
     matched = _item_graphics(assets, metadata.get("pages"))
     total = len(matched)
@@ -2500,6 +2527,11 @@ def render(conn, date, out_dir=None):
     # Summarized items plus the selected-but-unsummarized ones (GUIDE §6
     # r15): one list, one shape, so each section's builder renders both.
     items = _load_items(conn, date) + _load_unsummarized(conn, date)
+    # Cross-time corroboration (GUIDE §3, 2026-10-02): attach any stored
+    # link to an earlier publication of the same document so the item's
+    # renderer can reference it. Reads stored links only — detection ran
+    # once in the mechanical pipeline; this render stays zero-LLM.
+    corroboration.attach_prior_links(conn, items)
     lines = _header_lines(conn, date, git_short)
     lines += _day_in_review_lines(conn, date)
     lines += _crec_lines(conn, date, items)

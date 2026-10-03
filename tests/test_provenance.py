@@ -105,6 +105,36 @@ def test_manifest_chain_and_content(env, monkeypatch):
     assert entry_kinds == ["modified", "unchanged_304"]
 
 
+def test_manifest_includes_corroboration_links_by_utc_day(env):
+    """A corroboration link detected on a UTC day is appended to that
+    day's manifest as a discriminated record, and the header gains a
+    count (GUIDE §3, 2026-10-02, decision 6). A day with no links is
+    byte-identical to before this change — the hash chain is undisturbed."""
+    env.execute(
+        "INSERT INTO corroborations (package_id, granule_id, prior_package_id,"
+        " prior_granule_id, prior_collection, prior_source, prior_date,"
+        " prior_url, title_key, similarity, detected_at) VALUES"
+        " (?,?,?,?,?,?,?,?,?,?,?)",
+        ("FR-x", "g1", "PRESACT-y", "", "PRESACT", "the White House",
+         "2026-07-25", "https://wh.gov/eo", "an order", 0.52,
+         "2026-07-26T04:30:00Z"),
+    )
+    env.commit()
+    # A day with no links: unchanged shape, no corroboration lines/field.
+    m25 = provenance.export_manifest(env, "2026-07-25")
+    h25 = json.loads(m25.read_text().splitlines()[0])
+    assert "corroboration_links" not in h25
+    assert "corroboration" not in m25.read_text()
+    # The detection day carries the link.
+    m26 = provenance.export_manifest(env, "2026-07-26")
+    lines = m26.read_text().splitlines()
+    assert json.loads(lines[0])["corroboration_links"] == 1
+    link = json.loads(lines[-1])
+    assert link["record"] == "corroboration"
+    assert link["prior_package_id"] == "PRESACT-y"
+    assert link["similarity"] == 0.52
+
+
 def test_charset_fallback_deterministic(env):
     latin = "Café statement".encode("latin-1")
     body = b"<html><body>" + latin + b"</body></html>"

@@ -393,6 +393,23 @@ CREATE TABLE IF NOT EXISTS item_tags (
 
     PRIMARY KEY (package_id, granule_id, tag_kind, tag)
 ) WITHOUT ROWID;
+
+CREATE TABLE IF NOT EXISTS corroborations (
+    package_id        TEXT NOT NULL,            -- the later observation
+    granule_id        TEXT NOT NULL DEFAULT '',
+    prior_package_id  TEXT NOT NULL,            -- the earlier one it duplicates
+    prior_granule_id  TEXT NOT NULL DEFAULT '',
+    prior_collection  TEXT,                     -- the prior channel (e.g. PRESACT)
+    prior_source      TEXT,                     -- display label (e.g. the White House)
+    prior_date        TEXT,                     -- the prior publication's digest day
+    prior_url         TEXT,                     -- the prior official URL, for the reference
+    title_key         TEXT NOT NULL,            -- the normalized title that matched
+    similarity        REAL,                     -- word-shingle Jaccard, the audit score
+    detected_at       TEXT NOT NULL,            -- UTC stamp the link was recorded
+
+    PRIMARY KEY (package_id, granule_id, prior_package_id, prior_granule_id)
+) WITHOUT ROWID;
+CREATE INDEX IF NOT EXISTS idx_corroborations_pkg ON corroborations (package_id);
 """
 
 

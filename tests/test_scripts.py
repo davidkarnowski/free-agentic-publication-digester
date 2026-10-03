@@ -118,6 +118,8 @@ def test_main_runs_stages_in_order_and_keys_exit_on_out_path(monkeypatch, tmp_pa
     monkeypatch.setattr(
         run_pipeline, "stage_analyze",
         rec("analyze", {"before": (0, 0, 0), "after": (9, 9, 9)}))
+    monkeypatch.setattr(run_pipeline, "stage_corroborate",
+                        rec("corroborate", {"created": 0}))
     monkeypatch.setattr(
         run_pipeline, "stage_render",
         rec("render", (tmp_path / "2026-07-28.md", "PASSED")))
@@ -126,7 +128,7 @@ def test_main_runs_stages_in_order_and_keys_exit_on_out_path(monkeypatch, tmp_pa
 
     assert run_pipeline.main([]) == 0
     assert order == ["sync", "agencies", "email", "extract", "date",
-                     "analyze", "render", "site", "report", "close"]
+                     "analyze", "corroborate", "render", "site", "report", "close"]
 
 
 def test_main_exit_1_when_validation_fails(monkeypatch):
@@ -144,7 +146,8 @@ def test_main_exit_1_when_validation_fails(monkeypatch):
     monkeypatch.setattr(run_pipeline.db, "connect", lambda: FakeConn())
     monkeypatch.setattr(run_pipeline.logging_setup, "setup", lambda **kw: None)
     monkeypatch.setattr(run_pipeline.llm, "LLMClient", lambda *a, **kw: FakeLLMClient())
-    for name in ("stage_sync", "stage_agencies", "stage_email", "stage_extract"):
+    for name in ("stage_sync", "stage_agencies", "stage_email", "stage_extract",
+                 "stage_corroborate"):
         monkeypatch.setattr(run_pipeline, name, lambda *a, **kw: {})
     monkeypatch.setattr(
         run_pipeline, "stage_analyze",
@@ -434,7 +437,8 @@ def test_main_accepts_no_llm(monkeypatch, tmp_path):
     monkeypatch.setattr(run_pipeline.db, "connect", lambda: FakeConn())
     monkeypatch.setattr(run_pipeline.logging_setup, "setup", lambda **kw: None)
     for name in ("stage_sync", "stage_agencies", "stage_email", "stage_extract",
-                 "stage_day_view", "stage_source_text", "stage_insight"):
+                 "stage_corroborate", "stage_day_view", "stage_source_text",
+                 "stage_insight"):
         monkeypatch.setattr(run_pipeline, name, lambda *a, **kw: {})
     monkeypatch.setattr(run_pipeline, "stage_analyze",
                         lambda *a, **kw: {"before": (0, 0, 0), "after": (0, 0, 0)})

@@ -621,6 +621,48 @@ produces a row. `sender` is database-only: it never renders on the site
 or in a committed report (the site withholds addresses; the insight
 report prints counts and registry ids).
 
+### `corroborations` (2026-10-02; cross-time cross-source links)
+
+One row per recorded cross-day duplicate: a *later* observation of a
+document that duplicates an *earlier* publication of the same document on
+a different channel. The canonical case is a Federal Register
+presidential document (`FR`/`PRESDOCU`, the compilation) that duplicates
+an earlier White House presidential action (`PRESACT`, the origin),
+days apart. `report.corroborate` already merges *same-day, same-URL*
+observations in presentation; this table records the *cross-day*
+relationship as a stored, queryable, auditable fact so the render can
+reference the prior publication without re-deriving the match (GUIDE §3,
+amended 2026-10-02; `src/fapd/corroboration.py`).
+
+Keyed `(package_id, granule_id, prior_package_id, prior_granule_id)`,
+`WITHOUT ROWID`. The row direction is always **later → prior**, so a
+render fetches `WHERE package_id IN (the day's packages)` and only ever
+reads — never rewrites — the earlier, already-frozen day (operator
+decision 3). Every observation keeps its own distinct row elsewhere
+(GUIDE §3); this records a relationship *between* rows, it never merges
+or drops one.
+
+| column | meaning |
+|---|---|
+| `package_id`, `granule_id` | the later observation (the FR compilation) |
+| `prior_package_id`, `prior_granule_id` | the earlier one it duplicates (the White House action) |
+| `prior_collection` | the prior channel (e.g. `PRESACT`) |
+| `prior_source` | display label for the reference (e.g. *the White House*) |
+| `prior_date` | the prior publication's digest day — the date the reference shows |
+| `prior_url` | the prior official URL, for the reference link |
+| `title_key` | the normalized official title that matched (primary gate) |
+| `similarity` | word-shingle Jaccard of the two bodies — the secondary-check audit score |
+| `detected_at` | UTC stamp the link was recorded (write-once; also the manifest day) |
+
+Detection is mechanical, zero-LLM, write-once (`INSERT OR IGNORE`), and
+runs once in the end-of-day pipeline before render
+(`run_pipeline.stage_corroborate`). The match is two-stage: a
+deterministic `title_key` candidate, then a body-similarity confirmation
+(word-3-shingle Jaccard ≥ 0.15 **and** overlap/containment coefficient
+≥ 0.45 — thresholds set from the production corpus; see the module
+docstring). Links detected on a UTC day are also appended to that day's
+provenance manifest (decision 6).
+
 ## Continuous-ingestion layer (2026-07-30; docs/continuous-ingestion.md)
 
 `item_journal` — the intraday arrival journal, written by **post-cycle

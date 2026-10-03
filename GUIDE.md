@@ -716,6 +716,38 @@ direct HTML index pages where no feed exists). Governing rules:
   identity: the two package records, their captures, and their
   manifests remain distinct — de-duplicating at ingest would erase the
   corroborating observation, which is the opposite of its value.
+- **Cross-time corroboration (added 2026-10-02, operator decision).**
+  The same document also reaches us on *different* days through
+  different channels: the White House publishes an executive order or
+  proclamation on whitehouse.gov (`PRESACT`), and the Federal Register
+  compiles the same instrument days later (`FR`/`PRESDOCU`) — a measured
+  5-day median lag, tail to ~15 days. The same-day URL merge above cannot
+  see this; the two copies carry different official URLs on different
+  days. These cross-day duplicates are **recorded as a stored
+  relationship** (the `corroborations` table, `src/fapd/corroboration.py`)
+  so the later copy can reference the earlier publication. Binding rules:
+  **(1)** a **30-day** look-back window, stated publicly so readers
+  understand why a digest references a document first published earlier
+  (`docs/site/methods.md`); **(2)** the later copy is **never
+  suppressed** — it is listed as what the government said that day,
+  carrying the prior publication's **source and date**, in the same
+  presentation style as the same-day corroboration note; **(3)** the link
+  is recorded and shown on the day the **later** copy appears, pointing
+  back — the earlier, already-frozen day is read, never rewritten (§5);
+  **(4)** a normalized-title match is only a *candidate*; a programmatic
+  **secondary body-similarity confirmation** (word-shingle Jaccard plus a
+  containment check, thresholds measured from the corpus — no inference)
+  must confirm it before a link is recorded; **(5)** detection is
+  mechanical, zero-LLM, write-once, run once in the end-of-day pipeline;
+  **(6)** the link is appended to the day's committed, hash-chained
+  provenance manifest. As with the same-day rule, **every observation
+  stays its own distinct row** — this records a relationship *between*
+  rows, it never merges or drops one. Direction is inherent and
+  backfill-safe: the Federal Register is the compiler, never the origin,
+  so the 2026-08-06 White House-feed activation batch (months of actions
+  observed on one day) cannot create a spurious link. Scoped to
+  presidential documents for now; it generalizes behind an indexed title
+  key.
 - Ingestion obeys §4 unchanged: paced, budgeted (its own daily bucket),
   fully logged, conditional requests wherever the server supports them,
   robots.txt honored via an RFC 9309 parser with crawl-delay respected.
@@ -1452,6 +1484,21 @@ without touching upstream:
   "nothing happened." *(2026-08-06: observation-day filing — the §3
   amendment — removes the CREC case that motivated this amendment; it
   remains for genuine corrections.)*
+
+  **Amended 2026-10-02 — cross-time corroboration references a frozen
+  day, never rewrites it (operator).** When a document the digest carries
+  today was first published on an earlier day (§3 cross-time
+  corroboration — the Federal Register compiling a White House action
+  days after the fact), the reference is recorded and shown **on today's
+  entry**, pointing back to the earlier publication's source and date.
+  The earlier day's frozen digest, day view, and manifest are **read,
+  never rewritten** — a stored link whose direction is strictly
+  later→prior guarantees it (operator decision 3). This is not a
+  supersession and triggers no re-render of the earlier day: that day
+  published what it saw, correctly, and stands. The later copy is listed
+  in full, never suppressed; the earlier publication is referenced
+  alongside it, the same way the same-day corroboration note names the
+  other channel in place.
 
   **Amended 2026-08-26 — which clock a derived surface shows
   (operator).** Every derived surface that places observations on a

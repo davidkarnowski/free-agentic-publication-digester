@@ -34,6 +34,7 @@ from fapd import (
     analyze,
     assess,
     config,
+    corroboration,
     db,
     email_sources,
     extract,
@@ -42,6 +43,7 @@ from fapd import (
     insight,
     llm,
     logging_setup,
+    provenance,
     report,
 )
 from fapd.client import BudgetExceededError, GovinfoClient
@@ -214,6 +216,32 @@ def stage_analyze(conn, date, *, llm_client_factory=None):
     print("   " + finalize.summary_line(result), flush=True)
     return {"map": a, "plain": p, "compose": c, "sections": s, "tags": t,
             "layers": result["layers"], "before": before, "after": after}
+
+
+def stage_corroborate(conn, date):
+    """Cross-time cross-source corroboration (GUIDE §3, 2026-10-02):
+    mechanical, zero-LLM, before render. Record where a Federal Register
+    presidential document duplicates an earlier White House action so the
+    render can reference the prior publication without suppressing the
+    later copy. Links are write-once — a re-finalize records nothing new —
+    and when any are created this UTC day the daily manifest is refreshed
+    so the relationship lands in the committed, hash-chained provenance
+    (decision 6).
+
+    Best-effort by design: a detection failure must never cost the
+    finished digest (the finalizer-robustness doctrine, GUIDE §6 r15
+    family). The render reads whatever links exist — a missing link is an
+    absent reference, not a lost record — so a failure here is reported
+    and the run continues, exactly as the day-view and insight stages do."""
+    try:
+        created = corroboration.record_cross_source(conn, date)
+        if created:
+            provenance.export_manifest(conn)
+        print(f"   cross-source links: +{len(created)}", flush=True)
+        return {"created": len(created)}
+    except Exception as exc:  # noqa: BLE001 — see docstring
+        print(f"   corroboration failed: {exc!r} — continuing", flush=True)
+        return {"created": 0}
 
 
 def stage_render(conn, date, *, llm_client=None):
@@ -413,6 +441,11 @@ def main(argv=None) -> int:
     t0 = stage(f"STAGE 3/5 — ANALYZE (map + plain-speak + compose) for {date}")
     analysis = stage_analyze(conn, date)
     timings["analyze"] = time.monotonic() - t0
+    done(t0)
+
+    t0 = stage(f"STAGE 3b — CORROBORATE (cross-time cross-source links) for {date}")
+    stage_corroborate(conn, date)
+    timings["corroborate"] = time.monotonic() - t0
     done(t0)
 
     t0 = stage(f"STAGE 4/5 — RENDER + VALIDATE digest for {date}")

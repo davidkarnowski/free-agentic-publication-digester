@@ -214,6 +214,15 @@ def export_manifest(conn, date=None):
         """,
         (date,),
     ).fetchall()
+    # Cross-time corroboration links detected this UTC day (GUIDE §3,
+    # 2026-10-02, decision 6): the relationship is part of the committed,
+    # hash-chained provenance. Appended as distinct records with a
+    # ``"record": "corroboration"`` discriminator so the capture lines
+    # keep their shape. A day with no links produces a byte-identical
+    # manifest to before this change — the header gains its count only
+    # when links exist — so the existing chain is undisturbed.
+    from . import corroboration
+    links = corroboration.links_for_manifest(conn, date)
     header = {
         "manifest": date,
         "prev_manifest_sha256": _prev_manifest_sha(date),
@@ -222,8 +231,12 @@ def export_manifest(conn, date=None):
         "note": "one line per fetch attempt incl. 304s/refusals/errors;"
                 " hashes are of content as served to our identified client",
     }
+    if links:
+        header["corroboration_links"] = len(links)
     lines = [json.dumps(header, sort_keys=True)]
     lines += [json.dumps(dict(r), sort_keys=True) for r in rows]
+    lines += [json.dumps({"record": "corroboration", **link}, sort_keys=True)
+              for link in links]
     config.MANIFEST_DIR.mkdir(parents=True, exist_ok=True)
     path = config.MANIFEST_DIR / f"{date}.jsonl"
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
