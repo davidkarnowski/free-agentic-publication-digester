@@ -280,3 +280,18 @@ def test_dev_stack_does_not_mount_the_evidence_volumes():
             encoding="utf-8").splitlines()
         if not ln.lstrip().startswith("#"))
     assert "/app/digests" not in live and "/app/provenance" not in live
+
+
+def test_repo_export_and_build_context_exclude_local_db_backups():
+    """2026-10-02: a gitignored 1.7 GB production-database snapshot under
+    backups/ was rsynced toward the box by the repo export (rsync does not
+    read .gitignore), killed the deploy part-way, and left a partial copy
+    inside the backend build context. Two independent guards: the shared
+    exclude list keeps it off the box, .dockerignore keeps it out of the
+    image even if a copy is already there."""
+    excl = (PROJECT_ROOT / "deploy" / "common" / "repo-excludes.txt").read_text(encoding="utf-8")
+    assert "backups/" in excl.splitlines()
+    for d in (VPS, DEV):
+        lines = (d / ".dockerignore").read_text(encoding="utf-8").splitlines()
+        assert "repo/backups/" in lines, d
+    assert "/backups/" in (PROJECT_ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()

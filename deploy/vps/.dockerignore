@@ -4,3 +4,4 @@ secrets/
 placeholder/
 repo/data/
 repo/.venv/
+repo/backups/

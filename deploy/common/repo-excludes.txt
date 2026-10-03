@@ -30,3 +30,12 @@ deploy/vps/deploy.env
 # proof line is a constant in publish.py; the private key must never reach
 # the box or an image.
 secrets/
+# Local production-database backups (2026-10-02). A 1.7 GB snapshot under
+# backups/ is gitignored, but rsync does not read .gitignore: the deploy's
+# repo export shipped it toward the box, the upload died part-way, and the
+# partial copy sat in the backend build context where `COPY repo/ /app`
+# would have baked production data into an image. Excluded here AND from
+# the build context by .dockerignore (repo/backups/), so neither list has
+# to hold alone. --delete never removes an excluded path on the receiver:
+# a copy that already reached the box must be removed by hand.
+backups/
