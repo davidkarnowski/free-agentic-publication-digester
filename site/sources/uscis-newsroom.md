@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 4 item(s) in the last 14 days; most recent 2026-09-29; 0 of 96 request(s) to www.uscis.gov returned no content.
+**delivering** — 6 item(s) in the last 14 days; most recent 2026-10-02; 0 of 123 request(s) to www.uscis.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-02T03:48:29Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-03T03:48:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,24 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · no items ingested
+Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-09-29 |
-| Content length | 292 characters average, 291 median (shortest 220, longest 368) |
+| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-10-02 |
+| Content length | 274 characters average, 274 median (shortest 207, longest 368) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.uscis.gov | 96 request(s) · 96 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.uscis.gov | 123 request(s) · 123 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-02T04:18:06.020+00:00 UTC.
+last answered request 2026-10-03T04:14:37.220+00:00 UTC.
 
-4 item(s) in the last 14 days; most recent 2026-09-29; 0 of 96 request(s) to www.uscis.gov returned no content.
+6 item(s) in the last 14 days; most recent 2026-10-02; 0 of 123 request(s) to www.uscis.gov returned no content.
 
 ### All time
 
-- **Our requests to www.uscis.gov, all time (since 2026-09-28):** 96 request(s) · 96 answered · 0 returned no content
+- **Our requests to www.uscis.gov, all time (since 2026-09-28):** 123 request(s) · 123 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.uscis.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-03 | 0 | 0 | — |
 | 2026-09-04 | 0 | 0 | — |
 | 2026-09-05 | 0 | 0 | — |
 | 2026-09-06 | 0 | 0 | — |
@@ -127,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-29 | 1 | 29 | 156 |
 | 2026-09-30 | 0 | 26 | 196 |
 | 2026-10-01 | 0 | 28 | 159 |
-| 2026-10-02 | 0 | 1 | 160 |
+| 2026-10-02 | 2 | 27 | 155 |
+| 2026-10-03 | 0 | 1 | 158 |
 
 ## Our ingestion assessment
 

@@ -6,7 +6,7 @@
 
 # USDA NRCS (email)
 
-active · ingestion health: no data · Executive · Tier 2 · email bulletin · Department of Agriculture (NRCS)
+active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Agriculture (NRCS)
 
 Official site: https://www.nrcs.usda.gov/news · All sources: [sources.md](../sources.md)
 
@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**no data** — No bulletin recorded from this source in the last 180 days.
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-02, delivered by email.
 
-This label has held since 2026-10-01T21:38:40Z (UTC) and was last re-checked 2026-10-02T03:48:29Z (UTC).
+This label has held since 2026-10-02T13:48:30Z (UTC) and was last re-checked 2026-10-03T03:48:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,18 +62,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — none recorded in the lookback period |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-02 |
+| Content length | 1,170 characters average, 1,170 median (shortest 1,170, longest 1,170) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-02 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-No bulletin recorded from this source in the last 180 days.
+1 item(s) in the last 14 days; most recent 2026-10-02, delivered by email.
 
 ### All time
 
@@ -81,12 +83,45 @@ Bulletins from this source are delivered to the project mailbox, so there are no
 
 ### Last 30 days, day by day
 
-No requests and no items were recorded in the last 30 days, so there is nothing to chart.
+Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publication day the digests use; the stored request stamps remain UTC.
+
+| Day | Items ingested |
+|---|---|
+| 2026-09-04 | 0 |
+| 2026-09-05 | 0 |
+| 2026-09-06 | 0 |
+| 2026-09-07 | 0 |
+| 2026-09-08 | 0 |
+| 2026-09-09 | 0 |
+| 2026-09-10 | 0 |
+| 2026-09-11 | 0 |
+| 2026-09-12 | 0 |
+| 2026-09-13 | 0 |
+| 2026-09-14 | 0 |
+| 2026-09-15 | 0 |
+| 2026-09-16 | 0 |
+| 2026-09-17 | 0 |
+| 2026-09-18 | 0 |
+| 2026-09-19 | 0 |
+| 2026-09-20 | 0 |
+| 2026-09-21 | 0 |
+| 2026-09-22 | 0 |
+| 2026-09-23 | 0 |
+| 2026-09-24 | 0 |
+| 2026-09-25 | 0 |
+| 2026-09-26 | 0 |
+| 2026-09-27 | 0 |
+| 2026-09-28 | 0 |
+| 2026-09-29 | 0 |
+| 2026-09-30 | 0 |
+| 2026-10-01 | 0 |
+| 2026-10-02 | 1 |
+| 2026-10-03 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Subscription bulletins to the project mailbox, ingested by the email adapter with DKIM verification and alignment. Activated 2026-10-01 on observed delivery. The project mailbox received NRCS bulletins during the late-September changeover window (e.g., 'USDA Invests $52 Million in 19 Projects to Expand Wildlife Conservation'). However, the collector logs show no bulletins have yet been recorded as items in the system as of 2026-10-02 03:51 UTC. The source is subscribed through GovDelivery (sender usdafarmers@public.govdelivery.com) and registered in the active tier. The delay between observed mail delivery and recorded items is noted.
+The Natural Resources Conservation Service delivers conservation announcements to the project mailbox via GovDelivery (sender usdafarmers@public.govdelivery.com). Activated 2026-10-01 on observed delivery, with one bulletin recorded 2026-10-02 at 1,170 characters carrying conservation-program and funding announcements. All messages pass DKIM verification and alignment. The source is registered at tier 2 with active status; delivery cadence and format patterns are not yet established from a single item.
 
-_Model-written assessment of our own ingestion, generated 2026-10-02 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-03 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -298,6 +298,24 @@ Published request statistics begin 2026-07-30, the day this service
 went into production — earlier development-machine traffic is excluded,
 and the pages say so where the numbers render.
 
+**Why a digest sometimes references an earlier day.** The same
+government document can reach us through more than one official channel,
+days apart. The clearest case: the White House publishes an executive
+order or proclamation on whitehouse.gov the day it is signed, and the
+Federal Register compiles that same instrument a few days later — a
+five-day lag is typical. When that happens, we do not hide the later
+copy and we do not rewrite the earlier day: the Federal Register entry
+is listed in full as the official record of its own day, carrying a
+reference back to the White House publication's date and source, so you
+can see that the document first reached this digest earlier. This match
+is made mechanically, with no language model — a document's official
+title identifies a candidate, and a programmatic comparison of the two
+documents' text confirms it is genuinely the same document before any
+reference is recorded. The relationship is stored, looked back across a
+30-day window, and written into the day's hash-chained provenance
+manifest. Every observation stays its own record; we are recording that
+two records describe one document, never merging or dropping either.
+
 **Canonical Markdown, derived HTML.** The Markdown digest in the
 repository is the canonical artifact. The HTML site — including this
 page — is a derived, zero-model presentation layer, regenerable at any

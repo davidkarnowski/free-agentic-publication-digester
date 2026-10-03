@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-01; 0 of 347 request(s) to news.uscourts.gov returned no content.
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-01; 0 of 348 request(s) to news.uscourts.gov returned no content.
 
-This label has held since 2026-10-01T14:01:43Z (UTC) and was last re-checked 2026-10-02T03:48:29Z (UTC).
+This label has held since 2026-10-01T14:01:43Z (UTC) and was last re-checked 2026-10-03T03:48:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,7 +70,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -79,15 +79,15 @@ Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · 1 item(s) i
 | Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-01 |
 | Content length | 19,356 characters average, 19,356 median (shortest 19,356, longest 19,356) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to news.uscourts.gov | 347 request(s) · 347 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to news.uscourts.gov | 348 request(s) · 348 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-02T04:18:06.398+00:00 UTC.
+last answered request 2026-10-03T04:14:37.613+00:00 UTC.
 
-1 item(s) in the last 14 days; most recent 2026-10-01; 0 of 347 request(s) to news.uscourts.gov returned no content.
+1 item(s) in the last 14 days; most recent 2026-10-01; 0 of 348 request(s) to news.uscourts.gov returned no content.
 
 ### All time
 
-- **Our requests to news.uscourts.gov, all time (since 2026-07-30):** 1,837 request(s) · 1,836 answered · 1 returned no content
+- **Our requests to news.uscourts.gov, all time (since 2026-07-30):** 1,864 request(s) · 1,863 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to news.uscourts.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-03 | 0 | 26 | 882 |
 | 2026-09-04 | 0 | 26 | 429 |
 | 2026-09-05 | 0 | 33 | 606 |
 | 2026-09-06 | 0 | 26 | 369 |
@@ -126,7 +125,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-29 | 0 | 28 | 362 |
 | 2026-09-30 | 0 | 26 | 389 |
 | 2026-10-01 | 1 | 27 | 326 |
-| 2026-10-02 | 0 | 1 | 283 |
+| 2026-10-02 | 0 | 27 | 334 |
+| 2026-10-03 | 0 | 1 | 433 |
 
 ## Our ingestion assessment
 

@@ -14,6 +14,24 @@ Official site: https://www.nhi.fhwa.dot.gov/ · All sources: [sources.md](../sou
 
 The National Highway Institute is the training arm of the Federal Highway Administration. Its bulletins carry course offerings and training-program announcements for the transportation workforce.
 
+**Model-written orientation**
+
+The National Highway Institute (NHI) is the training division of the Federal Highway Administration, part of the Department of Transportation. It publishes bulletins announcing course offerings and professional development programs for the transportation workforce.
+
+The National Highway Institute (NHI) is the training and professional development arm of the Federal Highway Administration (FHWA), which operates within the Department of Transportation. The FHWA oversees the nation's interstate highway system and provides technical assistance to state transportation agencies, and NHI serves as its primary vehicle for workforce development and continuing education.
+
+NHI publishes course announcements and training-program bulletins covering a broad range of topics relevant to transportation professionals, including highway design, construction, maintenance, safety, and management. These publications are directed at practitioners—engineers, planners, administrators, and technicians—working in state departments of transportation, local governments, and the transportation consulting industry.
+
+The documents you will see in this digest from NHI are course catalogs, training schedules, and announcements of new or updated programs. These are typically formatted as bulletins describing course content, dates, registration information, and intended audience. The content reflects NHI's role as an educational institution: most items focus on technical skills, professional certification, and updating the workforce on evolving practices and standards.
+
+NHI operates training delivery in multiple formats, from in-person seminars to online instruction, and its publications reflect this mix. Announcements may cover new training initiatives, upcoming sessions, changes to existing programs, or resources made available to practitioners nationwide.
+
+In the context of this digest, NHI's bulletins represent training and professional-development activities within the federal transportation system. Unlike agency press releases or policy announcements, these documents are primarily informational—they tell the transportation workforce what educational opportunities are available. The digest includes them because they represent official government activity and are part of the public record of federal agency communications.
+
+Readers interested in transportation policy, infrastructure, or workforce development may find value in tracking these announcements. For professionals in the transportation field, NHI bulletins are a direct source of continuing education and professional advancement opportunities.
+
+_Model-written orientation, generated 2026-10-03 by haiku, prompt version 1. It may draw on general knowledge of public institutions and is not official-record content._
+
 ## Identity and registry record
 
 | Field | Value |
@@ -44,7 +62,7 @@ The National Highway Institute is the training arm of the Federal Highway Admini
 
 **no data** — No bulletin recorded from this source in the last 180 days.
 
-This label has held since 2026-10-01T21:38:40Z (UTC) and was last re-checked 2026-10-02T03:48:29Z (UTC).
+This label has held since 2026-10-01T21:38:40Z (UTC) and was last re-checked 2026-10-03T03:48:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
