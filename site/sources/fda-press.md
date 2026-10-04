@@ -52,7 +52,7 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 **delivering** — 7 item(s) in the last 14 days; most recent 2026-10-01; 0 of 359 request(s) to www.fda.gov returned no content.
 
-This label has held since 2026-09-15T14:20:47Z (UTC) and was last re-checked 2026-10-03T03:48:44Z (UTC).
+This label has held since 2026-09-15T14:20:47Z (UTC) and was last re-checked 2026-10-04T03:57:33Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,13 +73,13 @@ Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · no items in
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.fda.gov | 359 request(s) · 359 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-03T04:14:36.993+00:00 UTC.
+last answered request 2026-10-04T04:00:11.692+00:00 UTC.
 
 7 item(s) in the last 14 days; most recent 2026-10-01; 0 of 359 request(s) to www.fda.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fda.gov, all time (since 2026-07-30):** 1,895 request(s) · 1,894 answered · 1 returned no content
+- **Our requests to www.fda.gov, all time (since 2026-07-30):** 1,921 request(s) · 1,920 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
 
@@ -89,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fda.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-04 | 2 | 28 | 259 |
 | 2026-09-05 | 0 | 33 | 311 |
 | 2026-09-06 | 0 | 26 | 222 |
 | 2026-09-07 | 0 | 26 | 208 |
@@ -118,7 +117,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-30 | 1 | 27 | 159 |
 | 2026-10-01 | 1 | 28 | 270 |
 | 2026-10-02 | 0 | 27 | 179 |
-| 2026-10-03 | 0 | 1 | 212 |
+| 2026-10-03 | 0 | 26 | 228 |
+| 2026-10-04 | 0 | 1 | 226 |
 
 ## Our ingestion assessment
 

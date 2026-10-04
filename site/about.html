@@ -243,8 +243,9 @@ repository. Access to government servers follows a policy enforced in
 code, not by operator discipline:</p>
 <ul>
 <li><strong>Paced:</strong> at most 1 request per second sustained, and never more
-  than 500 govinfo requests in any hour — half of what the publisher's
-  own documentation permits per key.</li>
+  than 800 govinfo requests in any hour — 80 percent of what the
+  publisher's own documentation permits per key. The continuous
+  collectors stop at 680, so the end-of-day run always has room.</li>
 <li><strong>Budgeted:</strong> hard daily request caps per source class (6,000 for
   govinfo, bounded by the hourly ceiling above; 3,000 for agency sites;
   100 for archive corroboration); the client refuses to exceed them,
@@ -262,7 +263,7 @@ code, not by operator discipline:</p>
 </ul>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-10-03T04:26:22Z (UTC). Canonical source:
+  <p>Generated 2026-10-04T04:03:32Z (UTC). Canonical source:
   <code>docs/site/about.md</code> in the
   <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in
