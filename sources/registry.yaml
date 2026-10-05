@@ -156,6 +156,22 @@
   added: "2026-07-26"
   notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Research 2026-07-28: State documents feeds at state.gov/rss-feeds; an indexed live feed exists at state.gov/rss-feed/department-press-briefings/feed/ (implying .../press-releases/feed/). Site soft-blocks some non-browser clients but served our identified client HTTP 200 in July — re-probe the /rss-feed/<category>/feed/ URLs. Email sibling registered 2026-07-29: state-week-email (partial: weekly newsletter, not the press-statement stream) (GUIDE §3 email class; the web status here is unchanged). Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Phase 5, 2026-07-31: the html-index adapter now exists and was run against this source's captured index bytes. Against the 2026-07-31 capture (644 KB) it finds no article links at all, let alone dated ones: the listing is assembled client-side. This is a script-rendered listing; opening it needs evidence of a dated channel, not a cadence decision."
 
+- id: state-travel-advisories
+  name: State Travel Advisories
+  branch: executive
+  parent_org: Department of State
+  description: "The State Department's Bureau of Consular Affairs keeps a travel advisory for each country, rating it from Level 1 (exercise normal precautions) to Level 4 (do not travel) and giving the reasons. An advisory is re-issued when its level or content changes or after periodic review; across all countries that happens several times a week."
+  type: rss
+  tier: 2
+  adapter: travel-advisories
+  urls:
+    home: https://travel.state.gov/content/travel/en/traveladvisories/traveladvisories.html
+    feed: https://travel.state.gov/_res/rss/TAsTWs.xml
+  method: Polls the travel-advisory RSS feed via AgencyClient, feed metadata only (travel-advisories adapter), keeping advisories dated within the lookback window; each item's description carries the advisory text.
+  status: active
+  added: "2026-10-05"
+  notes: "Registered 2026-10-05 from the 2026-10-04 source research. Probed 2026-10-04 through FAPD's identified probe client: the feed answered HTTP 200 (956 KB, 216 items); the sample advisory page answered 403, recorded and not retried. Re-verified 2026-10-05 from the operator machine as a brief test, outside the server's budget, through FAPD's identified probe client (robots allows, no crawl-delay, no Retry-After, HTTP 200) for the feed (614 KB, 223 items, 223/223 dated, date-only RFC 822 'Tue, 15 Sep 2026'); its robots.txt answered 403, which the client reads as allow (RFC 9309), and no advisory page was requested. Three findings shaped a dedicated adapter (operator-approved 2026-10-05): the feed is a snapshot of every advisory in force (back to 2023-06), not a list of recent posts, so it is bounded to the lookback window; every item's GUID is the country's permanent page, which a re-issue keeps, so identity is the GUID plus the advisory's date, or each re-issue would be deduped away (disclosed limit: an edit made without a new date is not seen); and the advisory pages refuse FAPD, so it is feed-only, with the advisory text taken from the item description (~2,000 characters on average). Gate 2 through the adapter, 2026-10-05: 223 items read, 0 inside the 7-day window (the newest advisory was dated 2026-09-15), none undated; the channel's own pubDate is the moment of the request, so the feed is generated live, not a stale file. The feed sends no ETag or Last-Modified, so every hourly poll is a full fetch (about 614 KB, compressed in transit); the home URL is the one the feed's channel names. Coverage (gate 3): every re-issue dated inside the window. Of the advisories in force on 2026-10-05, 48 carried an August 2026 date and 17 a September date; a country re-issued twice shows only its latest, so these count countries, not re-issues. To measure after activation: whether an advisory is posted on the date it carries (one posted a day late is counted as backfill, not listed). ACTIVATED 2026-10-05 (operator)."
+
 - id: treasury-newsroom
   name: Treasury Press Releases
   branch: executive
@@ -461,14 +477,15 @@
   branch: executive
   parent_org: Independent agency
   description: "The National Labor Relations Board adjudicates private-sector labor-relations cases and conducts union elections. Its news-release index carries announcements of board decisions, election results, and enforcement actions, typically a few items per week."
-  type: html-index
+  type: rss
   tier: 1
   urls:
     home: https://www.nlrb.gov/news-publications/news/news-releases
-  method: Would parse the news-release HTML index daily for new items.
-  status: planned
+    feed: https://www.nlrb.gov/rss/rssPressReleases.xml
+  method: Polls the press-release RSS feed via AgencyClient, then fetches each new release for full text (mode full).
+  status: active
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Phase 5, 2026-07-31: the html-index adapter now exists and was run against this source's captured index bytes. Against the 2026-07-31 capture it reads listing has 229 article link(s); 1 dated inside the 7-day lookback, 26 dated outside it, 202 skipped for no readable date, and the entries it lists carry the publisher's own dates. Activation awaits the operator's polling-cadence decision (the agency class holds 500 requests a day). Probed 2026-08-06: the Drupal Views convention <index-path>/feed.xml — confirmed working on nih-news and tsa-press — returns 404 here. Recorded as a negative so the next reader does not repeat the guess: on this registry, mining a source's own captured page for feed links finds feeds, and guessing platform conventions does not (14 of 14 candidates 404'd)."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Phase 5, 2026-07-31: the html-index adapter now exists and was run against this source's captured index bytes. Against the 2026-07-31 capture it reads listing has 229 article link(s); 1 dated inside the 7-day lookback, 26 dated outside it, 202 skipped for no readable date, and the entries it lists carry the publisher's own dates. Activation awaits the operator's polling-cadence decision (the agency class holds 500 requests a day). Probed 2026-08-06: the Drupal Views convention <index-path>/feed.xml — confirmed working on nih-news and tsa-press — returns 404 here. Recorded as a negative so the next reader does not repeat the guess: on this registry, mining a source's own captured page for feed links finds feeds, and guessing platform conventions does not (14 of 14 candidates 404'd). ACTIVATED 2026-10-05 (operator) on https://www.nlrb.gov/rss/rssPressReleases.xml, listed on NLRB's own RSS page (nlrb.gov/resources/rss-feeds), which is how it was found after the convention guesses failed. Probed 2026-10-04 through FAPD's identified probe client. Re-verified 2026-10-05 from the operator machine as a brief test, outside the server's budget, through FAPD's identified probe client (robots allows, no crawl-delay, no Retry-After, HTTP 200): 10 items, 10/10 with GUID and date; newest 2026-09-11, the same five newest dates the listing page shows (NLRB had posted nothing newer). The feed's descriptions carry the release text (~2,800 characters on average); the article is fetched anyway for the page of record (sample extracted at 10,520 characters). Coverage (gate 3): 10 items spanned 2026-08-17 to 09-11, about three a week, inside the feed's depth at an hourly poll."
 
 - id: fec-newsroom
   name: FEC Press Releases
@@ -684,28 +701,45 @@
   branch: executive
   parent_org: Department of the Treasury
   description: "The Office of the Comptroller of the Currency, a Treasury bureau, charters and supervises national banks and federal savings associations. Its news-release index carries supervision and enforcement announcements, including monthly enforcement-action lists, typically a few items per week."
-  type: html-index
+  type: rss
   tier: 2
   urls:
     home: https://www.occ.gov/news-issuances/news-releases/
-  method: Would poll the documented RSS suite (occ.gov/rss/index-rss.html) for news releases, bulletins, and alerts.
-  status: planned
+    feed: https://www.occ.gov/rss/occ_news.xml
+  method: Polls OCC's News Releases RSS feed via AgencyClient, then fetches each new release for full text (mode full). The feed carries no GUIDs, so identity is the release link.
+  status: active
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — but research 2026-07-28 found OCC documents an RSS index at occ.gov/rss/index-rss.html with separate feeds for News Releases, Bulletins, Alerts, and Public Service Announcements (Bulletins/Alerts add supervisory-guidance coverage beyond press). Capture exact feed URLs from that page at probe; upgrade type to rss on confirmation. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Phase 5, 2026-07-31: the html-index adapter now exists and was run against this source's captured index bytes. Against the 2026-07-31 capture it reads listing has 77 article link(s); 0 dated inside the 7-day lookback, 0 dated outside it, 77 skipped for no readable date — the served HTML states no per-entry publication date, so every entry is skipped rather than dated by observation. This is a script-rendered listing; opening it needs evidence of a dated channel, not a cadence decision. Probed 2026-08-06: https://www.occ.gov/rss/index-rss.html is an HTML index of RSS offerings, not a feed (verdict html-only)."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — but research 2026-07-28 found OCC documents an RSS index at occ.gov/rss/index-rss.html with separate feeds for News Releases, Bulletins, Alerts, and Public Service Announcements (Bulletins/Alerts add supervisory-guidance coverage beyond press). Capture exact feed URLs from that page at probe; upgrade type to rss on confirmation. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Phase 5, 2026-07-31: the html-index adapter now exists and was run against this source's captured index bytes. Against the 2026-07-31 capture it reads listing has 77 article link(s); 0 dated inside the 7-day lookback, 0 dated outside it, 77 skipped for no readable date — the served HTML states no per-entry publication date, so every entry is skipped rather than dated by observation. This is a script-rendered listing; opening it needs evidence of a dated channel, not a cadence decision. Probed 2026-08-06: https://www.occ.gov/rss/index-rss.html is an HTML index of RSS offerings, not a feed (verdict html-only). ACTIVATED 2026-10-05 (operator) on the feed OCC documents on its RSS index page, https://www.occ.gov/rss/occ_news.xml. Probed 2026-10-04 through FAPD's identified probe client. Re-verified 2026-10-05 from the operator machine as a brief test, outside the server's budget, through FAPD's identified probe client (robots allows, no crawl-delay, no Retry-After, HTTP 200): 10 items, 10/10 dated in RFC 822 form without a weekday ('5 Oct 2026 16:30:00 -0400'), which report._claimed_day reads; no GUIDs, so identity is the release link, which carries the year and release number. The newest item was dated the day of the check and its own page states the same date; the sample release extracted at 6,503 characters. Coverage (gate 3): 10 items spanned 2026-09-10 to 10-05, so the feed's depth comfortably exceeds what an hourly poll can miss; descriptions are ~250-character teasers, so full mode. The listing page still states no per-entry date (0 entries read 2026-10-05), which is why the feed and not the listing is the channel."
+
+- id: occ-bulletins
+  name: OCC Bulletins
+  branch: executive
+  parent_org: Department of the Treasury
+  description: "The Office of the Comptroller of the Currency's bulletins are its numbered supervisory issuances to national banks and federal savings associations: guidance, handbook revisions, rescissions, and notices of rulemaking. They are a separate series from its news releases, typically several a month."
+  type: rss
+  tier: 2
+  urls:
+    home: https://www.occ.gov/rss/index-rss.html
+    feed: https://www.occ.gov/rss/occ_bulletins.xml
+  method: Polls OCC's Bulletins RSS feed via AgencyClient, then fetches each new bulletin for full text (mode full). The feed carries no GUIDs, so identity is the bulletin link.
+  status: active
+  added: "2026-10-05"
+  notes: "Registered and ACTIVATED 2026-10-05 (operator), from the 2026-10-04 source research: OCC's RSS index page lists a Bulletins feed beside News Releases. Probed 2026-10-04 through FAPD's identified probe client. Re-verified 2026-10-05 from the operator machine as a brief test, outside the server's budget, through FAPD's identified probe client (robots allows, no crawl-delay, no Retry-After, HTTP 200): 10 items, 10/10 dated in RFC 822 form without a weekday, no GUIDs (identity is the bulletin link, which carries the year and bulletin number). Newest item 2026-09-30; its own page states the same date; the sample bulletin extracted at 6,333 characters. Coverage (gate 3): 10 items spanned 2026-08-27 to 09-30 (seven in September), well inside the feed's depth at an hourly poll; descriptions are ~390-character summaries, so full mode. Overlap: an OCC rulemaking also appears in the Federal Register, which govinfo-fr already collects; the two are separate documents (the bulletin is OCC's notice to banks), not merged."
 
 - id: cfpb-newsroom
   name: CFPB Newsroom
   branch: executive
   parent_org: Independent agency
-  description: "The Consumer Financial Protection Bureau regulates consumer financial products and services. Its newsroom index carries press releases and statements on rules, supervision, and enforcement actions, typically a few items per week."
-  type: html-index
+  description: "The Consumer Financial Protection Bureau regulates consumer financial products and services. Its newsroom carries press releases and statements on rules, supervision, and enforcement actions; in 2026 it has posted about one item a month."
+  type: rss
   tier: 2
   urls:
     home: https://www.consumerfinance.gov/about-us/newsroom/
-  method: HTML index diff via AgencyClient (pending content evaluation)
-  status: planned
+    feed: https://www.consumerfinance.gov/about-us/newsroom/feed/
+  method: Polls the newsroom RSS feed via AgencyClient, then fetches each new release for full text (mode full).
+  status: active
   added: "2026-07-26"
-  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Phase 5, 2026-07-31: the html-index adapter now exists and was run against this source's captured index bytes. Against the 2026-07-31 capture it reads listing has 81 article link(s); 1 dated inside the 7-day lookback, 19 dated outside it, 61 skipped for no readable date, and the entries it lists carry the publisher's own dates. Activation awaits the operator's polling-cadence decision (the agency class holds 500 requests a day)."
+  notes: "Probed 2026-07-26: index reachable (HTTP 200), no RSS/Atom feed found or autodiscovered — HTML index diffing required. Probed 2026-07-31 (from the operator machine, outside the server's daily budget): reachable, HTTP 200, robots allows, but no machine-readable feed is advertised — ingestion waits on an html-index adapter, not on the publisher. Phase 5, 2026-07-31: the html-index adapter now exists and was run against this source's captured index bytes. Against the 2026-07-31 capture it reads listing has 81 article link(s); 1 dated inside the 7-day lookback, 19 dated outside it, 61 skipped for no readable date, and the entries it lists carry the publisher's own dates. Activation awaits the operator's polling-cadence decision (the agency class holds 500 requests a day). ACTIVATED 2026-10-05 (operator) on https://www.consumerfinance.gov/about-us/newsroom/feed/. CFPB's published site source (the cfgov feeds module) serves a feed at <page>/feed/ for every filterable list page, with a GUID built from the page's internal id, so identity survives a URL change. Probed 2026-10-04 through FAPD's identified probe client. Re-verified 2026-10-05 from the operator machine as a brief test, outside the server's budget, through FAPD's identified probe client (robots allows, no crawl-delay, no Retry-After, HTTP 200): 22 items, 22/22 with GUID and date; newest 2026-10-02, the same five newest dates the listing page shows, so the feed is current. Sample release extracted at 5,804 characters; descriptions are ~180-character teasers, so full mode. Coverage (gate 3): the feed reaches back to 2025-02 and holds about one release a month in 2026, so expect most days to list nothing. The first poll fetches the 21 older releases once, and they sort to backfill. Not activated with it: the enforcement-actions feed (/enforcement/actions/feed/), which held nothing newer than 2025-09-22 on 2026-10-05, is not in date order, and states dates whose meaning (filing or last update) is unconfirmed."
 
 - id: cftc-press
   name: CFTC Press Releases
@@ -860,6 +894,21 @@
   status: active
   added: "2026-07-26"
   notes: "Probed 2026-07-26; captured bytes re-examined 2026-07-28: feed verified — 668 items, ~270-char lede-paragraph descriptions with datelines, no GUIDs. Every feed link routes through /newsroom/rssrequest.htm?nr=<article-path>, and the captured sample-article bytes are that 1.8 KB JavaScript redirect interstitial, not an article: it embeds NO content (no JSON-LD, no framework state blob; its entire visible text is 'RSS Feed Request' — the probe's 16-char extraction). The real article pages at /newsroom/<nr> were never fetched, so their extractability is unknown, not proven bad. The usps adapter therefore: (1) derives document identity by statically resolving nr= to the canonical article URL, normalized (lowercase host, query/fragment/trailing slash stripped) — dedupes URL variants despite the missing GUIDs; (2) ingests feed-metadata only (title + lede description, mode feed-only), never spending a request per item on the known-contentless interstitial. Can extract: titles, ~270-char ledes, claimed dates, canonical article URLs. Cannot extract: full article text — would require a deliberate re-probe of a resolved direct article URL (e.g. /newsroom/national-releases/2026/...htm) before any change to this posture."
+
+- id: fmc-press
+  name: FMC Press Releases
+  branch: executive
+  parent_org: Independent agency
+  description: "The Federal Maritime Commission regulates ocean shipping in U.S. foreign trade: carriers, marine terminals, and ocean transportation intermediaries. Its press releases announce enforcement actions, rulemakings, and commission decisions; volume is low, ten releases from January to July 2026."
+  type: rss
+  tier: 3
+  urls:
+    home: https://www.fmc.gov/category/news-articles/press-releases/
+    feed: https://www.fmc.gov/category/news-articles/press-releases/feed/
+  method: Polls the press-release category RSS feed via AgencyClient, then fetches each new release for full text (mode full).
+  status: active
+  added: "2026-10-05"
+  notes: "Registered and ACTIVATED 2026-10-05 (operator), from the 2026-10-04 source research. Probed 2026-10-04 through FAPD's identified probe client. Re-verified 2026-10-05 from the operator machine as a brief test, outside the server's budget, through FAPD's identified probe client (robots allows, no crawl-delay, no Retry-After, HTTP 200): 10 items, 10/10 with GUID (the site's post id) and date; newest 2026-07-08, the same newest dates the press-release listing shows, so the feed is current and the Commission is quiet. Sample release extracted at 4,429 characters and its page states the feed's date; descriptions are ~680-character excerpts, so full mode. Coverage (gate 3): 10 items spanned 2026-01-26 to 07-08; expect most weeks to list nothing. The first poll fetches the ten releases once and they sort to backfill."
 
 # ---------------------------------------- planned: HHS components (tier 2) ----
 

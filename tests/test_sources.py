@@ -131,7 +131,16 @@ def test_registry_seeds_expected_active_sources():
         "nih-orwh-email", "nih-fogarty-email", "nhtsa-email",
         # activated 2026-10-01 (operator) from the same backlog review, public
         # news/press channels only (the training/resource lists stayed out):
-        "childrens-bureau-email", "otip-email"}
+        "childrens-bureau-email", "otip-email",
+        # activated 2026-10-05 (operator) after a re-verification through
+        # the identified probe client: three registered publishers whose
+        # listing pages state almost no per-entry dates, now read through
+        # the feeds they document (every item dated), OCC's separate
+        # bulletin series, FMC's press feed, and State's travel advisories
+        # through their own adapter (a snapshot feed whose guid survives
+        # a re-issue, and whose advisory pages answer FAPD 403):
+        "occ-news", "occ-bulletins", "cfpb-newsroom", "nlrb-newsroom",
+        "fmc-press", "state-travel-advisories"}
 
 
 # ------------------------------------------------------------ coverage_stats --
@@ -172,7 +181,8 @@ def test_coverage_stats_per_tier_on_real_registry():
     # + the two whitehouse.gov presidential-action feeds (08-06)
     # + energy, FEC, GSA and the White House news listing (09-28, html-index
     #   activations from the same-day live probe)
-    assert by_tier[1].get("active", 0) == 27
+    # + nlrb-newsroom (10-05, on its documented press-release feed)
+    assert by_tier[1].get("active", 0) == 28
 
 
 def test_coverage_stats_empty():
