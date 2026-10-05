@@ -276,6 +276,63 @@ def test_probe_requests_are_excluded_from_every_figure(tmp_path):
                     "first_seen": "2026-07-31T01:00:00Z"}
 
 
+def test_robots_checks_never_define_a_sources_health(tmp_path):
+    """Operator ruling 2026-10-05: a source's health rests on the requests
+    that fetch its publications, never on its robots.txt answer. A host
+    that answers robots.txt 403 every day (travel.state.gov does) must
+    not show a degraded day, a failed request, or a lower answer rate —
+    and a robots.txt 200 must not supply last_ok_at either."""
+    pipeline = make_pipeline_db(
+        tmp_path, [("A", "AGENCYPR", TODAY, 100, meta("justice-newsroom"))])
+    fetch = make_fetch_db(tmp_path, [
+        ("2026-07-31T01:00:00Z", "https://feeds.example.gov/robots.txt", 403,
+         "agency"),
+        ("2026-07-31T01:00:01Z", "https://feeds.example.gov/press.xml", 200,
+         "agency"),
+        ("2026-07-31T02:00:00Z", "https://feeds.example.gov/press.xml", 200,
+         "agency"),
+        ("2026-07-31T09:00:00Z", "https://feeds.example.gov/robots.txt", 200,
+         "agency"),
+    ])
+    out = health.source_health([WEB], pipeline_db=pipeline, fetch_db=fetch,
+                               today=TODAY, now=NOW)
+    rec = out["sources"]["justice-newsroom"]
+    f = rec["fetch"]
+    assert (f["attempts"], f["answered"], f["client_error"]) == (2, 2, 0)
+    assert f["last_ok_at"] == "2026-07-31T02:00:00Z"
+    assert (rec["recent"]["requests"], rec["recent"]["failed"]) == (2, 0)
+    # Bars are publication-clock days, so sum them rather than pick one.
+    bars = rec["daily_activity"]
+    assert sum(d["requests"] for d in bars) == 2
+    assert sum(d["failed"] for d in bars) == 0
+    assert not any(d["status"] == "degraded" for d in bars)
+    assert not any(h["status"] == "err" for d in bars for h in d["hourly"])
+    assert rec["health"] == health.DELIVERING
+    life = health.fetch_stats_all_time(fetch_db=fetch)["feeds.example.gov"]
+    assert (life["requests"], life["failures"]) == (2, 0)
+
+
+def test_robots_refusals_never_move_the_label(tmp_path):
+    """The label itself: robots.txt refusals at a rate that would cross
+    the degraded threshold (here half of all requests) leave a source
+    whose publication requests all succeed reading as delivering."""
+    pipeline = make_pipeline_db(
+        tmp_path, [("A", "AGENCYPR", TODAY, 100, meta("justice-newsroom"))])
+    fetch = make_fetch_db(tmp_path, [
+        row
+        for hour in range(10)
+        for row in (
+            (f"2026-07-31T{hour:02d}:00:00Z",
+             "https://feeds.example.gov/robots.txt", 403, "agency"),
+            (f"2026-07-31T{hour:02d}:00:01Z",
+             "https://feeds.example.gov/press.xml", 200, "agency"),
+        )
+    ])
+    out = health.source_health([WEB], pipeline_db=pipeline, fetch_db=fetch,
+                               today=TODAY, now=NOW)
+    assert out["sources"]["justice-newsroom"]["health"] == health.DELIVERING
+
+
 def test_fetch_log_without_client_column_still_reports(tmp_path):
     """A snapshot from before the client column existed degrades to
     counting everything — never to erroring the fetch section away."""
@@ -288,6 +345,11 @@ def test_fetch_log_without_client_column_still_reports(tmp_path):
         "INSERT INTO fetch_log (ts_utc, url, status, attempt) VALUES"
         " ('2026-07-31T01:00:00Z', 'https://feeds.example.gov/press.xml',"
         " 200, 1)")
+    # robots.txt checks stay out even without the client column
+    conn.execute(
+        "INSERT INTO fetch_log (ts_utc, url, status, attempt) VALUES"
+        " ('2026-07-31T00:59:00Z', 'https://feeds.example.gov/robots.txt',"
+        " 404, 1)")
     conn.commit()
     conn.close()
     pipeline = make_pipeline_db(

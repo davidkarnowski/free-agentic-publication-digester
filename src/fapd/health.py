@@ -386,17 +386,34 @@ def _collect_recent_items(conn, start, end):
 # rows are accepted as counted, no heuristics).
 _PROBE_EXCLUDED = "(client IS NULL OR client <> 'probe')"
 
+# robots.txt checks are excluded the same way and for the same reason
+# (operator ruling, 2026-10-05: "Response to robots.txt request should
+# not define the health of the source. Rather, it should be based on the
+# actual ingestion of publications that the source produces."). The
+# client fetches each host's robots.txt about once a day before it asks
+# for anything else; the check fetches no publication, and a host that
+# answers it 403 or 404 — travel.state.gov, defense.gov,
+# federalreserve.gov — is a host with no robots file to us (RFC 9309),
+# not a host failing to deliver. Counted as a request it painted a
+# degraded day on such a source every day it was polled. The checks stay
+# in the fetch log and in the request budget, which the client counts
+# itself; only the per-source statistics leave them out.
+_ROBOTS_EXCLUDED = "url NOT LIKE '%/robots.txt'"
 
-def _probe_filter(conn):
-    """The probe-exclusion predicate, or '1' (always true) against a
-    fetch log from before the client column existed — an old snapshot
-    degrades to counting everything rather than erroring the whole
-    fetch section away."""
+
+def _ingestion_filter(conn):
+    """The predicate selecting ingestion requests: no probe traffic and
+    no robots.txt checks. Against a fetch log from before the client
+    column existed it excludes robots.txt alone — an old snapshot
+    degrades to counting every other request rather than erroring the
+    whole fetch section away."""
     try:
         cols = {r[1] for r in conn.execute("PRAGMA table_info(fetch_log)")}
     except sqlite3.Error:
-        return "1"
-    return _PROBE_EXCLUDED if "client" in cols else "1"
+        return _ROBOTS_EXCLUDED
+    if "client" not in cols:
+        return _ROBOTS_EXCLUDED
+    return f"{_PROBE_EXCLUDED} AND {_ROBOTS_EXCLUDED}"
 
 
 # Host is parsed in SQL rather than in Python so the whole fetch log never
@@ -445,7 +462,7 @@ def _collect_fetch(conn, window_start, window_end_exclusive, recency_start):
     the publication days the item window covers — until 2026-08-26 the
     edges were bare dates compared against UTC stamps and differed from
     the item window by a few hours."""
-    probe = _probe_filter(conn)
+    probe = _ingestion_filter(conn)
     hosts = {}
     for row in conn.execute(_FETCH_SQL.format(probe=probe),
                             (window_start, window_end_exclusive)):
@@ -589,7 +606,7 @@ def _collect_daily_activity(conn, fconn, today, days=7, tz=None):
     hourly_fetch = {}
     if fconn:
         try:
-            p_filter = _probe_filter(fconn)
+            p_filter = _ingestion_filter(fconn)
             for row in fconn.execute(_HOURLY_FETCH_SQL.format(probe=p_filter, klen=klen),
                                      (lo, hi)):
                 where = bucket(row["bucket"])
@@ -624,7 +641,7 @@ def _collect_fetch_recent(conn, start, end):
     counters, collapsed: `failed` is everything that returned no content
     (4xx, 5xx, or no response at all)."""
     out = {}
-    for row in conn.execute(_FETCH_RECENT_SQL.format(probe=_probe_filter(conn)),
+    for row in conn.execute(_FETCH_RECENT_SQL.format(probe=_ingestion_filter(conn)),
                             (start, end)):
         ok = row["ok"] or 0
         out[row["host"]] = {"requests": row["requests"], "ok": ok,
@@ -1200,7 +1217,7 @@ def fetch_stats_all_time(fetch_db=None, *, since=None):
             out = {}
             floor = "ts_utc >= ?" if since else "1"
             params = (f"{since}T00:00:00Z",) if since else ()
-            sql = _FETCH_ALL_TIME_SQL.format(probe=_probe_filter(conn),
+            sql = _FETCH_ALL_TIME_SQL.format(probe=_ingestion_filter(conn),
                                              floor=floor)
             for row in conn.execute(sql, params):
                 ok = row["ok"] or 0

@@ -2600,13 +2600,18 @@ CHART_WINDOW_DAYS = 30
 ALL_TIME_STATS_SINCE = "2026-07-30"
 
 #: The all-time figures' honest limits, stated wherever they render:
-#: the floor above, and source-probe traffic unlabeled before the probe
-#: client existed.
+#: the floor above, source-probe traffic unlabeled before the probe
+#: client existed, and the robots.txt checks every figure leaves out
+#: (operator ruling 2026-10-05; see fapd.health._ROBOTS_EXCLUDED).
 ALL_TIME_PROBE_NOTE = (
     f"Request counts begin {ALL_TIME_STATS_SINCE}, the day this service "
     "went into production; earlier development-machine traffic is "
     "excluded. Counts before 2026-08-03 include unmarked source-probe "
-    "traffic; probes are labeled and excluded thereafter."
+    "traffic; probes are labeled and excluded thereafter. Robots.txt "
+    "checks, about one a day per host, are left out of these figures and "
+    "of every health label: they fetch no publication, so a source's "
+    "health rests on the requests that fetch its publications. They are "
+    "still logged and counted against our request budget."
 )
 
 _DAILY_ITEMS_SQL = """
@@ -2659,9 +2664,10 @@ GROUP BY 1, 2
 
 def _daily_fetches(conn, start_day, end_day):
     """{host: {day: {"n": requests, "avg_ms": mean elapsed or None}}} over
-    the chart's publication days, probe traffic excluded (same predicate
-    as every fetch figure in fapd.health). Tolerates a log from before
-    the elapsed_ms column existed — the sparkline is then simply absent."""
+    the chart's publication days, probe traffic and robots.txt checks
+    excluded (same predicate as every fetch figure in fapd.health).
+    Tolerates a log from before the elapsed_ms column existed — the
+    sparkline is then simply absent."""
     import sqlite3
 
     try:
@@ -2669,7 +2675,7 @@ def _daily_fetches(conn, start_day, end_day):
         elapsed = "elapsed_ms" if "elapsed_ms" in cols else "NULL"
         klen = health_mod._bucket_key_len()
         sql = _DAILY_FETCH_SQL.format(
-            elapsed=elapsed, probe=health_mod._probe_filter(conn), klen=klen)
+            elapsed=elapsed, probe=health_mod._ingestion_filter(conn), klen=klen)
         lo = publication_day_start_utc(start_day)
         hi = publication_day_start_utc(_next_day(end_day))
         acc = {}

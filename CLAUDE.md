@@ -853,3 +853,23 @@ live in `.claude/agents/fapd-*.md` (tracked).
   85% of each hour's govinfo ceiling so the finalizer always has room.
   No budget, ceiling or pace was raised, and no request comes sooner
   than a server asked.
+- **2026-10-05** — **A source's health rests on the ingestion of its
+  publications, never on its robots.txt answer** (operator: "Response
+  to robots.txt request should not define the health of the source.
+  Rather, it should be based on the actual ingestion of publications
+  that the source produces."). The client fetches each host's
+  robots.txt about once a day, and the per-source statistics counted
+  that check like any request, so a host answering it 403 or 404
+  (travel.state.gov, defense.gov, federalreserve.gov) showed a
+  degraded day every day it was polled, although the client itself
+  reads such an answer as "no robots file" (RFC 9309).
+  `health._ingestion_filter` now leaves robots.txt checks out of every
+  per-source figure, label and activity chart, the same way it already
+  left out probe traffic and for the same reason: the check fetches no
+  publication. The checks stay in the fetch log, the audit and the
+  request budget, and the per-source statistics note says they are
+  left out. Same day: six agency sources activated on re-verified
+  evidence (OCC news and bulletins, CFPB newsroom, NLRB, FMC, and State
+  travel advisories through a new feed-only adapter whose identity is
+  the advisory's guid plus its date, because State's guid survives a
+  re-issue).

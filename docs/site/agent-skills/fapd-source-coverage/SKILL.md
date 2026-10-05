@@ -43,7 +43,9 @@ official record and must never be cited as government publication.
 6. **Note the clock.** The `clock` object names the zone that
    `window` and every `daily_activity` bucket use (publication-clock
    days and hours). Stored request stamps are UTC; request counts
-   include retries.
+   include retries. They leave out source-probe traffic and robots.txt
+   checks, which fetch no publication: a source's health rests on the
+   requests that fetch its publications.
 7. **Note what a source delivers.** `delivery_mode` and
    `delivery_mode_note` describe whether the pipeline received full
    article text, a feed's own summary, or a bulletin's full text,
