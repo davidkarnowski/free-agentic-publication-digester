@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+  <channel>
+    <title>travel.state.gov: Travel Advisories</title>
+    <link>https://travel.state.gov/content/travel/en/traveladvisories/traveladvisories.html</link>
+    <description>As a first step in planning any trip abroad, check the Travel Advisories for your intended destination.</description>
+    <pubDate>Mon, 05 Oct 2026 23:20:01 GMT</pubDate>
+    <dc:date>2026-10-05T23:20:01Z</dc:date>
+        <item>
+      <title>Saudi Arabia - Level 3: Reconsider Travel</title>
+      <link>https://travel.state.gov/content/tsg_aem/us/en/home/international-travel/travel-advisories/destination.sau.html</link>
+      <pubDate>Tue, 15 Sep 2026</pubDate>
+      <description><![CDATA[Reconsider travel<p>to <b>Saudi Arabia</b> due to risk of<b> Iranian drone and missile targeting of American interests, armed conflict, terrorism, exit bans</b>, and <b>local laws regarding social media activity</b>. Some areas have increased risk. Read the en …]]></description>
+      <category domain="Threat-Level">Level 3: Reconsider Travel</category>
+      <category domain="Country-Tag">SA</category>
+      <category domain="Keyword">advisory</category>
+      <guid>https://travel.state.gov/content/tsg_aem/us/en/home/international-travel/travel-advisories/destination.sau.html</guid>
+      <dc:identifier>SA,advisory</dc:identifier>
+    </item>
+    <item>
+      <title>Italy - Level 2: Exercise Increased Caution</title>
+      <link>https://travel.state.gov/content/tsg_aem/us/en/home/international-travel/travel-advisories/destination.ita.html</link>
+      <pubDate>Thu, 10 Sep 2026</pubDate>
+      <description><![CDATA[Exercise increased caution<p>in <b>Italy</b> due to <b>terrorism</b>.</p>
+<p>There is risk of terrorist violence, including terrorist attacks and other activity in Italy. Visit the U.S. Department of State's <a href='https://www.state.gov/country-reports-on-te …]]></description>
+      <category domain="Threat-Level">Level 2: Exercise Increased Caution</category>
+      <category domain="Country-Tag">IT</category>
+      <category domain="Keyword">advisory</category>
+      <guid>https://travel.state.gov/content/tsg_aem/us/en/home/international-travel/travel-advisories/destination.ita.html</guid>
+      <dc:identifier>IT,advisory</dc:identifier>
+    </item>
+    <item>
+      <title>Zimbabwe - Level 2: Exercise Increased Caution</title>
+      <link>https://travel.state.gov/content/tsg_aem/us/en/home/international-travel/travel-advisories/destination.zwe.html</link>
+      <pubDate>Tue, 27 Jun 2023</pubDate>
+      <description><![CDATA[Exercise increased caution<p>in <b>Zimbabwe </b>due to <b>crime </b>and <b>official harassment of U.S. citizen</b>s.</p>
+<p>Opportunistic crime, such as pickpocketing, theft, and smashing of car windows with intent to steal, is common. Violent crime, such as a …]]></description>
+      <category domain="Threat-Level">Level 2: Exercise Increased Caution</category>
+      <category domain="Country-Tag">ZI</category>
+      <category domain="Keyword">advisory</category>
+      <guid>https://travel.state.gov/content/tsg_aem/us/en/home/international-travel/travel-advisories/destination.zwe.html</guid>
+      <dc:identifier>ZI,advisory</dc:identifier>
+    </item>
+  </channel>
+</rss>

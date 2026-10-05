@@ -63,7 +63,7 @@ URL_KEYS = ("collection", "feed", "index", "home", "signup")
 # the platform is not yet known, so nothing may assume one.
 WEB_ADAPTERS = ("rss", "rss-feed-only", "usps", "senate-votes",
                 "congress-bill-actions", "html-index",
-                "presidential-actions")
+                "presidential-actions", "travel-advisories")
 EMAIL_PLATFORMS = ("govdelivery",)
 
 _KEBAB_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")

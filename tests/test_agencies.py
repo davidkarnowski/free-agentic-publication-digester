@@ -1166,3 +1166,106 @@ def test_the_published_pages_disclose_the_wayback_pause():
             assert not says_paused, f"{rel} still announces a pause that is over"
         else:
             assert says_paused, f"{rel} does not disclose the wayback pause"
+
+
+# ---------------------------------------------------------------------------
+# State travel advisories (TravelAdvisoryAdapter). The fixture is three
+# items cut from the feed as served 2026-10-05 (descriptions shortened):
+# Saudi Arabia dated 2026-09-15, Italy 2026-09-10, Zimbabwe 2023-06-27.
+# ---------------------------------------------------------------------------
+
+ADVISORIES = (pathlib.Path(__file__).parent / "fixtures" / "travel_advisories"
+              / "TAsTWs-2026-10-05.xml").read_bytes()
+SAUDI = ("https://travel.state.gov/content/tsg_aem/us/en/home/"
+         "international-travel/travel-advisories/destination.sau.html")
+
+
+def advisory_entry():
+    return {"id": "state-travel-advisories", "name": "State Travel Advisories",
+            "adapter": "travel-advisories",
+            "urls": {"feed": "https://travel.state.gov/_res/rss/feed.xml"}}
+
+
+@pytest.fixture
+def advisory_day(monkeypatch):
+    """Freeze the publication day at 2026-09-16, the day after the newest
+    fixture advisory. A zone-aware claim still converts on the real
+    clock, so only the call with no argument is pinned."""
+    real = agencies.publication_date
+    monkeypatch.setattr(agencies, "publication_date",
+                        lambda when=None: real(when) if when else "2026-09-16")
+
+
+def reissued(feed, old="Tue, 15 Sep 2026", new="Wed, 16 Sep 2026"):
+    """The same feed with the Saudi advisory re-issued a day later: State
+    keeps the guid (the country's page) and changes only the date."""
+    assert feed.count(old.encode()) == 1
+    return feed.replace(old.encode(), new.encode())
+
+
+def test_advisories_are_bounded_to_the_lookback_window(advisory_day):
+    """The feed is a snapshot of every advisory in force (223 items back to
+    2023 on 2026-10-05). Only advisories dated inside INDEX_LOOKBACK_DAYS
+    come back, so first activation is not a day of backfill."""
+    fmt, items = agencies.TravelAdvisoryAdapter().items(ADVISORIES, "text/xml")
+    assert fmt == "rss"
+    assert [i["title"].split(" - ")[0] for i in items] == ["Saudi Arabia", "Italy"]
+
+
+def test_an_undated_advisory_is_skipped_not_observation_dated(advisory_day):
+    undated = ADVISORIES.replace(b"<pubDate>Tue, 15 Sep 2026</pubDate>", b"")
+    _fmt, items = agencies.TravelAdvisoryAdapter().items(undated, "text/xml")
+    assert [i["title"].split(" - ")[0] for i in items] == ["Italy"]
+
+
+def test_a_reissue_is_a_new_document_and_a_repoll_is_not(advisory_day):
+    """The guid names the country, not the advisory: identity keys on the
+    guid plus the advisory's date, or every re-issue would be deduped."""
+    adapter = agencies.TravelAdvisoryAdapter()
+    first = {i["guid"]: adapter.stable_id(i) for i in adapter.items(ADVISORIES, "")[1]}
+    again = {i["guid"]: adapter.stable_id(i) for i in adapter.items(ADVISORIES, "")[1]}
+    later = {i["guid"]: adapter.stable_id(i)
+             for i in adapter.items(reissued(ADVISORIES), "")[1]}
+    assert first == again
+    assert first[SAUDI] == f"{SAUDI}#2026-09-15"
+    assert later[SAUDI] == f"{SAUDI}#2026-09-16"
+    assert {k: v for k, v in later.items() if k != SAUDI} == {
+        k: v for k, v in first.items() if k != SAUDI}
+
+
+def test_advisory_day_reads_what_the_digest_reads():
+    day = agencies.TravelAdvisoryAdapter.advisory_day
+    assert day("Tue, 15 Sep 2026") == dt.date(2026, 9, 15)
+    # A zone-aware evening claim belongs to that Eastern day, as in
+    # report._claimed_day, not to the UTC day that has already begun.
+    assert day("Tue, 15 Sep 2026 23:30:00 -0400") == dt.date(2026, 9, 15)
+    assert day("2026-09-15") == dt.date(2026, 9, 15)
+    assert day("September 15, 2026") == dt.date(2026, 9, 15)
+    assert day("") is None and day(None) is None and day("soon") is None
+
+
+def test_advisory_ingest_is_feed_only_and_takes_each_reissue(env, advisory_day):
+    """End to end through poll_source: no advisory page is ever requested
+    (they answer FAPD 403), the advisory text comes from the feed, and a
+    re-issue on a later poll is ingested as one new document. The feed
+    sends no ETag or Last-Modified, so every poll is a full fetch."""
+    client = FakeAgency(feed=ADVISORIES, feed_headers={"Content-Type": "text/xml"})
+    stats = agencies.poll_source(client, FakeWayback(), env, advisory_entry())
+    assert (stats["new_items"], stats["articles_fetched"]) == (2, 0)
+    rows = env.execute(
+        "SELECT doc_type, metadata, text FROM extracted_texts"
+        " WHERE json_extract(metadata, '$.url') = ?", (SAUDI,)).fetchall()
+    assert len(rows) == 1
+    assert rows[0]["doc_type"] == "ADVISORY"
+    assert json.loads(rows[0]["metadata"])["mode"] == "feed-only"
+    assert "Reconsider travel" in rows[0]["text"]
+
+    assert agencies.poll_source(client, FakeWayback(), env,
+                                advisory_entry())["new_items"] == 0
+    client.feed = reissued(ADVISORIES)
+    assert agencies.poll_source(client, FakeWayback(), env,
+                                advisory_entry())["new_items"] == 1
+    assert {c["url"] for c in client.calls} == {advisory_entry()["urls"]["feed"]}
+    assert env.execute(
+        "SELECT COUNT(*) FROM extracted_texts"
+        " WHERE json_extract(metadata, '$.url') = ?", (SAUDI,)).fetchone()[0] == 2

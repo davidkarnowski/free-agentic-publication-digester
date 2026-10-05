@@ -10,6 +10,7 @@ attributed titles (GUIDE §2 attributed-speech rule).
 """
 
 import datetime as dt
+import email.utils
 import hashlib
 import json
 import logging
@@ -1244,6 +1245,94 @@ class PresidentialActionsAdapter(SourceAdapter):
         return self.DOC_TYPE
 
 
+class TravelAdvisoryAdapter(FeedOnlyAdapter):
+    """State Department travel advisories (travel.state.gov's TAsTWs.xml;
+    verified 2026-10-04/05 through ProbeClient). Three things differ from
+    an ordinary feed, each measured, none of them a choice of ours.
+
+    THE FEED IS A SNAPSHOT, NOT A LIST OF RECENT POSTS. It carries one
+    item per country, every advisory in force: 223 items reaching back to
+    June 2023 on 2026-10-05, 0.6-1 MB per fetch. Read as a feed, first
+    activation would file all of them as one day's backfill. So items()
+    bounds itself to config.INDEX_LOOKBACK_DAYS like an index does, and an
+    item whose date cannot be read is skipped rather than observation-
+    dated, for the same reason HtmlIndexAdapter skips one: in a snapshot,
+    an undated entry is not evidence of anything published today.
+
+    THE GUID NAMES THE COUNTRY, NOT THE ADVISORY. Every item's guid is the
+    country's permanent advisory page (…/destination.sau.html), which
+    survives a re-issue. The default identity would therefore see each
+    country once and never again, and every re-issue — the event this
+    source exists to report — would be deduped away. Identity here is the
+    guid plus the advisory's own date, so a re-issue is a new document
+    and an unchanged re-poll is not. The disclosed limit: an edit State
+    makes without changing the advisory's date is not seen. Designed
+    before activation, as IDENTITY IS A COMPATIBILITY CONTRACT requires.
+
+    THE ADVISORY PAGES REFUSE US. They answered FAPD's identified client
+    403 on 2026-10-04, so this is feed-only: never fetch what we would be
+    refused (GUIDE §4). Nothing is lost by it — each item's description
+    carries the advisory text itself (about 2,000 characters on average),
+    and the per-item mode says "feed-only".
+
+    Filing is the ordinary agency rule (DATED_BY_PUBLISHER False): an
+    advisory belongs to the day we observed it, and is listed when its own
+    date is that day."""
+
+    DOC_TYPE = "ADVISORY"
+
+    def items(self, body, content_type):
+        fmt, items = parse_feed(body)
+        if fmt is None:
+            return None, []
+        today = dt.date.fromisoformat(publication_date())
+        oldest = today - dt.timedelta(days=config.INDEX_LOOKBACK_DAYS)
+        out, undated, out_of_window = [], 0, 0
+        for item in items:
+            day = self.advisory_day(item.get("claimed_date"))
+            if day is None:
+                undated += 1
+                continue
+            if not oldest <= day <= today:
+                out_of_window += 1
+                continue
+            out.append(item)
+        logger.info("travel advisories: %d in window, %d outside the %d-day"
+                    " lookback%s", len(out), out_of_window,
+                    config.INDEX_LOOKBACK_DAYS,
+                    f", {undated} with no readable date (skipped)" if undated else "")
+        return fmt, out
+
+    def stable_id(self, item):
+        base = item.get("guid") or item["link"]
+        day = self.advisory_day(item.get("claimed_date"))
+        return f"{base}#{day.isoformat()}" if day else base
+
+    @staticmethod
+    def advisory_day(raw):
+        """The advisory's own date as a date, or None. Reads exactly what
+        report._claimed_day reads, in the same order, so the day this
+        adapter keys identity on is the day the digest lists it under.
+        Never raises: stable_id calls it before any storage exists."""
+        raw = (raw or "").strip()
+        if not raw:
+            return None
+        try:
+            parsed = email.utils.parsedate_to_datetime(raw)
+        except (TypeError, ValueError):
+            parsed = None
+        if parsed is not None:
+            if parsed.tzinfo is not None:
+                return dt.date.fromisoformat(publication_date(parsed))
+            return parsed.date()
+        iso = raw[:10] if re.match(r"^\d{4}-\d{2}-\d{2}$", raw[:10]) else None
+        iso = iso or claimed_day_from_text(raw)
+        try:
+            return dt.date.fromisoformat(iso) if iso else None
+        except ValueError:
+            return None
+
+
 ADAPTERS = {
     "rss": SourceAdapter,
     "rss-feed-only": FeedOnlyAdapter,
@@ -1252,6 +1341,7 @@ ADAPTERS = {
     "congress-bill-actions": CongressBillActionsAdapter,
     "html-index": HtmlIndexAdapter,
     "presidential-actions": PresidentialActionsAdapter,
+    "travel-advisories": TravelAdvisoryAdapter,
 }
 
 
