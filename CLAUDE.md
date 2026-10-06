@@ -901,3 +901,21 @@ live in `.claude/agents/fapd-*.md` (tracked).
   `details.bills` (congress from the SAP's own date), without fetching
   the PDF. The position a SAP states lives only in the PDF; reading it
   is a separate, later decision.
+- **2026-10-06** — **Unregistered government lists are filed to
+  `not-ingested`, still never ingested** (operator: "pass on ingesting
+  these emails at this time. Mark these emails when they come in as
+  sorted to a tag called not-ingested"). Amends the 2026-09-26 filing
+  rule, under which unregistered mail was never touched and so piled up
+  in INBOX (28 messages from 10 unregistered lists on 2026-10-06, beside
+  217 account and vendor messages). With `IMAP_FILE_TO` set, a message
+  whose sender the registry does not know but whose headers already
+  class it as a government mailing list is recorded `unregistered` as
+  before, then marked read and moved to `<prefix>/not-ingested` with the
+  rest of the poll's filing, after the evidence commits. Body never
+  fetched. Personal and other non-government mail is still never
+  touched; nothing in the junk folder is moved (moving it out of spam
+  would mark it not spam). The registration review
+  (`file_mailbox.py --report-unregistered`) reads the new label too, and
+  skips it until it exists. The same review declined, for now, the
+  operator's look at USDA FAS GAIN reports and the four NIH ORWH and
+  Medicare bulletins that arrived before those senders were registered.

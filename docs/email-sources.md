@@ -88,7 +88,11 @@ Bulletins accumulate in the polled folder. With `IMAP_FILE_TO` set (e.g. `FAPD`)
 **marking read and moving** the registered-sender messages it handled
 out of INBOX: bulletins to `<prefix>/Ingested`, subscription
 administrivia to `<prefix>/Admin` (on Gmail these are nested labels; the
-message stays in All Mail). Unset, the mailbox is never written.
+message stays in All Mail). Since 2026-10-06 (operator) it also files
+**government mailing-list mail from senders the registry does not know**
+to `<prefix>/not-ingested`: recorded as `unregistered`, never downloaded or
+ingested, and moved out of INBOX so it stops piling up there. Unset, the
+mailbox is never written.
 
 The rules, pinned by tests in `tests/test_email_sources.py`:
 
@@ -97,9 +101,15 @@ The rules, pinned by tests in `tests/test_email_sources.py`:
   mailbox is a buffer (§3), so moving it loses nothing.
 - **Only what the allowlist already matched.** The decision is the same
   header check that gates download — From address against the registry,
-  Subject against the administrivia pattern. Unregistered mail is never
-  touched; neither is a registered message whose processing failed (it
-  stays in INBOX, visible).
+  Subject against the administrivia pattern. The one addition
+  (2026-10-06): an unregistered sender's message that the header check
+  already classes as a government mailing list (a government domain plus
+  a list header) goes to `<prefix>/not-ingested`, headers only, body never
+  fetched. Personal and other non-government mail is never touched;
+  neither is a registered message whose processing failed (it stays in
+  INBOX, visible); and nothing in the junk folder is ever moved, because
+  taking mail out of spam marks it "not spam" and spam is where forged
+  From headers collect.
 - **One write verb.** `UID STORE +FLAGS.SILENT (\Seen)` then
   `UID MOVE` (RFC 6851). No delete, no expunge, no COPY-and-delete
   emulation: a server without MOVE gets nothing filed, because on Gmail
@@ -241,7 +251,8 @@ notice-only subscriptions, bulletins yielding no item, items without a
 URL, one document through two email sources, and government lists seen
 for the first time. The report prints counts and registry ids only;
 `scripts/file_mailbox.py --report-unregistered` shows the operator the
-addresses.
+addresses, reading INBOX, `<prefix>/Unregistered`, `<prefix>/not-ingested` and the
+junk folder.
 
 A bulletin whose items the source has **already ingested** is a
 `duplicate`, not `empty` (amended 2026-10-01). The live case is

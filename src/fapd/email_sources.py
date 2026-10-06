@@ -342,6 +342,14 @@ def _fetch_dkim_key(selector, domain):
 # Subfolders (Gmail: nested labels) under the IMAP_FILE_TO prefix.
 FILED_INGESTED = "Ingested"
 FILED_ADMIN = "Admin"
+# Government list mail from a sender the registry does not know (operator,
+# 2026-10-06): filed out of INBOX so it stops piling up there, and never
+# ingested. The registration review (scripts/file_mailbox.py
+# --report-unregistered) reads this folder too. Personal and other
+# non-government mail is still never touched, and nothing in the junk
+# folder is ever moved: taking mail out of spam marks it "not spam", and
+# spam is where forged From headers collect.
+FILED_NOT_INGESTED = "not-ingested"
 # UIDs per STORE/MOVE command — keeps command lines well under server limits
 # when the one-time sweep files thousands of messages.
 _FILE_CHUNK = 200
@@ -434,8 +442,12 @@ class MailboxClient:
         return None
 
     def use_folder(self, folder):
-        """Switch the polled folder (read-only select)."""
-        self._box.select(_quote_mailbox(folder), readonly=True)
+        """Switch the polled folder (read-only select). Raises when the
+        server will not open it (e.g. a label that does not exist yet),
+        rather than leaving the connection unselected for the next call."""
+        status, data = self._box.select(_quote_mailbox(folder), readonly=True)
+        if status != "OK":
+            raise imaplib.IMAP4.error(f"SELECT {folder}: {data!r}")
         self.folder = folder
 
     def all_uids(self):
@@ -779,7 +791,7 @@ def _poll_folder(client, conn, allow, *, limit, dkim_verifier, junk=False):
                 mailbox, len(uids), last_uid, len(allow))
 
     per_source, ignored, highest = {}, 0, last_uid
-    to_file = {FILED_INGESTED: [], FILED_ADMIN: []}
+    to_file = {FILED_INGESTED: [], FILED_ADMIN: [], FILED_NOT_INGESTED: []}
     for uid in uids:
         head = client.headers(uid)
         if head is None:
@@ -791,6 +803,8 @@ def _poll_folder(client, conn, allow, *, limit, dkim_verifier, junk=False):
             highest = max(highest, uid)
             if is_government_list(head, sender):
                 _record(conn, mailbox, validity, uid, "unregistered", sender=sender)
+                if not junk:
+                    to_file[FILED_NOT_INGESTED].append((uid, None))
             continue
         raw = client.raw(uid)
         if raw is None:
@@ -886,7 +900,13 @@ def unregistered_government_lists(client, entries, folders):
     home, found = client.folder, {}
     try:
         for folder in folders:
-            client.use_folder(folder)
+            try:
+                client.use_folder(folder)
+            except imaplib.IMAP4.error as exc:
+                # A folder that does not exist yet (not-ingested before the
+                # first filing) holds nothing to report.
+                logger.info("mailbox: %s not readable, skipped: %s", folder, exc)
+                continue
             for _uid, head in sorted(client.headers_many(client.all_uids()).items()):
                 sender = _from_address(head)
                 if sender in allow or not is_government_list(head, sender):
@@ -909,7 +929,8 @@ def unregistered_government_lists(client, entries, folders):
 
 
 def _file_handled(client, to_file, per_source):
-    """Mark read and move the messages this poll handled. A filing failure
+    """Mark read and move the messages this poll handled — registered mail
+    to Ingested/Admin, unregistered government lists to not-ingested. A filing failure
     is logged and never fails the poll — the watermark has already passed
     those messages, so they simply stay in INBOX (scripts/file_mailbox.py
     sweeps them later)."""
@@ -928,7 +949,8 @@ def _file_handled(client, to_file, per_source):
             continue
         if filed == len(pairs):
             for _uid, source_id in pairs:
-                per_source[source_id]["filed"] += 1
+                if source_id is not None:   # not-ingested mail has no source
+                    per_source[source_id]["filed"] += 1
         logger.info("mailbox: filed %d message(s) to %s", filed, dest)
 
 

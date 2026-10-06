@@ -18,7 +18,8 @@ Usage:
   uv run python scripts/file_mailbox.py --through-uid N  # explicit ceiling
   uv run python scripts/file_mailbox.py --report-unregistered
       # list government mailing lists the registry does not know (headers
-      # only, INBOX + <prefix>/Unregistered + the junk folder); read-only
+      # only, INBOX + <prefix>/Unregistered + <prefix>/not-ingested + the
+      # junk folder); read-only
 """
 
 import argparse
@@ -99,7 +100,8 @@ def main() -> int:
 
 def _report_unregistered(entries, prefix):
     with email_sources.MailboxClient(file_to="") as client:
-        folders = ["INBOX", f"{prefix}/Unregistered"]
+        folders = ["INBOX", f"{prefix}/Unregistered",
+                   f"{prefix}/{email_sources.FILED_NOT_INGESTED}"]
         junk = client.junk_folder()
         if junk:
             folders.append(junk)

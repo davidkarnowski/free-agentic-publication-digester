@@ -729,3 +729,59 @@ def test_junk_refusal_is_logged(conn):
                                                           "domain": "x.example"})
     assert [(r["mailbox"], r["outcome"], r["dkim"]) for r in _log(conn)] == [
         ("Junk", "refused", "fail")]
+
+
+# ---------------------------------------------------------------------------
+# Unregistered government lists are filed to <prefix>/not-ingested
+# (operator, 2026-10-06): out of INBOX, never ingested. Personal and other
+# non-government mail is still never touched, and nothing in the junk
+# folder is ever moved.
+# ---------------------------------------------------------------------------
+
+def test_unregistered_government_lists_are_filed_not_ingested(conn):
+    box = FakeMailbox([PERSONAL, LIST_GOV, PERSONAL_GOV, MULTI])
+    box.file_to = "FAPD"
+    results = email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=no_dkim)
+    assert box.filed == {"FAPD/Ingested": [4], "FAPD/not-ingested": [2]}
+    assert box.bodies_fetched == [4]          # the list's body is never fetched
+    assert results[0]["filed"] == 1           # per-source counts stay registered-only
+    assert [(r["uid"], r["outcome"]) for r in _log(conn)] == [
+        (2, "unregistered"), (4, "ingested")]
+
+
+def test_not_ingested_filing_is_off_with_filing_off(conn):
+    box = FakeMailbox([LIST_GOV])
+    email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=no_dkim)
+    assert box.filed == {}
+
+
+def test_junk_folder_unregistered_lists_are_never_moved(conn):
+    """Moving mail out of spam marks it "not spam", and spam is where forged
+    From headers collect: an unregistered list in the junk folder is
+    recorded, never filed."""
+    box = TwoFolderMailbox([], [LIST_GOV])
+    box.file_to = "FAPD"
+    seed_junk_watermark(conn, box)
+    email_sources.poll_mailbox(box, conn, [entry()], dkim_verifier=aligned_dkim)
+    assert box.moves == []
+    assert [(r["mailbox"], r["outcome"]) for r in _log(conn)] == [("Junk", "unregistered")]
+
+
+def test_unregistered_report_reads_not_ingested_and_skips_a_missing_folder():
+    """The registration review must still see senders once their mail is
+    filed away, and a label that does not exist yet must not break it."""
+    import imaplib
+
+    class Box(TwoFolderMailbox):
+        def use_folder(self, folder):
+            if folder not in self.folders:
+                raise imaplib.IMAP4.error(f"SELECT {folder}: no such folder")
+            super().use_folder(folder)
+
+    box = Box([], [])
+    box.folders["FAPD/not-ingested"] = {1: LIST_GOV}
+    found = email_sources.unregistered_government_lists(
+        box, [entry()], ["INBOX", "FAPD/Unregistered", "FAPD/not-ingested"])
+    assert list(found) == ["news@updates.example.gov"]
+    assert found["news@updates.example.gov"]["folders"] == {"FAPD/not-ingested"}
+    assert box.folder == "INBOX"              # back where it started
