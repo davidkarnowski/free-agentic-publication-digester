@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 9 item(s) in the last 14 days; most recent 2026-10-02; 19 of 356 request(s) to www.federalreserve.gov returned no content.
+**delivering** — 9 item(s) in the last 14 days; most recent 2026-10-05; 7 of 343 request(s) to www.federalreserve.gov returned no content.
 
-This label has held since 2026-09-04T15:32:05Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-09-04T15:32:05Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,26 +68,26 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (25 answered, 1 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (25 answered, 1 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 9 in 14 days (0.64 per day) · most recent 2026-10-02 |
-| Content length | 9,783 characters average, 9,277 median (shortest 8,959, longest 12,457) |
+| Items ingested | 9 in 14 days (0.64 per day) · most recent 2026-10-05 |
+| Content length | 9,784 characters average, 9,277 median (shortest 8,959, longest 12,457) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.federalreserve.gov | 356 request(s) · 337 answered · 19 declined (4xx) · 0 server declined (5xx) · 0 no response — 5.3% returned no content |
+| Our requests to www.federalreserve.gov | 343 request(s) · 336 answered · 7 declined (4xx) · 0 server declined (5xx) · 0 no response — 2.0% returned no content |
 
-last answered request 2026-10-05T04:00:09.825+00:00 UTC.
+last answered request 2026-10-06T04:00:15.668+00:00 UTC.
 
-9 item(s) in the last 14 days; most recent 2026-10-02; 19 of 356 request(s) to www.federalreserve.gov returned no content.
+9 item(s) in the last 14 days; most recent 2026-10-05; 7 of 343 request(s) to www.federalreserve.gov returned no content.
 
 ### All time
 
-- **Our requests to www.federalreserve.gov, all time (since 2026-07-30):** 1,947 request(s) · 1,838 answered · 109 returned no content
+- **Our requests to www.federalreserve.gov, all time (since 2026-07-30):** 1,877 request(s) · 1,863 answered · 14 returned no content
 
-Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
+Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
 ### Last 30 days, day by day
 
@@ -95,41 +95,41 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.federalreserve.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-06 | 0 | 26 | 107 |
-| 2026-09-07 | 0 | 25 | 98 |
-| 2026-09-08 | 0 | 26 | 92 |
-| 2026-09-09 | 0 | 26 | 102 |
-| 2026-09-10 | 1 | 27 | 125 |
-| 2026-09-11 | 1 | 27 | 102 |
-| 2026-09-12 | 0 | 29 | 151 |
-| 2026-09-13 | 0 | 27 | 215 |
-| 2026-09-14 | 0 | 29 | 245 |
-| 2026-09-15 | 0 | 26 | 102 |
-| 2026-09-16 | 2 | 29 | 115 |
-| 2026-09-17 | 0 | 26 | 172 |
-| 2026-09-18 | 2 | 28 | 130 |
-| 2026-09-19 | 0 | 26 | 88 |
-| 2026-09-20 | 0 | 27 | 79 |
-| 2026-09-21 | 0 | 28 | 178 |
-| 2026-09-22 | 1 | 28 | 110 |
-| 2026-09-23 | 0 | 25 | 112 |
-| 2026-09-24 | 2 | 28 | 132 |
+| 2026-09-07 | 0 | 24 | 95 |
+| 2026-09-08 | 0 | 25 | 89 |
+| 2026-09-09 | 0 | 25 | 99 |
+| 2026-09-10 | 1 | 26 | 122 |
+| 2026-09-11 | 1 | 26 | 101 |
+| 2026-09-12 | 0 | 28 | 147 |
+| 2026-09-13 | 0 | 26 | 218 |
+| 2026-09-14 | 0 | 28 | 228 |
+| 2026-09-15 | 0 | 25 | 99 |
+| 2026-09-16 | 2 | 28 | 115 |
+| 2026-09-17 | 0 | 25 | 92 |
+| 2026-09-18 | 2 | 27 | 130 |
+| 2026-09-19 | 0 | 25 | 87 |
+| 2026-09-20 | 0 | 26 | 77 |
+| 2026-09-21 | 0 | 27 | 179 |
+| 2026-09-22 | 1 | 27 | 104 |
+| 2026-09-23 | 0 | 24 | 110 |
+| 2026-09-24 | 2 | 27 | 114 |
 | 2026-09-25 | 1 | 26 | 107 |
-| 2026-09-26 | 0 | 27 | 146 |
-| 2026-09-27 | 0 | 27 | 127 |
-| 2026-09-28 | 0 | 28 | 148 |
-| 2026-09-29 | 1 | 28 | 92 |
-| 2026-09-30 | 1 | 27 | 97 |
-| 2026-10-01 | 0 | 28 | 90 |
-| 2026-10-02 | 3 | 30 | 89 |
-| 2026-10-03 | 0 | 27 | 85 |
-| 2026-10-04 | 0 | 26 | 100 |
-| 2026-10-05 | 0 | 1 | 154 |
+| 2026-09-26 | 0 | 26 | 146 |
+| 2026-09-27 | 0 | 26 | 124 |
+| 2026-09-28 | 0 | 27 | 150 |
+| 2026-09-29 | 1 | 27 | 91 |
+| 2026-09-30 | 1 | 26 | 96 |
+| 2026-10-01 | 0 | 27 | 88 |
+| 2026-10-02 | 3 | 29 | 88 |
+| 2026-10-03 | 0 | 26 | 84 |
+| 2026-10-04 | 0 | 25 | 98 |
+| 2026-10-05 | 1 | 26 | 114 |
+| 2026-10-06 | 0 | 1 | 209 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The RSS feed delivers board press releases with teaser descriptions and full article extraction. Over 14 days, 3 items arrived at 0.21 per day, a slight decline from the previous 0.29 per day. Extracted text averaged 9,220 characters. Our requests to www.federalreserve.gov returned a 3.8% error rate across 346 attempts, with 13 client errors; the previous period showed a 3.2% error rate. The most recent item was published on 2026-09-04. Publication rate remains infrequent, with individual items substantial in scope.
+Federal Reserve press releases arrive through an RSS feed with full article text extracted from linked pages. Over 14 days, 9 items accumulated at 0.64 per day, an increase from the previous 0.21 per day. Extracted text averaged 9,784 characters. Publication remains sparse; individual releases cover FOMC statements, monetary-policy actions, and banking regulation. Of 343 requests to www.federalreserve.gov, 336 succeeded; 7 returned no content for a 2.0% error rate. This represents a higher failure rate than the prior 3.8%, though item volume has improved. Most recent item published 2026-10-05.
 
-_Model-written assessment of our own ingestion, generated 2026-09-05 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

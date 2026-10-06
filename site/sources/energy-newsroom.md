@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 7 item(s) in the last 14 days; most recent 2026-10-01; 0 of 174 request(s) to www.energy.gov returned no content.
+**delivering** — 9 item(s) in the last 14 days; most recent 2026-10-05; 0 of 193 request(s) to www.energy.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,26 +67,26 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 7 in 14 days (0.5 per day) · most recent 2026-10-01 |
-| Content length | 368 characters average, 175 median (shortest 117, longest 904) |
+| Items ingested | 9 in 14 days (0.64 per day) · most recent 2026-10-05 |
+| Content length | 335 characters average, 210 median (shortest 117, longest 904) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.energy.gov | 174 request(s) · 174 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.energy.gov | 193 request(s) · 193 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-05T04:00:08.936+00:00 UTC.
+last answered request 2026-10-06T04:00:14.576+00:00 UTC.
 
-7 item(s) in the last 14 days; most recent 2026-10-01; 0 of 174 request(s) to www.energy.gov returned no content.
+9 item(s) in the last 14 days; most recent 2026-10-05; 0 of 193 request(s) to www.energy.gov returned no content.
 
 ### All time
 
-- **Our requests to www.energy.gov, all time (since 2026-09-28):** 174 request(s) · 174 answered · 0 returned no content
+- **Our requests to www.energy.gov, all time (since 2026-09-28):** 193 request(s) · 193 answered · 0 returned no content
 
-Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
+Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
 ### Last 30 days, day by day
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.energy.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-06 | 0 | 0 | — |
 | 2026-09-07 | 0 | 0 | — |
 | 2026-09-08 | 0 | 0 | — |
 | 2026-09-09 | 0 | 0 | — |
@@ -116,14 +115,15 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-25 | 0 | 0 | — |
 | 2026-09-26 | 0 | 0 | — |
 | 2026-09-27 | 0 | 0 | — |
-| 2026-09-28 | 5 | 12 | 168 |
-| 2026-09-29 | 1 | 28 | 86 |
-| 2026-09-30 | 0 | 26 | 80 |
-| 2026-10-01 | 1 | 28 | 92 |
-| 2026-10-02 | 0 | 27 | 91 |
-| 2026-10-03 | 0 | 26 | 86 |
-| 2026-10-04 | 0 | 26 | 112 |
-| 2026-10-05 | 0 | 1 | 388 |
+| 2026-09-28 | 5 | 11 | 148 |
+| 2026-09-29 | 1 | 27 | 84 |
+| 2026-09-30 | 0 | 25 | 79 |
+| 2026-10-01 | 1 | 27 | 92 |
+| 2026-10-02 | 0 | 26 | 92 |
+| 2026-10-03 | 0 | 25 | 87 |
+| 2026-10-04 | 0 | 25 | 113 |
+| 2026-10-05 | 2 | 26 | 108 |
+| 2026-10-06 | 0 | 1 | 481 |
 
 ## Our ingestion assessment
 

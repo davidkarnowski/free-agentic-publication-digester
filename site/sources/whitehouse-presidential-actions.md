@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-10-02; 7 of 851 request(s) to www.whitehouse.gov returned no content.
+**delivering** — 7 item(s) in the last 14 days; most recent 2026-10-05; 7 of 873 request(s) to www.whitehouse.gov returned no content.
 
-This label has held since 2026-08-06T23:57:19Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-08-06T23:57:19Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,28 +69,28 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 76 request(s) (76 answered, 0 returned no content) · no items ingested
+Last 24 hours: 80 request(s) (80 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-10-02 |
-| Content length | 8,919 characters average, 8,426 median (shortest 6,423, longest 12,251) |
+| Items ingested | 7 in 14 days (0.5 per day) · most recent 2026-10-05 |
+| Content length | 9,060 characters average, 8,999 median (shortest 6,423, longest 12,251) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.whitehouse.gov | 851 request(s) · 844 answered · 7 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.8% returned no content |
+| Our requests to www.whitehouse.gov | 873 request(s) · 866 answered · 7 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.8% returned no content |
 
-last answered request 2026-10-05T04:00:11.898+00:00 UTC; this host serves 3 registered sources, so these figures are host-wide.
+last answered request 2026-10-06T04:00:17.581+00:00 UTC; this host serves 3 registered sources, so these figures are host-wide.
 
-6 item(s) in the last 14 days; most recent 2026-10-02; 7 of 851 request(s) to www.whitehouse.gov returned no content.
+7 item(s) in the last 14 days; most recent 2026-10-05; 7 of 873 request(s) to www.whitehouse.gov returned no content.
 
 ### All time
 
-- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 3,464 request(s) · 3,450 answered · 14 returned no content
+- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 3,488 request(s) · 3,474 answered · 14 returned no content
 
 This host serves 3 registered sources, so these figures are host-wide.
 
-Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
+Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
 ### Last 30 days, day by day
 
@@ -98,36 +98,36 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.whitehouse.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-06 | 0 | 51 | 52 |
-| 2026-09-07 | 1 | 52 | 50 |
-| 2026-09-08 | 7 | 58 | 67 |
-| 2026-09-09 | 1 | 52 | 49 |
-| 2026-09-10 | 0 | 51 | 77 |
-| 2026-09-11 | 0 | 51 | 64 |
-| 2026-09-12 | 0 | 55 | 63 |
-| 2026-09-13 | 0 | 51 | 44 |
-| 2026-09-14 | 1 | 58 | 140 |
-| 2026-09-15 | 0 | 53 | 46 |
-| 2026-09-16 | 4 | 56 | 49 |
-| 2026-09-17 | 3 | 56 | 69 |
-| 2026-09-18 | 2 | 54 | 81 |
-| 2026-09-19 | 0 | 51 | 42 |
-| 2026-09-20 | 0 | 53 | 40 |
-| 2026-09-21 | 0 | 57 | 72 |
-| 2026-09-22 | 0 | 49 | 59 |
-| 2026-09-23 | 0 | 49 | 52 |
-| 2026-09-24 | 0 | 51 | 54 |
-| 2026-09-25 | 1 | 54 | 61 |
-| 2026-09-26 | 0 | 53 | 85 |
-| 2026-09-27 | 0 | 53 | 69 |
-| 2026-09-28 | 1 | 67 | 69 |
-| 2026-09-29 | 3 | 85 | 53 |
-| 2026-09-30 | 0 | 76 | 42 |
-| 2026-10-01 | 0 | 79 | 42 |
-| 2026-10-02 | 1 | 80 | 65 |
-| 2026-10-03 | 0 | 76 | 39 |
-| 2026-10-04 | 0 | 76 | 41 |
-| 2026-10-05 | 0 | 3 | 84 |
+| 2026-09-07 | 1 | 51 | 49 |
+| 2026-09-08 | 7 | 57 | 67 |
+| 2026-09-09 | 1 | 51 | 49 |
+| 2026-09-10 | 0 | 50 | 76 |
+| 2026-09-11 | 0 | 50 | 64 |
+| 2026-09-12 | 0 | 54 | 62 |
+| 2026-09-13 | 0 | 50 | 44 |
+| 2026-09-14 | 1 | 57 | 142 |
+| 2026-09-15 | 0 | 52 | 46 |
+| 2026-09-16 | 4 | 55 | 49 |
+| 2026-09-17 | 3 | 55 | 69 |
+| 2026-09-18 | 2 | 53 | 81 |
+| 2026-09-19 | 0 | 50 | 41 |
+| 2026-09-20 | 0 | 52 | 39 |
+| 2026-09-21 | 0 | 56 | 72 |
+| 2026-09-22 | 0 | 48 | 59 |
+| 2026-09-23 | 0 | 48 | 52 |
+| 2026-09-24 | 0 | 50 | 54 |
+| 2026-09-25 | 1 | 53 | 60 |
+| 2026-09-26 | 0 | 52 | 85 |
+| 2026-09-27 | 0 | 52 | 70 |
+| 2026-09-28 | 1 | 66 | 69 |
+| 2026-09-29 | 3 | 84 | 52 |
+| 2026-09-30 | 0 | 75 | 41 |
+| 2026-10-01 | 0 | 78 | 42 |
+| 2026-10-02 | 1 | 79 | 65 |
+| 2026-10-03 | 0 | 75 | 39 |
+| 2026-10-04 | 0 | 75 | 40 |
+| 2026-10-05 | 1 | 83 | 55 |
+| 2026-10-06 | 0 | 3 | 123 |
 
 ## Our ingestion assessment
 

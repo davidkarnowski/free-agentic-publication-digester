@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 38 item(s) in the last 14 days; most recent 2026-10-01; 0 of 349 request(s) to www.eeoc.gov returned no content.
+**delivering** — 37 item(s) in the last 14 days; most recent 2026-10-05; 0 of 338 request(s) to www.eeoc.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -63,26 +63,26 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 38 in 14 days (2.71 per day) · most recent 2026-10-01 |
-| Content length | 612 characters average, 612 median (shortest 538, longest 691) |
+| Items ingested | 37 in 14 days (2.64 per day) · most recent 2026-10-05 |
+| Content length | 613 characters average, 615 median (shortest 538, longest 691) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.eeoc.gov | 349 request(s) · 349 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.eeoc.gov | 338 request(s) · 338 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-05T04:00:10.686+00:00 UTC.
+last answered request 2026-10-06T04:00:16.646+00:00 UTC.
 
-38 item(s) in the last 14 days; most recent 2026-10-01; 0 of 349 request(s) to www.eeoc.gov returned no content.
+37 item(s) in the last 14 days; most recent 2026-10-05; 0 of 338 request(s) to www.eeoc.gov returned no content.
 
 ### All time
 
-- **Our requests to www.eeoc.gov, all time (since 2026-08-01):** 1,856 request(s) · 1,851 answered · 5 returned no content
+- **Our requests to www.eeoc.gov, all time (since 2026-08-01):** 1,817 request(s) · 1,812 answered · 5 returned no content
 
-Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
+Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
 ### Last 30 days, day by day
 
@@ -90,41 +90,41 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.eeoc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-06 | 0 | 26 | 286 |
-| 2026-09-07 | 0 | 26 | 274 |
-| 2026-09-08 | 2 | 26 | 298 |
-| 2026-09-09 | 0 | 25 | 286 |
-| 2026-09-10 | 1 | 27 | 262 |
-| 2026-09-11 | 0 | 26 | 299 |
-| 2026-09-12 | 0 | 28 | 343 |
-| 2026-09-13 | 0 | 26 | 315 |
-| 2026-09-14 | 1 | 28 | 422 |
-| 2026-09-15 | 1 | 27 | 260 |
-| 2026-09-16 | 2 | 26 | 322 |
-| 2026-09-17 | 1 | 26 | 274 |
-| 2026-09-18 | 0 | 26 | 319 |
-| 2026-09-19 | 0 | 26 | 259 |
-| 2026-09-20 | 0 | 25 | 253 |
-| 2026-09-21 | 1 | 28 | 323 |
-| 2026-09-22 | 2 | 26 | 264 |
+| 2026-09-07 | 0 | 25 | 275 |
+| 2026-09-08 | 2 | 25 | 298 |
+| 2026-09-09 | 0 | 24 | 281 |
+| 2026-09-10 | 1 | 26 | 262 |
+| 2026-09-11 | 0 | 25 | 300 |
+| 2026-09-12 | 0 | 27 | 340 |
+| 2026-09-13 | 0 | 25 | 316 |
+| 2026-09-14 | 1 | 27 | 410 |
+| 2026-09-15 | 1 | 26 | 259 |
+| 2026-09-16 | 2 | 25 | 324 |
+| 2026-09-17 | 1 | 25 | 274 |
+| 2026-09-18 | 0 | 25 | 316 |
+| 2026-09-19 | 0 | 25 | 258 |
+| 2026-09-20 | 0 | 24 | 253 |
+| 2026-09-21 | 1 | 27 | 325 |
+| 2026-09-22 | 2 | 25 | 264 |
 | 2026-09-23 | 3 | 24 | 298 |
-| 2026-09-24 | 3 | 27 | 291 |
-| 2026-09-25 | 6 | 26 | 287 |
-| 2026-09-26 | 0 | 28 | 330 |
-| 2026-09-27 | 0 | 27 | 299 |
-| 2026-09-28 | 5 | 29 | 352 |
-| 2026-09-29 | 4 | 29 | 383 |
-| 2026-09-30 | 12 | 26 | 273 |
-| 2026-10-01 | 3 | 28 | 317 |
-| 2026-10-02 | 0 | 26 | 271 |
-| 2026-10-03 | 0 | 27 | 311 |
-| 2026-10-04 | 0 | 25 | 296 |
-| 2026-10-05 | 0 | 1 | 547 |
+| 2026-09-24 | 3 | 26 | 292 |
+| 2026-09-25 | 6 | 25 | 288 |
+| 2026-09-26 | 0 | 27 | 333 |
+| 2026-09-27 | 0 | 26 | 299 |
+| 2026-09-28 | 5 | 28 | 356 |
+| 2026-09-29 | 4 | 28 | 388 |
+| 2026-09-30 | 12 | 25 | 274 |
+| 2026-10-01 | 3 | 27 | 319 |
+| 2026-10-02 | 0 | 25 | 271 |
+| 2026-10-03 | 0 | 26 | 312 |
+| 2026-10-04 | 0 | 24 | 297 |
+| 2026-10-05 | 1 | 26 | 286 |
+| 2026-10-06 | 0 | 1 | 497 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The newsroom listing displays prose-dated text entries without machine-readable timestamps; dated items are extracted from the visible index. Over 14 days, 11 items arrived at 0.79 per day, an increase from the previous 0.43 per day. Each item carries a 560- to 725-character summary paragraph (median 617 characters). All 344 polling requests succeeded. The most recent item was published on 2026-09-02. The listing shows only its first screen of roughly 21 releases; litigation filings and guidance documents are published through separate channels.
+The newsroom listing delivered items at 2.64 per day over 14 days, a substantial increase from the prior 0.79 per day. Thirty-seven items were ingested with an average of 613 characters drawn from prose-dated entries on the listing page. All 338 polling requests succeeded. The visible index shows only its first screen of approximately 21 releases; litigation filings and guidance documents are published through separate channels.
 
-_Model-written assessment of our own ingestion, generated 2026-09-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

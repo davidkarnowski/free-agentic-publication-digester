@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-08-27, 39 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-08-27, 40 days ago (quiet past 7 days).
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -80,7 +80,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-08-27, 39 days ago (quiet past 7 days).
+Most recent item 2026-08-27, 40 days ago (quiet past 7 days).
 
 ### All time
 

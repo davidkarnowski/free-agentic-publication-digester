@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 66 item(s) in the last 14 days; most recent 2026-10-02, delivered by email.
+**delivering** — 71 item(s) in the last 14 days; most recent 2026-10-05, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,20 +69,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 13 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 66 in 14 days (4.71 per day) · most recent 2026-10-02 |
-| Content length | 3,592 characters average, 4,252 median (shortest 446, longest 4,303) |
+| Items ingested | 71 in 14 days (5.07 per day) · most recent 2026-10-05 |
+| Content length | 3,539 characters average, 4,252 median (shortest 446, longest 4,303) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 35 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-02 |
+| Mailbox | 48 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-05 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-66 item(s) in the last 14 days; most recent 2026-10-02, delivered by email.
+71 item(s) in the last 14 days; most recent 2026-10-05, delivered by email.
 
 ### All time
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-06 | 0 |
 | 2026-09-07 | 0 |
 | 2026-09-08 | 14 |
 | 2026-09-09 | 13 |
@@ -123,12 +122,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-02 | 9 |
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
-| 2026-10-05 | 0 |
+| 2026-10-05 | 13 |
+| 2026-10-06 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Social Security Administration press releases arrive via email subscription with full text, DKIM-verified. Over the past 14 days through 2026-09-04, the source delivered 93 items at an average of 6.64 per day, a substantial increase from the earlier 0.71 items per day observed through 2026-08-04. The subscription was confirmed 2026-07-29 and represents the only working input for this agency; the web newsroom returns HTTP 403 to our identified client. Delivery has been consistent with no consecutive failures. Text averaged 3,918 characters with a median of 4,252. The volume increase since activation reflects the agency's own distribution cadence for its benefits programs.
+Social Security Administration press releases arrive via email subscription at 5.07 items per day over 14 days, a decrease from the 6.64 items per day observed in the prior assessment. We received 71 items with the most recent arriving 2026-10-05. The bulletin stream carries full-text releases, DKIM-verified, with ssa.gov URLs. This email subscription is the sole working input for SSA releases; the web newsroom returns HTTP 403 to our client. Text ranged from 446 to 4,303 characters with a median of 4,252, indicating substantial narrative content in each bulletin.
 
-_Model-written assessment of our own ingestion, generated 2026-09-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

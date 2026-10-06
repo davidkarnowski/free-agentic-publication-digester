@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 513 item(s) in the last 14 days; most recent 2026-10-02, delivered by email.
+**delivering** — 495 item(s) in the last 14 days; most recent 2026-10-05, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,20 +69,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 29 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 513 in 14 days (36.64 per day) · most recent 2026-10-02 |
-| Content length | 336 characters average, 309 median (shortest 50, longest 2,873) |
+| Items ingested | 495 in 14 days (35.36 per day) · most recent 2026-10-05 |
+| Content length | 341 characters average, 314 median (shortest 46, longest 2,873) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 64 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-03 |
+| Mailbox | 76 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-06 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-513 item(s) in the last 14 days; most recent 2026-10-02, delivered by email.
+495 item(s) in the last 14 days; most recent 2026-10-05, delivered by email.
 
 ### All time
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-06 | 0 |
 | 2026-09-07 | 0 |
 | 2026-09-08 | 34 |
 | 2026-09-09 | 45 |
@@ -123,12 +122,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-02 | 79 |
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
-| 2026-10-05 | 0 |
+| 2026-10-05 | 29 |
+| 2026-10-06 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-U.S. Attorneys' news arrives via consolidated email from the Executive Office for U.S. Attorneys, delivering releases from all 93 districts with full text. The source provided 483 items over 14 days through 2026-09-04, averaging 34.5 per day—nearly double the 18.29 items per day observed through 2026-08-04. Individual bulletins carry multiple district releases in varying text completeness. The subscription represents EOUSA's all-districts distribution and provides fuller coverage than the web press page, which the system cannot retrieve through article fetching. Text averaged 307 characters with a median of 293. No consecutive delivery failures have occurred.
+U.S. Attorneys' news arrives from the Executive Office for U.S. Attorneys at 35.36 items per day over 14 days, consistent with the 34.5 items per day observed in the prior assessment. We received 495 items with the most recent arriving 2026-10-05. The subscription delivers consolidated bulletins from all 93 districts with full-text releases varying in completeness. This represents EOUSA's all-districts distribution and provides fuller coverage than the web press page, which cannot be retrieved through article fetching. Text averaged 341 characters with a median of 314. No consecutive delivery failures have occurred.
 
-_Model-written assessment of our own ingestion, generated 2026-09-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

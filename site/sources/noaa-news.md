@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 4 item(s) in the last 14 days; most recent 2026-09-30; 12 of 348 request(s) to www.noaa.gov returned no content.
+**delivering** — 3 item(s) in the last 14 days; most recent 2026-09-30; 0 of 337 request(s) to www.noaa.gov returned no content.
 
-This label has held since 2026-09-18T04:27:20Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-09-18T04:27:20Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,26 +67,26 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (25 answered, 1 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-09-30 |
-| Content length | 2,464 characters average, 2,388 median (shortest 242, longest 4,836) |
+| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-09-30 |
+| Content length | 2,373 characters average, 2,042 median (shortest 242, longest 4,836) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.noaa.gov | 348 request(s) · 336 answered · 12 declined (4xx) · 0 server declined (5xx) · 0 no response — 3.4% returned no content |
+| Our requests to www.noaa.gov | 337 request(s) · 337 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-05T04:00:11.394+00:00 UTC.
+last answered request 2026-10-06T04:00:17.249+00:00 UTC.
 
-4 item(s) in the last 14 days; most recent 2026-09-30; 12 of 348 request(s) to www.noaa.gov returned no content.
+3 item(s) in the last 14 days; most recent 2026-09-30; 0 of 337 request(s) to www.noaa.gov returned no content.
 
 ### All time
 
-- **Our requests to www.noaa.gov, all time (since 2026-07-30):** 2,004 request(s) · 1,800 answered · 204 returned no content
+- **Our requests to www.noaa.gov, all time (since 2026-07-30):** 1,935 request(s) · 1,826 answered · 109 returned no content
 
-Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
+Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
 ### Last 30 days, day by day
 
@@ -94,36 +94,36 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.noaa.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-06 | 0 | 26 | 309 |
-| 2026-09-07 | 0 | 26 | 287 |
-| 2026-09-08 | 0 | 26 | 274 |
-| 2026-09-09 | 1 | 30 | 1312 |
-| 2026-09-10 | 1 | 25 | 390 |
-| 2026-09-11 | 0 | 26 | 294 |
-| 2026-09-12 | 0 | 29 | 249 |
-| 2026-09-13 | 0 | 26 | 249 |
-| 2026-09-14 | 0 | 30 | 422 |
-| 2026-09-15 | 2 | 26 | 204 |
-| 2026-09-16 | 0 | 26 | 312 |
-| 2026-09-17 | 2 | 26 | 286 |
-| 2026-09-18 | 0 | 26 | 895 |
-| 2026-09-19 | 0 | 26 | 276 |
-| 2026-09-20 | 0 | 26 | 261 |
-| 2026-09-21 | 2 | 29 | 322 |
-| 2026-09-22 | 1 | 26 | 232 |
-| 2026-09-23 | 0 | 25 | 285 |
-| 2026-09-24 | 1 | 26 | 289 |
-| 2026-09-25 | 1 | 27 | 262 |
-| 2026-09-26 | 0 | 27 | 348 |
-| 2026-09-27 | 0 | 27 | 336 |
-| 2026-09-28 | 0 | 29 | 454 |
-| 2026-09-29 | 0 | 28 | 280 |
-| 2026-09-30 | 1 | 26 | 270 |
+| 2026-09-07 | 0 | 25 | 292 |
+| 2026-09-08 | 0 | 25 | 279 |
+| 2026-09-09 | 1 | 29 | 1354 |
+| 2026-09-10 | 1 | 24 | 400 |
+| 2026-09-11 | 0 | 25 | 300 |
+| 2026-09-12 | 0 | 28 | 240 |
+| 2026-09-13 | 0 | 25 | 253 |
+| 2026-09-14 | 0 | 29 | 413 |
+| 2026-09-15 | 2 | 25 | 206 |
+| 2026-09-16 | 0 | 25 | 319 |
+| 2026-09-17 | 2 | 25 | 290 |
+| 2026-09-18 | 0 | 25 | 925 |
+| 2026-09-19 | 0 | 25 | 282 |
+| 2026-09-20 | 0 | 25 | 266 |
+| 2026-09-21 | 2 | 28 | 329 |
+| 2026-09-22 | 1 | 25 | 236 |
+| 2026-09-23 | 0 | 24 | 291 |
+| 2026-09-24 | 1 | 25 | 295 |
+| 2026-09-25 | 1 | 26 | 267 |
+| 2026-09-26 | 0 | 26 | 350 |
+| 2026-09-27 | 0 | 26 | 338 |
+| 2026-09-28 | 0 | 28 | 464 |
+| 2026-09-29 | 0 | 27 | 285 |
+| 2026-09-30 | 1 | 25 | 268 |
 | 2026-10-01 | 0 | 26 | 296 |
-| 2026-10-02 | 0 | 27 | 274 |
-| 2026-10-03 | 0 | 27 | 271 |
-| 2026-10-04 | 0 | 26 | 305 |
-| 2026-10-05 | 0 | 1 | 208 |
+| 2026-10-02 | 0 | 26 | 278 |
+| 2026-10-03 | 0 | 26 | 274 |
+| 2026-10-04 | 0 | 25 | 311 |
+| 2026-10-05 | 0 | 26 | 272 |
+| 2026-10-06 | 0 | 1 | 185 |
 
 ## Our ingestion assessment
 

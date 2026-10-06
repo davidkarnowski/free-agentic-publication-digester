@@ -65,9 +65,9 @@ Not ingested: the registry status of this source is planned. Ingestion statistic
 
 ### All time
 
-- **Our requests to api.congress.gov, all time (since 2026-08-01):** 1,859 request(s) · 1,787 answered · 72 returned no content
+- **Our requests to api.congress.gov, all time (since 2026-08-01):** 1,818 request(s) · 1,812 answered · 6 returned no content
 
-Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
+Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
 ### Last 30 days, day by day
 
@@ -75,33 +75,33 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to api.congress.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-06 | 0 | 27 | 306 |
-| 2026-09-07 | 0 | 26 | 296 |
-| 2026-09-08 | 0 | 26 | 310 |
-| 2026-09-09 | 0 | 26 | 318 |
-| 2026-09-10 | 0 | 25 | 336 |
-| 2026-09-11 | 0 | 26 | 315 |
-| 2026-09-12 | 0 | 29 | 436 |
-| 2026-09-13 | 0 | 26 | 294 |
-| 2026-09-14 | 0 | 30 | 464 |
-| 2026-09-15 | 0 | 26 | 317 |
-| 2026-09-16 | 0 | 26 | 342 |
-| 2026-09-17 | 0 | 26 | 447 |
-| 2026-09-18 | 0 | 26 | 465 |
-| 2026-09-19 | 0 | 26 | 295 |
-| 2026-09-20 | 0 | 26 | 318 |
-| 2026-09-21 | 0 | 28 | 368 |
-| 2026-09-22 | 0 | 26 | 296 |
-| 2026-09-23 | 0 | 25 | 319 |
-| 2026-09-24 | 0 | 25 | 320 |
-| 2026-09-25 | 0 | 26 | 358 |
+| 2026-09-07 | 0 | 25 | 298 |
+| 2026-09-08 | 0 | 25 | 310 |
+| 2026-09-09 | 0 | 25 | 319 |
+| 2026-09-10 | 0 | 24 | 339 |
+| 2026-09-11 | 0 | 25 | 317 |
+| 2026-09-12 | 0 | 28 | 443 |
+| 2026-09-13 | 0 | 25 | 296 |
+| 2026-09-14 | 0 | 29 | 472 |
+| 2026-09-15 | 0 | 25 | 320 |
+| 2026-09-16 | 0 | 25 | 346 |
+| 2026-09-17 | 0 | 25 | 455 |
+| 2026-09-18 | 0 | 25 | 472 |
+| 2026-09-19 | 0 | 25 | 295 |
+| 2026-09-20 | 0 | 25 | 321 |
+| 2026-09-21 | 0 | 27 | 371 |
+| 2026-09-22 | 0 | 25 | 298 |
+| 2026-09-23 | 0 | 24 | 309 |
+| 2026-09-24 | 0 | 24 | 320 |
+| 2026-09-25 | 0 | 25 | 356 |
 | 2026-09-26 | 0 | 26 | 717 |
-| 2026-09-27 | 0 | 27 | 354 |
-| 2026-09-28 | 0 | 29 | 991 |
-| 2026-09-29 | 0 | 27 | 312 |
-| 2026-09-30 | 0 | 26 | 532 |
-| 2026-10-01 | 0 | 28 | 314 |
-| 2026-10-02 | 0 | 28 | 320 |
-| 2026-10-03 | 0 | 26 | 404 |
-| 2026-10-04 | 0 | 26 | 387 |
-| 2026-10-05 | 0 | 1 | 309 |
+| 2026-09-27 | 0 | 26 | 355 |
+| 2026-09-28 | 0 | 28 | 1015 |
+| 2026-09-29 | 0 | 26 | 314 |
+| 2026-09-30 | 0 | 25 | 543 |
+| 2026-10-01 | 0 | 27 | 315 |
+| 2026-10-02 | 0 | 27 | 325 |
+| 2026-10-03 | 0 | 25 | 408 |
+| 2026-10-04 | 0 | 25 | 391 |
+| 2026-10-05 | 0 | 25 | 559 |
+| 2026-10-06 | 0 | 1 | 578 |

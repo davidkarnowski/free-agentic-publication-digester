@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-10-01; 0 of 357 request(s) to www.fda.gov returned no content.
+**delivering** — 7 item(s) in the last 14 days; most recent 2026-10-05; 0 of 345 request(s) to www.fda.gov returned no content.
 
-This label has held since 2026-09-15T14:20:47Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-09-15T14:20:47Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,26 +62,26 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-10-01 |
-| Content length | 6,537 characters average, 6,347 median (shortest 3,973, longest 8,805) |
+| Items ingested | 7 in 14 days (0.5 per day) · most recent 2026-10-05 |
+| Content length | 6,508 characters average, 6,336 median (shortest 3,973, longest 8,805) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.fda.gov | 357 request(s) · 357 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.fda.gov | 345 request(s) · 345 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-05T04:00:11.231+00:00 UTC.
+last answered request 2026-10-06T04:00:18.480+00:00 UTC.
 
-6 item(s) in the last 14 days; most recent 2026-10-01; 0 of 357 request(s) to www.fda.gov returned no content.
+7 item(s) in the last 14 days; most recent 2026-10-05; 0 of 345 request(s) to www.fda.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fda.gov, all time (since 2026-07-30):** 1,948 request(s) · 1,947 answered · 1 returned no content
+- **Our requests to www.fda.gov, all time (since 2026-07-30):** 1,878 request(s) · 1,877 answered · 1 returned no content
 
-Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
+Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
 ### Last 30 days, day by day
 
@@ -89,36 +89,36 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fda.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-06 | 0 | 26 | 222 |
-| 2026-09-07 | 0 | 26 | 208 |
-| 2026-09-08 | 0 | 26 | 215 |
-| 2026-09-09 | 0 | 25 | 239 |
-| 2026-09-10 | 0 | 26 | 161 |
-| 2026-09-11 | 0 | 26 | 156 |
-| 2026-09-12 | 0 | 28 | 266 |
-| 2026-09-13 | 0 | 25 | 285 |
-| 2026-09-14 | 0 | 30 | 310 |
-| 2026-09-15 | 1 | 27 | 175 |
-| 2026-09-16 | 0 | 27 | 177 |
-| 2026-09-17 | 1 | 26 | 187 |
-| 2026-09-18 | 0 | 27 | 209 |
-| 2026-09-19 | 0 | 26 | 170 |
-| 2026-09-20 | 0 | 26 | 179 |
-| 2026-09-21 | 1 | 29 | 224 |
-| 2026-09-22 | 0 | 26 | 175 |
-| 2026-09-23 | 1 | 26 | 190 |
-| 2026-09-24 | 0 | 27 | 198 |
-| 2026-09-25 | 0 | 27 | 281 |
-| 2026-09-26 | 0 | 27 | 238 |
-| 2026-09-27 | 0 | 28 | 205 |
-| 2026-09-28 | 2 | 30 | 205 |
-| 2026-09-29 | 1 | 30 | 165 |
-| 2026-09-30 | 1 | 27 | 159 |
-| 2026-10-01 | 1 | 28 | 270 |
-| 2026-10-02 | 0 | 27 | 179 |
-| 2026-10-03 | 0 | 26 | 228 |
-| 2026-10-04 | 0 | 27 | 166 |
-| 2026-10-05 | 0 | 1 | 233 |
+| 2026-09-07 | 0 | 25 | 207 |
+| 2026-09-08 | 0 | 25 | 213 |
+| 2026-09-09 | 0 | 24 | 231 |
+| 2026-09-10 | 0 | 25 | 162 |
+| 2026-09-11 | 0 | 25 | 156 |
+| 2026-09-12 | 0 | 27 | 270 |
+| 2026-09-13 | 0 | 24 | 291 |
+| 2026-09-14 | 0 | 29 | 291 |
+| 2026-09-15 | 1 | 26 | 175 |
+| 2026-09-16 | 0 | 26 | 178 |
+| 2026-09-17 | 1 | 25 | 188 |
+| 2026-09-18 | 0 | 26 | 210 |
+| 2026-09-19 | 0 | 25 | 172 |
+| 2026-09-20 | 0 | 25 | 178 |
+| 2026-09-21 | 1 | 28 | 226 |
+| 2026-09-22 | 0 | 25 | 175 |
+| 2026-09-23 | 1 | 25 | 192 |
+| 2026-09-24 | 0 | 26 | 200 |
+| 2026-09-25 | 0 | 26 | 285 |
+| 2026-09-26 | 0 | 26 | 241 |
+| 2026-09-27 | 0 | 27 | 205 |
+| 2026-09-28 | 2 | 29 | 207 |
+| 2026-09-29 | 1 | 29 | 166 |
+| 2026-09-30 | 1 | 26 | 160 |
+| 2026-10-01 | 1 | 27 | 274 |
+| 2026-10-02 | 0 | 26 | 171 |
+| 2026-10-03 | 0 | 25 | 231 |
+| 2026-10-04 | 0 | 26 | 167 |
+| 2026-10-05 | 1 | 26 | 196 |
+| 2026-10-06 | 0 | 1 | 1726 |
 
 ## Our ingestion assessment
 

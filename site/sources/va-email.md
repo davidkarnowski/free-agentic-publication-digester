@@ -55,7 +55,7 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 **delivering** — 3 item(s) in the last 14 days; most recent 2026-10-01, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -90,7 +90,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-06 | 0 |
 | 2026-09-07 | 0 |
 | 2026-09-08 | 1 |
 | 2026-09-09 | 2 |
@@ -120,11 +119,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
 | 2026-10-05 | 0 |
+| 2026-10-06 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The VA subscriptions (veteransaffairs@messages.va.gov and veteransbenefits@messages.va.gov) have delivered 3 items over the 14-day measurement window, averaging 0.21 items per day. Items arrive as full-text email bulletins to the project mailbox, with lengths ranging from 1,152 to 5,235 characters (average 3,643). Delivery has accelerated since the previous assessment on 2026-08-05, which recorded 1 item and 0.07 per day; the source now sustains more regular bulletin frequency. Most recent delivery arrived 2026-09-03. No request-level statistics apply; the email adapter confirms DKIM verification and archival of all bulletins. The collector reports no consecutive errors and full operational status as of 2026-09-05.
+VA Updates from veteransaffairs@messages.va.gov and veteransbenefits@messages.va.gov deliver bulletins carrying benefit-policy announcements, claims and eligibility changes, and health-system news. Over 14 days, 3 items have been delivered averaging 0.21 items per day, with the most recent on 2026-10-01. Bulletins arrive as full-text email to the project mailbox with lengths ranging from 1,354 to 5,220 characters. Delivery has maintained regular frequency since the previous assessment. The email adapter confirms DKIM verification and archival of all subscribed content. No request metrics apply. The collector shows no consecutive errors and normal status.
 
-_Model-written assessment of our own ingestion, generated 2026-09-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

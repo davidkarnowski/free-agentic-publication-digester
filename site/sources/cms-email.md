@@ -57,7 +57,7 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 **delivering** — 2 item(s) in the last 14 days; most recent 2026-10-01, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-06 | 0 |
 | 2026-09-07 | 0 |
 | 2026-09-08 | 0 |
 | 2026-09-09 | 0 |
@@ -122,11 +121,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
 | 2026-10-05 | 0 |
+| 2026-10-06 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-CMS Newsroom bulletins arrive via email with full text, carrying payment-rule announcements, coverage decisions, program guidance, and enrollment data. The source delivered 2 items over 14 days through 2026-09-03, maintaining the 0.14 items per day rate observed through 2026-08-03. Absolute volume is minimal with both items arriving on 2026-09-03 and no deliveries since. Text length is consistent at 1,453 and 1,492 characters. Delivery remains reliable with no consecutive failures. At subscription confirmation on 2026-07-29, no bulletins had arrived in the initial monitoring window. Additional CMS-related subscriptions remain awaiting confirmation.
+CMS Newsroom bulletins arrive via email carrying payment-rule announcements, coverage decisions, program guidance, and enrollment data. Over the 14-day measurement window, 2 items have been delivered at an average rate of 0.14 items per day, with the most recent delivery on 2026-10-01. Bulletins arrive as full-text email to the project mailbox with lengths around 1,400 characters (ranging 1,264 to 1,541). The email adapter confirms DKIM verification and archival of all subscribed content. No request-level statistics apply as this source delivers via email subscription. The collector reports no consecutive errors and normal operational status.
 
-_Model-written assessment of our own ingestion, generated 2026-09-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

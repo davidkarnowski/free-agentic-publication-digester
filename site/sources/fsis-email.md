@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 13 item(s) in the last 14 days; most recent 2026-10-02, delivered by email.
+**delivering** — 10 item(s) in the last 14 days; most recent 2026-10-02, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,14 +73,14 @@ Last 24 hours: no items ingested
 
 | Measure | Value |
 |---|---|
-| Items ingested | 13 in 14 days (0.93 per day) · most recent 2026-10-02 |
-| Content length | 1,355 characters average, 463 median (shortest 69, longest 8,931) |
+| Items ingested | 10 in 14 days (0.71 per day) · most recent 2026-10-02 |
+| Content length | 1,684 characters average, 493 median (shortest 69, longest 8,931) |
 | Delivery mode | email-full — the bulletin carried the full item text |
 | Mailbox | 5 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-02 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-13 item(s) in the last 14 days; most recent 2026-10-02, delivered by email.
+10 item(s) in the last 14 days; most recent 2026-10-02, delivered by email.
 
 ### All time
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-06 | 1 |
 | 2026-09-07 | 0 |
 | 2026-09-08 | 2 |
 | 2026-09-09 | 6 |
@@ -122,11 +121,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
 | 2026-10-05 | 0 |
+| 2026-10-06 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Food Safety and Inspection Service recall notices and public-health alerts arrive via email with full text, DKIM-verified. The source delivered 19 items over 14 days through 2026-09-04, averaging 1.36 per day, a slight increase from the 1.07 items per day observed in the initial seven days. The subscription represents the agency's own time-critical recall-and-alert distribution channel, a document class distinct from departmental press releases. Items ranged from 82 to 7,734 characters with a median of 153 characters. The source has delivered consistently without consecutive failures, providing product identification and safety information as the agency issues recalls and alerts.
+Food Safety and Inspection Service recall notices and public-health alerts arrive via email at 0.71 items per day over 14 days, a decrease from the 1.36 items per day observed in the prior assessment. We received 10 items with the most recent arriving 2026-10-02. The subscription represents the agency's own time-critical recall-and-alert distribution channel, a document class distinct from departmental press releases. Text ranged from 69 to 8,931 characters with a median of 493. The source has delivered consistently without consecutive failures, providing product identification and safety information.
 
-_Model-written assessment of our own ingestion, generated 2026-09-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

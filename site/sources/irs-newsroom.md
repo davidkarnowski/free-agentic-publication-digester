@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-10-02; 0 of 173 request(s) to www.irs.gov returned no content.
+**delivering** — 6 item(s) in the last 14 days; most recent 2026-10-02; 0 of 191 request(s) to www.irs.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,7 +71,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -80,17 +80,17 @@ Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items in
 | Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-10-02 |
 | Content length | 349 characters average, 360 median (shortest 258, longest 412) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.irs.gov | 173 request(s) · 173 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.irs.gov | 191 request(s) · 191 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-05T04:00:11.286+00:00 UTC.
+last answered request 2026-10-06T04:00:17.264+00:00 UTC.
 
-6 item(s) in the last 14 days; most recent 2026-10-02; 0 of 173 request(s) to www.irs.gov returned no content.
+6 item(s) in the last 14 days; most recent 2026-10-02; 0 of 191 request(s) to www.irs.gov returned no content.
 
 ### All time
 
-- **Our requests to www.irs.gov, all time (since 2026-09-28):** 173 request(s) · 173 answered · 0 returned no content
+- **Our requests to www.irs.gov, all time (since 2026-09-28):** 191 request(s) · 191 answered · 0 returned no content
 
-Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
+Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
 ### Last 30 days, day by day
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.irs.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-06 | 0 | 0 | — |
 | 2026-09-07 | 0 | 0 | — |
 | 2026-09-08 | 0 | 0 | — |
 | 2026-09-09 | 0 | 0 | — |
@@ -120,14 +119,15 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-09-25 | 0 | 0 | — |
 | 2026-09-26 | 0 | 0 | — |
 | 2026-09-27 | 0 | 0 | — |
-| 2026-09-28 | 3 | 12 | 288 |
-| 2026-09-29 | 0 | 28 | 223 |
-| 2026-09-30 | 0 | 26 | 656 |
-| 2026-10-01 | 2 | 27 | 271 |
-| 2026-10-02 | 1 | 27 | 219 |
-| 2026-10-03 | 0 | 26 | 200 |
-| 2026-10-04 | 0 | 26 | 215 |
-| 2026-10-05 | 0 | 1 | 337 |
+| 2026-09-28 | 3 | 11 | 270 |
+| 2026-09-29 | 0 | 27 | 223 |
+| 2026-09-30 | 0 | 25 | 678 |
+| 2026-10-01 | 2 | 26 | 275 |
+| 2026-10-02 | 1 | 26 | 220 |
+| 2026-10-03 | 0 | 25 | 201 |
+| 2026-10-04 | 0 | 25 | 220 |
+| 2026-10-05 | 0 | 25 | 223 |
+| 2026-10-06 | 0 | 1 | 273 |
 
 ## Our ingestion assessment
 

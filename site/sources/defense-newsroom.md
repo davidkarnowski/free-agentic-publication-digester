@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 24 item(s) in the last 14 days; most recent 2026-10-03; 13 of 345 request(s) to www.defense.gov returned no content.
+**delivering** — 21 item(s) in the last 14 days; most recent 2026-10-05; 0 of 333 request(s) to www.defense.gov returned no content.
 
-This label has held since 2026-08-11T18:00:02Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-08-11T18:00:02Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,26 +69,26 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (24 answered, 1 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 24 in 14 days (1.71 per day) · most recent 2026-10-03 |
-| Content length | 286 characters average, 285 median (shortest 204, longest 401) |
+| Items ingested | 21 in 14 days (1.5 per day) · most recent 2026-10-05 |
+| Content length | 277 characters average, 281 median (shortest 202, longest 401) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.defense.gov | 345 request(s) · 332 answered · 13 declined (4xx) · 0 server declined (5xx) · 0 no response — 3.8% returned no content |
+| Our requests to www.defense.gov | 333 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-05T04:00:09.484+00:00 UTC.
+last answered request 2026-10-06T04:00:15.083+00:00 UTC.
 
-24 item(s) in the last 14 days; most recent 2026-10-03; 13 of 345 request(s) to www.defense.gov returned no content.
+21 item(s) in the last 14 days; most recent 2026-10-05; 0 of 333 request(s) to www.defense.gov returned no content.
 
 ### All time
 
-- **Our requests to www.defense.gov, all time (since 2026-07-30):** 1,917 request(s) · 1,813 answered · 104 returned no content
+- **Our requests to www.defense.gov, all time (since 2026-07-30):** 1,848 request(s) · 1,839 answered · 9 returned no content
 
-Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
+Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
 ### Last 30 days, day by day
 
@@ -96,36 +96,36 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.defense.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-06 | 0 | 27 | 383 |
-| 2026-09-07 | 0 | 26 | 331 |
-| 2026-09-08 | 4 | 26 | 340 |
-| 2026-09-09 | 3 | 26 | 295 |
-| 2026-09-10 | 1 | 26 | 335 |
-| 2026-09-11 | 4 | 25 | 350 |
-| 2026-09-12 | 0 | 29 | 542 |
-| 2026-09-13 | 0 | 26 | 472 |
-| 2026-09-14 | 1 | 29 | 792 |
-| 2026-09-15 | 3 | 26 | 316 |
-| 2026-09-16 | 2 | 26 | 314 |
-| 2026-09-17 | 3 | 27 | 380 |
-| 2026-09-18 | 3 | 26 | 682 |
-| 2026-09-19 | 1 | 26 | 401 |
-| 2026-09-20 | 0 | 26 | 351 |
+| 2026-09-07 | 0 | 25 | 338 |
+| 2026-09-08 | 4 | 25 | 337 |
+| 2026-09-09 | 3 | 25 | 302 |
+| 2026-09-10 | 1 | 25 | 344 |
+| 2026-09-11 | 4 | 24 | 359 |
+| 2026-09-12 | 0 | 28 | 552 |
+| 2026-09-13 | 0 | 25 | 486 |
+| 2026-09-14 | 1 | 28 | 797 |
+| 2026-09-15 | 3 | 25 | 324 |
+| 2026-09-16 | 2 | 25 | 322 |
+| 2026-09-17 | 3 | 26 | 389 |
+| 2026-09-18 | 3 | 25 | 702 |
+| 2026-09-19 | 1 | 25 | 407 |
+| 2026-09-20 | 0 | 25 | 354 |
 | 2026-09-21 | 2 | 27 | 572 |
-| 2026-09-22 | 4 | 26 | 326 |
-| 2026-09-23 | 2 | 24 | 330 |
-| 2026-09-24 | 1 | 26 | 394 |
-| 2026-09-25 | 1 | 26 | 302 |
-| 2026-09-26 | 0 | 27 | 400 |
-| 2026-09-27 | 0 | 27 | 374 |
-| 2026-09-28 | 2 | 28 | 410 |
-| 2026-09-29 | 3 | 29 | 383 |
-| 2026-09-30 | 4 | 25 | 340 |
-| 2026-10-01 | 3 | 27 | 339 |
-| 2026-10-02 | 3 | 27 | 278 |
-| 2026-10-03 | 1 | 27 | 304 |
-| 2026-10-04 | 0 | 25 | 275 |
-| 2026-10-05 | 0 | 1 | 971 |
+| 2026-09-22 | 4 | 25 | 334 |
+| 2026-09-23 | 2 | 23 | 319 |
+| 2026-09-24 | 1 | 25 | 404 |
+| 2026-09-25 | 1 | 25 | 307 |
+| 2026-09-26 | 0 | 26 | 410 |
+| 2026-09-27 | 0 | 26 | 384 |
+| 2026-09-28 | 2 | 27 | 420 |
+| 2026-09-29 | 3 | 28 | 392 |
+| 2026-09-30 | 4 | 24 | 348 |
+| 2026-10-01 | 3 | 26 | 347 |
+| 2026-10-02 | 3 | 26 | 284 |
+| 2026-10-03 | 1 | 26 | 312 |
+| 2026-10-04 | 0 | 24 | 281 |
+| 2026-10-05 | 1 | 26 | 302 |
+| 2026-10-06 | 0 | 1 | 1035 |
 
 ## Our ingestion assessment
 

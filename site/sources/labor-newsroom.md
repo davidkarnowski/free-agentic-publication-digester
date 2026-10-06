@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 14 item(s) in the last 14 days; most recent 2026-10-02; 14 of 360 request(s) to www.dol.gov returned no content.
+**delivering** — 14 item(s) in the last 14 days; most recent 2026-10-02; 14 of 348 request(s) to www.dol.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -75,17 +75,17 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Items ingested | 14 in 14 days (1.0 per day) · most recent 2026-10-02 |
 | Content length | 2,192 characters average, 2,083 median (shortest 460, longest 6,020) |
 | Delivery mode | feed-fallback — the feed's summary, used because the article page could not be read |
-| Our requests to www.dol.gov | 360 request(s) · 346 answered · 14 declined (4xx) · 0 server declined (5xx) · 0 no response — 3.9% returned no content |
+| Our requests to www.dol.gov | 348 request(s) · 334 answered · 14 declined (4xx) · 0 server declined (5xx) · 0 no response — 4.0% returned no content |
 
-last answered request 2026-10-05T04:00:09.116+00:00 UTC.
+last answered request 2026-10-06T04:00:14.852+00:00 UTC.
 
-14 item(s) in the last 14 days; most recent 2026-10-02; 14 of 360 request(s) to www.dol.gov returned no content.
+14 item(s) in the last 14 days; most recent 2026-10-02; 14 of 348 request(s) to www.dol.gov returned no content.
 
 ### All time
 
-- **Our requests to www.dol.gov, all time (since 2026-07-30):** 1,955 request(s) · 1,923 answered · 32 returned no content
+- **Our requests to www.dol.gov, all time (since 2026-07-30):** 1,887 request(s) · 1,855 answered · 32 returned no content
 
-Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
+Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
 ### Last 30 days, day by day
 
@@ -93,41 +93,41 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.dol.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-06 | 0 | 26 | 192 |
-| 2026-09-07 | 1 | 27 | 288 |
-| 2026-09-08 | 1 | 27 | 162 |
-| 2026-09-09 | 0 | 27 | 167 |
-| 2026-09-10 | 1 | 27 | 135 |
-| 2026-09-11 | 0 | 25 | 150 |
-| 2026-09-12 | 0 | 29 | 227 |
-| 2026-09-13 | 0 | 26 | 235 |
-| 2026-09-14 | 1 | 30 | 298 |
-| 2026-09-15 | 1 | 27 | 131 |
-| 2026-09-16 | 0 | 27 | 206 |
-| 2026-09-17 | 1 | 27 | 139 |
-| 2026-09-18 | 0 | 26 | 214 |
-| 2026-09-19 | 0 | 26 | 166 |
-| 2026-09-20 | 0 | 26 | 161 |
-| 2026-09-21 | 0 | 28 | 228 |
-| 2026-09-22 | 0 | 27 | 150 |
-| 2026-09-23 | 3 | 28 | 154 |
-| 2026-09-24 | 2 | 28 | 213 |
-| 2026-09-25 | 1 | 28 | 149 |
-| 2026-09-26 | 0 | 27 | 199 |
-| 2026-09-27 | 0 | 26 | 169 |
-| 2026-09-28 | 0 | 28 | 253 |
-| 2026-09-29 | 1 | 30 | 140 |
-| 2026-09-30 | 3 | 29 | 135 |
+| 2026-09-07 | 1 | 26 | 292 |
+| 2026-09-08 | 1 | 26 | 160 |
+| 2026-09-09 | 0 | 26 | 166 |
+| 2026-09-10 | 1 | 26 | 135 |
+| 2026-09-11 | 0 | 24 | 152 |
+| 2026-09-12 | 0 | 28 | 230 |
+| 2026-09-13 | 0 | 25 | 239 |
+| 2026-09-14 | 1 | 29 | 303 |
+| 2026-09-15 | 1 | 26 | 131 |
+| 2026-09-16 | 0 | 26 | 209 |
+| 2026-09-17 | 1 | 26 | 140 |
+| 2026-09-18 | 0 | 25 | 217 |
+| 2026-09-19 | 0 | 25 | 167 |
+| 2026-09-20 | 0 | 25 | 162 |
+| 2026-09-21 | 0 | 27 | 230 |
+| 2026-09-22 | 0 | 26 | 151 |
+| 2026-09-23 | 3 | 27 | 154 |
+| 2026-09-24 | 2 | 27 | 216 |
+| 2026-09-25 | 1 | 27 | 149 |
+| 2026-09-26 | 0 | 26 | 191 |
+| 2026-09-27 | 0 | 25 | 170 |
+| 2026-09-28 | 0 | 27 | 258 |
+| 2026-09-29 | 1 | 29 | 141 |
+| 2026-09-30 | 3 | 28 | 134 |
 | 2026-10-01 | 3 | 29 | 149 |
-| 2026-10-02 | 1 | 27 | 140 |
-| 2026-10-03 | 0 | 27 | 150 |
-| 2026-10-04 | 0 | 25 | 158 |
-| 2026-10-05 | 0 | 1 | 617 |
+| 2026-10-02 | 1 | 26 | 139 |
+| 2026-10-03 | 0 | 26 | 148 |
+| 2026-10-04 | 0 | 24 | 158 |
+| 2026-10-05 | 0 | 26 | 165 |
+| 2026-10-06 | 0 | 1 | 765 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Labor news releases arrive through RSS feed. Over 14 days we collected 9 items averaging 1,799 characters at 0.64 per day, most recent on September 4. Delivery mode is feed-fallback, indicating article page fetches are not retrieving content, so feed summaries serve as the delivery text. The www.dol.gov host shows 2.6% request failure (9 of 352 requests). Compared to the prior assessment (15 items at ~1/day with full article extraction), collection volume has declined and delivery has shifted from full article text extraction to feed summaries only.
+Labor Department news releases arrive through RSS feed in feed-fallback delivery mode, indicating article page fetches do not retrieve content and feed summaries serve as the delivery text. The current 14-day window shows 14 items at 1.0 per day, averaging 2,192 characters, most recent on October 2. The www.dol.gov host shows 4.0% request failure (14 of 348 requests returned no content). Compared to the assessment of September 5 (9 items at 0.64 per day, also feed-fallback, averaging 1,799 characters), collection volume has increased while delivery remains limited to feed summaries only.
 
-_Model-written assessment of our own ingestion, generated 2026-09-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

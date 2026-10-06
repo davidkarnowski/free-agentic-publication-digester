@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 27 item(s) in the last 14 days; most recent 2026-10-02, delivered by email.
+**delivering** — 27 item(s) in the last 14 days; most recent 2026-10-05, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,20 +67,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 8 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 27 in 14 days (1.93 per day) · most recent 2026-10-02 |
-| Content length | 2,089 characters average, 1,735 median (shortest 302, longest 6,571) |
+| Items ingested | 27 in 14 days (1.93 per day) · most recent 2026-10-05 |
+| Content length | 2,442 characters average, 1,768 median (shortest 510, longest 6,571) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 11 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-02 |
+| Mailbox | 19 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-05 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-27 item(s) in the last 14 days; most recent 2026-10-02, delivered by email.
+27 item(s) in the last 14 days; most recent 2026-10-05, delivered by email.
 
 ### All time
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-06 | 1 |
 | 2026-09-07 | 0 |
 | 2026-09-08 | 6 |
 | 2026-09-09 | 1 |
@@ -121,12 +120,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-02 | 4 |
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
-| 2026-10-05 | 0 |
+| 2026-10-05 | 8 |
+| 2026-10-06 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-FDA updates arrive via email with full text, carrying approvals, safety communications, recalls, and warning letters. The source delivered 43 items over 14 days through 2026-09-04, averaging 3.07 per day, more than tripling the 1.0 items per day observed in the initial seven days. The email channel operates as a corroborating input alongside the active fda-press RSS feed; whether the bulletins carry material the feed omits remains under evaluation. Text averaged 1,918 characters, ranging from 296 to 4,652. Delivery has been consistent with no consecutive failures. At subscription confirmation on 2026-07-29, no bulletins had arrived in the initial monitoring window.
+FDA updates arrive via email at 1.93 items per day over 14 days, a decrease from the 3.07 items per day observed in the prior assessment. We received 27 items with the most recent arriving 2026-10-05. The email channel carries full-text materials covering approvals, safety communications, recalls, and warning letters, with DKIM verification applied. It operates as a corroborating input alongside the active fda-press RSS feed. Text ranged from 510 to 6,571 characters with a median of 1,768. Delivery has been consistent with no consecutive failures recorded.
 
-_Model-written assessment of our own ingestion, generated 2026-09-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-10-02; 0 of 348 request(s) to about.usps.com returned no content.
+**delivering** — 6 item(s) in the last 14 days; most recent 2026-10-05; 0 of 336 request(s) to about.usps.com returned no content.
 
-This label has held since 2026-09-08T15:31:58Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-09-08T15:31:58Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -63,26 +63,26 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-10-02 |
-| Content length | 324 characters average, 335 median (shortest 193, longest 445) |
+| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-10-05 |
+| Content length | 333 characters average, 335 median (shortest 249, longest 445) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to about.usps.com | 348 request(s) · 348 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to about.usps.com | 336 request(s) · 336 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-05T04:00:10.689+00:00 UTC.
+last answered request 2026-10-06T04:00:16.948+00:00 UTC.
 
-6 item(s) in the last 14 days; most recent 2026-10-02; 0 of 348 request(s) to about.usps.com returned no content.
+6 item(s) in the last 14 days; most recent 2026-10-05; 0 of 336 request(s) to about.usps.com returned no content.
 
 ### All time
 
-- **Our requests to about.usps.com, all time (since 2026-08-01):** 1,860 request(s) · 1,859 answered · 1 returned no content
+- **Our requests to about.usps.com, all time (since 2026-08-01):** 1,821 request(s) · 1,820 answered · 1 returned no content
 
-Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter.
+Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
 ### Last 30 days, day by day
 
@@ -90,36 +90,36 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to about.usps.com | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-06 | 0 | 27 | 204 |
-| 2026-09-07 | 0 | 26 | 198 |
-| 2026-09-08 | 2 | 26 | 203 |
-| 2026-09-09 | 0 | 26 | 191 |
-| 2026-09-10 | 0 | 25 | 491 |
-| 2026-09-11 | 0 | 26 | 184 |
-| 2026-09-12 | 1 | 29 | 288 |
-| 2026-09-13 | 0 | 26 | 227 |
-| 2026-09-14 | 1 | 29 | 578 |
-| 2026-09-15 | 0 | 26 | 223 |
-| 2026-09-16 | 0 | 26 | 176 |
-| 2026-09-17 | 1 | 26 | 232 |
-| 2026-09-18 | 1 | 26 | 219 |
-| 2026-09-19 | 1 | 26 | 216 |
-| 2026-09-20 | 0 | 26 | 155 |
-| 2026-09-21 | 0 | 28 | 315 |
-| 2026-09-22 | 1 | 27 | 199 |
-| 2026-09-23 | 1 | 25 | 374 |
-| 2026-09-24 | 0 | 26 | 359 |
-| 2026-09-25 | 2 | 26 | 182 |
-| 2026-09-26 | 0 | 28 | 281 |
-| 2026-09-27 | 0 | 27 | 197 |
-| 2026-09-28 | 0 | 29 | 231 |
-| 2026-09-29 | 1 | 28 | 193 |
-| 2026-09-30 | 0 | 26 | 177 |
+| 2026-09-07 | 0 | 25 | 198 |
+| 2026-09-08 | 2 | 25 | 179 |
+| 2026-09-09 | 0 | 25 | 184 |
+| 2026-09-10 | 0 | 24 | 430 |
+| 2026-09-11 | 0 | 25 | 179 |
+| 2026-09-12 | 1 | 28 | 283 |
+| 2026-09-13 | 0 | 25 | 219 |
+| 2026-09-14 | 1 | 28 | 584 |
+| 2026-09-15 | 0 | 25 | 223 |
+| 2026-09-16 | 0 | 25 | 174 |
+| 2026-09-17 | 1 | 25 | 232 |
+| 2026-09-18 | 1 | 25 | 214 |
+| 2026-09-19 | 1 | 25 | 194 |
+| 2026-09-20 | 0 | 25 | 151 |
+| 2026-09-21 | 0 | 27 | 307 |
+| 2026-09-22 | 1 | 26 | 198 |
+| 2026-09-23 | 1 | 24 | 201 |
+| 2026-09-24 | 0 | 25 | 363 |
+| 2026-09-25 | 2 | 25 | 167 |
+| 2026-09-26 | 0 | 27 | 266 |
+| 2026-09-27 | 0 | 26 | 196 |
+| 2026-09-28 | 0 | 28 | 231 |
+| 2026-09-29 | 1 | 27 | 191 |
+| 2026-09-30 | 0 | 25 | 176 |
 | 2026-10-01 | 0 | 26 | 180 |
-| 2026-10-02 | 1 | 28 | 192 |
-| 2026-10-03 | 0 | 26 | 164 |
-| 2026-10-04 | 0 | 25 | 169 |
-| 2026-10-05 | 0 | 1 | 403 |
+| 2026-10-02 | 1 | 27 | 189 |
+| 2026-10-03 | 0 | 25 | 163 |
+| 2026-10-04 | 0 | 24 | 165 |
+| 2026-10-05 | 1 | 26 | 189 |
+| 2026-10-06 | 0 | 1 | 376 |
 
 ## Our ingestion assessment
 

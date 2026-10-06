@@ -17,7 +17,7 @@
   },
   {
    "description": "Understand which federal sources the digest covers, which are planned or unavailable, and how to read its ingestion statistics.",
-   "digest": "sha256:01a9f39d3ed8918d2fff6b75e447927d4c2925ea70a61dd570559a284954cff4",
+   "digest": "sha256:ca0cd7e3a6f14db41a8967be95c05738e6eb07cce0622de325b161b4df1eacda",
    "name": "fapd-source-coverage",
    "type": "skill-md",
    "url": "https://fapd.info/.well-known/agent-skills/fapd-source-coverage/SKILL.md"

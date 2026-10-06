@@ -62,7 +62,7 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 **no data** — No bulletin recorded from this source in the last 180 days.
 
-This label has held since 2026-10-01T22:11:29Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-10-01T22:11:29Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 

@@ -6,7 +6,7 @@
 
 # NIH Office of Research on Women's Health (email)
 
-active · ingestion health: no data · Executive · Tier 3 · email bulletin · Department of Health and Human Services (NIH / ORWH)
+active · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Health and Human Services (NIH / ORWH)
 
 Official site: https://orwh.od.nih.gov/ · All sources: [sources.md](../sources.md)
 
@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**no data** — No bulletin recorded from this source in the last 180 days.
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-05, delivered by email.
 
-This label has held since 2026-10-01T21:38:40Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-10-05T18:11:01Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -72,18 +72,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — none recorded in the lookback period |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-05 |
+| Content length | 1,250 characters average, 1,250 median (shortest 1,250, longest 1,250) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-05 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-No bulletin recorded from this source in the last 180 days.
+1 item(s) in the last 14 days; most recent 2026-10-05, delivered by email.
 
 ### All time
 
@@ -91,12 +93,45 @@ Bulletins from this source are delivered to the project mailbox, so there are no
 
 ### Last 30 days, day by day
 
-No requests and no items were recorded in the last 30 days, so there is nothing to chart.
+Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publication day the digests use; the stored request stamps remain UTC.
+
+| Day | Items ingested |
+|---|---|
+| 2026-09-07 | 0 |
+| 2026-09-08 | 0 |
+| 2026-09-09 | 0 |
+| 2026-09-10 | 0 |
+| 2026-09-11 | 0 |
+| 2026-09-12 | 0 |
+| 2026-09-13 | 0 |
+| 2026-09-14 | 0 |
+| 2026-09-15 | 0 |
+| 2026-09-16 | 0 |
+| 2026-09-17 | 0 |
+| 2026-09-18 | 0 |
+| 2026-09-19 | 0 |
+| 2026-09-20 | 0 |
+| 2026-09-21 | 0 |
+| 2026-09-22 | 0 |
+| 2026-09-23 | 0 |
+| 2026-09-24 | 0 |
+| 2026-09-25 | 0 |
+| 2026-09-26 | 0 |
+| 2026-09-27 | 0 |
+| 2026-09-28 | 0 |
+| 2026-09-29 | 0 |
+| 2026-09-30 | 0 |
+| 2026-10-01 | 0 |
+| 2026-10-02 | 0 |
+| 2026-10-03 | 0 |
+| 2026-10-04 | 0 |
+| 2026-10-05 | 1 |
+| 2026-10-06 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-NIH's Office of Research on Women's Health was activated on 2026-10-01 following observed delivery. The source carries research and funding announcements mixed with event and webinar invitations (tier 3). No messages have been recorded in the mailbox since activation. Messages are ingested through the email adapter via DKIM verification.
+NIH's Office of Research on Women's Health subscription was activated on 2026-10-01 following observed delivery. It carries research announcements, funding news, and event invitations via email. One item has been recorded since activation, delivered on 2026-10-05 at 1,250 characters. The email adapter confirms DKIM verification and archival of messages received. No request-level statistics apply as this source delivers via email. The collector shows normal status with no consecutive errors.
 
-_Model-written assessment of our own ingestion, generated 2026-10-02 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 75 item(s) in the last 14 days; most recent 2026-10-02, delivered by email.
+**delivering** — 76 item(s) in the last 14 days; most recent 2026-10-05, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-05T03:47:32Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,20 +69,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 9 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 75 in 14 days (5.36 per day) · most recent 2026-10-02 |
-| Content length | 1,925 characters average, 221 median (shortest 81, longest 21,297) |
+| Items ingested | 76 in 14 days (5.43 per day) · most recent 2026-10-05 |
+| Content length | 2,050 characters average, 221 median (shortest 81, longest 21,297) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 50 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-02 |
+| Mailbox | 59 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-06 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-75 item(s) in the last 14 days; most recent 2026-10-02, delivered by email.
+76 item(s) in the last 14 days; most recent 2026-10-05, delivered by email.
 
 ### All time
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-06 | 0 |
 | 2026-09-07 | 0 |
 | 2026-09-08 | 9 |
 | 2026-09-09 | 8 |
@@ -123,12 +122,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-02 | 11 |
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
-| 2026-10-05 | 0 |
+| 2026-10-05 | 9 |
+| 2026-10-06 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Treasury press releases arrive via GovDelivery email subscription at 5.71 items per day over 14 days, representing a doubling from the 2.43 per day observed in the prior assessment. We received 80 items with the most recent arriving 2026-09-04. The bulletin stream carries full-text releases bearing home.treasury.gov URLs. This email subscription is the department's own press-release distribution list; the web newsroom path blocks our automated client, making the bulletin stream the first available input for this channel. DKIM signature verification has been applied to each bulletin. Item delivery frequency aligns with the department's release volume as observed through the email channel itself.
+Treasury press releases arrive via GovDelivery subscription at 5.43 items per day over 14 days, a slight decrease from the 5.71 items per day observed in the prior assessment. We received 76 items with the most recent arriving 2026-10-05. The bulletin stream carries full-text releases bearing home.treasury.gov URLs, with DKIM signature verification applied. This email subscription remains the first working input for Treasury releases, as the web newsroom path blocks our client. Text averaged 2,050 characters; message volume aligns with the department's release frequency measured through this channel.
 
-_Model-written assessment of our own ingestion, generated 2026-09-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
