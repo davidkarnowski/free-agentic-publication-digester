@@ -318,10 +318,14 @@ def _download_pending(client, conn, collection, stats, max_downloads):
     most `config.GOVINFO_DOWNLOAD_TRIES_PER_CYCLE` tries a cycle. And
     when `config.SOURCE_UNAVAILABLE_STREAK` second chances in a row are
     turned down, the source is treated as unavailable for this cycle:
-    packages that already failed an earlier cycle are no longer tried or
-    revisited, and stay queued for the next one. A package new to this
-    cycle is never skipped for that reason — a new document always gets
-    its tries.
+    packages that already failed an earlier cycle are no longer tried,
+    and nothing set aside is revisited; all of it stays queued for the
+    next cycle. A package new to this cycle is never skipped for that
+    reason — a new document always gets its first try. Its revisits
+    stop with everyone else's (OB-16 tuning, GUIDE §4 amended
+    2026-10-06): in the outage of 2026-10-03 the new packages' second
+    and third tries were 141 set-aside packages of which none arrived,
+    and they tripled the hourly load on a publisher that was down.
 
     What a cycle costs a package is unchanged: one failed cycle counts
     once toward `config.MAX_PACKAGE_FETCH_ATTEMPTS`, however many tries
@@ -418,8 +422,11 @@ def _download_pending(client, conn, collection, stats, max_downloads):
     not_revisited = 0
     while waiting:                                        # the second half
         _, _, item = heapq.heappop(waiting)
-        if item.prior and streak >= limit:
-            # Tried this cycle and turned down: that is a failed cycle.
+        if streak >= limit:
+            # Tried this cycle and turned down: that is a failed cycle,
+            # for a package new to the cycle as much as for an old one.
+            # Its first try was made; a source that has refused `limit`
+            # second chances in a row is not asked for its second.
             _record_failed_cycle(conn, item.package_id, item.error, stats)
             not_revisited += 1
             continue
@@ -437,8 +444,8 @@ def _download_pending(client, conn, collection, stats, max_downloads):
         logger.warning(
             "%s: %d second chances in a row were turned down — treating the"
             " source as unavailable for this cycle; %d package(s) that failed"
-            " an earlier cycle were not tried and %d were not revisited, all"
-            " still queued",
+            " an earlier cycle were not tried and %d set-aside package(s)"
+            " were not revisited, all still queued",
             collection, limit, not_tried, not_revisited,
         )
     if set_aside:

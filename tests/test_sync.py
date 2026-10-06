@@ -883,9 +883,12 @@ def test_second_chances_that_keep_failing_stop_the_asking(conn, raw_dir, monkeyp
     assert content_gets(client) == ["O3", "O4"]
 
 
-def test_a_new_package_always_gets_its_tries(conn, raw_dir, monkeypatch):
+def test_a_new_package_always_gets_its_first_try(conn, raw_dir, monkeypatch):
     """A document nobody has asked for yet is never skipped because older
-    ones are failing: it gets every try a cycle allows."""
+    ones are failing: it is asked for once. Once the source has turned
+    down a run of second chances, its revisits stop with everyone else's
+    (OB-16 tuning, GUIDE §4 amended 2026-10-06) and it is charged the
+    cycle it actually failed."""
     monkeypatch.setattr(config, "SOURCE_UNAVAILABLE_STREAK", 1)
     client = FakeClient()
     queued(client, ["OLD", "NEW"])
@@ -896,11 +899,51 @@ def test_a_new_package_always_gets_its_tries(conn, raw_dir, monkeypatch):
     client.never_ready["https://x/OLD/xml"] = 30
     client.never_ready["https://x/NEW/xml"] = 30
 
-    sync.sync_collection(client, conn, "BILLS")
+    stats = sync.sync_collection(client, conn, "BILLS")
 
     gets = content_gets(client)
-    assert gets.count("NEW") == config.GOVINFO_DOWNLOAD_TRIES_PER_CYCLE
+    assert gets.count("NEW") == 1                   # its first try, no revisit
     assert gets.count("OLD") == 1                   # probed once, then left
+    assert client.waits == []                       # nobody was waited for
+    assert stats["source_unavailable"] is True
+    row = conn.execute("SELECT fetch_status, fetch_attempts FROM packages"
+                       " WHERE package_id = 'NEW'").fetchone()
+    assert (row["fetch_status"], row["fetch_attempts"]) == ("failed", 1)
+
+
+def test_an_outage_of_new_packages_alone_stops_their_revisits(
+        conn, raw_dir, monkeypatch):
+    """The shape of the 2026-10-03 outage: a cycle of packages nobody had
+    asked for, none of which arrives. Every one is asked for once; the
+    revisits stop once the source has refused a run of second chances,
+    instead of every package taking all its tries."""
+    monkeypatch.setattr(config, "SOURCE_UNAVAILABLE_STREAK", 3)
+    client = FakeClient()
+    pids = [f"N{i}" for i in range(8)]
+    queued(client, pids)
+    for pid in pids:
+        client.never_ready[f"https://x/{pid}/xml"] = 30
+
+    stats = sync.sync_collection(client, conn, "BILLS")
+
+    gets = content_gets(client)
+    assert gets[:8] == pids                         # every first try is made
+    assert len(gets) == 8 + 3                       # then three refused revisits
+    assert stats["source_unavailable"] is True
+    assert stats["failed"] == 8                     # each charged one cycle
+
+
+def test_on_an_ordinary_day_a_new_package_still_gets_every_try(conn, raw_dir):
+    """No outage, no change: a package the server is slow to build is
+    revisited up to the per-cycle limit and arrives."""
+    client = FakeClient()
+    queued(client, ["SLOW"])
+    client.not_ready["https://x/SLOW/xml"] = [30, 30]
+
+    stats = sync.sync_collection(client, conn, "BILLS")
+
+    assert content_gets(client).count("SLOW") == config.GOVINFO_DOWNLOAD_TRIES_PER_CYCLE
+    assert stats["downloaded"] == 1 and "source_unavailable" not in stats
 
 
 def test_a_first_try_that_is_not_ready_says_nothing_about_the_source(
