@@ -140,7 +140,12 @@ def test_registry_seeds_expected_active_sources():
         # through their own adapter (a snapshot feed whose guid survives
         # a re-issue, and whose advisory pages answer FAPD 403):
         "occ-news", "occ-bulletins", "cfpb-newsroom", "nlrb-newsroom",
-        "fmc-press", "state-travel-advisories"}
+        "fmc-press", "state-travel-advisories",
+        # activated 2026-10-06 (operator ruling: SAPs are attributed
+        # official statements under GUIDE §2): OMB's dated SAP listing
+        # through a listing subclass that files them as document type SAP
+        # and reads the measure each title names:
+        "omb-saps"}
 
 
 # ------------------------------------------------------------ coverage_stats --
@@ -182,7 +187,8 @@ def test_coverage_stats_per_tier_on_real_registry():
     # + energy, FEC, GSA and the White House news listing (09-28, html-index
     #   activations from the same-day live probe)
     # + nlrb-newsroom (10-05, on its documented press-release feed)
-    assert by_tier[1].get("active", 0) == 28
+    # + omb-saps (10-06, Statements of Administration Policy)
+    assert by_tier[1].get("active", 0) == 29
 
 
 def test_coverage_stats_empty():

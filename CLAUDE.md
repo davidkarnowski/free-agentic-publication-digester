@@ -888,3 +888,16 @@ live in `.claude/agents/fapd-*.md` (tracked).
   of 2026-10-05 all 251 set-aside court packages arrived on a later
   try, the busiest govinfo hour was 520, and nothing was exhausted.
   Fewer requests to a struggling server, none sooner than it asked.
+- **2026-10-06** — **Statements of Administration Policy are attributed
+  official statements** (operator; GUIDE §2's attributed-speech rule
+  applied, not amended). A SAP is the Administration's formal written
+  position on a bill before floor action, issued by OMB: political by
+  nature, and the single official position of the executive branch on
+  that measure, structurally like the presidential actions already
+  carried. It files as an agency release (AGENCYPR) with document type
+  SAP, titled verbatim and attributed, never characterized. Ingested
+  from OMB's dated listing (`omb-saps`) by a listing subclass that sets
+  the document type and reads the measure each title names into
+  `details.bills` (congress from the SAP's own date), without fetching
+  the PDF. The position a SAP states lives only in the PDF; reading it
+  is a separate, later decision.
