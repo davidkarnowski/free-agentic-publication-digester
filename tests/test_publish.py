@@ -2275,6 +2275,11 @@ def test_today_excludes_publisher_backdated_items(conn, tmp_path):
 
     assert "Old release" not in page, "a 2021 release must not read as today's news"
     assert "publishers date earlier" in page          # disclosed, not hidden
+    # counted, never claimed as listed (2026-10-06: the old sentence said
+    # the digest's coverage accounting "listed" them; it only counts them)
+    assert "are listed in the dated digest" not in page
+    assert "counts them in its Coverage Statement" in page
+    assert "(is_backfill: true)" in page
     assert "VA announces a claims program" in page    # today's items still shown
 
     # agents still get everything, labelled

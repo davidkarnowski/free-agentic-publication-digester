@@ -500,9 +500,10 @@ def _header_lines(conn, date, git_short):
     if first and date >= first:
         lines += [
             (f"[Full observed listing for this day](day/{date}.html) — "
-             "every item our collectors observed for this publication "
-             "day, mechanical rules applied, frozen at end of day. This "
-             "digest is the canonical record."),
+             "the items our collectors observed for this publication "
+             "day, mechanical rules applied, frozen at end of day; "
+             "releases their publishers date on other days are counted "
+             "there, not listed. This digest is the canonical record."),
             "",
         ]
     lines += [

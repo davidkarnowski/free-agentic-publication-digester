@@ -1437,9 +1437,10 @@ def _inject_day_view_link(body, date, md_text, out_dir):
     if href in md_text or not (out_dir / "day" / f"{date}.html").exists():
         return body
     para = (f'<p><a href="{href}">Full observed listing for this day</a>'
-            " &mdash; every item our collectors observed for this"
-            " publication day, mechanical rules applied. This digest is"
-            " the canonical record.</p>")
+            " &mdash; the items our collectors observed for this"
+            " publication day, mechanical rules applied; releases their"
+            " publishers date on other days are counted there, not listed."
+            " This digest is the canonical record.</p>")
     # The same position the markdown-emitted paragraph lands in: right
     # after the compact header strip, or after the title when a digest
     # has no metadata table.
@@ -5109,8 +5110,9 @@ def _build_day_page(conn, date, out_dir, *, live, reconstructed_on=None):
         (meta
          + (f" A further {len(status['backfill'])} item(s) {arrived}"
             " that their publishers date earlier; they are not this day's"
-            " news and are listed in the dated digest's coverage"
-            " accounting, not here."
+            " news. The day's dated digest counts them in its Coverage"
+            " Statement, and the JSON version of this page lists each one"
+            " (is_backfill: true)."
             if status.get("backfill") else "")
          + (f" {len(status['duplicates'])} item(s) arrived through a"
             " second ingestion channel (the same canonical URL twice);"
