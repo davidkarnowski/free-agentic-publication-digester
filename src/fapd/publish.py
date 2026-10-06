@@ -2468,8 +2468,9 @@ def _registry_entries():
 
 def _source_line_md(entry, record):
     """One directory entry as a Markdown list item: the same registry
-    fields and, for a measured source, the same 24-hour figures and
-    health sentence the HTML card shows (`_card_stats_block`)."""
+    fields and, for a measured source, the same delivery rate, 24-hour
+    figures and health sentence the HTML card shows
+    (`_card_stats_block`)."""
     line = (f"- **{_md_escape(entry['name'])}** (`{entry['id']}`) — "
             f"{_STATUS_PHRASES[entry['status']]}; "
             f"{_md_escape(_redact_addresses(entry['method']))}; "
@@ -2477,6 +2478,10 @@ def _source_line_md(entry, record):
     if record and record.get("health"):
         line += f" — ingestion health: {_HEALTH_WORDS.get(record['health'], record['health'])}"
     if record and record["measured"]:
+        rate = _delivery_rate(record)
+        if rate:
+            line += (f"; delivery rate, last {len(record['daily_activity'])}"
+                     f" days: {rate}")
         recent = _recent_bits(record)
         if recent:
             line += f"; last {recent[0]} hours: {' · '.join(recent[1])}"
@@ -2838,6 +2843,41 @@ def _recent_bits(record):
     return recent["hours"], bits
 
 
+def _delivery_rate(record):
+    """The 7-Day Activity graph's own item counts as one rate phrase, or
+    None where the record carries no activity window. Operator request
+    (2026-10-05): the card should say near its top how fast a source is
+    delivering, in the one-week window the card already shows — so the
+    phrase sums exactly the day blocks drawn below it, and the two can
+    never disagree. Per day when the source averages at least one item a
+    day, per week when it does not, so a quiet source reads "3 items a
+    week" rather than "0.4 items a day". Like the graph, it counts what
+    arrived: a newly activated source's first-poll backfill is in its
+    first week."""
+    activity = (record or {}).get("daily_activity") or []
+    if not activity:
+        return None
+    days = len(activity)
+    items = sum(day.get("items") or 0 for day in activity)
+    if not items:
+        return f"no items in the last {days} days"
+    if items >= days:
+        per_day = items / days
+        rate = f"{per_day:,.0f}" if per_day >= 10 else f"{per_day:.1f}"
+        return f"about {rate} items a day ({_n(items)} items)"
+    return f"{items} item{'' if items == 1 else 's'} a week"
+
+
+def _delivery_rate_sentence(record):
+    """`_delivery_rate` as one HTML sentence for the card."""
+    rate = _delivery_rate(record)
+    if not rate:
+        return ""
+    days = len(record["daily_activity"])
+    return (f'<p><span class="src-stat-label">Delivery rate, last {days} '
+            f'days:</span> {html.escape(rate)}</p>')
+
+
 def _recent_sentence(record):
     """`_recent_bits` as one HTML sentence."""
     recent = _recent_bits(record)
@@ -2871,8 +2911,9 @@ def _mailbox_sentence(record):
 
 
 def _card_stats_block(record):
-    """The compact statistics panel on a sources.html card: the 24-hour
-    recent block plus the health-reason sentence. The 14-day view — and
+    """The compact statistics panel on a sources.html card: the 7-day
+    delivery rate, the 24-hour recent block, and the health-reason
+    sentence. The 14-day view — and
     everything else — lives on the per-source page now."""
     if not record:
         return ""
@@ -2880,7 +2921,7 @@ def _card_stats_block(record):
         return (f'<p class="src-stats src-unmeasured">'
                 f"{html.escape(record['health_reason'])} Ingestion "
                 f"statistics are shown for sources the pipeline reads.</p>")
-    parts = [_recent_sentence(record)]
+    parts = [_delivery_rate_sentence(record), _recent_sentence(record)]
     fetch = record.get("fetch")
     if fetch and fetch.get("shared_with_sources", 1) > 1:
         parts.append(

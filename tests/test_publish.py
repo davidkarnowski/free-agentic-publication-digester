@@ -717,6 +717,52 @@ def test_each_card_states_its_own_numbers(health_site):
     assert 'href="sources/example-newsroom.html"' in card
 
 
+def _week(*items):
+    return {"daily_activity": [{"date": f"2026-07-{25 + i:02d}", "items": n}
+                               for i, n in enumerate(items)]}
+
+
+def test_delivery_rate_reads_per_day_or_per_week():
+    """Operator request 2026-10-05: one readable rate near the top of the
+    card, in the card's own one-week window. Per day once a source
+    averages an item a day; per week below that, so a slow source never
+    reads as a fraction of an item a day."""
+    rate = publish._delivery_rate
+    assert rate(_week(3, 2, 4, 1, 2, 3, 1)) == "about 2.3 items a day (16 items)"
+    assert rate(_week(1, 1, 1, 1, 1, 1, 1)) == "about 1.0 items a day (7 items)"
+    assert rate(_week(30, 25, 0, 0, 40, 35, 30)) == "about 23 items a day (160 items)"
+    # thousands separated like every other count on the site
+    assert rate(_week(*[1010] * 7)) == "about 1,010 items a day (7,070 items)"
+    assert rate(_week(0, 0, 3, 0, 0, 0, 0)) == "3 items a week"
+    assert rate(_week(0, 0, 0, 1, 0, 0, 0)) == "1 item a week"
+    assert rate(_week(0, 0, 0, 0, 0, 0, 0)) == "no items in the last 7 days"
+    assert rate({}) is None and rate(None) is None
+
+
+def test_delivery_rate_is_the_graphs_own_total():
+    """The rate sums exactly the day blocks the 7-Day Activity graph
+    draws, so the sentence and the picture below it cannot disagree."""
+    record = _week(0, 2, 0, 0, 3, 0, 1)
+    shown = sum(d["items"] for d in record["daily_activity"])
+    assert publish._delivery_rate(record) == f"{shown} items a week"
+
+
+def test_the_card_leads_with_its_delivery_rate(health_site):
+    out = health_site(DELIVERING_ITEMS, CLEAN_FETCHES)
+    listing = (out / "sources.html").read_text()
+    card = listing[listing.index('id="src-example-newsroom"'):]
+    card = card[:card.index("</article>")]
+    assert "Delivery rate, last 7 days:</span>" in card
+    # near the top: before the 24-hour line and the 7-day graph
+    assert (card.index("Delivery rate, last 7 days")
+            < card.index("Last 24 hours:")
+            < card.index("7-Day Activity"))
+    md = (out / "sources.md").read_text()
+    line = next(x for x in md.splitlines() if "`example-newsroom`" in x)
+    assert "delivery rate, last 7 days: " in line
+    assert line.index("delivery rate") < line.index("last 24 hours")
+
+
 def test_content_length_exposes_a_teaser_source(health_site):
     """Content length is the signal the operator asked for: a source
     emitting 310-character stubs is giving a reader far less than one
