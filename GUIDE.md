@@ -1304,12 +1304,19 @@ discipline:
      after a package's first: a revisit, or the first try of a package
      that failed an earlier cycle. When ten second chances in a row are
      turned down (`config.SOURCE_UNAVAILABLE_STREAK`), packages that
-     already failed an earlier cycle are no longer tried or revisited in
-     this cycle. They stay queued, they are not charged a failed cycle
-     they did not have, and the least-tried are probed first next time,
-     because the queue is now ordered by fewest failed cycles and then
-     newest. A package new to the cycle is never skipped for this
-     reason: a new document is always asked for. On an ordinary day ten
+     already failed an earlier cycle are no longer tried in this cycle,
+     and nothing set aside in this cycle is revisited. The untried stay
+     queued, they are not charged a failed cycle they did not have, and
+     the least-tried are probed first next time, because the queue is
+     now ordered by fewest failed cycles and then newest. A package new
+     to the cycle is never skipped for this reason: a new document is
+     always asked for once. Its revisits stop with everyone else's
+     (amended 2026-10-06, operator: in the outage of 2026-10-03, 141 new
+     packages were set aside and none arrived on a later try, and their
+     second and third tries tripled the hourly load on the publisher
+     while it was down; on the ordinary weekday of 2026-10-05 every one
+     of 251 set-aside packages arrived on a later try, a day this
+     amendment does not change). On an ordinary day ten
      refusals in a row is about one chance in a million; in the outage
      it is what happened, and the rule turns an outage's cost to the
      publisher from several requests for every stuck package into a

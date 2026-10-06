@@ -166,9 +166,10 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   half of all first requests for a court opinion while it builds the
   file; the pass serves the rest of the queue and returns no sooner than
   the server asked, three tries a cycle. Ten second chances turned down
-  in a row mark the source unavailable for the cycle and earlier
-  failures are left queued, uncharged. A package's FIRST try never
-  counts toward that streak and is never skipped by it. Do not restore
+  in a row mark the source unavailable for the cycle: earlier failures
+  are left queued, uncharged, and nothing set aside is revisited
+  (2026-10-06: new packages' revisits stop too). A package's FIRST try
+  never counts toward that streak and is never skipped by it. Do not restore
   the in-place wait: it is what let one publisher's outage hold every
   govinfo collection and cost the 2026-10-02 digest 66 packages.
 - **The retry ceiling is per ITEM as well as per run** (GUIDE §6 r14,
@@ -873,3 +874,17 @@ live in `.claude/agents/fapd-*.md` (tracked).
   travel advisories through a new feed-only adapter whose identity is
   the advisory's guid plus its date, because State's guid survives a
   re-issue).
+- **2026-10-06** — **An unavailable source's revisits stop for new
+  packages too** (operator; GUIDE §4 rule 3 amended; OB-16 tuning).
+  The 2026-10-03 rotation stopped asking for EARLIER failures once ten
+  second chances in a row were refused, but a package new to the cycle
+  still took all three tries. In that night's outage 141 new packages
+  were set aside, none arrived on a later try, the collector reached its
+  680-an-hour share three times, and the publisher saw about three
+  times the hourly requests of the old in-place ladder. Now a new
+  package keeps its guaranteed first try and loses only its revisits
+  once the source is unavailable; it is charged the one cycle it failed.
+  Measured first that ordinary days are untouched: on the weekday burst
+  of 2026-10-05 all 251 set-aside court packages arrived on a later
+  try, the busiest govinfo hour was 520, and nothing was exhausted.
+  Fewer requests to a struggling server, none sooner than it asked.

@@ -119,8 +119,9 @@ this file.
 - Temporary robots disallows (5xx) are not persisted.
 - The download pass sets a not-ready package aside instead of sleeping
   on it, orders the queue by fewest failed cycles, gives a package three
-  tries a cycle, and stops asking for earlier failures once ten second
-  chances in a row are turned down (GUIDE §4, 2026-10-03). Do not
+  tries a cycle, and once ten second chances in a row are turned down
+  stops asking for earlier failures and stops every revisit, new
+  packages' included (GUIDE §4, 2026-10-03, amended 2026-10-06). Do not
   "simplify" any of it back to an in-place wait, and do not make a
   package's FIRST try count toward the unavailable-source streak: nearly
   half of first tries are "not ready" on a healthy day.
