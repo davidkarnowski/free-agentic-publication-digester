@@ -4311,6 +4311,7 @@ _TODAY_DOC_TYPES = {
     "HOUSE": "house floor", "EXTENSIONS": "extensions of remarks",
     "DAILYDIGEST": "daily digest", "PRESS": "press release",
     "ROLLCALL": "roll-call vote", "BILLACTION": "bill action",
+    "SAP": "statement of administration policy",
 }
 
 

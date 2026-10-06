@@ -1269,3 +1269,96 @@ def test_advisory_ingest_is_feed_only_and_takes_each_reissue(env, advisory_day):
     assert env.execute(
         "SELECT COUNT(*) FROM extracted_texts"
         " WHERE json_extract(metadata, '$.url') = ?", (SAUDI,)).fetchone()[0] == 2
+
+
+# ---------------------------------------------------------------------------
+# OMB Statements of Administration Policy (operator ruling 2026-10-06).
+# The fixture is the breadcrumb navigation and the first six entries of the
+# listing as served 2026-10-06: SAPs dated 09-30, 09-29, 09-29 (inside the
+# window as of 10-06), 09-24, 09-16 and 09-16.
+# ---------------------------------------------------------------------------
+
+SAP_INDEX = "https://www.whitehouse.gov/omb/statements-of-administration-policy/"
+
+
+def sap_entry():
+    return {"id": "omb-saps", "name": "OMB Statements of Administration Policy",
+            "type": "html-index", "adapter": "statements-of-administration-policy",
+            "index_item_path": "/wp-content/uploads/", "urls": {"index": SAP_INDEX}}
+
+
+def sap_items(monkeypatch, today):
+    monkeypatch.setattr(agencies, "publication_date", lambda *a: today)
+    adapter = agencies.adapter_for(sap_entry())
+    return adapter, adapter.items(fixture("omb-saps"), "text/html; charset=UTF-8")
+
+
+def test_sap_listing_yields_dated_pdf_entries_and_their_bills(monkeypatch):
+    adapter, (fmt, items) = sap_items(monkeypatch, "2026-10-06")
+    assert fmt == "html-index"
+    assert [(i["claimed_date"], i["extra"]["bills"]) for i in items] == [
+        ("2026-09-30", [{"congress": 119, "type": "hr", "number": 9340,
+                         "designation": "H.R. 9340"}]),
+        ("2026-09-29", [{"congress": 119, "type": "sres", "number": 852,
+                         "designation": "S.Res. 852"}]),
+        ("2026-09-29", [{"congress": 119, "type": "sjres", "number": 197,
+                         "designation": "S.J.Res. 197"}]),
+    ]
+    # titles verbatim, links are the PDFs, the breadcrumb is not an entry
+    assert items[0]["title"] == "H.R. 9340 – Ratepayer Protection Act (September 30, 2026)"
+    assert all(i["link"].startswith("https://www.whitehouse.gov/wp-content/uploads/")
+               and i["link"].endswith(".pdf") for i in items)
+    assert adapter.doc_type_for(items[0]) == "SAP"
+    assert adapter.wants_article() is False
+
+
+def test_sap_reads_the_spaced_concurrent_resolution_form(monkeypatch):
+    _adapter, (_fmt, items) = sap_items(monkeypatch, "2026-09-24")
+    assert [i["extra"]["bills"][0]["designation"] for i in items] == ["H.Con.Res. 89"]
+    # a week earlier the window holds the two SAPs of 09-16 instead
+    _adapter, (_fmt, items) = sap_items(monkeypatch, "2026-09-17")
+    assert [i["extra"]["bills"][0]["designation"] for i in items] == [
+        "H.R. 10326", "H.R. 9576"]
+
+
+def test_sap_measures_never_guess():
+    measures = agencies.StatementsOfAdministrationPolicyAdapter.measures
+    # "U.S." is not the Senate, and an unknown form is skipped
+    assert measures("Strengthening U.S. 2026 Trade Act", "2026-05-01") == []
+    assert measures("H. 5 – Something", "2026-05-01") == []
+    # every measure named, in order, once
+    assert [m["designation"] for m in measures(
+        "S. 45 and H.J.Res. 12; S. 45", "2026-05-01")] == ["S. 45", "H.J.Res. 12"]
+    # a Congress begins on 3 January of an odd year
+    assert measures("H.R. 1", "2027-01-02")[0]["congress"] == 119
+    assert measures("H.R. 1", "2027-01-03")[0]["congress"] == 120
+    # no readable date, no congress, no join
+    assert measures("H.R. 1", None) == [] and measures("H.R. 1", "soon") == []
+
+
+class _SapSite:
+    """Serves the SAP listing at its real address; records every request."""
+
+    def __init__(self):
+        self.calls = []
+
+    def get(self, url, params=None, headers=None):
+        self.calls.append(url)
+        assert url == SAP_INDEX, "only the listing may be requested"
+        return Resp(fixture("omb-saps"), headers={"Content-Type": "text/html"})
+
+
+def test_sap_ingest_stores_attributed_statements_without_fetching_pdfs(
+        env, monkeypatch):
+    monkeypatch.setattr(agencies, "publication_date", lambda *a: "2026-10-06")
+    client = _SapSite()
+    stats = agencies.poll_source(client, FakeWayback(), env, sap_entry())
+    assert (stats["new_items"], stats["articles_fetched"]) == (3, 0)
+    assert client.calls == [SAP_INDEX]
+    rows = env.execute("SELECT collection, doc_type, agency, metadata FROM extracted_texts"
+                       " ORDER BY title").fetchall()
+    assert {(r["collection"], r["doc_type"], r["agency"]) for r in rows} == {
+        ("AGENCYPR", "SAP", "OMB Statements of Administration Policy")}
+    meta = json.loads(rows[0]["metadata"])
+    assert meta["mode"] == "feed-only"
+    assert meta["details"]["bills"][0]["designation"] == "H.R. 9340"

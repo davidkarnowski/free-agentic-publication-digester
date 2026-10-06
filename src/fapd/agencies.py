@@ -1245,6 +1245,75 @@ class PresidentialActionsAdapter(SourceAdapter):
         return self.DOC_TYPE
 
 
+class StatementsOfAdministrationPolicyAdapter(HtmlIndexAdapter):
+    """OMB Statements of Administration Policy (whitehouse.gov/omb/
+    statements-of-administration-policy/; operator ruling 2026-10-06).
+
+    A SAP is the Administration's formal, written position on a bill
+    before floor action. The operator ruled them attributed official
+    statements under GUIDE §2: they file as AGENCYPR, are titled verbatim
+    and are attributed, never characterized. Everything mechanical is the
+    stock listing adapter's — the page is a dated list linking each SAP's
+    PDF under /wp-content/uploads/ (the registry's index_item_path), with
+    no feed — so this subclass decides only two things the stock adapter
+    cannot.
+
+    DOCUMENT TYPE. The stock adapter files every entry as PRESS, which
+    would call a SAP a press release. DOC_TYPE is "SAP".
+
+    THE BILL. A SAP names the measure it speaks to in its title ("H.R.
+    9340 – Ratepayer Protection Act"). items() reads every measure the
+    title names into item["extra"]["bills"] so a renderer can join a SAP
+    to that bill's actions by congress, type and number without parsing
+    stored prose. The congress comes from the SAP's own date (a Congress
+    begins on 3 January of each odd year); the designations are the
+    module's own table, so a form it does not know is skipped, never
+    guessed. A title naming no measure simply carries no "bills".
+
+    The PDF is not fetched (wants_article stays False, as for every
+    listing source): the title, date and link are what section 6 renders.
+    The position a SAP states lives only in the PDF, and reading it is a
+    separate, later decision."""
+
+    DOC_TYPE = "SAP"
+
+    # "H.R. 9340", "S. 45", "H.J.Res. 12", "S.Con.Res. 3", "H.Res. 7",
+    # with or without the space after each period. The lookbehind keeps
+    # "U.S. 2026" from reading as Senate bill 2026.
+    _MEASURE = re.compile(
+        r"(?<![\w.])([HS])\.\s?(?:(J|Con)\.\s?)?(R|Res)?\.?\s?(\d{1,5})\b")
+
+    def items(self, body, content_type):
+        fmt, items = super().items(body, content_type)
+        for item in items:
+            bills = self.measures(item.get("title") or "", item.get("claimed_date"))
+            if bills:
+                item.setdefault("extra", {})["bills"] = bills
+        return fmt, items
+
+    @classmethod
+    def measures(cls, title, claimed_date):
+        """[{congress, type, number, designation}] for every measure the
+        title names, in order, duplicates dropped. Empty when the title
+        names none or the date cannot be read (no congress, no join)."""
+        try:
+            day = dt.date.fromisoformat((claimed_date or "")[:10])
+        except ValueError:
+            return []
+        year = day.year - 1 if (day.month, day.day) < (1, 3) else day.year
+        congress = (year - 1789) // 2 + 1
+        out, seen = [], set()
+        for chamber, middle, kind, number in cls._MEASURE.findall(title):
+            code = (chamber + (middle or "") + (kind or "")).upper()
+            if code not in _BILL_DESIGNATIONS or (code, number) in seen:
+                continue
+            seen.add((code, number))
+            out.append({"congress": congress, "type": code.lower(),
+                        "number": int(number),
+                        "designation": f"{_BILL_DESIGNATIONS[code]} {int(number)}"})
+        return out
+
+
 class TravelAdvisoryAdapter(FeedOnlyAdapter):
     """State Department travel advisories (travel.state.gov's TAsTWs.xml;
     verified 2026-10-04/05 through ProbeClient). Three things differ from
@@ -1342,6 +1411,7 @@ ADAPTERS = {
     "html-index": HtmlIndexAdapter,
     "presidential-actions": PresidentialActionsAdapter,
     "travel-advisories": TravelAdvisoryAdapter,
+    "statements-of-administration-policy": StatementsOfAdministrationPolicyAdapter,
 }
 
 
