@@ -353,7 +353,10 @@ def test_the_v1_summary_would_be_withheld_for_naming_a_provider():
 
 
 def test_a_grounded_summary_passes_and_numbers_are_checked():
-    s = _sweep(verdicts=[_v("patch.base_age", "medium", "python:3.12-slim is 18d old")])
+    # A fixed stamp: the default fixture stamps "now", and an hour like 19
+    # in it would make "19 probes" look sourced (failed 2026-10-07 19:xx UTC).
+    s = _sweep(generated_utc="2026-10-06T03:40:00+00:00",
+               verdicts=[_v("patch.base_age", "medium", "python:3.12-slim is 18d old")])
     t = insight.triage("2026-10-06", s, [])
     ok = "Nothing new needs action. The base image python:3.12-slim is 18d old, past its threshold."
     assert insight.ungrounded(ok, s, t) == ""

@@ -452,6 +452,36 @@ def gather(conn, date, *, fetch_db=None, ledger_db=None, now=None):
     except sqlite3.OperationalError:
         m["packages"] = []
 
+    # Packages given up on (OB-31's second gap, 2026-10-07). A package past
+    # its fetch or extraction ceiling is a disclosed gap, never re-queued;
+    # the 2026-09-29 Federal Register issue went that way and its digest
+    # showed a zero, not a gap, while nothing reported the package. Listed
+    # when the ceiling was reached inside this window, whatever its digest
+    # day, so each one is reported exactly once, plus the standing totals.
+    try:
+        m["exhausted"] = [
+            {"layer": layer, "collection": c, "package_id": pid, "digest_day": d,
+             "attempts": n}
+            for layer, c, pid, d, n in conn.execute(
+                "SELECT 'fetch', collection, package_id, digest_day, fetch_attempts"
+                " FROM packages WHERE fetch_status = 'exhausted'"
+                " AND substr(last_attempt_at, 1, 19) >= ? AND substr(last_attempt_at, 1, 19) < ?"
+                " UNION ALL"
+                " SELECT 'extract', collection, package_id, digest_day, extract_attempts"
+                " FROM packages WHERE extract_attempts >= ?"
+                " AND substr(last_extract_attempt_at, 1, 19) >= ?"
+                " AND substr(last_extract_attempt_at, 1, 19) < ?"
+                " ORDER BY 1, 2, 3",
+                (start, end, config.MAX_PACKAGE_EXTRACT_ATTEMPTS, start, end))]
+        m["exhausted_totals"] = [
+            {"collection": c, "packages": n}
+            for c, n in conn.execute(
+                "SELECT collection, COUNT(*) FROM packages"
+                " WHERE fetch_status = 'exhausted' OR extract_attempts >= ?"
+                " GROUP BY 1 ORDER BY 2 DESC, 1", (config.MAX_PACKAGE_EXTRACT_ATTEMPTS,))]
+    except sqlite3.OperationalError:
+        m["exhausted"], m["exhausted_totals"] = [], []
+
     m["collectors"] = [
         {"worker": w, "last_ok_at": ok, "consecutive_errors": errs}
         for w, ok, errs in conn.execute(
@@ -460,6 +490,28 @@ def gather(conn, date, *, fetch_db=None, ledger_db=None, now=None):
     ]
     m["email"] = gather_email(conn, start, end)
     return m
+
+
+def render_exhausted(rows, totals):
+    """Packages that reached a retry ceiling in the work window. Always
+    rendered, including when there are none: a gap must be visible."""
+    if rows is None:
+        return []
+    L = ["", "## Packages given up on (work window)", "",
+         "A package past its fetch or extraction retry ceiling is not tried",
+         "again unless its content changes. Whatever it held is missing from",
+         "its digest day and belongs in a correction.", ""]
+    if rows:
+        L += ["| layer | collection | package | digest day | attempts |",
+              "|---|---|---|---|---|"]
+        L += [f"| {r['layer']} | {r['collection']} | {r['package_id']} |"
+              f" {r['digest_day'] or '—'} | {r['attempts']} |" for r in rows]
+    else:
+        L += ["None reached a ceiling in this window."]
+    if totals:
+        L += ["", "All packages given up on to date: "
+              + ", ".join(f"{t['collection']} {t['packages']}" for t in totals) + "."]
+    return L
 
 
 def _status_list(counts):
@@ -544,6 +596,8 @@ def render_report(metrics, suggestions=None, withheld=0):
         L += [f"| {r['purpose']} | {r['calls']} |" for r in zb]
     else:
         L += ["None — every call in the window billed tokens."]
+
+    L += render_exhausted(metrics.get("exhausted"), metrics.get("exhausted_totals"))
 
     L += ["", "## Coverage (journal, last 4 digest days)", "",
           "| date | day | ingested | summarized | plain | model layers |",

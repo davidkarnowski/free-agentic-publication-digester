@@ -423,3 +423,35 @@ def test_the_prompt_states_what_is_normal_and_what_is_never_suggested():
                    "Never suggest raising a request budget", "This report is public",
                    "invent baselines"):
         assert phrase in p, phrase
+
+
+def test_packages_given_up_on_are_reported_once_and_totalled(conn, tmp_path):
+    """OB-31's second gap: the 2026-09-29 Federal Register issue was
+    exhausted and its digest showed a zero, while no report named it."""
+    fetch_db, ledger_db = seed_ops(conn, tmp_path)
+    inside, before = f"{DATE}T18:00:00Z", "2026-07-01T12:00:00Z"
+    rows = [  # (id, collection, digest_day, status, fetch_attempts, last_attempt,
+              #  extract_attempts, last_extract)
+        ("FR-1", "FR", DATE, "exhausted", 48, inside, 0, None),
+        ("FR-OLD", "FR", "2026-07-01", "exhausted", 48, before, 0, None),
+        ("USC-1", "USCOURTS", DATE, "fetched", 1, inside,
+         config.MAX_PACKAGE_EXTRACT_ATTEMPTS, inside),
+    ]
+    conn.executemany(
+        "INSERT INTO packages (package_id, collection, last_modified, first_seen_at,"
+        " digest_day, fetch_status, fetch_attempts, last_attempt_at, extract_attempts,"
+        " last_extract_attempt_at) VALUES (?, ?, 'x', 'x', ?, ?, ?, ?, ?, ?)", rows)
+    conn.commit()
+    m = insight.gather(conn, DATE, fetch_db=fetch_db, ledger_db=ledger_db)
+    assert [(r["layer"], r["package_id"]) for r in m["exhausted"]] == [
+        ("extract", "USC-1"), ("fetch", "FR-1")]
+    text = insight.render_report(m)
+    assert "| fetch | FR | FR-1 |" in text and "FR-OLD" not in text.split("All packages")[0]
+    assert "All packages given up on to date: FR 2, USCOURTS 1." in text
+
+
+def test_no_packages_given_up_on_still_says_so(conn, tmp_path):
+    fetch_db, ledger_db = seed_ops(conn, tmp_path)
+    text = insight.render_report(insight.gather(conn, DATE, fetch_db=fetch_db,
+                                                ledger_db=ledger_db))
+    assert "None reached a ceiling in this window." in text
