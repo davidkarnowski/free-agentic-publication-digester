@@ -6,7 +6,7 @@
 
 # NHTSA (email)
 
-active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Transportation (NHTSA)
+active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Transportation (NHTSA)
 
 Official site: https://www.nhtsa.gov/press-releases · All sources: [sources.md](../sources.md)
 
@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-09-16, 20 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-06, delivered by email.
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-10-06T03:59:42Z (UTC).
+This label has held since 2026-10-06T18:49:48Z (UTC) and was last re-checked 2026-10-07T03:45:41Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -63,18 +63,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-09-16 |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-06 |
+| Content length | 817 characters average, 817 median (shortest 817, longest 817) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-06 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-09-16, 20 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-10-06, delivered by email.
 
 ### All time
 
@@ -86,7 +88,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-07 | 0 |
 | 2026-09-08 | 0 |
 | 2026-09-09 | 0 |
 | 2026-09-10 | 0 |
@@ -115,12 +116,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
 | 2026-10-05 | 0 |
-| 2026-10-06 | 0 |
+| 2026-10-06 | 1 |
+| 2026-10-07 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The NHTSA subscription was confirmed in late July 2026 and has delivered one bulletin, recorded on September 16 eleven days ago. That bulletin carried 723 characters of content. No activity has been recorded in the recent measurement window. The email adapter is functioning without errors and continues to monitor the configured sender address.
+NHTSA bulletins arrive via subscription to two GovDelivery sender addresses (nhtsa@service.govdelivery.com and traffic_safety_marketing@service.govdelivery.com) and are ingested by the email adapter with DKIM verification and RFC-5322 capture. Over six measurement days from October 1-7, one bulletin was delivered on 2026-10-06 carrying 817 characters of full-text content. The mailbox records one message, zero administrative filings, no refusals, and no errors. The October delivery followed a prior bulletin from September 16; the October 6 arrival shows continued delivery. The traffic-safety-marketing stream carries campaign and awareness content alongside press releases. No HTTP requests are made for this source; health is measured from email delivery recency alone.
 
-_Model-written assessment of our own ingestion, generated 2026-09-27 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-07 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
