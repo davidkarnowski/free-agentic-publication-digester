@@ -36,6 +36,7 @@ import re
 import sqlite3
 import subprocess
 import time
+from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import requests
@@ -276,8 +277,24 @@ class CLIBackend:
 
     name = "cli"
 
-    def __init__(self, runner=None):
+    def __init__(self, runner=None, workdir=None):
         self._runner = runner or subprocess.run
+        self._workdir = Path(workdir or config.LLM_CLI_WORKDIR)
+
+    def _isolated_cwd(self):
+        """An empty working directory outside the repository (config
+        LLM_CLI_WORKDIR). The CLI reads CLAUDE.md and .claude/ settings
+        from its working directory and every parent, so a directory
+        anywhere under the project would hand the model the agent guide
+        again: refused rather than silently used."""
+        wd = self._workdir.resolve()
+        root = config.PROJECT_ROOT.resolve()
+        if wd == root or root in wd.parents:
+            raise LLMError(
+                f"LLM_CLI_WORKDIR {wd} is inside the project; the CLI would"
+                " load CLAUDE.md into every model call (GUIDE §3a)")
+        wd.mkdir(parents=True, exist_ok=True)
+        return str(wd)
 
     def complete(self, prompt, *, model, timeout):
         cmd = ["claude", "-p", "--model", model, "--output-format", "json"]
@@ -289,7 +306,7 @@ class CLIBackend:
         try:
             proc = self._runner(
                 cmd, input=prompt, capture_output=True, text=True,
-                timeout=timeout, env=env,
+                timeout=timeout, env=env, cwd=self._isolated_cwd(),
             )
         except subprocess.TimeoutExpired as exc:
             # A timeout may have consumed tokens server-side before the

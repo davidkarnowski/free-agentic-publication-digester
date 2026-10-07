@@ -423,6 +423,22 @@ MAX_PACKAGE_EXTRACT_ATTEMPTS = 5
 
 LLM_TIMEOUT = 300  # seconds per call
 
+# Where the `claude` CLI runs (2026-10-07). The CLI loads CLAUDE.md, and
+# the project's .claude/ settings, from its working directory and every
+# parent. Run from the repository, as it was until this date, every model
+# call carried this project's agent guide (~61 KB): measured over 14 days
+# of the production ledger, no CLI call used fewer than ~35,800 input
+# tokens, while the same purposes on Gemini started at 1,000-4,000. The
+# insight model quoted a figure from that guide that was in none of its
+# metrics. GUIDE §3a already forbids it: the plain-speak input is "ONLY
+# the stored summary (never raw text, never outside knowledge)" and the
+# insight input is "the run's own mechanical metrics". So the CLI runs in
+# an empty directory outside the repository; llm.CLIBackend refuses one
+# inside it, because CLAUDE.md is found by walking up.
+LLM_CLI_WORKDIR = Path(os.environ.get(
+    "FAPD_LLM_CLI_WORKDIR",
+    str(Path(os.environ.get("TMPDIR", "/tmp")) / "fapd-llm-cli")))
+
 # GUIDE.md §3: scope. Order is sync order. USCOURTS added 2026-07-25 (J1).
 COLLECTIONS = ("CREC", "BILLS", "FR", "USCOURTS", "PLAW")
 

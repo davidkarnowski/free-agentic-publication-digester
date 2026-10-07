@@ -5,6 +5,7 @@ injected fake client — no monkeypatching of either backend's internals."""
 import datetime as dt
 import json
 import sqlite3
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -33,7 +34,7 @@ def make_client(tmp_path, procs):
     calls = []
 
     def runner(cmd, **kwargs):
-        calls.append({"cmd": cmd, "input": kwargs.get("input")})
+        calls.append({"cmd": cmd, "input": kwargs.get("input"), "cwd": kwargs.get("cwd")})
         return procs.pop(0)
 
     client = LLMClient(db_path=tmp_path / "ledger.db", runner=runner)
@@ -50,6 +51,28 @@ def test_complete_returns_text_and_logs_tokens(tmp_path):
     assert "--output-format" in calls[0]["cmd"]
     inp, out, n = client.tokens_today()
     assert (inp, out, n) == (108, 20, 1)
+
+
+def test_cli_runs_outside_the_repository(tmp_path):
+    """The CLI loads CLAUDE.md from its working directory and every parent.
+    Run from the repository it handed the agent guide to every model call
+    (2026-10-07: no CLI call under ~35,800 input tokens in 14 days), against
+    GUIDE §3a's "never outside knowledge"."""
+    client, calls = make_client(tmp_path, [FakeProc(stdout=cli_json())])
+    client.complete("x", purpose="map:test")
+    cwd = Path(calls[0]["cwd"]).resolve()
+    root = config.PROJECT_ROOT.resolve()
+    assert cwd != root and root not in cwd.parents
+    assert not (cwd / "CLAUDE.md").exists()
+
+
+def test_a_workdir_inside_the_project_is_refused(tmp_path):
+    ran = []
+    backend = CLIBackend(runner=lambda *a, **k: ran.append(k),
+                         workdir=config.PROJECT_ROOT / "data" / "cli")
+    with pytest.raises(LLMError, match="inside the project"):
+        backend.complete("x", model="haiku", timeout=5)
+    assert ran == []
 
 
 def test_cli_failure_is_logged_and_raises(tmp_path):
