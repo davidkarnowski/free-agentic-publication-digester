@@ -17,7 +17,7 @@ class FakeLLM:
     def __init__(self, reply=None):
         self.calls = []
         self.reply = reply if reply is not None else json.dumps(
-            ["Investigate the 42% retry share on the map layer.",
+            ["Investigate the 48.4% retry share on the map layer.",
              "Confirm the email worker's last_ok_at recovers overnight."])
 
     def complete(self, prompt, **kw):
@@ -77,7 +77,8 @@ def test_gather_is_mechanical_and_complete(conn, tmp_path):
     # model events carry no digest_date of their own; the count has to go
     # through each item's ingest row (the old query read zero here)
     assert m["coverage"] == [
-        {"date": DATE, "ingested": 2, "summarized": 1, "plain": 0}]
+        {"date": DATE, "ingested": 2, "summarized": 1, "plain": 0,
+         "calendar": "business day", "layers": None}]
     # errors sort first so a sick worker tops the table
     assert m["collectors"][0] == {
         "worker": "email", "last_ok_at": None, "consecutive_errors": 3}
@@ -103,7 +104,7 @@ def test_run_with_llm_labels_suggestions(conn, tmp_path):
     text = path.read_text()
     assert "model output (insight prompt v" in text
     assert f"insight prompt v{config.INSIGHT_PROMPT_VERSION}" in text
-    assert "1. Investigate the 42% retry share on the map layer." in text
+    assert "1. Investigate the 48.4% retry share on the map layer." in text
     [call] = fake.calls
     assert call["purpose"] == "insight:suggestions"
     assert call["model"] == config.MAP_MODEL
@@ -345,3 +346,80 @@ def test_run_withholds_an_ungrounded_security_summary_and_keeps_a_record(conn, t
     assert "`patch.host`" in report
     assert (sec / f"security-{DATE}.record.json").exists()
     assert "=== TRIAGE ===" in llm.calls[-1]["prompt"]
+
+
+# ------------------------------------------------ v2 (2026-10-07)
+#
+# On 2026-10-06 three of four suggestions pointed the wrong way: a
+# govinfo error rate against a baseline nobody gave the model, a quiet
+# Sunday's idle layers read as a failure, and topic-list duplicates
+# blamed on sender verification. The metrics now explain themselves.
+
+def test_errors_carry_their_status_split_and_rate(conn, tmp_path):
+    fetch_db, ledger_db = seed_ops(conn, tmp_path)
+    m = insight.gather(conn, DATE, fetch_db=fetch_db, ledger_db=ledger_db)
+    agency = next(r for r in m["requests"] if r["client"] == "agency")
+    assert agency["errors_by_status"] == {"403": 1} and agency["error_pct"] == 100.0
+    text = insight.render_report(m)
+    assert "| agency | 1 | 1 (100.0%) | 403: 1 |" in text
+
+
+def test_the_baseline_is_measured_from_earlier_windows(conn, tmp_path):
+    fetch_db, ledger_db = seed_ops(conn, tmp_path)
+    f = sqlite3.connect(fetch_db)
+    prev = (dt.date.fromisoformat(DATE) - dt.timedelta(days=1)).isoformat()
+    f.executemany("INSERT INTO fetch_log VALUES (?, 'govinfo', ?)",
+                  [(f"{prev}T18:00:00Z", 503), (f"{prev}T18:01:00Z", 200),
+                   (f"{prev}T18:02:00Z", 200), (f"{prev}T18:03:00Z", 200)])
+    f.commit(); f.close()
+    m = insight.gather(conn, DATE, fetch_db=fetch_db, ledger_db=ledger_db)
+    assert m["error_baseline"]["govinfo"] == {
+        "windows": 1, "median_pct": 25.0, "min_pct": 25.0, "max_pct": 25.0}
+    assert "govinfo median 25.0% (range 25.0–25.0%, 1 windows)" in insight.render_report(m)
+
+
+def test_coverage_shows_the_calendar_and_layer_outcomes(conn, tmp_path):
+    fetch_db, ledger_db = seed_ops(conn, tmp_path)
+    sunday = "2026-10-04"
+    conn.execute(
+        "INSERT INTO item_journal (observed_at, source_class, package_id, granule_id,"
+        " digest_date, event) VALUES ('x', 'govinfo', 'P9', 'G9', ?, 'ingested')", (sunday,))
+    conn.execute(
+        "INSERT INTO day_inference (date, available, backend, models, layers, recorded_at)"
+        " VALUES (?, 1, 'cli', 'opus', ?, 'x')",
+        (sunday, json.dumps({"compose": "ran", "map": "idle", "plain": "idle"})))
+    conn.commit()
+    m = insight.gather(conn, "2026-10-05", fetch_db=fetch_db, ledger_db=ledger_db)
+    row = next(c for c in m["coverage"] if c["date"] == sunday)
+    assert row["calendar"] == "weekend: Sunday"
+    assert "| 2026-10-04 | weekend: Sunday | 1 | 0 | 0 | compose ran; map, plain idle |" \
+        in insight.render_report(m)
+
+
+def test_packages_filed_for_the_day_are_counted_by_outcome(conn, tmp_path):
+    fetch_db, ledger_db = seed_ops(conn, tmp_path)
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(packages)")}
+    assert {"collection", "fetch_status", "digest_day"} <= cols
+    m = insight.gather(conn, DATE, fetch_db=fetch_db, ledger_db=ledger_db)
+    assert m["packages"] == []           # none seeded: no table rendered
+    assert "## Packages filed" not in insight.render_report(m)
+
+
+def test_a_suggestion_citing_an_absent_figure_is_withheld(conn, tmp_path):
+    fetch_db, ledger_db = seed_ops(conn, tmp_path)
+    fake = FakeLLM(reply=json.dumps([
+        "Investigate govinfo's rate against the established 18.1% baseline.",
+        "Investigate the 48.4% retry share on the map layer."]))
+    text = insight.run(conn, fake, DATE, out_dir=tmp_path / "runs",
+                       fetch_db=fetch_db, ledger_db=ledger_db).read_text()
+    assert "18.1%" not in text
+    assert "1. Investigate the 48.4% retry share on the map layer." in text
+    assert "*1 suggestion(s) withheld: each cited a figure that does not appear" in text
+
+
+def test_the_prompt_states_what_is_normal_and_what_is_never_suggested():
+    p = insight._PROMPT
+    for phrase in ("503", "idle", "duplicate", "never sooner than the server asked",
+                   "Never suggest raising a request budget", "This report is public",
+                   "invent baselines"):
+        assert phrase in p, phrase

@@ -36,8 +36,9 @@ import json
 import logging
 import re
 import sqlite3
+import statistics
 
-from . import config
+from . import config, fedcal
 from .llm import LLMError
 from .sync import utc_now_iso
 
@@ -50,17 +51,47 @@ logger = logging.getLogger("fapd.insight")
 _FINALIZE_GRACE = dt.timedelta(hours=6)
 
 _PROMPT = """You are reviewing one day's operational metrics for an
-automated publication pipeline (fetch counts, LLM token spend, retry
-economics, errors, coverage, collector liveness). Suggest the most
-useful next steps for the developer.
+automated pipeline that reads official US federal publications and
+publishes a daily, cited digest. The metrics cover fetch counts and
+answers, LLM token spend, coverage, packages filed for the day,
+collector liveness and the email feed. Suggest the most useful next
+steps for the developer.
+
+What is normal here by design (do not suggest "fixing" these):
+- govinfo often answers 503 with Retry-After while it builds a file.
+  The download is set aside and tried again after the rest of the queue,
+  never sooner than the server asked. Judge govinfo by the packages left
+  unfetched for the day, not by its error count. Failed requests count
+  against the request budget on purpose.
+- Court-opinion packages marked "skipped" are revisions of old cases
+  outside a seven-day window, skipped on purpose.
+- A model layer recorded "idle" had nothing to work from (often a
+  weekend or holiday, shown in the coverage table). It did not fail.
+- The analysis layer works only on the current publication day and the
+  day before; older unsummarized items are disclosed gaps, not backlog.
+- An email "duplicate" is a bulletin whose items had already arrived,
+  through another channel or another of the sender's own lists. Mail
+  that fails sender verification is refused, never counted a duplicate.
+- An email item "without URL" came from a bulletin that links to
+  nothing for that item. It is stored, and it cannot be corroborated.
+- There is no daily token cap: spend is measured first, on purpose.
 
 Rules:
-- Ground every suggestion in a specific number or line from the metrics.
+- Ground every suggestion in a figure from the metrics, quoted exactly
+  as it appears there. Do not compute new ratios or invent baselines;
+  compare only with a baseline the metrics give.
+- Never suggest raising a request budget or ceiling, retrying sooner
+  than a server asked, loosening a validation gate, re-rendering a
+  frozen digest, or working around an access refusal. Those are the
+  operator's decisions, not fixes.
+- This report is public. Describe what a server answered; never
+  characterize a publisher, agency or person. Do not mention hosting,
+  servers' locations or security.
 - At most five suggestions, ordered by expected payoff; fewer is fine.
-- One sentence each, concrete and checkable ("investigate X", "reduce
-  Y", "confirm Z") — no generic advice, no praise, no filler.
-- If the metrics look healthy, say so in one line instead of inventing
-  work.
+  One sentence each, concrete and checkable. No generic advice, no
+  praise, no filler.
+- If the metrics look healthy, say so in one suggestion instead of
+  inventing work.
 
 Output format: STRICT JSON, a single array of suggestion strings. No
 markdown fences, no other keys.
@@ -253,6 +284,35 @@ def _provider_metrics(ldb, start, end):
     return out
 
 
+def _request_counts(fdb, start, end):
+    return fdb.execute(
+        "SELECT COALESCE(client,'govinfo'), COUNT(*),"
+        " SUM(CASE WHEN status IS NULL OR status >= 400 THEN 1 ELSE 0 END)"
+        " FROM fetch_log WHERE ts_utc >= ? AND ts_utc < ?"
+        " GROUP BY 1 ORDER BY 2 DESC", (start, end)).fetchall()
+
+
+#: Earlier work windows the error baseline is computed over.
+_BASELINE_WINDOWS = 7
+
+
+def _error_baseline(fdb, date, *, now=None):
+    """Each client's error rate over the previous work windows: median
+    and range. Until 2026-10-07 the model compared the day with a
+    baseline nobody had given it ("the established 18.1%", a figure from
+    a July ruling); this one is measured every night from the same log."""
+    rates = {}
+    day = dt.date.fromisoformat(date)
+    for k in range(1, _BASELINE_WINDOWS + 1):
+        start, end = _work_window((day - dt.timedelta(days=k)).isoformat(), now=now)
+        for c, n, e in _request_counts(fdb, start, end):
+            if n:
+                rates.setdefault(c, []).append(round(100 * (e or 0) / n, 1))
+    return {c: {"windows": len(r), "median_pct": round(statistics.median(r), 1),
+                "min_pct": min(r), "max_pct": max(r)}
+            for c, r in sorted(rates.items())}
+
+
 def gather(conn, date, *, fetch_db=None, ledger_db=None, now=None):
     """Mechanical metrics for the report — zero tokens. `date` is the
     digest date just finalized; request and token accounting cover the
@@ -265,14 +325,23 @@ def gather(conn, date, *, fetch_db=None, ledger_db=None, now=None):
     fdb = _ro(fetch_db or config.FETCH_LOG_DB)
     try:
         m["requests"] = [
-            {"client": c, "requests": n, "errors": e or 0}
-            for c, n, e in fdb.execute(
-                "SELECT COALESCE(client,'govinfo'), COUNT(*),"
-                " SUM(CASE WHEN status IS NULL OR status >= 400 THEN 1 ELSE 0 END)"
-                " FROM fetch_log WHERE ts_utc >= ? AND ts_utc < ?"
-                " GROUP BY 1 ORDER BY 2 DESC",
-                (start, end))
+            {"client": c, "requests": n, "errors": e or 0,
+             "error_pct": round(100 * (e or 0) / n, 1) if n else 0.0}
+            for c, n, e in _request_counts(fdb, start, end)
         ]
+        # What the errors were (2026-10-07). A bare count let the model
+        # read govinfo's routine 503 set-asides as a failure to
+        # investigate; the status split says what the servers answered.
+        by_status = {}
+        for c, st, n in fdb.execute(
+                "SELECT COALESCE(client,'govinfo'), COALESCE(CAST(status AS TEXT), 'none'),"
+                " COUNT(*) FROM fetch_log WHERE ts_utc >= ? AND ts_utc < ?"
+                " AND (status IS NULL OR status >= 400) GROUP BY 1, 2 ORDER BY 3 DESC",
+                (start, end)):
+            by_status.setdefault(c, {})[st] = n
+        for r in m["requests"]:
+            r["errors_by_status"] = by_status.get(r["client"], {})
+        m["error_baseline"] = _error_baseline(fdb, date, now=now)
     finally:
         fdb.close()
 
@@ -359,6 +428,30 @@ def gather(conn, date, *, fetch_db=None, ledger_db=None, now=None):
             """, (date,))
     ]
 
+    # The day's calendar and each model layer's outcome (2026-10-07): the
+    # model read a quiet Sunday's idle layers as a failure to investigate.
+    try:
+        layers = {d: json.loads(lj) for d, lj in conn.execute(
+            "SELECT date, layers FROM day_inference WHERE date >= date(?, '-3 days')",
+            (date,))}
+    except (sqlite3.OperationalError, ValueError):
+        layers = {}
+    for c in m["coverage"]:
+        rp = fedcal.reduced_publishing(c["date"])
+        c["calendar"] = f"{rp['kind']}: {rp['name']}" if rp else "business day"
+        c["layers"] = layers.get(c["date"])
+
+    # What happened to the day's packages: the outcome a govinfo error
+    # count stands in for, badly.
+    try:
+        m["packages"] = [
+            {"collection": c, "status": st, "count": n}
+            for c, st, n in conn.execute(
+                "SELECT collection, fetch_status, COUNT(*) FROM packages"
+                " WHERE digest_day = ? GROUP BY 1, 2 ORDER BY 1, 2", (date,))]
+    except sqlite3.OperationalError:
+        m["packages"] = []
+
     m["collectors"] = [
         {"worker": w, "last_ok_at": ok, "consecutive_errors": errs}
         for w, ok, errs in conn.execute(
@@ -369,7 +462,26 @@ def gather(conn, date, *, fetch_db=None, ledger_db=None, now=None):
     return m
 
 
-def render_report(metrics, suggestions=None):
+def _status_list(counts):
+    return ", ".join(f"{s}: {n}" for s, n in (counts or {}).items()) or "—"
+
+
+def _layer_list(layers):
+    """'all ran', or 'compose ran; map idle, plain idle, …'."""
+    if not layers:
+        return "—"
+    states = set(layers.values())
+    if len(states) == 1:
+        return f"all {states.pop()}"
+    groups = {}
+    for name, st in sorted(layers.items()):
+        groups.setdefault(st, []).append(name)
+    order = {"ran": 0, "idle": 1, "skipped": 2, "failed": 3}
+    return "; ".join(f"{', '.join(n)} {st}" for st, n in
+                     sorted(groups.items(), key=lambda g: (order.get(g[0], 9), g[0])))
+
+
+def render_report(metrics, suggestions=None, withheld=0):
     """Deterministic Markdown from the metrics dict. Suggestions, when
     present, render under an explicit model-output label (GUIDE §2).
 
@@ -384,9 +496,23 @@ def render_report(metrics, suggestions=None):
          "and the item journal.", ""]
 
     L += ["## HTTP requests (work window, by client)", "",
-          "| client | requests | errors/blocked |", "|---|---|---|"]
-    L += [f"| {r['client']} | {r['requests']} | {r['errors']} |"
-          for r in metrics["requests"]] or ["| — | 0 | 0 |"]
+          "| client | requests | errors/blocked | answers counted as errors |",
+          "|---|---|---|---|"]
+    L += [f"| {r['client']} | {r['requests']} | {r['errors']}"
+          f"{' (' + str(r['error_pct']) + '%)' if 'error_pct' in r else ''} |"
+          f" {_status_list(r.get('errors_by_status'))} |"
+          for r in metrics["requests"]] or ["| — | 0 | 0 | — |"]
+    base = metrics.get("error_baseline") or {}
+    if base:
+        L += ["", "Error rate in the previous work windows: " + "; ".join(
+            f"{c} median {b['median_pct']}% (range {b['min_pct']}–{b['max_pct']}%,"
+            f" {b['windows']} windows)" for c, b in base.items()) + "."]
+
+    pk = metrics.get("packages") or []
+    if pk:
+        L += ["", "## Packages filed for this digest day", "",
+              "| collection | status | packages |", "|---|---|---|"]
+        L += [f"| {p['collection']} | {p['status']} | {p['count']} |" for p in pk]
 
     t = metrics["tokens"]
     L += ["", "## LLM spend (work window)", "",
@@ -420,9 +546,11 @@ def render_report(metrics, suggestions=None):
         L += ["None — every call in the window billed tokens."]
 
     L += ["", "## Coverage (journal, last 4 digest days)", "",
-          "| date | ingested | summarized | plain |", "|---|---|---|---|"]
-    L += [f"| {c['date']} | {c['ingested']} | {c['summarized']} |"
-          f" {c['plain']} |" for c in metrics["coverage"]]
+          "| date | day | ingested | summarized | plain | model layers |",
+          "|---|---|---|---|---|---|"]
+    L += [f"| {c['date']} | {c.get('calendar', '—')} | {c['ingested']} |"
+          f" {c['summarized']} | {c['plain']} | {_layer_list(c.get('layers'))} |"
+          for c in metrics["coverage"]]
 
     L += ["", "## Collector liveness", "",
           "| worker | last ok (UTC) | consecutive errors |", "|---|---|---|"]
@@ -445,6 +573,9 @@ def render_report(metrics, suggestions=None):
                " executes automatically.*"), ""]
         L += [f"{i}. {s}" for i, s in enumerate(suggestions, 1)] or \
              ["(no suggestions returned)"]
+        if withheld:
+            L += ["", (f"*{withheld} suggestion(s) withheld: each cited a figure that"
+                       " does not appear in the metrics above.*")]
 
     L += ["", f"*Generated {utc_now_iso()}.*", ""]
     return "\n".join(L)
@@ -973,6 +1104,20 @@ _GROUNDED_WORDS = {
 }
 
 
+def _numbers(text):
+    return re.findall(r"\d+(?:\.\d+)?", text)
+
+
+def unsourced_numbers(text, *sources):
+    """Numerals in `text` that appear nowhere in `sources` (as JSON)."""
+    have = set(_numbers(" ".join(json.dumps(src) for src in sources)))
+    out = []
+    for n in _numbers(text):
+        if n not in have and n not in out:
+            out.append(n)
+    return out
+
+
 def ungrounded(summary, *sources):
     """What the summary names that its input does not: numerals and
     capitalized words absent from the JSON it was given, compared case-
@@ -984,11 +1129,7 @@ def ungrounded(summary, *sources):
     in the same spirit as the lexicon gate behind the plain-speak prompt.
     A withheld summary costs nothing: the mechanical report is complete."""
     corpus = " ".join(json.dumps(src) for src in sources).lower()
-    numbers = set(re.findall(r"\d+(?:\.\d+)?", corpus))
-    bad = []
-    for n in re.findall(r"\d+(?:\.\d+)?", summary):
-        if n not in numbers and n not in bad:
-            bad.append(n)
+    bad = unsourced_numbers(summary, *sources)
     for m in re.finditer(r"[A-Za-z][A-Za-z0-9]*(?:[-'][A-Za-z0-9]+)*", summary):
         word = m.group(0)
         if not word[0].isupper() or word in bad:
@@ -1070,7 +1211,19 @@ def run(conn, llm, date, *, out_dir=None, fetch_db=None, ledger_db=None,
     out_dir = out_dir or (config.PROJECT_ROOT / "provenance" / "runs")
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"insight-{date}.md"
-    path.write_text(render_report(metrics, suggestions), encoding="utf-8")
+    # A suggestion citing a figure the metrics do not hold is withheld,
+    # not published: on 2026-10-06 one compared the day with "the
+    # established 18.1% baseline", a number in no metric (it reached the
+    # model through the CLI's project context, since removed).
+    withheld = 0
+    if suggestions:
+        kept = [x for x in suggestions if not unsourced_numbers(x, metrics)]
+        withheld = len(suggestions) - len(kept)
+        if withheld:
+            logger.warning("insight: %d suggestion(s) withheld for unsourced figures",
+                           withheld)
+        suggestions = kept
+    path.write_text(render_report(metrics, suggestions, withheld), encoding="utf-8")
 
     # The security sweep is PRIVATE (CLAUDE.md §13, operator ruling
     # 2026-09-29): written to a gitignored, host-durable directory the

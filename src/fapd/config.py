@@ -327,7 +327,13 @@ SECTION_PROMPT_VERSION = 2
 TAG_PROMPT_VERSION = 2
 # Developer-insight suggestions (§3a): dev-facing surface, one cheap-tier
 # call per EOD over the run's own metrics — never document content.
-INSIGHT_PROMPT_VERSION = 1
+# v2 (2026-10-07): the prompt states what is normal by design, forbids
+# invented baselines and the proposals CLAUDE.md §13 reserves for the
+# operator, and asks for neutral public wording; the metrics gained the
+# errors' status split, a measured seven-window baseline, the day's
+# package outcomes and each coverage day's calendar and layer outcomes;
+# a suggestion citing a figure absent from the metrics is withheld.
+INSIGHT_PROMPT_VERSION = 2
 
 #: The nightly security sweep (host-side, read-only) writes one JSON
 #: file; the insight report renders it. The path is a bind mount the
