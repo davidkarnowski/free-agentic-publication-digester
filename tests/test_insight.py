@@ -313,3 +313,35 @@ def test_provider_metrics_from_a_real_ledger(tmp_path, monkeypatch):
     assert cli["last_refusal"].startswith("2026-09-26T11:00:00")
     assert out["fallback_reserve"]["used_24h"] == 1
     assert out["fallback_reserve"]["collector_budget"] == 10
+
+
+def test_run_withholds_an_ungrounded_security_summary_and_keeps_a_record(conn, tmp_path):
+    """2026-10-07: the private report leads with Action today, a summary
+    naming what the sweep does not (v1 said "Examplenet-hosted") is
+    withheld, and the night leaves a small record for the next to compare."""
+    fetch_db, ledger_db = seed_ops(conn, tmp_path)
+    sweep = {"generated_utc": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
+             "window_hours": 24, "probing": {"events": 0, "findings": []},
+             "verdicts": [{"key": "patch.host", "severity": "high", "detail": "7 pending",
+                           "escalate": False}],
+             "escalate": False, "stage_errors": []}
+    sweep_path = tmp_path / "security-sweep.json"
+    sweep_path.write_text(json.dumps(sweep))
+    sec = tmp_path / "sec"
+
+    class SecLLM(FakeLLM):
+        def complete(self, prompt, **kw):
+            if kw.get("purpose") == "security:summary":
+                self.calls.append({"prompt": prompt, **kw})
+                return {"text": "Nothing to do. Examplenet probes were refused."}
+            return super().complete(prompt, **kw)
+
+    llm = SecLLM()
+    insight.run(conn, llm, DATE, out_dir=tmp_path / "runs", fetch_db=fetch_db,
+                ledger_db=ledger_db, sweep_path=sweep_path, security_dir=sec)
+    report = (sec / f"security-{DATE}.md").read_text()
+    assert "Model summary withheld: it named Examplenet" in report
+    assert report.index("## Action today") < report.index("## Security sweep")
+    assert "`patch.host`" in report
+    assert (sec / f"security-{DATE}.record.json").exists()
+    assert "=== TRIAGE ===" in llm.calls[-1]["prompt"]

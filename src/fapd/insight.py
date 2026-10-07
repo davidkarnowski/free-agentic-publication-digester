@@ -21,11 +21,20 @@ PRIVATE report under config.INSIGHT_SECURITY_DIR — gitignored and never
 staged by the evidence commit — while the public report keeps only a
 neutral pointer that leaks no posture. The loud "sweep did not run"
 disclosure is preserved in full, in the private file.
+
+Since 2026-10-07 the private report opens with "Action today": each
+verdict triaged against earlier nights (new, standing with nights open,
+cleared) and routed to whoever acts. Each night leaves a small record
+(security-<date>.record.json: verdict keys, hashed login addresses,
+edge status counts) for the next night to compare against. The model
+summary must pass ungrounded() or it is withheld.
 """
 
 import datetime as dt
+import hashlib
 import json
 import logging
+import re
 import sqlite3
 
 from . import config
@@ -496,24 +505,201 @@ def render_email(email):
     return L
 
 
-_SECURITY_PROMPT = """Below is a machine-generated security sweep of a
-static-site VPS. Every number in it was computed by a script and every
-verdict was decided by a fixed threshold before you saw it.
+_SECURITY_PROMPT = """Below is tonight's machine-generated security sweep of
+a VPS, and a mechanical triage of its verdicts against earlier nights:
+"act" (new tonight, or critical), "standing" (open on earlier nights
+too, with the number of nights), "watch" (new, lower severity),
+"recorded" (low severity: nothing to do) and "cleared" (open last night,
+gone tonight). Every number was computed by a script and every verdict
+was decided by a fixed threshold before you saw it.
 
 Rules:
-- Do NOT recount, re-classify, or re-rank anything. The verdicts are
-  already decided.
-- Do NOT speculate about causes you cannot see in this data.
-- At most 150 words.
-- Say whether anything changed that a human must act on today, name the
-  single most important item, and say plainly if the answer is nothing.
+- Use only facts present in the data below. Do not name any company,
+  hosting provider, network, country, product or attacker the data does
+  not name, and do not guess where traffic came from.
+- Do NOT recount, re-classify or re-rank anything; quote numbers exactly
+  as they appear.
+- A verdict has already passed its threshold: never call it
+  "approaching" or "near" one.
+- Lead with what is in "act". If "act" is empty, say plainly that
+  nothing new needs action, then give the standing items in one
+  sentence with how many nights each has been open.
 - If "escalate" is true, lead with it.
+- At most 120 words.
 
 Output: plain prose. No markdown headings, no bullet list, no JSON.
+
+=== TRIAGE ===
+{triage}
 
 === SWEEP ===
 {sweep}
 """
+
+#: Severity order, most urgent first. "low" (added to the sweep
+#: 2026-10-07) means recorded, nothing to do.
+_SEVERITY_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+
+#: Who acts on a verdict, by key prefix (longest match wins). The sweep
+#: decides THAT something is wrong; this only routes it, so the morning
+#: reader knows whose list it belongs on.
+_WHO_ACTS = {
+    "intrusion.": "operator, now",
+    "auth.": "operator, now",
+    "integrity.auth_changed": "operator: confirm the change was yours",
+    "integrity.schedule_changed": "operator: confirm (a staged script or a package?)",
+    "integrity.image_changed": "confirm it was a deploy",
+    "campaign.": "edge configuration",
+    "jail.": "edge configuration",
+    "edge.": "edge configuration",
+    "tls.": "edge configuration (certificates)",
+    "retention.": "edge configuration (log retention)",
+    "sweep.": "the sweep's owner",
+    "fault.upstream_5xx": "the failing site's project",
+    "patch.host": "operator (host packages)",
+    "patch.reboot": "operator (host reboot)",
+    "patch.base_age": "image refresh (each image's owner)",
+    "host.disk": "operator (disk)",
+    "health.container": "the container's project",
+}
+
+
+def _who_acts(key):
+    best = max((p for p in _WHO_ACTS if key.startswith(p)), key=len, default=None)
+    return _WHO_ACTS[best] if best else "operator"
+
+
+def _addr_tag(addr):
+    """A short, stable tag for an address, so the history can say "new"
+    without keeping the address itself on disk a second time."""
+    return hashlib.sha256(addr.encode()).hexdigest()[:12]
+
+
+def sweep_record(sweep):
+    """The small per-night record kept beside the private report: the
+    verdict keys and severities, tagged login addresses, and the edge
+    refusal counts the next night compares against."""
+    accepted = [a for a in (sweep.get("auth", {}).get("accepted_from") or "").split(",") if a]
+    return {
+        "generated_utc": sweep.get("generated_utc"),
+        "verdicts": {v["key"]: v.get("severity") for v in sweep.get("verdicts", [])},
+        "accepted_tags": sorted({_addr_tag(a) for a in accepted}),
+        "by_status": sweep.get("refusals", {}).get("by_status") or {},
+    }
+
+
+def save_sweep_record(security_dir, date, sweep):
+    path = security_dir / f"security-{date}.record.json"
+    path.write_text(json.dumps(sweep_record(sweep), indent=1), encoding="utf-8")
+    return path
+
+
+def load_history(security_dir, date, nights=None):
+    """Earlier nights' records, newest first, strictly before `date`. A
+    missing or unreadable record ends nothing: it is skipped, and the
+    'open N nights' count treats the gap as a break (see triage)."""
+    nights = nights or config.SECURITY_HISTORY_NIGHTS
+    out = []
+    for path in sorted(security_dir.glob("security-*.record.json"), reverse=True):
+        day = path.name[len("security-"):-len(".record.json")]
+        if day >= date:
+            continue
+        try:
+            out.append((day, json.loads(path.read_text(encoding="utf-8"))))
+        except (OSError, ValueError):
+            continue
+        if len(out) >= nights:
+            break
+    return out
+
+
+#: Nights of records needed before a login address can read as new.
+_LOGIN_NOVELTY_MIN_NIGHTS = 7
+
+
+def _previous_day(date):
+    return (dt.date.fromisoformat(date) - dt.timedelta(days=1)).isoformat()
+
+
+def triage(date, sweep, history):
+    """Sort tonight's verdicts by what a human must do with them.
+
+    - act: critical, or high and new tonight;
+    - standing: high or medium, open on consecutive earlier nights too;
+    - watch: medium and new tonight;
+    - recorded: low;
+    - cleared: present in the previous night's record, absent tonight.
+
+    The sweep's design asked for this from the start: "a number that has
+    been true for three weeks reads differently from one that became true
+    last night". Until 2026-10-07 every night listed the same high
+    verdicts as if each were news. The verdicts themselves are the
+    sweep's; nothing here changes a severity."""
+    by_day = dict(history)
+    out = {"act": [], "standing": [], "watch": [], "recorded": [], "cleared": [],
+           "new_login_addresses": 0, "history_nights": len(history)}
+    for v in sorted(sweep.get("verdicts", []),
+                    key=lambda x: _SEVERITY_ORDER.get(x.get("severity"), 4)):
+        nights, day = 1, _previous_day(date)
+        while v["key"] in (by_day.get(day) or {}).get("verdicts", {}):
+            nights += 1
+            day = _previous_day(day)
+        item = {"key": v["key"], "severity": v.get("severity"), "detail": v.get("detail", ""),
+                "nights": nights, "who": _who_acts(v["key"])}
+        sev = v.get("severity")
+        if sev == "critical" or (sev == "high" and nights == 1):
+            out["act"].append(item)
+        elif sev == "low":
+            out["recorded"].append(item)
+        elif nights > 1:
+            out["standing"].append(item)
+        else:
+            out["watch"].append(item)
+    tonight = {v["key"] for v in sweep.get("verdicts", [])}
+    prev = by_day.get(_previous_day(date))
+    if prev:
+        out["cleared"] = sorted(set(prev.get("verdicts", {})) - tonight)
+    # An operator may log in from several addresses a day, so "new"
+    # means something only against some weeks of records: below the
+    # minimum it would fire every night.
+    seen = {t for _, rec in history for t in rec.get("accepted_tags", [])}
+    if len(history) >= _LOGIN_NOVELTY_MIN_NIGHTS:
+        out["new_login_addresses"] = len(set(sweep_record(sweep)["accepted_tags"]) - seen)
+    return out
+
+
+def render_action_today(t, problem=None):
+    """The block a morning reader reads first, and often only."""
+    L = ["", "## Action today", ""]
+    if problem:
+        return L + [f"**Act: the security sweep did not run or cannot be trusted ({problem}).**",
+                    "Nothing below describes last night.", ""]
+    if t["act"]:
+        L += ["**Act:**", "", "| severity | finding | who acts | detail |", "|---|---|---|---|"]
+        L += [f"| {i['severity']} | `{i['key']}` | {i['who']} | {i['detail']} |" for i in t["act"]]
+    else:
+        L += ["**Nothing new needs action.**"]
+    if t["new_login_addresses"]:
+        L += ["", (f"**Watch:** SSH logins were accepted from {t['new_login_addresses']}"
+                   f" address(es) not seen in the previous {t['history_nights']} night(s)"
+                   " of records. Confirm they were yours.")]
+    if t["watch"]:
+        L += ["", "**Watch** (new tonight, lower severity):", ""]
+        L += [f"- `{i['key']}` ({i['severity']}; {i['who']}): {i['detail']}" for i in t["watch"]]
+    if t["standing"]:
+        L += ["", "**Standing** (known; open on earlier nights too):", "",
+              "| finding | severity | nights open | who acts | detail |", "|---|---|---|---|---|"]
+        L += [f"| `{i['key']}` | {i['severity']} | {i['nights']} | {i['who']} | {i['detail']} |"
+              for i in t["standing"]]
+    if t["recorded"]:
+        L += ["", "Recorded, nothing to do: "
+              + "; ".join(f"`{i['key']}` ({i['detail']})" for i in t["recorded"]) + "."]
+    if t["cleared"]:
+        L += ["", "Cleared since the previous night: "
+              + ", ".join(f"`{k}`" for k in t["cleared"]) + "."]
+    if not t["history_nights"]:
+        L += ["", "*No earlier records yet: every verdict reads as new tonight.*"]
+    return L + [""]
 
 
 def read_sweep(path=None, *, now=None):
@@ -563,7 +749,80 @@ def _by_host(counts):
     return " (" + ", ".join(f"{h}: {n}" for h, n in sorted(counts.items())) + ")"
 
 
-def render_security(sweep, problem=None, summary=None):
+def _finding_kinds(findings):
+    """'2 (by-agent 1, by-target 1)'. One campaign is often seen twice,
+    by its target paths and by its client; a bare total read as two
+    campaigns beside a verdict that counted one (2026-10-06)."""
+    if not findings:
+        return "0"
+    kinds = {}
+    for f in findings:
+        kinds[f.get("kind", "?")] = kinds.get(f.get("kind", "?"), 0) + 1
+    return (f"{len(findings)} ("
+            + ", ".join(f"{k} {n}" for k, n in sorted(kinds.items())) + ")")
+
+
+#: Edge statuses worth a named line: refusals (400, 403, 404, 405, 444)
+#: and the ones that show limits working (408 timeouts, 413 bodies too
+#: large, 429 rate limits).
+_NAMED_STATUSES = ("400", "403", "404", "405", "408", "413", "429", "444")
+
+
+def _host_rows(sweep):
+    """Rows for fields the sweep gained on 2026-10-07. A sweep from
+    before that date has none of them and renders as it always did."""
+    L = []
+    host, edge, auth = sweep.get("host"), sweep.get("edge_errors"), sweep.get("auth", {})
+    integ = sweep.get("integrity", {})
+    if host:
+        L += [f"| root filesystem used | {host.get('disk_pct', '?')}% |",
+              ("| reboot required | "
+               + (f"yes, {host.get('reboot_age_hours', 0)}h ({host.get('reboot_pkgs', '')})"
+                  if host.get("reboot_required") else "no") + " |")]
+    if "accepted_users" in auth:
+        L += [f"| SSH accounts that logged in | {auth.get('accepted_users') or 'none'} |",
+              f"| SSH password logins | {auth.get('password_logins', 0)} |"]
+    if "fingerprints" in integ:
+        changes = integ.get("fingerprint_changes") or []
+        L += [(f"| watched files (accounts, keys, sudo, sshd, schedules) | "
+               f"{len(integ['fingerprints'])}, "
+               + ("baseline recorded" if integ.get("fingerprint_baseline")
+                  else (f"{len(changes)} changed" if changes else "unchanged")) + " |")]
+    if edge:
+        levels = edge.get("by_level") or {}
+        spill = edge.get("buffered_to_temp_file") or {}
+        L += [("| edge error log, severe lines (crit/alert/emerg) | "
+               f"{sum(levels.get(k, 0) for k in ('crit', 'alert', 'emerg'))} |"),
+              ("| edge buffered to a temporary file (response / request body) | "
+               f"{spill.get('upstream_response', 0)} / {spill.get('client_body', 0)} |")]
+    by_status = sweep.get("refusals", {}).get("by_status") or {}
+    named = [f"{c}: {by_status[c]}" for c in _NAMED_STATUSES if by_status.get(c)]
+    if named:
+        L += [f"| edge refusals by status | {', '.join(named)} |"]
+    return L
+
+
+def _jail_table(jails):
+    """Each jail, and whether a firewall rule uses its chain. A jail with
+    no bans may have no chain yet: most actions create it at the first
+    ban. A jail WITH bans and a missing chain is the finding the sweep's
+    jail.chainless verdict reports."""
+    if not jails:
+        return []
+    L = ["", "| jail | banned now | banned since start | firewall chain |", "|---|---|---|---|"]
+    for j in jails:
+        if j.get("has_chain"):
+            chain = j.get("chains") or "yes"
+        elif not j.get("total_banned"):
+            chain = "none yet (no bans)"
+        else:
+            chain = f"**missing: {j.get('missing_chains') or 'f2b-' + j.get('jail', '?')}**"
+        L.append(f"| {j.get('jail')} | {j.get('currently_banned', 0)} |"
+                 f" {j.get('total_banned', 0)} | {chain} |")
+    return L
+
+
+def render_security(sweep, problem=None, summary=None, withheld=None):
     """The security section. Entirely mechanical; `summary` is prose and
     the section is complete without it."""
     L = ["", "## Security sweep", ""]
@@ -586,7 +845,7 @@ def render_security(sweep, problem=None, summary=None):
           "| measure | value |", "|---|---|",
           f"| probe requests | {probing.get('events', 0)} |",
           f"| distinct probing addresses | {probing.get('distinct_ips', 0)} |",
-          f"| correlated campaign findings | {len(probing.get('findings', []))} |",
+          f"| correlated campaign findings | {_finding_kinds(probing.get('findings', []))} |",
           (f"| **probe paths served a 2xx** | "
            f"**{sweep.get('refusals', {}).get('probes_served_2xx', 0)}**"
            f"{_by_host(sweep.get('refusals', {}).get('probes_served_2xx_by_host'))} |"),
@@ -610,6 +869,8 @@ def render_security(sweep, problem=None, summary=None):
           (f"| containers not healthy | "
            f"{sweep.get('integrity', {}).get('unhealthy', 0)} |")]
 
+    L += _host_rows(sweep)
+
     fam = probing.get("by_family") or {}
     if fam:
         L += ["", "Probe families seen: "
@@ -621,6 +882,8 @@ def render_security(sweep, problem=None, summary=None):
         L += [f"| {x['severity']} | `{x['key']}` | {x['detail']} |" for x in v]
     else:
         L += ["", "No verdict tripped a threshold."]
+
+    L += _jail_table(sweep.get("jails") or [])
 
     tls = sweep.get("tls") or []
     if tls:
@@ -640,12 +903,16 @@ def render_security(sweep, problem=None, summary=None):
         L += ["", (f"*Model summary (security prompt v"
                    f"{config.SECURITY_PROMPT_VERSION}), over the classified"
                    f" sweep above; it decides nothing.*"), "", summary]
+    elif withheld:
+        L += ["", (f"*Model summary withheld: it named {withheld}, which the sweep does not"
+                   " contain. The mechanical findings above are complete.*")]
     else:
         L += ["", "*(no inference available; the mechanical findings above are complete)*"]
     return L
 
 
-def render_security_report(date, sweep, problem=None, summary=None):
+def render_security_report(date, sweep, problem=None, summary=None, *,
+                           triaged=None, withheld=None):
     """The standalone PRIVATE security report. Same section body the public
     report used to embed, written instead to config.INSIGHT_SECURITY_DIR
     (gitignored, host-durable, never staged by the evidence commit) —
@@ -656,29 +923,80 @@ def render_security_report(date, sweep, problem=None, summary=None):
          "Host security posture for the operator. NOT committed to the",
          "public repository (CLAUDE.md §13). Generated by the post-EOD",
          "feedback loop; the public insight report carries only a pointer."]
-    L += render_security(sweep, problem, summary)
+    if triaged is not None or problem:
+        L += render_action_today(triaged or {}, problem)
+    L += render_security(sweep, problem, summary, withheld)
     L += ["", f"*Generated {utc_now_iso()}.*", ""]
     return "\n".join(L)
 
 
-def summarize_security(llm, sweep):
-    """One cheap-tier call over the already-classified sweep. Returns a
-    string, or None if the call fails — the section never depends on it.
-
-    The payload is trimmed first: address lists and full path samples
-    are evidence for a human reading the JSON, not context a summariser
-    needs, and they are the only unbounded fields in the file."""
+def _trim_for_model(sweep):
+    """Address lists, path samples and file hashes are evidence for a
+    human reading the JSON, not context a summariser needs; they are
+    also the only unbounded fields in the file."""
     trimmed = json.loads(json.dumps(sweep))
     for f in trimmed.get("probing", {}).get("findings", []):
         f.pop("sample_paths", None)
         if isinstance(f.get("ips"), list):
             f["ips"] = f["ips"][:5]
     trimmed.get("auth", {}).pop("accepted_from", None)
+    for k in ("fingerprints", "images"):
+        trimmed.get("integrity", {}).pop(k, None)
+    return trimmed
+
+
+def summarize_security(llm, sweep, triaged=None):
+    """One cheap-tier call over the already-classified sweep. Returns a
+    string, or None if the call fails — the section never depends on it.
+    The caller passes the reply through ungrounded() before using it."""
     result = llm.complete(
-        _SECURITY_PROMPT.format(sweep=json.dumps(trimmed, indent=1)),
+        _SECURITY_PROMPT.format(triage=json.dumps(triaged or {}, indent=1),
+                                sweep=json.dumps(_trim_for_model(sweep), indent=1)),
         purpose="security:summary", model=config.MAP_MODEL,
         package_id=f"SEC-{sweep.get('generated_utc', '')[:10]}")
     return (result["text"] or "").strip() or None
+
+
+#: Words a summary may capitalize although the sweep never spells them:
+#: protocol names, and the function words that open ordinary sentences.
+#: Every other capitalized word, sentence-initial or not, must occur in
+#: the data. (Skipping sentence-initial words let an invented provider
+#: name through after a colon; the case is pinned in the tests.)
+_GROUNDED_WORDS = {
+    "ssh", "tls", "vps", "mcp", "http", "https", "ip", "utc", "dns", "api", "json",
+    "fail2ban", "the", "a", "an", "no", "nothing", "none", "one", "two", "three", "four", "five",
+    "it", "its", "this", "these", "that", "there", "all", "both", "every", "each",
+    "and", "but", "or", "so", "if", "while", "since", "after", "before", "today",
+    "tonight", "yesterday", "last", "new", "also", "only", "still", "otherwise",
+    "however", "overall", "in", "on", "of", "for", "from", "with", "at", "by",
+    "is", "are", "was", "were", "has", "have", "act", "action", "watch",
+}
+
+
+def ungrounded(summary, *sources):
+    """What the summary names that its input does not: numerals and
+    capitalized words absent from the JSON it was given, compared case-
+    insensitively. Returns a comma-joined string, or '' when grounded.
+
+    Written after v1 attributed a scan to a hosting provider it invented
+    (2026-10-06): no provider appears anywhere in the sweep. A prompt rule
+    asks the model not to; this check is the second, independent layer,
+    in the same spirit as the lexicon gate behind the plain-speak prompt.
+    A withheld summary costs nothing: the mechanical report is complete."""
+    corpus = " ".join(json.dumps(src) for src in sources).lower()
+    numbers = set(re.findall(r"\d+(?:\.\d+)?", corpus))
+    bad = []
+    for n in re.findall(r"\d+(?:\.\d+)?", summary):
+        if n not in numbers and n not in bad:
+            bad.append(n)
+    for m in re.finditer(r"[A-Za-z][A-Za-z0-9]*(?:[-'][A-Za-z0-9]+)*", summary):
+        word = m.group(0)
+        if not word[0].isupper() or word in bad:
+            continue
+        parts = [p for p in re.split(r"[-']", word.lower()) if p]
+        if not all(p in _GROUNDED_WORDS or p in corpus for p in parts):
+            bad.append(word)
+    return ", ".join(bad)
 
 
 def suggest(llm, metrics):
@@ -728,14 +1046,26 @@ def run(conn, llm, date, *, out_dir=None, fetch_db=None, ledger_db=None,
     # cannot cost us the security section too: read_sweep touches no
     # provider, and render_security is complete without prose.
     sweep, problem = read_sweep(sweep_path)
-    security = {"sweep": sweep, "problem": problem, "summary": None}
+    security_dir = security_dir or config.INSIGHT_SECURITY_DIR
+    security_dir.mkdir(parents=True, exist_ok=True)
+    triaged = (triage(date, sweep, load_history(security_dir, date))
+               if sweep is not None else None)
+    security = {"sweep": sweep, "problem": problem, "summary": None, "withheld": None}
     if sweep is not None and llm is not None:
         try:
-            security["summary"] = summarize_security(llm, sweep)
+            summary = summarize_security(llm, sweep, triaged)
         except LLMError as exc:
+            summary = None
             logger.warning(
                 "insight: security summary call failed (%s) — the mechanical"
                 " findings are unaffected", exc)
+        if summary:
+            bad = ungrounded(summary, _trim_for_model(sweep), triaged)
+            if bad:
+                logger.warning("insight: security summary withheld; ungrounded: %s", bad)
+                security["withheld"] = bad
+            else:
+                security["summary"] = summary
 
     out_dir = out_dir or (config.PROJECT_ROOT / "provenance" / "runs")
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -745,12 +1075,13 @@ def run(conn, llm, date, *, out_dir=None, fetch_db=None, ledger_db=None,
     # The security sweep is PRIVATE (CLAUDE.md §13, operator ruling
     # 2026-09-29): written to a gitignored, host-durable directory the
     # evidence commit never stages — never into the public report above.
-    security_dir = security_dir or config.INSIGHT_SECURITY_DIR
-    security_dir.mkdir(parents=True, exist_ok=True)
     sec_path = security_dir / f"security-{date}.md"
     sec_path.write_text(
-        render_security_report(date, sweep, problem, security["summary"]),
+        render_security_report(date, sweep, problem, security["summary"],
+                               triaged=triaged, withheld=security["withheld"]),
         encoding="utf-8")
+    if sweep is not None:
+        save_sweep_record(security_dir, date, sweep)
 
     logger.info("insight report written: %s (%d suggestion(s)); security"
                 " (private): %s (%s)", path, len(suggestions or []), sec_path,

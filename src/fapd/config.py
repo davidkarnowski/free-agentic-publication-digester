@@ -343,7 +343,17 @@ SECURITY_SWEEP_STALE_HOURS = int(
     os.environ.get("FAPD_SECURITY_SWEEP_STALE_HOURS", "26"))
 
 #: Bumping this regenerates the security summary layer only.
-SECURITY_PROMPT_VERSION = 1
+#: v2 (2026-10-07): the model reads the night's triage (new, standing,
+#: cleared) beside the sweep, may name nothing the data does not name,
+#: and its reply passes insight.ungrounded() or is withheld. v1 tied a
+#: scan to a hosting provider the sweep never names, and called base
+#: images already past their age threshold "approaching" it.
+SECURITY_PROMPT_VERSION = 2
+
+#: Nights of earlier verdicts the private report compares against: how
+#: long a verdict has been open, what cleared, and which SSH login
+#: addresses are new. Each night keeps a small record beside its report.
+SECURITY_HISTORY_NIGHTS = 30
 
 #: The rendered security section is PRIVATE (CLAUDE.md §13: operational
 #: security posture — certificates, host patch state, authentication-

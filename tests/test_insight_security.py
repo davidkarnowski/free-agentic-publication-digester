@@ -206,3 +206,155 @@ def test_served_probes_are_attributed_and_app_fallbacks_shown():
     text = "\n".join(insight.render_security(sweep))
     assert "**1** (other.example: 1)" in text
     assert "| probe paths answered by an app's own index page | 76 |" in text
+
+
+# ------------------------------------------- triage: new, standing, cleared
+#
+# Added 2026-10-07: night after night the report listed the same "high"
+# verdicts as if they were news, so a real one read like the noise.
+
+def _v(key, severity, detail="d"):
+    return {"key": key, "severity": severity, "detail": detail,
+            "escalate": severity == "critical"}
+
+
+def _rec(*keys, sev="high", tags=()):
+    return {"verdicts": {k: sev for k in keys}, "accepted_tags": list(tags), "by_status": {}}
+
+
+def test_a_new_high_is_action_and_an_old_one_is_standing():
+    s = _sweep(verdicts=[_v("patch.host", "high"), _v("jail.chainless", "high")])
+    history = [("2026-10-05", _rec("jail.chainless")), ("2026-10-04", _rec("jail.chainless")),
+               ("2026-10-03", _rec("jail.chainless"))]
+    t = insight.triage("2026-10-06", s, history)
+    assert [i["key"] for i in t["act"]] == ["patch.host"]
+    assert [(i["key"], i["nights"]) for i in t["standing"]] == [("jail.chainless", 4)]
+
+
+def test_a_gap_in_the_records_restarts_the_count():
+    s = _sweep(verdicts=[_v("jail.chainless", "high")])
+    history = [("2026-10-05", _rec("jail.chainless")), ("2026-10-03", _rec("jail.chainless"))]
+    t = insight.triage("2026-10-06", s, history)
+    assert t["standing"][0]["nights"] == 2
+
+
+def test_critical_is_always_action_even_when_standing():
+    s = _sweep(verdicts=[_v("intrusion.ports", "critical")])
+    t = insight.triage("2026-10-06", s, [("2026-10-05", _rec("intrusion.ports", sev="critical"))])
+    assert [i["key"] for i in t["act"]] == ["intrusion.ports"]
+
+
+def test_low_is_recorded_and_disappearances_are_cleared():
+    s = _sweep(verdicts=[_v("campaign.refused", "low")])
+    t = insight.triage("2026-10-06", s, [("2026-10-05", _rec("campaign.active", "patch.host"))])
+    assert [i["key"] for i in t["recorded"]] == ["campaign.refused"]
+    assert t["cleared"] == ["campaign.active", "patch.host"]
+    assert t["act"] == [] and t["standing"] == []
+
+
+def test_a_login_from_an_unseen_address_is_counted_not_printed():
+    s = _sweep()  # accepted_from 198.51.100.7
+    old = insight._addr_tag("203.0.113.9")
+    week = [(f"2026-09-{d:02d}", _rec(tags=[old])) for d in range(30, 23, -1)]
+    t = insight.triage("2026-10-01", s, week)
+    assert t["new_login_addresses"] == 1
+    out = "\n".join(insight.render_action_today(t))
+    assert "not seen in the previous 7 night" in out and "198.51.100.7" not in out
+    seen = insight._addr_tag("198.51.100.7")
+    assert insight.triage("2026-10-01", s, week[:-1] + [("2026-09-24", _rec(tags=[seen]))])[
+        "new_login_addresses"] == 0
+    # fewer than a week of records: too little to call anything new
+    assert insight.triage("2026-10-01", s, week[:3])["new_login_addresses"] == 0
+
+
+def test_action_today_says_plainly_when_nothing_is_new():
+    s = _sweep(verdicts=[_v("patch.base_age", "medium", "python:3.12-slim is 18d old")])
+    t = insight.triage("2026-10-06", s, [("2026-10-05", _rec("patch.base_age", sev="medium"))])
+    out = "\n".join(insight.render_action_today(t))
+    assert "**Nothing new needs action.**" in out
+    assert "| `patch.base_age` | medium | 2 |" in out
+
+
+def test_action_today_leads_with_an_unavailable_sweep():
+    out = "\n".join(insight.render_action_today({}, problem="no sweep file"))
+    assert "**Act: the security sweep did not run" in out
+
+
+def test_who_acts_uses_the_longest_prefix():
+    assert insight._who_acts("integrity.auth_changed").startswith("operator: confirm")
+    assert insight._who_acts("jail.chainless") == "edge configuration"
+    assert insight._who_acts("something.new") == "operator"
+
+
+def test_history_reads_earlier_nights_newest_first_and_skips_bad_files(tmp_path):
+    for day, keys in (("2026-10-03", ["a"]), ("2026-10-05", ["b"]), ("2026-10-06", ["c"])):
+        insight.save_sweep_record(tmp_path, day, _sweep(verdicts=[_v(k, "high") for k in keys]))
+    (tmp_path / "security-2026-10-04.record.json").write_text("{not json")
+    hist = insight.load_history(tmp_path, "2026-10-06")
+    assert [d for d, _ in hist] == ["2026-10-05", "2026-10-03"]
+    assert hist[0][1]["verdicts"] == {"b": "high"}
+
+
+def test_the_record_keeps_no_address():
+    rec = json.dumps(insight.sweep_record(_sweep()))
+    assert "198.51.100.7" not in rec
+
+
+# --------------------------------------------- the table and the counts
+
+def test_campaign_findings_are_counted_by_kind():
+    s = _sweep(probing={"events": 9, "distinct_ips": 2, "by_family": {},
+                        "findings": [{"kind": "by-target"}, {"kind": "by-agent"}]})
+    out = "\n".join(insight.render_security(s))
+    assert "| correlated campaign findings | 2 (by-agent 1, by-target 1) |" in out
+
+
+def test_jail_table_names_chains_and_tells_missing_from_not_yet():
+    s = _sweep(jails=[
+        {"jail": "manual-bans", "currently_banned": 0, "total_banned": 1, "has_chain": 1,
+         "chains": "manual-host,manual-web", "missing_chains": ""},
+        {"jail": "nginx-botsearch", "currently_banned": 0, "total_banned": 0, "has_chain": 0},
+        {"jail": "broken", "currently_banned": 2, "total_banned": 5, "has_chain": 0,
+         "missing_chains": "broken"}])
+    out = "\n".join(insight.render_security(s))
+    assert "| manual-bans | 0 | 1 | manual-host,manual-web |" in out
+    assert "| nginx-botsearch | 0 | 0 | none yet (no bans) |" in out
+    assert "| broken | 2 | 5 | **missing: broken** |" in out
+
+
+def test_new_sweep_fields_render_and_old_sweeps_do_not_break():
+    s = _sweep(host={"disk_pct": 70, "reboot_required": False},
+               edge_errors={"files": 2, "by_level": {"warn": 90, "crit": 1},
+                            "buffered_to_temp_file": {"upstream_response": 81, "client_body": 9}},
+               refusals={"by_status": {"404": 12, "413": 3}, "probes_served_2xx": 0})
+    s["auth"].update(accepted_users="operator", password_logins=0)
+    s["integrity"].update(fingerprints={"/etc/passwd": "ab"}, fingerprint_baseline=True)
+    out = "\n".join(insight.render_security(s))
+    for row in ("| root filesystem used | 70% |", "| reboot required | no |",
+                "| SSH password logins | 0 |", "1, baseline recorded",
+                "| edge error log, severe lines (crit/alert/emerg) | 1 |",
+                "| 81 / 9 |", "| edge refusals by status | 404: 12, 413: 3 |"):
+        assert row in out, row
+    assert "root filesystem" not in "\n".join(insight.render_security(_sweep()))
+
+
+# --------------------------------------------- grounding the model summary
+
+#: The shape of a v1 summary (2026-10-06): a provider named after a colon.
+_V1_SUMMARY_2026_10_06 = (
+    "Nothing requires action today. The probing seen is refused: Examplenet-hosted "
+    "probes are getting 404, not 2xx.")
+
+
+def test_the_v1_summary_would_be_withheld_for_naming_a_provider():
+    s = _sweep(probing={"events": 9, "distinct_ips": 4, "by_family": {"wordpress": 9},
+                        "findings": [{"kind": "by-target", "statuses": {"404": 9}}]})
+    assert "Examplenet-hosted" in insight.ungrounded(_V1_SUMMARY_2026_10_06, s)
+
+
+def test_a_grounded_summary_passes_and_numbers_are_checked():
+    s = _sweep(verdicts=[_v("patch.base_age", "medium", "python:3.12-slim is 18d old")])
+    t = insight.triage("2026-10-06", s, [])
+    ok = "Nothing new needs action. The base image python:3.12-slim is 18d old, past its threshold."
+    assert insight.ungrounded(ok, s, t) == ""
+    assert insight.ungrounded("Nothing new. 19 probes landed.", s, t) == "19"

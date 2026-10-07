@@ -57,6 +57,14 @@ source of truth. This skill never writes or restarts anything.
    `unregistered` rows are the ones to name. The nightly insight
    report's Mailbox flags are the day's classification findings. Never
    print a sender address outside the operator's terminal.
+4d. **Last night's security review** (2026-10-07). The nightly sweep's
+   report is private and lands inside the backend's data volume, where
+   nothing else reads it, so this check is its reader. Read-only:
+   `sudo docker exec fapd-backend sh -c 'f=$(ls -1 /app/data/ops-security/security-*.md | tail -1); echo "$f"; sed -n "/^## Action today/,/^## Security sweep/p" "$f"'`.
+   Report the file's date, every **Act** row, every **Watch** line, and
+   the **Standing** rows with their nights open. A report older than the
+   last finalized day, or a "did not run" line, is a finding. Never paste
+   addresses or file hashes from the sweep JSON into a public surface.
 5. **Verify/report**: state each check's actual observed value against
    its expectation; flag anomalies — never summarize unchecked items as
    fine. If a check could not run, say so and why; an unrunnable check
