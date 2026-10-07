@@ -27,7 +27,11 @@ fi
 
 echo "==> [1/4] stage build context ($DEV/repo/, shared exclude list)"
 # Same excludes as deploy.sh's repo export — one list, two stagers, no drift.
-rsync -a --delete --exclude-from deploy/common/repo-excludes.txt ./ "$DEV/repo/"
+# Plus everything git ignores (2026-10-07; deploy/common/git-ignored.sh).
+GIT_IGNORED="$(mktemp)"
+trap 'rm -f "$GIT_IGNORED"' EXIT
+deploy/common/git-ignored.sh > "$GIT_IGNORED"
+rsync -a --delete --exclude-from deploy/common/repo-excludes.txt --exclude-from "$GIT_IGNORED" ./ "$DEV/repo/"
 
 echo "==> [2/4] build"
 docker compose -f "$DEV/docker-compose.yml" --project-directory "$DEV" build render

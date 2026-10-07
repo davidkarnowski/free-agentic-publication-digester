@@ -46,8 +46,17 @@ rsync -az --delete --exclude '.DS_Store' \
 # stack's stager (deploy/common/repo-excludes.txt) so the two build
 # contexts cannot drift; the bundle rsync above keeps its own inline
 # list on purpose (F-004 — those excludes protect the box's state).
+# Nothing git ignores ships (2026-10-07): rsync does not read git's ignore
+# rules, and private untracked files had been riding every export into the
+# backend image. deploy/common/git-ignored.sh lists what git ignores right
+# now; repo-excludes.txt stays as the floor for paths that must never ship
+# even if an ignore rule is dropped.
+GIT_IGNORED="$(mktemp)"
+trap 'rm -f "$GIT_IGNORED"' EXIT
+deploy/common/git-ignored.sh > "$GIT_IGNORED"
 rsync -az --delete \
   --exclude-from 'deploy/common/repo-excludes.txt' \
+  --exclude-from "$GIT_IGNORED" \
   -e "ssh ${SSH_OPTS[*]}" \
   ./ "${VPS}:${REMOTE_DIR}/repo/"
 

@@ -235,7 +235,8 @@ def test_dev_up_stages_the_package_the_dev_mcp_service_builds():
     excl = (PROJECT_ROOT / "deploy" / "common" / "repo-excludes.txt").read_text(encoding="utf-8")
     assert "packages" not in excl
     up = (DEV / "scripts" / "dev-up.sh").read_text(encoding="utf-8")
-    assert 'rsync -a --delete --exclude-from deploy/common/repo-excludes.txt ./ "$DEV/repo/"' in up
+    assert ('rsync -a --delete --exclude-from deploy/common/repo-excludes.txt'
+            ' --exclude-from "$GIT_IGNORED" ./ "$DEV/repo/"') in up
 
 
 def test_dev_compose_builds_the_production_dockerfile():

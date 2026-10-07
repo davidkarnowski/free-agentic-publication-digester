@@ -23,7 +23,18 @@ GUIDE.md §1–§2.
   to disagree, GUIDE.md wins and this file has a bug — fix this file.
 - **WORKLOG.md** — timestamped session log, append-only, **never
   retroactively edited** (entries before 2026-07-28 use the old project
-  name; that's deliberate).
+  name; that's deliberate). Private: it lives outside the repository
+  (next bullet).
+- **Private documents live outside the repository** (operator,
+  2026-10-07). The verbose WORKLOG.md, the untracked operations documents
+  this file names (`docs/ops/ops-backlog.md`, `findings.md`,
+  `SERVER-GUIDE.md`, `AGENT-CVE-GUIDE.md`, `docs/pre-publication-todo.md`,
+  `deploy/vps/README.md` and the like) and private notes sit in the
+  operator's private research tree under `repo-private/`, at the same
+  relative path. A path named here that is not in a clone is there. Never
+  recreate them inside the working tree: a deploy ships only what git
+  does not ignore (`deploy/common/git-ignored.sh`), but nothing private
+  belongs beside a public repository's files at all.
 - **docs/schema.md** — the design authority for the SQLite schema;
   `db.py` implements it, not the other way around.
 - **docs/accessibility-doctrine.md** — the method of record for

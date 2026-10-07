@@ -45,7 +45,7 @@ the exit report carries the exact desired diff instead:**
 |---|---|
 | `src/fapd/config.py` | Constants are policy (GUIDE §4); every section reads them, budget changes are operator decisions |
 | `GUIDE.md` | The editorial constitution; amendments are the operator's alone and precede implementation (§10) |
-| `CLAUDE.md`, `WORKLOG.md` | Cross-section governance and the append-only log; WORKLOG entries are written by the orchestrator with the merge |
+| `CLAUDE.md`, and the private WORKLOG (outside the repository, CLAUDE.md §2) | Cross-section governance and the append-only log; WORKLOG entries are written by the orchestrator with the merge |
 | `src/fapd/db.py` `_DDL` block | Corpus owns the file, but DDL touches every section's queries — schema changes are coordinated through the orchestrator and `docs/schema.md` first |
 | `tests/conftest.py` | The shared corpus fixture spans every section's tests |
 | `pyproject.toml`, `.gitignore` | Dependency policy is deliberately minimal; one owner keeps it that way |
