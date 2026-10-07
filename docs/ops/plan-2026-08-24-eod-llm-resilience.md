@@ -65,8 +65,8 @@ lastModified churn on 08-06) fails extraction every ~30 min forever
 `summary_attempts` on the finalizer path and a raising batch records no
 attempts (`analyze.py:426-427`, `:678-679`); GUIDE §6 r7 permits
 failover but none is implemented. VPS security/functional posture is
-clean (orderly reboots 08-20 and 08-23; ufw 2222/80/443; fail2ban
-active; nginx 48 h 1,503×200 / 3×404; cert to 2026-10-28; disk 29%).
+clean (orderly reboots 08-20 and 08-23; firewall and intrusion
+protection active; nginx 48 h 1,503×200 / 3×404; cert valid; disk 29%).
 govinfo's ~22% error rate is the known on-demand-ZIP baseline; not a
 plan item.
 

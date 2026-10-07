@@ -73,6 +73,16 @@ secrets/
 /docs/ops/plan-2026-08-06-phase7-logs.md
 /docs/code-review-2026-08-02.md
 /docs/code-review-2026-08-02-amended.md
+# Third batch (2026-10-07, the same rule): a sweep of the tracked tree
+# found the DNS provider, the /mcp jail's thresholds and filter, rate-limit
+# values, the SSH port and a login name in these plans and staged scripts.
+# Moved to the private tree; forward-only, as above.
+/docs/ops/plan-2026-09-13-phase6-dns.md
+/docs/ops/plan-2026-09-13-phase4-mcp-service.md
+/docs/ops/plan-2026-09-13-phase3-web-config.md
+/docs/ops/plan-2026-09-13-security-review.md
+/scripts/staged/2026-08-05-fail2ban-sshd-journalmatch.sh
+/scripts/staged/2026-08-05-rotate-oauth-token.sh
 
 # Local production-DB backups (never committed — public repo + prod data)
 /backups/
