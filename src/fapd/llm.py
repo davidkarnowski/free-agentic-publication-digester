@@ -297,7 +297,16 @@ class CLIBackend:
         return str(wd)
 
     def complete(self, prompt, *, model, timeout):
-        cmd = ["claude", "-p", "--model", model, "--output-format", "json"]
+        # No tools and no MCP servers (2026-10-07). Every pipeline call is
+        # text in, text out, and its prompt carries document text we do not
+        # control. With the CLI's default tools, a prompt can make the model
+        # read a file in its working directory and return the contents
+        # (proven locally with a planted file); until this date that
+        # directory was the repository, beside the deploy key. The empty
+        # working directory below already denies reads elsewhere; this
+        # removes the tools themselves, and their definitions' tokens.
+        cmd = ["claude", "-p", "--model", model, "--output-format", "json",
+               "--tools", "", "--strict-mcp-config"]
         # The CLI backend means subscription billing by definition: an
         # ANTHROPIC_API_KEY in the environment would silently take
         # precedence over the CLI's login/token and switch billing (the

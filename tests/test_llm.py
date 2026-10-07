@@ -66,6 +66,16 @@ def test_cli_runs_outside_the_repository(tmp_path):
     assert not (cwd / "CLAUDE.md").exists()
 
 
+def test_cli_runs_with_no_tools_and_no_mcp_servers(tmp_path):
+    """A prompt carries document text we do not control; with tools the
+    model can be asked to read files and repeat them (2026-10-07)."""
+    client, calls = make_client(tmp_path, [FakeProc(stdout=cli_json())])
+    client.complete("x", purpose="map:test")
+    cmd = calls[0]["cmd"]
+    assert cmd[cmd.index("--tools") + 1] == ""
+    assert "--strict-mcp-config" in cmd
+
+
 def test_a_workdir_inside_the_project_is_refused(tmp_path):
     ran = []
     backend = CLIBackend(runner=lambda *a, **k: ran.append(k),
