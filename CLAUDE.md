@@ -60,7 +60,7 @@ GUIDE.md §1–§2.
 | Storage | SQLite ×3: `data/fapd.db` (pipeline), `data/fetch_log.db` (every HTTP attempt), `data/llm_ledger.db` (every LLM call) |
 | Site | static HTML, no framework — `publish.py` renders it; exactly one script (the live page's local-time snippet, code-standards §2 r10); machine discovery documents under `/.well-known/`, `openapi.json`, `auth.md`, Markdown twins by content negotiation (agent-discovery plan, 2026-09-13) |
 | MCP | stdlib-only `static-mcp` package (`packages/static-mcp/`, generic and reusable) with FAPD's manifest in `deploy/vps/mcp/`; container `fapd-mcp` behind `fapd-web` at `/mcp`, no host port, no inference; dual-era MCP 2026-07-28 + legacy 2025-11-25/2025-06-18 without sessions (`docs/mcp-server.md`) |
-| Lint/tests | ruff (line 100), pytest (740+ tests; bare `pytest` collects `tests/` only via pyproject `testpaths` — the dev stack's staged repo copy would otherwise double-collect), CI on push/PR |
+| Lint/tests | ruff (line 100), pytest (1,600+ tests; bare `pytest` collects `tests/` only via pyproject `testpaths` — the dev stack's staged repo copy would otherwise double-collect); `scripts/preflight.sh` before every push, no hosted CI (§8) |
 | LLM | pluggable backends: `claude` CLI (default; production again since 2026-08-24) / Anthropic API (`LLM_BACKEND=api`) / Google Gemini (`LLM_BACKEND=gemini`, `GOOGLE_GEMINI_API_KEY`; production 2026-08-15..24) / none (`LLM_BACKEND=none`, GUIDE §6 r15); tier aliases resolved per backend via `config.LLM_MODELS`; an unknown value is an error, not the CLI. `LLM_BACKEND_FALLBACK` is the one-hop failover (GUIDE §6 r7, 2026-09-05; every caller since 2026-09-27, the collector within a ledger-counted reserve) |
 
 ## 4. Repository layout

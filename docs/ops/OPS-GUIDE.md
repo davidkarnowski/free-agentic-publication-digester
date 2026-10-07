@@ -167,9 +167,11 @@ print({k: r[k] for k in (\"finalized_date\", \"evidence_pushed_at\",
 
 The push succeeds only because the `fapd-pipeline` deploy key is the
 bypass actor on the `main` ruleset (2026-08-27): the evidence commit
-is created in the container and never sees CI. A push rejected with a
-rules/`required_status_checks` message means that bypass was removed —
-check the ruleset before anything else.
+is created in the container and runs no checks before it pushes. Hosted
+CI and the ruleset's required-check rule were retired on 2026-09-21; the
+ruleset still refuses force-pushes and deletion. A push rejected with a
+rules message means that bypass was removed — check the ruleset before
+anything else.
 
 `accept-new` is not optional in that first command: a freshly recreated
 container has an empty `known_hosts`, and a bare fetch fails `Host key
