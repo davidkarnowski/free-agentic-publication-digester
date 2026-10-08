@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 32 item(s) in the last 14 days; most recent 2026-10-06; 0 of 368 request(s) to www.cisa.gov returned no content.
+**delivering** — 29 item(s) in the last 14 days; most recent 2026-10-06; 0 of 367 request(s) to www.cisa.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-07T03:45:41Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-08T03:55:12Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,24 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 32 request(s) (32 answered, 0 returned no content) · 6 item(s) ingested
+Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 32 in 14 days (2.29 per day) · most recent 2026-10-06 |
-| Content length | 9,771 characters average, 8,990 median (shortest 4,389, longest 23,805) |
+| Items ingested | 29 in 14 days (2.07 per day) · most recent 2026-10-06 |
+| Content length | 9,525 characters average, 9,433 median (shortest 4,389, longest 23,695) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.cisa.gov | 368 request(s) · 368 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.cisa.gov | 367 request(s) · 367 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-07T04:00:55.888+00:00 UTC.
+last answered request 2026-10-08T04:00:13.832+00:00 UTC.
 
-32 item(s) in the last 14 days; most recent 2026-10-06; 0 of 368 request(s) to www.cisa.gov returned no content.
+29 item(s) in the last 14 days; most recent 2026-10-06; 0 of 367 request(s) to www.cisa.gov returned no content.
 
 ### All time
 
-- **Our requests to www.cisa.gov, all time (since 2026-07-30):** 2,041 request(s) · 2,037 answered · 4 returned no content
+- **Our requests to www.cisa.gov, all time (since 2026-07-30):** 2,068 request(s) · 2,064 answered · 4 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.cisa.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-08 | 3 | 28 | 150 |
 | 2026-09-09 | 1 | 26 | 142 |
 | 2026-09-10 | 5 | 31 | 113 |
 | 2026-09-11 | 2 | 26 | 126 |
@@ -127,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-04 | 1 | 26 | 122 |
 | 2026-10-05 | 0 | 27 | 139 |
 | 2026-10-06 | 6 | 32 | 110 |
-| 2026-10-07 | 0 | 1 | 108 |
+| 2026-10-07 | 0 | 27 | 142 |
+| 2026-10-08 | 0 | 1 | 127 |
 
 ## Our ingestion assessment
 

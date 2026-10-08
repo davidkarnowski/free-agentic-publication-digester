@@ -20,7 +20,7 @@ item carries a citation to the official record and names the mechanical
 rule that selected it. Everything not summarized is counted. Nothing is
 silently omitted.
 
-## Status (2026-08-03)
+## Status (2026-10-07)
 
 The authoritative numbers block — where any other figure in the
 repository disagrees, this dated snapshot is the current one. (For
@@ -28,21 +28,23 @@ source counts the live [Sources page](https://fapd.info/sources.html)
 is always current; it derives them from the registry at build time.)
 
 - **Live site:** https://fapd.info — served from a Docker stack on a
-  VPS; GitHub holds the repository, CI, and the integrity record.
-- **Source registry (updated 2026-09-26):** 155 sources — 45 active (19
-  web feeds, 15 email bulletins, 5 govinfo collections, 4 listing-page
-  sources, 1 chamber XML index, 1 API source), 88 planned (41 of them
+  VPS; GitHub holds the repository and the integrity record. Tests and
+  lint run locally before every push (`scripts/preflight.sh`); there is
+  no hosted CI.
+- **Source registry (updated 2026-10-07):** 171 sources — 83 active (33
+  email bulletins, 25 web feeds, 18 listing-page sources, 5 govinfo
+  collections, 1 chamber XML index, 1 API source), 66 planned (35 of them
   email subscriptions, which are read and ingested while planned), 20
   recorded unavailable, 2 evaluated and excluded. Every entry now has its own page at
   `/sources/<id>.html` — statistics, method, health history, and
   labeled model-written orientation.
-- **Latest digest:** [2026-08-02](2026-08-02.html); digests
+- **Latest digest:** [2026-10-06](2026-10-06.html); digests
   publish daily just after midnight on the publication clock (Eastern,
   Washington's — `FAPD_PUBLICATION_TZ`; see docs/forking.md). The **official record
   begins 2026-07-27** (two development-era digests were retired on
   2026-08-03; they remain in git history). Each finished day also has
   a frozen observed listing at `/day/<date>.html`.
-- **Test suite:** 740+ tests (741 collected in a clean checkout, 2026-08-24).
+- **Test suite:** 1,600+ tests (1,581 passed and 38 skipped, 2026-10-07).
 
 ---
 
@@ -150,7 +152,7 @@ access to what they already publish for the public. Coverage grows by
 doors opening — never by evasion.
 
 That effort produced its first result in July 2026, and the channel has
-grown since: **15 email sources are active, and agencies whose web
+grown since: **33 email sources are active, and agencies whose web
 channels refuse us have a working input path through their own email
 bulletins** — Treasury, USDA, SSA and DEA among them. Subscriptions to
 EPA, DOT, FAA, NHTSA, ATF, the Coast Guard and HUD's Inspector General

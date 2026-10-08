@@ -39,28 +39,30 @@ the federal government actually did on a given day.</p>
 item carries a citation to the official record and names the mechanical
 rule that selected it. Everything not summarized is counted. Nothing is
 silently omitted.</p>
-<h2 id="status-2026-08-03">Status (2026-08-03)</h2>
+<h2 id="status-2026-10-07">Status (2026-10-07)</h2>
 <p>The authoritative numbers block — where any other figure in the
 repository disagrees, this dated snapshot is the current one. (For
 source counts the live <a href="https://fapd.info/sources.html">Sources page</a>
 is always current; it derives them from the registry at build time.)</p>
 <ul>
 <li><strong>Live site:</strong> https://fapd.info — served from a Docker stack on a
-  VPS; GitHub holds the repository, CI, and the integrity record.</li>
-<li><strong>Source registry (updated 2026-09-26):</strong> 155 sources — 45 active (19
-  web feeds, 15 email bulletins, 5 govinfo collections, 4 listing-page
-  sources, 1 chamber XML index, 1 API source), 88 planned (41 of them
+  VPS; GitHub holds the repository and the integrity record. Tests and
+  lint run locally before every push (<code>scripts/preflight.sh</code>); there is
+  no hosted CI.</li>
+<li><strong>Source registry (updated 2026-10-07):</strong> 171 sources — 83 active (33
+  email bulletins, 25 web feeds, 18 listing-page sources, 5 govinfo
+  collections, 1 chamber XML index, 1 API source), 66 planned (35 of them
   email subscriptions, which are read and ingested while planned), 20
   recorded unavailable, 2 evaluated and excluded. Every entry now has its own page at
   <code>/sources/&lt;id&gt;.html</code> — statistics, method, health history, and
   labeled model-written orientation.</li>
-<li><strong>Latest digest:</strong> <a href="2026-08-02.html">2026-08-02</a>; digests
+<li><strong>Latest digest:</strong> <a href="2026-10-06.html">2026-10-06</a>; digests
   publish daily just after midnight on the publication clock (Eastern,
   Washington's — <code>FAPD_PUBLICATION_TZ</code>; see docs/forking.md). The <strong>official record
   begins 2026-07-27</strong> (two development-era digests were retired on
   2026-08-03; they remain in git history). Each finished day also has
   a frozen observed listing at <code>/day/&lt;date&gt;.html</code>.</li>
-<li><strong>Test suite:</strong> 740+ tests (741 collected in a clean checkout, 2026-08-24).</li>
+<li><strong>Test suite:</strong> 1,600+ tests (1,581 passed and 38 skipped, 2026-10-07).</li>
 </ul>
 <hr />
 <h2 id="philosophy">Philosophy</h2>
@@ -151,7 +153,7 @@ agency web and API teams directly to advocate for safe, sane automated
 access to what they already publish for the public. Coverage grows by
 doors opening — never by evasion.</p>
 <p>That effort produced its first result in July 2026, and the channel has
-grown since: <strong>15 email sources are active, and agencies whose web
+grown since: <strong>33 email sources are active, and agencies whose web
 channels refuse us have a working input path through their own email
 bulletins</strong> — Treasury, USDA, SSA and DEA among them. Subscriptions to
 EPA, DOT, FAA, NHTSA, ATF, the Coast Guard and HUD's Inspector General
@@ -419,7 +421,7 @@ again.</p>
 </ul>
 </main>
 <footer class="site-footer">
-  <p>Generated 2026-10-07T04:05:23Z (UTC). Canonical source:
+  <p>Generated 2026-10-08T04:04:05Z (UTC). Canonical source:
   <code>README.md</code> in the
   <a href="https://github.com/davidkarnowski/free-agentic-publication-digester" target="_blank" rel="noopener noreferrer">public repository<span class="vh"> (opens in a new tab)</span></a>. Selection is mechanical and
   every item cites its official source; methodology in
