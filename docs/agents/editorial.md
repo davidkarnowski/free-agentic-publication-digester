@@ -257,8 +257,12 @@ file.
   it), raising `TokenBudgetExceededError` — a `BudgetExceededError`
   subclass, so workers record it paused-not-failed. The per-call
   prompt-size guard (`LLM_MAX_PROMPT_CHARS`) is standing policy.
-  **Remaining, low priority:** split the ledger's `input_tokens` into
-  its three billed components so spend is measurable in dollars.
+  The ledger's input split followed on 2026-10-08
+  (`feature/llm-usage-live`): every row records fresh input, cache read
+  and cache write (5-minute / 1-hour where reported), billed output,
+  thinking, the exact model id and the provider's own cost figure,
+  beside the unchanged `input_tokens`/`output_tokens`; a totals-only
+  snapshot (`llm_usage.json`) is rewritten after each ledger write.
 - **D4** — **Done 2026-08-24** (`bug/analyze-attempts`): the plain
   layer recorded attempts but never read them, and the map layer read
   them only in `collect.pending_items` — the finalizer path re-bought

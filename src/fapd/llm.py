@@ -26,6 +26,17 @@ exception it throws (plan 2026-08-24, FEAT-1): once a quota- or
 auth-class failure survives the bounded retry ladder, the client marks
 itself unavailable and every later call short-circuits — ledgered, zero
 tokens, no HTTP — instead of paying the same refusal thirty more times.
+
+Each row also carries the usage the provider reported at the response
+(2026-10-08): fresh input, cache read, cache write (with the 5-minute /
+1-hour split where reported), billed output, thinking tokens, the exact
+model id behind an alias, and the provider's own cost figure. NULL in
+those columns means "not reported" (a timeout, a row older than the
+columns); 0 means reported zero. `input_tokens` and `output_tokens` keep
+their original meaning, so the throttle and the insight report read the
+same numbers as before. After every ledger write the client rewrites a
+small totals-only snapshot beside the ledger (USAGE_SNAPSHOT_NAME), so
+spend can be read live without opening the database.
 """
 
 import datetime as dt
@@ -35,6 +46,7 @@ import os
 import re
 import sqlite3
 import subprocess
+import tempfile
 import time
 from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -67,11 +79,15 @@ CREATE INDEX IF NOT EXISTS idx_llm_calls_ts ON llm_calls (ts_utc);
 class LLMError(RuntimeError):
     """Any backend failure. `unavailable` is set by the backend when the
     failure is a quota- or auth-class refusal (see LLMClient's breaker):
-    a short reason string, or None for an ordinary failure."""
+    a short reason string, or None for an ordinary failure. `usage` is the
+    normalized usage the provider reported with the failure (see
+    _usage_row), or None when nothing was reported — a timeout, a
+    connection error."""
 
-    def __init__(self, message="", *, unavailable=None):
+    def __init__(self, message="", *, unavailable=None, usage=None):
         super().__init__(message)
         self.unavailable = unavailable
+        self.usage = usage
 
 
 class ProviderUnavailableError(LLMError):
@@ -119,8 +135,9 @@ class TransientLLMError(LLMError):
     `retryDelay` / "Please retry in Ns", an HTTP Retry-After), or None.
     LLMClient honors it, capped by config.LLM_RETRY_MAX_WAIT_S."""
 
-    def __init__(self, message="", *, retry_after=None, unavailable=None):
-        super().__init__(message, unavailable=unavailable)
+    def __init__(self, message="", *, retry_after=None, unavailable=None,
+                 usage=None):
+        super().__init__(message, unavailable=unavailable, usage=usage)
         self.retry_after = retry_after
 
 
@@ -254,6 +271,107 @@ def classify_unavailable(text, status_code=None):
     return None
 
 
+#: Per-call usage columns, added to llm_calls by
+#: LLMClient._ensure_usage_columns (the backend-column micro-migration
+#: pattern). NULL = the provider reported nothing; 0 = it reported zero.
+USAGE_COLUMNS = (
+    ("model_id", "TEXT"),                 # exact model(s) the provider named
+    ("fresh_input_tokens", "INTEGER"),    # input outside any cache
+    ("cache_read_tokens", "INTEGER"),
+    ("cache_write_tokens", "INTEGER"),    # total cache creation
+    ("cache_write_5m_tokens", "INTEGER"),  # split, where reported
+    ("cache_write_1h_tokens", "INTEGER"),
+    ("output_billed_tokens", "INTEGER"),  # output incl. thinking
+    ("thinking_tokens", "INTEGER"),       # of which (or beside) reasoning
+    ("reported_cost_usd", "REAL"),        # the provider's figure, as given
+)
+_USAGE_KEYS = tuple(name for name, _ in USAGE_COLUMNS)
+
+#: Usage for a row that sent no request at all (a short-circuit, the
+#: prompt-size guard, a held reserve) or a refusal that is zero-billed by
+#: definition: known zero, as distinct from unknown.
+ZERO_USAGE = {k: 0 for k in _USAGE_KEYS
+              if k not in ("model_id", "cache_write_5m_tokens",
+                           "cache_write_1h_tokens", "reported_cost_usd")}
+
+
+def _field(obj, key):
+    """`key` from a dict or an attribute object (the SDK's usage), else None."""
+    if obj is None:
+        return None
+    return obj.get(key) if isinstance(obj, dict) else getattr(obj, key, None)
+
+
+def _int(value):
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
+def anthropic_usage(usage, *, model_id=None, cost_usd=None):
+    """Normalized usage from an Anthropic usage block — the CLI's JSON
+    envelope `usage` or the SDK's `response.usage`. Thinking tokens are
+    already inside Anthropic's output_tokens, so billed output is
+    output_tokens and thinking is reported as the part of it."""
+    if usage is None:
+        return None
+    split = _field(usage, "cache_creation")
+    details = _field(usage, "output_tokens_details")
+    out = _int(_field(usage, "output_tokens"))
+    return {
+        "model_id": model_id or None,
+        "fresh_input_tokens": _int(_field(usage, "input_tokens")),
+        "cache_read_tokens": _int(_field(usage, "cache_read_input_tokens")),
+        "cache_write_tokens": _int(_field(usage, "cache_creation_input_tokens")),
+        "cache_write_5m_tokens": _int(_field(split, "ephemeral_5m_input_tokens")),
+        "cache_write_1h_tokens": _int(_field(split, "ephemeral_1h_input_tokens")),
+        "output_billed_tokens": out,
+        "thinking_tokens": _int(_field(details, "thinking_tokens")),
+        "reported_cost_usd": (float(cost_usd) if isinstance(cost_usd, (int, float))
+                              and not isinstance(cost_usd, bool) else None),
+    }
+
+
+def cli_usage(data):
+    """Normalized usage from the CLI's JSON envelope: the usage block,
+    the exact model id(s) from `modelUsage` (the alias passed to --model
+    resolves on the CLI's side, so only the envelope names the model that
+    answered), and `total_cost_usd` as the CLI reports it (a list-price
+    figure; a subscription is not billed per call)."""
+    if not isinstance(data, dict) or not isinstance(data.get("usage"), dict):
+        return None
+    model_usage = data.get("modelUsage")
+    model_id = (",".join(sorted(model_usage))
+                if isinstance(model_usage, dict) and model_usage else None)
+    return anthropic_usage(data["usage"], model_id=model_id,
+                           cost_usd=data.get("total_cost_usd"))
+
+
+def gemini_usage(data):
+    """Normalized usage from a Gemini generateContent response. Gemini
+    omits zero-valued counts, so inside a present usageMetadata an absent
+    count is 0. promptTokenCount includes the cached part; thinking
+    (thoughtsTokenCount) is billed as output but is NOT inside
+    candidatesTokenCount, so billed output is the sum of the two."""
+    meta = data.get("usageMetadata") if isinstance(data, dict) else None
+    if not isinstance(meta, dict):
+        return None
+    prompt = _int(meta.get("promptTokenCount")) or 0
+    cached = _int(meta.get("cachedContentTokenCount")) or 0
+    out = _int(meta.get("candidatesTokenCount")) or 0
+    thoughts = _int(meta.get("thoughtsTokenCount")) or 0
+    model_id = data.get("modelVersion")
+    return {
+        "model_id": model_id if isinstance(model_id, str) and model_id else None,
+        "fresh_input_tokens": max(prompt - cached, 0),
+        "cache_read_tokens": cached,
+        "cache_write_tokens": 0,  # implicit caching has no write charge
+        "cache_write_5m_tokens": None,
+        "cache_write_1h_tokens": None,
+        "output_billed_tokens": out + thoughts,
+        "thinking_tokens": thoughts,
+        "reported_cost_usd": None,
+    }
+
+
 class NullBackend:
     """No provider (LLM_BACKEND=none). Every call raises
     ProviderUnavailableError; LLMClient still ledgers each one, so the
@@ -320,6 +438,8 @@ class CLIBackend:
         except subprocess.TimeoutExpired as exc:
             # A timeout may have consumed tokens server-side before the
             # clock ran out: never classified transient, never retried.
+            # The envelope only arrives at the end, so nothing is known:
+            # usage stays None and the row's usage columns stay NULL.
             raise LLMError(repr(exc)) from exc
         if proc.returncode != 0:
             raise self._cli_error(proc)
@@ -341,6 +461,7 @@ class CLIBackend:
                 + usage.get("cache_creation_input_tokens", 0)
             ),
             "output_tokens": usage.get("output_tokens", 0),
+            "usage": cli_usage(data),
         }
 
     def _cli_error(self, proc):
@@ -388,9 +509,12 @@ class CLIBackend:
         if billed == 0 and not data.get("modelUsage"):
             return TransientLLMError(msg + " — zero tokens billed",
                                      retry_after=retry_after,
-                                     unavailable=unavailable)
+                                     unavailable=unavailable,
+                                     usage=cli_usage(data))
+        # A failure that billed tokens carries them to the ledger row, so
+        # the spend is counted even though no completion came back.
         return LLMError(msg + f" — {billed} token(s) billed, not retried",
-                        unavailable=unavailable)
+                        unavailable=unavailable, usage=cli_usage(data))
 
 
 class AnthropicBackend:
@@ -451,6 +575,7 @@ class AnthropicBackend:
                 + (getattr(usage, "cache_creation_input_tokens", 0) or 0)
             ),
             "output_tokens": usage.output_tokens,
+            "usage": anthropic_usage(usage, model_id=getattr(resp, "model", None)),
         }
 
 
@@ -529,9 +654,11 @@ class GeminiBackend:
                         full_text, getattr(resp, "headers", None)),
                     unavailable=(classify_unavailable(full_text, status_code)
                                  if status_code == 429 else None),
+                    usage=dict(ZERO_USAGE),
                 )
             raise LLMError(f"Gemini API error (HTTP {status_code}): {err_text}",
-                           unavailable=classify_unavailable(full_text, status_code))
+                           unavailable=classify_unavailable(full_text, status_code),
+                           usage=dict(ZERO_USAGE))
 
         try:
             data = resp.json() if callable(getattr(resp, "json", None)) else json.loads(resp.text)
@@ -541,13 +668,15 @@ class GeminiBackend:
         candidates = data.get("candidates") or []
         if not candidates:
             prompt_feedback = data.get("promptFeedback")
-            raise LLMError(f"Gemini returned no candidates. Feedback: {prompt_feedback}")
+            raise LLMError(f"Gemini returned no candidates. Feedback: {prompt_feedback}",
+                           usage=gemini_usage(data))
 
         candidate = candidates[0]
         finish_reason = candidate.get("finishReason")
         if finish_reason in ("SAFETY", "RECITATION", "BLOCKLIST", "PROHIBITED_CONTENT", "SPII"):
             raise LLMError(
-                f"refusal: Gemini model output blocked due to finishReason={finish_reason}"
+                f"refusal: Gemini model output blocked due to finishReason={finish_reason}",
+                usage=gemini_usage(data),
             )
 
         content = candidate.get("content") or {}
@@ -562,6 +691,7 @@ class GeminiBackend:
             "text": text,
             "input_tokens": input_tokens,
             "output_tokens": output_tokens,
+            "usage": gemini_usage(data),
         }
 
 
@@ -594,12 +724,16 @@ def backend_from_config(name=None):
 
 class LLMClient:
     def __init__(self, db_path=None, runner=None, backend=None, sleeper=None,
-                 fallback=None, fallback_budget=None):
+                 fallback=None, fallback_budget=None, snapshot_path=None):
         self._db_path = db_path or config.LLM_LEDGER_DB
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._db = sqlite3.connect(self._db_path)
         self._db.executescript(_SCHEMA)
         self._ensure_backend_column()
+        self._ensure_usage_columns()
+        # The live usage snapshot sits beside the ledger it summarizes.
+        self._snapshot_path = (Path(snapshot_path) if snapshot_path
+                               else self._db_path.parent / USAGE_SNAPSHOT_NAME)
         if backend is not None:
             self._backend = backend
         elif runner is not None:
@@ -765,7 +899,7 @@ class LLMClient:
             # rather than a silent switch to a provider nobody chose.
             self._log(resolved, purpose, package_id, granule_id, 0, 0, 0,
                       error=f"provider unavailable: {self.unavailable}"
-                            " (short-circuit)")
+                            " (short-circuit)", usage=ZERO_USAGE)
             raise ProviderUnavailableError(self.unavailable)
         # Start gates, before any backend work. The throttle is counted
         # from the ledger (the fetch-log budget pattern: nothing bypasses
@@ -781,7 +915,8 @@ class LLMClient:
                     " next UTC day")
         if len(prompt) > config.LLM_MAX_PROMPT_CHARS:
             self._log(resolved, purpose, package_id, granule_id, 0, 0, 0,
-                      error=f"prompt size guard: {len(prompt):,} chars"[:500])
+                      error=f"prompt size guard: {len(prompt):,} chars"[:500],
+                      usage=ZERO_USAGE)
             raise PromptSizeError(
                 f"prompt for {purpose!r} is {len(prompt):,} chars, past the"
                 f" {config.LLM_MAX_PROMPT_CHARS:,}-char guard — one call"
@@ -799,7 +934,8 @@ class LLMClient:
                 # remainder stays available to the finalizer.
                 self._log(resolved, purpose, package_id, granule_id, 0, 0, 0,
                           error="provider unavailable: fallback reserve held"
-                                " for the finalizer (short-circuit)")
+                                " for the finalizer (short-circuit)",
+                          usage=ZERO_USAGE)
                 self._trip("quota exhausted", purpose)
                 raise ProviderUnavailableError("quota exhausted")
             try:
@@ -850,13 +986,15 @@ class LLMClient:
                 # a key that is missing) — trip without a ladder.
                 self._log(resolved, purpose, package_id, granule_id, 0, 0,
                           int((time.monotonic() - started) * 1000),
-                          error=f"provider unavailable: {exc.reason}")
+                          error=f"provider unavailable: {exc.reason}",
+                          usage=exc.usage or ZERO_USAGE)
                 self._trip(exc.reason, purpose)
                 raise
             except TransientLLMError as exc:
                 self._log(resolved, purpose, package_id, granule_id, 0, 0,
                           int((time.monotonic() - started) * 1000),
-                          error=redact_secrets(str(exc))[:500])
+                          error=redact_secrets(str(exc))[:500],
+                          usage=exc.usage)
                 if attempt >= max_attempts:
                     if exc.unavailable:
                         # The ladder is exhausted on a refusal that will
@@ -883,7 +1021,8 @@ class LLMClient:
             except LLMError as exc:
                 self._log(resolved, purpose, package_id, granule_id, 0, 0,
                           int((time.monotonic() - started) * 1000),
-                          error=redact_secrets(str(exc))[:500])
+                          error=redact_secrets(str(exc))[:500],
+                          usage=exc.usage)
                 if exc.unavailable:
                     self._trip(exc.unavailable, purpose)
                     raise ProviderUnavailableError(
@@ -897,7 +1036,8 @@ class LLMClient:
         self._models_used.add(resolved)
         self._backends_used.add(self._backend.name)
         self._log(resolved, purpose, package_id, granule_id,
-                  result["input_tokens"], result["output_tokens"], duration_ms)
+                  result["input_tokens"], result["output_tokens"], duration_ms,
+                  usage=result.get("usage"))
         logger.info(
             "LLM %s/%s [%s] -> %d in / %d out tokens, %d ms [today: %s in]",
             self._backend.name, resolved, purpose,
@@ -935,14 +1075,123 @@ class LLMClient:
             )
             self._db.commit()
 
+    def _ensure_usage_columns(self):
+        # Additive, same pattern as the backend column: older ledgers gain
+        # the per-call usage columns NULL-filled ("not reported").
+        cols = {row[1] for row in self._db.execute("PRAGMA table_info(llm_calls)")}
+        missing = [(n, t) for n, t in USAGE_COLUMNS if n not in cols]
+        for name, sqltype in missing:
+            self._db.execute(f"ALTER TABLE llm_calls ADD COLUMN {name} {sqltype}")
+        if missing:
+            self._db.commit()
+
     def _log(self, model, purpose, package_id, granule_id,
-             input_tokens, output_tokens, duration_ms, error=None):
+             input_tokens, output_tokens, duration_ms, error=None, usage=None):
+        usage = usage or {}
         self._db.execute(
             "INSERT INTO llm_calls (ts_utc, backend, model, purpose, package_id,"
-            " granule_id, input_tokens, output_tokens, duration_ms, error)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            " granule_id, input_tokens, output_tokens, duration_ms, error, "
+            + ", ".join(_USAGE_KEYS) + ") VALUES ("
+            + ", ".join("?" * (10 + len(_USAGE_KEYS))) + ")",
             (dt.datetime.now(dt.UTC).isoformat(timespec="milliseconds"),
              self._backend.name, model, purpose, package_id, granule_id,
-             input_tokens, output_tokens, duration_ms, error),
+             input_tokens, output_tokens, duration_ms, error,
+             *(usage.get(k) for k in _USAGE_KEYS)),
         )
         self._db.commit()
+        self._refresh_snapshot()
+
+    def _refresh_snapshot(self):
+        """Rewrite the live usage snapshot. Never fatal: the ledger row is
+        already committed, and a snapshot that cannot be written must not
+        cost a completion that was paid for."""
+        try:
+            write_usage_snapshot(self._db, self._snapshot_path)
+        except (OSError, sqlite3.Error) as exc:
+            logger.warning("LLM usage snapshot not written: %s", exc)
+
+
+# ---- Live usage snapshot (2026-10-08)
+
+#: The snapshot's file name; it lives beside the ledger.
+USAGE_SNAPSHOT_NAME = "llm_usage.json"
+USAGE_SNAPSHOT_SCHEMA = 2
+USAGE_SNAPSHOT_HOURS = 48
+USAGE_SNAPSHOT_DAYS = 14
+
+# Total input is the split's sum where the provider reported one, else the
+# lumped input_tokens (rows written before the columns existed).
+_SNAPSHOT_SELECT = """
+  SELECT substr(ts_utc, 1, {width}), backend, model,
+         GROUP_CONCAT(DISTINCT model_id),
+         COUNT(*), SUM(error IS NULL), SUM(error IS NOT NULL),
+         SUM(CASE WHEN fresh_input_tokens IS NOT NULL
+                  THEN fresh_input_tokens + COALESCE(cache_read_tokens, 0)
+                       + COALESCE(cache_write_tokens, 0)
+                  ELSE input_tokens END),
+         SUM(fresh_input_tokens), SUM(cache_read_tokens), SUM(cache_write_tokens),
+         SUM(cache_write_5m_tokens), SUM(cache_write_1h_tokens),
+         SUM(COALESCE(output_billed_tokens, output_tokens)),
+         SUM(thinking_tokens), SUM(reported_cost_usd),
+         SUM(fresh_input_tokens IS NULL),
+         SUM(error IS NOT NULL AND fresh_input_tokens IS NULL)
+  FROM llm_calls WHERE ts_utc >= ?
+  GROUP BY 1, 2, 3 ORDER BY 1, 2, 3"""
+
+_SNAPSHOT_FIELDS = (
+    "calls", "ok", "errors", "input_tokens", "fresh_input_tokens",
+    "cache_read_tokens", "cache_write_tokens", "cache_write_5m_tokens",
+    "cache_write_1h_tokens", "output_tokens", "thinking_tokens",
+    "reported_cost_usd", "calls_without_split", "errors_usage_unknown",
+)
+
+
+def _snapshot_rows(db, width, key, since):
+    rows = []
+    for period, backend, model, model_ids, *totals in db.execute(
+            _SNAPSHOT_SELECT.format(width=width), (since,)):
+        ids = sorted({m for part in (model_ids or "").split(",") if (m := part.strip())})
+        row = {key: period, "backend": backend, "model": model, "model_ids": ids}
+        row.update(zip(_SNAPSHOT_FIELDS, totals))
+        if row["reported_cost_usd"] is not None:
+            row["reported_cost_usd"] = round(row["reported_cost_usd"], 6)
+        rows.append(row)
+    return rows
+
+
+def build_usage_snapshot(db, *, now=None):
+    """Totals-only view of the ledger: per UTC hour × backend × model for
+    the last USAGE_SNAPSHOT_HOURS hours, per UTC day for the last
+    USAGE_SNAPSHOT_DAYS days. Carries no prompt, text, package or granule
+    id, and no error text: counts and sums only. A null sum means no row
+    in the group reported that figure."""
+    now = now or dt.datetime.now(dt.UTC)
+    hour_floor = (now - dt.timedelta(hours=USAGE_SNAPSHOT_HOURS - 1)).strftime("%Y-%m-%dT%H")
+    day_floor = (now - dt.timedelta(days=USAGE_SNAPSHOT_DAYS - 1)).strftime("%Y-%m-%d")
+    return {
+        "schema": USAGE_SNAPSHOT_SCHEMA,
+        "source": "fapd-llm-ledger",
+        "clock": "UTC",
+        "generated_utc": now.isoformat(timespec="seconds"),
+        "hours": USAGE_SNAPSHOT_HOURS,
+        "days": USAGE_SNAPSHOT_DAYS,
+        "hourly": _snapshot_rows(db, 13, "hour", hour_floor),
+        "daily": _snapshot_rows(db, 10, "day", day_floor),
+    }
+
+
+def write_usage_snapshot(db, path, *, now=None):
+    """Build the snapshot and replace `path` atomically: a reader sees the
+    previous file or the new one, never a partial write, whichever process
+    (collector or finalizer) wrote last."""
+    path = Path(path)
+    body = json.dumps(build_usage_snapshot(db, now=now), separators=(",", ":"))
+    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w") as fh:
+            fh.write(body + "\n")
+        os.chmod(tmp, 0o644)
+        os.replace(tmp, path)
+    except BaseException:
+        Path(tmp).unlink(missing_ok=True)
+        raise

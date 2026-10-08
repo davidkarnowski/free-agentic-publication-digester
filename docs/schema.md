@@ -406,17 +406,48 @@ it:
 Owned by `LLMClient` (`config.LLM_LEDGER_DB`, at `data/llm_ledger.db`);
 the accountability layer for model spend, paralleling the fetch log
 (GUIDE §6 r7-r8). One table, `llm_calls`: `ts_utc`, `backend`
-(`cli`/`api` — added by the `_ensure_backend_column` in-place ALTER,
-the canonical micro-migration pattern), `model` (the resolved concrete
-model, never the tier alias), `purpose` (`layer:detail`, e.g.
-`map:batch2`), `package_id`/`granule_id`, `input_tokens` (currently the
-SUM of regular + cache-read + cache-creation tokens — splitting the
-three billed components is review R1), `output_tokens`, `duration_ms`,
-`error`. Every call is recorded — failures included — before anyone
-reads the response. No cap is enforced yet (§6 r8 measure-first; the
-ceiling derived from this ledger is the Editorial section's top backlog
-item). Pragmas: neither WAL nor busy_timeout today — aligning it is on
-the Corpus backlog.
+(`cli`/`api`/`gemini`/`none` — added by the `_ensure_backend_column`
+in-place ALTER, the canonical micro-migration pattern), `model` (the
+resolved name for the backend: a concrete model for `api` and `gemini`,
+the alias the CLI resolves itself — `haiku`, `opus` — for `cli`),
+`purpose` (`layer:detail`, e.g. `map:batch2`), `package_id`/`granule_id`,
+`input_tokens` (the SUM of fresh + cache-read + cache-creation input; 0
+on a failed row), `output_tokens`, `duration_ms`, `error`. Every call is
+recorded — failures included — before anyone reads the response. No cap
+is enforced yet (§6 r8 measure-first; the ceiling derived from this
+ledger is the Editorial section's top backlog item). Pragmas: neither
+WAL nor busy_timeout today — aligning it is on the Corpus backlog.
+
+**Per-call usage columns (2026-10-08)**, added by
+`_ensure_usage_columns` (same pattern; older rows NULL). NULL means the
+provider reported nothing — a timeout, or a row written before the
+columns; 0 means it reported zero, which is also what a row that sent no
+request records (a short-circuit, the prompt-size guard, a held
+reserve, a Gemini HTTP refusal). A failure that billed tokens (a CLI
+error envelope with usage) carries them here while `input_tokens` stays
+0, so the throttle reads what it always read.
+
+| Column | Meaning |
+|---|---|
+| `model_id` | the exact model the provider named (CLI `modelUsage` keys, comma-joined; SDK `model`; Gemini `modelVersion`) |
+| `fresh_input_tokens` | input outside any cache |
+| `cache_read_tokens` | input read from cache (Gemini: `cachedContentTokenCount`) |
+| `cache_write_tokens` | cache creation, total (Gemini: 0, implicit caching has no write) |
+| `cache_write_5m_tokens`, `cache_write_1h_tokens` | the creation split by cache lifetime, where reported |
+| `output_billed_tokens` | output as billed: Anthropic `output_tokens` (thinking inside); Gemini candidates + thoughts |
+| `thinking_tokens` | reasoning tokens as reported (Anthropic: part of output; Gemini: `thoughtsTokenCount`, not in `output_tokens`) |
+| `reported_cost_usd` | the CLI's `total_cost_usd`, as reported (a list-price figure; a subscription is not billed per call) |
+
+**Live usage snapshot.** After every ledger write the client rewrites
+`llm_usage.json` beside the ledger (temp file + atomic rename; a failure
+is logged, never fatal). Schema 2: `generated_utc`, `clock: "UTC"`,
+`hourly` (last 48 UTC hours) and `daily` (last 14 UTC days), each a list
+of rows per period × `backend` × `model` with `model_ids`, `calls`,
+`ok`, `errors`, `input_tokens` (the split's sum, else the lumped
+column), the split columns above summed (null when no row in the group
+reported one), `output_tokens` (billed output, else the original column),
+`calls_without_split`, and `errors_usage_unknown`. Totals only: no
+prompt, text, purpose, package or granule id, or error text.
 
 ---
 
