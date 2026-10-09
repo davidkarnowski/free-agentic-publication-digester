@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-09-30, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-09-30, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-09-29T14:03:51Z (UTC) and was last re-checked 2026-10-08T03:55:12Z (UTC).
+This label has held since 2026-10-08T04:14:09Z (UTC) and was last re-checked 2026-10-09T03:52:22Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -80,7 +80,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-09-30, 8 days ago (quiet past 7 days).
+Most recent item 2026-09-30, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-09 | 2 |
 | 2026-09-10 | 0 |
 | 2026-09-11 | 1 |
 | 2026-09-12 | 0 |
@@ -122,11 +121,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-06 | 0 |
 | 2026-10-07 | 0 |
 | 2026-10-08 | 0 |
+| 2026-10-09 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The USCIS Updates source delivers bulletins from uscis@messages.dhs.gov via email subscription (GovDelivery) to the project mailbox. Over the past 14 days, 2 new items were observed at a rate of 0.14 items per day, improving from the prior assessment's lower observation. The most recent item was delivered on 2026-09-29, bringing content that averages 820 characters (range 170–1,471). Bulletins carry policy-manual updates, form revisions, and processing changes in full text and are DKIM-verified. The email adapter operates without errors. Health status is read from delivery recency alone, as email sources generate no polling requests.
+The USCIS Updates source delivers bulletins from uscis@messages.dhs.gov via GovDelivery subscription to the project mailbox. Over the 14-day measurement window, 2 items were ingested, continuing the observed rate of 0.14 items per day. Bulletins contain full-text policy and procedural updates ranging from 1,471 to 1,543 characters, with median 1,507 characters. All messages in the mailbox are DKIM-verified bulletins with no delivery errors or refusals. The most recent item arrived on 2026-09-30, placing the source in quiet status with no deliveries in the past 7 days. The email collector maintains stable operation with no consecutive errors. Health is read from delivery recency alone, as no polling requests are issued for email sources.
 
-_Model-written assessment of our own ingestion, generated 2026-09-30 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-09 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

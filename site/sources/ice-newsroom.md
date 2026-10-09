@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 13 item(s) in the last 14 days; most recent 2026-10-07; 0 of 246 request(s) to www.ice.gov returned no content.
+**delivering** — 13 item(s) in the last 14 days; most recent 2026-10-07; 0 of 272 request(s) to www.ice.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-08T03:55:12Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-09T03:52:22Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,7 +71,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -80,15 +80,15 @@ Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) i
 | Items ingested | 13 in 14 days (0.93 per day) · most recent 2026-10-07 |
 | Content length | 403 characters average, 379 median (shortest 207, longest 634) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.ice.gov | 246 request(s) · 246 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.ice.gov | 272 request(s) · 272 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-08T04:00:13.017+00:00 UTC.
+last answered request 2026-10-09T04:00:11.785+00:00 UTC.
 
-13 item(s) in the last 14 days; most recent 2026-10-07; 0 of 246 request(s) to www.ice.gov returned no content.
+13 item(s) in the last 14 days; most recent 2026-10-07; 0 of 272 request(s) to www.ice.gov returned no content.
 
 ### All time
 
-- **Our requests to www.ice.gov, all time (since 2026-09-28):** 246 request(s) · 246 answered · 0 returned no content
+- **Our requests to www.ice.gov, all time (since 2026-09-28):** 272 request(s) · 272 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.ice.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-09 | 0 | 0 | — |
 | 2026-09-10 | 0 | 0 | — |
 | 2026-09-11 | 0 | 0 | — |
 | 2026-09-12 | 0 | 0 | — |
@@ -127,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-05 | 2 | 26 | 149 |
 | 2026-10-06 | 1 | 26 | 188 |
 | 2026-10-07 | 1 | 26 | 213 |
-| 2026-10-08 | 0 | 1 | 215 |
+| 2026-10-08 | 0 | 26 | 193 |
+| 2026-10-09 | 0 | 1 | 129 |
 
 ## Our ingestion assessment
 

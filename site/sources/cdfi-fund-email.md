@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-09-30, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-09-30, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-09-30T15:53:25Z (UTC) and was last re-checked 2026-10-08T03:55:12Z (UTC).
+This label has held since 2026-10-08T04:14:09Z (UTC) and was last re-checked 2026-10-09T03:52:22Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -79,7 +79,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-09-30, 8 days ago (quiet past 7 days).
+Most recent item 2026-09-30, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-09 | 0 |
 | 2026-09-10 | 0 |
 | 2026-09-11 | 0 |
 | 2026-09-12 | 0 |
@@ -121,11 +120,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-06 | 0 |
 | 2026-10-07 | 0 |
 | 2026-10-08 | 0 |
+| 2026-10-09 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-This source delivers bulletins through GovDelivery email subscription. The previous assessment from 2026-09-27 recorded zero bulletins after the 2026-09-26 registration date. As of 2026-10-01, the source has delivered three bulletins on 2026-09-30, ingested during UTC hours 11, 12, and 14. The bulletins ranged from 2,321 to 3,845 characters with a median of 3,464 characters, all in full-text format. The collector has maintained stable mailbox access throughout with no delivery errors. Cadence cannot yet be established from a single delivery day. Gate-3 coverage evaluation proceeds with the first ingested bulletins. Related sources that may publish the same news include treasury-email and treasury-newsroom; items duplicated at the same URL merge as corroboration, while the same event at different URLs are listed separately.
+The CDFI Fund email source, registered 2026-09-26, delivers bulletins from cdfifund@service.govdelivery.com via GovDelivery subscription. Three bulletins have been ingested since activation, all delivered on 2026-09-30 in full-text format, ranging from 2,321 to 3,845 characters with median 3,464 characters. No subsequent deliveries have arrived; the source has been quiet for 9 days. The mailbox maintains stable access with no delivery errors or refused messages. Delivery cadence cannot yet be established from a single event day. Gate-3 coverage evaluation is proceeding with these initial ingestions. Related sources that may publish overlapping content include treasury-email and treasury-newsroom; items at the same URL merge as corroboration, while the same event at different URLs are tracked separately.
 
-_Model-written assessment of our own ingestion, generated 2026-10-01 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-09 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -6,7 +6,7 @@
 
 # E-Verify (email)
 
-planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Homeland Security, U.S. Citizenship and Immigration Services
+planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Homeland Security, U.S. Citizenship and Immigration Services
 
 Official site: https://www.e-verify.gov/ · All sources: [sources.md](../sources.md)
 
@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 3 item(s) in the last 14 days; most recent 2026-10-01, delivered by email.
+**quiet** — Most recent item 2026-10-01, 8 days ago (quiet past 7 days).
 
-This label has held since 2026-10-01T14:21:57Z (UTC) and was last re-checked 2026-10-08T03:55:12Z (UTC).
+This label has held since 2026-10-01T14:21:57Z (UTC) and was last re-checked 2026-10-09T03:52:22Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -79,7 +79,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-3 item(s) in the last 14 days; most recent 2026-10-01, delivered by email.
+Most recent item 2026-10-01, 8 days ago (quiet past 7 days).
 
 ### All time
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-09 | 0 |
 | 2026-09-10 | 0 |
 | 2026-09-11 | 0 |
 | 2026-09-12 | 0 |
@@ -121,6 +120,7 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-06 | 0 |
 | 2026-10-07 | 0 |
 | 2026-10-08 | 0 |
+| 2026-10-09 | 0 |
 
 ## Our ingestion assessment
 
