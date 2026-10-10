@@ -58,7 +58,7 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 **delivering** — 4 item(s) in the last 14 days; most recent 2026-10-08; 0 of 343 request(s) to www.nist.gov returned no content.
 
-This label has held since 2026-09-28T22:03:13Z (UTC) and was last re-checked 2026-10-09T03:52:22Z (UTC).
+This label has held since 2026-09-28T22:03:13Z (UTC) and was last re-checked 2026-10-10T03:58:47Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,7 +68,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 28 request(s) (28 answered, 0 returned no content) · 2 item(s) ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -79,13 +79,13 @@ Last 24 hours: 28 request(s) (28 answered, 0 returned no content) · 2 item(s) i
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.nist.gov | 343 request(s) · 343 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-09T04:00:11.879+00:00 UTC.
+last answered request 2026-10-10T04:00:13.058+00:00 UTC.
 
 4 item(s) in the last 14 days; most recent 2026-10-08; 0 of 343 request(s) to www.nist.gov returned no content.
 
 ### All time
 
-- **Our requests to www.nist.gov, all time (since 2026-07-30):** 1,938 request(s) · 1,932 answered · 6 returned no content
+- **Our requests to www.nist.gov, all time (since 2026-07-30):** 1,964 request(s) · 1,958 answered · 6 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nist.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-10 | 1 | 26 | 143 |
 | 2026-09-11 | 0 | 25 | 146 |
 | 2026-09-12 | 0 | 27 | 164 |
 | 2026-09-13 | 0 | 25 | 147 |
@@ -124,7 +123,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-06 | 0 | 27 | 140 |
 | 2026-10-07 | 0 | 26 | 151 |
 | 2026-10-08 | 2 | 28 | 154 |
-| 2026-10-09 | 0 | 1 | 194 |
+| 2026-10-09 | 0 | 26 | 150 |
+| 2026-10-10 | 0 | 1 | 387 |
 
 ## Our ingestion assessment
 

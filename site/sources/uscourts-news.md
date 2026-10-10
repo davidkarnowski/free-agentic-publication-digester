@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-01, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-01, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-01T14:01:43Z (UTC) and was last re-checked 2026-10-09T03:52:22Z (UTC).
+This label has held since 2026-10-09T04:08:52Z (UTC) and was last re-checked 2026-10-10T03:58:47Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,7 +70,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -79,15 +79,15 @@ Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items in
 | Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-01 |
 | Content length | 19,356 characters average, 19,356 median (shortest 19,356, longest 19,356) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to news.uscourts.gov | 340 request(s) · 340 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to news.uscourts.gov | 338 request(s) · 338 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-09T04:00:13.667+00:00 UTC.
+last answered request 2026-10-10T04:00:13.908+00:00 UTC.
 
-Most recent item 2026-10-01, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-01, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to news.uscourts.gov, all time (since 2026-07-30):** 1,925 request(s) · 1,925 answered · 0 returned no content
+- **Our requests to news.uscourts.gov, all time (since 2026-07-30):** 1,950 request(s) · 1,950 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to news.uscourts.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-10 | 0 | 25 | 317 |
 | 2026-09-11 | 0 | 25 | 329 |
 | 2026-09-12 | 0 | 27 | 444 |
 | 2026-09-13 | 0 | 25 | 473 |
@@ -126,12 +125,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-06 | 0 | 26 | 753 |
 | 2026-10-07 | 0 | 26 | 492 |
 | 2026-10-08 | 0 | 26 | 430 |
-| 2026-10-09 | 0 | 1 | 1966 |
+| 2026-10-09 | 0 | 25 | 372 |
+| 2026-10-10 | 0 | 1 | 671 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The U.S. Courts News source is ingested by polling its RSS feed and retrieving the full article text from the news.uscourts.gov feed. Over the past 14 days, we observed one new item, delivered on 2026-10-01, maintaining a rate of approximately 0.07 items per day. All 347 polling requests to news.uscourts.gov were answered successfully with a 0.0% error rate. The observed item measures 19,356 characters, consistent with full-text delivery from the original article pages. No consecutive polling errors were recorded by the collector, and delivery remains stable.
+The RSS feed is polled daily and ingested with full article text retrieval from the original news.uscourts.gov pages, yielding items averaging 19,356 characters. All 155 polling requests to news.uscourts.gov succeeded. The most recent observed item was dated 2026-10-01, nine days prior. The 14-day measurement window contains one item, representing an observed rate of approximately 0.07 items per day.
 
-_Model-written assessment of our own ingestion, generated 2026-10-02 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-10 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

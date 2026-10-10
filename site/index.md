@@ -14,13 +14,13 @@ An automated, citation-bound, opinion-agnostic daily digest of official United S
 
 ## The last 7 days
 
+- [Daily Digest — 2026-10-09](2026-10-09.md) — The digest carries one presidential document and one presidential memorandum.
 - [Daily Digest — 2026-10-08](2026-10-08.md) — The digest carries no floor proceedings or recorded votes from either chamber.
 - [Daily Digest — 2026-10-07](2026-10-07.md) — The digest carries Congressional Record material from both chambers: 29 House items, 4 Senate items, 5 Daily Digest entries and 42 Extensions of Remarks, with no recorded votes among the summarized items.
 - [Daily Digest — 2026-10-06](2026-10-06.md) — The digest carries 85 House and 20 Senate entries from the Congressional Record, along with 74 Extensions of Remarks and 11 Daily Digest entries.
 - [Daily Digest — 2026-10-05](2026-10-05.md) — The digest carries two presidential action entries, both for an executive order titled "Emergency Tax Relief on Diesel Fuel."
 - [Daily Digest — 2026-10-04](2026-10-04.md) — This is a short review: few publications were observed for this digest day, and none met the digest's summary rules, so there are no item summaries to draw on.
 - [Daily Digest — 2026-10-03](2026-10-03.md) — On the congressional side, the digest carries 14 bills introduced in the Senate.
-- [Daily Digest — 2026-10-02](2026-10-02.md) — The digest carries 98 House and 4 Senate entries from the Congressional Record, plus 55 Extensions of Remarks and 6 Daily Digest entries.
 
 ## Earlier days
 
