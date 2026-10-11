@@ -1,13 +1,15 @@
 """Shared test infrastructure.
 
-Two jobs:
+Three jobs:
 1. Put scripts/ on sys.path so tests can import the CLI modules
    (run_pipeline, digest) — they are plain modules with no package.
 2. Hold the fixtures shared by the rules and analyze suites (the corpus
    spans every selection rule, so both test files assert against it).
+3. Keep the narration key out of every test (`no_tts_key`, autouse).
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -15,7 +17,36 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
-from fapd import db
+from fapd import config, db
+
+
+@pytest.fixture(autouse=True)
+def no_tts_key():
+    """No test may reach the paid narration service.
+
+    config.py loads the developer's .env at import, so a narration key kept
+    there reached the suite: compose_day() narrates every Day in Review it
+    stores, and the compose tests made real speech calls and wrote MP3s into
+    the tracked site/ folder (found 2026-10-08; until 2026-10-11 the only
+    guard was remembering to run preflight with the key blanked). This
+    blanks the key for every test. The environment copy is blanked too,
+    because a test that starts a script in a subprocess gets a fresh
+    interpreter that would read .env again, and load_dotenv never overrides
+    a variable that is already set. A test that needs a key sets one itself,
+    as tests/test_tts.py does.
+    """
+    saved_attr = config.OPENAI_API_KEY
+    saved_env = os.environ.get("OPENAI_API_KEY")
+    config.OPENAI_API_KEY = ""
+    os.environ["OPENAI_API_KEY"] = ""
+    try:
+        yield
+    finally:
+        config.OPENAI_API_KEY = saved_attr
+        if saved_env is None:
+            os.environ.pop("OPENAI_API_KEY", None)
+        else:
+            os.environ["OPENAI_API_KEY"] = saved_env
 
 DATE = "2026-07-23"
 LONG_TEXT = ("floor debate " * 1200)[:16000]  # above the 15000-char threshold
