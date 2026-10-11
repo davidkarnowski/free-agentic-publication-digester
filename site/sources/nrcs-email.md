@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-02, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-02, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-02T13:48:30Z (UTC) and was last re-checked 2026-10-10T03:58:47Z (UTC).
+This label has held since 2026-10-10T04:16:51Z (UTC) and was last re-checked 2026-10-11T03:57:56Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -75,7 +75,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-02, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-02, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -87,7 +87,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-11 | 0 |
 | 2026-09-12 | 0 |
 | 2026-09-13 | 0 |
 | 2026-09-14 | 0 |
@@ -117,11 +116,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-08 | 0 |
 | 2026-10-09 | 0 |
 | 2026-10-10 | 0 |
+| 2026-10-11 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The Natural Resources Conservation Service delivers conservation announcements to the project mailbox via GovDelivery (sender usdafarmers@public.govdelivery.com). Activated 2026-10-01 on observed delivery, with one bulletin recorded 2026-10-02 at 1,170 characters carrying conservation-program and funding announcements. All messages pass DKIM verification and alignment. The source is registered at tier 2 with active status; delivery cadence and format patterns are not yet established from a single item.
+Subscription bulletins via GovDelivery deliver conservation-program and funding announcements to the project mailbox with full text. Activated 2026-10-01. Over 14 days, 1 item was ingested on 2026-10-02 (9 days ago) at 1,170 characters, containing conservation-program investment content. The mailbox received 1 verified bulletin with zero administrative messages, errors, or refusals. The registry notes the mailbox received NRCS bulletins during late September before formal activation. Delivery cadence and format patterns are not yet established from a single observation. The previous assessment recorded this same initial bulletin.
 
-_Model-written assessment of our own ingestion, generated 2026-10-03 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

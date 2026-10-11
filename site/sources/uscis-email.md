@@ -6,7 +6,7 @@
 
 # USCIS Updates (email)
 
-active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Homeland Security (USCIS)
+active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Homeland Security (USCIS)
 
 Official site: https://www.uscis.gov/newsroom · All sources: [sources.md](../sources.md)
 
@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-09-30, 10 days ago (quiet past 7 days).
+**delivering** — 3 item(s) in the last 14 days; most recent 2026-10-10, delivered by email.
 
-This label has held since 2026-10-08T04:14:09Z (UTC) and was last re-checked 2026-10-10T03:58:47Z (UTC).
+This label has held since 2026-10-10T20:42:26Z (UTC) and was last re-checked 2026-10-11T03:57:56Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,20 +67,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-09-30 |
-| Content length | 1,507 characters average, 1,507 median (shortest 1,471, longest 1,543) |
+| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-10-10 |
+| Content length | 1,122 characters average, 1,471 median (shortest 351, longest 1,543) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 4 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-07 |
+| Mailbox | 5 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-10 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-09-30, 10 days ago (quiet past 7 days).
+3 item(s) in the last 14 days; most recent 2026-10-10, delivered by email.
 
 ### All time
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-11 | 1 |
 | 2026-09-12 | 0 |
 | 2026-09-13 | 0 |
 | 2026-09-14 | 0 |
@@ -121,12 +120,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-07 | 0 |
 | 2026-10-08 | 0 |
 | 2026-10-09 | 0 |
-| 2026-10-10 | 0 |
+| 2026-10-10 | 1 |
+| 2026-10-11 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The USCIS Updates source delivers bulletins from uscis@messages.dhs.gov via GovDelivery subscription to the project mailbox. Over the 14-day measurement window, 2 items were ingested, continuing the observed rate of 0.14 items per day. Bulletins contain full-text policy and procedural updates ranging from 1,471 to 1,543 characters, with median 1,507 characters. All messages in the mailbox are DKIM-verified bulletins with no delivery errors or refusals. The most recent item arrived on 2026-09-30, placing the source in quiet status with no deliveries in the past 7 days. The email collector maintains stable operation with no consecutive errors. Health is read from delivery recency alone, as no polling requests are issued for email sources.
+Subscription bulletins via GovDelivery deliver policy and procedural updates to the project mailbox with full text. Over 14 days, 3 items arrived at 0.21 per day (ranging 351 to 1,543 characters, median 1,471), with the most recent on 2026-10-10. All mailbox entries are DKIM-verified bulletins with zero errors or refusals. The previous assessment recorded 2 items in the window; this measurement shows 3, with the latest delivery occurring after the prior assessment date. The email collector operates stably with zero consecutive errors.
 
-_Model-written assessment of our own ingestion, generated 2026-10-09 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

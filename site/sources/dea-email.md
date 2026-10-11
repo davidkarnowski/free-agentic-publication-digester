@@ -61,7 +61,7 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 **delivering** — 6 item(s) in the last 14 days; most recent 2026-10-09, delivered by email.
 
-This label has held since 2026-09-09T20:07:29Z (UTC) and was last re-checked 2026-10-10T03:58:47Z (UTC).
+This label has held since 2026-09-09T20:07:29Z (UTC) and was last re-checked 2026-10-11T03:57:56Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,7 +71,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 1 item(s) ingested
+Last 24 hours: no items ingested
 
 ### Last 14 days
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-11 | 2 |
 | 2026-09-12 | 0 |
 | 2026-09-13 | 0 |
 | 2026-09-14 | 1 |
@@ -126,11 +125,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-08 | 2 |
 | 2026-10-09 | 1 |
 | 2026-10-10 | 0 |
+| 2026-10-11 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The DEA Updates source delivers bulletins by email subscription with DKIM verification, serving as the primary ingestion channel for this agency. Email bulletins arrive in teaser format (short summaries), not full article text. Over the 14-day measurement window, 2 items were delivered, averaging 0.14 items per day. The most recent bulletin arrived on 2026-09-09. Extracted bulletin text ranges from 82 to 5,579 characters, with a median of 2,830 characters. The source exhibited a delivery gap prior to the recent arrival; the previous assessment recorded the prior delivery on August 31. The sibling dea-press HTTP endpoint returns an access error to our client, making email subscription the only working channel. The Diversion Control Division mailing list, subscribed during setup, remains unconfirmed and has not yet delivered content.
+Subscription bulletins via GovDelivery deliver to the project mailbox with full text. Over 14 days, 6 items arrived at 0.43 per day, averaging 916 characters (ranging 71 to 2,576), with the most recent on 2026-10-09. All messages are DKIM-verified with zero errors or refusals. The previous assessment recorded 2 items with a median of 2,830 characters; the current window shows increased frequency but shorter average length. The HTTP press endpoint returns 403, making email subscription the only working channel. The Diversion Control Division mailing list remains unconfirmed.
 
-_Model-written assessment of our own ingestion, generated 2026-09-10 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-11 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

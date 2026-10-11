@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-02, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-02, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-09-28T15:30:51Z (UTC) and was last re-checked 2026-10-10T03:58:47Z (UTC).
+This label has held since 2026-10-10T04:16:51Z (UTC) and was last re-checked 2026-10-11T03:57:56Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -84,7 +84,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-02, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-02, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-11 | 0 |
 | 2026-09-12 | 0 |
 | 2026-09-13 | 0 |
 | 2026-09-14 | 0 |
@@ -126,11 +125,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-08 | 0 |
 | 2026-10-09 | 0 |
 | 2026-10-10 | 0 |
+| 2026-10-11 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Treasury Inspector General for Tax Administration announcements are delivered via email subscription (GovDelivery platform) confirmed 2026-09-26, providing email-full delivery to the project mailbox with complete message text. One bulletin was ingested on 2026-09-28 with 3,930 characters, announcing audit reports and DKIM-verified, with the archived message cited since the bulletin carried no external link. Compared to the previous assessment dated 2026-09-27, which noted the subscription pending first ingestion, this represents the initial bulletin delivery following subscription confirmation on 2026-09-26.
+Subscription bulletins via GovDelivery deliver audit and inspection announcements to the project mailbox with full text. Over 14 days, 2 items arrived at 0.14 per day, averaging 5,513 characters (ranging 3,930 to 7,096). The most recent item is from 2026-10-02 (9 days ago), placing the source quiet past 7 days. All messages are DKIM-verified with zero errors. The previous assessment recorded 1 bulletin on 2026-09-28; current measurement shows a second item. Bulletins cite archived messages, as no external links are carried. The email collector maintains stable operation.
 
-_Model-written assessment of our own ingestion, generated 2026-09-29 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -6,7 +6,7 @@
 
 # State Travel Advisories
 
-active · ingestion health: quiet · Executive · Tier 2 · RSS feed · Department of State
+active · ingestion health: delivering · Executive · Tier 2 · RSS feed · Department of State
 
 Official site: https://travel.state.gov/content/travel/en/traveladvisories/traveladvisories.html · All sources: [sources.md](../sources.md)
 
@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — No item recorded from this source in the last 180 days.
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-10; 0 of 136 request(s) to travel.state.gov returned no content.
 
-This label has held since 2026-10-05T23:57:58Z (UTC) and was last re-checked 2026-10-10T03:58:47Z (UTC).
+This label has held since 2026-10-10T21:49:32Z (UTC) and was last re-checked 2026-10-11T03:57:56Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -63,22 +63,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — none recorded in the lookback period |
-| Our requests to travel.state.gov | 111 request(s) · 111 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-10 |
+| Content length | 5,020 characters average, 5,020 median (shortest 4,668, longest 5,373) |
+| Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
+| Our requests to travel.state.gov | 136 request(s) · 136 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-10T04:00:09.120+00:00 UTC.
+last answered request 2026-10-11T04:00:11.155+00:00 UTC.
 
-No item recorded from this source in the last 180 days.
+2 item(s) in the last 14 days; most recent 2026-10-10; 0 of 136 request(s) to travel.state.gov returned no content.
 
 ### All time
 
-- **Our requests to travel.state.gov, all time (since 2026-10-05):** 111 request(s) · 111 answered · 0 returned no content
+- **Our requests to travel.state.gov, all time (since 2026-10-05):** 136 request(s) · 136 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -88,7 +90,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to travel.state.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-11 | 0 | 0 | — |
 | 2026-09-12 | 0 | 0 | — |
 | 2026-09-13 | 0 | 0 | — |
 | 2026-09-14 | 0 | 0 | — |
@@ -117,12 +118,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-07 | 0 | 27 | 303 |
 | 2026-10-08 | 0 | 26 | 332 |
 | 2026-10-09 | 0 | 25 | 294 |
-| 2026-10-10 | 0 | 1 | 493 |
+| 2026-10-10 | 2 | 25 | 293 |
+| 2026-10-11 | 0 | 1 | 376 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-State Department travel advisories activated October 5 via a dedicated feed-only adapter reading an RSS feed of all advisories in force, with advisory text extracted from item descriptions (~2,000 characters per advisory on average). The feed carries advisories dating back to 2023-06, generated live on each poll (223 items across all advisory levels on October 5 verification). The current 14-day window shows 0 items collected because the most recent advisory in the feed carries a September 15 date, falling outside the 7-day lookback window. Advisory detail pages return HTTP 403, confirming feed-only posture. The feed sends no ETag or Last-Modified, so each hourly poll fetches the full feed (~614 KB compressed). Coverage will be measured by whether advisories are filed on the date they carry.
+The RSS feed of travel advisories delivers full advisory text (~5,000 characters per item) sourced from item descriptions. Two items appeared in the 14-day measurement window (most recent 2026-10-10), a shift from the previous assessment's zero items within the window. The feed polls hourly at approximately 614 KB with no caching headers, so each poll fetches the complete feed containing advisories dating back to 2023-06. All 136 requests succeeded with zero errors. Advisory detail pages return HTTP 403, confirming feed-only delivery posture. The feed is generated live on each poll request.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
