@@ -1010,6 +1010,7 @@ def test_rotation_end_to_end_with_the_real_client(conn, raw_dir, tmp_path, monke
     the fetch log included — over a scripted session. What the log shows
     is what the publisher saw: A asked for once, B and C served while A's
     file was being built, A asked for again only after its Retry-After."""
+    import datetime as dt
     import json
 
     from fapd.client import GovinfoClient
@@ -1041,6 +1042,12 @@ def test_rotation_end_to_end_with_the_real_client(conn, raw_dir, tmp_path, monke
 
     clock = Clock()
     pids = ["USCOURTS-a", "USCOURTS-b", "USCOURTS-c"]
+    # Dates relative to today: USCOURTS syncs only USCOURTS_FETCH_WINDOW_DAYS
+    # of date_issued, measured from the real clock, so fixed October dates
+    # fell out of the window on 2026-10-11 and the test downloaded nothing.
+    today = dt.datetime.now(dt.UTC).date()
+    issued = [(today - dt.timedelta(days=i)).isoformat() for i in range(len(pids))]
+    modified = f"{today.isoformat()}T00:00:00Z"
     not_ready_once = {f"{base}/packages/USCOURTS-a/zip"}
     asked = []
 
@@ -1049,13 +1056,13 @@ def test_rotation_end_to_end_with_the_real_client(conn, raw_dir, tmp_path, monke
             asked.append((url, clock.t))
             if "/collections/" in url:
                 return Resp(body=json.dumps({"packages": [
-                    {"packageId": pid, "lastModified": "2026-10-02T20:00:00Z",
-                     "dateIssued": f"2026-10-0{3 - i}"}
+                    {"packageId": pid, "lastModified": modified,
+                     "dateIssued": issued[i]}
                     for i, pid in enumerate(pids)]}).encode())
             if url.endswith("/summary"):
                 pid = url.split("/")[-2]
                 return Resp(body=json.dumps({
-                    "dateIssued": "2026-10-02",
+                    "dateIssued": issued[pids.index(pid)],
                     "download": {"zipLink": f"{base}/packages/{pid}/zip"}}).encode())
             if url in not_ready_once:
                 not_ready_once.discard(url)
