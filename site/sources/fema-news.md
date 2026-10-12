@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 59 item(s) in the last 14 days; most recent 2026-10-10; 0 of 339 request(s) to www.fema.gov returned no content.
+**delivering** — 52 item(s) in the last 14 days; most recent 2026-10-10; 0 of 338 request(s) to www.fema.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-11T03:57:56Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-12T03:59:22Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,24 +69,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 2 item(s) ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 59 in 14 days (4.21 per day) · most recent 2026-10-10 |
-| Content length | 425 characters average, 342 median (shortest 155, longest 943) |
+| Items ingested | 52 in 14 days (3.71 per day) · most recent 2026-10-10 |
+| Content length | 402 characters average, 341 median (shortest 155, longest 943) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.fema.gov | 339 request(s) · 339 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.fema.gov | 338 request(s) · 338 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-11T04:00:13.225+00:00 UTC.
+last answered request 2026-10-12T04:00:17.107+00:00 UTC.
 
-59 item(s) in the last 14 days; most recent 2026-10-10; 0 of 339 request(s) to www.fema.gov returned no content.
+52 item(s) in the last 14 days; most recent 2026-10-10; 0 of 338 request(s) to www.fema.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fema.gov, all time (since 2026-08-01):** 1,957 request(s) · 1,942 answered · 15 returned no content
+- **Our requests to www.fema.gov, all time (since 2026-08-01):** 1,983 request(s) · 1,968 answered · 15 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fema.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-12 | 0 | 27 | 927 |
 | 2026-09-13 | 0 | 25 | 240 |
 | 2026-09-14 | 7 | 27 | 342 |
 | 2026-09-15 | 4 | 25 | 525 |
@@ -125,7 +124,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-08 | 9 | 26 | 152 |
 | 2026-10-09 | 4 | 26 | 158 |
 | 2026-10-10 | 2 | 25 | 159 |
-| 2026-10-11 | 0 | 1 | 218 |
+| 2026-10-11 | 0 | 26 | 156 |
+| 2026-10-12 | 0 | 1 | 185 |
 
 ## Our ingestion assessment
 

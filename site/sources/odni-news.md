@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-08-03, 69 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-08-03, 70 days ago (quiet past 7 days).
 
-This label has held since 2026-08-11T04:22:38Z (UTC) and was last re-checked 2026-10-11T03:57:56Z (UTC).
+This label has held since 2026-08-11T04:22:38Z (UTC) and was last re-checked 2026-10-12T03:59:22Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,22 +70,22 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
 | Items ingested | none in the last 14 days — most recent 2026-08-03 |
-| Our requests to www.odni.gov | 338 request(s) · 338 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.odni.gov | 335 request(s) · 335 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-11T04:00:13.711+00:00 UTC.
+last answered request 2026-10-12T04:00:18.051+00:00 UTC.
 
-Most recent item 2026-08-03, 69 days ago (quiet past 7 days).
+Most recent item 2026-08-03, 70 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.odni.gov, all time (since 2026-08-01):** 2,006 request(s) · 2,006 answered · 0 returned no content
+- **Our requests to www.odni.gov, all time (since 2026-08-01):** 2,031 request(s) · 2,031 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.odni.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-12 | 0 | 28 | 254 |
 | 2026-09-13 | 0 | 25 | 257 |
 | 2026-09-14 | 0 | 28 | 459 |
 | 2026-09-15 | 0 | 25 | 132 |
@@ -124,12 +123,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-08 | 0 | 26 | 172 |
 | 2026-10-09 | 0 | 25 | 120 |
 | 2026-10-10 | 0 | 26 | 139 |
-| 2026-10-11 | 0 | 1 | 71 |
+| 2026-10-11 | 0 | 25 | 130 |
+| 2026-10-12 | 0 | 1 | 240 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The ODNI Newsroom RSS feed has entered a prolonged quiet period. No items have been ingested over the past 14 days; the most recent item was published on 2026-08-03, 39 days ago. Our polling requests to www.odni.gov continue to succeed at 100%—all 348 attempts answered with no content failures—but the feed itself is returning no new items. In the previous 14-day window (ending 2026-08-12), the source delivered 55 items at an average rate of 3.93 per day. The shift from regular publication to silence marks a significant change in delivery pattern. The registry notes that article extraction was working when the source last published, and that the feed respects a 10-second crawl-delay.
+The ODNI Newsroom press-release feed has remained inactive throughout the 14-day measurement window ending October 12. Daily polling produced 335 requests to www.odni.gov, all of which succeeded with no failures or timeouts. The feed did not deliver any new items during this period; the most recent item on record was published on August 3, now 70 days prior. This represents a continuation of the quiet period that began in early August—a marked change from the source's earlier delivery pattern, which recorded 3.93 items per day in late July and early August 2026. The 10-second crawl-delay documented in the registry continues to be honored by our requests. When the feed last published, article pages were being extracted and processed successfully.
 
-_Model-written assessment of our own ingestion, generated 2026-09-11 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-12 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

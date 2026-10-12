@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 29 item(s) in the last 14 days; most recent 2026-10-09; 1 of 338 request(s) to www.defense.gov returned no content.
+**delivering** — 27 item(s) in the last 14 days; most recent 2026-10-09; 1 of 336 request(s) to www.defense.gov returned no content.
 
-This label has held since 2026-08-11T18:00:02Z (UTC) and was last re-checked 2026-10-11T03:57:56Z (UTC).
+This label has held since 2026-08-11T18:00:02Z (UTC) and was last re-checked 2026-10-12T03:59:22Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -75,18 +75,18 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 
 | Measure | Value |
 |---|---|
-| Items ingested | 29 in 14 days (2.07 per day) · most recent 2026-10-09 |
-| Content length | 291 characters average, 281 median (shortest 202, longest 401) |
+| Items ingested | 27 in 14 days (1.93 per day) · most recent 2026-10-09 |
+| Content length | 287 characters average, 281 median (shortest 202, longest 398) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.defense.gov | 338 request(s) · 337 answered · 1 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.3% returned no content |
+| Our requests to www.defense.gov | 336 request(s) · 335 answered · 1 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.3% returned no content |
 
-last answered request 2026-10-11T04:00:11.147+00:00 UTC.
+last answered request 2026-10-12T04:00:14.778+00:00 UTC.
 
-29 item(s) in the last 14 days; most recent 2026-10-09; 1 of 338 request(s) to www.defense.gov returned no content.
+27 item(s) in the last 14 days; most recent 2026-10-09; 1 of 336 request(s) to www.defense.gov returned no content.
 
 ### All time
 
-- **Our requests to www.defense.gov, all time (since 2026-07-30):** 1,978 request(s) · 1,968 answered · 10 returned no content
+- **Our requests to www.defense.gov, all time (since 2026-07-30):** 2,003 request(s) · 1,993 answered · 10 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.defense.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-12 | 0 | 28 | 552 |
 | 2026-09-13 | 0 | 25 | 486 |
 | 2026-09-14 | 1 | 28 | 797 |
 | 2026-09-15 | 3 | 25 | 324 |
@@ -125,12 +124,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-08 | 3 | 26 | 347 |
 | 2026-10-09 | 2 | 25 | 282 |
 | 2026-10-10 | 0 | 26 | 269 |
-| 2026-10-11 | 0 | 1 | 356 |
+| 2026-10-11 | 0 | 25 | 297 |
+| 2026-10-12 | 0 | 1 | 759 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The feed continues to deliver title-only summaries at roughly 1.5 items per day, slightly lower than the prior measurement of 2 per day. Over 14 days we observed 21 items, averaging 278 characters per item. Article pages remain inaccessible to automated clients, so our ingestion is feed-only. Of 355 requests to www.defense.gov, 20 returned no content—a 5.6% error rate, improved from 9.8% in the prior period. Request failures occur sporadically throughout each day with no persistent pattern. The source remains consistently reachable, with the most recent item published on 2026-09-10.
+The Defense News Releases RSS feed continues to deliver title-only item summaries from the defense.gov domain. Over the 14-day measurement window (October 6–12), we collected 27 feed items averaging 1.93 per day and 287 characters per item. Publication showed clustering in the first four days (12 items October 6–9) with no items in the final three days. Feed-only ingestion mode remains in effect, as full article text is not accessible to automated clients. Our polling produced 336 requests to www.defense.gov with 335 successful responses; one client error on October 6 represents a 0.3% failure rate, substantially improved from the previous measurement period's 5.6% error rate. The most recent item dates to October 9.
 
-_Model-written assessment of our own ingestion, generated 2026-09-11 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-12 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

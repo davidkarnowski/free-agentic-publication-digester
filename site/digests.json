@@ -2,6 +2,12 @@
  "agent_guide": "agents.html",
  "digests": [
   {
+   "canonical_markdown": "digests/2026-10-11.md",
+   "date": "2026-10-11",
+   "html": "https://fapd.info/2026-10-11.html",
+   "teaser": "The digest carries 14 agency press releases from the executive branch."
+  },
+  {
    "canonical_markdown": "digests/2026-10-10.md",
    "date": "2026-10-10",
    "html": "https://fapd.info/2026-10-10.html",
@@ -458,6 +464,6 @@
    "teaser": "The House introduced 44 bills, 7 with published texts, on topics including offshore oil and gas whistleblower protections, youth mental health and social media, infant formula contaminants, school nutrition, education, trade and manufacturing, occupational safety, and fishing practices, each referred to committee."
   }
  ],
- "generated": "2026-10-11T04:05:40Z",
+ "generated": "2026-10-12T04:05:00Z",
  "title": "Free Agentic Publication Digester \u2014 Daily Federal Digest"
 }
