@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-01, 11 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-01, 12 days ago (quiet past 7 days).
 
-This label has held since 2026-10-09T04:08:52Z (UTC) and was last re-checked 2026-10-12T03:59:22Z (UTC).
+This label has held since 2026-10-09T04:08:52Z (UTC) and was last re-checked 2026-10-13T03:46:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,24 +67,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-01 |
-| Content length | 216 characters average, 216 median (shortest 148, longest 284) |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-01 |
+| Content length | 284 characters average, 284 median (shortest 284, longest 284) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.gsa.gov | 333 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.gsa.gov | 332 request(s) · 332 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-12T04:00:15.689+00:00 UTC.
+last answered request 2026-10-13T04:00:08.896+00:00 UTC.
 
-Most recent item 2026-10-01, 11 days ago (quiet past 7 days).
+Most recent item 2026-10-01, 12 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.gsa.gov, all time (since 2026-09-28):** 344 request(s) · 344 answered · 0 returned no content
+- **Our requests to www.gsa.gov, all time (since 2026-09-28):** 369 request(s) · 369 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.gsa.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-13 | 0 | 0 | — |
 | 2026-09-14 | 0 | 0 | — |
 | 2026-09-15 | 0 | 0 | — |
 | 2026-09-16 | 0 | 0 | — |
@@ -123,7 +122,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-09 | 0 | 26 | 158 |
 | 2026-10-10 | 0 | 25 | 277 |
 | 2026-10-11 | 0 | 24 | 213 |
-| 2026-10-12 | 0 | 1 | 593 |
+| 2026-10-12 | 0 | 25 | 268 |
+| 2026-10-13 | 0 | 1 | 413 |
 
 ## Our ingestion assessment
 

@@ -6,7 +6,7 @@
 
 # NIH Office of Research on Women's Health (email)
 
-active · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Health and Human Services (NIH / ORWH)
+active · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Health and Human Services (NIH / ORWH)
 
 Official site: https://orwh.od.nih.gov/ · All sources: [sources.md](../sources.md)
 
@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-05, delivered by email.
+**quiet** — Most recent item 2026-10-05, 8 days ago (quiet past 7 days).
 
-This label has held since 2026-10-05T18:11:01Z (UTC) and was last re-checked 2026-10-12T03:59:22Z (UTC).
+This label has held since 2026-10-05T18:11:01Z (UTC) and was last re-checked 2026-10-13T03:46:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -85,7 +85,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-1 item(s) in the last 14 days; most recent 2026-10-05, delivered by email.
+Most recent item 2026-10-05, 8 days ago (quiet past 7 days).
 
 ### All time
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-13 | 0 |
 | 2026-09-14 | 0 |
 | 2026-09-15 | 0 |
 | 2026-09-16 | 0 |
@@ -127,6 +126,7 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-10 | 0 |
 | 2026-10-11 | 0 |
 | 2026-10-12 | 0 |
+| 2026-10-13 | 0 |
 
 ## Our ingestion assessment
 
