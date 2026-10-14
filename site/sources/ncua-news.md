@@ -61,9 +61,9 @@ _Model-written orientation, generated 2026-09-30 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-09-30, 13 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-09-30, 14 days ago (quiet past 7 days).
 
-This label has held since 2026-10-08T04:14:09Z (UTC) and was last re-checked 2026-10-13T03:46:24Z (UTC).
+This label has held since 2026-10-08T04:14:09Z (UTC) and was last re-checked 2026-10-14T03:53:01Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,24 +73,22 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-09-30 |
-| Content length | 130 characters average, 130 median (shortest 130, longest 130) |
-| Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
+| Items ingested | none in the last 14 days — most recent 2026-09-30 |
 | Our requests to ncua.gov | 335 request(s) · 335 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-13T04:00:09.547+00:00 UTC.
+last answered request 2026-10-14T04:00:28.089+00:00 UTC.
 
-Most recent item 2026-09-30, 13 days ago (quiet past 7 days).
+Most recent item 2026-09-30, 14 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to ncua.gov, all time (since 2026-09-28):** 374 request(s) · 374 answered · 0 returned no content
+- **Our requests to ncua.gov, all time (since 2026-09-28):** 399 request(s) · 399 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -100,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to ncua.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-14 | 0 | 0 | — |
 | 2026-09-15 | 0 | 0 | — |
 | 2026-09-16 | 0 | 0 | — |
 | 2026-09-17 | 0 | 0 | — |
@@ -129,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-10 | 0 | 25 | 344 |
 | 2026-10-11 | 0 | 25 | 370 |
 | 2026-10-12 | 0 | 26 | 368 |
-| 2026-10-13 | 0 | 1 | 330 |
+| 2026-10-13 | 0 | 25 | 372 |
+| 2026-10-14 | 0 | 1 | 313 |
 
 ## Our ingestion assessment
 

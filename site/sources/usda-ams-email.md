@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-05, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-05, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-09-28T20:11:15Z (UTC) and was last re-checked 2026-10-13T03:46:24Z (UTC).
+This label has held since 2026-10-13T04:07:47Z (UTC) and was last re-checked 2026-10-14T03:53:01Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -79,7 +79,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-05, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-05, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-14 | 0 |
 | 2026-09-15 | 0 |
 | 2026-09-16 | 0 |
 | 2026-09-17 | 0 |
@@ -121,11 +120,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-11 | 0 |
 | 2026-10-12 | 0 |
 | 2026-10-13 | 0 |
+| 2026-10-14 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Registered 2026-09-26; began delivering 2026-09-28. One bulletin ingested in full text (~954 characters) generating one item, with no errors or refusals. The collector maintains stable contact with the email system. A single bulletin cannot characterize source coverage; the stream observed is the subscription's own editorial selection.
+The Agricultural Marketing Service delivers bulletins to the project mailbox via GovDelivery (sender usdaams@public.govdelivery.com), with content ingested in full RFC-5322 format. The subscription was confirmed and registered on 2026-09-26. Since the previous assessment on 2026-09-29, which reported one bulletin delivered on 2026-09-28, an additional bulletin has been received. A total of two bulletins have been ingested, with the most recent occurring on 2026-10-05. These bulletins contained full item text, with character counts ranging from 548 to 997 characters, averaging 772. The email collector has reported no consecutive errors and maintains stable contact. The source is currently quiet, with no items received for the past 9 days.
 
-_Model-written assessment of our own ingestion, generated 2026-09-29 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-14 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

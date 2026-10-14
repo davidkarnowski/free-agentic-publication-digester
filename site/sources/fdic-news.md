@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-30 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-05, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-05, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-13T03:46:24Z (UTC).
+This label has held since 2026-10-13T04:07:47Z (UTC) and was last re-checked 2026-10-14T03:53:01Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -77,18 +77,18 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-05 |
-| Content length | 88 characters average, 88 median (shortest 88, longest 89) |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-05 |
+| Content length | 88 characters average, 88 median (shortest 88, longest 88) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to www.fdic.gov | 333 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-13T04:00:09.293+00:00 UTC.
+last answered request 2026-10-14T04:00:27.870+00:00 UTC.
 
-Most recent item 2026-10-05, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-05, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.fdic.gov, all time (since 2026-09-28):** 370 request(s) · 370 answered · 0 returned no content
+- **Our requests to www.fdic.gov, all time (since 2026-09-28):** 395 request(s) · 395 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fdic.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-14 | 0 | 0 | — |
 | 2026-09-15 | 0 | 0 | — |
 | 2026-09-16 | 0 | 0 | — |
 | 2026-09-17 | 0 | 0 | — |
@@ -127,12 +126,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-10 | 0 | 25 | 324 |
 | 2026-10-11 | 0 | 26 | 287 |
 | 2026-10-12 | 0 | 25 | 305 |
-| 2026-10-13 | 0 | 1 | 216 |
+| 2026-10-13 | 0 | 25 | 203 |
+| 2026-10-14 | 0 | 1 | 230 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Activated with the html-index adapter in late September. The FDIC press-release listing yields items carrying the publisher's own dates. The companion fdic-email channel delivers the same releases via email; identical URLs are merged as corroboration under the multi-channel policy. A GovDelivery feed link was found but the hosting domain refused our requests via robots.txt; such refusals are recorded and not retried, as they constitute accountability data. We observed 2 items over 14 days. All 12 requests to www.fdic.gov succeeded with no failures. The listing displays the first page only, so any entries published between two polls that exceed the page size would not be seen. Entries lacking readable dates are dropped and never observation-dated.
+The FDIC Press Releases source utilizes an HTML-index adapter to ingest listings in a feed-only mode, as a GovDelivery feed link previously discovered was inaccessible due to robots.txt restrictions. We observed 1 item over the past 14 days, delivered on 2026-10-05, resulting in an average of 0.07 items per day. This represents a decrease in activity compared to the 2 items observed in the previous assessment. All 333 requests to www.fdic.gov succeeded with a 0.0% error rate, maintaining the 100% success rate reported previously. Extracted items averaged 88 characters. A known limitation is that only the first page of the listing is processed, and entries lacking readable dates are not ingested. The source is currently quiet, with no items detected in the last 7 days.
 
-_Model-written assessment of our own ingestion, generated 2026-09-29 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-14 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

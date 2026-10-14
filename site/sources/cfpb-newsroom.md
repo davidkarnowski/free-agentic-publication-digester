@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-05, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-05, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-05T23:57:58Z (UTC) and was last re-checked 2026-10-13T03:46:24Z (UTC).
+This label has held since 2026-10-13T04:07:47Z (UTC) and was last re-checked 2026-10-14T03:53:01Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,7 +62,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -71,15 +71,15 @@ Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · no items in
 | Items ingested | 22 in 14 days (1.57 per day) · most recent 2026-10-05 |
 | Content length | 5,096 characters average, 4,120 median (shortest 2,681, longest 12,025) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.consumerfinance.gov | 207 request(s) · 207 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.consumerfinance.gov | 233 request(s) · 233 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-13T04:00:10.179+00:00 UTC.
+last answered request 2026-10-14T04:00:28.763+00:00 UTC.
 
-Most recent item 2026-10-05, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-05, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.consumerfinance.gov, all time (since 2026-10-05):** 207 request(s) · 207 answered · 0 returned no content
+- **Our requests to www.consumerfinance.gov, all time (since 2026-10-05):** 233 request(s) · 233 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -89,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.consumerfinance.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-14 | 0 | 0 | — |
 | 2026-09-15 | 0 | 0 | — |
 | 2026-09-16 | 0 | 0 | — |
 | 2026-09-17 | 0 | 0 | — |
@@ -118,12 +117,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-10 | 0 | 25 | 124 |
 | 2026-10-11 | 0 | 26 | 121 |
 | 2026-10-12 | 0 | 24 | 134 |
-| 2026-10-13 | 0 | 1 | 58 |
+| 2026-10-13 | 0 | 26 | 127 |
+| 2026-10-14 | 0 | 1 | 17 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Activated 2026-10-05, the newsroom feed is delivering releases at 1.57 per day. Twenty-two items were ingested, each averaging 5,096 characters. All 28 requests to www.consumerfinance.gov succeeded. The feed carries GUID identifiers and published dates; feed descriptions are approximately 180-character teasers, and full text is fetched from the release page.
+Activated on 2026-10-05, the CFPB Newsroom source polls an RSS feed and fetches the full text from each item's linked page, as feed descriptions are teasers. Over the past 14 days, we observed 22 items at a rate of 1.57 per day, consistent with the initial assessment. The most recent item was delivered on 2026-10-05, which is more recent than the 2026-10-02 date noted in the previous assessment. All 233 requests to www.consumerfinance.gov succeeded with a 0.0% error rate, maintaining the 100% success rate reported previously. Extracted content averaged 5,096 characters, with a range from 2,681 to 12,025 characters, consistent with the initial assessment. The feed utilizes GUIDs based on the page's internal ID. Due to historically low volume (approximately one release per month in 2026), most days may not show new items. The enforcement-actions feed was not activated due to unconfirmed date meaning and lack of recent items. The source is currently quiet, with no items detected in the last 7 days.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-14 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

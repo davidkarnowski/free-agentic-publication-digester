@@ -6,7 +6,7 @@
 
 # USPS Newsroom
 
-active · ingestion health: delivering · Executive · Tier 2 · RSS feed · Independent establishment
+active · ingestion health: quiet · Executive · Tier 2 · RSS feed · Independent establishment
 
 Official site: https://about.usps.com/newsroom/national-releases/ · All sources: [sources.md](../sources.md)
 
@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 3 item(s) in the last 14 days; most recent 2026-10-06; 0 of 334 request(s) to about.usps.com returned no content.
+**quiet** — Most recent item 2026-10-06, 8 days ago (quiet past 7 days).
 
-This label has held since 2026-09-08T15:31:58Z (UTC) and was last re-checked 2026-10-13T03:46:24Z (UTC).
+This label has held since 2026-09-08T15:31:58Z (UTC) and was last re-checked 2026-10-14T03:53:01Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -74,13 +74,13 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to about.usps.com | 334 request(s) · 334 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-13T04:00:09.870+00:00 UTC.
+last answered request 2026-10-14T04:00:28.524+00:00 UTC.
 
-3 item(s) in the last 14 days; most recent 2026-10-06; 0 of 334 request(s) to about.usps.com returned no content.
+Most recent item 2026-10-06, 8 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to about.usps.com, all time (since 2026-08-01):** 2,001 request(s) · 2,000 answered · 1 returned no content
+- **Our requests to about.usps.com, all time (since 2026-08-01):** 2,026 request(s) · 2,025 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -90,7 +90,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to about.usps.com | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-14 | 1 | 28 | 584 |
 | 2026-09-15 | 0 | 25 | 223 |
 | 2026-09-16 | 0 | 25 | 174 |
 | 2026-09-17 | 1 | 25 | 232 |
@@ -119,7 +118,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-10 | 0 | 25 | 157 |
 | 2026-10-11 | 0 | 26 | 171 |
 | 2026-10-12 | 0 | 25 | 421 |
-| 2026-10-13 | 0 | 1 | 353 |
+| 2026-10-13 | 0 | 25 | 181 |
+| 2026-10-14 | 0 | 1 | 424 |
 
 ## Our ingestion assessment
 

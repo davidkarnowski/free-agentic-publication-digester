@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-05, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-05, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-05T23:57:58Z (UTC) and was last re-checked 2026-10-13T03:46:24Z (UTC).
+This label has held since 2026-10-13T04:07:47Z (UTC) and was last re-checked 2026-10-14T03:53:01Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,7 +62,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 50 request(s) (50 answered, 0 returned no content) · no items ingested
+Last 24 hours: 51 request(s) (51 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -71,15 +71,15 @@ Last 24 hours: 50 request(s) (50 answered, 0 returned no content) · no items in
 | Items ingested | 10 in 14 days (0.71 per day) · most recent 2026-10-05 |
 | Content length | 7,408 characters average, 6,226 median (shortest 5,316, longest 12,791) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.occ.gov | 391 request(s) · 391 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.occ.gov | 442 request(s) · 442 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-13T04:00:10.141+00:00 UTC; this host serves 2 registered sources, so these figures are host-wide.
+last answered request 2026-10-14T04:00:28.739+00:00 UTC; this host serves 2 registered sources, so these figures are host-wide.
 
-Most recent item 2026-10-05, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-05, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.occ.gov, all time (since 2026-10-05):** 391 request(s) · 391 answered · 0 returned no content
+- **Our requests to www.occ.gov, all time (since 2026-10-05):** 442 request(s) · 442 answered · 0 returned no content
 
 This host serves 2 registered sources, so these figures are host-wide.
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.occ.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-14 | 0 | 0 | — |
 | 2026-09-15 | 0 | 0 | — |
 | 2026-09-16 | 0 | 0 | — |
 | 2026-09-17 | 0 | 0 | — |
@@ -120,12 +119,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-10 | 0 | 50 | 206 |
 | 2026-10-11 | 0 | 48 | 204 |
 | 2026-10-12 | 0 | 50 | 206 |
-| 2026-10-13 | 0 | 2 | 224 |
+| 2026-10-13 | 0 | 51 | 215 |
+| 2026-10-14 | 0 | 2 | 263 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Newly ingested starting 2026-10-05, the feed delivers OCC bulletins at a measured rate of 0.71 per day. Ten items were observed spanning late September through early October, each averaging 7,408 characters of extracted text. All 34 requests to www.occ.gov succeeded. The feed carries RFC 822–formatted dates without weekday information and no GUIDs; item identity is established by the bulletin link.
+Newly ingested and activated on 2026-10-05, the OCC Bulletins source polls an RSS feed and fetches the full text from each item's linked page, as feed descriptions are summaries. Over the past 14 days, we observed 10 items at a rate of 0.71 per day, consistent with the initial assessment. The most recent item was delivered on 2026-10-05. All 442 requests to www.occ.gov succeeded with a 0.0% error rate, maintaining the 100% success rate reported previously. Extracted content averaged 7,408 characters, with a range from 5,316 to 12,791 characters, consistent with the initial assessment. The feed does not include GUIDs, with item identity established by the bulletin link. Overlap with Federal Register entries for rulemaking is noted, but these are separate documents and are not merged. The source is currently quiet, with no items detected in the last 7 days.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-14 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

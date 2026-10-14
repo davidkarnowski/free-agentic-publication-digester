@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-05, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-05, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-05T18:11:01Z (UTC) and was last re-checked 2026-10-13T03:46:24Z (UTC).
+This label has held since 2026-10-13T04:07:47Z (UTC) and was last re-checked 2026-10-14T03:53:01Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -85,7 +85,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-05, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-05, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-14 | 0 |
 | 2026-09-15 | 0 |
 | 2026-09-16 | 0 |
 | 2026-09-17 | 0 |
@@ -127,11 +126,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-11 | 0 |
 | 2026-10-12 | 0 |
 | 2026-10-13 | 0 |
+| 2026-10-14 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-NIH's Office of Research on Women's Health subscription was activated on 2026-10-01 following observed delivery. It carries research announcements, funding news, and event invitations via email. One item has been recorded since activation, delivered on 2026-10-05 at 1,250 characters. The email adapter confirms DKIM verification and archival of messages received. No request-level statistics apply as this source delivers via email. The collector shows normal status with no consecutive errors.
+The NIH Office of Research on Women's Health delivers bulletins to the project mailbox via email (sender orwh@subscriptions.nih.gov), with content ingested in full RFC-5322 format. The source was activated on 2026-10-01 after initial observed delivery. Since the previous assessment on 2026-10-06, no additional items have been received. A single bulletin, containing the full item text of 1,250 characters, was recorded on 2026-10-05. DKIM verification and archival of messages have been confirmed by the email adapter. The email collector has reported no consecutive errors, indicating stable contact with the email system. However, the source is currently quiet, with no new items delivered for the past 9 days.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-14 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

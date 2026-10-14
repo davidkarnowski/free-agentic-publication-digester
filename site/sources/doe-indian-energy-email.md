@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-05, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-05, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-02T20:47:16Z (UTC) and was last re-checked 2026-10-13T03:46:24Z (UTC).
+This label has held since 2026-10-13T04:07:47Z (UTC) and was last re-checked 2026-10-14T03:53:01Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -83,7 +83,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-05, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-05, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-14 | 0 |
 | 2026-09-15 | 0 |
 | 2026-09-16 | 0 |
 | 2026-09-17 | 0 |
@@ -125,11 +124,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-11 | 0 |
 | 2026-10-12 | 0 |
 | 2026-10-13 | 0 |
+| 2026-10-14 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The Department of Energy's Office of Indian Energy delivers bulletins to the project mailbox via GovDelivery (sender indianenergy@public.govdelivery.com). Subscription was confirmed 2026-09-26. The first bulletin arrived 2026-10-02 at 300 characters. The mailbox ingestion channel is operational; the single delivery confirms the subscription is reaching the project mailbox. No delivery pattern or cadence is yet observable. Gate-3 coverage evaluation awaits further deliveries.
+The DOE Office of Indian Energy delivers bulletins to the project mailbox via GovDelivery (sender indianenergy@public.govdelivery.com), with content ingested in raw RFC-5322 format. The subscription was confirmed on 2026-09-26. Since the previous assessment on 2026-10-03, which noted the first bulletin arriving on 2026-10-02, one additional bulletin has been received. A total of two items have been ingested, with the latest occurring on 2026-10-05. These bulletins provided full item text, with character counts ranging from 300 to 373, averaging 336 characters. The email collector has reported no consecutive errors and maintains stable contact with the email system. The source is currently quiet, with no items delivered for the past 9 days.
 
-_Model-written assessment of our own ingestion, generated 2026-10-03 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-14 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
