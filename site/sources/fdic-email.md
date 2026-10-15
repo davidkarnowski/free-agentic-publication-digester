@@ -52,9 +52,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-05, 9 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-05, 10 days ago (quiet past 7 days).
 
-This label has held since 2026-10-13T04:07:47Z (UTC) and was last re-checked 2026-10-14T03:53:01Z (UTC).
+This label has held since 2026-10-13T04:07:47Z (UTC) and was last re-checked 2026-10-15T03:55:59Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -77,7 +77,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-05, 9 days ago (quiet past 7 days).
+Most recent item 2026-10-05, 10 days ago (quiet past 7 days).
 
 ### All time
 
@@ -89,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-15 | 1 |
 | 2026-09-16 | 0 |
 | 2026-09-17 | 1 |
 | 2026-09-18 | 0 |
@@ -119,11 +118,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-12 | 0 |
 | 2026-10-13 | 0 |
 | 2026-10-14 | 0 |
+| 2026-10-15 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The FDIC Press Releases source delivers full-text bulletins via email to the project mailbox from subscriptions@subscriptions.fdic.gov. These bulletins are DKIM-verified and archived. Over the past 14 days, we observed 3 new items, averaging 0.21 items per day. This rate represents a decrease from the 0.43 items per day reported in the previous assessment. The most recent item was delivered on 2026-09-25, resulting in 1 day since the last delivery and a current "delivering" health status. Extracted content averaged 1,218 characters, ranging from 537 to 2,230 characters, which is a decrease from the previous average of 1,468 characters. As an email-based source, no polling requests apply, and the collector recorded no consecutive errors.
+FDIC Press Releases delivers full-text bulletins to the project mailbox from subscriptions@subscriptions.fdic.gov, DKIM-verified and archived. Over 14 days, two items delivered at a rate of 0.14 per day. Content averaged 1,375 characters, ranging from 1,128 to 1,622. The most recent bulletin arrived 2026-10-05. The mailbox collector recorded zero consecutive errors and zero refused messages. This represents a decrease in rate from the prior assessment's 0.21 items per day and one fewer observed item in the window. Email sources generate no polling requests.
 
-_Model-written assessment of our own ingestion, generated 2026-09-26 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-15 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -6,7 +6,7 @@
 
 # E-Verify (email)
 
-planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Homeland Security, U.S. Citizenship and Immigration Services
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Homeland Security, U.S. Citizenship and Immigration Services
 
 Official site: https://www.e-verify.gov/ · All sources: [sources.md](../sources.md)
 
@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-01, 13 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-14, delivered by email.
 
-This label has held since 2026-10-09T04:08:52Z (UTC) and was last re-checked 2026-10-14T03:53:01Z (UTC).
+This label has held since 2026-10-14T14:16:03Z (UTC) and was last re-checked 2026-10-15T03:55:59Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -66,20 +66,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-10-01 |
-| Content length | 1,415 characters average, 1,510 median (shortest 1,194, longest 1,541) |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-14 |
+| Content length | 1,721 characters average, 1,721 median (shortest 1,721, longest 1,721) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 3 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-01 |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-14 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-01, 13 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-10-14, delivered by email.
 
 ### All time
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-15 | 0 |
 | 2026-09-16 | 0 |
 | 2026-09-17 | 0 |
 | 2026-09-18 | 0 |
@@ -120,12 +119,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-11 | 0 |
 | 2026-10-12 | 0 |
 | 2026-10-13 | 0 |
-| 2026-10-14 | 0 |
+| 2026-10-14 | 1 |
+| 2026-10-15 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Bulletins arrive at the project mailbox from sender e-verify.uscis@messages.dhs.gov. Over the past six days, zero items were observed. The 14-day window shows three bulletins, all delivered on 2026-10-01 across separate hours, ranging from 1,194 to 1,541 characters (average 1,415) in full text. The mailbox collector recorded zero errors and zero refused messages. Subscription was confirmed 2026-09-26; earlier bulletins already in the mailbox were not backfilled.
+E-Verify delivers full-text bulletins to the project mailbox from e-verify.uscis@messages.dhs.gov, DKIM-verified and archived. Subscription was confirmed 2026-09-26; earlier bulletins were not backfilled. Over 14 days, one item delivered at a rate of 0.07 per day, dated 2026-10-14. Content measured 1,721 characters. The prior assessment, measured over a six-day window, observed zero items in that period; this assessment captures the first post-subscription delivery. The mailbox collector recorded zero consecutive errors and zero refused messages. Email sources generate no polling requests.
 
-_Model-written assessment of our own ingestion, generated 2026-10-10 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-15 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

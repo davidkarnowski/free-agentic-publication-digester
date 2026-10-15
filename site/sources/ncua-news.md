@@ -6,7 +6,7 @@
 
 # NCUA Press Releases
 
-active · ingestion health: quiet · Executive · Tier 2 · HTML index · Independent agency
+active · ingestion health: delivering · Executive · Tier 2 · HTML index · Independent agency
 
 Official site: https://ncua.gov/newsroom/press-releases · All sources: [sources.md](../sources.md)
 
@@ -61,9 +61,9 @@ _Model-written orientation, generated 2026-09-30 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-09-30, 14 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-14; 0 of 333 request(s) to ncua.gov returned no content.
 
-This label has held since 2026-10-08T04:14:09Z (UTC) and was last re-checked 2026-10-14T03:53:01Z (UTC).
+This label has held since 2026-10-14T17:01:04Z (UTC) and was last re-checked 2026-10-15T03:55:59Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,22 +73,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-09-30 |
-| Our requests to ncua.gov | 335 request(s) · 335 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-14 |
+| Content length | 94 characters average, 94 median (shortest 94, longest 94) |
+| Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
+| Our requests to ncua.gov | 333 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-14T04:00:28.089+00:00 UTC.
+last answered request 2026-10-15T04:00:10.194+00:00 UTC.
 
-Most recent item 2026-09-30, 14 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-10-14; 0 of 333 request(s) to ncua.gov returned no content.
 
 ### All time
 
-- **Our requests to ncua.gov, all time (since 2026-09-28):** 399 request(s) · 399 answered · 0 returned no content
+- **Our requests to ncua.gov, all time (since 2026-09-28):** 424 request(s) · 424 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +100,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to ncua.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-15 | 0 | 0 | — |
 | 2026-09-16 | 0 | 0 | — |
 | 2026-09-17 | 0 | 0 | — |
 | 2026-09-18 | 0 | 0 | — |
@@ -127,12 +128,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-11 | 0 | 25 | 370 |
 | 2026-10-12 | 0 | 26 | 368 |
 | 2026-10-13 | 0 | 25 | 372 |
-| 2026-10-14 | 0 | 1 | 313 |
+| 2026-10-14 | 1 | 25 | 342 |
+| 2026-10-15 | 0 | 1 | 360 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The source ingests via HTML index adapter from ncua.gov/news/press-releases (redirected from /newsroom/press-releases). Over the observed period, we made 273 requests with 100% success across ncua.gov, observing 2 items over the 14-day window at a rate of 0.14 items per day. Content consists of brief items averaging 104 characters. The most recent item appeared 9 days ago on 2026-09-30. No machine-readable feeds are advertised; the adapter relies on HTML index diffing of the first page only, creating potential undercoverage if publishing volume between polls exceeds page capacity. Items lacking readable dates are discarded and never observation-dated. Request success rate and delivery stability remain unchanged from the previous assessment.
+NCUA Press Releases uses an HTML index adapter against ncua.gov/news/press-releases (redirected from /newsroom/press-releases) in feed-only mode. No machine-readable feeds are advertised; the adapter relies on HTML index diffing of the first page only, creating potential undercoverage if publishing volume exceeds page capacity. Over 14 days, one item delivered at a rate of 0.07 per day. Content measured 94 characters. All 333 requests to ncua.gov succeeded (0.0% error rate). Items lacking readable dates are discarded and never observation-dated. The most recent item dates 2026-10-14. This is a low-volume source; most days list nothing.
 
-_Model-written assessment of our own ingestion, generated 2026-10-09 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-15 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

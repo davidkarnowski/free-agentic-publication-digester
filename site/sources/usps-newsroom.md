@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-06, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-06, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-09-08T15:31:58Z (UTC) and was last re-checked 2026-10-14T03:53:01Z (UTC).
+This label has held since 2026-10-14T04:14:02Z (UTC) and was last re-checked 2026-10-15T03:55:59Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -72,15 +72,15 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-10-06 |
 | Content length | 260 characters average, 249 median (shortest 215, longest 316) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to about.usps.com | 334 request(s) · 334 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to about.usps.com | 333 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-14T04:00:28.524+00:00 UTC.
+last answered request 2026-10-15T04:00:10.307+00:00 UTC.
 
-Most recent item 2026-10-06, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-06, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to about.usps.com, all time (since 2026-08-01):** 2,026 request(s) · 2,025 answered · 1 returned no content
+- **Our requests to about.usps.com, all time (since 2026-08-01):** 2,051 request(s) · 2,050 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -90,7 +90,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to about.usps.com | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-15 | 0 | 25 | 223 |
 | 2026-09-16 | 0 | 25 | 174 |
 | 2026-09-17 | 1 | 25 | 232 |
 | 2026-09-18 | 1 | 25 | 214 |
@@ -119,12 +118,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-11 | 0 | 26 | 171 |
 | 2026-10-12 | 0 | 25 | 421 |
 | 2026-10-13 | 0 | 25 | 181 |
-| 2026-10-14 | 0 | 1 | 424 |
+| 2026-10-14 | 0 | 25 | 197 |
+| 2026-10-15 | 0 | 1 | 189 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The RSS feed is polled daily and ingested in feed-only mode, extracting lede-paragraph descriptions averaging 285 characters per item. All 154 polling requests succeeded. The feed carries 668 items deep in its archive but our ingestion captures only newly published entries. Feed links route through a JavaScript redirect carrying no article content; the adapter resolves canonical article URLs for deduplication without relying on feed GUIDs. The most recent item was dated 2026-10-06.
+The USPS Newsroom RSS feed is polled daily in feed-only mode, extracting lede-paragraph descriptions with datelines. The feed carries 668 items spanning the administration with deep history but captures only newly published entries. Feed links route through a JavaScript redirect carrying no article content; the adapter resolves canonical article URLs for deduplication without relying on GUIDs. Over 14 days, three items delivered at a rate of 0.21 per day. Content averaged 260 characters, ranging from 215 to 316. All 333 requests to about.usps.com succeeded (0.0% error rate). The most recent item dates 2026-10-06.
 
-_Model-written assessment of our own ingestion, generated 2026-10-10 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-15 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
