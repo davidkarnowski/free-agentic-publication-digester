@@ -6,7 +6,7 @@
 
 # DOE Office of Indian Energy (email)
 
-planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Energy, Office of Indian Energy Policy and Programs
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Energy, Office of Indian Energy Policy and Programs
 
 Official site: https://www.energy.gov/indianenergy · All sources: [sources.md](../sources.md)
 
@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-05, 10 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-15, delivered by email.
 
-This label has held since 2026-10-13T04:07:47Z (UTC) and was last re-checked 2026-10-15T03:55:59Z (UTC).
+This label has held since 2026-10-15T19:33:11Z (UTC) and was last re-checked 2026-10-16T03:47:50Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,20 +70,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-05 |
-| Content length | 336 characters average, 336 median (shortest 300, longest 373) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-15 |
+| Content length | 293 characters average, 293 median (shortest 213, longest 373) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-05 |
+| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-15 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-05, 10 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-10-15, delivered by email.
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-16 | 0 |
 | 2026-09-17 | 0 |
 | 2026-09-18 | 0 |
 | 2026-09-19 | 0 |
@@ -124,12 +123,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-12 | 0 |
 | 2026-10-13 | 0 |
 | 2026-10-14 | 0 |
-| 2026-10-15 | 0 |
+| 2026-10-15 | 1 |
+| 2026-10-16 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The DOE Office of Indian Energy delivers bulletins to the project mailbox via GovDelivery (sender indianenergy@public.govdelivery.com), with content ingested in raw RFC-5322 format. The subscription was confirmed on 2026-09-26. Since the previous assessment on 2026-10-03, which noted the first bulletin arriving on 2026-10-02, one additional bulletin has been received. A total of two items have been ingested, with the latest occurring on 2026-10-05. These bulletins provided full item text, with character counts ranging from 300 to 373, averaging 336 characters. The email collector has reported no consecutive errors and maintains stable contact with the email system. The source is currently quiet, with no items delivered for the past 9 days.
+Bulletins from indianenergy@public.govdelivery.com arrive in the project mailbox via GovDelivery and are ingested through the email adapter with DKIM verification and archival. Over the 14-day measurement window, two bulletins were received at an observed rate of 0.14 items per day, with content averaging 293 characters per item (ranging from 213 to 373 characters). Full item text is delivered inline. The mailbox shows two messages classified as bulletins with no errors, administrative messages, or refused items. The most recent bulletin arrived on 2026-10-15 at 15:27 UTC. The previous assessment dated 2026-10-14 reported the most recent item as 2026-10-05; a subsequent bulletin has now been delivered on 2026-10-15.
 
-_Model-written assessment of our own ingestion, generated 2026-10-14 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-16 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

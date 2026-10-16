@@ -6,7 +6,7 @@
 
 # Fogarty International Center (email)
 
-active · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Health and Human Services (NIH / FIC)
+active · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Health and Human Services (NIH / FIC)
 
 Official site: https://www.fic.nih.gov/ · All sources: [sources.md](../sources.md)
 
@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-08, delivered by email.
+**quiet** — Most recent item 2026-10-08, 8 days ago (quiet past 7 days).
 
-This label has held since 2026-10-06T12:25:01Z (UTC) and was last re-checked 2026-10-15T03:55:59Z (UTC).
+This label has held since 2026-10-06T12:25:01Z (UTC) and was last re-checked 2026-10-16T03:47:50Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -85,7 +85,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-2 item(s) in the last 14 days; most recent 2026-10-08, delivered by email.
+Most recent item 2026-10-08, 8 days ago (quiet past 7 days).
 
 ### All time
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-16 | 0 |
 | 2026-09-17 | 0 |
 | 2026-09-18 | 0 |
 | 2026-09-19 | 0 |
@@ -127,6 +126,7 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-13 | 0 |
 | 2026-10-14 | 0 |
 | 2026-10-15 | 0 |
+| 2026-10-16 | 0 |
 
 ## Our ingestion assessment
 
