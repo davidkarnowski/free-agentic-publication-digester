@@ -6,7 +6,7 @@
 
 # DOT Inspector General (email)
 
-planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Transportation, Office of Inspector General
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Transportation, Office of Inspector General
 
 Official site: https://www.oig.dot.gov/ · All sources: [sources.md](../sources.md)
 
@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-02, 14 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-16, delivered by email.
 
-This label has held since 2026-10-10T04:16:51Z (UTC) and was last re-checked 2026-10-16T03:47:50Z (UTC).
+This label has held since 2026-10-16T15:34:20Z (UTC) and was last re-checked 2026-10-17T03:56:12Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,18 +68,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-02 |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-16 |
+| Content length | 1,710 characters average, 1,710 median (shortest 1,710, longest 1,710) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-16 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-02, 14 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-10-16, delivered by email.
 
 ### All time
 
@@ -91,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-17 | 0 |
 | 2026-09-18 | 0 |
 | 2026-09-19 | 0 |
 | 2026-09-20 | 0 |
@@ -120,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-13 | 0 |
 | 2026-10-14 | 0 |
 | 2026-10-15 | 0 |
-| 2026-10-16 | 0 |
+| 2026-10-16 | 1 |
+| 2026-10-17 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Subscription bulletins via GovDelivery deliver audit and investigative announcements to the project mailbox with full text. Status is 'planned.' Over 14 days, 3 items arrived at 0.21 per day, averaging 3,391 characters (ranging 3,301 to 3,464). The most recent item is from 2026-10-02 (9 days ago), placing the source quiet past 7 days. All messages are verified and error-free in the mailbox. The previous assessment noted 1 bulletin on 2026-09-30; current measurement shows 3 total items. Gate-3 coverage evaluation remains pending with complete analysis.
+The Department of Transportation Office of Inspector General delivers subscription bulletins via GovDelivery (sender news@updates.oig.dot.gov) to the project mailbox with full text. One bulletin was received on 2026-10-16, yielding 0.07 items per day over 14 days. The single bulletin carried 1,710 characters. The mailbox records 1 message as 1 bulletin with zero administrative messages, errors, or refused deliveries. Subscription was confirmed in 2026-09 through the publisher's own signup flow; bulletins observed in the mailbox preceded formal registration. The previous assessment on 2026-10-11 reported 3 items totaling 0.21 per day with the most recent on 2026-10-02. Current measurement shows reduced delivery frequency with the most recent item on 2026-10-16.
 
-_Model-written assessment of our own ingestion, generated 2026-10-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-17 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

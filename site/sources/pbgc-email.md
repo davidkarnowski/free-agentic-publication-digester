@@ -6,7 +6,7 @@
 
 # PBGC Updates (email)
 
-planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · Pension Benefit Guaranty Corporation
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Pension Benefit Guaranty Corporation
 
 Official site: https://www.pbgc.gov/news · All sources: [sources.md](../sources.md)
 
@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-09-24, 22 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-16, delivered by email.
 
-This label has held since 2026-10-02T04:32:29Z (UTC) and was last re-checked 2026-10-16T03:47:50Z (UTC).
+This label has held since 2026-10-16T15:16:10Z (UTC) and was last re-checked 2026-10-17T03:56:12Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,18 +62,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-09-24 |
-| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-14 |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-16 |
+| Content length | 4,078 characters average, 4,078 median (shortest 4,078, longest 4,078) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 3 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-16 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-09-24, 22 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-10-16, delivered by email.
 
 ### All time
 
@@ -85,7 +87,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-17 | 0 |
 | 2026-09-18 | 0 |
 | 2026-09-19 | 0 |
 | 2026-09-20 | 0 |
@@ -114,12 +115,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-13 | 0 |
 | 2026-10-14 | 0 |
 | 2026-10-15 | 0 |
-| 2026-10-16 | 0 |
+| 2026-10-16 | 1 |
+| 2026-10-17 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The Pension Benefit Guaranty Corporation delivers pension-related announcements to the project mailbox via confirmed subscription (sender pbgc@subscriptions.pbgc.gov). One bulletin was ingested on 2026-09-24 at 1,736 characters; no additional bulletins have been recorded in the nine days since, yielding an observed rate of 0.07 items per day. The mailbox ingestion channel is operational; delivery pattern and cadence are not yet established.
+The Pension Benefit Guaranty Corporation delivers subscription bulletins to the project mailbox with full text included. One bulletin was received on 2026-10-16, yielding 0.07 items per day over the 14-day measurement window. The single ingested item carried 4,078 characters. The mailbox records 3 total messages with 1 bulletin, zero administrative messages, errors, or refused deliveries. Subscription is confirmed through sender pbgc@subscriptions.pbgc.gov. The previous assessment on 2026-10-03 reported one item on 2026-09-24 after subscription confirmation on 2026-07-29, with no bulletins received in the nine days following. The current measurement shows delivery resuming after a lengthy quiet period.
 
-_Model-written assessment of our own ingestion, generated 2026-10-03 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-17 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

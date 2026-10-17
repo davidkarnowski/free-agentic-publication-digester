@@ -6,7 +6,7 @@
 
 # NIH Office of Research on Women's Health (email)
 
-active · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Health and Human Services (NIH / ORWH)
+active · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Health and Human Services (NIH / ORWH)
 
 Official site: https://orwh.od.nih.gov/ · All sources: [sources.md](../sources.md)
 
@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-05, 11 days ago (quiet past 7 days).
+**delivering** — 3 item(s) in the last 14 days; most recent 2026-10-16, delivered by email.
 
-This label has held since 2026-10-13T04:07:47Z (UTC) and was last re-checked 2026-10-16T03:47:50Z (UTC).
+This label has held since 2026-10-16T15:16:10Z (UTC) and was last re-checked 2026-10-17T03:56:12Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -72,20 +72,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-05 |
-| Content length | 1,250 characters average, 1,250 median (shortest 1,250, longest 1,250) |
+| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-10-16 |
+| Content length | 2,950 characters average, 1,622 median (shortest 1,250, longest 5,977) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-05 |
+| Mailbox | 3 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-16 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-05, 11 days ago (quiet past 7 days).
+3 item(s) in the last 14 days; most recent 2026-10-16, delivered by email.
 
 ### All time
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-17 | 0 |
 | 2026-09-18 | 0 |
 | 2026-09-19 | 0 |
 | 2026-09-20 | 0 |
@@ -126,12 +125,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-13 | 0 |
 | 2026-10-14 | 0 |
 | 2026-10-15 | 0 |
-| 2026-10-16 | 0 |
+| 2026-10-16 | 2 |
+| 2026-10-17 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The NIH Office of Research on Women's Health delivers bulletins to the project mailbox via email (sender orwh@subscriptions.nih.gov), with content ingested in full RFC-5322 format. The source was activated on 2026-10-01 after initial observed delivery. Since the previous assessment on 2026-10-06, no additional items have been received. A single bulletin, containing the full item text of 1,250 characters, was recorded on 2026-10-05. DKIM verification and archival of messages have been confirmed by the email adapter. The email collector has reported no consecutive errors, indicating stable contact with the email system. However, the source is currently quiet, with no new items delivered for the past 9 days.
+The NIH Office of Research on Women's Health delivers subscription bulletins via GovDelivery (sender orwh@subscriptions.nih.gov) to the project mailbox with full text. The source was activated 2026-10-01 after observed delivery. Over 14 days, 3 items arrived at 0.21 per day, with the most recent on 2026-10-16, averaging 2,950 characters and ranging from 1,250 to 5,977 characters. The mailbox records 3 messages as bulletins with zero administrative messages, errors, or refused deliveries. Content includes research announcements, funding news, and event invitations. The previous assessment on 2026-10-14 recorded one item on 2026-10-05 with no additional items for the following 9 days. The current measurement shows increased delivery activity with two additional items arriving on 2026-10-16.
 
-_Model-written assessment of our own ingestion, generated 2026-10-14 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-17 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

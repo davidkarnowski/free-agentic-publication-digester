@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-08, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-08, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-06T12:25:01Z (UTC) and was last re-checked 2026-10-16T03:47:50Z (UTC).
+This label has held since 2026-10-16T04:16:49Z (UTC) and was last re-checked 2026-10-17T03:56:12Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -85,7 +85,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-08, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-08, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-17 | 0 |
 | 2026-09-18 | 0 |
 | 2026-09-19 | 0 |
 | 2026-09-20 | 0 |
@@ -127,11 +126,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-14 | 0 |
 | 2026-10-15 | 0 |
 | 2026-10-16 | 0 |
+| 2026-10-17 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The Fogarty International Center at NIH was activated on 2026-10-01 based on observed bulletins during the late-September changeover carrying funding announcements and global-health research news. Over six measurement days from October 1-7, one bulletin was delivered on 2026-10-06 carrying 1105 characters of full-text content. The mailbox records one message ingested by the email adapter with DKIM verification, zero administrative filings, no refusals, and no errors. The source is newly activated and shows minimal activity volume to date with a single delivery early in the measurement window. Bulletins are delivered directly to the project mailbox by the configured sender (ficinfo@subscriptions.nih.gov) with no HTTP requests made to external services; health is measured from email delivery recency alone.
+Fogarty International Center bulletins have been delivered to the project mailbox via ficinfo@subscriptions.nih.gov subscription since activation on 2026-10-01. Two bulletins were received: one on 2026-10-06 carrying 1105 characters and one on 2026-10-08 carrying 680 characters, averaging 892 characters per message. Both arrived in full-text email format with DKIM verification recorded at ingest. No delivery errors, refusals, or administrative complications have been recorded. Delivery cadence was sparse: two days between the first and second bulletins, followed by nine days of quiet through the current measurement window ending 2026-10-17. Since the previous assessment on 2026-10-07, the second bulletin arrived on 2026-10-08; the source has produced no further activity since then. Ingestion relies entirely on direct mailbox delivery with no HTTP requests to external services, and health is measured from email arrival recency alone. Measured delivery behavior remains consistent with initial activation observations.
 
-_Model-written assessment of our own ingestion, generated 2026-10-07 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-17 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

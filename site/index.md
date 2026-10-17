@@ -14,13 +14,13 @@ An automated, citation-bound, opinion-agnostic daily digest of official United S
 
 ## The last 7 days
 
+- [Daily Digest — 2026-10-16](2026-10-16.md) — The digest carries 45 House and 4 Senate floor entries from the Congressional Record, plus 38 Extensions of Remarks and 6 Daily Digest entries.
 - [Daily Digest — 2026-10-15](2026-10-15.md) — The digest carries 13 bills introduced in the House and two in the Senate; no recorded floor votes appear among the items.
 - [Daily Digest — 2026-10-14](2026-10-14.md) — On the congressional side, the digest carries 28 House and 4 Senate Congressional Record items, along with 6 Daily Digest entries and 41 Extensions of Remarks.
 - [Daily Digest — 2026-10-13](2026-10-13.md) — The digest includes two presidential proclamations, designating October 2026 as National Energy Dominance Month, which describes various energy policy actions, and October 12, 2026, as Columbus Day.
 - [Daily Digest — 2026-10-12](2026-10-12.md) — This is a short review: few publications were observed for this digest day, and none met the digest's summary rules, so there are no item summaries to draw on.
 - [Daily Digest — 2026-10-11](2026-10-11.md) — The digest carries 14 agency press releases from the executive branch.
 - [Daily Digest — 2026-10-10](2026-10-10.md) — The digest carries 41 House and 4 Senate Congressional Record entries, 80 Extensions of Remarks, and 5 Daily Digest items; none of the item summaries describe recorded votes.
-- [Daily Digest — 2026-10-09](2026-10-09.md) — The digest carries one presidential document and one presidential memorandum.
 
 ## Earlier days
 

@@ -6,7 +6,7 @@
 
 # USDA NRCS (email)
 
-active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Agriculture (NRCS)
+active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Agriculture (NRCS)
 
 Official site: https://www.nrcs.usda.gov/news · All sources: [sources.md](../sources.md)
 
@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-02, 14 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-16, delivered by email.
 
-This label has held since 2026-10-10T04:16:51Z (UTC) and was last re-checked 2026-10-16T03:47:50Z (UTC).
+This label has held since 2026-10-16T13:29:58Z (UTC) and was last re-checked 2026-10-17T03:56:12Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,18 +62,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-02 |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-16 |
+| Content length | 1,204 characters average, 1,204 median (shortest 1,193, longest 1,216) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-16 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-02, 14 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-10-16, delivered by email.
 
 ### All time
 
@@ -85,7 +87,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-17 | 0 |
 | 2026-09-18 | 0 |
 | 2026-09-19 | 0 |
 | 2026-09-20 | 0 |
@@ -114,12 +115,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-13 | 0 |
 | 2026-10-14 | 0 |
 | 2026-10-15 | 0 |
-| 2026-10-16 | 0 |
+| 2026-10-16 | 2 |
+| 2026-10-17 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Subscription bulletins via GovDelivery deliver conservation-program and funding announcements to the project mailbox with full text. Activated 2026-10-01. Over 14 days, 1 item was ingested on 2026-10-02 (9 days ago) at 1,170 characters, containing conservation-program investment content. The mailbox received 1 verified bulletin with zero administrative messages, errors, or refusals. The registry notes the mailbox received NRCS bulletins during late September before formal activation. Delivery cadence and format patterns are not yet established from a single observation. The previous assessment recorded this same initial bulletin.
+The Natural Resources Conservation Service delivers subscription bulletins via GovDelivery (sender usdafarmers@public.govdelivery.com) to the project mailbox with full text. The source was activated 2026-10-01 after observed delivery. Over 14 days, 2 items arrived at 0.14 per day, with the most recent on 2026-10-16, averaging 1,204 characters and ranging from 1,193 to 1,216 characters. The mailbox records 2 messages as bulletins with zero administrative messages, errors, or refused deliveries. The registry notes that bulletins were received in the mailbox during late September before formal activation. The previous assessment on 2026-10-11 recorded a single bulletin on 2026-10-02; the current measurement shows a second bulletin delivered on 2026-10-16.
 
-_Model-written assessment of our own ingestion, generated 2026-10-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-17 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
