@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-09, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-09, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-09-28T17:26:00Z (UTC) and was last re-checked 2026-10-17T03:56:12Z (UTC).
+This label has held since 2026-10-17T04:14:41Z (UTC) and was last re-checked 2026-10-18T03:58:25Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -83,7 +83,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-09, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-09, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-18 | 0 |
 | 2026-09-19 | 0 |
 | 2026-09-20 | 0 |
 | 2026-09-21 | 0 |
@@ -125,11 +124,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-15 | 0 |
 | 2026-10-16 | 0 |
 | 2026-10-17 | 0 |
+| 2026-10-18 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Registered 2026-09-26 with three configured sender addresses; began delivering 2026-09-28. One bulletin ingested in full text (~4,677 characters) generating one item, with no errors or refusals. The collector maintains stable contact with the email system. A single bulletin is an insufficient sample to characterize completeness; the observed stream is the subscription's own coverage measure.
+USDA Rural Development bulletins are delivered to the project mailbox from three configured sender addresses and ingested via the email adapter with DKIM verification. Over the measurement window, five messages arrived in the mailbox and three items were extracted at an observed rate of 0.21 items per day, with an average of 2,774 characters per item (ranging 2,268–3,769). Bulletins carry full text content. The most recent delivery arrived 2026-10-16, though the most recent dated item is from 2026-10-09. Since registration on 2026-09-26 and activation two days later, the mailbox has collected five bulletins with no errors or refused messages. Compared to the prior assessment of 2026-09-29, which recorded a single ingested bulletin, the observed count has grown to three items, though delivery remains quiet over the past nine days.
 
-_Model-written assessment of our own ingestion, generated 2026-09-29 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-18 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

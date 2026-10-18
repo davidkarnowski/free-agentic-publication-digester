@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 23 item(s) in the last 14 days; most recent 2026-10-16; 1 of 332 request(s) to www.defense.gov returned no content.
+**delivering** — 24 item(s) in the last 14 days; most recent 2026-10-17; 1 of 334 request(s) to www.defense.gov returned no content.
 
-This label has held since 2026-08-11T18:00:02Z (UTC) and was last re-checked 2026-10-17T03:56:12Z (UTC).
+This label has held since 2026-08-11T18:00:02Z (UTC) and was last re-checked 2026-10-18T03:58:25Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,24 +69,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 2 item(s) ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 23 in 14 days (1.64 per day) · most recent 2026-10-16 |
-| Content length | 296 characters average, 286 median (shortest 202, longest 398) |
+| Items ingested | 24 in 14 days (1.71 per day) · most recent 2026-10-17 |
+| Content length | 297 characters average, 290 median (shortest 202, longest 398) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.defense.gov | 332 request(s) · 331 answered · 1 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.3% returned no content |
+| Our requests to www.defense.gov | 334 request(s) · 333 answered · 1 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.3% returned no content |
 
-last answered request 2026-10-17T04:00:12.756+00:00 UTC.
+last answered request 2026-10-18T04:01:39.092+00:00 UTC.
 
-23 item(s) in the last 14 days; most recent 2026-10-16; 1 of 332 request(s) to www.defense.gov returned no content.
+24 item(s) in the last 14 days; most recent 2026-10-17; 1 of 334 request(s) to www.defense.gov returned no content.
 
 ### All time
 
-- **Our requests to www.defense.gov, all time (since 2026-07-30):** 2,129 request(s) · 2,119 answered · 10 returned no content
+- **Our requests to www.defense.gov, all time (since 2026-07-30):** 2,155 request(s) · 2,145 answered · 10 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.defense.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-18 | 3 | 25 | 702 |
 | 2026-09-19 | 1 | 25 | 407 |
 | 2026-09-20 | 0 | 25 | 354 |
 | 2026-09-21 | 2 | 27 | 572 |
@@ -125,7 +124,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-14 | 2 | 24 | 280 |
 | 2026-10-15 | 4 | 25 | 351 |
 | 2026-10-16 | 2 | 26 | 242 |
-| 2026-10-17 | 0 | 1 | 998 |
+| 2026-10-17 | 1 | 26 | 291 |
+| 2026-10-18 | 0 | 1 | 427 |
 
 ## Our ingestion assessment
 

@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-09, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-09, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-17T03:56:12Z (UTC).
+This label has held since 2026-10-17T04:14:41Z (UTC) and was last re-checked 2026-10-18T03:58:25Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -80,13 +80,13 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to www.cftc.gov | 332 request(s) · 332 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-17T04:00:13.925+00:00 UTC.
+last answered request 2026-10-18T04:01:39.604+00:00 UTC.
 
-Most recent item 2026-10-09, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-09, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.cftc.gov, all time (since 2026-08-01):** 2,097 request(s) · 2,097 answered · 0 returned no content
+- **Our requests to www.cftc.gov, all time (since 2026-08-01):** 2,122 request(s) · 2,122 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.cftc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-18 | 0 | 25 | 116 |
 | 2026-09-19 | 0 | 25 | 54 |
 | 2026-09-20 | 0 | 25 | 52 |
 | 2026-09-21 | 1 | 28 | 118 |
@@ -125,12 +124,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-14 | 0 | 25 | 81 |
 | 2026-10-15 | 0 | 25 | 68 |
 | 2026-10-16 | 0 | 25 | 62 |
-| 2026-10-17 | 0 | 1 | 109 |
+| 2026-10-17 | 0 | 25 | 63 |
+| 2026-10-18 | 0 | 1 | 93 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The press-release index continues delivery at 0.43 per day over 14 days, an increase from the prior 0.36 per day. Six items were ingested with an average of 142 characters; stored text consists of the headline and release number. All 337 polling requests succeeded. The index holds approximately 37 releases with agency-dated <time> elements and visible date text; pagination is not a concern at the current item rate.
+The CFTC press-release index is accessed via html-index adapter with an observed rate of 0.29 items per day over 14 days, down from 0.43 in the prior assessment. Ingested content consists of headlines and release numbers, averaging 153 characters per item (ranging 108–175 characters), with the feed-only delivery mode capturing index entries only, not article bodies. All 332 polling requests since activation succeeded without error. The underlying HTML table contains approximately 37 releases spanning roughly five months at the current publishing rate, with each row carrying double-dated information (machine-readable datetime attribute plus visible date text). The most recent item was dated 2026-10-09, nine days from the observation window. The decrease in items per day and the nine-day gap since the last dated entry both represent changes from the prior assessment.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-18 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

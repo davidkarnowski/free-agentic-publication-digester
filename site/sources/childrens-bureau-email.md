@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-09, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-09, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-07T18:52:44Z (UTC) and was last re-checked 2026-10-17T03:56:12Z (UTC).
+This label has held since 2026-10-17T04:14:41Z (UTC) and was last re-checked 2026-10-18T03:58:25Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -85,7 +85,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-09, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-09, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-18 | 0 |
 | 2026-09-19 | 0 |
 | 2026-09-20 | 0 |
 | 2026-09-21 | 0 |
@@ -127,11 +126,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-15 | 0 |
 | 2026-10-16 | 0 |
 | 2026-10-17 | 0 |
+| 2026-10-18 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Email bulletins from newsfromcb@communications.childwelfare.gov arrive in the project mailbox and are ingested through the email adapter with DKIM verification. Two bulletins arrived over 14 days at 0.14 items per day, with the most recent on 2026-10-07, averaging 326 characters (ranging from 215 to 437). The mailbox shows 2 messages classified as bulletins with no errors, administrative messages, or refused items. Since activation on 2026-10-01, the source has delivered policy news including policy manual amendments and program announcements. Compared to the assessment of 2026-10-02, which showed no messages recorded at that time, the source has now delivered two bulletins with the most recent dated 2026-10-07.
+Email bulletins from the Children's Bureau's 'News From CB' subscription arrive at the project mailbox and are ingested via the email adapter with DKIM verification. Three items have been extracted at a rate of 0.21 items per day over 14 days, averaging 323 characters per item (ranging 215–437), with content delivered in full text. The mailbox holds three messages classified as bulletins with no errors or refused items. The most recent dated item is 2026-10-09, with the most recent delivery recorded 2026-10-09. Since activation on 2026-10-01, the source has published policy news including Child Welfare Policy Manual amendments and program announcements. Compared to the prior assessment of 2026-10-08, which reported two items at 0.14 items per day, the source has delivered one additional item, increasing the observed rate to 0.21 items per day; delivery remains quiet over the past nine days.
 
-_Model-written assessment of our own ingestion, generated 2026-10-08 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-18 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
