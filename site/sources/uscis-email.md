@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-10, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-10, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-10T20:42:26Z (UTC) and was last re-checked 2026-10-18T03:58:25Z (UTC).
+This label has held since 2026-10-18T04:17:16Z (UTC) and was last re-checked 2026-10-19T03:57:17Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -80,7 +80,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-10, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-10, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-19 | 0 |
 | 2026-09-20 | 0 |
 | 2026-09-21 | 0 |
 | 2026-09-22 | 0 |
@@ -122,11 +121,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-16 | 0 |
 | 2026-10-17 | 0 |
 | 2026-10-18 | 0 |
+| 2026-10-19 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Subscription bulletins via GovDelivery deliver policy and procedural updates to the project mailbox with full text. Over 14 days, 3 items arrived at 0.21 per day (ranging 351 to 1,543 characters, median 1,471), with the most recent on 2026-10-10. All mailbox entries are DKIM-verified bulletins with zero errors or refusals. The previous assessment recorded 2 items in the window; this measurement shows 3, with the latest delivery occurring after the prior assessment date. The email collector operates stably with zero consecutive errors.
+GovDelivery subscription bulletins delivering policy-manual updates, form revisions, and filing-fee changes reach the project mailbox with full text. Three messages have been received from sender uscis@messages.dhs.gov, all DKIM-verified with zero errors or refusals, most recent on 2026-10-10. Current measurement shows 1 item at 351 characters in the 14-day window. Prior assessment recorded 3 items with a median of 1,471 characters and a range of 351 to 1,543 characters over its measurement period, with the same most-recent delivery date. The email collector operates without consecutive errors, last accessed the mailbox 2026-10-19, and health status is currently quiet with no deliveries in the past 7 days.
 
-_Model-written assessment of our own ingestion, generated 2026-10-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-19 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

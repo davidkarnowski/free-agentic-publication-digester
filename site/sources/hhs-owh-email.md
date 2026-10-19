@@ -6,7 +6,7 @@
 
 # HHS Office on Women's Health (email)
 
-planned · ingestion health: no data · Executive · Tier 3 · email bulletin · Department of Health and Human Services, Office on Women's Health
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Health and Human Services, Office on Women's Health
 
 Official site: https://womenshealth.gov/ · All sources: [sources.md](../sources.md)
 
@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**no data** — No bulletin recorded from this source in the last 180 days.
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-18, delivered by email.
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-10-18T03:58:25Z (UTC).
+This label has held since 2026-10-18T14:36:04Z (UTC) and was last re-checked 2026-10-19T03:57:17Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,18 +68,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — none recorded in the lookback period |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-18 |
+| Content length | 153 characters average, 153 median (shortest 153, longest 153) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-18 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-No bulletin recorded from this source in the last 180 days.
+1 item(s) in the last 14 days; most recent 2026-10-18, delivered by email.
 
 ### All time
 
@@ -87,12 +89,45 @@ Bulletins from this source are delivered to the project mailbox, so there are no
 
 ### Last 30 days, day by day
 
-No requests and no items were recorded in the last 30 days, so there is nothing to chart.
+Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publication day the digests use; the stored request stamps remain UTC.
+
+| Day | Items ingested |
+|---|---|
+| 2026-09-20 | 0 |
+| 2026-09-21 | 0 |
+| 2026-09-22 | 0 |
+| 2026-09-23 | 0 |
+| 2026-09-24 | 0 |
+| 2026-09-25 | 0 |
+| 2026-09-26 | 0 |
+| 2026-09-27 | 0 |
+| 2026-09-28 | 0 |
+| 2026-09-29 | 0 |
+| 2026-09-30 | 0 |
+| 2026-10-01 | 0 |
+| 2026-10-02 | 0 |
+| 2026-10-03 | 0 |
+| 2026-10-04 | 0 |
+| 2026-10-05 | 0 |
+| 2026-10-06 | 0 |
+| 2026-10-07 | 0 |
+| 2026-10-08 | 0 |
+| 2026-10-09 | 0 |
+| 2026-10-10 | 0 |
+| 2026-10-11 | 0 |
+| 2026-10-12 | 0 |
+| 2026-10-13 | 0 |
+| 2026-10-14 | 0 |
+| 2026-10-15 | 0 |
+| 2026-10-16 | 0 |
+| 2026-10-17 | 0 |
+| 2026-10-18 | 1 |
+| 2026-10-19 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-This source delivers bulletins through the project mailbox using the GovDelivery platform. Subscription was confirmed through the publisher's signup flow in September 2026, and the source was registered for automated ingestion on 2026-09-26. Bulletins matching this sender were already present in the mailbox before registration; ingestion begins with the first poll following deployment. No bulletins have been recorded from this source since registration. The collector has accessed the mailbox without errors, observing zero messages associated with this source across the past week. No delivery pattern, cadence, or format characteristics are yet observable. Gate-3 coverage evaluation awaits the first ingested bulletin.
+GovDelivery subscription bulletins carrying press releases and program announcements have begun delivery to the project mailbox with full text. Subscription was confirmed 2026-09-26. One message arrived 2026-10-18 at 153 characters, DKIM-verified with zero errors or refusals. This represents the first observable ingestion from this source; the previous assessment dated 2026-09-27 reported zero bulletins since registration and deployment. Current health status indicates active delivery. The email collector operates without consecutive errors and last accessed the mailbox 2026-10-19.
 
-_Model-written assessment of our own ingestion, generated 2026-09-27 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-19 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

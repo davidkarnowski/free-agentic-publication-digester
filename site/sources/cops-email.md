@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-10, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-10, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-10T14:47:50Z (UTC) and was last re-checked 2026-10-18T03:58:25Z (UTC).
+This label has held since 2026-10-18T04:17:16Z (UTC) and was last re-checked 2026-10-19T03:57:17Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -83,7 +83,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-10, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-10, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-19 | 0 |
 | 2026-09-20 | 0 |
 | 2026-09-21 | 0 |
 | 2026-09-22 | 0 |
@@ -125,11 +124,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-16 | 0 |
 | 2026-10-17 | 0 |
 | 2026-10-18 | 0 |
+| 2026-10-19 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Subscription bulletins via GovDelivery deliver grant announcements and resources to the project mailbox with full text. Status is 'planned.' Over 14 days, 1 item was ingested on 2026-10-10 at 417 characters. The mailbox received 2 messages total, with 1 parsed as a bulletin. Messages arrive from two sender addresses: copsdonotreply@service.govdelivery.com and copsusdoj@service.govdelivery.com. All messages are verified and error-free. The previous assessment noted zero bulletins after registration on 2026-09-26; this measurement shows the first ingested item. Gate-3 coverage evaluation is pending.
+GovDelivery subscription bulletins carrying grant announcements and resources deliver to the project mailbox with full text. Two messages have been received from either copsdonotreply@service.govdelivery.com or copsusdoj@service.govdelivery.com, with 1 parsed as a bulletin at 417 characters on 2026-10-10; all messages are DKIM-verified with zero errors or refusals. Registration occurred 2026-09-26; the previous assessment reported zero bulletins, while current measurement shows 1 ingested item appearing after that assessment date. Health status is currently quiet with no recent deliveries. The email collector operates without consecutive errors.
 
-_Model-written assessment of our own ingestion, generated 2026-10-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-19 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
