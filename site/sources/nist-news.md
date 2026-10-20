@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 3 item(s) in the last 14 days; most recent 2026-10-16; 0 of 334 request(s) to www.nist.gov returned no content.
+**delivering** — 3 item(s) in the last 14 days; most recent 2026-10-16; 0 of 332 request(s) to www.nist.gov returned no content.
 
-This label has held since 2026-10-16T16:27:15Z (UTC) and was last re-checked 2026-10-19T03:57:17Z (UTC).
+This label has held since 2026-10-16T16:27:15Z (UTC) and was last re-checked 2026-10-20T03:44:38Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -77,15 +77,15 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-10-16 |
 | Content length | 7,370 characters average, 6,549 median (shortest 5,460, longest 10,100) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.nist.gov | 334 request(s) · 334 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.nist.gov | 332 request(s) · 332 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-19T04:00:22.372+00:00 UTC.
+last answered request 2026-10-20T04:00:17.557+00:00 UTC.
 
-3 item(s) in the last 14 days; most recent 2026-10-16; 0 of 334 request(s) to www.nist.gov returned no content.
+3 item(s) in the last 14 days; most recent 2026-10-16; 0 of 332 request(s) to www.nist.gov returned no content.
 
 ### All time
 
-- **Our requests to www.nist.gov, all time (since 2026-07-30):** 2,190 request(s) · 2,184 answered · 6 returned no content
+- **Our requests to www.nist.gov, all time (since 2026-07-30):** 2,215 request(s) · 2,209 answered · 6 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nist.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-20 | 0 | 25 | 139 |
 | 2026-09-21 | 0 | 26 | 175 |
 | 2026-09-22 | 0 | 25 | 128 |
 | 2026-09-23 | 0 | 24 | 131 |
@@ -124,7 +123,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-16 | 1 | 27 | 120 |
 | 2026-10-17 | 0 | 25 | 119 |
 | 2026-10-18 | 0 | 25 | 114 |
-| 2026-10-19 | 0 | 1 | 193 |
+| 2026-10-19 | 0 | 25 | 119 |
+| 2026-10-20 | 0 | 1 | 103 |
 
 ## Our ingestion assessment
 

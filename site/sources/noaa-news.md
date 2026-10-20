@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-10-15; 0 of 331 request(s) to www.noaa.gov returned no content.
+**delivering** — 6 item(s) in the last 14 days; most recent 2026-10-15; 0 of 330 request(s) to www.noaa.gov returned no content.
 
-This label has held since 2026-09-18T04:27:20Z (UTC) and was last re-checked 2026-10-19T03:57:17Z (UTC).
+This label has held since 2026-09-18T04:27:20Z (UTC) and was last re-checked 2026-10-20T03:44:38Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -76,15 +76,15 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-10-15 |
 | Content length | 3,336 characters average, 3,402 median (shortest 401, longest 6,254) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.noaa.gov | 331 request(s) · 331 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.noaa.gov | 330 request(s) · 330 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-19T04:00:22.266+00:00 UTC.
+last answered request 2026-10-20T04:00:17.563+00:00 UTC.
 
-6 item(s) in the last 14 days; most recent 2026-10-15; 0 of 331 request(s) to www.noaa.gov returned no content.
+6 item(s) in the last 14 days; most recent 2026-10-15; 0 of 330 request(s) to www.noaa.gov returned no content.
 
 ### All time
 
-- **Our requests to www.noaa.gov, all time (since 2026-07-30):** 2,265 request(s) · 2,156 answered · 109 returned no content
+- **Our requests to www.noaa.gov, all time (since 2026-07-30):** 2,290 request(s) · 2,181 answered · 109 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.noaa.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-20 | 0 | 25 | 266 |
 | 2026-09-21 | 2 | 28 | 329 |
 | 2026-09-22 | 1 | 25 | 236 |
 | 2026-09-23 | 0 | 24 | 291 |
@@ -123,12 +122,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-16 | 0 | 26 | 255 |
 | 2026-10-17 | 0 | 25 | 260 |
 | 2026-10-18 | 0 | 25 | 289 |
-| 2026-10-19 | 0 | 1 | 243 |
+| 2026-10-19 | 0 | 25 | 169 |
+| 2026-10-20 | 0 | 1 | 143 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-NOAA's news feed at noaa.gov/rss.xml remains feed-only ingestion; the news index and individual article pages return HTTP 403. Feed descriptions average 2,343 characters and supply the substance of items. Over the past 14 days we ingested 6 items at a rate of 0.43 per day, with the most recent on 2026-09-17. Request reliability has improved from the prior assessment: of 349 requests to www.noaa.gov in the current window, 18 returned no content (5.2% error rate) versus 15.3% no-response previously. A single failure occurred in the past 24 hours. Delivery cadence is intermittent—several inactive days followed by occasional pulses of multiple items within a single collection cycle.
+The NOAA feed remains accessible at noaa.gov/rss.xml with feed-only ingestion; the news index and individual article pages return HTTP 403, blocking direct access to full article text. Feed descriptions carry the substantive content, averaging 3,336 characters per item. Over the past 14 days, six items have been ingested at a measured rate of 0.43 items per day, with the most recent dated 2026-10-15. All 330 requests to www.noaa.gov completed successfully with zero errors. Request reliability has improved in the current window; the prior assessment on 2026-09-19 reported the same six items at the same rate, but recorded 18 of 349 requests (5.2%) returning no content, whereas the current window shows zero such failures.
 
-_Model-written assessment of our own ingestion, generated 2026-09-19 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-20 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
