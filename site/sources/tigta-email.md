@@ -6,7 +6,7 @@
 
 # Treasury Inspector General for Tax Administration (email)
 
-active · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of the Treasury, Treasury Inspector General for Tax Administration
+active · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of the Treasury, Treasury Inspector General for Tax Administration
 
 Official site: https://www.tigta.gov/ · All sources: [sources.md](../sources.md)
 
@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-02, 18 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-20, delivered by email.
 
-This label has held since 2026-10-10T04:16:51Z (UTC) and was last re-checked 2026-10-20T03:44:38Z (UTC).
+This label has held since 2026-10-20T14:18:15Z (UTC) and was last re-checked 2026-10-21T03:52:40Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,18 +71,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-02 |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-20 |
+| Content length | 2,912 characters average, 2,912 median (shortest 2,912, longest 2,912) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-20 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-02, 18 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-10-20, delivered by email.
 
 ### All time
 
@@ -94,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-21 | 0 |
 | 2026-09-22 | 0 |
 | 2026-09-23 | 0 |
 | 2026-09-24 | 0 |
@@ -123,12 +124,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-17 | 0 |
 | 2026-10-18 | 0 |
 | 2026-10-19 | 0 |
-| 2026-10-20 | 0 |
+| 2026-10-20 | 1 |
+| 2026-10-21 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Subscription bulletins via GovDelivery deliver audit and inspection announcements to the project mailbox with full text. Over 14 days, 2 items arrived at 0.14 per day, averaging 5,513 characters (ranging 3,930 to 7,096). The most recent item is from 2026-10-02 (9 days ago), placing the source quiet past 7 days. All messages are DKIM-verified with zero errors. The previous assessment recorded 1 bulletin on 2026-09-28; current measurement shows a second item. Bulletins cite archived messages, as no external links are carried. The email collector maintains stable operation.
+The TIGTA email subscription via GovDelivery delivers bulletins with full text to the project mailbox, announcing audit and inspection reports. Over the past 14 days, 1 item arrived at a rate of 0.07 per day, containing 2,912 characters. The message, delivered 2026-10-20 at 14:16 UTC, was DKIM-verified with zero errors and zero rejected items. Bulletins cite archived messages without carrying external web links. Compared to the previous assessment from 2026-10-11, the ingestion pattern has changed: that measurement showed 2 items at 0.14 per day, averaging 5,513 characters (ranging 3,930 to 7,096), with the most recent from 2026-10-02. The current 14-day window beginning 2026-10-07 captures only 1 of those items; a new bulletin arrived on 2026-10-20. Email collection maintains stable operational status with zero errors.
 
-_Model-written assessment of our own ingestion, generated 2026-10-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-21 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
