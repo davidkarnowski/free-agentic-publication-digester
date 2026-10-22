@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-13, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-13, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-02T01:22:07Z (UTC) and was last re-checked 2026-10-21T03:52:40Z (UTC).
+This label has held since 2026-10-21T04:19:32Z (UTC) and was last re-checked 2026-10-22T03:45:30Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -76,7 +76,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-13, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-13, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -88,7 +88,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-22 | 0 |
 | 2026-09-23 | 0 |
 | 2026-09-24 | 0 |
 | 2026-09-25 | 0 |
@@ -118,11 +117,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-19 | 0 |
 | 2026-10-20 | 0 |
 | 2026-10-21 | 0 |
+| 2026-10-22 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The HUD Office of Inspector General subscription delivers audit and investigative announcements to the project mailbox. One bulletin was observed in the 14-day window, delivered on 2026-10-01, measuring 1,987 characters. The email adapter is functioning without errors. This represents the first ingested bulletin from this source since subscription confirmation in July 2026. The bulletin carries the substantive content of audit reports or investigative findings. DKIM verification is applied on ingestion.
+The HUD Office of Inspector General subscription delivers audit and investigative bulletins from hudoig@info.hudoig.gov to the project mailbox in full-text format. One bulletin was ingested during the 14-day window, dated 2026-10-13 and measuring 4,202 characters. The email adapter processed this delivery without errors; DKIM verification is applied and the signing key archived. Subscription was confirmed 2026-07-29. The prior assessment (2026-10-02) recorded one item dated 2026-10-01; one additional delivery has since arrived. The source has been quiet for nine days since 2026-10-13. The HUD newsroom returns HTTP 403 to the identified client, making the email subscription the only working delivery channel from this office.
 
-_Model-written assessment of our own ingestion, generated 2026-10-02 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-22 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

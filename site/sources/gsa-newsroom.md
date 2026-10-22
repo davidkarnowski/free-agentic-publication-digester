@@ -6,7 +6,7 @@
 
 # GSA News Releases
 
-active · ingestion health: quiet · Executive · Tier 1 · HTML index · Independent agency
+active · ingestion health: delivering · Executive · Tier 1 · HTML index · Independent agency
 
 Official site: https://www.gsa.gov/about-us/newsroom/news-releases · All sources: [sources.md](../sources.md)
 
@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-01, 20 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-21; 0 of 328 request(s) to www.gsa.gov returned no content.
 
-This label has held since 2026-10-09T04:08:52Z (UTC) and was last re-checked 2026-10-21T03:52:40Z (UTC).
+This label has held since 2026-10-21T17:58:30Z (UTC) and was last re-checked 2026-10-22T03:45:30Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,22 +67,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-01 |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-21 |
+| Content length | 299 characters average, 299 median (shortest 210, longest 388) |
+| Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to www.gsa.gov | 328 request(s) · 328 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-21T04:00:17.669+00:00 UTC.
+last answered request 2026-10-22T04:00:14.094+00:00 UTC.
 
-Most recent item 2026-10-01, 20 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-10-21; 0 of 328 request(s) to www.gsa.gov returned no content.
 
 ### All time
 
-- **Our requests to www.gsa.gov, all time (since 2026-09-28):** 570 request(s) · 570 answered · 0 returned no content
+- **Our requests to www.gsa.gov, all time (since 2026-09-28):** 596 request(s) · 596 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -92,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.gsa.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-22 | 0 | 0 | — |
 | 2026-09-23 | 0 | 0 | — |
 | 2026-09-24 | 0 | 0 | — |
 | 2026-09-25 | 0 | 0 | — |
@@ -121,12 +122,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-18 | 0 | 25 | 203 |
 | 2026-10-19 | 0 | 24 | 210 |
 | 2026-10-20 | 0 | 26 | 134 |
-| 2026-10-21 | 0 | 1 | 10 |
+| 2026-10-21 | 2 | 26 | 212 |
+| 2026-10-22 | 0 | 1 | 283 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Polling occurs consistently, with 25–26 requests per day. The HTML index requires daily diffing as no autodiscovered RSS feed exists. Over the past six days, zero items were observed; the most recent item was dated 2026-10-01, nine days prior. All 130 requests to www.gsa.gov answered successfully. The listing displays the first page only, so items published between two polls in excess of page size would not be observed. Entries without readable dates are dropped and never observation-dated.
+Polling the GSA News Releases HTML index via daily diffing yields approximately 25 to 26 requests daily. All 328 requests to www.gsa.gov succeeded with zero failures over the measurement period. Two items were observed during the 14-day window, both dated 2026-10-21 and averaging 299 characters. The prior assessment (2026-10-10) recorded zero items with the most recent dating 2026-10-01; delivery resumed on 2026-10-21 after a nine-day gap. The index displays the first page only, creating the possibility of under-coverage if publication volume exceeds page capacity between polls. Entries without machine-readable dates are dropped and never observation-dated. A URL redirect from /about-us/ to /about-gsa/ has been registered as the active index.
 
-_Model-written assessment of our own ingestion, generated 2026-10-10 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-22 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

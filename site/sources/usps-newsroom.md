@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-20; 0 of 329 request(s) to about.usps.com returned no content.
+**delivering** — 3 item(s) in the last 14 days; most recent 2026-10-21; 0 of 328 request(s) to about.usps.com returned no content.
 
-This label has held since 2026-10-20T15:49:09Z (UTC) and was last re-checked 2026-10-21T03:52:40Z (UTC).
+This label has held since 2026-10-20T15:49:09Z (UTC) and was last re-checked 2026-10-22T03:45:30Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -63,24 +63,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · 2 item(s) ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-20 |
-| Content length | 403 characters average, 403 median (shortest 253, longest 553) |
+| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-10-21 |
+| Content length | 402 characters average, 400 median (shortest 253, longest 553) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to about.usps.com | 329 request(s) · 329 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to about.usps.com | 328 request(s) · 328 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-21T04:00:19.391+00:00 UTC.
+last answered request 2026-10-22T04:00:14.870+00:00 UTC.
 
-2 item(s) in the last 14 days; most recent 2026-10-20; 0 of 329 request(s) to about.usps.com returned no content.
+3 item(s) in the last 14 days; most recent 2026-10-21; 0 of 328 request(s) to about.usps.com returned no content.
 
 ### All time
 
-- **Our requests to about.usps.com, all time (since 2026-08-01):** 2,202 request(s) · 2,201 answered · 1 returned no content
+- **Our requests to about.usps.com, all time (since 2026-08-01):** 2,227 request(s) · 2,226 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -90,7 +90,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to about.usps.com | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-22 | 1 | 26 | 198 |
 | 2026-09-23 | 1 | 24 | 201 |
 | 2026-09-24 | 0 | 25 | 363 |
 | 2026-09-25 | 2 | 25 | 167 |
@@ -119,7 +118,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-18 | 0 | 25 | 159 |
 | 2026-10-19 | 0 | 25 | 149 |
 | 2026-10-20 | 2 | 24 | 237 |
-| 2026-10-21 | 0 | 1 | 106 |
+| 2026-10-21 | 1 | 25 | 197 |
+| 2026-10-22 | 0 | 1 | 187 |
 
 ## Our ingestion assessment
 

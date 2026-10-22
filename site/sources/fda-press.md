@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-10-20; 0 of 333 request(s) to www.fda.gov returned no content.
+**delivering** — 6 item(s) in the last 14 days; most recent 2026-10-20; 0 of 334 request(s) to www.fda.gov returned no content.
 
-This label has held since 2026-10-14T18:56:51Z (UTC) and was last re-checked 2026-10-21T03:52:40Z (UTC).
+This label has held since 2026-10-14T18:56:51Z (UTC) and was last re-checked 2026-10-22T03:45:30Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,7 +62,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · 3 item(s) ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -71,15 +71,15 @@ Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · 3 item(s) i
 | Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-10-20 |
 | Content length | 6,626 characters average, 6,498 median (shortest 5,888, longest 7,529) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.fda.gov | 333 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.fda.gov | 334 request(s) · 334 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-21T04:00:20.158+00:00 UTC.
+last answered request 2026-10-22T04:00:15.137+00:00 UTC.
 
-6 item(s) in the last 14 days; most recent 2026-10-20; 0 of 333 request(s) to www.fda.gov returned no content.
+6 item(s) in the last 14 days; most recent 2026-10-20; 0 of 334 request(s) to www.fda.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fda.gov, all time (since 2026-07-30):** 2,264 request(s) · 2,263 answered · 1 returned no content
+- **Our requests to www.fda.gov, all time (since 2026-07-30):** 2,290 request(s) · 2,289 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -89,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fda.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-22 | 0 | 25 | 175 |
 | 2026-09-23 | 1 | 25 | 192 |
 | 2026-09-24 | 0 | 26 | 200 |
 | 2026-09-25 | 0 | 26 | 285 |
@@ -118,7 +117,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-18 | 0 | 25 | 180 |
 | 2026-10-19 | 1 | 26 | 203 |
 | 2026-10-20 | 3 | 27 | 130 |
-| 2026-10-21 | 0 | 1 | 126 |
+| 2026-10-21 | 0 | 26 | 162 |
+| 2026-10-22 | 0 | 1 | 177 |
 
 ## Our ingestion assessment
 

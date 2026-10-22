@@ -6,7 +6,7 @@
 
 # OCC Bulletins
 
-active · ingestion health: quiet · Executive · Tier 2 · RSS feed · Department of the Treasury
+active · ingestion health: delivering · Executive · Tier 2 · RSS feed · Department of the Treasury
 
 Official site: https://www.occ.gov/rss/index-rss.html · All sources: [sources.md](../sources.md)
 
@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-05, 16 days ago (quiet past 7 days).
+**delivering** — 3 item(s) in the last 14 days; most recent 2026-10-21; 1 of 660 request(s) to www.occ.gov returned no content.
 
-This label has held since 2026-10-13T04:07:47Z (UTC) and was last re-checked 2026-10-21T03:52:40Z (UTC).
+This label has held since 2026-10-21T12:06:15Z (UTC) and was last re-checked 2026-10-22T03:45:30Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,22 +62,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 50 request(s) (50 answered, 0 returned no content) · no items ingested
+Last 24 hours: 55 request(s) (54 answered, 1 returned no content) · 3 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-05 |
-| Our requests to www.occ.gov | 659 request(s) · 659 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-10-21 |
+| Content length | 9,305 characters average, 7,923 median (shortest 7,020, longest 12,973) |
+| Delivery mode | full — full article text, fetched from the item's own page |
+| Our requests to www.occ.gov | 660 request(s) · 659 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.2% returned no content |
 
-last answered request 2026-10-21T04:00:18.803+00:00 UTC; this host serves 2 registered sources, so these figures are host-wide.
+last answered request 2026-10-22T04:00:37.497+00:00 UTC; this host serves 2 registered sources, so these figures are host-wide.
 
-Most recent item 2026-10-05, 16 days ago (quiet past 7 days).
+3 item(s) in the last 14 days; most recent 2026-10-21; 1 of 660 request(s) to www.occ.gov returned no content.
 
 ### All time
 
-- **Our requests to www.occ.gov, all time (since 2026-10-05):** 796 request(s) · 796 answered · 0 returned no content
+- **Our requests to www.occ.gov, all time (since 2026-10-05):** 851 request(s) · 850 answered · 1 returned no content
 
 This host serves 2 registered sources, so these figures are host-wide.
 
@@ -89,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.occ.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-22 | 0 | 0 | — |
 | 2026-09-23 | 0 | 0 | — |
 | 2026-09-24 | 0 | 0 | — |
 | 2026-09-25 | 0 | 0 | — |
@@ -118,12 +119,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-18 | 0 | 50 | 198 |
 | 2026-10-19 | 0 | 50 | 202 |
 | 2026-10-20 | 0 | 50 | 228 |
-| 2026-10-21 | 0 | 2 | 290 |
+| 2026-10-21 | 3 | 54 | 201 |
+| 2026-10-22 | 0 | 3 | 5406 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Newly ingested and activated on 2026-10-05, the OCC Bulletins source polls an RSS feed and fetches the full text from each item's linked page, as feed descriptions are summaries. Over the past 14 days, we observed 10 items at a rate of 0.71 per day, consistent with the initial assessment. The most recent item was delivered on 2026-10-05. All 442 requests to www.occ.gov succeeded with a 0.0% error rate, maintaining the 100% success rate reported previously. Extracted content averaged 7,408 characters, with a range from 5,316 to 12,791 characters, consistent with the initial assessment. The feed does not include GUIDs, with item identity established by the bulletin link. Overlap with Federal Register entries for rulemaking is noted, but these are separate documents and are not merged. The source is currently quiet, with no items detected in the last 7 days.
+The OCC Bulletins RSS feed is polled hourly with full-text retrieval from each item's linked page. Three items were ingested on 2026-10-21 in full-text format, averaging 9,305 characters with a range from 7,020 to 12,973 characters. Of 660 requests to www.occ.gov, 659 answered successfully; one request on 2026-10-22 at 00:00 UTC returned no response, yielding a 0.2% error rate. The feed lacks GUIDs; item identity is established by the bulletin link URL. The prior assessment (2026-10-14) reported 10 items through 2026-10-05 at 0.71 per day with none in the prior seven days; measurement now shows resumption of deliveries on 2026-10-21 following a 16-day gap.
 
-_Model-written assessment of our own ingestion, generated 2026-10-14 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-22 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-08, 13 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-08, 14 days ago (quiet past 7 days).
 
-This label has held since 2026-10-16T04:16:49Z (UTC) and was last re-checked 2026-10-21T03:52:40Z (UTC).
+This label has held since 2026-10-16T04:16:49Z (UTC) and was last re-checked 2026-10-22T03:45:30Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -78,14 +78,12 @@ Last 24 hours: no items ingested
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-08 |
-| Content length | 680 characters average, 680 median (shortest 680, longest 680) |
-| Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-20 |
+| Items ingested | none in the last 14 days — most recent 2026-10-08 |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-20 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-08, 13 days ago (quiet past 7 days).
+Most recent item 2026-10-08, 14 days ago (quiet past 7 days).
 
 ### All time
 
@@ -97,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-22 | 0 |
 | 2026-09-23 | 0 |
 | 2026-09-24 | 0 |
 | 2026-09-25 | 0 |
@@ -127,6 +124,7 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-19 | 0 |
 | 2026-10-20 | 0 |
 | 2026-10-21 | 0 |
+| 2026-10-22 | 0 |
 
 ## Our ingestion assessment
 

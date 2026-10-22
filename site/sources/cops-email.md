@@ -6,7 +6,7 @@
 
 # DOJ COPS Office (email)
 
-planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Justice, Office of Community Oriented Policing Services
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Justice, Office of Community Oriented Policing Services
 
 Official site: https://cops.usdoj.gov/ · All sources: [sources.md](../sources.md)
 
@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-10, 11 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-21, delivered by email.
 
-This label has held since 2026-10-18T04:17:16Z (UTC) and was last re-checked 2026-10-21T03:52:40Z (UTC).
+This label has held since 2026-10-21T13:53:36Z (UTC) and was last re-checked 2026-10-22T03:45:30Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,20 +70,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-10 |
-| Content length | 417 characters average, 417 median (shortest 417, longest 417) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-21 |
+| Content length | 538 characters average, 538 median (shortest 417, longest 659) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-10 |
+| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-21 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-10, 11 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-10-21, delivered by email.
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-22 | 0 |
 | 2026-09-23 | 0 |
 | 2026-09-24 | 0 |
 | 2026-09-25 | 0 |
@@ -124,12 +123,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-18 | 0 |
 | 2026-10-19 | 0 |
 | 2026-10-20 | 0 |
-| 2026-10-21 | 0 |
+| 2026-10-21 | 1 |
+| 2026-10-22 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-GovDelivery subscription bulletins carrying grant announcements and resources deliver to the project mailbox with full text. Two messages have been received from either copsdonotreply@service.govdelivery.com or copsusdoj@service.govdelivery.com, with 1 parsed as a bulletin at 417 characters on 2026-10-10; all messages are DKIM-verified with zero errors or refusals. Registration occurred 2026-09-26; the previous assessment reported zero bulletins, while current measurement shows 1 ingested item appearing after that assessment date. Health status is currently quiet with no recent deliveries. The email collector operates without consecutive errors.
+DOJ COPS Office bulletins deliver via GovDelivery to the project mailbox in full-text format from copsdonotreply@service.govdelivery.com or copsusdoj@service.govdelivery.com. Two bulletins were ingested during the 14-day window, most recently on 2026-10-21, measuring 417 and 659 characters. The email adapter reports zero errors and zero refused messages; all deliveries are DKIM-verified. Subscription was confirmed 2026-09-26. The prior assessment (2026-10-19) noted one parsed bulletin from 2026-10-10; one additional bulletin arrived on 2026-10-21. Bulletins were observed in the mailbox prior to formal registry entry; ingestion proceeded from the first collection cycle after deployment without backfilling pre-deployment messages.
 
-_Model-written assessment of our own ingestion, generated 2026-10-19 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-22 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
