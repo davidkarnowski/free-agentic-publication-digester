@@ -6,7 +6,7 @@
 
 # ATF News (email)
 
-planned · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Justice (ATF)
+planned · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Justice (ATF)
 
 Official site: https://www.atf.gov/news · All sources: [sources.md](../sources.md)
 
@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-08-14, 69 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-22, delivered by email.
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-10-22T03:45:30Z (UTC).
+This label has held since 2026-10-22T17:54:48Z (UTC) and was last re-checked 2026-10-23T03:51:00Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,18 +70,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-08-14 |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-22 |
+| Content length | 1,113 characters average, 1,113 median (shortest 1,113, longest 1,113) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-22 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-08-14, 69 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-10-22, delivered by email.
 
 ### All time
 
@@ -89,12 +91,45 @@ Bulletins from this source are delivered to the project mailbox, so there are no
 
 ### Last 30 days, day by day
 
-No requests and no items were recorded in the last 30 days, so there is nothing to chart.
+Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publication day the digests use; the stored request stamps remain UTC.
+
+| Day | Items ingested |
+|---|---|
+| 2026-09-24 | 0 |
+| 2026-09-25 | 0 |
+| 2026-09-26 | 0 |
+| 2026-09-27 | 0 |
+| 2026-09-28 | 0 |
+| 2026-09-29 | 0 |
+| 2026-09-30 | 0 |
+| 2026-10-01 | 0 |
+| 2026-10-02 | 0 |
+| 2026-10-03 | 0 |
+| 2026-10-04 | 0 |
+| 2026-10-05 | 0 |
+| 2026-10-06 | 0 |
+| 2026-10-07 | 0 |
+| 2026-10-08 | 0 |
+| 2026-10-09 | 0 |
+| 2026-10-10 | 0 |
+| 2026-10-11 | 0 |
+| 2026-10-12 | 0 |
+| 2026-10-13 | 0 |
+| 2026-10-14 | 0 |
+| 2026-10-15 | 0 |
+| 2026-10-16 | 0 |
+| 2026-10-17 | 0 |
+| 2026-10-18 | 0 |
+| 2026-10-19 | 0 |
+| 2026-10-20 | 0 |
+| 2026-10-21 | 0 |
+| 2026-10-22 | 1 |
+| 2026-10-23 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The ATF subscription was activated in late July 2026, with a single bulletin recorded on August 14, now 44 days in the past. No bulletins have arrived in the recent measurement window. The email adapter is polling without errors. The earlier receipt confirms the subscription is functional, and ingestion will resume when new bulletins arrive.
+The ATF News source delivers bulletins via email subscription (atf@service.govdelivery.com) to the project mailbox, ingested through DKIM verification and RFC-5322 archiving. Over 14 days, one bulletin arrived dated 2026-10-22, measuring 1,113 characters in full-text delivery mode. The mailbox collector recorded zero consecutive errors and zero refused messages. The source has demonstrated sporadic delivery: the prior assessment (2026-09-27) reported a single bulletin from August 14, after which no further deliveries occurred for over two months. The recent bulletin on 2026-10-22 represents resumed delivery. Email sources generate no polling requests; health is assessed from mailbox activity alone.
 
-_Model-written assessment of our own ingestion, generated 2026-09-27 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-23 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

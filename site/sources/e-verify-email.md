@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-14, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-14, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-14T14:16:03Z (UTC) and was last re-checked 2026-10-22T03:45:30Z (UTC).
+This label has held since 2026-10-22T04:14:08Z (UTC) and was last re-checked 2026-10-23T03:51:00Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -79,7 +79,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-14, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-14, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-23 | 0 |
 | 2026-09-24 | 0 |
 | 2026-09-25 | 0 |
 | 2026-09-26 | 0 |
@@ -121,11 +120,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-20 | 0 |
 | 2026-10-21 | 0 |
 | 2026-10-22 | 0 |
+| 2026-10-23 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-E-Verify delivers full-text bulletins to the project mailbox from e-verify.uscis@messages.dhs.gov, DKIM-verified and archived. Subscription was confirmed 2026-09-26; earlier bulletins were not backfilled. Over 14 days, one item delivered at a rate of 0.07 per day, dated 2026-10-14. Content measured 1,721 characters. The prior assessment, measured over a six-day window, observed zero items in that period; this assessment captures the first post-subscription delivery. The mailbox collector recorded zero consecutive errors and zero refused messages. Email sources generate no polling requests.
+The E-Verify source delivers bulletins via email subscription (e-verify.uscis@messages.dhs.gov) to the project mailbox, ingested through DKIM verification and RFC-5322 archiving. Subscription was confirmed 2026-09-26; earlier bulletins were not backfilled. Over 14 days, one item arrived dated 2026-10-14, measuring 1,721 characters in full-text delivery. The mailbox collector recorded zero consecutive errors and zero refused messages. This represents the first post-subscription delivery recorded in the measurement window. The prior assessment (2026-10-15) reported the same single item; nine days have elapsed since delivery. Email sources generate no polling requests; health is assessed from mailbox activity alone.
 
-_Model-written assessment of our own ingestion, generated 2026-10-15 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-23 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

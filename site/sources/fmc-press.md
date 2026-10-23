@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-14, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-14, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-14T13:26:29Z (UTC) and was last re-checked 2026-10-22T03:45:30Z (UTC).
+This label has held since 2026-10-22T04:14:08Z (UTC) and was last re-checked 2026-10-23T03:51:00Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,15 +71,15 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-14 |
 | Content length | 3,896 characters average, 3,896 median (shortest 3,896, longest 3,896) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.fmc.gov | 328 request(s) · 328 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.fmc.gov | 327 request(s) · 327 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-22T04:00:14.951+00:00 UTC.
+last answered request 2026-10-23T04:00:16.177+00:00 UTC.
 
-Most recent item 2026-10-14, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-14, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.fmc.gov, all time (since 2026-10-05):** 421 request(s) · 421 answered · 0 returned no content
+- **Our requests to www.fmc.gov, all time (since 2026-10-05):** 446 request(s) · 446 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -89,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fmc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-23 | 0 | 0 | — |
 | 2026-09-24 | 0 | 0 | — |
 | 2026-09-25 | 0 | 0 | — |
 | 2026-09-26 | 0 | 0 | — |
@@ -118,12 +117,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-19 | 0 | 25 | 87 |
 | 2026-10-20 | 0 | 25 | 121 |
 | 2026-10-21 | 0 | 25 | 189 |
-| 2026-10-22 | 0 | 1 | 137 |
+| 2026-10-22 | 0 | 25 | 104 |
+| 2026-10-23 | 0 | 1 | 112 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Activated 2026-10-05, FMC Press Releases polls an RSS feed and fetches full article text from each item's linked page. Feed descriptions are approximately 680-character excerpts. Over 14 days, 11 items delivered at a rate of 0.79 per day. Extracted content averaged 5,329 characters, ranging from 2,455 to 22,756. All 246 requests to www.fmc.gov succeeded (0.0% error rate). The feed uses the site's post ID as GUID. The most recent item dates 2026-10-14, one day beyond the prior assessment's cutoff, confirming continued low-frequency delivery. Historical volume spans January to July 2026.
+The FMC Press Releases source polls an RSS feed and fetches full article text from each item; feed descriptions are approximately 680-character excerpts. Over 14 days, one item delivered, dated 2026-10-14. Extracted content measured 3,896 characters. All 327 polling requests to www.fmc.gov succeeded with zero errors. The feed uses the site's post ID as GUID. Historical volume spans January to July 2026, totaling ten items across that period. The prior assessment (2026-10-15) measured 11 items over its 14-day window at 0.79 per day. The current window contains only one item, reflecting the rolling measurement scope and the absence of new deliveries for the past nine days.
 
-_Model-written assessment of our own ingestion, generated 2026-10-15 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-23 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

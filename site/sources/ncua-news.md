@@ -63,7 +63,7 @@ _Model-written orientation, generated 2026-09-30 by haiku, prompt version 1. It 
 
 **delivering** — 4 item(s) in the last 14 days; most recent 2026-10-20; 0 of 328 request(s) to ncua.gov returned no content.
 
-This label has held since 2026-10-14T17:01:04Z (UTC) and was last re-checked 2026-10-22T03:45:30Z (UTC).
+This label has held since 2026-10-14T17:01:04Z (UTC) and was last re-checked 2026-10-23T03:51:00Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -84,13 +84,13 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to ncua.gov | 328 request(s) · 328 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-22T04:00:15.002+00:00 UTC.
+last answered request 2026-10-23T04:00:16.190+00:00 UTC.
 
 4 item(s) in the last 14 days; most recent 2026-10-20; 0 of 328 request(s) to ncua.gov returned no content.
 
 ### All time
 
-- **Our requests to ncua.gov, all time (since 2026-09-28):** 600 request(s) · 600 answered · 0 returned no content
+- **Our requests to ncua.gov, all time (since 2026-09-28):** 625 request(s) · 625 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -100,7 +100,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to ncua.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-23 | 0 | 0 | — |
 | 2026-09-24 | 0 | 0 | — |
 | 2026-09-25 | 0 | 0 | — |
 | 2026-09-26 | 0 | 0 | — |
@@ -129,7 +128,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-19 | 0 | 25 | 338 |
 | 2026-10-20 | 1 | 25 | 335 |
 | 2026-10-21 | 0 | 25 | 340 |
-| 2026-10-22 | 0 | 1 | 385 |
+| 2026-10-22 | 0 | 25 | 373 |
+| 2026-10-23 | 0 | 1 | 343 |
 
 ## Our ingestion assessment
 
