@@ -6,7 +6,7 @@
 
 # Office of Justice Programs (email)
 
-planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Justice, Office of Justice Programs
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Justice, Office of Justice Programs
 
 Official site: https://www.ojp.gov/ · All sources: [sources.md](../sources.md)
 
@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-15, 8 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-23, delivered by email.
 
-This label has held since 2026-10-09T20:15:00Z (UTC) and was last re-checked 2026-10-23T03:51:00Z (UTC).
+This label has held since 2026-10-23T21:25:32Z (UTC) and was last re-checked 2026-10-24T03:42:48Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,20 +68,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-15 |
-| Content length | 379 characters average, 379 median (shortest 379, longest 379) |
-| Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-15 |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-23 |
+| Content length | 250 characters average, 250 median (shortest 120, longest 379) |
+| Delivery mode | email-teaser — the bulletin carried a short teaser, not the full item |
+| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-23 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-15, 8 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-10-23, delivered by email.
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-24 | 0 |
 | 2026-09-25 | 0 |
 | 2026-09-26 | 0 |
 | 2026-09-27 | 0 |
@@ -122,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-20 | 0 |
 | 2026-10-21 | 0 |
 | 2026-10-22 | 0 |
-| 2026-10-23 | 0 |
+| 2026-10-23 | 1 |
+| 2026-10-24 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Bulletins arrive via three configured sender addresses (newsfromovc@public.govdelivery.com, fundingnews@public.govdelivery.com, ojp_comms@public.govdelivery.com). Over the past six days, one item was observed, delivered on 2026-10-09 measuring 595 characters in full text. The 14-day window shows one bulletin total. The mailbox collector recorded zero errors and zero refused messages. Subscription was confirmed 2026-09-26; this is the first ingested bulletin since registration, as earlier messages were not backfilled.
+Office of Justice Programs bulletins arrive via email from three configured sender addresses (newsfromovc@public.govdelivery.com, fundingnews@public.govdelivery.com, ojp_comms@public.govdelivery.com) and are stored in the project mailbox with DKIM verification. Over 14 days, two bulletins were delivered at 0.14 per day, containing 120 to 379 characters (median 250). Delivery occurs as email teasers rather than full article text. The mailbox collector recorded zero processing errors and zero refused messages. Subscription was confirmed 2026-09-26 through the publisher's own signup flow; earlier messages were not backfilled, so ingestion captures only messages received after that date. The prior assessment on 2026-10-10 reported one item over six days. The current measurement shows two items including a newly arrived bulletin dated 2026-10-23, indicating delivery has resumed following a prior gap.
 
-_Model-written assessment of our own ingestion, generated 2026-10-10 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-24 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

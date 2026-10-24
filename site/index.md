@@ -14,13 +14,13 @@ An automated, citation-bound, opinion-agnostic daily digest of official United S
 
 ## The last 7 days
 
+- [Daily Digest — 2026-10-23](2026-10-23.md) — The digest carries 66 House and 4 Senate Congressional Record items, along with 6 Daily Digest entries and 58 Extensions of Remarks.
 - [Daily Digest — 2026-10-22](2026-10-22.md) — The digest carries one bill introduced in the Senate and one public law.
 - [Daily Digest — 2026-10-21](2026-10-21.md) — The digest carries no congressional floor proceedings or recorded votes from either chamber.
 - [Daily Digest — 2026-10-20](2026-10-20.md) — The digest carries 27 House and 4 Senate Congressional Record items, plus 34 Extensions of Remarks and 6 Daily Digest entries; the summaries describe no recorded votes.
 - [Daily Digest — 2026-10-19](2026-10-19.md) — On the legislative side, the digest carries no recorded floor votes from either chamber.
 - [Daily Digest — 2026-10-18](2026-10-18.md) — This is a short review: few agency publications were observed for this digest day, and none met the digest's summary rules, so there are no item summaries to draw on.
 - [Daily Digest — 2026-10-17](2026-10-17.md) — The digest carries six agency press releases.
-- [Daily Digest — 2026-10-16](2026-10-16.md) — The digest carries 45 House and 4 Senate floor entries from the Congressional Record, plus 38 Extensions of Remarks and 6 Daily Digest entries.
 
 ## Earlier days
 

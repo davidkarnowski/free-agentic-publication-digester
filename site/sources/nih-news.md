@@ -6,7 +6,7 @@
 
 # NIH News Releases
 
-active · ingestion health: quiet · Executive · Tier 2 · RSS feed · Department of Health and Human Services
+active · ingestion health: delivering · Executive · Tier 2 · RSS feed · Department of Health and Human Services
 
 Official site: https://www.nih.gov/news-events/news-releases · All sources: [sources.md](../sources.md)
 
@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-14, 9 days ago (quiet past 7 days).
+**delivering** — 4 item(s) in the last 14 days; most recent 2026-10-23; 0 of 333 request(s) to www.nih.gov returned no content.
 
-This label has held since 2026-10-22T04:14:08Z (UTC) and was last re-checked 2026-10-23T03:51:00Z (UTC).
+This label has held since 2026-10-23T17:22:46Z (UTC) and was last re-checked 2026-10-24T03:42:48Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -66,24 +66,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 28 request(s) (28 answered, 0 returned no content) · 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-14 |
-| Content length | 8,616 characters average, 8,616 median (shortest 8,369, longest 8,864) |
+| Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-10-23 |
+| Content length | 8,676 characters average, 8,616 median (shortest 7,557, longest 9,913) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.nih.gov | 330 request(s) · 330 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.nih.gov | 333 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-23T04:00:16.595+00:00 UTC.
+last answered request 2026-10-24T04:00:11.078+00:00 UTC.
 
-Most recent item 2026-10-14, 9 days ago (quiet past 7 days).
+4 item(s) in the last 14 days; most recent 2026-10-23; 0 of 333 request(s) to www.nih.gov returned no content.
 
 ### All time
 
-- **Our requests to www.nih.gov, all time (since 2026-08-06):** 2,046 request(s) · 2,046 answered · 0 returned no content
+- **Our requests to www.nih.gov, all time (since 2026-08-06):** 2,074 request(s) · 2,074 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nih.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-24 | 1 | 26 | 268 |
 | 2026-09-25 | 0 | 26 | 336 |
 | 2026-09-26 | 0 | 26 | 332 |
 | 2026-09-27 | 0 | 25 | 270 |
@@ -122,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-20 | 0 | 25 | 232 |
 | 2026-10-21 | 0 | 25 | 231 |
 | 2026-10-22 | 0 | 25 | 219 |
-| 2026-10-23 | 0 | 1 | 267 |
+| 2026-10-23 | 2 | 28 | 251 |
+| 2026-10-24 | 0 | 1 | 226 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The NIH News Releases source polls an RSS feed and fetches full article text; feed descriptions are approximately 123-character teasers requiring full-text extraction. Over 14 days, two items delivered at 0.14 per day, most recent dated 2026-10-14. Extracted content ranged from 8,369 to 8,864 characters, averaging 8,616. All 330 polling requests to www.nih.gov succeeded with zero errors. The feed carries dates in a Drupal format ('Wed, 08/05/2026 - 08:00'); date-parsing support was added before activation 2026-08-06 to prevent the entire feed window from publishing as current content. The source publishes inconsistently; most days contain no releases. The prior assessment (2026-10-08) also measured two items at 0.14 per day, indicating consistent low-frequency delivery.
+The NIH News Releases source ingests via an RSS feed available at https://www.nih.gov/news-releases/feed.xml, delivering full article text. Feed descriptions are approximately 123 characters; the feed carries publication dates in Drupal format ('Wed, 08/05/2026 - 08:00'), which required date-parsing support added prior to activation on 2026-08-06 to prevent publishing the entire feed window as current content. Over the 14-day measurement window, four items were delivered at an average of 0.29 per day, with extracted content ranging from 7,557 to 9,913 characters (average 8,676, median 8,616). All 333 polling requests to www.nih.gov succeeded with a zero error rate. The publication pattern is irregular; the source publishes infrequently and most days contain no releases. The prior assessment from 2026-10-23 measured two items, and the current measurement shows this count has doubled, with the most recent item now dated 2026-10-23 compared to the prior most-recent date of 2026-10-14.
 
-_Model-written assessment of our own ingestion, generated 2026-10-23 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-24 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
