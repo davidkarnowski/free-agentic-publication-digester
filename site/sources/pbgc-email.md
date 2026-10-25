@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-16, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-16, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-16T15:16:10Z (UTC) and was last re-checked 2026-10-24T03:42:48Z (UTC).
+This label has held since 2026-10-24T04:12:35Z (UTC) and was last re-checked 2026-10-25T03:58:26Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -75,7 +75,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-16, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-16, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -87,7 +87,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-25 | 0 |
 | 2026-09-26 | 0 |
 | 2026-09-27 | 0 |
 | 2026-09-28 | 0 |
@@ -117,11 +116,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-22 | 0 |
 | 2026-10-23 | 0 |
 | 2026-10-24 | 0 |
+| 2026-10-25 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The Pension Benefit Guaranty Corporation delivers subscription bulletins to the project mailbox with full text included. One bulletin was received on 2026-10-16, yielding 0.07 items per day over the 14-day measurement window. The single ingested item carried 4,078 characters. The mailbox records 3 total messages with 1 bulletin, zero administrative messages, errors, or refused deliveries. Subscription is confirmed through sender pbgc@subscriptions.pbgc.gov. The previous assessment on 2026-10-03 reported one item on 2026-09-24 after subscription confirmation on 2026-07-29, with no bulletins received in the nine days following. The current measurement shows delivery resuming after a lengthy quiet period.
+The Pension Benefit Guaranty Corporation delivers subscription bulletins to the mailbox via GovDelivery (sender pbgc@subscriptions.pbgc.gov) with full text included. One bulletin was ingested on 2026-10-16 at 0.07 per day, carrying 4,078 characters. The mailbox records four total messages with one bulletin parsed, zero administrative messages, errors, or refused deliveries. Subscription was confirmed 2026-07-29. Most recent item dated 2026-10-16, nine days prior, with no activity in the past seven days. Source status remains planned.
 
-_Model-written assessment of our own ingestion, generated 2026-10-17 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-25 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

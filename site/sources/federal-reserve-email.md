@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-16, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-16, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-09-28T18:01:41Z (UTC) and was last re-checked 2026-10-24T03:42:48Z (UTC).
+This label has held since 2026-10-24T04:12:35Z (UTC) and was last re-checked 2026-10-25T03:58:26Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -76,7 +76,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-16, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-16, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -88,7 +88,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-25 | 0 |
 | 2026-09-26 | 0 |
 | 2026-09-27 | 0 |
 | 2026-09-28 | 1 |
@@ -118,11 +117,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-22 | 0 |
 | 2026-10-23 | 0 |
 | 2026-10-24 | 0 |
+| 2026-10-25 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Federal Reserve Board announcements are delivered via email subscription confirmed 2026-07-29, providing email-full delivery to the project mailbox with complete message text; no external links are fetched. One bulletin was ingested over the 14-day measurement window, dated 2026-09-28 with 477 characters, DKIM-verified and archived. A Federal Reserve Bank of New York alerts subscription is also active. Compared to the previous assessment dated 2026-09-09, which noted one bulletin on 2026-07-31 followed by 40 quiet days, a second bulletin arrived on 2026-09-28 after an additional 20-day interval. Total subscription activity: two bulletins across 62 days.
+Federal Reserve Board announcements are delivered via email subscription confirmed 2026-07-29, with full message text archived to the mailbox; no external links are fetched. Two bulletins arrived over the 14-day window at 0.14 per day, averaging 540 characters each and DKIM-verified. A Federal Reserve Bank of New York alerts subscription is also active on the same address. Most recent bulletin dated 2026-10-16, nine days prior; none received in the past seven days. The mailbox records two bulletins with zero administrative messages, errors, or refused deliveries.
 
-_Model-written assessment of our own ingestion, generated 2026-09-29 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-25 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

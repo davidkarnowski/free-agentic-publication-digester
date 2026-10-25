@@ -6,7 +6,7 @@
 
 # Senate.gov XML services
 
-active · ingestion health: quiet · Legislative · Tier 1 · XML index · Secretary of the Senate (LIS)
+active · ingestion health: degraded · Legislative · Tier 1 · XML index · Secretary of the Senate (LIS)
 
 Official site: https://www.senate.gov/general/common/generic/XML_Availability.htm · All sources: [sources.md](../sources.md)
 
@@ -61,9 +61,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-01, 23 days ago (quiet past 7 days).
+**degraded** — 43 of 327 request(s) to www.senate.gov returned no content (13.1%, at or above the 10% mark).
 
-This label has held since 2026-10-09T04:08:52Z (UTC) and was last re-checked 2026-10-24T03:42:48Z (UTC).
+This label has held since 2026-10-24T20:48:55Z (UTC) and was last re-checked 2026-10-25T03:58:26Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,22 +73,22 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (7 answered, 18 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (0 answered, 25 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
 | Items ingested | none in the last 14 days — most recent 2026-10-01 |
-| Our requests to www.senate.gov | 328 request(s) · 310 answered · 18 declined (4xx) · 0 server declined (5xx) · 0 no response — 5.5% returned no content |
+| Our requests to www.senate.gov | 327 request(s) · 284 answered · 43 declined (4xx) · 0 server declined (5xx) · 0 no response — 13.1% returned no content |
 
 last answered request 2026-10-23T10:18:01.051+00:00 UTC.
 
-Most recent item 2026-10-01, 23 days ago (quiet past 7 days).
+43 of 327 request(s) to www.senate.gov returned no content (13.1%, at or above the 10% mark).
 
 ### All time
 
-- **Our requests to www.senate.gov, all time (since 2026-08-01):** 2,317 request(s) · 2,299 answered · 18 returned no content
+- **Our requests to www.senate.gov, all time (since 2026-08-01):** 2,342 request(s) · 2,299 answered · 43 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.senate.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-25 | 0 | 25 | 175 |
 | 2026-09-26 | 0 | 27 | 202 |
 | 2026-09-27 | 0 | 26 | 192 |
 | 2026-09-28 | 6 | 33 | 204 |
@@ -127,12 +126,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-21 | 0 | 25 | 181 |
 | 2026-10-22 | 0 | 25 | 204 |
 | 2026-10-23 | 0 | 25 | 189 |
-| 2026-10-24 | 0 | 1 | 385 |
+| 2026-10-24 | 0 | 25 | 207 |
+| 2026-10-25 | 0 | 1 | 597 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The senate-votes adapter polls the vote menu daily and fetches per-vote XML records containing the full member vote tallies. All 156 requests to www.senate.gov succeeded. The adapter bounds enumeration to a 7-day lookback to control request volume despite the published index listing the complete session from January onward. The most recent item was dated 2026-10-01, nine days prior. Vote dates in the index lack year information and vote tallies are unpopulated, requiring per-vote record retrieval. Two en-bloc confirmations carry minimal structured data beyond title.
+The senate-votes adapter polls the published vote-menu XML and fetches individual per-vote records containing member tally data. No items were ingested over the 14-day window. The service returned no content on 43 of 327 requests (13.1% error rate), crossing the 10% degradation threshold. Errors began 2026-10-23 and continued through 2026-10-24 with sporadic recovery 2026-10-25. Most recent item dates 2026-10-01, 24 days prior. Last successful request occurred 2026-10-23. The index lists the complete session; the adapter bounds enumeration to seven-day lookback to control request volume.
 
-_Model-written assessment of our own ingestion, generated 2026-10-10 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-25 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

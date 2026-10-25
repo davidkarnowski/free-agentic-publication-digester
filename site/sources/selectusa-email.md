@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-16, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-16, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-14T16:26:51Z (UTC) and was last re-checked 2026-10-24T03:42:48Z (UTC).
+This label has held since 2026-10-24T04:12:35Z (UTC) and was last re-checked 2026-10-25T03:58:26Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -85,7 +85,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-16, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-16, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-25 | 0 |
 | 2026-09-26 | 0 |
 | 2026-09-27 | 0 |
 | 2026-09-28 | 0 |
@@ -127,11 +126,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-22 | 0 |
 | 2026-10-23 | 0 |
 | 2026-10-24 | 0 |
+| 2026-10-25 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-SelectUSA email subscription from the International Trade Administration activated on 2026-10-01. As of 2026-10-15, the mailbox contains one bulletin ingested on 2026-10-14. Messages arrive from two sender addresses (selectusa@public.govdelivery.com and selectusa@email.trade.gov) with DKIM verification recorded at ingest. Bulletins deliver full text averaging 501 characters. Delivery cadence remains minimal at 0.07 items per day, with no errors or refusals recorded. The previous assessment dated 2026-10-02 reported no messages since activation; the source began delivering approximately thirteen days later.
+SelectUSA's email subscription activated on 2026-10-01 and remained quiet for approximately two weeks before beginning delivery around 2026-10-14. The subscription has delivered two bulletins as of 2026-10-25, with the most recent on 2026-10-16; there has been no activity in the nine days since. Messages arrive from two sender addresses (selectusa@public.govdelivery.com and selectusa@email.trade.gov) with DKIM verification recorded at ingest. Bulletins deliver full text, with message lengths ranging from 236 to 501 characters (median 368). The observed delivery cadence is 0.14 items per day. No transmission errors or refusals have been recorded in the mailbox.
 
-_Model-written assessment of our own ingestion, generated 2026-10-15 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-25 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

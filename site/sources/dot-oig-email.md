@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-16, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-16, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-16T15:34:20Z (UTC) and was last re-checked 2026-10-24T03:42:48Z (UTC).
+This label has held since 2026-10-24T04:12:35Z (UTC) and was last re-checked 2026-10-25T03:58:26Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -81,7 +81,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-16, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-16, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-25 | 0 |
 | 2026-09-26 | 0 |
 | 2026-09-27 | 0 |
 | 2026-09-28 | 0 |
@@ -123,11 +122,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-22 | 0 |
 | 2026-10-23 | 0 |
 | 2026-10-24 | 0 |
+| 2026-10-25 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The Department of Transportation Office of Inspector General delivers subscription bulletins via GovDelivery (sender news@updates.oig.dot.gov) to the project mailbox with full text. One bulletin was received on 2026-10-16, yielding 0.07 items per day over 14 days. The single bulletin carried 1,710 characters. The mailbox records 1 message as 1 bulletin with zero administrative messages, errors, or refused deliveries. Subscription was confirmed in 2026-09 through the publisher's own signup flow; bulletins observed in the mailbox preceded formal registration. The previous assessment on 2026-10-11 reported 3 items totaling 0.21 per day with the most recent on 2026-10-02. Current measurement shows reduced delivery frequency with the most recent item on 2026-10-16.
+The Department of Transportation Office of Inspector General delivers subscription bulletins via GovDelivery (sender news@updates.oig.dot.gov) to the project mailbox with full text. One bulletin was received on 2026-10-16, yielding 0.07 per day over 14 days and carrying 1,710 characters. The mailbox records one message as one bulletin with zero administrative messages, errors, or refused deliveries. Subscription confirmed 2026-09-26. Most recent item dated 2026-10-16, nine days prior. Item frequency decreased from 0.21 per day in the previous assessment. No activity in the past seven days. Source status remains planned.
 
-_Model-written assessment of our own ingestion, generated 2026-10-17 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-25 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
