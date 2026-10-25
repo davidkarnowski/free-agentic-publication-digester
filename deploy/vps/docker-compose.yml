@@ -13,9 +13,10 @@ name: fapd
 
 services:
   web:
-    # Pinned to 1.30-alpine — parity with the edge proxy (the current nginx
-    # STABLE branch). Bump both together during CVE sweeps, never just one.
-    image: nginx:1.30-alpine
+    # Pinned to 1.30.6-alpine (CVE sweep 2026-10-25; digest to add) — parity
+    # with the edge proxy (the current nginx STABLE branch). Bump both together
+    # during CVE sweeps, never just one.
+    image: nginx:1.30.6-alpine
     container_name: fapd-web
     restart: unless-stopped
     expose: ["80"]                # private network only — never published

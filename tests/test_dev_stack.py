@@ -242,7 +242,7 @@ def test_dev_up_stages_the_package_the_dev_mcp_service_builds():
 def test_dev_compose_builds_the_production_dockerfile():
     compose = (DEV / "docker-compose.yml").read_text(encoding="utf-8")
     assert "dockerfile: ../vps/Dockerfile.backend" in compose
-    assert "nginx:1.30-alpine" in compose      # same pin as production
+    assert "nginx:1.30.6-alpine" in compose    # same pin as production
     # live mode: one serial mechanical cycle, no archive writes
     assert '["--once", "--no-llm", "--no-wayback"]' in compose
 
