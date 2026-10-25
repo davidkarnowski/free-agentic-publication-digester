@@ -15,10 +15,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends git openssh-cli
 # requirement. The image also serves the api/gemini/none backends, which
 # need nothing installed here; dropping Node when the CLI is retired is
 # plan OPS-3 (docs/ops/plan-2026-08-24-eod-llm-resilience.md).
+# CVE sweep 2026-10-25: the Node 22 line must be 22.23.4 or later (the
+# October 2026 Brotli and related fixes), checked at build time so an old
+# NodeSource package cannot slip through; the claude CLI is pinned to an
+# exact version (>= 2.1.179, the fix for GHSA-pq7j-f95f-qfcv) instead of
+# whatever npm resolves on the day of the build. Re-pin at each sweep.
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/* \
-    && npm install -g @anthropic-ai/claude-code \
+    && node -e 'const [a,b,c]=process.versions.node.split(".").map(Number); if (a!==22 || b<23 || (b===23 && c<4)) { console.error("node " + process.version + " is below 22.23.4"); process.exit(1) }' \
+    && npm install -g @anthropic-ai/claude-code@2.1.310 \
     && claude --version
 
 WORKDIR /app
