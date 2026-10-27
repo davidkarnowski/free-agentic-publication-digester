@@ -6,7 +6,7 @@
 
 # FDIC Press Releases
 
-active · ingestion health: quiet · Executive · Tier 2 · HTML index · Independent agency
+active · ingestion health: delivering · Executive · Tier 2 · HTML index · Independent agency
 
 Official site: https://www.fdic.gov/news/press-releases · All sources: [sources.md](../sources.md)
 
@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-30 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-05, 21 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-26; 0 of 327 request(s) to www.fdic.gov returned no content.
 
-This label has held since 2026-10-13T04:07:47Z (UTC) and was last re-checked 2026-10-26T12:04:27Z (UTC).
+This label has held since 2026-10-26T16:26:46Z (UTC) and was last re-checked 2026-10-27T03:54:11Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,22 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-05 |
-| Our requests to www.fdic.gov | 335 request(s) · 335 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-26 |
+| Content length | 84 characters average, 84 median (shortest 84, longest 84) |
+| Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
+| Our requests to www.fdic.gov | 327 request(s) · 327 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-26T11:34:37.658+00:00 UTC.
+last answered request 2026-10-27T04:00:12.848+00:00 UTC.
 
-Most recent item 2026-10-05, 21 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-10-26; 0 of 327 request(s) to www.fdic.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fdic.gov, all time (since 2026-09-28):** 704 request(s) · 704 answered · 0 returned no content
+- **Our requests to www.fdic.gov, all time (since 2026-09-28):** 721 request(s) · 721 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -96,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fdic.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-27 | 0 | 0 | — |
 | 2026-09-28 | 2 | 10 | 231 |
 | 2026-09-29 | 1 | 27 | 257 |
 | 2026-09-30 | 1 | 25 | 261 |
@@ -125,12 +126,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-23 | 0 | 25 | 611 |
 | 2026-10-24 | 0 | 25 | 327 |
 | 2026-10-25 | 0 | 26 | 241 |
-| 2026-10-26 | 0 | 9 | 271 |
+| 2026-10-26 | 1 | 25 | 240 |
+| 2026-10-27 | 0 | 1 | 644 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The FDIC Press Releases source utilizes an HTML-index adapter to ingest listings in a feed-only mode, as a GovDelivery feed link previously discovered was inaccessible due to robots.txt restrictions. We observed 1 item over the past 14 days, delivered on 2026-10-05, resulting in an average of 0.07 items per day. This represents a decrease in activity compared to the 2 items observed in the previous assessment. All 333 requests to www.fdic.gov succeeded with a 0.0% error rate, maintaining the 100% success rate reported previously. Extracted items averaged 88 characters. A known limitation is that only the first page of the listing is processed, and entries lacking readable dates are not ingested. The source is currently quiet, with no items detected in the last 7 days.
+Since activation on 2026-09-28, the html-index adapter has read the FDIC Press Releases listing at www.fdic.gov on an hourly cycle. The only format we have ingested is HTML index entries, which carry the publisher's own dates, with an average extracted length of 84 characters. In the 14-day window we made 327 requests to this host, none of which returned no content (0.0% error rate). One item has been ingested, dated 2026-10-26, a rate of 0.07 items per day. The previous assessment dated 2026-10-14 recorded one item dated 2026-10-05 and an 88-character average, so the item count is unchanged while the most recent dated item has moved to 2026-10-26. The adapter reads only the first page of the listing, and entries without a readable date are dropped rather than assigned an observation date. Registry notes record two earlier probes: a GovDelivery feed linked from the FDIC page was disallowed by its host's robots.txt on 2026-08-06 and was not retried, and a guessed Drupal feed path returned 404 on the same date. The FDIC email subscription fdic-email covers the same releases through a separate channel, and same-URL copies from the two sources merge as corroboration.
 
-_Model-written assessment of our own ingestion, generated 2026-10-14 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-27 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

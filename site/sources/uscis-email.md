@@ -6,7 +6,7 @@
 
 # USCIS Updates (email)
 
-active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Homeland Security (USCIS)
+active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Homeland Security (USCIS)
 
 Official site: https://www.uscis.gov/newsroom · All sources: [sources.md](../sources.md)
 
@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-10, 16 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-26, delivered by email.
 
-This label has held since 2026-10-18T04:17:16Z (UTC) and was last re-checked 2026-10-26T12:04:27Z (UTC).
+This label has held since 2026-10-26T21:01:55Z (UTC) and was last re-checked 2026-10-27T03:54:11Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,18 +67,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-10 |
-| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-16 |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-26 |
+| Content length | 460 characters average, 460 median (shortest 460, longest 460) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-26 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-10, 16 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-10-26, delivered by email.
 
 ### All time
 
@@ -90,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-27 | 0 |
 | 2026-09-28 | 0 |
 | 2026-09-29 | 1 |
 | 2026-09-30 | 1 |
@@ -119,12 +120,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-23 | 0 |
 | 2026-10-24 | 0 |
 | 2026-10-25 | 0 |
-| 2026-10-26 | 0 |
+| 2026-10-26 | 1 |
+| 2026-10-27 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-GovDelivery subscription bulletins delivering policy-manual updates, form revisions, and filing-fee changes reach the project mailbox with full text. Three messages have been received from sender uscis@messages.dhs.gov, all DKIM-verified with zero errors or refusals, most recent on 2026-10-10. Current measurement shows 1 item at 351 characters in the 14-day window. Prior assessment recorded 3 items with a median of 1,471 characters and a range of 351 to 1,543 characters over its measurement period, with the same most-recent delivery date. The email collector operates without consecutive errors, last accessed the mailbox 2026-10-19, and health status is currently quiet with no deliveries in the past 7 days.
+The uscis-email subscription, sender uscis@messages.dhs.gov, has been confirmed since 2026-07-29 and is ingested by the email adapter as full-text bulletins with DKIM verification and raw message capture. In the 14-day window we recorded one item at 460 characters, most recently delivered 2026-10-26, a rate of 0.07 items per day. The mailbox counters show two bulletins and two messages, with zero errors and zero refused deliveries; the previous assessment reported three messages. That assessment, dated 2026-10-19, recorded a median of 1,471 characters, a range of 351 to 1,543, and a most recent delivery on 2026-10-10, and it described the source as quiet. The current health status is delivering, and the collector reports no consecutive errors, with a last cycle at 2026-10-27T03:48:33Z. The Gate-3 evaluation from the 2026-07-29 bulletin recorded one update carried in full text with its canonical uscis.gov URL. Registry notes state that the subscription's scope overlaps the newsroom page, and that this comparison remains part of coverage accounting as volume accrues.
 
-_Model-written assessment of our own ingestion, generated 2026-10-19 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-27 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

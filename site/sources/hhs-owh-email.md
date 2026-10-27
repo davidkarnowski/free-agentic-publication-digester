@@ -6,7 +6,7 @@
 
 # HHS Office on Women's Health (email)
 
-planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Health and Human Services, Office on Women's Health
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Health and Human Services, Office on Women's Health
 
 Official site: https://womenshealth.gov/ · All sources: [sources.md](../sources.md)
 
@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-18, 8 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-26, delivered by email.
 
-This label has held since 2026-10-26T04:08:41Z (UTC) and was last re-checked 2026-10-26T12:04:27Z (UTC).
+This label has held since 2026-10-26T14:41:43Z (UTC) and was last re-checked 2026-10-27T03:54:11Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,20 +68,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-18 |
-| Content length | 153 characters average, 153 median (shortest 153, longest 153) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-26 |
+| Content length | 158 characters average, 158 median (shortest 153, longest 163) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-18 |
+| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-26 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-18, 8 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-10-26, delivered by email.
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-27 | 0 |
 | 2026-09-28 | 0 |
 | 2026-09-29 | 0 |
 | 2026-09-30 | 0 |
@@ -122,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-23 | 0 |
 | 2026-10-24 | 0 |
 | 2026-10-25 | 0 |
-| 2026-10-26 | 0 |
+| 2026-10-26 | 1 |
+| 2026-10-27 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-GovDelivery subscription bulletins carrying press releases and program announcements have begun delivery to the project mailbox with full text. Subscription was confirmed 2026-09-26. One message arrived 2026-10-18 at 153 characters, DKIM-verified with zero errors or refusals. This represents the first observable ingestion from this source; the previous assessment dated 2026-09-27 reported zero bulletins since registration and deployment. Current health status indicates active delivery. The email collector operates without consecutive errors and last accessed the mailbox 2026-10-19.
+The hhs-owh-email subscription, sender owh@service.govdelivery.com, was confirmed through the publisher's own signup flow and registered on 2026-09-26. Bulletins observed in the mailbox before registration were not backfilled. Bulletins are ingested by the email adapter as full text, with DKIM verification and raw message capture. In the 14-day window we recorded two items at 0.14 per day, ranging from 153 to 163 characters with a median of 158, most recently delivered 2026-10-26. The mailbox counters show two bulletins and two messages, with zero errors and zero refused deliveries. The collector reports no consecutive errors, with a last cycle at 2026-10-27T03:48:33Z. The previous assessment, dated 2026-10-19, recorded one message delivered 2026-10-18 at 153 characters, the first observed ingestion from this source. Relative to that assessment, the item count rose from one to two and the most recent delivery moved to 2026-10-26. The registry status remains planned, and the registry notes list the Gate-3 coverage evaluation as pending.
 
-_Model-written assessment of our own ingestion, generated 2026-10-19 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-27 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

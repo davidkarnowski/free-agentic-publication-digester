@@ -6,7 +6,7 @@
 
 # PBGC Updates (email)
 
-planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · Pension Benefit Guaranty Corporation
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Pension Benefit Guaranty Corporation
 
 Official site: https://www.pbgc.gov/news · All sources: [sources.md](../sources.md)
 
@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-16, 10 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-26, delivered by email.
 
-This label has held since 2026-10-24T04:12:35Z (UTC) and was last re-checked 2026-10-26T12:04:27Z (UTC).
+This label has held since 2026-10-26T20:09:18Z (UTC) and was last re-checked 2026-10-27T03:54:11Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,20 +62,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-16 |
-| Content length | 4,078 characters average, 4,078 median (shortest 4,078, longest 4,078) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-26 |
+| Content length | 2,792 characters average, 2,792 median (shortest 1,505, longest 4,078) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 4 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-22 |
+| Mailbox | 5 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-26 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-16, 10 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-10-26, delivered by email.
 
 ### All time
 
@@ -87,7 +87,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-27 | 0 |
 | 2026-09-28 | 0 |
 | 2026-09-29 | 0 |
 | 2026-09-30 | 0 |
@@ -116,12 +115,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-23 | 0 |
 | 2026-10-24 | 0 |
 | 2026-10-25 | 0 |
-| 2026-10-26 | 0 |
+| 2026-10-26 | 1 |
+| 2026-10-27 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The Pension Benefit Guaranty Corporation delivers subscription bulletins to the mailbox via GovDelivery (sender pbgc@subscriptions.pbgc.gov) with full text included. One bulletin was ingested on 2026-10-16 at 0.07 per day, carrying 4,078 characters. The mailbox records four total messages with one bulletin parsed, zero administrative messages, errors, or refused deliveries. Subscription was confirmed 2026-07-29. Most recent item dated 2026-10-16, nine days prior, with no activity in the past seven days. Source status remains planned.
+The pbgc-email subscription, sender pbgc@subscriptions.pbgc.gov, was confirmed on 2026-07-29 and is ingested by the email adapter as full-text bulletins with DKIM verification. The registry status remains planned, and no signup URL is recorded; only the confirmed sender is asserted. In the 14-day window we recorded two items at 0.14 per day, with character counts ranging from 1,505 to 4,078 and a median of 2,792, most recently delivered 2026-10-26. The mailbox counters show five bulletins and five messages, with zero administrative messages, zero errors, and zero refused deliveries. The previous assessment, dated 2026-10-25, recorded one bulletin delivered 2026-10-16 at 4,078 characters, a rate of 0.07 per day, and four total messages with one parsed. Relative to that assessment, the item count in the window rose from one to two, the most recent delivery moved to 2026-10-26, and the health status is now reported as delivering. The collector reports no consecutive errors, with a last cycle at 2026-10-27T03:48:33Z.
 
-_Model-written assessment of our own ingestion, generated 2026-10-25 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-27 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -6,7 +6,7 @@
 
 # NHTSA (email)
 
-active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Transportation (NHTSA)
+active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Transportation (NHTSA)
 
 Official site: https://www.nhtsa.gov/press-releases · All sources: [sources.md](../sources.md)
 
@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 3 item(s) in the last 14 days; most recent 2026-10-19, delivered by email.
+**quiet** — Most recent item 2026-10-19, 8 days ago (quiet past 7 days).
 
-This label has held since 2026-10-06T18:49:48Z (UTC) and was last re-checked 2026-10-26T12:04:27Z (UTC).
+This label has held since 2026-10-06T18:49:48Z (UTC) and was last re-checked 2026-10-27T03:54:11Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,14 +69,14 @@ Last 24 hours: no items ingested
 
 | Measure | Value |
 |---|---|
-| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-10-19 |
-| Content length | 645 characters average, 564 median (shortest 562, longest 808) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-19 |
+| Content length | 686 characters average, 686 median (shortest 564, longest 808) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 3 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-19 |
+| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-19 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-3 item(s) in the last 14 days; most recent 2026-10-19, delivered by email.
+Most recent item 2026-10-19, 8 days ago (quiet past 7 days).
 
 ### All time
 
@@ -88,7 +88,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-27 | 0 |
 | 2026-09-28 | 0 |
 | 2026-09-29 | 0 |
 | 2026-09-30 | 0 |
@@ -118,6 +117,7 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-24 | 0 |
 | 2026-10-25 | 0 |
 | 2026-10-26 | 0 |
+| 2026-10-27 | 0 |
 
 ## Our ingestion assessment
 
