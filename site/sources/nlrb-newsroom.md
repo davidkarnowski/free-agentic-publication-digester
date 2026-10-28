@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-19, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-19, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-19T18:44:21Z (UTC) and was last re-checked 2026-10-27T03:54:11Z (UTC).
+This label has held since 2026-10-27T04:09:39Z (UTC) and was last re-checked 2026-10-28T03:58:23Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,7 +62,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -73,13 +73,13 @@ Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · no items in
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.nlrb.gov | 329 request(s) · 328 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.3% returned no content |
 
-last answered request 2026-10-27T04:00:12.352+00:00 UTC.
+last answered request 2026-10-28T04:00:16.124+00:00 UTC.
 
-Most recent item 2026-10-19, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-19, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.nlrb.gov, all time (since 2026-10-05):** 550 request(s) · 549 answered · 1 returned no content
+- **Our requests to www.nlrb.gov, all time (since 2026-10-05):** 575 request(s) · 574 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -89,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nlrb.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-28 | 0 | 0 | — |
 | 2026-09-29 | 0 | 0 | — |
 | 2026-09-30 | 0 | 0 | — |
 | 2026-10-01 | 0 | 0 | — |
@@ -118,12 +117,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-24 | 0 | 25 | 530 |
 | 2026-10-25 | 0 | 26 | 415 |
 | 2026-10-26 | 0 | 24 | 414 |
-| 2026-10-27 | 0 | 1 | 611 |
+| 2026-10-27 | 0 | 25 | 457 |
+| 2026-10-28 | 0 | 1 | 756 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The NLRB feed was activated on 2026-10-05 after the documented RSS feed URL was identified from the publisher's own RSS page. The feed carries items with GUIDs and publication dates; feed descriptions average approximately 2,800 characters, while fetched article pages average 11,044 characters. Over the past 14 days, two items have been ingested at a measured rate of 0.14 items per day, with the most recent dated 2026-10-19. All 331 requests to www.nlrb.gov completed successfully with zero errors. Since the prior assessment on 2026-10-17, which measured 12 items over its 14-day window at a rate of 0.86 items per day, the measured delivery rate has declined significantly to 0.14 items per day in the current observation window.
+We ingest NLRB News Releases from the press-release RSS feed, activated 2026-10-05, and fetch each item's article page for full text (delivery mode full). Feed descriptions average about 2,800 characters; the one article in the current window measured 12,247 characters. Over the past 14 days we measured one item at 0.07 per day, dated 2026-10-19, nine days before this assessment, and our health measure reads quiet. The previous assessment, dated 2026-10-20, measured two items at 0.14 per day over its window, with the same most recent date. Our fetches to www.nlrb.gov totaled 329 attempts: 328 returned content and one returned no response (0.3 percent). A failed request is our request that returned no content, and from outside we cannot tell whether the cause was load, maintenance, or a limit set by the publisher. The previous assessment recorded zero errors across 331 requests.
 
-_Model-written assessment of our own ingestion, generated 2026-10-20 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-28 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

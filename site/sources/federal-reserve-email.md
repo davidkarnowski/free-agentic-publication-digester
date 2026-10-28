@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-16, 11 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-16, 12 days ago (quiet past 7 days).
 
-This label has held since 2026-10-24T04:12:35Z (UTC) and was last re-checked 2026-10-27T03:54:11Z (UTC).
+This label has held since 2026-10-24T04:12:35Z (UTC) and was last re-checked 2026-10-28T03:58:23Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,14 +69,14 @@ Last 24 hours: no items ingested
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-16 |
-| Content length | 540 characters average, 540 median (shortest 523, longest 556) |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-16 |
+| Content length | 523 characters average, 523 median (shortest 523, longest 523) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-16 |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-16 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-16, 11 days ago (quiet past 7 days).
+Most recent item 2026-10-16, 12 days ago (quiet past 7 days).
 
 ### All time
 
@@ -88,7 +88,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-28 | 1 |
 | 2026-09-29 | 4 |
 | 2026-09-30 | 2 |
 | 2026-10-01 | 3 |
@@ -118,6 +117,7 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-25 | 0 |
 | 2026-10-26 | 0 |
 | 2026-10-27 | 0 |
+| 2026-10-28 | 0 |
 
 ## Our ingestion assessment
 

@@ -61,9 +61,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**degraded** — 93 of 327 request(s) to www.senate.gov returned no content (28.4%, at or above the 10% mark).
+**degraded** — 118 of 327 request(s) to www.senate.gov returned no content (36.1%, at or above the 10% mark).
 
-This label has held since 2026-10-24T20:48:55Z (UTC) and was last re-checked 2026-10-27T03:54:11Z (UTC).
+This label has held since 2026-10-24T20:48:55Z (UTC) and was last re-checked 2026-10-28T03:58:23Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -80,15 +80,15 @@ Last 24 hours: 25 request(s) (0 answered, 25 returned no content) · no items in
 | Measure | Value |
 |---|---|
 | Items ingested | none in the last 14 days — most recent 2026-10-01 |
-| Our requests to www.senate.gov | 327 request(s) · 234 answered · 93 declined (4xx) · 0 server declined (5xx) · 0 no response — 28.4% returned no content |
+| Our requests to www.senate.gov | 327 request(s) · 209 answered · 118 declined (4xx) · 0 server declined (5xx) · 0 no response — 36.1% returned no content |
 
 last answered request 2026-10-23T10:18:01.051+00:00 UTC.
 
-93 of 327 request(s) to www.senate.gov returned no content (28.4%, at or above the 10% mark).
+118 of 327 request(s) to www.senate.gov returned no content (36.1%, at or above the 10% mark).
 
 ### All time
 
-- **Our requests to www.senate.gov, all time (since 2026-08-01):** 2,392 request(s) · 2,299 answered · 93 returned no content
+- **Our requests to www.senate.gov, all time (since 2026-08-01):** 2,417 request(s) · 2,299 answered · 118 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.senate.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-28 | 6 | 33 | 204 |
 | 2026-09-29 | 2 | 29 | 168 |
 | 2026-09-30 | 3 | 28 | 235 |
 | 2026-10-01 | 1 | 27 | 156 |
@@ -127,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-24 | 0 | 25 | 207 |
 | 2026-10-25 | 0 | 25 | 186 |
 | 2026-10-26 | 0 | 25 | 180 |
-| 2026-10-27 | 0 | 1 | 346 |
+| 2026-10-27 | 0 | 25 | 200 |
+| 2026-10-28 | 0 | 1 | 441 |
 
 ## Our ingestion assessment
 

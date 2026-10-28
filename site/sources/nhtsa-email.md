@@ -6,7 +6,7 @@
 
 # NHTSA (email)
 
-active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Transportation (NHTSA)
+active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Transportation (NHTSA)
 
 Official site: https://www.nhtsa.gov/press-releases · All sources: [sources.md](../sources.md)
 
@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-19, 8 days ago (quiet past 7 days).
+**delivering** — 3 item(s) in the last 14 days; most recent 2026-10-27, delivered by email.
 
-This label has held since 2026-10-06T18:49:48Z (UTC) and was last re-checked 2026-10-27T03:54:11Z (UTC).
+This label has held since 2026-10-27T17:03:59Z (UTC) and was last re-checked 2026-10-28T03:58:23Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -63,20 +63,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-19 |
-| Content length | 686 characters average, 686 median (shortest 564, longest 808) |
+| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-10-27 |
+| Content length | 685 characters average, 683 median (shortest 564, longest 808) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-19 |
+| Mailbox | 3 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-27 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-19, 8 days ago (quiet past 7 days).
+3 item(s) in the last 14 days; most recent 2026-10-27, delivered by email.
 
 ### All time
 
@@ -88,7 +88,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-28 | 0 |
 | 2026-09-29 | 0 |
 | 2026-09-30 | 0 |
 | 2026-10-01 | 0 |
@@ -117,12 +116,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-24 | 0 |
 | 2026-10-25 | 0 |
 | 2026-10-26 | 0 |
-| 2026-10-27 | 0 |
+| 2026-10-27 | 1 |
+| 2026-10-28 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-NHTSA bulletins arrive via subscription to two GovDelivery sender addresses (nhtsa@service.govdelivery.com and traffic_safety_marketing@service.govdelivery.com) and are ingested by the email adapter with DKIM verification and RFC-5322 capture. Over six measurement days from October 1-7, one bulletin was delivered on 2026-10-06 carrying 817 characters of full-text content. The mailbox records one message, zero administrative filings, no refusals, and no errors. The October delivery followed a prior bulletin from September 16; the October 6 arrival shows continued delivery. The traffic-safety-marketing stream carries campaign and awareness content alongside press releases. No HTTP requests are made for this source; health is measured from email delivery recency alone.
+We receive NHTSA bulletins through the email adapter from two GovDelivery senders, nhtsa@service.govdelivery.com and traffic_safety_marketing@service.govdelivery.com, activated 2026-10-01. Bulletins carry full item text, and each message is DKIM-verified at ingest. The registry notes that the press-release sender had not delivered a bulletin as of activation, and that the Traffic Safety Marketing stream carries campaign and awareness content. Our measurements do not break counts down by sender. Over the past 14 days we measured three items at 0.21 per day, with lengths from 564 to 808 characters and a median of 683. The most recent is dated 2026-10-27. The mailbox recorded three messages, with no administrative filings, refusals, or errors. The previous assessment, dated 2026-10-07, recorded one bulletin dated 2026-10-06 at 817 characters, which falls outside the current 14-day window.
 
-_Model-written assessment of our own ingestion, generated 2026-10-07 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-28 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -53,7 +53,7 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 **no data** — No bulletin recorded from this source in the last 180 days.
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-10-27T03:54:11Z (UTC).
+This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-10-28T03:58:23Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -88,6 +88,6 @@ No requests and no items were recorded in the last 30 days, so there is nothing 
 
 **Model-written ingestion assessment**
 
-This source delivers export-assistance announcements from the U.S. Commercial Service via email subscription confirmed 2026-07-29. No bulletins have been recorded in our ingestion logs; the subscription remains in planned status with no items or delivery attempts measured across the observation period.
+We receive U.S. Commercial Service bulletins through the email adapter from the sender u.s.commercialservice@public.govdelivery.com, with the subscription confirmed 2026-07-29. The registry status remains planned. The mailbox records no messages and no bulletins from this sender. Our health measure reads no-data, with no bulletin recorded in the past 180 days. The collector reports no consecutive errors. The registry notes that partial coverage comes only from commerce-newsroom, which returns HTTP 403 to our identified client, and that a departmental Commerce subscription has not yet been identified. The previous assessment, dated 2026-09-27, also recorded no bulletins, so nothing has changed since then.
 
-_Model-written assessment of our own ingestion, generated 2026-09-27 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-28 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

@@ -57,7 +57,7 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 **delivering** — 6 item(s) in the last 14 days; most recent 2026-10-26; 0 of 328 request(s) to ustr.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-27T03:54:11Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-28T03:58:23Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,7 +67,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -78,13 +78,13 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 1 item(s) i
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to ustr.gov | 328 request(s) · 328 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-27T04:00:12.901+00:00 UTC.
+last answered request 2026-10-28T04:00:17.462+00:00 UTC.
 
 6 item(s) in the last 14 days; most recent 2026-10-26; 0 of 328 request(s) to ustr.gov returned no content.
 
 ### All time
 
-- **Our requests to ustr.gov, all time (since 2026-09-28):** 721 request(s) · 721 answered · 0 returned no content
+- **Our requests to ustr.gov, all time (since 2026-09-28):** 746 request(s) · 746 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to ustr.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-28 | 6 | 10 | 114 |
 | 2026-09-29 | 0 | 27 | 65 |
 | 2026-09-30 | 2 | 25 | 79 |
 | 2026-10-01 | 0 | 26 | 68 |
@@ -123,7 +122,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-24 | 0 | 25 | 67 |
 | 2026-10-25 | 0 | 25 | 90 |
 | 2026-10-26 | 1 | 25 | 83 |
-| 2026-10-27 | 0 | 1 | 179 |
+| 2026-10-27 | 0 | 25 | 80 |
+| 2026-10-28 | 0 | 1 | 392 |
 
 ## Our ingestion assessment
 

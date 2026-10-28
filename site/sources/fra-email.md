@@ -56,7 +56,7 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 **no data** — No bulletin recorded from this source in the last 180 days.
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-10-27T03:54:11Z (UTC).
+This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-10-28T03:58:23Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -91,6 +91,6 @@ No requests and no items were recorded in the last 30 days, so there is nothing 
 
 **Model-written ingestion assessment**
 
-Subscription bulletins to the project mailbox, ingested by the email adapter. Registered 2026-09-26 with sender usdotfra@info.dot.gov. The registry notes no bulletin was observed at the time of registration; the source was registered to attribute the first bulletin on arrival. As of 2026-09-27, no bulletins have been received or parsed; the collector shows zero items. Status is planned and will activate on the first parsed bulletin.
+Bulletins from the Federal Railroad Administration are ingested through the email adapter from usdotfra@info.dot.gov. The subscription was registered on 2026-09-26, when no bulletin had been observed, so that the first bulletin would be attributed on arrival. The registry status is planned and the source activates on the first parsed bulletin. The measured 14-day window contains zero items and zero mailbox messages, with no last item date recorded and no character statistics. Health reads no-data because no bulletin has been recorded in the last 180 days, and the collector reports zero consecutive errors. Since the previous assessment on 2026-09-27, which also recorded zero items, nothing has changed.
 
-_Model-written assessment of our own ingestion, generated 2026-09-27 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-28 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

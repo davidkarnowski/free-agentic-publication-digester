@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-14, 13 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-14, 14 days ago (quiet past 7 days).
 
-This label has held since 2026-10-22T04:14:08Z (UTC) and was last re-checked 2026-10-27T03:54:11Z (UTC).
+This label has held since 2026-10-22T04:14:08Z (UTC) and was last re-checked 2026-10-28T03:58:23Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,24 +62,22 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-14 |
-| Content length | 5,952 characters average, 5,952 median (shortest 5,952, longest 5,952) |
-| Delivery mode | full — full article text, fetched from the item's own page |
+| Items ingested | none in the last 14 days — most recent 2026-10-14 |
 | Our requests to www.consumerfinance.gov | 327 request(s) · 327 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-27T04:00:12.638+00:00 UTC.
+last answered request 2026-10-28T04:00:16.825+00:00 UTC.
 
-Most recent item 2026-10-14, 13 days ago (quiet past 7 days).
+Most recent item 2026-10-14, 14 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.consumerfinance.gov, all time (since 2026-10-05):** 559 request(s) · 559 answered · 0 returned no content
+- **Our requests to www.consumerfinance.gov, all time (since 2026-10-05):** 584 request(s) · 584 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -89,7 +87,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.consumerfinance.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-28 | 0 | 0 | — |
 | 2026-09-29 | 0 | 0 | — |
 | 2026-09-30 | 0 | 0 | — |
 | 2026-10-01 | 0 | 0 | — |
@@ -118,7 +115,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-24 | 0 | 26 | 115 |
 | 2026-10-25 | 0 | 25 | 90 |
 | 2026-10-26 | 0 | 24 | 84 |
-| 2026-10-27 | 0 | 1 | 244 |
+| 2026-10-27 | 0 | 25 | 167 |
+| 2026-10-28 | 0 | 1 | 351 |
 
 ## Our ingestion assessment
 

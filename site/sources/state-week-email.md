@@ -52,9 +52,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-08-03, 85 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-08-03, 86 days ago (quiet past 7 days).
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-10-27T03:54:11Z (UTC).
+This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-10-28T03:58:23Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -75,7 +75,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-08-03, 85 days ago (quiet past 7 days).
+Most recent item 2026-08-03, 86 days ago (quiet past 7 days).
 
 ### All time
 
@@ -89,6 +89,6 @@ No requests and no items were recorded in the last 30 days, so there is nothing 
 
 **Model-written ingestion assessment**
 
-The Department of State's weekly digest arrived via confirmed email subscription; one item was ingested on 2026-08-03. The source has been quiet for 55 consecutive days with no items in the 14-day measurement window, reflecting the weekly publication schedule of this summarized digest format.
+The Week at State is ingested through the email adapter from usstatebpa@public.govdelivery.com. The subscription was confirmed on 2026-07-29 and the registry status is still planned. The registry describes this bulletin as a weekly summary rather than the daily press statements or briefing transcripts. Our measured history shows one item, dated 2026-08-03. The 14-day window and every daily bucket from 2026-10-22 through 2026-10-28 contain zero items. The last item is 86 days old as of this assessment, the mailbox shows zero messages with zero errors and zero refused messages, and no character statistics have been recorded. Since the previous assessment on 2026-09-27, which recorded 55 days without an item, no new bulletin has been ingested and the gap has grown to 86 days.
 
-_Model-written assessment of our own ingestion, generated 2026-09-27 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-28 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
