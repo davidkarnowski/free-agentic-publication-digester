@@ -56,7 +56,7 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 **delivering** — 4 item(s) in the last 14 days; most recent 2026-10-23; 0 of 329 request(s) to www.sec.gov returned no content.
 
-This label has held since 2026-08-27T22:46:31Z (UTC) and was last re-checked 2026-10-28T03:58:23Z (UTC).
+This label has held since 2026-08-27T22:46:31Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -66,7 +66,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -77,13 +77,13 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.sec.gov | 329 request(s) · 329 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-28T04:00:15.058+00:00 UTC.
+last answered request 2026-10-29T04:00:11.793+00:00 UTC.
 
 4 item(s) in the last 14 days; most recent 2026-10-23; 0 of 329 request(s) to www.sec.gov returned no content.
 
 ### All time
 
-- **Our requests to www.sec.gov, all time (since 2026-07-30):** 2,445 request(s) · 2,442 answered · 3 returned no content
+- **Our requests to www.sec.gov, all time (since 2026-07-30):** 2,471 request(s) · 2,468 answered · 3 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.sec.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-29 | 1 | 29 | 112 |
 | 2026-09-30 | 3 | 27 | 125 |
 | 2026-10-01 | 2 | 29 | 188 |
 | 2026-10-02 | 0 | 26 | 129 |
@@ -122,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-25 | 0 | 25 | 121 |
 | 2026-10-26 | 0 | 24 | 120 |
 | 2026-10-27 | 0 | 25 | 132 |
-| 2026-10-28 | 0 | 1 | 571 |
+| 2026-10-28 | 0 | 26 | 148 |
+| 2026-10-29 | 0 | 1 | 276 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The SEC Press Releases RSS feed continues to deliver enforcement actions, rulemakings, and commission announcements paired with full-text extraction from article pages. Over the past 14 days we received 5 items, with articles averaging 6,038 characters extracted from source pages. Recent activity during September 22–23 yielded 3 new items; no items have arrived since. Of 349 polling requests to www.sec.gov, all returned content successfully (zero errors). Request reliability has improved since our previous assessment on August 28, which reported a 0.3% error rate; we now maintain 100% success. The feed's delivery pattern shows items clustering around mid-week activity windows followed by quiet periods, consistent with our prior observations. Article extraction length remains stable near the previous average.
+We ingest the SEC Press Releases RSS feed (registered 2026-07-26, status active). The feed carries teaser descriptions averaging about 251 characters, and we fetch full article text from each item's own page. In the 14-day window we recorded 4 items, a rate of 0.29 per day, with the most recent dated 2026-10-23, six days before this assessment. Extracted article text averaged 5,441 characters (median 4,974; range 4,443 to 7,375). All 329 requests to www.sec.gov returned content, an error rate of 0.0%, and the collector shows no consecutive errors. The registry notes record only the 2026-07-26 probe, which verified the feed end to end, and no incidents are recorded. Compared with the previous assessment dated 2026-09-28, the 14-day item count fell from 5 to 4, average extracted length fell from about 6,038 to 5,441 characters, and the error rate remained at zero. Health is recorded as delivering.
 
-_Model-written assessment of our own ingestion, generated 2026-09-28 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-29 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

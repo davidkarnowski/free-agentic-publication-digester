@@ -53,7 +53,7 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 **delivering** — 6 item(s) in the last 14 days; most recent 2026-10-26; 5 of 333 request(s) to www.eeoc.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-28T03:58:23Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -74,13 +74,13 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to www.eeoc.gov | 333 request(s) · 328 answered · 0 declined (4xx) · 2 server declined (5xx) · 3 no response — 1.5% returned no content |
 
-last answered request 2026-10-28T04:00:17.082+00:00 UTC.
+last answered request 2026-10-29T04:00:13.182+00:00 UTC.
 
 6 item(s) in the last 14 days; most recent 2026-10-26; 5 of 333 request(s) to www.eeoc.gov returned no content.
 
 ### All time
 
-- **Our requests to www.eeoc.gov, all time (since 2026-08-01):** 2,377 request(s) · 2,367 answered · 10 returned no content
+- **Our requests to www.eeoc.gov, all time (since 2026-08-01):** 2,402 request(s) · 2,392 answered · 10 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -90,7 +90,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.eeoc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-29 | 4 | 28 | 388 |
 | 2026-09-30 | 12 | 25 | 274 |
 | 2026-10-01 | 3 | 27 | 319 |
 | 2026-10-02 | 0 | 25 | 271 |
@@ -119,7 +118,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-25 | 0 | 26 | 281 |
 | 2026-10-26 | 1 | 25 | 276 |
 | 2026-10-27 | 0 | 25 | 270 |
-| 2026-10-28 | 0 | 1 | 444 |
+| 2026-10-28 | 0 | 25 | 337 |
+| 2026-10-29 | 0 | 1 | 350 |
 
 ## Our ingestion assessment
 

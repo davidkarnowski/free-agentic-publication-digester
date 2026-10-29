@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-23; 0 of 331 request(s) to www.nih.gov returned no content.
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-23; 0 of 330 request(s) to www.nih.gov returned no content.
 
-This label has held since 2026-10-23T17:22:46Z (UTC) and was last re-checked 2026-10-28T03:58:23Z (UTC).
+This label has held since 2026-10-23T17:22:46Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -75,15 +75,15 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-23 |
 | Content length | 8,735 characters average, 8,735 median (shortest 7,557, longest 9,913) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.nih.gov | 331 request(s) · 331 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.nih.gov | 330 request(s) · 330 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-28T04:00:18.306+00:00 UTC.
+last answered request 2026-10-29T04:00:13.761+00:00 UTC.
 
-2 item(s) in the last 14 days; most recent 2026-10-23; 0 of 331 request(s) to www.nih.gov returned no content.
+2 item(s) in the last 14 days; most recent 2026-10-23; 0 of 330 request(s) to www.nih.gov returned no content.
 
 ### All time
 
-- **Our requests to www.nih.gov, all time (since 2026-08-06):** 2,175 request(s) · 2,175 answered · 0 returned no content
+- **Our requests to www.nih.gov, all time (since 2026-08-06):** 2,200 request(s) · 2,200 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nih.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-29 | 0 | 25 | 312 |
 | 2026-09-30 | 0 | 25 | 301 |
 | 2026-10-01 | 0 | 26 | 279 |
 | 2026-10-02 | 0 | 26 | 257 |
@@ -122,7 +121,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-25 | 0 | 25 | 197 |
 | 2026-10-26 | 0 | 25 | 224 |
 | 2026-10-27 | 0 | 25 | 217 |
-| 2026-10-28 | 0 | 1 | 304 |
+| 2026-10-28 | 0 | 25 | 234 |
+| 2026-10-29 | 0 | 1 | 339 |
 
 ## Our ingestion assessment
 
