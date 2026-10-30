@@ -70,9 +70,12 @@ echo "==> [3/4] build + up on the box"
 # logs/ is the /mcp access-log bind mount (compose); it is created
 # here, not by Docker, so it is owned by the deploy user and the bundle
 # rsync's exclude (SR-3) keeps it across deploys.
+# --pull re-resolves every base image on each build (CVE sweep 2026-10-30):
+# without it a cached base outlived its security fixes for weeks. web is
+# built too, since fapd-web is the patched nginx image in web-image/.
 ssh "${SSH_OPTS[@]}" "$VPS" \
   "cd '$REMOTE_DIR' && mkdir -p logs && chmod 755 logs \
-   && sudo docker compose --profile backend build backend mcp \
+   && sudo docker compose --profile backend build --pull backend mcp web \
    && sudo docker compose --profile backend up -d \
    && sudo docker compose ps --format '{{.Name}} {{.Status}}'"
 

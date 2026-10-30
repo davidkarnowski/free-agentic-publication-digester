@@ -5,7 +5,10 @@
 # directory mounted read-only at /etc/static-mcp. The container binds
 # 0.0.0.0:8080 because a reverse proxy on the same internal network is
 # the only expected client; the CLI's own default stays 127.0.0.1.
-FROM python:3.12-slim
+# Pinned to an exact patch release (CVE sweep 2026-10-30: the floating
+# 3.12-slim tag let a cached 3.12.14 base, with its older bundled expat and
+# OpenSSL, outlive the fixes). Re-pin at each sweep.
+FROM python:3.12.16-slim-trixie
 RUN useradd --system --uid 10001 --no-create-home --shell /usr/sbin/nologin staticmcp
 COPY src/ /opt/static-mcp/src/
 ENV PYTHONPATH=/opt/static-mcp/src \

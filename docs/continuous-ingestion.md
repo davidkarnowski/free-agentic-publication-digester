@@ -175,7 +175,8 @@ anyway: the supervisor pauses collector workers during finalization
 
 ## §9 Backend container (OB-1 — LIVE since 2026-07-30)
 
-- `deploy/vps/Dockerfile.backend`: `python:3.12-slim` + uv + git + curl
+- `deploy/vps/Dockerfile.backend`: `python:3.12.16-slim-trixie` (exact
+  patch pin since 2026-10-30, re-pinned each sweep) + uv + git + curl
   + openssh-client + Node 22 with `@anthropic-ai/claude-code` (the CLI
   backend; retained as of 2026-08-24 — see GUIDE §6 r7's provider
   record); repo at `/app`; entrypoint `scripts/collect.py` (run_forever).

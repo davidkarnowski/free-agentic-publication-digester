@@ -13,10 +13,15 @@ name: fapd
 
 services:
   web:
-    # Pinned to 1.30.6-alpine (CVE sweep 2026-10-25; digest to add) — parity
-    # with the edge proxy (the current nginx STABLE branch). Bump both together
-    # during CVE sweeps, never just one.
-    image: nginx:1.30.6-alpine
+    # The official nginx 1.30.6-alpine image, pinned by digest and patched
+    # for CVE-2026-111497 (Brotli) and curl 8.23.0 in web-image/Dockerfile
+    # (CVE sweep 2026-10-30). Temporary: back to `image: nginx:...@sha256:`
+    # once the official tag carries the fixes. Parity with the edge proxy
+    # (the current nginx STABLE branch); bump both together during CVE
+    # sweeps, never just one.
+    build:
+      context: ./web-image
+    image: fapd-web:1.30.6-p1
     container_name: fapd-web
     restart: unless-stopped
     expose: ["80"]                # private network only — never published

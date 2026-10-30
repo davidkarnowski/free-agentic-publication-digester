@@ -34,7 +34,7 @@ deploy/common/git-ignored.sh > "$GIT_IGNORED"
 rsync -a --delete --exclude-from deploy/common/repo-excludes.txt --exclude-from "$GIT_IGNORED" ./ "$DEV/repo/"
 
 echo "==> [2/4] build"
-docker compose -f "$DEV/docker-compose.yml" --project-directory "$DEV" build render
+docker compose -f "$DEV/docker-compose.yml" --project-directory "$DEV" build --pull render web
 
 echo "==> [3/4] up + render"
 docker compose -f "$DEV/docker-compose.yml" --project-directory "$DEV" up -d web

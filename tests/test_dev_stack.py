@@ -10,6 +10,8 @@ Each guard here pins a hazard the plan documents (deploy/dev/README.md).
 import re
 from pathlib import Path
 
+import yaml
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEV = PROJECT_ROOT / "deploy" / "dev"
 VPS = PROJECT_ROOT / "deploy" / "vps"
@@ -129,9 +131,18 @@ def test_both_stacks_mount_the_edge_owned_nginx_config():
 
 
 def test_web_services_share_the_nginx_image_pin():
-    prod = re.search(r"image:\s*(nginx:\S+)", _live_yaml(VPS / "docker-compose.yml"))
-    dev = re.search(r"image:\s*(nginx:\S+)", _live_yaml(DEV / "docker-compose.yml"))
-    assert prod and dev and prod.group(1) == dev.group(1)
+    # Since 2026-10-30 both stacks build the same patched image
+    # (web-image/Dockerfile, CVE-2026-111497) instead of naming the
+    # official tag; the pin parity is that one file, pinned by digest.
+    prod = yaml.safe_load(_live_yaml(VPS / "docker-compose.yml"))["services"]["web"]
+    dev = yaml.safe_load(_live_yaml(DEV / "docker-compose.yml"))["services"]["web"]
+    assert prod["build"] == {"context": "./web-image"}
+    assert dev["build"] == {"context": "../vps/web-image"}
+    dockerfile = (VPS / "web-image" / "Dockerfile").read_text(encoding="utf-8")
+    pin = r"^FROM nginx:1\.30\.6-alpine@sha256:[0-9a-f]{64}$"
+    assert re.search(pin, dockerfile, re.MULTILINE)
+    # The guard that makes a stale cache fail the build, not pass it.
+    assert "need brotli-libs 1.2.1-r0" in dockerfile and "need curl 8.23.0-r0" in dockerfile
     # The deploy-time syntax gate and the rehearsal used to be checked here
     # for the same pin. Both moved to the operator's private host tree with the config on 2026-09-21,
     # so the pin parity that remains in this repo is prod <-> dev, above.
@@ -242,7 +253,7 @@ def test_dev_up_stages_the_package_the_dev_mcp_service_builds():
 def test_dev_compose_builds_the_production_dockerfile():
     compose = (DEV / "docker-compose.yml").read_text(encoding="utf-8")
     assert "dockerfile: ../vps/Dockerfile.backend" in compose
-    assert "nginx:1.30.6-alpine" in compose    # same pin as production
+    assert "context: ../vps/web-image" in compose    # same patched image as production
     # live mode: one serial mechanical cycle, no archive writes
     assert '["--once", "--no-llm", "--no-wayback"]' in compose
 

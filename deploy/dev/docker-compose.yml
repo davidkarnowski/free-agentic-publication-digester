@@ -23,7 +23,9 @@ name: fapd-dev
 
 services:
   web:
-    image: nginx:1.30.6-alpine        # same pin as production
+    build:
+      context: ../vps/web-image     # the same patched image as production
+    image: fapd-dev-web:1.30.6-p1
     container_name: fapd-dev-web
     restart: unless-stopped
     ports: ["8080:80"]              # published directly; no edge proxy in dev
