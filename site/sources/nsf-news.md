@@ -61,7 +61,7 @@ _Model-written orientation, generated 2026-09-30 by haiku, prompt version 1. It 
 
 **delivering** — 4 item(s) in the last 14 days; most recent 2026-10-27; 0 of 326 request(s) to www.nsf.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -82,13 +82,13 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to www.nsf.gov | 326 request(s) · 326 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-29T04:00:12.975+00:00 UTC.
+last answered request 2026-10-30T04:00:13.332+00:00 UTC.
 
 4 item(s) in the last 14 days; most recent 2026-10-27; 0 of 326 request(s) to www.nsf.gov returned no content.
 
 ### All time
 
-- **Our requests to www.nsf.gov, all time (since 2026-09-28):** 775 request(s) · 775 answered · 0 returned no content
+- **Our requests to www.nsf.gov, all time (since 2026-09-28):** 800 request(s) · 800 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nsf.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-30 | 1 | 25 | 98 |
 | 2026-10-01 | 0 | 27 | 101 |
 | 2026-10-02 | 0 | 26 | 135 |
 | 2026-10-03 | 0 | 26 | 88 |
@@ -127,12 +126,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-26 | 0 | 25 | 63 |
 | 2026-10-27 | 2 | 24 | 80 |
 | 2026-10-28 | 0 | 25 | 81 |
-| 2026-10-29 | 0 | 1 | 136 |
+| 2026-10-29 | 0 | 25 | 48 |
+| 2026-10-30 | 0 | 1 | 96 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Activated with the html-index adapter in late September. The NSF news listing carries podcasts and features alongside press releases; all content types are read. We observed 1 item over 14 days. All 13 requests to www.nsf.gov succeeded with no failures. The listing displays the first page only, so any entries published between two polls that exceed the page size would not be seen. Entries lacking readable dates are dropped and never observation-dated. No machine-readable feeds are advertised on this source.
+We ingest the NSF news listing through an HTML index, with one listing fetch per poll and no article pages fetched (feed-only mode). The listing carries podcasts and features as well as releases, and we read all of them. The one entry dated 2026-09-21 at activation was a podcast episode. Over the 14-day window we recorded 4 items, most recently dated 2026-10-27, with a median of 246 characters and an average of 209. The listing shows its first page only, and entries we cannot date are dropped rather than dated by observation. A feed-shaped link on the captured page resolved to an HTML directory of feeds rather than a feed, and no machine-readable feed is advertised. All 326 requests to www.nsf.gov were answered, with none failing, and the registry notes record no delivery incidents. Since the 2026-09-29 assessment, which recorded 1 item and 13 successful requests, the item count has risen to 4.
 
-_Model-written assessment of our own ingestion, generated 2026-09-29 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

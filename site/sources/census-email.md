@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 8 item(s) in the last 14 days; most recent 2026-10-28, delivered by email.
+**delivering** — 10 item(s) in the last 14 days; most recent 2026-10-29, delivered by email.
 
-This label has held since 2026-09-28T16:01:47Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
+This label has held since 2026-09-28T16:01:47Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -74,14 +74,14 @@ Last 24 hours: 2 item(s) ingested
 
 | Measure | Value |
 |---|---|
-| Items ingested | 8 in 14 days (0.57 per day) · most recent 2026-10-28 |
-| Content length | 2,267 characters average, 2,448 median (shortest 952, longest 3,579) |
+| Items ingested | 10 in 14 days (0.71 per day) · most recent 2026-10-29 |
+| Content length | 2,468 characters average, 2,448 median (shortest 952, longest 4,504) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 8 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-28 |
+| Mailbox | 10 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-29 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-8 item(s) in the last 14 days; most recent 2026-10-28, delivered by email.
+10 item(s) in the last 14 days; most recent 2026-10-29, delivered by email.
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-30 | 1 |
 | 2026-10-01 | 1 |
 | 2026-10-02 | 0 |
 | 2026-10-03 | 0 |
@@ -122,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-26 | 2 |
 | 2026-10-27 | 0 |
 | 2026-10-28 | 2 |
-| 2026-10-29 | 0 |
+| 2026-10-29 | 2 |
+| 2026-10-30 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The source was registered on 2026-09-26 and began delivering bulletins on 2026-09-28. Four bulletins have been ingested to date, each generating one item, with no delivery errors or refusals. Bulletins arrive in full text form, averaging 1,890 characters (range 695–2,854). The collector maintains stable contact with the email system with no recorded errors. A four-bulletin sample over a single day is insufficient to characterize source coverage or completeness; the observed stream is the subscription's own editorial selection.
+Census Bureau bulletins are ingested by email from the project mailbox, with full item text carried in each message. The average item is 2,468 characters (median 2,448, range 952 to 4,504). In the last 14 days we ingested 10 items, the most recent dated 2026-10-29, and the mailbox recorded 10 bulletins with zero errors and zero refused messages. The subscription was registered on 2026-09-26 and ingestion began with the first poll after deployment; earlier bulletins are not backfilled. The registry lists Gate-3 coverage evaluation as pending and notes that the same news may also appear through census-newsroom and commerce-email. Since the previous assessment on 2026-09-29, which described four bulletins averaging 1,890 characters over a single day, the 14-day count is now 10 and the average item has risen to 2,468 characters.
 
-_Model-written assessment of our own ingestion, generated 2026-09-29 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

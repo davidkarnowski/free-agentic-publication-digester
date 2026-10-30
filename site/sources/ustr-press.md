@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 7 item(s) in the last 14 days; most recent 2026-10-28; 0 of 328 request(s) to ustr.gov returned no content.
+**delivering** — 7 item(s) in the last 14 days; most recent 2026-10-28; 0 of 327 request(s) to ustr.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,7 +67,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -76,15 +76,15 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 1 item(s) i
 | Items ingested | 7 in 14 days (0.5 per day) · most recent 2026-10-28 |
 | Content length | 113 characters average, 120 median (shortest 49, longest 158) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to ustr.gov | 328 request(s) · 328 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to ustr.gov | 327 request(s) · 327 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-29T04:00:13.057+00:00 UTC.
+last answered request 2026-10-30T04:00:13.353+00:00 UTC.
 
-7 item(s) in the last 14 days; most recent 2026-10-28; 0 of 328 request(s) to ustr.gov returned no content.
+7 item(s) in the last 14 days; most recent 2026-10-28; 0 of 327 request(s) to ustr.gov returned no content.
 
 ### All time
 
-- **Our requests to ustr.gov, all time (since 2026-09-28):** 771 request(s) · 771 answered · 0 returned no content
+- **Our requests to ustr.gov, all time (since 2026-09-28):** 796 request(s) · 796 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to ustr.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-30 | 2 | 25 | 79 |
 | 2026-10-01 | 0 | 26 | 68 |
 | 2026-10-02 | 5 | 26 | 69 |
 | 2026-10-03 | 0 | 26 | 65 |
@@ -123,12 +122,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-26 | 1 | 25 | 83 |
 | 2026-10-27 | 0 | 25 | 80 |
 | 2026-10-28 | 1 | 25 | 72 |
-| 2026-10-29 | 0 | 1 | 148 |
+| 2026-10-29 | 0 | 25 | 64 |
+| 2026-10-30 | 0 | 1 | 94 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Activated with the html-index adapter in late September. The USTR press-release listing yields items carrying the publisher's own dates. We observed 6 items over 14 days. All 13 requests to ustr.gov succeeded with no failures. The listing displays the first page only, so any entries published between two polls that exceed the page size would not be seen. Entries lacking readable dates are dropped and never observation-dated. No machine-readable feeds are advertised on this source.
+We ingest the USTR press-release index through an HTML index, with one listing fetch per poll and no article pages fetched (feed-only mode). The items we recorded are press releases carrying USTR's own dates. Over the 14-day window we recorded 7 items, most recently dated 2026-10-28, with a median of 120 characters and an average of 113. The listing shows its first page only, and entries we cannot date are dropped rather than dated by observation. No machine-readable feed is advertised on this source. All 327 requests to ustr.gov were answered, with none failing, and the registry notes record no delivery incidents. Since the 2026-09-29 assessment, which recorded 6 items and 13 successful requests, the item count has risen to 7.
 
-_Model-written assessment of our own ingestion, generated 2026-09-29 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

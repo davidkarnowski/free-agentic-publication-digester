@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 29 item(s) in the last 14 days; most recent 2026-10-28; 1 of 1325 request(s) to www.whitehouse.gov returned no content.
+**delivering** — 30 item(s) in the last 14 days; most recent 2026-10-29; 1 of 1323 request(s) to www.whitehouse.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,24 +67,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 101 request(s) (101 answered, 0 returned no content) · 5 item(s) ingested
+Last 24 hours: 100 request(s) (100 answered, 0 returned no content) · 3 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 29 in 14 days (2.07 per day) · most recent 2026-10-28 |
-| Content length | 120 characters average, 116 median (shortest 70, longest 188) |
+| Items ingested | 30 in 14 days (2.14 per day) · most recent 2026-10-29 |
+| Content length | 123 characters average, 121 median (shortest 70, longest 188) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.whitehouse.gov | 1,325 request(s) · 1,324 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.1% returned no content |
+| Our requests to www.whitehouse.gov | 1,323 request(s) · 1,322 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.1% returned no content |
 
-last answered request 2026-10-29T04:00:15.470+00:00 UTC; this host serves 4 registered sources, so these figures are host-wide.
+last answered request 2026-10-30T04:00:15.835+00:00 UTC; this host serves 4 registered sources, so these figures are host-wide.
 
-29 item(s) in the last 14 days; most recent 2026-10-28; 1 of 1325 request(s) to www.whitehouse.gov returned no content.
+30 item(s) in the last 14 days; most recent 2026-10-29; 1 of 1323 request(s) to www.whitehouse.gov returned no content.
 
 ### All time
 
-- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 5,820 request(s) · 5,804 answered · 16 returned no content
+- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 5,920 request(s) · 5,904 answered · 16 returned no content
 
 This host serves 4 registered sources, so these figures are host-wide.
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.whitehouse.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-30 | 3 | 75 | 41 |
 | 2026-10-01 | 4 | 78 | 42 |
 | 2026-10-02 | 4 | 79 | 65 |
 | 2026-10-03 | 1 | 75 | 39 |
@@ -125,12 +124,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-26 | 3 | 100 | 75 |
 | 2026-10-27 | 1 | 100 | 77 |
 | 2026-10-28 | 5 | 101 | 84 |
-| 2026-10-29 | 0 | 4 | 100 |
+| 2026-10-29 | 3 | 100 | 77 |
+| 2026-10-30 | 0 | 4 | 50 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Activated with the html-index adapter in late September, reading from the /news/ listing which carries releases, statements, and fact sheets. We exclude items under /presidential-actions/ to avoid duplication with proclamation feeds already ingested into the presidential actions section. We observed 11 items over 14 days. Of 709 total requests to www.whitehouse.gov, 7 returned no content, yielding a 1% failure rate; failed requests count against the request budget per policy. The listing displays the first page only, so any entries published between two polls that exceed the page size would not be seen. Entries lacking readable dates are dropped and never observation-dated.
+We ingest the White House briefing room through an HTML index of the /news/ listing, since /briefing-room/ redirects there. The fetch is one listing request per poll, feed-only, with no article pages fetched. The listing carries releases, briefings and statements, and fact sheets. Items under /presidential-actions/ are excluded by an index_exclude_path setting, because the presidential-action feeds already ingest them, so no document appears in both sections. Over the 14-day window we recorded 30 items, most recently dated 2026-10-29, with a median of 121 characters and an average of 123. The listing shows its first page only, and undatable entries are dropped rather than dated by observation. Of 1,323 requests to www.whitehouse.gov in the window, 1,322 were answered and 1 returned no content; the host is shared with 4 registered sources. The registry describes this channel as the fast channel, with the official compilation arriving later through the planned govinfo DCPD collection. Since the 2026-09-29 assessment, which recorded 11 items and 7 of 709 requests returning no content, the item count has risen to 30 and the no-content share has fallen below 0.1 percent.
 
-_Model-written assessment of our own ingestion, generated 2026-09-29 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

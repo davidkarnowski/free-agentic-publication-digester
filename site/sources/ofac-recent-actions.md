@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-10-28; 0 of 328 request(s) to ofac.treasury.gov returned no content.
+**delivering** — 6 item(s) in the last 14 days; most recent 2026-10-29; 0 of 326 request(s) to ofac.treasury.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,24 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-10-28 |
-| Content length | 154 characters average, 148 median (shortest 121, longest 217) |
+| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-10-29 |
+| Content length | 148 characters average, 148 median (shortest 86, longest 217) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to ofac.treasury.gov | 328 request(s) · 328 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to ofac.treasury.gov | 326 request(s) · 326 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-29T04:00:25.081+00:00 UTC.
+last answered request 2026-10-30T04:00:24.854+00:00 UTC.
 
-6 item(s) in the last 14 days; most recent 2026-10-28; 0 of 328 request(s) to ofac.treasury.gov returned no content.
+6 item(s) in the last 14 days; most recent 2026-10-29; 0 of 326 request(s) to ofac.treasury.gov returned no content.
 
 ### All time
 
-- **Our requests to ofac.treasury.gov, all time (since 2026-09-28):** 772 request(s) · 772 answered · 0 returned no content
+- **Our requests to ofac.treasury.gov, all time (since 2026-09-28):** 796 request(s) · 796 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to ofac.treasury.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-30 | 1 | 24 | 9122 |
 | 2026-10-01 | 1 | 27 | 9253 |
 | 2026-10-02 | 1 | 25 | 9158 |
 | 2026-10-03 | 0 | 25 | 8999 |
@@ -127,12 +126,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-26 | 1 | 24 | 9037 |
 | 2026-10-27 | 1 | 26 | 9237 |
 | 2026-10-28 | 1 | 25 | 8960 |
-| 2026-10-29 | 0 | 1 | 10230 |
+| 2026-10-29 | 1 | 24 | 9301 |
+| 2026-10-30 | 0 | 1 | 10153 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-OFAC Recent Actions is ingested via HTML index diffing with path filtering to /recent-actions/20 and one listing poll per cycle. Activation on 2026-09-28 set the measurement baseline. In the 6 days since activation, three items were ingested with dates ranging from 2026-09-23 to 2026-09-28, averaging 137 characters each. The source operates feed-only with no article fetches; filtered index text serves as the full digest content. All 13 polling requests to ofac.treasury.gov completed successfully with no errors. The host refused robots.txt requests on 2026-07-31 but answered normally on 2026-09-28; no polling was attempted during the outage window. Coverage is limited to dateable entries on the filtered page; undatable entries are dropped and never observation-dated.
+OFAC Recent Actions is ingested by the html-index adapter from the recent-actions listing, with one listing fetch per poll and no article fetches, so the filtered index text is the content we hold. Entries we can date carry the publisher's own date; entries we cannot date are dropped and never observation-dated. The average item is 148 characters (range 86 to 217). In the last 14 days we ingested 6 items, the most recent dated 2026-10-29, and the last 24 hours recorded one item across 24 polls. Requests to ofac.treasury.gov totaled 326 over the measured period, all answered, with no client errors, server errors, or empty responses. The registry records that OFAC retired its RSS feed on 2025-01-31 by its own notice and that the recent-actions index remains. On 2026-07-31 the host did not serve robots.txt across five attempts, and the client fetched nothing during that time; the source was activated on 2026-09-28 after robots.txt answered. Since the previous assessment on 2026-09-29, which counted 3 items and 13 polling requests, the item count has risen to 6 and the most recent item is now dated 2026-10-29. Coverage is limited to the first listing page, so new entries beyond that page between two polls would not be seen.
 
-_Model-written assessment of our own ingestion, generated 2026-09-29 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

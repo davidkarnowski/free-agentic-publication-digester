@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 24 item(s) in the last 14 days; most recent 2026-10-28; 0 of 327 request(s) to www.ice.gov returned no content.
+**delivering** — 27 item(s) in the last 14 days; most recent 2026-10-29; 0 of 327 request(s) to www.ice.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -77,18 +77,18 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 3 item(s) i
 
 | Measure | Value |
 |---|---|
-| Items ingested | 24 in 14 days (1.71 per day) · most recent 2026-10-28 |
-| Content length | 310 characters average, 307 median (shortest 199, longest 520) |
+| Items ingested | 27 in 14 days (1.93 per day) · most recent 2026-10-29 |
+| Content length | 310 characters average, 308 median (shortest 199, longest 520) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to www.ice.gov | 327 request(s) · 327 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-29T04:00:13.900+00:00 UTC.
+last answered request 2026-10-30T04:00:14.075+00:00 UTC.
 
-24 item(s) in the last 14 days; most recent 2026-10-28; 0 of 327 request(s) to www.ice.gov returned no content.
+27 item(s) in the last 14 days; most recent 2026-10-29; 0 of 327 request(s) to www.ice.gov returned no content.
 
 ### All time
 
-- **Our requests to www.ice.gov, all time (since 2026-09-28):** 775 request(s) · 775 answered · 0 returned no content
+- **Our requests to www.ice.gov, all time (since 2026-09-28):** 800 request(s) · 800 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.ice.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-30 | 1 | 25 | 174 |
 | 2026-10-01 | 1 | 26 | 167 |
 | 2026-10-02 | 0 | 26 | 168 |
 | 2026-10-03 | 0 | 25 | 170 |
@@ -127,12 +126,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-26 | 6 | 25 | 141 |
 | 2026-10-27 | 3 | 25 | 155 |
 | 2026-10-28 | 3 | 25 | 180 |
-| 2026-10-29 | 0 | 1 | 184 |
+| 2026-10-29 | 3 | 25 | 148 |
+| 2026-10-30 | 0 | 1 | 174 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The ICE Newsroom is ingested via HTML index diffing with one listing poll per cycle. Activation on 2026-09-28 set the measurement baseline. In the 6 days since activation, seven items were ingested with dates ranging from 2026-09-21 to 2026-09-28, averaging 360 characters each. The source operates feed-only with no article fetches; index text serves as the full digest content. All 13 polling requests to www.ice.gov completed successfully with no errors. Coverage is limited to dateable entries on the listing's first page; undatable entries are dropped and never observation-dated.
+We ingest the ICE newsroom through an HTML index, with one listing fetch per poll and no article pages fetched (feed-only mode). The items we recorded are news releases carrying ICE's own dates, covering the enforcement and removal operations and Homeland Security Investigations cases that the registry describes for this source. Over the 14-day window we recorded 27 items, most recently dated 2026-10-29, with a median of 308 characters and an average of 310. Daily item counts in the most recent seven days ranged from zero to six. The listing shows its first page only, and entries we cannot date are dropped rather than dated by observation. All 327 requests to www.ice.gov were answered, with none failing, and the registry notes record no delivery incidents. The previous assessment covered the six days since activation, when we recorded 7 items averaging 360 characters from 13 successful polling requests. Since then the item count has risen to 27 and the average length has moved to 310 characters.
 
-_Model-written assessment of our own ingestion, generated 2026-09-29 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

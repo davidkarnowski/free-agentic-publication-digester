@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 11 item(s) in the last 14 days; most recent 2026-10-27, delivered by email.
+**delivering** — 11 item(s) in the last 14 days; most recent 2026-10-29, delivered by email.
 
-This label has held since 2026-09-29T15:58:13Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
+This label has held since 2026-09-29T15:58:13Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,20 +70,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 11 in 14 days (0.79 per day) · most recent 2026-10-27 |
-| Content length | 5,567 characters average, 4,107 median (shortest 1,280, longest 21,776) |
+| Items ingested | 11 in 14 days (0.79 per day) · most recent 2026-10-29 |
+| Content length | 6,397 characters average, 4,385 median (shortest 1,280, longest 21,776) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 11 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-28 |
+| Mailbox | 11 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-29 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-11 item(s) in the last 14 days; most recent 2026-10-27, delivered by email.
+11 item(s) in the last 14 days; most recent 2026-10-29, delivered by email.
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-30 | 2 |
 | 2026-10-01 | 1 |
 | 2026-10-02 | 5 |
 | 2026-10-03 | 0 |
@@ -124,12 +123,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-26 | 1 |
 | 2026-10-27 | 1 |
 | 2026-10-28 | 0 |
-| 2026-10-29 | 0 |
+| 2026-10-29 | 2 |
+| 2026-10-30 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The EPA News Releases source delivers bulletins via email subscription (GovDelivery) to the project mailbox. Following a configuration correction in late September that identified the actual bulletin-sending address (epapress@govdelivery.epa.gov), distinct from the administrative confirmation address, ingestion began with the first poll after the correction. Over the measured period, 2 new items were delivered on 2026-09-29, averaging 3,170 characters per item (range 2,882–3,459). Both bulletins arrived within the same day, carrying full text and archive-eligible content. No backfill of earlier bulletins occurs. The email adapter operates without errors, and health status is read from delivery recency alone, as email sources generate no polling requests to track.
+EPA News Releases is ingested from GovDelivery bulletins delivered by email to the project mailbox, with full item text carried in each message. The average item is 6,397 characters (median 4,385, range 1,280 to 21,776). In the last 14 days we ingested 11 items, the most recent dated 2026-10-29, and the mailbox recorded 11 bulletins with zero errors and zero refused messages. The registry records a 2026-09-26 correction: the bulletins arrive from epapress@govdelivery.epa.gov rather than the confirming address, so no bulletins had been ingested before the sender was added. Earlier bulletins are not backfilled. A press release about a rule and the rule itself are separate documents, and both are listed, with the Federal Register copies arriving through the FR collection. The registry status is planned, while measured health reads delivering. Since the previous assessment on 2026-09-30, which counted 2 items on 2026-09-29 averaging 3,170 characters, the 14-day count has risen to 11 and the average has risen to 6,397 characters.
 
-_Model-written assessment of our own ingestion, generated 2026-09-30 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

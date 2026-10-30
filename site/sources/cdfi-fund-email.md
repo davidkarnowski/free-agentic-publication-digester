@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-21, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-21, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-21T21:09:06Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
+This label has held since 2026-10-29T04:09:56Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -79,7 +79,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-21, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-21, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-30 | 3 |
 | 2026-10-01 | 0 |
 | 2026-10-02 | 0 |
 | 2026-10-03 | 0 |
@@ -121,11 +120,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-27 | 0 |
 | 2026-10-28 | 0 |
 | 2026-10-29 | 0 |
+| 2026-10-30 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-CDFI Fund bulletins from cdfifund@service.govdelivery.com deliver via GovDelivery subscription to the project mailbox in full-text format. One bulletin was ingested during the 14-day window, dated 2026-10-21 and measuring 2,579 characters. The mailbox adapter reports zero errors and zero refused messages. Subscription was confirmed 2026-09-26. The prior assessment (2026-10-09) reported three bulletins all dated 2026-09-30; one additional bulletin arrived on 2026-10-21 following a 21-day quiet period. Ingestion began after subscription confirmation and does not backfill pre-subscription messages. Delivery to date shows a pattern of activity clustered on single publication days followed by extended quiet intervals.
+CDFI Fund bulletins are ingested by email from the project mailbox, with full item text carried in each message. In the 14-day window we ingested one item, dated 2026-10-21, measuring 2,579 characters. The mailbox recorded one bulletin, one message, zero errors, and zero refused messages, with the last message arriving on 2026-10-21. The subscription was confirmed on 2026-09-26, and ingestion began after confirmation without backfilling earlier messages. The registry lists the status as planned and notes that coverage evaluation is pending first ingested bulletins. Health reads quiet, since the most recent item is 9 days old. Since the previous assessment on 2026-10-22, which also recorded one item dated 2026-10-21, no new bulletins have arrived. The recorded pattern is activity on single publication days followed by extended quiet intervals.
 
-_Model-written assessment of our own ingestion, generated 2026-10-22 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

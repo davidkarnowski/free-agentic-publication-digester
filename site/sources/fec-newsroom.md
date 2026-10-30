@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-10-23; 0 of 328 request(s) to www.fec.gov returned no content.
+**delivering** — 5 item(s) in the last 14 days; most recent 2026-10-23; 0 of 327 request(s) to www.fec.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,18 +73,18 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 
 | Measure | Value |
 |---|---|
-| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-10-23 |
-| Content length | 231 characters average, 306 median (shortest 81, longest 307) |
+| Items ingested | 5 in 14 days (0.36 per day) · most recent 2026-10-23 |
+| Content length | 261 characters average, 306 median (shortest 81, longest 307) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.fec.gov | 328 request(s) · 328 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.fec.gov | 327 request(s) · 327 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-29T04:00:14.868+00:00 UTC.
+last answered request 2026-10-30T04:00:12.818+00:00 UTC.
 
-6 item(s) in the last 14 days; most recent 2026-10-23; 0 of 328 request(s) to www.fec.gov returned no content.
+5 item(s) in the last 14 days; most recent 2026-10-23; 0 of 327 request(s) to www.fec.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fec.gov, all time (since 2026-09-28):** 774 request(s) · 774 answered · 0 returned no content
+- **Our requests to www.fec.gov, all time (since 2026-09-28):** 799 request(s) · 799 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fec.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-09-30 | 0 | 25 | 1554 |
 | 2026-10-01 | 1 | 26 | 1102 |
 | 2026-10-02 | 1 | 26 | 874 |
 | 2026-10-03 | 0 | 25 | 821 |
@@ -123,12 +122,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-26 | 0 | 25 | 1160 |
 | 2026-10-27 | 0 | 24 | 1970 |
 | 2026-10-28 | 0 | 25 | 895 |
-| 2026-10-29 | 0 | 1 | 2602 |
+| 2026-10-29 | 0 | 25 | 1714 |
+| 2026-10-30 | 0 | 1 | 167 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Activated with the html-index adapter in late September. The FEC's updates listing is broader in scope than press releases alone and includes compliance tips, weekly digests, filing reminders, and enforcement notices—all of which are read and ingested as published. We observed 4 items over 14 days from this source carrying the Commission's own dates. All 14 requests to www.fec.gov succeeded with no failures. The listing displays the first page only, so any entries published between two polls that exceed the page size would not be seen. Entries lacking readable dates are dropped and never observation-dated. No machine-readable feeds are advertised on this source.
+We ingest the Federal Election Commission updates listing through an HTML index, with one listing fetch per poll and no article pages fetched (feed-only mode). The listing is broader than press releases. On the activation day it carried Commission press releases, compliance tips, a weekly digest and filing reminders, and we read all of these as published. Over the 14-day window we recorded 5 items, most recently dated 2026-10-23, with a median of 306 characters and an average of 261. The listing shows its first page only, and entries we cannot date are dropped rather than dated by observation. At the 2026-07-31 capture, 31 of 54 listed links had no readable date. No machine-readable feed is advertised on this source. All 327 requests to www.fec.gov were answered, with none failing, and the registry notes record no delivery incidents. Since the 2026-09-29 assessment, which recorded 4 items and 14 successful requests, the item count has risen to 5.
 
-_Model-written assessment of our own ingestion, generated 2026-09-29 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-23, delivered by email.
+**delivering** — 3 item(s) in the last 14 days; most recent 2026-10-29, delivered by email.
 
-This label has held since 2026-09-28T14:07:50Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
+This label has held since 2026-09-28T14:07:50Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,20 +71,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-23 |
-| Content length | 3,634 characters average, 3,634 median (shortest 1,852, longest 5,416) |
+| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-10-29 |
+| Content length | 3,238 characters average, 2,446 median (shortest 1,852, longest 5,416) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 3 bulletin(s), 0 subscription notice(s), 4 junk-folder message(s) refused on a failed or unaligned DKIM signature in the last 14 days; most recent message 2026-10-23 |
+| Mailbox | 4 bulletin(s), 0 subscription notice(s), 3 junk-folder message(s) refused on a failed or unaligned DKIM signature in the last 14 days; most recent message 2026-10-29 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-2 item(s) in the last 14 days; most recent 2026-10-23, delivered by email.
+3 item(s) in the last 14 days; most recent 2026-10-29, delivered by email.
 
 ### All time
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-30 | 1 |
 | 2026-10-01 | 1 |
 | 2026-10-02 | 1 |
 | 2026-10-03 | 0 |
@@ -125,12 +124,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-26 | 0 |
 | 2026-10-27 | 0 |
 | 2026-10-28 | 0 |
-| 2026-10-29 | 0 |
+| 2026-10-29 | 1 |
+| 2026-10-30 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Registered 2026-09-26, began delivering 2026-09-28. One bulletin ingested in full text (~1,051 characters) generating one item, with no errors or refusals. DKIM signature verified and archived; signed by subscribers.usda.gov, aligning with the sender's domain. The bulletin carried no external link; the item cites the archived message. The collector maintains stable contact. A single bulletin is too thin a sample to establish coverage scope; the stream is the subscription's own measure.
+APHIS bulletins are ingested by email from the project mailbox. The bulletins carry full text, the item cites the archived message because the bulletin contains no web link, and DKIM verification passes with the signing domain aligned to the sender. The average item is 3,238 characters (median 2,446, range 1,852 to 5,416). In the last 14 days we ingested 3 items, the most recent dated 2026-10-29. The mailbox recorded 7 messages in total: 4 bulletins were ingested and 3 were refused, with no collector errors. The measured data does not record the reason for the refusals. The registry notes that the subscription's topic selection at signup was not recorded, and that the coverage evaluation rests on a single bulletin and claims no relationship to the agency's full output. Since the previous assessment on 2026-09-29, which described one bulletin of about 1,051 characters with no refusals, the stream now shows 3 items, 4 bulletins, and 3 refused messages.
 
-_Model-written assessment of our own ingestion, generated 2026-09-29 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

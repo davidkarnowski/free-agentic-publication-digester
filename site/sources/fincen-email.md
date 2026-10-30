@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-21, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-21, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-13T21:05:24Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
+This label has held since 2026-10-29T04:09:56Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -81,7 +81,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-21, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-21, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-30 | 0 |
 | 2026-10-01 | 1 |
 | 2026-10-02 | 0 |
 | 2026-10-03 | 0 |
@@ -123,11 +122,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-27 | 0 |
 | 2026-10-28 | 0 |
 | 2026-10-29 | 0 |
+| 2026-10-30 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The FinCEN Updates source delivers full-text bulletins via email to the project mailbox from fincenupdates@public.govdelivery.com. These bulletins undergo DKIM verification. Over the past 14 days, we observed 3 new items, an increase from the 1 item reported in the previous assessment, resulting in an average of 0.21 items per day, up from 0.07. The most recent item was delivered on 2026-10-13, which is more recent than the 2026-10-01 date in the prior assessment. Extracted content averaged 1,289 characters, with a range from 1,128 to 1,445 characters, an increase from the previous average of 1,128 characters. As an email-based source, no polling requests are applicable, and no errors were recorded. The source is currently delivering, with its most recent item delivered 1 day ago.
+FinCEN Updates is ingested from bulletins delivered by email to the project mailbox, with the full item text carried in each message. The average item is 1,228 characters (range 1,002 to 1,453). In the last 14 days the mailbox recorded 3 bulletins, the latest message arriving on 2026-10-26, and 2 items were ingested, the most recent dated 2026-10-21. The mailbox shows zero errors and zero refused messages. The registry records the subscription as confirmed on 2026-07-29 and lists the status as planned. Health reads quiet, since the most recent item is 9 days old. Since the previous assessment on 2026-10-14, which counted 3 items with the latest dated 2026-10-13, the 14-day item count has fallen to 2 and the most recent item is now dated 2026-10-21. The average item length has moved from 1,289 characters to 1,228.
 
-_Model-written assessment of our own ingestion, generated 2026-10-14 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

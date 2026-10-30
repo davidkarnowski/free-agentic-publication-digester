@@ -6,7 +6,7 @@
 
 # Children's Bureau — News From CB (email)
 
-active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Health and Human Services (ACF / Children's Bureau)
+active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Health and Human Services (ACF / Children's Bureau)
 
 Official site: https://www.acf.hhs.gov/cb · All sources: [sources.md](../sources.md)
 
@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-22, delivered by email.
+**quiet** — Most recent item 2026-10-22, 8 days ago (quiet past 7 days).
 
-This label has held since 2026-10-22T16:41:41Z (UTC) and was last re-checked 2026-10-29T03:48:33Z (UTC).
+This label has held since 2026-10-22T16:41:41Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -85,7 +85,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-1 item(s) in the last 14 days; most recent 2026-10-22, delivered by email.
+Most recent item 2026-10-22, 8 days ago (quiet past 7 days).
 
 ### All time
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-09-30 | 0 |
 | 2026-10-01 | 0 |
 | 2026-10-02 | 0 |
 | 2026-10-03 | 0 |
@@ -127,6 +126,7 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-27 | 0 |
 | 2026-10-28 | 0 |
 | 2026-10-29 | 0 |
+| 2026-10-30 | 0 |
 
 ## Our ingestion assessment
 
