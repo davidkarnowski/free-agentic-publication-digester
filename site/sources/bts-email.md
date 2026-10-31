@@ -6,7 +6,7 @@
 
 # Bureau of Transportation Statistics (email)
 
-planned · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Transportation, Bureau of Transportation Statistics
+planned · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Transportation, Bureau of Transportation Statistics
 
 Official site: https://www.bts.gov/ · All sources: [sources.md](../sources.md)
 
@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 4 item(s) in the last 14 days; most recent 2026-10-23, delivered by email.
+**quiet** — Most recent item 2026-10-23, 8 days ago (quiet past 7 days).
 
-This label has held since 2026-09-30T15:21:24Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
+This label has held since 2026-09-30T15:21:24Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -77,11 +77,11 @@ Last 24 hours: no items ingested
 | Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-10-23 |
 | Content length | 2,482 characters average, 2,321 median (shortest 762, longest 4,525) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 4 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-23 |
+| Mailbox | 5 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-30 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-4 item(s) in the last 14 days; most recent 2026-10-23, delivered by email.
+Most recent item 2026-10-23, 8 days ago (quiet past 7 days).
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-01 | 0 |
 | 2026-10-02 | 1 |
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
@@ -123,11 +122,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-28 | 0 |
 | 2026-10-29 | 0 |
 | 2026-10-30 | 0 |
+| 2026-10-31 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-This source delivers bulletins through GovDelivery email subscription. The previous assessment from 2026-09-27 recorded zero bulletins after the 2026-09-26 registration date. As of 2026-10-01, the source has delivered two bulletins on 2026-09-30, ingested during UTC hours 11 and 13. The bulletins ranged from 2,251 to 4,477 characters with a median of 3,364 characters, both in full-text format. The collector has maintained stable mailbox access throughout with no delivery errors. Cadence cannot yet be established from a single delivery day. Gate-3 coverage evaluation proceeds with the first ingested bulletins. Related sources that may publish the same news include transportation-email and transportation-newsroom; items duplicated at the same URL merge as corroboration, while the same event at different URLs are listed separately.
+Bulletins from this source arrive by GovDelivery email to the project mailbox with full item text. The 14-day window holds four measured items, a rate of 0.29 per day, with character counts from 762 to 4,525, a median of 2,321, and a mean of 2,482. The mailbox records five bulletin messages, with zero administrative messages, zero errors, and zero refused deliveries. The last message arrived 2026-10-30 at 15:15 UTC. The most recent item is dated 2026-10-23, eight days before this assessment, so health reads quiet. The daily breakdown shows no items from 2026-10-25 through 2026-10-31. Ingestion began at the first poll after the 2026-09-26 registration, and earlier bulletins were not backfilled. Since the previous assessment on 2026-10-01, which recorded two bulletins dated 2026-09-30, the window now records four items, with the most recent dated 2026-10-23. The mailbox count of five and the four measured items differ by one, and we have not reconciled that difference. Gate-3 coverage evaluation remains pending, and the registry status is planned.
 
-_Model-written assessment of our own ingestion, generated 2026-10-01 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

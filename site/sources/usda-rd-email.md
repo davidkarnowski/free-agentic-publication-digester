@@ -6,7 +6,7 @@
 
 # USDA Rural Development (email)
 
-planned · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Agriculture, Rural Development
+planned · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Agriculture, Rural Development
 
 Official site: https://www.rd.usda.gov/ · All sources: [sources.md](../sources.md)
 
@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-22, 8 days ago (quiet past 7 days).
+**delivering** — 3 item(s) in the last 14 days; most recent 2026-10-30, delivered by email.
 
-This label has held since 2026-10-19T18:13:26Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
+This label has held since 2026-10-30T16:50:05Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,20 +70,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-22 |
-| Content length | 3,328 characters average, 3,328 median (shortest 2,551, longest 4,105) |
+| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-10-30 |
+| Content length | 3,659 characters average, 4,105 median (shortest 2,551, longest 4,320) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 4 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-29 |
+| Mailbox | 5 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-30 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-22, 8 days ago (quiet past 7 days).
+3 item(s) in the last 14 days; most recent 2026-10-30, delivered by email.
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-01 | 2 |
 | 2026-10-02 | 0 |
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
@@ -124,12 +123,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-27 | 0 |
 | 2026-10-28 | 0 |
 | 2026-10-29 | 0 |
-| 2026-10-30 | 0 |
+| 2026-10-30 | 1 |
+| 2026-10-31 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-USDA Rural Development bulletins arrive via three configured sender addresses (ruraldevelopment@public.govdelivery.com, oearuraldevelopment@public.govdelivery.com, and rd.oea.legaffairs@public.govdelivery.com) to the project mailbox and are ingested via the email adapter with DKIM verification. Bulletins carry full text, with measured items averaging 2,886 characters. Over the past 14 days, three items have been extracted at a rate of 0.21 items per day, with the most recent dated 2026-10-19. The mailbox has collected four messages with zero errors and zero refused messages since registration on 2026-09-26. Compared to the prior assessment of 2026-10-18, which recorded the most recent delivery on 2026-10-16, a new bulletin has arrived on 2026-10-19.
+USDA Rural Development bulletins reach the project mailbox by email from three configured sender addresses, with full item text in each message. The 14-day window holds three measured items at 0.21 per day, ranging from 2,551 to 4,320 characters, with a median of 4,105 and a mean of 3,659. The mailbox records five bulletin messages, with zero administrative messages, zero errors, and zero refused deliveries. The last message arrived 2026-10-30 at 16:33 UTC. The most recent item is dated 2026-10-30, and it is the only item in the daily breakdown from 2026-10-25 through 2026-10-31. Since the previous assessment on 2026-10-20, which recorded three items with the latest dated 2026-10-19 and a mean of 2,886 characters, the most recent item has advanced to 2026-10-30, the mailbox count has risen from four messages to five, and the window mean has increased to 3,659 characters. Ingestion began at the first poll after the 2026-09-26 registration, and earlier bulletins were not backfilled. Gate-3 coverage evaluation is pending, and the registry status is planned.
 
-_Model-written assessment of our own ingestion, generated 2026-10-20 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

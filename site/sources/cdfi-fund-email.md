@@ -6,7 +6,7 @@
 
 # CDFI Fund (email)
 
-planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of the Treasury, Community Development Financial Institutions Fund
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of the Treasury, Community Development Financial Institutions Fund
 
 Official site: https://www.cdfifund.gov/ · All sources: [sources.md](../sources.md)
 
@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-21, 9 days ago (quiet past 7 days).
+**delivering** — 4 item(s) in the last 14 days; most recent 2026-10-30, delivered by email.
 
-This label has held since 2026-10-29T04:09:56Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
+This label has held since 2026-10-30T15:12:11Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -66,20 +66,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 3 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-21 |
-| Content length | 2,579 characters average, 2,579 median (shortest 2,579, longest 2,579) |
+| Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-10-30 |
+| Content length | 3,164 characters average, 3,122 median (shortest 2,480, longest 3,930) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-21 |
+| Mailbox | 4 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-30 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-21, 9 days ago (quiet past 7 days).
+4 item(s) in the last 14 days; most recent 2026-10-30, delivered by email.
 
 ### All time
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-01 | 0 |
 | 2026-10-02 | 0 |
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
@@ -120,12 +119,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-27 | 0 |
 | 2026-10-28 | 0 |
 | 2026-10-29 | 0 |
-| 2026-10-30 | 0 |
+| 2026-10-30 | 3 |
+| 2026-10-31 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-CDFI Fund bulletins are ingested by email from the project mailbox, with full item text carried in each message. In the 14-day window we ingested one item, dated 2026-10-21, measuring 2,579 characters. The mailbox recorded one bulletin, one message, zero errors, and zero refused messages, with the last message arriving on 2026-10-21. The subscription was confirmed on 2026-09-26, and ingestion began after confirmation without backfilling earlier messages. The registry lists the status as planned and notes that coverage evaluation is pending first ingested bulletins. Health reads quiet, since the most recent item is 9 days old. Since the previous assessment on 2026-10-22, which also recorded one item dated 2026-10-21, no new bulletins have arrived. The recorded pattern is activity on single publication days followed by extended quiet intervals.
+CDFI Fund bulletins arrive by email to the project mailbox with full item text in each message. The 14-day window holds four measured items, a rate of 0.29 per day, with character counts from 2,480 to 3,930, a median of 3,122, and a mean of 3,164. The mailbox records four bulletin messages, with zero administrative messages, zero errors, and zero refused deliveries. The last message arrived 2026-10-30 at 15:31 UTC. The daily breakdown shows one item at 10:00 UTC and two at 11:00 UTC on 2026-10-30, and no other items from 2026-10-25 through 2026-10-31. Health reads delivering on that basis. Since the previous assessment at 2026-10-30 04:07 UTC, which recorded one item dated 2026-10-21 measuring 2,579 characters, three further items dated 2026-10-30 have been recorded. The subscription was confirmed 2026-09-26, and ingestion began after confirmation without backfill. The registry status is planned, and coverage evaluation remains pending the first ingested bulletins.
 
-_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

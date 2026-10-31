@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-22, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-22, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-17T01:36:56Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
+This label has held since 2026-10-30T04:11:38Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,7 +71,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 100 request(s) (100 answered, 0 returned no content) · no items ingested
+Last 24 hours: 104 request(s) (104 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -80,15 +80,15 @@ Last 24 hours: 100 request(s) (100 answered, 0 returned no content) · no items 
 | Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-10-22 |
 | Content length | 14,490 characters average, 13,917 median (shortest 12,211, longest 17,341) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.whitehouse.gov | 1,323 request(s) · 1,322 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.1% returned no content |
+| Our requests to www.whitehouse.gov | 1,327 request(s) · 1,326 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.1% returned no content |
 
-last answered request 2026-10-30T04:00:15.835+00:00 UTC; this host serves 4 registered sources, so these figures are host-wide.
+last answered request 2026-10-31T04:00:16.210+00:00 UTC; this host serves 4 registered sources, so these figures are host-wide.
 
-Most recent item 2026-10-22, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-22, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 5,920 request(s) · 5,904 answered · 16 returned no content
+- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 6,024 request(s) · 6,008 answered · 16 returned no content
 
 This host serves 4 registered sources, so these figures are host-wide.
 
@@ -100,7 +100,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.whitehouse.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-01 | 0 | 78 | 42 |
 | 2026-10-02 | 0 | 79 | 65 |
 | 2026-10-03 | 0 | 75 | 39 |
 | 2026-10-04 | 0 | 75 | 40 |
@@ -129,12 +128,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-27 | 0 | 100 | 77 |
 | 2026-10-28 | 0 | 101 | 84 |
 | 2026-10-29 | 0 | 100 | 77 |
-| 2026-10-30 | 0 | 4 | 50 |
+| 2026-10-30 | 0 | 104 | 71 |
+| 2026-10-31 | 0 | 4 | 48 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The White House Executive Orders feed polls an RSS feed and fetches full article text from linked pages, as feed descriptions are teasers. Over 14 days, 2 items were delivered at 0.14 per day, with the most recent on 2026-10-16. The feed is intentionally designed to overlap with the parent whitehouse-presidential-actions feed; items carry identical link URLs and merge through corroboration. Of 1,274 requests to www.whitehouse.gov, 1,273 succeeded (99.9% completion), with 1 unanswered request recorded on 2026-10-10. Extracted content averages 12,509 characters. The previous assessment on 2026-10-14 reported 0.07 items per day with the most recent item on 2026-10-05; the current measurement shows increased delivery rate and a more recent item, with improved error handling.
+We ingest the executive-orders RSS feed of whitehouse.gov's presidential actions. It was registered 2026-08-06 as a separate entry from whitehouse-presidential-actions because each feed holds 30 items and this one reaches back further. Feed descriptions are teasers, so we fetch each item's page for full order text (delivery mode full). Measured lengths in the current window were 12,211, 13,917, and 17,341 characters, averaging 14,490; the previous assessment averaged 12,509. Over the past 14 days we measured three items at 0.21 per day, the most recent dated 2026-10-22, nine days before this assessment, and the health reading is quiet. The previous assessment recorded two items, the most recent dated 2026-10-16. Orders that also appear in the parent feed carry identical link URLs and merge through corroboration. Of 1,327 requests to www.whitehouse.gov, 1,326 returned content and one returned no content, the same single no-content count as the previous assessment. From outside, we cannot tell whether that was load, maintenance, or a limit set by the publisher.
 
-_Model-written assessment of our own ingestion, generated 2026-10-17 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

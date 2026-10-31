@@ -6,7 +6,7 @@
 
 # FinCEN Updates (email)
 
-planned · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of the Treasury (FinCEN)
+planned · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of the Treasury (FinCEN)
 
 Official site: https://www.fincen.gov/news-room · All sources: [sources.md](../sources.md)
 
@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-21, 9 days ago (quiet past 7 days).
+**delivering** — 4 item(s) in the last 14 days; most recent 2026-10-30, delivered by email.
 
-This label has held since 2026-10-29T04:09:56Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
+This label has held since 2026-10-30T18:45:40Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,20 +68,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-21 |
-| Content length | 1,228 characters average, 1,228 median (shortest 1,002, longest 1,453) |
+| Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-10-30 |
+| Content length | 1,336 characters average, 1,360 median (shortest 1,002, longest 1,622) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 3 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-26 |
+| Mailbox | 5 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-30 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-21, 9 days ago (quiet past 7 days).
+4 item(s) in the last 14 days; most recent 2026-10-30, delivered by email.
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-01 | 1 |
 | 2026-10-02 | 0 |
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
@@ -122,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-27 | 0 |
 | 2026-10-28 | 0 |
 | 2026-10-29 | 0 |
-| 2026-10-30 | 0 |
+| 2026-10-30 | 2 |
+| 2026-10-31 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-FinCEN Updates is ingested from bulletins delivered by email to the project mailbox, with the full item text carried in each message. The average item is 1,228 characters (range 1,002 to 1,453). In the last 14 days the mailbox recorded 3 bulletins, the latest message arriving on 2026-10-26, and 2 items were ingested, the most recent dated 2026-10-21. The mailbox shows zero errors and zero refused messages. The registry records the subscription as confirmed on 2026-07-29 and lists the status as planned. Health reads quiet, since the most recent item is 9 days old. Since the previous assessment on 2026-10-14, which counted 3 items with the latest dated 2026-10-13, the 14-day item count has fallen to 2 and the most recent item is now dated 2026-10-21. The average item length has moved from 1,289 characters to 1,228.
+We ingest FinCEN Updates from GovDelivery bulletins that arrive by email at the project mailbox from fincenupdates@public.govdelivery.com. Each message carries the full item text, so no article fetch is made, and raw messages are captured and DKIM-verified before parsing. Measured item lengths in the current window were 1,002 to 1,622 characters, averaging 1,336. Over the past 14 days we measured four items at 0.29 per day, the most recent dated 2026-10-30, with health reading delivering. The mailbox counters show five bulletin messages, with no errors and no refused messages. The previous assessment recorded two items, the most recent dated 2026-10-21, averaging 1,228 characters. The registry status remains planned, although the subscription was confirmed 2026-07-29.
 
-_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

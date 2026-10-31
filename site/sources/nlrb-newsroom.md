@@ -6,7 +6,7 @@
 
 # NLRB News Releases
 
-active · ingestion health: quiet · Executive · Tier 1 · RSS feed · Independent agency
+active · ingestion health: delivering · Executive · Tier 1 · RSS feed · Independent agency
 
 Official site: https://www.nlrb.gov/news-publications/news/news-releases · All sources: [sources.md](../sources.md)
 
@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-19, 11 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-30; 1 of 331 request(s) to www.nlrb.gov returned no content.
 
-This label has held since 2026-10-27T04:09:39Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
+This label has held since 2026-10-30T14:53:55Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,24 +62,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 28 request(s) (28 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-19 |
-| Content length | 12,247 characters average, 12,247 median (shortest 12,247, longest 12,247) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-30 |
+| Content length | 14,125 characters average, 14,125 median (shortest 12,247, longest 16,003) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.nlrb.gov | 328 request(s) · 327 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.3% returned no content |
+| Our requests to www.nlrb.gov | 331 request(s) · 330 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.3% returned no content |
 
-last answered request 2026-10-30T04:00:13.124+00:00 UTC.
+last answered request 2026-10-31T04:00:13.376+00:00 UTC.
 
-Most recent item 2026-10-19, 11 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-10-30; 1 of 331 request(s) to www.nlrb.gov returned no content.
 
 ### All time
 
-- **Our requests to www.nlrb.gov, all time (since 2026-10-05):** 625 request(s) · 624 answered · 1 returned no content
+- **Our requests to www.nlrb.gov, all time (since 2026-10-05):** 653 request(s) · 652 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -89,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nlrb.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-01 | 0 | 0 | — |
 | 2026-10-02 | 0 | 0 | — |
 | 2026-10-03 | 0 | 0 | — |
 | 2026-10-04 | 0 | 0 | — |
@@ -118,12 +117,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-27 | 0 | 25 | 457 |
 | 2026-10-28 | 0 | 25 | 736 |
 | 2026-10-29 | 0 | 25 | 518 |
-| 2026-10-30 | 0 | 1 | 471 |
+| 2026-10-30 | 1 | 28 | 581 |
+| 2026-10-31 | 0 | 1 | 460 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest NLRB News Releases from the press-release RSS feed, activated 2026-10-05, and fetch each item's article page for full text (delivery mode full). Feed descriptions average about 2,800 characters; the one article in the current window measured 12,247 characters. Over the past 14 days we measured one item at 0.07 per day, dated 2026-10-19, nine days before this assessment, and our health measure reads quiet. The previous assessment, dated 2026-10-20, measured two items at 0.14 per day over its window, with the same most recent date. Our fetches to www.nlrb.gov totaled 329 attempts: 328 returned content and one returned no response (0.3 percent). A failed request is our request that returned no content, and from outside we cannot tell whether the cause was load, maintenance, or a limit set by the publisher. The previous assessment recorded zero errors across 331 requests.
+We ingest NLRB News Releases from the press-release RSS feed at nlrb.gov/rss/rssPressReleases.xml, activated 2026-10-05. The feed was found on NLRB's own RSS page after our earlier HTML index probes and guessed feed paths did not yield a feed. Feed descriptions average about 2,800 characters, and we fetch each item's article page for full text (delivery mode full). Full-text lengths in the current window were 12,247 and 16,003 characters, averaging 14,125. Over the past 14 days we measured two items at 0.14 per day, the most recent dated 2026-10-30. The previous assessment measured one item at 0.07 per day, dated 2026-10-19, with health reading quiet; the current health reading is delivering. Of 331 requests to www.nlrb.gov, 330 returned content and one returned no content (0.3 percent). From outside, we cannot tell whether that was load, maintenance, or a limit set by the publisher. The registry notes record no delivery incidents.
 
-_Model-written assessment of our own ingestion, generated 2026-10-28 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

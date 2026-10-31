@@ -6,7 +6,7 @@
 
 # Coast Guard News (email)
 
-planned · ingestion health: no data · Executive · Tier 2 · email bulletin · Department of Homeland Security (U.S. Coast Guard)
+planned · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Homeland Security (U.S. Coast Guard)
 
 Official site: https://www.news.uscg.mil/ · All sources: [sources.md](../sources.md)
 
@@ -53,9 +53,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**no data** — No bulletin recorded from this source in the last 180 days.
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-30, delivered by email.
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
+This label has held since 2026-10-30T15:31:59Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -65,18 +65,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — none recorded in the lookback period |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-30 |
+| Content length | 8,597 characters average, 8,597 median (shortest 8,597, longest 8,597) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-30 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-No bulletin recorded from this source in the last 180 days.
+1 item(s) in the last 14 days; most recent 2026-10-30, delivered by email.
 
 ### All time
 
@@ -84,12 +86,45 @@ Bulletins from this source are delivered to the project mailbox, so there are no
 
 ### Last 30 days, day by day
 
-No requests and no items were recorded in the last 30 days, so there is nothing to chart.
+Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publication day the digests use; the stored request stamps remain UTC.
+
+| Day | Items ingested |
+|---|---|
+| 2026-10-02 | 0 |
+| 2026-10-03 | 0 |
+| 2026-10-04 | 0 |
+| 2026-10-05 | 0 |
+| 2026-10-06 | 0 |
+| 2026-10-07 | 0 |
+| 2026-10-08 | 0 |
+| 2026-10-09 | 0 |
+| 2026-10-10 | 0 |
+| 2026-10-11 | 0 |
+| 2026-10-12 | 0 |
+| 2026-10-13 | 0 |
+| 2026-10-14 | 0 |
+| 2026-10-15 | 0 |
+| 2026-10-16 | 0 |
+| 2026-10-17 | 0 |
+| 2026-10-18 | 0 |
+| 2026-10-19 | 0 |
+| 2026-10-20 | 0 |
+| 2026-10-21 | 0 |
+| 2026-10-22 | 0 |
+| 2026-10-23 | 0 |
+| 2026-10-24 | 0 |
+| 2026-10-25 | 0 |
+| 2026-10-26 | 0 |
+| 2026-10-27 | 0 |
+| 2026-10-28 | 0 |
+| 2026-10-29 | 0 |
+| 2026-10-30 | 1 |
+| 2026-10-31 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We receive Coast Guard News through the email adapter from the sender uscoastguard@service.govdelivery.com, with the subscription confirmed 2026-07-29. The registry status remains planned. The mailbox records no messages and no bulletins from this sender, and no item has been recorded in the past 180 days. The collector reports no consecutive errors. The registry notes that this entry is a consent-based path alongside a planned DVIDS API integration, and that the sibling source uscg-news is disallowed by its robots.txt for our client. The previous assessment, dated 2026-09-27, also recorded no bulletins, so the measurements are unchanged since then.
+We ingest Coast Guard News from GovDelivery bulletins that arrive by email from uscoastguard@service.govdelivery.com, with bulletins carrying the full item text. One bulletin is recorded in the current window, dated 2026-10-30 and measuring 8,597 characters, a rate of 0.07 per day, with health reading delivering. The mailbox shows one message and one bulletin, with no errors and no refused messages. The previous assessment recorded no messages and no items from this sender, so this bulletin is the first recorded in the measurements to date. The registry does not record a signup URL, because the address inferred from the sender did not resolve when checked. The registry status remains planned, and the subscription was confirmed 2026-07-29.
 
-_Model-written assessment of our own ingestion, generated 2026-10-28 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

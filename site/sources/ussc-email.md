@@ -6,7 +6,7 @@
 
 # Sentencing Commission News (email)
 
-planned · ingestion health: quiet · Judicial · Tier 2 · email bulletin · U.S. Sentencing Commission
+planned · ingestion health: delivering · Judicial · Tier 2 · email bulletin · U.S. Sentencing Commission
 
 Official site: https://www.ussc.gov/topic/news · All sources: [sources.md](../sources.md)
 
@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-16, 14 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-30, delivered by email.
 
-This label has held since 2026-10-24T04:12:35Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
+This label has held since 2026-10-30T17:46:51Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,18 +69,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-16 |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-30 |
+| Content length | 466 characters average, 466 median (shortest 466, longest 466) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-30 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-16, 14 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-10-30, delivered by email.
 
 ### All time
 
@@ -92,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-01 | 0 |
 | 2026-10-02 | 0 |
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
@@ -121,12 +122,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-27 | 0 |
 | 2026-10-28 | 0 |
 | 2026-10-29 | 0 |
-| 2026-10-30 | 0 |
+| 2026-10-30 | 1 |
+| 2026-10-31 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The United States Sentencing Commission delivers subscription bulletins via GovDelivery (sender ussc@public.govdelivery.com) to the project mailbox with full text. One bulletin was received on 2026-10-16, yielding 0.07 per day over the 14-day window, carrying 721 characters and DKIM-verified. The mailbox records one message categorized as one bulletin, with zero administrative messages, errors, or refused deliveries. Subscription confirmed 2026-07-29. Most recent item dated 2026-10-16, nine days prior. No activity in the past seven days. Source status remains planned.
+Bulletins from this source arrive by email to the project mailbox with full item text in each message. The 14-day window holds one measured item, dated 2026-10-30 and 466 characters long, a rate of 0.07 per day. The mailbox records one bulletin message, with zero administrative messages, zero errors, and zero refused deliveries. The last message arrived 2026-10-30 at 17:31 UTC. Since the previous assessment on 2026-10-25, which recorded one bulletin dated 2026-10-16 measuring 721 characters, a new bulletin dated 2026-10-30 has been recorded. The subscription was confirmed 2026-07-29. The signup URL was not recorded, because an address inferred from the sender did not resolve when checked, so only the confirmed sender is asserted. Registry status remains planned, and the registry notes record activation as pending the first parsed bulletin.
 
-_Model-written assessment of our own ingestion, generated 2026-10-25 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

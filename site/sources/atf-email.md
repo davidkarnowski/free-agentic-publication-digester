@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-22, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-22, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-22T17:54:48Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
+This label has held since 2026-10-30T04:11:38Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -83,7 +83,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-22, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-22, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-01 | 0 |
 | 2026-10-02 | 0 |
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
@@ -125,11 +124,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-28 | 0 |
 | 2026-10-29 | 0 |
 | 2026-10-30 | 0 |
+| 2026-10-31 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The ATF News source delivers bulletins via email subscription (atf@service.govdelivery.com) to the project mailbox, ingested through DKIM verification and RFC-5322 archiving. Over 14 days, one bulletin arrived dated 2026-10-22, measuring 1,113 characters in full-text delivery mode. The mailbox collector recorded zero consecutive errors and zero refused messages. The source has demonstrated sporadic delivery: the prior assessment (2026-09-27) reported a single bulletin from August 14, after which no further deliveries occurred for over two months. The recent bulletin on 2026-10-22 represents resumed delivery. Email sources generate no polling requests; health is assessed from mailbox activity alone.
+We ingest ATF News from GovDelivery bulletins that arrive by email from atf@service.govdelivery.com, with DKIM verification and raw RFC-5322 capture. Bulletins carry the full item text. In the current window one bulletin was recorded, dated 2026-10-22 and measuring 1,113 characters, a rate of 0.07 per day. The mailbox shows one message, no errors, and no refused messages. The health reading is quiet, nine days after that bulletin. The previous assessment recorded the same single bulletin, so no new deliveries have been recorded since then. That assessment also recorded an earlier bulletin on August 14, followed by no deliveries for more than two months before the 2026-10-22 bulletin. The registry status remains planned, and the subscription was confirmed 2026-07-29.
 
-_Model-written assessment of our own ingestion, generated 2026-10-23 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

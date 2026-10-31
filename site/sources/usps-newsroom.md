@@ -6,7 +6,7 @@
 
 # USPS Newsroom
 
-active · ingestion health: quiet · Executive · Tier 2 · RSS feed · Independent establishment
+active · ingestion health: delivering · Executive · Tier 2 · RSS feed · Independent establishment
 
 Official site: https://about.usps.com/newsroom/national-releases/ · All sources: [sources.md](../sources.md)
 
@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-22, 8 days ago (quiet past 7 days).
+**delivering** — 5 item(s) in the last 14 days; most recent 2026-10-30; 0 of 326 request(s) to about.usps.com returned no content.
 
-This label has held since 2026-10-20T15:49:09Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
+This label has held since 2026-10-30T19:01:08Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -63,24 +63,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-10-22 |
-| Content length | 335 characters average, 326 median (shortest 134, longest 553) |
+| Items ingested | 5 in 14 days (0.36 per day) · most recent 2026-10-30 |
+| Content length | 336 characters average, 342 median (shortest 134, longest 553) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to about.usps.com | 326 request(s) · 326 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-30T04:00:13.663+00:00 UTC.
+last answered request 2026-10-31T04:00:13.830+00:00 UTC.
 
-Most recent item 2026-10-22, 8 days ago (quiet past 7 days).
+5 item(s) in the last 14 days; most recent 2026-10-30; 0 of 326 request(s) to about.usps.com returned no content.
 
 ### All time
 
-- **Our requests to about.usps.com, all time (since 2026-08-01):** 2,427 request(s) · 2,426 answered · 1 returned no content
+- **Our requests to about.usps.com, all time (since 2026-08-01):** 2,453 request(s) · 2,452 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -90,7 +90,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to about.usps.com | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-01 | 0 | 26 | 180 |
 | 2026-10-02 | 1 | 27 | 189 |
 | 2026-10-03 | 0 | 25 | 163 |
 | 2026-10-04 | 0 | 24 | 165 |
@@ -119,12 +118,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-27 | 0 | 25 | 153 |
 | 2026-10-28 | 0 | 25 | 267 |
 | 2026-10-29 | 0 | 25 | 144 |
-| 2026-10-30 | 0 | 1 | 230 |
+| 2026-10-30 | 1 | 26 | 294 |
+| 2026-10-31 | 0 | 1 | 191 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The USPS Newsroom RSS feed is polled daily in feed-only mode, capturing title and lede-paragraph descriptions averaging 403 characters from a registry of 668 items with deep administrative history. Feed links route through a JavaScript redirect interstitial carrying no article text; the adapter derives document identity by resolving canonical article URLs to deduplicate variants without relying on GUIDs. Over the past 14 days, 2 items delivered at a rate of 0.14 per day, with content ranging 253 to 553 characters. All 329 requests to about.usps.com returned content (0% error rate). The most recent item dates 2026-10-20. Compared to the previous assessment from 2026-10-15, delivery has slowed: prior measurement showed 3 items over 14 days at 0.21 per day with the most recent from 2026-10-06, and average content length increased from 260 to 403 characters.
+We ingest USPS Newsroom from its RSS feed, latestnews.rss, in feed-only mode. We keep each item's title and lede-paragraph description and do not fetch article pages. Feed links route through a JavaScript redirect interstitial that carries no article text, so full article text has not been extracted, and the registry records the extractability of the article pages as unknown. Descriptions in the current window ran from 134 to 553 characters, averaging 336 across five items; the previous assessment averaged 403 across two items. Over the past 14 days we measured five items at 0.36 per day, the most recent dated 2026-10-30, with health reading delivering. The previous assessment recorded two items at 0.14 per day, the most recent dated 2026-10-20. The feed carries no GUIDs, so the adapter derives item identity by resolving each link to its canonical article URL. All 326 requests to about.usps.com in the current measurement returned content.
 
-_Model-written assessment of our own ingestion, generated 2026-10-21 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

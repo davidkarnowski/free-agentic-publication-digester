@@ -64,7 +64,7 @@ Not ingested: the registry status of this source is planned. Ingestion statistic
 
 ### All time
 
-- **Our requests to api.govinfo.gov, all time (since 2026-07-30):** 198,214 request(s) · 151,307 answered · 46,907 returned no content
+- **Our requests to api.govinfo.gov, all time (since 2026-07-30):** 200,382 request(s) · 153,122 answered · 47,260 returned no content
 
 This host serves 5 registered sources, so these figures are host-wide.
 
@@ -76,7 +76,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to api.govinfo.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-01 | 0 | 2548 | 622 |
 | 2026-10-02 | 0 | 2843 | 431 |
 | 2026-10-03 | 0 | 5013 | 468 |
 | 2026-10-04 | 0 | 582 | 887 |
@@ -105,4 +104,5 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-27 | 0 | 2542 | 666 |
 | 2026-10-28 | 0 | 2535 | 526 |
 | 2026-10-29 | 0 | 2145 | 515 |
-| 2026-10-30 | 0 | 5 | 199 |
+| 2026-10-30 | 0 | 2168 | 523 |
+| 2026-10-31 | 0 | 5 | 220 |

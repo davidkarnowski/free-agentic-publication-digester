@@ -56,7 +56,7 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 **delivering** — 2 item(s) in the last 14 days; most recent 2026-10-28, delivered by email.
 
-This label has held since 2026-09-30T21:44:29Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
+This label has held since 2026-09-30T21:44:29Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-01 | 0 |
 | 2026-10-02 | 1 |
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
@@ -121,11 +120,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-28 | 1 |
 | 2026-10-29 | 0 |
 | 2026-10-30 | 0 |
+| 2026-10-31 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-This source delivers bulletins through GovDelivery email subscription. The previous assessment from 2026-09-27 recorded zero bulletins after the 2026-09-26 registration date. As of 2026-10-01, the source has delivered one bulletin on 2026-09-30 during UTC hour 17. The bulletin contained 10,041 characters in full-text format. The collector has maintained stable mailbox access throughout with no delivery errors. No delivery pattern beyond the single observation is yet apparent. Gate-3 coverage evaluation proceeds with the first ingested bulletin. Related sources that may publish the same news include agriculture-email; items duplicated at the same URL merge as corroboration, while the same event at different URLs are listed separately.
+National Institute of Food and Agriculture bulletins arrive by email to the project mailbox with full item text in each message. The 14-day window holds two measured items, a rate of 0.14 per day, with character counts of 7,285 and 8,450 and a mean and median of 7,868. The mailbox records two bulletin messages, with zero administrative messages, zero errors, and zero refused deliveries. The last message arrived 2026-10-28 at 21:39 UTC. The most recent item is dated 2026-10-28, three days before this assessment. The daily breakdown shows one item in the range from 2026-10-25 through 2026-10-31, at 17:00 UTC on 2026-10-28. Since the previous assessment on 2026-10-01, which recorded one bulletin dated 2026-09-30 at 17:00 UTC measuring 10,041 characters, the window now records two bulletins with the most recent dated 2026-10-28. The 2026-09-30 bulletin falls outside the current 14-day window. Ingestion began at the first poll after the 2026-09-26 registration, and earlier bulletins were not backfilled. Gate-3 coverage evaluation is pending, and the registry status is planned.
 
-_Model-written assessment of our own ingestion, generated 2026-10-01 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

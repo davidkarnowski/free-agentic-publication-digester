@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 35 item(s) in the last 14 days; most recent 2026-10-29; 1 of 362 request(s) to news.va.gov returned no content.
+**delivering** — 37 item(s) in the last 14 days; most recent 2026-10-30; 1 of 366 request(s) to news.va.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-30T03:49:13Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -66,24 +66,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · 3 item(s) ingested
+Last 24 hours: 30 request(s) (30 answered, 0 returned no content) · 3 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 35 in 14 days (2.5 per day) · most recent 2026-10-29 |
-| Content length | 7,910 characters average, 7,363 median (shortest 5,441, longest 13,622) |
+| Items ingested | 37 in 14 days (2.64 per day) · most recent 2026-10-30 |
+| Content length | 7,790 characters average, 7,135 median (shortest 5,441, longest 13,622) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to news.va.gov | 362 request(s) · 361 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.3% returned no content |
+| Our requests to news.va.gov | 366 request(s) · 365 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.3% returned no content |
 
-last answered request 2026-10-30T04:00:12.325+00:00 UTC.
+last answered request 2026-10-31T04:00:12.814+00:00 UTC.
 
-35 item(s) in the last 14 days; most recent 2026-10-29; 1 of 362 request(s) to news.va.gov returned no content.
+37 item(s) in the last 14 days; most recent 2026-10-30; 1 of 366 request(s) to news.va.gov returned no content.
 
 ### All time
 
-- **Our requests to news.va.gov, all time (since 2026-07-30):** 2,711 request(s) · 2,707 answered · 4 returned no content
+- **Our requests to news.va.gov, all time (since 2026-07-30):** 2,741 request(s) · 2,737 answered · 4 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to news.va.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-01 | 4 | 30 | 322 |
 | 2026-10-02 | 3 | 30 | 219 |
 | 2026-10-03 | 2 | 28 | 247 |
 | 2026-10-04 | 2 | 27 | 255 |
@@ -122,7 +121,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-27 | 4 | 29 | 559 |
 | 2026-10-28 | 3 | 29 | 256 |
 | 2026-10-29 | 3 | 27 | 198 |
-| 2026-10-30 | 0 | 1 | 518 |
+| 2026-10-30 | 3 | 30 | 238 |
+| 2026-10-31 | 0 | 1 | 286 |
 
 ## Our ingestion assessment
 
