@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-23, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-23, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-23T21:25:32Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
+This label has held since 2026-10-31T04:14:35Z (UTC) and was last re-checked 2026-11-01T03:46:26Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -81,7 +81,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-23, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-23, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-02 | 0 |
 | 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
 | 2026-10-05 | 0 |
@@ -123,11 +122,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-29 | 0 |
 | 2026-10-30 | 0 |
 | 2026-10-31 | 0 |
+| 2026-11-01 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Office of Justice Programs bulletins arrive via email from three configured sender addresses (newsfromovc@public.govdelivery.com, fundingnews@public.govdelivery.com, ojp_comms@public.govdelivery.com) and are stored in the project mailbox with DKIM verification. Over 14 days, two bulletins were delivered at 0.14 per day, containing 120 to 379 characters (median 250). Delivery occurs as email teasers rather than full article text. The mailbox collector recorded zero processing errors and zero refused messages. Subscription was confirmed 2026-09-26 through the publisher's own signup flow; earlier messages were not backfilled, so ingestion captures only messages received after that date. The prior assessment on 2026-10-10 reported one item over six days. The current measurement shows two items including a newly arrived bulletin dated 2026-10-23, indicating delivery has resumed following a prior gap.
+Office of Justice Programs bulletins arrive by GovDelivery email from three configured senders, all at public.govdelivery.com, and are stored in the project mailbox with DKIM verification. Delivery is a short teaser rather than full item text. Over the 14-day window we measured one item, a rate of 0.07 per day, at 120 characters. The mailbox records one bulletin message, with no administrative messages, errors, or refused deliveries, last received 2026-10-23 at 21:11 UTC. Health reads quiet at nine days since the last item. Ingestion began at the first poll after the 2026-09-26 registration, and earlier messages were not backfilled. The previous assessment recorded two bulletins at 0.14 per day, between 120 and 379 characters (median 250). The current window shows one item where the previous assessment showed two, and it does not include a 379-character item. We have not reconciled that difference. Gate-3 coverage evaluation remains pending, and the registry status is planned.
 
-_Model-written assessment of our own ingestion, generated 2026-10-24 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-01 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-23, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-23, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-23T17:22:46Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
+This label has held since 2026-10-31T04:14:35Z (UTC) and was last re-checked 2026-11-01T03:46:26Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -77,13 +77,13 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.nih.gov | 330 request(s) · 330 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-10-31T04:00:14.055+00:00 UTC.
+last answered request 2026-11-01T04:00:14.437+00:00 UTC.
 
-Most recent item 2026-10-23, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-23, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.nih.gov, all time (since 2026-08-06):** 2,250 request(s) · 2,250 answered · 0 returned no content
+- **Our requests to www.nih.gov, all time (since 2026-08-06):** 2,275 request(s) · 2,275 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nih.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-02 | 0 | 26 | 257 |
 | 2026-10-03 | 0 | 24 | 223 |
 | 2026-10-04 | 0 | 25 | 232 |
 | 2026-10-05 | 0 | 26 | 265 |
@@ -122,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-28 | 0 | 25 | 234 |
 | 2026-10-29 | 0 | 25 | 216 |
 | 2026-10-30 | 0 | 25 | 253 |
-| 2026-10-31 | 0 | 1 | 152 |
+| 2026-10-31 | 0 | 25 | 216 |
+| 2026-11-01 | 0 | 1 | 254 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The NIH News Releases source ingests via an RSS feed available at https://www.nih.gov/news-releases/feed.xml, delivering full article text. Feed descriptions are approximately 123 characters; the feed carries publication dates in Drupal format ('Wed, 08/05/2026 - 08:00'), which required date-parsing support added prior to activation on 2026-08-06 to prevent publishing the entire feed window as current content. Over the 14-day measurement window, four items were delivered at an average of 0.29 per day, with extracted content ranging from 7,557 to 9,913 characters (average 8,676, median 8,616). All 333 polling requests to www.nih.gov succeeded with a zero error rate. The publication pattern is irregular; the source publishes infrequently and most days contain no releases. The prior assessment from 2026-10-23 measured two items, and the current measurement shows this count has doubled, with the most recent item now dated 2026-10-23 compared to the prior most-recent date of 2026-10-14.
+We ingest NIH News Releases from the feed at nih.gov/news-releases/feed.xml. The feed's descriptions are about 123-character teasers, so we retrieve full text from each release's page. The feed states dates in Drupal form, such as 'Wed, 08/05/2026 - 08:00', which our date reader parses through its third dating tier. Over the 14-day window we measured two items, a rate of 0.14 per day, ranging from 7,557 to 9,913 characters (median 8,735, average 8,735). The most recent item is dated 2026-10-23. The daily breakdown shows no items on any day in the window, and health reads quiet at nine days since the last item. Of 330 requests to www.nih.gov, all 330 were answered with no errors. The previous assessment recorded four items at 0.29 per day, a median of 8,616 characters, and 333 requests. The current measurement reports two items and 330 requests, and we have not reconciled the difference. The registry notes that zero listed items is expected on days NIH does not publish.
 
-_Model-written assessment of our own ingestion, generated 2026-10-24 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-01 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

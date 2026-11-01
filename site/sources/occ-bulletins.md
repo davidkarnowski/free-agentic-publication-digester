@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-23, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-23, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-21T12:06:15Z (UTC) and was last re-checked 2026-10-31T03:45:15Z (UTC).
+This label has held since 2026-10-31T04:14:35Z (UTC) and was last re-checked 2026-11-01T03:46:26Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,7 +62,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 52 request(s) (52 answered, 0 returned no content) · no items ingested
+Last 24 hours: 50 request(s) (50 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -73,13 +73,13 @@ Last 24 hours: 52 request(s) (52 answered, 0 returned no content) · no items in
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.occ.gov | 665 request(s) · 664 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.2% returned no content |
 
-last answered request 2026-10-31T04:00:14.614+00:00 UTC; this host serves 2 registered sources, so these figures are host-wide.
+last answered request 2026-11-01T04:00:14.440+00:00 UTC; this host serves 2 registered sources, so these figures are host-wide.
 
-Most recent item 2026-10-23, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-23, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.occ.gov, all time (since 2026-10-05):** 1,309 request(s) · 1,308 answered · 1 returned no content
+- **Our requests to www.occ.gov, all time (since 2026-10-05):** 1,359 request(s) · 1,358 answered · 1 returned no content
 
 This host serves 2 registered sources, so these figures are host-wide.
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.occ.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-02 | 0 | 0 | — |
 | 2026-10-03 | 0 | 0 | — |
 | 2026-10-04 | 0 | 0 | — |
 | 2026-10-05 | 10 | 32 | 121 |
@@ -120,12 +119,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-28 | 0 | 52 | 204 |
 | 2026-10-29 | 0 | 51 | 210 |
 | 2026-10-30 | 0 | 52 | 242 |
-| 2026-10-31 | 0 | 2 | 566 |
+| 2026-10-31 | 0 | 50 | 396 |
+| 2026-11-01 | 0 | 2 | 257 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The OCC Bulletins RSS feed is polled hourly with full-text retrieval from each item's linked page. Three items were ingested on 2026-10-21 in full-text format, averaging 9,305 characters with a range from 7,020 to 12,973 characters. Of 660 requests to www.occ.gov, 659 answered successfully; one request on 2026-10-22 at 00:00 UTC returned no response, yielding a 0.2% error rate. The feed lacks GUIDs; item identity is established by the bulletin link URL. The prior assessment (2026-10-14) reported 10 items through 2026-10-05 at 0.71 per day with none in the prior seven days; measurement now shows resumption of deliveries on 2026-10-21 following a 16-day gap.
+We ingest OCC Bulletins by polling the bulletins RSS feed hourly and fetching full text from each bulletin's own page. The feed carries no GUIDs, so we identify items by bulletin link, and its dates use RFC 822 form without a weekday. Over the 14-day window we measured four items, a rate of 0.29 per day, ranging from 5,184 to 12,973 characters (median 7,472, average 8,275). The most recent item is dated 2026-10-23. The daily breakdown shows no items from 2026-10-26 through 2026-11-01, and health reads quiet at nine days since the last item. Of 665 requests to www.occ.gov, 664 were answered and one received no response, an error rate of 0.2 percent. From outside, we cannot tell whether a non-response reflects load, maintenance, or a limit set by the publisher. The previous assessment recorded three items ingested on 2026-10-21 after a 16-day gap. The current window extends that record with a 2026-10-23 item and no later items.
 
-_Model-written assessment of our own ingestion, generated 2026-10-22 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-01 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
