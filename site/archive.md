@@ -117,4 +117,8 @@ Every daily digest, by date. The digest for a day is the canonical record of wha
 - [2026-10-30](2026-10-30.md)
 - [2026-10-31](2026-10-31.md)
 
+## November 2026
+
+- [2026-11-01](2026-11-01.md)
+
 The complete machine-readable index is digests.json, and every digest is also published as Markdown in the public repository: https://github.com/davidkarnowski/free-agentic-publication-digester

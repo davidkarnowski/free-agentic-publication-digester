@@ -56,7 +56,7 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 **delivering** — 2 item(s) in the last 14 days; most recent 2026-10-30, delivered by email.
 
-This label has held since 2026-10-02T14:36:23Z (UTC) and was last re-checked 2026-11-01T03:46:26Z (UTC).
+This label has held since 2026-10-02T14:36:23Z (UTC) and was last re-checked 2026-11-02T04:47:07Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
 | 2026-10-05 | 0 |
 | 2026-10-06 | 0 |
@@ -121,11 +120,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-30 | 1 |
 | 2026-10-31 | 0 |
 | 2026-11-01 | 0 |
+| 2026-11-02 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The Alcohol and Tobacco Tax and Trade Bureau delivers bulletins through the project mailbox via GovDelivery (sender usttb@public.govdelivery.com). Subscription was confirmed 2026-09-26. The first bulletin arrived 2026-10-02 at 210 characters. The mailbox ingestion channel is operational; no delivery pattern or cadence is yet observable from a single item. Gate-3 coverage evaluation awaits additional deliveries.
+The Alcohol and Tobacco Tax and Trade Bureau email subscription delivered two bulletins to the project mailbox in the 14-day window ending 2026-11-02, the most recent on 2026-10-30. Both carried the full item text. Measured lengths range from 147 to 170 characters, with an average of 158. The seven-day daily view shows one item, on 2026-10-30. The collector reports no consecutive errors and no refused messages, and DKIM is recorded at ingest. The source was registered on 2026-09-26 and ingested from the first poll after deploy. Earlier bulletins were not backfilled, and the registry notes still record Gate-3 coverage evaluation as pending. The previous assessment, dated 2026-10-03, recorded a first bulletin on 2026-10-02 at 210 characters and stated that no cadence was yet observable. That bulletin falls outside the current window. Both bulletins in the current window are shorter than 210 characters.
 
-_Model-written assessment of our own ingestion, generated 2026-10-03 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-02 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

@@ -52,7 +52,7 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 **no data** — No bulletin recorded from this source in the last 180 days.
 
-This label has held since 2026-10-01T21:38:40Z (UTC) and was last re-checked 2026-11-01T03:46:26Z (UTC).
+This label has held since 2026-10-01T21:38:40Z (UTC) and was last re-checked 2026-11-02T04:47:07Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -87,6 +87,6 @@ No requests and no items were recorded in the last 30 days, so there is nothing 
 
 **Model-written ingestion assessment**
 
-Subscription bulletins to the project mailbox, ingested by the email adapter with DKIM verification and alignment. Activated 2026-10-01 on observed delivery. The project mailbox received an FMCSA bulletin during the changeover window (e.g., 'Celebrate the Pros During National Truck Driver Appreciation Week') carrying mixed program and awareness content. However, no items have yet been recorded as of 2026-10-02. The source is subscribed through DOT's GovDelivery flow (sender usdotfmcsa@info.dot.gov) in the active tier. Low volume has been observed in the early sample period.
+The FMCSA email subscription was activated on 2026-10-01 and is listed as active in tier 2. The measured mailbox record shows zero bulletins from this source, with no last message date and no measured message lengths. The health reading is no-data, meaning no bulletin was recorded in the last 180 days. The seven-day daily view shows no items, and the collector reports no consecutive errors. The registry notes describe a bulletin received in the project mailbox during the changeover window and cite it by title as an example of mixed program and awareness content, but that bulletin does not appear in the measured record. The previous assessment, dated 2026-10-02, recorded no items as of that date and described low volume in an early sample. The current measurements record no items, and no delivery cadence can be determined from the data.
 
-_Model-written assessment of our own ingestion, generated 2026-10-02 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-02 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

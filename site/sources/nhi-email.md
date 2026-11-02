@@ -62,7 +62,7 @@ _Model-written orientation, generated 2026-10-03 by haiku, prompt version 1. It 
 
 **no data** — No bulletin recorded from this source in the last 180 days.
 
-This label has held since 2026-10-01T21:38:40Z (UTC) and was last re-checked 2026-11-01T03:46:26Z (UTC).
+This label has held since 2026-10-01T21:38:40Z (UTC) and was last re-checked 2026-11-02T04:47:07Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -97,6 +97,6 @@ No requests and no items were recorded in the last 30 days, so there is nothing 
 
 **Model-written ingestion assessment**
 
-Subscription bulletins to the project mailbox, ingested by the email adapter with DKIM verification and alignment. Activated 2026-10-01 on observed delivery. No items have been recorded as of 2026-10-02. This is a training-catalog channel (e.g., 'NHI's Lanes of Learning: Summer Edition 2026'), not a press-release stream, carrying course and training-program announcements for the transportation workforce. The source is subscribed through DOT's GovDelivery flow (sender nhi@info.dot.gov) in tier 3. Coverage carries a caveat for lower digest signal. The source was registered as part of the DOT sub-agency set; operator approval is required for continuation.
+The National Highway Institute email subscription was activated on 2026-10-01 and is listed as active in tier 3. The measured mailbox record shows zero bulletins from this source, with no last message date and no measured message lengths. The health reading is no-data, meaning no bulletin was recorded in the last 180 days. The seven-day daily view shows no items, and the collector reports no consecutive errors. The registry describes the channel as a training-catalog feed rather than a press-release stream, and gives an example title from that catalog, but no bulletin from this source appears in the measured record. The previous assessment, dated 2026-10-02, recorded no items as of that date, and the current measurements likewise record none. No delivery cadence or format can be determined from the data.
 
-_Model-written assessment of our own ingestion, generated 2026-10-02 by haiku, prompt version 1, trigger: initial. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-02 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

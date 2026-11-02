@@ -53,7 +53,7 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 **delivering** — 4 item(s) in the last 14 days; most recent 2026-10-30, delivered by email.
 
-This label has held since 2026-10-01T17:01:29Z (UTC) and was last re-checked 2026-11-01T03:46:26Z (UTC).
+This label has held since 2026-10-01T17:01:29Z (UTC) and was last re-checked 2026-11-02T04:47:07Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -88,7 +88,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
 | 2026-10-05 | 0 |
 | 2026-10-06 | 0 |
@@ -118,11 +117,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-30 | 1 |
 | 2026-10-31 | 0 |
 | 2026-11-01 | 0 |
+| 2026-11-02 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Consumer Product Safety Commission recall announcements are delivered through email subscription confirmed in July 2026. One bulletin was observed in the 14-day window, delivered on 2026-10-01, measuring 289 characters. The email adapter is functioning without errors. This represents the first ingested bulletin from this source since subscription activation. The brief message length reflects the notification structure of the CPSC bulletin format.
+The Consumer Product Safety Commission email subscription delivered four bulletins to the project mailbox in the 14-day window ending 2026-11-02, the most recent on 2026-10-30. Each bulletin carried the full item text. Measured lengths fall between 268 and 270 characters, with an average of 269. The seven-day daily view shows one item on 2026-10-29 and one on 2026-10-30. The collector reports no consecutive errors and no refused messages, and DKIM verification is recorded at ingest. The registry notes describe this as new coverage, with the subscription confirmed on 2026-07-29 and no bulletin observed at the first poll; the registry lists the source as planned. The previous assessment, dated 2026-10-02, recorded one bulletin delivered on 2026-10-01 at 289 characters. That bulletin falls outside the current window, which now contains four bulletins at the lengths listed above.
 
-_Model-written assessment of our own ingestion, generated 2026-10-02 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-02 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 3 item(s) in the last 14 days; most recent 2026-10-26, delivered by email.
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-26, delivered by email.
 
-This label has held since 2026-10-01T14:38:17Z (UTC) and was last re-checked 2026-11-01T03:46:26Z (UTC).
+This label has held since 2026-10-01T14:38:17Z (UTC) and was last re-checked 2026-11-02T04:47:07Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -74,14 +74,14 @@ Last 24 hours: no items ingested
 
 | Measure | Value |
 |---|---|
-| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-10-26 |
-| Content length | 2,037 characters average, 2,194 median (shortest 1,446, longest 2,471) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-26 |
+| Content length | 1,820 characters average, 1,820 median (shortest 1,446, longest 2,194) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 3 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-26 |
+| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-26 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-3 item(s) in the last 14 days; most recent 2026-10-26, delivered by email.
+2 item(s) in the last 14 days; most recent 2026-10-26, delivered by email.
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-03 | 0 |
 | 2026-10-04 | 0 |
 | 2026-10-05 | 0 |
 | 2026-10-06 | 0 |
@@ -123,11 +122,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-30 | 0 |
 | 2026-10-31 | 0 |
 | 2026-11-01 | 0 |
+| 2026-11-02 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The Bureau of Justice Statistics subscription was registered on 2026-09-26 via GovDelivery. One bulletin was observed in the 14-day measurement window, delivered on 2026-10-01, measuring 1,379 characters. The email adapter is functioning without errors. This is the first ingested bulletin from this source since registration. The bulletin carries the full text of a statistical report announcement or data release. Earlier bulletins present in the mailbox before registration were not backfilled.
+The Bureau of Justice Statistics email subscription delivered two bulletins to the project mailbox in the 14-day window ending 2026-11-02, the most recent on 2026-10-26. Both carried the full item text. Measured lengths range from 1,446 to 2,194 characters, with a median of 1,820. The seven-day daily view shows no items. The collector reports no consecutive errors and no refused messages, and DKIM is recorded at ingest. The source was registered on 2026-09-26 and ingested from the first poll after deploy. Bulletins that were in the mailbox before registration were not backfilled. The registry records Gate-3 coverage evaluation as pending. The previous assessment, dated 2026-10-02, recorded one bulletin delivered on 2026-10-01 at 1,379 characters. That bulletin falls outside the current window, and the window now records two bulletins.
 
-_Model-written assessment of our own ingestion, generated 2026-10-02 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-02 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
