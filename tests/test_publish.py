@@ -172,8 +172,8 @@ def test_digest_readability_classes(digests, tmp_path):
     page = (out / "2026-07-01.html").read_text()
     assert '<li class="plain"><span class="plain-label">In plain terms</span>' in page
     assert '<li class="rule-note">Included because: ' in page
-    assert ('<span class="rule-id" title="floor item">CREC-SEL-01'
-            '<span class="vh"> — floor item</span></span>') in page
+    assert ('<a class="rule-id" href="rules.html#crec-sel-01" title="floor item">CREC-SEL-01'
+            '<span class="vh"> — floor item</span></a>') in page
     assert '<li class="source-note">Source: <a href=' in page
     assert "Included because: CREC-SEL-01 — floor item" not in page  # folded
     css = (out / "style.css").read_text()
@@ -950,7 +950,7 @@ def test_doc_pages_built_from_docs_site(digests, tmp_path, monkeypatch):
     monkeypatch.setattr(config, "PROJECT_ROOT", root)
     out = tmp_path / "site"
     stats = publish.build_site(digests, out)
-    assert stats["doc_pages"] == 2
+    assert stats["doc_pages"] == 3  # + the generated rules page (2026-11-03)
     about = (out / "about.html").read_text()
     assert "<title>About this project" in about  # title from first h1
     assert "Body A." in about
@@ -1018,7 +1018,7 @@ def test_readme_rendered_with_repo_links_rewritten(digests, tmp_path, monkeypatc
     monkeypatch.setattr(config, "PROJECT_ROOT", root)
     out = tmp_path / "site"
     stats = publish.build_site(digests, out)
-    assert stats["doc_pages"] == 1
+    assert stats["doc_pages"] == 2  # + the generated rules page (2026-11-03)
     page = (out / "readme.html").read_text()
     assert "<title>Free Agentic Publication Digester (FAPD)" in page
     assert 'href="sources.html"' in page          # SOURCES.md -> site page
@@ -1123,7 +1123,7 @@ def test_no_docs_site_degrades_gracefully(digests, tmp_path, monkeypatch):
     monkeypatch.setattr(config, "PROJECT_ROOT", empty_root)
     out = tmp_path / "site"
     stats = publish.build_site(digests, out)
-    assert stats["doc_pages"] == 0
+    assert stats["doc_pages"] == 1  # + the generated rules page (2026-11-03)
     assert not (out / "about.html").exists()
     assert 'href="about.html"' not in (out / "2026-07-01.html").read_text()
     assert 'href="about.html"' not in (out / "index.html").read_text()
@@ -2746,6 +2746,61 @@ def test_digest_day_view_link_is_not_duplicated(digests, tmp_path):
     publish.build_site(digests, out)
     page = (out / "2026-07-03.html").read_text()
     assert page.count('href="day/2026-07-03.html"') == 1
+
+
+def test_digest_link_to_an_unbuilt_day_view_is_ghosted(digests, tmp_path):
+    """2026-11-03 (operator): the frozen 2026-08-14 digest's markdown links
+    a day view that was never built. The derived page must not serve that
+    link (crawlers retried the 404 dozens of times); it keeps the words,
+    drops the href, and says why. The canonical markdown is untouched."""
+    md = ("# Daily Digest — 2026-07-04\n\n"
+          "| | |\n|---|---|\n| **Digest date** | 2026-07-04 |\n\n"
+          "[Full observed listing for this day](day/2026-07-04.html) — every "
+          "item our collectors observed for this publication day.\n\n"
+          "## Day in Review\n\nQuiet day.\n")
+    (digests / "2026-07-04.md").write_text(md)
+    out = tmp_path / "site"
+    (out / "day").mkdir(parents=True)
+    publish.build_site(digests, out)
+    page = (out / "2026-07-04.html").read_text()
+    assert 'href="day/2026-07-04.html"' not in page
+    assert '<span class="day-view-missing">Full observed listing for this day</span>' in page
+    assert "no full listing was built for this day" in page
+    assert (digests / "2026-07-04.md").read_text() == md
+
+
+def test_rules_page_lists_every_rule_with_its_own_anchor(digests, tmp_path):
+    """2026-11-03 (operator): the rule ids on digest items link to a public
+    rules listing, one entry per rule, generated from the registries the
+    digest itself prints from — so every id has exactly one target."""
+    from fapd import report
+
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "rules.html").read_text()
+    for rule_id, line in report.RULE_DESCRIPTIONS.items():
+        assert page.count(f'id="{publish.rule_anchor(rule_id)}"') == 1, rule_id
+        assert line.replace("&", "&amp;").split(" (")[0] in page, rule_id
+    assert "Mechanical definition:" in page
+    assert (out / "rules.md").exists()          # the Markdown twin
+
+
+def test_digest_rule_ids_link_to_their_rule_entry(digests, tmp_path):
+    """The 'Included because' id is a working link to that rule's entry
+    (it used to be a dotted-underline span that read as a dead link); the
+    description stays available to assistive technology."""
+    md = ("# Daily Digest — 2026-07-05\n\n## Courts\n\n"
+          "- **A v. B** — an opinion.\n"
+          "    - Included because: USCOURTS-SEL-01 — appellate court opinion (all listed)\n"
+          "    - Source: [USCOURTS-x](https://www.govinfo.gov/app/details/USCOURTS-x)\n")
+    (digests / "2026-07-05.md").write_text(md)
+    out = tmp_path / "site"
+    publish.build_site(digests, out)
+    page = (out / "2026-07-05.html").read_text()
+    assert ('<a class="rule-id" href="rules.html#uscourts-sel-01"' in page)
+    assert '<span class="vh"> — appellate court opinion (all listed)</span></a>' in page
+    rules_page = (out / "rules.html").read_text()
+    assert 'id="uscourts-sel-01"' in rules_page
 
 
 def _seed_corroborated_pair(conn):

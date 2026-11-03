@@ -378,9 +378,8 @@ details.digest-section[open] > summary .tags { display: none; }
 }
 li.rule-note, li.source-note { list-style: none; }
 li.source-note a { color: var(--muted); }
+li.rule-note a.rule-id { color: var(--muted); }
 .rule-id {
-  border-bottom: 1px dotted var(--muted);
-  cursor: help;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.74rem;
 }
@@ -1434,7 +1433,19 @@ def _inject_day_view_link(body, date, md_text, out_dir):
     wording — a backfilled day view discloses its own reconstructed
     provenance; the digest page does not claim it was frozen live."""
     href = f"day/{date}.html"
-    if href in md_text or not (out_dir / "day" / f"{date}.html").exists():
+    built = (out_dir / "day" / f"{date}.html").exists()
+    if href in md_text and not built:
+        # The canonical markdown links a day view that was never built
+        # (2026-08-14 is the one known case). The markdown is evidence and
+        # stays as frozen; the derived page ghosts the link instead of
+        # serving a 404 (operator, 2026-11-03), and says so in words, not
+        # by styling alone (GUIDE §2a).
+        return re.sub(
+            r'<a href="' + re.escape(href) + r'">([^<]*)</a>',
+            r'<span class="day-view-missing">\1</span>'
+            r" (no full listing was built for this day)",
+            body)
+    if href in md_text or not built:
         return body
     para = (f'<p><a href="{href}">Full observed listing for this day</a>'
             " &mdash; the items our collectors observed for this"
@@ -1474,9 +1485,12 @@ def _style_digest_body(html_body):
         # touch. The canonical Markdown was never touched either way.
         rule_id, desc = match.group(1), match.group(2)
         title = html.escape(re.sub(r"<[^>]+>", "", desc), quote=True)
+        # 2026-11-03 (operator): the id is a real link to its own entry on
+        # the rules page; it looked like one and led nowhere.
         return (f'<li class="rule-note">Included because: '
-                f'<span class="rule-id" title="{title}">{rule_id}'
-                f'<span class="vh"> — {title}</span></span></li>')
+                f'<a class="rule-id" href="{RULES_PAGE_STEM}.html#'
+                f'{rule_anchor(rule_id)}" title="{title}">{rule_id}'
+                f'<span class="vh"> — {title}</span></a></li>')
 
     html_body = _RULE_LI_RE.sub(_rule, html_body)
     html_body = _SOURCE_LI_RE.sub(
@@ -1837,6 +1851,56 @@ def _textualize_external_images(md_text):
     return _EXTERNAL_IMAGE.sub(lambda m: m.group(1).strip() or "image", md_text)
 
 
+RULES_PAGE_STEM = "rules"
+
+
+def rule_anchor(rule_id):
+    """The rules page's anchor for a rule id: the id the toc extension
+    gives its `### <RULE-ID>` heading (lower case, hyphens kept)."""
+    return rule_id.lower()
+
+
+def _rules_page_markdown():
+    """The public rules listing (operator, 2026-11-03): every digest item's
+    "Included because" id links here, to its own entry. Generated from the
+    two registries the digest already uses — report.RULE_DESCRIPTIONS (the
+    reader-facing line printed beside each item) and rules.RULES (the
+    mechanical definition, where one is recorded) — so the page cannot
+    drift from the rules the pipeline applies. Imported lazily: report
+    pulls in the image stack, and a nav-only caller should not pay for it."""
+    from . import report
+    from . import rules as rules_mod
+
+    def entry(rule_id, line):
+        out = [f"### {rule_id}", "", f"**In the digest:** {line}.", ""]
+        definition = rules_mod.RULES.get(rule_id, {}).get("description")
+        if definition:
+            out += [f"**Mechanical definition:** {definition}", ""]
+        return out
+
+    ids = list(report.RULE_DESCRIPTIONS)
+    sel = [r for r in ids if "-SEL-" in r]
+    exc = [r for r in ids if "-SEL-" not in r]
+    md = ["# Selection rules", "",
+          ("Every item in a digest names the rule that put it there, on its"
+          " “Included because” line. Each rule is mechanical: it tests"
+          " what a document is (its type, its court, its stage, whether it"
+          " records a vote, how much floor time it took), never its party,"
+          " its subject or its importance. When an item matches several"
+          " rules, the first one listed here is the one recorded. Exclusion"
+          " rules name what is counted in a section's totals but not listed"
+          " one by one, so that nothing is left out silently. Changing a"
+          " rule is a change to the project's governing guide, made in"
+          " public. The [methods page](methods.html) explains the reasoning."),
+          "", "## Inclusion rules", ""]
+    for r in sel:
+        md += entry(r, report.RULE_DESCRIPTIONS[r])
+    md += ["## Exclusion rules (counted, not listed)", ""]
+    for r in exc:
+        md += entry(r, report.RULE_DESCRIPTIONS[r])
+    return "\n".join(md)
+
+
 def _doc_sources():
     """[(markdown, stem, title, canonical)] for every explanatory page —
     docs/site/*.md plus the repo README. Separated from rendering so any
@@ -1851,6 +1915,9 @@ def _doc_sources():
             match = _H1_RE.search(md_text)
             title = match.group(1) if match else path.stem.capitalize()
             docs.append((md_text, path.stem, title, f"docs/site/{path.name}"))
+    rules_md = _rules_page_markdown()
+    docs.append((rules_md, RULES_PAGE_STEM, _H1_RE.search(rules_md).group(1),
+                 "src/fapd/rules.py"))
     readme = config.PROJECT_ROOT / "README.md"
     if readme.exists():
         # Images first: an image's URL is not a link the rewriter should

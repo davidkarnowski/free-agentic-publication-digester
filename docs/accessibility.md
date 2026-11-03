@@ -1332,6 +1332,48 @@ Known limits, disclosed:
 - **Focus order:** a closed group's document links are out of the tab
   order until opened, which is the A11Y-04 property, not a defect.
 
+### A11Y-25 — Info — new page class and pattern: the rules listing and rule links
+
+**Status: opened and closed at build, 2026-11-03** (doctrine §8).
+Inspection only — not assistive-technology verified (operator ruling
+2026-09-05). Pinned by
+`test_rules_page_lists_every_rule_with_its_own_anchor`,
+`test_digest_rule_ids_link_to_their_rule_entry` and
+`test_digest_readability_classes`.
+
+**Where:** `publish._rules_page_markdown` (new page `rules.html`, with
+its Markdown twin `rules.md`), and `_style_digest_body._rule` on every
+digest page.
+
+The operator reported (2026-11-03) that the "Included because" rule id
+read as a dead link: a dotted underline and a help cursor, with the
+description only in a `title` tooltip and in visually hidden text. The
+id is now a real link to its own entry on a generated rules page.
+
+Decisions, and what each protects:
+
+- **Rung 1 of the ladder:** a plain `<a>` to a fragment, which lands on
+  the rule's `<h3>` (the toc extension's id). No script, no new control.
+- **The accessible name keeps the description** (2.4.4, link purpose in
+  context): "USCOURTS-SEL-01 — appellate court opinion (all listed)",
+  because the visually hidden span sits inside the link. The `title`
+  tooltip stays for pointer readers; nothing depends on it.
+- **The link looks like a link.** It drops the dotted border and help
+  cursor and takes the browser underline in `--muted`, the same colour
+  pairing the adjacent "Source:" link already uses, so no new contrast
+  pairing was introduced.
+- **Target size:** an inline link in a sentence-like line, so 2.5.8's
+  inline exception applies; unchanged from the Source link beside it.
+- **The page comes from the registries the digest prints from**
+  (`report.RULE_DESCRIPTIONS` and `rules.RULES`), so every id on any
+  digest has exactly one target, and the page is built through the
+  shared doc-page path (shell, nav, `_accessible_tables`, twin).
+
+Known limit, disclosed: the rules page describes the rules as they
+stand now. A digest frozen under an earlier wording of a rule links to
+the current entry; the rule id itself is unchanged, and the history of
+a rule's wording is the repository's, not the page's.
+
 ---
 
 ## 4. What is already right
