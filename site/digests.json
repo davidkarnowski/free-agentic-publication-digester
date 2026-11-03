@@ -2,6 +2,12 @@
  "agent_guide": "agents.html",
  "digests": [
   {
+   "canonical_markdown": "digests/2026-11-02.md",
+   "date": "2026-11-02",
+   "html": "https://fapd.info/2026-11-02.html",
+   "teaser": "The digest carries two presidential documents, both dated October 28, 2026."
+  },
+  {
    "canonical_markdown": "digests/2026-11-01.md",
    "date": "2026-11-01",
    "html": "https://fapd.info/2026-11-01.html",
@@ -590,6 +596,6 @@
    "teaser": "The House introduced 44 bills, 7 with published texts, on topics including offshore oil and gas whistleblower protections, youth mental health and social media, infant formula contaminants, school nutrition, education, trade and manufacturing, occupational safety, and fishing practices, each referred to committee."
   }
  ],
- "generated": "2026-11-02T05:18:23Z",
+ "generated": "2026-11-03T05:13:41Z",
  "title": "Free Agentic Publication Digester \u2014 Daily Federal Digest"
 }

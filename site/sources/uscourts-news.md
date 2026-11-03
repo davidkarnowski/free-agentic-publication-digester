@@ -6,7 +6,7 @@
 
 # U.S. Courts News
 
-active · ingestion health: quiet · Judicial · Tier 2 · RSS feed · Administrative Office of the U.S. Courts
+active · ingestion health: delivering · Judicial · Tier 2 · RSS feed · Administrative Office of the U.S. Courts
 
 Official site: https://www.uscourts.gov/data-news/judiciary-news · All sources: [sources.md](../sources.md)
 
@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-22, 11 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-11-02; 0 of 331 request(s) to news.uscourts.gov returned no content.
 
-This label has held since 2026-10-30T04:11:38Z (UTC) and was last re-checked 2026-11-02T04:47:07Z (UTC).
+This label has held since 2026-11-02T17:31:13Z (UTC) and was last re-checked 2026-11-03T04:49:23Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,24 +70,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-22 |
-| Content length | 18,565 characters average, 18,565 median (shortest 18,565, longest 18,565) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-11-02 |
+| Content length | 19,030 characters average, 19,030 median (shortest 18,565, longest 19,496) |
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to news.uscourts.gov | 331 request(s) · 331 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-02T05:00:16.472+00:00 UTC.
+last answered request 2026-11-03T05:00:31.498+00:00 UTC.
 
-Most recent item 2026-10-22, 11 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-11-02; 0 of 331 request(s) to news.uscourts.gov returned no content.
 
 ### All time
 
-- **Our requests to news.uscourts.gov, all time (since 2026-07-30):** 2,530 request(s) · 2,530 answered · 0 returned no content
+- **Our requests to news.uscourts.gov, all time (since 2026-07-30):** 2,555 request(s) · 2,555 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to news.uscourts.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-04 | 0 | 25 | 324 |
 | 2026-10-05 | 0 | 26 | 344 |
 | 2026-10-06 | 0 | 26 | 753 |
 | 2026-10-07 | 0 | 26 | 492 |
@@ -126,12 +125,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-30 | 0 | 27 | 540 |
 | 2026-10-31 | 0 | 25 | 329 |
 | 2026-11-01 | 0 | 26 | 363 |
-| 2026-11-02 | 0 | 1 | 581 |
+| 2026-11-02 | 1 | 25 | 462 |
+| 2026-11-03 | 0 | 1 | 405 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest U.S. Courts News from the Judiciary News feed at news.uscourts.gov/feed, activated 2026-07-28. Feed descriptions run about 174 characters, and we fetch each item's article page in full mode. The registry records that a 2026-07-26 probe of the earlier uscourts.gov index returned HTTP 404, and attributes that to the site having moved; the documented feed was verified at its new host. In the current window we measured one item, dated 2026-10-22, at 18,565 characters, a rate of 0.07 per day. The health reading is quiet, nine days after that item. The previous assessment measured one item, dated 2026-10-15, at about 17,657 characters, which has since fallen outside the 14-day window. All 330 requests to news.uscourts.gov in the current measurement returned content.
+We ingest U.S. Courts News from the Judiciary News RSS feed at news.uscourts.gov/feed, activated 2026-07-28. We fetch each item's article page in full mode. Feed descriptions are about 174 characters. The registry records that an earlier 2026-07-26 probe of the uscourts.gov index returned HTTP 404, and attributes that to the site having moved. The documented feed was verified at its new host. In the 14-day window measured on 2026-11-03, we recorded two items: one dated 2026-10-22 at 18,565 characters, and one dated 2026-11-02 at 19,496 characters. The median is 19,030 characters, and the rate is 0.14 per day. All 331 requests to news.uscourts.gov in the window returned content, with no client or server errors. Health reads delivering. Since the previous assessment (2026-10-31), which recorded one item dated 2026-10-22 at 18,565 characters and a quiet health reading nine days after it, the 2026-11-02 item has been added. The 2026-10-15 item measured in that earlier assessment has left the window. The request count rose from 330 to 331, all returning content.
 
-_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-03 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

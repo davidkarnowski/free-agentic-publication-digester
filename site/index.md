@@ -14,13 +14,13 @@ An automated, citation-bound, opinion-agnostic daily digest of official United S
 
 ## The last 7 days
 
+- [Daily Digest — 2026-11-02](2026-11-02.md) — The digest carries two presidential documents, both dated October 28, 2026.
 - [Daily Digest — 2026-11-01](2026-11-01.md) — This is a short review: few publications were observed for this digest day, and none met the digest's summary rules, so there are no item summaries to draw on.
 - [Daily Digest — 2026-10-31](2026-10-31.md) — The digest carries 12 bills introduced in the House.
 - [Daily Digest — 2026-10-30](2026-10-30.md) — The digest carries 48 House and 4 Senate Congressional Record items, along with 34 Extensions of Remarks and 6 Daily Digest entries.
 - [Daily Digest — 2026-10-29](2026-10-29.md) — The digest carries two public laws, both approved October 22, 2026.
 - [Daily Digest — 2026-10-28](2026-10-28.md) — The digest carries nine bills introduced in the House and three public laws approved October 20, 2026.
 - [Daily Digest — 2026-10-27](2026-10-27.md) — The digest carries 23 House and 4 Senate Congressional Record entries, along with 6 Daily Digest items and 24 Extensions of Remarks.
-- [Daily Digest — 2026-10-26](2026-10-26.md) — The digest carries eight final rules, five proposed rules and 86 notices from the Federal Register.
 
 ## Earlier days
 

@@ -6,7 +6,7 @@
 
 # State Travel Advisories
 
-active · ingestion health: delivering · Executive · Tier 2 · RSS feed · Department of State
+active · ingestion health: quiet · Executive · Tier 2 · RSS feed · Department of State
 
 Official site: https://travel.state.gov/content/travel/en/traveladvisories/traveladvisories.html · All sources: [sources.md](../sources.md)
 
@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 15 item(s) in the last 14 days; most recent 2026-10-26; 0 of 329 request(s) to travel.state.gov returned no content.
+**quiet** — Most recent item 2026-10-26, 8 days ago (quiet past 7 days).
 
-This label has held since 2026-10-10T21:49:32Z (UTC) and was last re-checked 2026-11-02T04:47:07Z (UTC).
+This label has held since 2026-10-10T21:49:32Z (UTC) and was last re-checked 2026-11-03T04:49:23Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -72,15 +72,15 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Items ingested | 15 in 14 days (1.07 per day) · most recent 2026-10-26 |
 | Content length | 2,889 characters average, 2,310 median (shortest 1,170, longest 5,669) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to travel.state.gov | 329 request(s) · 329 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to travel.state.gov | 330 request(s) · 330 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-02T05:00:13.942+00:00 UTC.
+last answered request 2026-11-03T05:00:29.770+00:00 UTC.
 
-15 item(s) in the last 14 days; most recent 2026-10-26; 0 of 329 request(s) to travel.state.gov returned no content.
+Most recent item 2026-10-26, 8 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to travel.state.gov, all time (since 2026-10-05):** 691 request(s) · 691 answered · 0 returned no content
+- **Our requests to travel.state.gov, all time (since 2026-10-05):** 716 request(s) · 716 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -90,7 +90,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to travel.state.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-04 | 0 | 0 | — |
 | 2026-10-05 | 0 | 6 | 322 |
 | 2026-10-06 | 0 | 26 | 306 |
 | 2026-10-07 | 0 | 27 | 303 |
@@ -119,7 +118,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-30 | 0 | 27 | 324 |
 | 2026-10-31 | 0 | 25 | 311 |
 | 2026-11-01 | 0 | 26 | 283 |
-| 2026-11-02 | 0 | 1 | 340 |
+| 2026-11-02 | 0 | 25 | 275 |
+| 2026-11-03 | 0 | 1 | 247 |
 
 ## Our ingestion assessment
 
