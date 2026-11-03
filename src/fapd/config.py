@@ -11,6 +11,12 @@ from dotenv import load_dotenv
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"
+# GUIDE §5 (amended 2026-11-03): raw downloads are a working cache. A file is
+# deleted once its text is extracted at the current extractor version and
+# this many days have passed since it was fetched; its sha256 and size stay
+# in `packages`. RAW_PRUNE_MAX_PER_CYCLE bounds one collector cycle's work.
+RAW_RETENTION_DAYS = int(os.environ.get("FAPD_RAW_RETENTION_DAYS", "30"))
+RAW_PRUNE_MAX_PER_CYCLE = int(os.environ.get("FAPD_RAW_PRUNE_MAX_PER_CYCLE", "2000"))
 DIGEST_DIR = PROJECT_ROOT / "digests"
 SITE_DIR = PROJECT_ROOT / "site"
 

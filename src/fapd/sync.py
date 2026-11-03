@@ -14,6 +14,7 @@ served, and revisited afterwards, never sooner than the server asked. See
 """
 
 import datetime as dt
+import hashlib
 import heapq
 import itertools
 import logging
@@ -509,10 +510,14 @@ def _fetch_planned(client, conn, collection, package_id, plan, attempt_no):
     date_issued = summary.get("dateIssued")
 
     resp = client.get(url, defer_retry=True, attempt_no=attempt_no)
+    prior = conn.execute(
+        "SELECT raw_path FROM packages WHERE package_id = ?", (package_id,)).fetchone()
+    prior_raw = prior["raw_path"] if prior else None
     raw_dir = config.RAW_DIR / collection / (date_issued or "unknown-date")
     raw_dir.mkdir(parents=True, exist_ok=True)
     raw_path = raw_dir / f"{package_id}.{fmt}"
     raw_path.write_bytes(resp.content)
+    raw_sha256 = hashlib.sha256(resp.content).hexdigest()
 
     if collection in _GRAPHICS_COLLECTIONS and fmt == "xml":
         _maybe_fetch_graphics_pdf(client, package_id, resp.content, links, raw_dir)
@@ -532,7 +537,8 @@ def _fetch_planned(client, conn, collection, package_id, plan, attempt_no):
         " raw_path = ?, fetch_status = 'fetched', fetched_at = ?,"
         " fetched_last_modified = last_modified, last_error = NULL,"
         " fetch_attempts = 0, last_attempt_at = NULL,"
-        " extract_attempts = 0, extract_error = NULL"
+        " extract_attempts = 0, extract_error = NULL,"
+        " raw_sha256 = ?, raw_bytes = ?, raw_pruned_at = NULL"
         " WHERE package_id = ?",
         (
             date_issued,
@@ -541,10 +547,34 @@ def _fetch_planned(client, conn, collection, package_id, plan, attempt_no):
             fmt,
             str(raw_path.relative_to(config.PROJECT_ROOT)),
             utc_now_iso(),
+            raw_sha256,
+            len(resp.content),
             package_id,
         ),
     )
     conn.commit()
+    _remove_superseded_raw(prior_raw, raw_path)
+
+
+def _remove_superseded_raw(prior_rel, new_path):
+    """GUIDE §5 (amended 2026-11-03): when a package is re-filed under
+    another date_issued, the new download lands in a new folder and the old
+    copy is no longer referenced by any row. Delete it (and its graphics
+    PDF) once the row points at the replacement, so superseded copies stop
+    accumulating — 6,689 of them (16.9 GB) had by 2026-11-03."""
+    if not prior_rel:
+        return
+    old = config.PROJECT_ROOT / prior_rel
+    if old.resolve() == new_path.resolve():
+        return
+    for path in (old, old.with_suffix(".pdf")):
+        if path.resolve() == new_path.resolve():
+            continue
+        try:
+            path.unlink()
+            logger.info("removed superseded raw copy %s", path.name)
+        except FileNotFoundError:
+            pass
 
 
 def classify_graphics(xml_bytes):

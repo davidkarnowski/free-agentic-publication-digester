@@ -67,7 +67,10 @@ CREATE TABLE packages (
     last_attempt_at       TEXT,                          -- ISO-8601 UTC of the most recent attempt, NULL until first
     extract_attempts      INTEGER NOT NULL DEFAULT 0,     -- consecutive extraction failures since the last success (2026-08-24)
     extract_error         TEXT,                          -- most recent extraction error, NULL when healthy
-    last_extract_attempt_at TEXT                         -- ISO-8601 UTC of the most recent extraction attempt
+    last_extract_attempt_at TEXT,                        -- ISO-8601 UTC of the most recent extraction attempt
+    raw_sha256            TEXT,                          -- sha256 of the downloaded file (GUIDE §5, amended 2026-11-03); kept after pruning
+    raw_bytes             INTEGER,                       -- its size in bytes; kept after pruning
+    raw_pruned_at         TEXT                           -- when retention deleted the file; NULL while it is on disk
 );
 ```
 
@@ -105,7 +108,19 @@ CREATE TABLE packages (
   We record the one format we chose (XML preferred, GUIDE §5), not the full
   format matrix — this is an inventory, not a mirror of the API.
 - **`raw_path`** — repo-relative (GUIDE §9 bans absolute paths), NULL until
-  the file is actually on disk.
+  the file is actually on disk. After retention prunes the file
+  (`raw_pruned_at` set) the path stays as the record of where it was.
+- **`raw_sha256` / `raw_bytes` / `raw_pruned_at`** — raw retention (GUIDE §5,
+  amended 2026-11-03). Sync records the fingerprint when it writes the file;
+  `retention.prune_raw` (once per govinfo collector cycle, at most
+  `config.RAW_PRUNE_MAX_PER_CYCLE` files) deletes a file once its package was
+  fetched more than `config.RAW_RETENTION_DAYS` (30) days ago and its text is
+  extracted after that fetch at the current extractor version, hashing first
+  for rows fetched before the columns existed. A row whose file was already
+  removed by the 2026-11-03 one-time prune is marked without a hash (its
+  fingerprint is in that prune's manifest). A pruned package is never pending
+  extraction; re-fetching one is an operator action. When a re-filed package's
+  new download lands in another date folder, sync deletes the superseded copy.
 - **`fetch_status`** — the download lifecycle, deliberately coarse:
   - `pending` — known to exist; no current local copy (new, or the server's
     `last_modified` moved past `fetched_last_modified`).

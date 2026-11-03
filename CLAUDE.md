@@ -930,3 +930,20 @@ live in `.claude/agents/fapd-*.md` (tracked).
   skips it until it exists. The same review declined, for now, the
   operator's look at USDA FAS GAIN reports and the four NIH ORWH and
   Medicare bulletins that arrived before those senders were registered.
+- **2026-11-03** — **Raw downloads are a working cache, not the record**
+  (operator; GUIDE §5 amended). The raw package store had grown to 56 GB
+  (court-opinion ZIPs about 0.5 GB a day, plus 16.9 GB of superseded copies
+  left behind when a package was re-filed under another date) and filled
+  the production disk to 98%. Extraction reads a raw file once; the
+  digests, the site, the MCP service and the manifests never do. Ruled: a
+  raw file is deleted once its text is extracted at the current extractor
+  version and `RAW_RETENTION_DAYS` (30) have passed since its fetch; its
+  sha256 and size are kept on the row forever (`raw_sha256`, `raw_bytes`,
+  `raw_pruned_at`); sync deletes a superseded copy when the replacement
+  is written; a pruned package is never pending extraction, and
+  re-fetching it is a budgeted operator action. `retention.prune_raw` runs
+  once per govinfo cycle, bounded by `RAW_PRUNE_MAX_PER_CYCLE`. A
+  one-time prune the same day freed 43.8 GB with a fingerprint manifest.
+  Same day, derived presentation only: the 2026-08-14 page ghosts its link
+  to the day view that was never built, and every "Included because"
+  rule id links to its entry on a generated `rules.html`.

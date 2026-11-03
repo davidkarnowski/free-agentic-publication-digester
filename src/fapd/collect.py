@@ -470,6 +470,15 @@ class GovinfoWorker(Worker):
         ex = extract.run(conn)
         stats["extracted"] = ex["records"]
         stats["journaled"] = journal_new(conn, "govinfo", cycle_id)
+        # Raw retention (GUIDE §5, 2026-11-03): after extraction, so a file
+        # extracted this cycle is never a candidate before its window ends.
+        # A failure here never fails the collection it follows.
+        try:
+            from . import retention
+
+            stats["raw_pruned"] = retention.prune_raw(conn)["pruned"]
+        except Exception:
+            logger.exception("raw retention failed; collection unaffected")
         return stats
 
 

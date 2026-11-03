@@ -53,6 +53,10 @@ def pending_packages(conn, collections=None):
           -- extracted" line), not pending work. Same shape as
           -- MAX_PACKAGE_FETCH_ATTEMPTS one layer down.
           AND p.extract_attempts < ?
+          -- Raw retention (GUIDE §5, 2026-11-03): a pruned package's file
+          -- is gone on purpose. A later extractor version does not make it
+          -- pending; re-fetching it is a budgeted operator action.
+          AND p.raw_pruned_at IS NULL
         ORDER BY p.package_id
         """,
         (EXTRACTOR_VERSION, config.MAX_PACKAGE_EXTRACT_ATTEMPTS),

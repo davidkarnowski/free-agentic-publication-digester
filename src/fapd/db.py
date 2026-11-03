@@ -31,7 +31,10 @@ CREATE TABLE IF NOT EXISTS packages (
     last_attempt_at       TEXT,
     extract_attempts      INTEGER NOT NULL DEFAULT 0,
     extract_error         TEXT,
-    last_extract_attempt_at TEXT
+    last_extract_attempt_at TEXT,
+    raw_sha256            TEXT,
+    raw_bytes             INTEGER,
+    raw_pruned_at         TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_packages_collection_lastmod
@@ -447,6 +450,13 @@ def connect(db_path=None):
         "extract_attempts": "INTEGER NOT NULL DEFAULT 0",
         "extract_error": "TEXT",
         "last_extract_attempt_at": "TEXT",
+    })
+    # Raw retention (GUIDE §5, amended 2026-11-03): the downloaded file's
+    # fingerprint outlives the file; raw_pruned_at says it is gone on purpose.
+    _ensure_columns(conn, "packages", {
+        "raw_sha256": "TEXT",
+        "raw_bytes": "INTEGER",
+        "raw_pruned_at": "TEXT",
     })
     return conn
 

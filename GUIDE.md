@@ -1606,6 +1606,25 @@ without touching upstream:
   says. No surface hard-codes the clock's name: `config.py` owns it.
 - **Storage:** filesystem for raw documents (`data/raw/<collection>/<date>/`),
   SQLite for metadata and extracted records. No cloud dependency to start.
+  **Amended 2026-11-03 — raw downloads are a working cache, not the record
+  (operator).** A downloaded package file is read once, when its text is
+  extracted into the database; the digests, the site, the MCP service and
+  the provenance manifests are built from the database, the committed
+  evidence and the captures, and cite the publisher's own URL. The
+  publisher keeps the permanent copy. So a raw file is kept only until
+  (a) its text is extracted at the current extractor version and (b)
+  `RAW_RETENTION_DAYS` (30) have passed since it was fetched; then it is
+  deleted. What we downloaded stays accountable: every raw file's sha256
+  and size are recorded when it is written and kept forever, with the
+  time it was pruned. A superseded copy (a package re-filed under another
+  date) is deleted when its replacement is written. A pruned package is
+  never re-downloaded automatically: if a later extractor version wants
+  it, that is a disclosed gap, and re-fetching is a deliberate, budgeted
+  operator action under §4. *Measured 2026-11-03:* the store had grown
+  to 56 GB (50 GB of court-opinion ZIPs, about 0.5 GB a day, plus 16.9
+  GB of superseded copies) and filled the server's disk to 98%; a
+  one-time prune under this rule freed 43.8 GB with a fingerprint
+  manifest kept.
 - **Language:** Python (mature XML tooling, easy scheduling). Decide at first
   implementation step; record in worklog.
 - **Digest output:** `digests/YYYY-MM-DD.md` — accumulates as a browsable
