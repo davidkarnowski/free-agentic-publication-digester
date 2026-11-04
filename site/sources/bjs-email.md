@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-26, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-26, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-01T14:38:17Z (UTC) and was last re-checked 2026-11-03T04:49:23Z (UTC).
+This label has held since 2026-11-03T05:15:27Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -81,7 +81,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-26, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-26, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-05 | 0 |
 | 2026-10-06 | 0 |
 | 2026-10-07 | 1 |
 | 2026-10-08 | 0 |
@@ -123,11 +122,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 |
 | 2026-11-02 | 0 |
 | 2026-11-03 | 0 |
+| 2026-11-04 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The Bureau of Justice Statistics email subscription delivered two bulletins to the project mailbox in the 14-day window ending 2026-11-02, the most recent on 2026-10-26. Both carried the full item text. Measured lengths range from 1,446 to 2,194 characters, with a median of 1,820. The seven-day daily view shows no items. The collector reports no consecutive errors and no refused messages, and DKIM is recorded at ingest. The source was registered on 2026-09-26 and ingested from the first poll after deploy. Bulletins that were in the mailbox before registration were not backfilled. The registry records Gate-3 coverage evaluation as pending. The previous assessment, dated 2026-10-02, recorded one bulletin delivered on 2026-10-01 at 1,379 characters. That bulletin falls outside the current window, and the window now records two bulletins.
+The bjs-email subscription, from sender juststats@public.govdelivery.com, is ingested by the email adapter in full-text delivery mode, with DKIM recorded at ingest. Its registry status reads planned. Bulletins already in the mailbox before its 2026-09-26 registration were not backfilled. In the 14-day window we recorded one bulletin, 1,446 characters, most recently delivered 2026-10-26, a rate of 0.07 per day. The mailbox counters show one bulletin and one message, with zero administrative messages, zero errors, and zero refused deliveries. The health status reads quiet, since the most recent item is nine days old. The previous assessment, dated 2026-11-02, recorded two bulletins in its window, with lengths from 1,446 to 2,194 characters and a median of 1,820. The current measured figures show one bulletin where that assessment recorded two. The registry lists Gate-3 coverage evaluation as pending.
 
-_Model-written assessment of our own ingestion, generated 2026-11-02 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-04 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

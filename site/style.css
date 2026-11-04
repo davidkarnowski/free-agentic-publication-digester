@@ -293,9 +293,8 @@ details.digest-section[open] > summary .tags { display: none; }
 }
 li.rule-note, li.source-note { list-style: none; }
 li.source-note a { color: var(--muted); }
+li.rule-note a.rule-id { color: var(--muted); }
 .rule-id {
-  border-bottom: 1px dotted var(--muted);
-  cursor: help;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.74rem;
 }

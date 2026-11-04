@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 130 item(s) in the last 14 days; most recent 2026-10-29; 0 of 330 request(s) to api.congress.gov returned no content.
+**delivering** — 137 item(s) in the last 14 days; most recent 2026-11-02; 5 of 334 request(s) to api.congress.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-03T04:49:23Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,24 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 29 request(s) (24 answered, 5 returned no content) · 7 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 130 in 14 days (9.29 per day) · most recent 2026-10-29 |
-| Content length | 481 characters average, 461 median (shortest 266, longest 887) |
+| Items ingested | 137 in 14 days (9.79 per day) · most recent 2026-11-02 |
+| Content length | 483 characters average, 457 median (shortest 266, longest 887) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to api.congress.gov | 330 request(s) · 330 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to api.congress.gov | 334 request(s) · 329 answered · 0 declined (4xx) · 0 server declined (5xx) · 5 no response — 1.5% returned no content |
 
-last answered request 2026-11-03T05:00:31.401+00:00 UTC.
+last answered request 2026-11-04T05:00:13.129+00:00 UTC.
 
-130 item(s) in the last 14 days; most recent 2026-10-29; 0 of 330 request(s) to api.congress.gov returned no content.
+137 item(s) in the last 14 days; most recent 2026-11-02; 5 of 334 request(s) to api.congress.gov returned no content.
 
 ### All time
 
-- **Our requests to api.congress.gov, all time (since 2026-08-01):** 2,525 request(s) · 2,519 answered · 6 returned no content
+- **Our requests to api.congress.gov, all time (since 2026-08-01):** 2,554 request(s) · 2,543 answered · 11 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to api.congress.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-05 | 63 | 25 | 559 |
 | 2026-10-06 | 24 | 27 | 327 |
 | 2026-10-07 | 2 | 26 | 301 |
 | 2026-10-08 | 0 | 26 | 312 |
@@ -126,8 +125,9 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-30 | 0 | 27 | 578 |
 | 2026-10-31 | 0 | 25 | 532 |
 | 2026-11-01 | 0 | 26 | 313 |
-| 2026-11-02 | 0 | 25 | 300 |
-| 2026-11-03 | 0 | 1 | 309 |
+| 2026-11-02 | 7 | 25 | 300 |
+| 2026-11-03 | 0 | 29 | 253 |
+| 2026-11-04 | 0 | 1 | 639 |
 
 ## Our ingestion assessment
 

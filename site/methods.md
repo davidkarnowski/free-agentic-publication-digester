@@ -270,7 +270,8 @@ italicized quick-read and a `Tags:` line at the top of major sections;
 a Terms Used Today glossary; the Coverage Statement; and a Methodology
 footer restating the selection and labeling rules. Every item carries
 its citation and an "Included because" line naming the mechanical rule
-that selected it.
+that selected it; the rule's name links to its entry on the
+[selection rules page](rules.html).
 
 **Three views of a day** (the third added 2026-08-03). The **live page**
 (`/today.html`) shows publications as our collectors observe them and is
