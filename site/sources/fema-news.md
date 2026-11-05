@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 31 item(s) in the last 14 days; most recent 2026-11-02; 0 of 328 request(s) to www.fema.gov returned no content.
+**delivering** — 19 item(s) in the last 14 days; most recent 2026-11-02; 13 of 328 request(s) to www.fema.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,24 +69,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (12 answered, 13 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 31 in 14 days (2.21 per day) · most recent 2026-11-02 |
-| Content length | 514 characters average, 448 median (shortest 167, longest 869) |
+| Items ingested | 19 in 14 days (1.36 per day) · most recent 2026-11-02 |
+| Content length | 488 characters average, 437 median (shortest 167, longest 869) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.fema.gov | 328 request(s) · 328 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.fema.gov | 328 request(s) · 315 answered · 13 declined (4xx) · 0 server declined (5xx) · 0 no response — 4.0% returned no content |
 
-last answered request 2026-11-04T05:00:12.160+00:00 UTC.
+last answered request 2026-11-04T16:32:31.304+00:00 UTC.
 
-31 item(s) in the last 14 days; most recent 2026-11-02; 0 of 328 request(s) to www.fema.gov returned no content.
+19 item(s) in the last 14 days; most recent 2026-11-02; 13 of 328 request(s) to www.fema.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fema.gov, all time (since 2026-08-01):** 2,560 request(s) · 2,545 answered · 15 returned no content
+- **Our requests to www.fema.gov, all time (since 2026-08-01):** 2,585 request(s) · 2,557 answered · 28 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fema.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-06 | 3 | 26 | 339 |
 | 2026-10-07 | 1 | 26 | 356 |
 | 2026-10-08 | 9 | 26 | 152 |
 | 2026-10-09 | 4 | 26 | 158 |
@@ -125,12 +124,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 | 25 | 176 |
 | 2026-11-02 | 1 | 25 | 141 |
 | 2026-11-03 | 0 | 25 | 152 |
-| 2026-11-04 | 0 | 1 | 282 |
+| 2026-11-04 | 0 | 25 | 132 |
+| 2026-11-05 | 0 | 1 | 279 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The national press-release index delivered 66 items over 14 days at 4.71 per day, substantially above the prior 2.57 per day. Each item averages 452 characters extracted from FEMA's markup. All 337 polling requests succeeded, an improvement from the prior 2.8% no-response rate. The index paginates at 10 entries per page and we read page 1 only; each entry carries a full timestamp and a 150–300-character summary. FEMA volume rises sharply during active disasters; the single-page read means releases published faster than the hourly poll interval may be missed.
+We read the FEMA Press Releases national index in feed-only mode through the html-index adapter, with one listing fetch per poll and no article fetches. Each entry carries FEMA's own full timestamp and a body paragraph, which we store as the item text, so items are dated from the publisher's markup. Over the 14-day window we recorded 19 items at 1.36 per day, down from 66 items at 4.71 per day in the prior assessment. Item text averaged 488 characters (median 437, range 167 to 869). The most recent item is dated 2026-11-02. Of 328 requests to www.fema.gov, 315 returned content and 13 returned no content, an error rate of 4.0 percent. The prior assessment recorded 337 requests with all succeeding. On 2026-11-04, 12 of 25 requests returned no content, and 1 more did so on 2026-11-05. We read page 1 only, which holds 10 entries, so releases published between polls beyond that page would not be seen. The per-disaster release pages are a separate channel that this entry does not cover.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

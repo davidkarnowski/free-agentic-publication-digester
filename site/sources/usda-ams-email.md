@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-27, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-27, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-27T18:16:17Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-11-04T05:14:10Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -79,7 +79,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-27, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-27, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-06 | 0 |
 | 2026-10-07 | 0 |
 | 2026-10-08 | 0 |
 | 2026-10-09 | 0 |
@@ -121,11 +120,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-02 | 0 |
 | 2026-11-03 | 0 |
 | 2026-11-04 | 0 |
+| 2026-11-05 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Bulletins from the Agricultural Marketing Service arrive in the project mailbox from usdaams@public.govdelivery.com and are ingested by the email adapter with DKIM verification. The registry lists the delivery mode as email-full, meaning the bulletin carried the full item text. Across the 14-day window we measured two items, with a median and average of 1572 characters, a minimum of 917 characters, and a maximum of 2226 characters. One item was recorded in the hour-13 bucket on 2026-10-27, and the mailbox's last message is timestamped 2026-10-27T17:59:50Z. The mailbox shows two bulletins with zero errors and zero refused messages, and health reads delivering at 0.14 items per day. Since the previous assessment on 2026-10-20, which recorded one item dated 2026-10-19 at 0.07 items per day, one additional bulletin dated 2026-10-27 has been ingested. Earlier bulletins were not backfilled, and the status remains planned pending gate-3 coverage evaluation.
+Agricultural Marketing Service bulletins are ingested by email from usdaams@public.govdelivery.com, with full text carried in each message, DKIM-verified and archived. Over the 14-day window we ingested 1 item at 0.07 per day, with the most recent dated 2026-10-27. The mailbox recorded 1 bulletin with no administrative messages, errors, or refused deliveries. The single measured item was 2,226 characters. None of the daily records shown for 2026-10-30 through 2026-11-05 contain an item. The collector reports no consecutive errors, and health reads quiet, with 9 days since the last item. Since the previous assessment on 2026-10-28, the 14-day count fell from 2 items at 0.14 per day and the mailbox count fell from 2 bulletins to 1, while the most recent item date stayed at 2026-10-27. The previous minimum of 917 characters is no longer in the window, and health moved from delivering to quiet. The registry records the status as planned, with registration on 2026-09-26, no backfill of earlier bulletins, and the gate-3 coverage evaluation still pending.
 
-_Model-written assessment of our own ingestion, generated 2026-10-28 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

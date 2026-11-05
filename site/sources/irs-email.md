@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 14 item(s) in the last 14 days; most recent 2026-11-03, delivered by email.
+**delivering** — 12 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,20 +69,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 1 item(s) ingested
+Last 24 hours: 3 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 14 in 14 days (1.0 per day) · most recent 2026-11-03 |
-| Content length | 1,014 characters average, 288 median (shortest 136, longest 2,796) |
+| Items ingested | 12 in 14 days (0.86 per day) · most recent 2026-11-04 |
+| Content length | 1,044 characters average, 438 median (shortest 152, longest 2,796) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 14 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-03 |
+| Mailbox | 13 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-04 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-14 item(s) in the last 14 days; most recent 2026-11-03, delivered by email.
+12 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
 ### All time
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-06 | 1 |
 | 2026-10-07 | 1 |
 | 2026-10-08 | 1 |
 | 2026-10-09 | 0 |
@@ -123,12 +122,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 |
 | 2026-11-02 | 0 |
 | 2026-11-03 | 1 |
-| 2026-11-04 | 0 |
+| 2026-11-04 | 3 |
+| 2026-11-05 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-IRS newswire bulletins arrive via subscription at 1.36 items per day over 14 days, a one-third increase from the 1.0 items per day reported in the prior assessment. We received 19 items with the most recent arriving 2026-10-02. The bulletin stream carries full-text releases bearing irs.gov URLs with DKIM verification. This email subscription represents the first working input for IRS releases and the agency's primary distribution channel for announcements. Text averaged 488 characters with a median of 190.
+Our ingestion of IRS Newswire runs through subscription bulletins delivered to the project mailbox, which carry full item text and are DKIM-verified. Over 14 days the mailbox recorded 13 bulletins and 13 messages, with no errors and no refused messages, and we recorded 12 items, or 0.86 per day, with the most recent on 2026-11-04. Daily detail shows one item on 2026-11-03 and three on 2026-11-04, with none on the other displayed days. Item text has a median of 438 characters, a minimum of 152 and a maximum of 2,796, with an average of 1,044 characters. Compared with the previous assessment, which recorded 19 items at 1.36 per day, with a most recent item on 2026-10-02 and an average of 488 characters, both the item count and the daily rate are lower in this window.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

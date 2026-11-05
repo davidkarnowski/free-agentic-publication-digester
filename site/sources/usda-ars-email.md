@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-27, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-27, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-09-28T15:46:43Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-11-04T05:14:10Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -80,7 +80,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-27, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-27, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-06 | 1 |
 | 2026-10-07 | 0 |
 | 2026-10-08 | 1 |
 | 2026-10-09 | 0 |
@@ -122,11 +121,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-02 | 0 |
 | 2026-11-03 | 0 |
 | 2026-11-04 | 0 |
+| 2026-11-05 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Agricultural Research Service bulletins are ingested by email from the project mailbox, with full item text carried in each message. The bulletins contain no web link, so items cite the archived message, and DKIM verification passes with the signing domain aligned to the sender. The average item is 1,380 characters (range 1,297 to 1,464). In the last 14 days we ingested 2 items, the most recent dated 2026-10-27, and the mailbox recorded 2 bulletins with zero errors and zero refused messages. The registry records that the coverage evaluation rests on a single bulletin and claims no coverage relationship to the agency's full output. Since the previous assessment on 2026-09-29, which described one bulletin of about 1,507 characters, the 14-day count is now 2 and the most recent item is dated 2026-10-27. The current size range does not include the earlier figure.
+Agricultural Research Service bulletins are ingested by email from usda-ars-comms@subscribers.usda.gov, with full text carried in each message, DKIM-verified and archived, and the bulletins contain no web link. Over the 14-day window we ingested 1 item at 0.07 per day, with the most recent dated 2026-10-27. The mailbox recorded 2 messages, of which 1 is counted as a bulletin and 1 as a refused delivery, with no administrative messages or errors. The single measured item was 1,297 characters. None of the daily records shown for 2026-10-30 through 2026-11-05 contain an item. The collector reports no consecutive errors, and health reads quiet, with 9 days since the last item. Since the previous assessment on 2026-10-30, the 14-day count fell from 2 items to 1, the length range of 1,297 to 1,464 characters is now a single item of 1,297 characters, and the mailbox now records one refused delivery where the previous assessment recorded none. The registry notes record that the coverage evaluation rests on a single bulletin and claims no coverage relationship to the agency's full output.
 
-_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

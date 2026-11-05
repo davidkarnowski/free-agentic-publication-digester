@@ -6,7 +6,7 @@
 
 # Bureau of Transportation Statistics (email)
 
-planned · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Transportation, Bureau of Transportation Statistics
+planned · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Transportation, Bureau of Transportation Statistics
 
 Official site: https://www.bts.gov/ · All sources: [sources.md](../sources.md)
 
@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-23, 12 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
-This label has held since 2026-10-31T04:14:35Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-11-04T17:14:18Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,20 +68,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-23 |
-| Content length | 3,551 characters average, 3,551 median (shortest 2,577, longest 4,525) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-11-04 |
+| Content length | 2,234 characters average, 2,234 median (shortest 1,891, longest 2,577) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 4 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-03 |
+| Mailbox | 5 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-04 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-23, 12 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-06 | 0 |
 | 2026-10-07 | 2 |
 | 2026-10-08 | 0 |
 | 2026-10-09 | 1 |
@@ -122,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 |
 | 2026-11-02 | 0 |
 | 2026-11-03 | 0 |
-| 2026-11-04 | 0 |
+| 2026-11-04 | 1 |
+| 2026-11-05 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Bureau of Transportation Statistics bulletins arrive by GovDelivery email from btsnews@info.dot.gov into the project mailbox, and the email adapter stores each raw message with DKIM verification. Each bulletin carried the full item text. Over the 14-day window we measured four items, a rate of 0.29 per day, ranging from 762 to 4,525 characters (median 2,321, average 2,482). The mailbox records five bulletin messages, with no administrative messages, errors, or refused deliveries. The last message arrived 2026-10-30 at 15:15 UTC, while the most recent item is dated 2026-10-23, and health reads quiet at nine days. The daily breakdown shows no items from 2026-10-26 through 2026-11-01. Ingestion began at the first poll after the 2026-09-26 registration, and earlier bulletins were not backfilled. The earlier assessment recorded two bulletins dated 2026-09-30, and the current window records four. The mailbox count of five and the four measured items differ by one, and we have not reconciled that difference. Gate-3 coverage evaluation is still pending, and the registry status is planned.
+Bureau of Transportation Statistics bulletins are ingested by email from btsnews@info.dot.gov, with full text carried in each message, DKIM-verified and archived. Over the 14-day window we ingested 2 items at 0.14 per day, with the most recent dated 2026-11-04. The mailbox recorded 5 bulletin messages with no administrative messages, errors, or refused deliveries, and we have not reconciled the difference between 5 messages and 2 items. Item length ranged from 1,891 to 2,577 characters, with an average and median of 2,234. The only day with an item in the displayed daily records is 2026-11-04. The collector reports no consecutive errors, and health reads delivering. Since the previous assessment on 2026-11-01, the 14-day count fell from 4 items at 0.29 per day, the most recent item moved from 2026-10-23 to 2026-11-04, the length range moved from 762 to 4,525 characters to 1,891 to 2,577, and health moved from quiet to delivering. The registry records the status as planned, with registration on 2026-09-26, no backfill of earlier bulletins, and the gate-3 coverage evaluation still pending.
 
-_Model-written assessment of our own ingestion, generated 2026-11-01 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

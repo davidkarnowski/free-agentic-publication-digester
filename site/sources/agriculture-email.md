@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 28 item(s) in the last 14 days; most recent 2026-11-03, delivered by email.
+**delivering** — 25 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,20 +71,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 2 item(s) ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 28 in 14 days (2.0 per day) · most recent 2026-11-03 |
-| Content length | 415 characters average, 303 median (shortest 124, longest 859) |
+| Items ingested | 25 in 14 days (1.79 per day) · most recent 2026-11-04 |
+| Content length | 422 characters average, 299 median (shortest 124, longest 859) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 28 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-03 |
+| Mailbox | 25 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-04 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-28 item(s) in the last 14 days; most recent 2026-11-03, delivered by email.
+25 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
 ### All time
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-06 | 5 |
 | 2026-10-07 | 2 |
 | 2026-10-08 | 3 |
 | 2026-10-09 | 3 |
@@ -125,12 +124,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 1 |
 | 2026-11-02 | 1 |
 | 2026-11-03 | 2 |
-| 2026-11-04 | 0 |
+| 2026-11-04 | 1 |
+| 2026-11-05 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-USDA news arrives via subscription at 1.29 items per day over 14 days, a modest increase from the 1.14 items per day observed in the prior assessment. We received 18 items with the most recent arriving 2026-10-05. The bulletin stream carries full-text releases bearing usda.gov URLs, DKIM-verified. This email subscription is the first working input for departmental press material; the web newsroom returns access refusals via robots.txt. Additional component-list subscriptions remain confirmed and measured under this entry pending future separation. Text ranged from 124 to 1,012 characters with a median of 468.
+Our ingestion of USDA News runs through subscription bulletins delivered to the project mailbox, which carry full item text and are DKIM-verified. The registry notes record usda.gov URLs in the bulletins sampled at evaluation. Over 14 days the mailbox recorded 25 bulletins and 25 messages, with no errors and no refused messages, and we recorded 25 items, or 1.79 per day, with the most recent on 2026-11-04. Daily detail shows three items on 2026-10-30, one on 2026-11-01, one on 2026-11-02, two on 2026-11-03 and one on 2026-11-04, with none on 2026-10-31 or 2026-11-05. Item text has a median of 299 characters, a minimum of 124 and a maximum of 859. The registry notes record that component-list subscriptions are confirmed and measured under this entry until a separation decision is made. Compared with the previous assessment, which recorded 18 items at 1.29 per day with a median of 468 characters, the daily rate is higher in this window and the median text length is lower.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 137 item(s) in the last 14 days; most recent 2026-11-02; 5 of 334 request(s) to api.congress.gov returned no content.
+**delivering** — 77 item(s) in the last 14 days; most recent 2026-11-03; 5 of 334 request(s) to api.congress.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,24 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 29 request(s) (24 answered, 5 returned no content) · 7 item(s) ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 137 in 14 days (9.79 per day) · most recent 2026-11-02 |
-| Content length | 483 characters average, 457 median (shortest 266, longest 887) |
+| Items ingested | 77 in 14 days (5.5 per day) · most recent 2026-11-03 |
+| Content length | 486 characters average, 466 median (shortest 284, longest 887) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to api.congress.gov | 334 request(s) · 329 answered · 0 declined (4xx) · 0 server declined (5xx) · 5 no response — 1.5% returned no content |
 
-last answered request 2026-11-04T05:00:13.129+00:00 UTC.
+last answered request 2026-11-05T05:00:33.594+00:00 UTC.
 
-137 item(s) in the last 14 days; most recent 2026-11-02; 5 of 334 request(s) to api.congress.gov returned no content.
+77 item(s) in the last 14 days; most recent 2026-11-03; 5 of 334 request(s) to api.congress.gov returned no content.
 
 ### All time
 
-- **Our requests to api.congress.gov, all time (since 2026-08-01):** 2,554 request(s) · 2,543 answered · 11 returned no content
+- **Our requests to api.congress.gov, all time (since 2026-08-01):** 2,579 request(s) · 2,568 answered · 11 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to api.congress.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-06 | 24 | 27 | 327 |
 | 2026-10-07 | 2 | 26 | 301 |
 | 2026-10-08 | 0 | 26 | 312 |
 | 2026-10-09 | 41 | 25 | 303 |
@@ -126,13 +125,14 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-10-31 | 0 | 25 | 532 |
 | 2026-11-01 | 0 | 26 | 313 |
 | 2026-11-02 | 7 | 25 | 300 |
-| 2026-11-03 | 0 | 29 | 253 |
-| 2026-11-04 | 0 | 1 | 639 |
+| 2026-11-03 | 2 | 29 | 253 |
+| 2026-11-04 | 0 | 25 | 267 |
+| 2026-11-05 | 0 | 1 | 13137 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The bill-actions endpoint delivered 647 items over 14 days at 46.21 per day, more than doubling from the prior 20.5 per day. All 334 requests succeeded, an improvement from the prior 4.1% no-response rate. Each item represents a bill whose latest action falls within the lookback window; the endpoint exposes only the latest action per bill, not the full action history. Daily item counts showed substantial variation. Committee meetings, nominations, treaties, and House roll-call votes are documented endpoints not yet ingested.
+Our ingestion of the Congress.gov API runs through the bill endpoint only, polled once per run as a conditional GET of one page of 250 records. Items are structured JSON bill-action records, one per bill, carrying the measure's identity and latest action, and no article pages are fetched. Items are dated by the publisher's action date, and the registry notes record that the action typically appears in the API the morning after it occurs. Over the 14-day window we recorded 77 items, or 5.5 per day, with the most recent on 2026-11-03. Daily detail shows 53 items on 2026-10-30, 7 on 2026-11-03 and 2 on 2026-11-04, with none on the other displayed days. Of 334 requests, 5 returned no content (1.5 percent), all of them in the 00:00 hour on 2026-11-03. Delivery mode is feed-only, and the bill page links returned HTTP 403 to our identified client, so no article fetch is made. Compared with the previous assessment, which recorded 647 items over 14 days at 46.21 per day, the item count is substantially lower in this window. Committee, nomination, treaty and House roll-call endpoints are not ingested.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

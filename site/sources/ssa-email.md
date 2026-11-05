@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 28 item(s) in the last 14 days; most recent 2026-11-03, delivered by email.
+**delivering** — 21 item(s) in the last 14 days; most recent 2026-11-03, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,20 +69,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 1 item(s) ingested
+Last 24 hours: no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 28 in 14 days (2.0 per day) · most recent 2026-11-03 |
-| Content length | 3,053 characters average, 4,244 median (shortest 538, longest 5,215) |
+| Items ingested | 21 in 14 days (1.5 per day) · most recent 2026-11-03 |
+| Content length | 2,823 characters average, 3,292 median (shortest 538, longest 5,215) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 28 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-03 |
+| Mailbox | 21 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-03 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-28 item(s) in the last 14 days; most recent 2026-11-03, delivered by email.
+21 item(s) in the last 14 days; most recent 2026-11-03, delivered by email.
 
 ### All time
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-06 | 13 |
 | 2026-10-07 | 10 |
 | 2026-10-08 | 14 |
 | 2026-10-09 | 22 |
@@ -124,11 +123,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-02 | 3 |
 | 2026-11-03 | 1 |
 | 2026-11-04 | 0 |
+| 2026-11-05 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Social Security Administration press releases arrive via email subscription at 5.07 items per day over 14 days, a decrease from the 6.64 items per day observed in the prior assessment. We received 71 items with the most recent arriving 2026-10-05. The bulletin stream carries full-text releases, DKIM-verified, with ssa.gov URLs. This email subscription is the sole working input for SSA releases; the web newsroom returns HTTP 403 to our client. Text ranged from 446 to 4,303 characters with a median of 4,252, indicating substantial narrative content in each bulletin.
+Our ingestion of SSA press releases runs through subscription bulletins delivered to the project mailbox, which carry full item text and are DKIM-verified. The registry notes record that the sibling web newsroom returned HTTP 403 to our identified client. Over 14 days the mailbox recorded 21 bulletins and 21 messages, with no errors and no refused messages, and we recorded 21 items, or 1.5 per day, with the most recent on 2026-11-03. Daily detail shows two items on 2026-10-30, three on 2026-11-02 and one on 2026-11-03, and no items in the final 24 hours of the window. Item text has a median of 3,292 characters, a minimum of 538 and a maximum of 5,215. Compared with the previous assessment, which recorded 71 items at 5.07 per day with a median of 4,252 characters, the daily rate is lower and the median text length is lower in this window.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

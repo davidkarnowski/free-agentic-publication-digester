@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 20 item(s) in the last 14 days; most recent 2026-11-03, delivered by email.
+**delivering** — 22 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,20 +67,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 3 item(s) ingested
+Last 24 hours: 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 20 in 14 days (1.43 per day) · most recent 2026-11-03 |
-| Content length | 2,026 characters average, 1,942 median (shortest 510, longest 3,492) |
+| Items ingested | 22 in 14 days (1.57 per day) · most recent 2026-11-04 |
+| Content length | 1,979 characters average, 1,942 median (shortest 510, longest 3,492) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 21 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-03 |
+| Mailbox | 23 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-04 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-20 item(s) in the last 14 days; most recent 2026-11-03, delivered by email.
+22 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
 ### All time
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-06 | 0 |
 | 2026-10-07 | 4 |
 | 2026-10-08 | 2 |
 | 2026-10-09 | 1 |
@@ -121,12 +120,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 |
 | 2026-11-02 | 2 |
 | 2026-11-03 | 3 |
-| 2026-11-04 | 0 |
+| 2026-11-04 | 2 |
+| 2026-11-05 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-FDA updates arrive via email at 1.93 items per day over 14 days, a decrease from the 3.07 items per day observed in the prior assessment. We received 27 items with the most recent arriving 2026-10-05. The email channel carries full-text materials covering approvals, safety communications, recalls, and warning letters, with DKIM verification applied. It operates as a corroborating input alongside the active fda-press RSS feed. Text ranged from 510 to 6,571 characters with a median of 1,768. Delivery has been consistent with no consecutive failures recorded.
+FDA email bulletins are ingested by email with full text carried in each message, DKIM-verified and archived. Over the 14-day window we ingested 22 items at 1.57 per day, with the most recent dated 2026-11-04. The mailbox recorded 23 bulletin messages with no administrative messages, errors, or refused deliveries, and we have not reconciled the difference between 23 messages and 22 items. Item length ranged from 510 to 3,492 characters, averaging 1,979 with a median of 1,942. Daily counts in the seven records shown were 4 on 2026-10-30, 1 on 2026-10-31, 2 on 2026-11-02, 3 on 2026-11-03, and 2 on 2026-11-04, with none on the other two days. The collector reports no consecutive errors and health reads delivering. Since the previous assessment on 2026-10-06, the 14-day count fell from 27 items at 1.93 per day, the most recent item moved from 2026-10-05 to 2026-11-04, the maximum length fell from 6,571 to 3,492 characters, and the median rose from 1,768 to 1,942. The registry records this source as a corroborating sibling of the fda-press feed.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

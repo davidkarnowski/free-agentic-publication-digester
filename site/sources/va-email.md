@@ -53,9 +53,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-28, delivered by email.
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -65,20 +65,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-28 |
-| Content length | 4,120 characters average, 4,120 median (shortest 4,120, longest 4,120) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-11-04 |
+| Content length | 4,626 characters average, 4,626 median (shortest 4,120, longest 5,132) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 3 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-03 |
+| Mailbox | 4 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-05 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-1 item(s) in the last 14 days; most recent 2026-10-28, delivered by email.
+2 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
 ### All time
 
@@ -90,7 +90,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-06 | 1 |
 | 2026-10-07 | 1 |
 | 2026-10-08 | 0 |
 | 2026-10-09 | 0 |
@@ -119,12 +118,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 |
 | 2026-11-02 | 0 |
 | 2026-11-03 | 0 |
-| 2026-11-04 | 0 |
+| 2026-11-04 | 1 |
+| 2026-11-05 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-VA Updates from veteransaffairs@messages.va.gov and veteransbenefits@messages.va.gov deliver bulletins carrying benefit-policy announcements, claims and eligibility changes, and health-system news. Over 14 days, 3 items have been delivered averaging 0.21 items per day, with the most recent on 2026-10-01. Bulletins arrive as full-text email to the project mailbox with lengths ranging from 1,354 to 5,220 characters. Delivery has maintained regular frequency since the previous assessment. The email adapter confirms DKIM verification and archival of all subscribed content. No request metrics apply. The collector shows no consecutive errors and normal status.
+VA Updates bulletins are ingested by email from two sender addresses, with full text carried in each message, DKIM-verified and archived. Over the 14-day window we ingested 2 items at 0.14 per day, with the most recent dated 2026-11-04. The mailbox recorded 4 bulletin messages with no administrative messages, errors, or refused deliveries, and we have not reconciled the difference between 4 messages and 2 items. Item length ranged from 4,120 to 5,132 characters, with an average and median of 4,626. The only day with an item in the displayed daily records is 2026-11-04. The collector reports no consecutive errors, and health reads delivering. Since the previous assessment on 2026-10-06, the 14-day count fell from 3 items at 0.21 per day, the most recent item moved from 2026-10-01 to 2026-11-04, the minimum length rose from 1,354 to 4,120 characters, and the maximum fell from 5,220 to 5,132. The registry notes record the subscription as confirmed on 2026-07-29 and the 2026-07-30 evaluation as finding one bulletin producing one item.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

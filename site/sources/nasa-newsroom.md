@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 74 item(s) in the last 14 days; most recent 2026-11-03; 0 of 365 request(s) to www.nasa.gov returned no content.
+**delivering** — 78 item(s) in the last 14 days; most recent 2026-11-04; 0 of 369 request(s) to www.nasa.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -66,24 +66,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 28 request(s) (28 answered, 0 returned no content) · 5 item(s) ingested
+Last 24 hours: 31 request(s) (31 answered, 0 returned no content) · 9 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 74 in 14 days (5.29 per day) · most recent 2026-11-03 |
-| Content length | 10,960 characters average, 10,006 median (shortest 7,417, longest 20,388) |
+| Items ingested | 78 in 14 days (5.57 per day) · most recent 2026-11-04 |
+| Content length | 10,974 characters average, 10,140 median (shortest 7,417, longest 20,388) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.nasa.gov | 365 request(s) · 365 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.nasa.gov | 369 request(s) · 369 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-04T05:00:09.737+00:00 UTC.
+last answered request 2026-11-05T05:00:18.738+00:00 UTC.
 
-74 item(s) in the last 14 days; most recent 2026-11-03; 0 of 365 request(s) to www.nasa.gov returned no content.
+78 item(s) in the last 14 days; most recent 2026-11-04; 0 of 369 request(s) to www.nasa.gov returned no content.
 
 ### All time
 
-- **Our requests to www.nasa.gov, all time (since 2026-07-30):** 2,884 request(s) · 2,865 answered · 19 returned no content
+- **Our requests to www.nasa.gov, all time (since 2026-07-30):** 2,915 request(s) · 2,896 answered · 19 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nasa.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-06 | 9 | 32 | 131 |
 | 2026-10-07 | 8 | 30 | 128 |
 | 2026-10-08 | 11 | 32 | 108 |
 | 2026-10-09 | 5 | 28 | 105 |
@@ -122,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 1 | 26 | 105 |
 | 2026-11-02 | 8 | 29 | 111 |
 | 2026-11-03 | 5 | 28 | 90 |
-| 2026-11-04 | 0 | 1 | 346 |
+| 2026-11-04 | 9 | 31 | 84 |
+| 2026-11-05 | 0 | 1 | 200 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-NASA breaking-news releases arrive through an RSS feed with full article text extracted from linked pages. Over 14 days, 95 items accumulated at 6.79 per day, substantially up from the previously measured 4.86 per day, representing the highest collection volume among measured sources. Extracted text averaged 10,899 characters. Items distribute throughout most hours of each day, with concentrations in morning and midday windows. All 391 requests to www.nasa.gov succeeded without error or no-content responses, a significant improvement from the prior 4.8% error rate with 19 no-content responses. Most recent item published 2026-10-05.
+We ingest the NASA News Releases RSS feed in full mode, fetching each item's page for article text. Over the 14-day window we recorded 78 items at 5.57 per day, down from 95 items at 6.79 per day in the prior assessment. Article text averaged 10,974 characters (median 10,140, range 7,417 to 20,388), compared with 10,899 characters in the prior assessment. Daily counts in the seven-day breakdown range from 0 to 9, with 2026-11-04 the highest at 9. The most recent item is dated 2026-11-04, up from 2026-10-05 in the prior assessment. Of 369 requests to www.nasa.gov, all returned content, an error rate of 0 percent. The prior assessment recorded 391 requests with no errors.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 16 item(s) in the last 14 days; most recent 2026-11-03, delivered by email.
+**delivering** — 15 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,20 +67,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 3 item(s) ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 16 in 14 days (1.14 per day) · most recent 2026-11-03 |
-| Content length | 900 characters average, 233 median (shortest 83, longest 5,853) |
+| Items ingested | 15 in 14 days (1.07 per day) · most recent 2026-11-04 |
+| Content length | 911 characters average, 189 median (shortest 81, longest 5,853) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 16 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-04 |
+| Mailbox | 15 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-04 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-16 item(s) in the last 14 days; most recent 2026-11-03, delivered by email.
+15 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
 ### All time
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-06 | 1 |
 | 2026-10-07 | 0 |
 | 2026-10-08 | 1 |
 | 2026-10-09 | 1 |
@@ -121,12 +120,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 |
 | 2026-11-02 | 1 |
 | 2026-11-03 | 3 |
-| 2026-11-04 | 0 |
+| 2026-11-04 | 1 |
+| 2026-11-05 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Food Safety and Inspection Service recall notices and public-health alerts arrive via email at 0.71 items per day over 14 days, a decrease from the 1.36 items per day observed in the prior assessment. We received 10 items with the most recent arriving 2026-10-02. The subscription represents the agency's own time-critical recall-and-alert distribution channel, a document class distinct from departmental press releases. Text ranged from 69 to 8,931 characters with a median of 493. The source has delivered consistently without consecutive failures, providing product identification and safety information.
+Our FSIS recall and public-health alert subscription is ingested by email, and each measured bulletin carried its full text, DKIM-verified and archived. Over the 14-day window we ingested 15 items at 1.07 per day, with the most recent dated 2026-11-04. The mailbox recorded 15 bulletins, with no administrative messages, errors, or refused deliveries. Item length ranged from 81 to 5,853 characters, averaging 911 with a median of 189. Among the seven daily records shown, 2026-10-30 and 2026-11-03 each held 3 items, 2026-11-02 and 2026-11-04 each held 1, and three days held none. The collector reports no consecutive errors and health reads delivering. Since the previous assessment on 2026-10-06, the 14-day count rose from 10 items at 0.71 per day, the most recent item moved from 2026-10-02 to 2026-11-04, the maximum length fell from 8,931 to 5,853 characters, and the median fell from 493 to 189. The registry notes record the subscription as confirmed on 2026-07-29, with a canonical fsis.usda.gov URL on the bulletin reviewed in that evaluation.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 16 item(s) in the last 14 days; most recent 2026-10-30, delivered by email.
+**delivering** — 18 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,20 +71,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 16 in 14 days (1.14 per day) · most recent 2026-10-30 |
-| Content length | 899 characters average, 726 median (shortest 511, longest 2,035) |
+| Items ingested | 18 in 14 days (1.29 per day) · most recent 2026-11-04 |
+| Content length | 858 characters average, 688 median (shortest 511, longest 2,035) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 16 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-30 |
+| Mailbox | 18 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-04 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-16 item(s) in the last 14 days; most recent 2026-10-30, delivered by email.
+18 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
 ### All time
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-06 | 1 |
 | 2026-10-07 | 3 |
 | 2026-10-08 | 1 |
 | 2026-10-09 | 1 |
@@ -125,12 +124,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 |
 | 2026-11-02 | 0 |
 | 2026-11-03 | 0 |
-| 2026-11-04 | 0 |
+| 2026-11-04 | 2 |
+| 2026-11-05 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-USPS Inspector General bulletins deliver audit reports, investigative findings, and white papers via email subscription. Over 14 days, 15 items have been delivered averaging 1.07 items per day, with the most recent on 2026-10-05. Bulletins arrive as full-text email with lengths ranging from 534 to 2,060 characters. Delivery has accelerated from the previous assessment rate of 0.86 items per day, showing increased bulletin frequency from the subscription. The email adapter confirms DKIM verification and archival of all messages. No request metrics apply. The collector reports no consecutive errors and normal operational status.
+USPS Inspector General bulletins are ingested by email with full text carried in each message, DKIM-verified and archived. Over the 14-day window we ingested 18 items at 1.29 per day, with the most recent dated 2026-11-04. The mailbox recorded 18 bulletins with no administrative messages, errors, or refused deliveries. Item length ranged from 511 to 2,035 characters, averaging 858 with a median of 688. In the daily records shown, 5 items fall on 2026-10-30, 2 on 2026-11-04, and none on the other five displayed days. The collector reports no consecutive errors, and health reads delivering. Since the previous assessment on 2026-10-06, the 14-day count rose from 15 items at 1.07 per day, the most recent item moved from 2026-10-05 to 2026-11-04, and the length range moved from 534 to 2,060 characters to 511 to 2,035. The registry notes record that this subscription overlaps the planned oversight.gov aggregator, and that the aggregator rule applies if both are activated.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

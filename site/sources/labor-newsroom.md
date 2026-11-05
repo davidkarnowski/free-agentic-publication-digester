@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 10 item(s) in the last 14 days; most recent 2026-11-02; 10 of 340 request(s) to www.dol.gov returned no content.
+**delivering** — 8 item(s) in the last 14 days; most recent 2026-11-02; 8 of 337 request(s) to www.dol.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -72,18 +72,18 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 
 | Measure | Value |
 |---|---|
-| Items ingested | 10 in 14 days (0.71 per day) · most recent 2026-11-02 |
-| Content length | 2,528 characters average, 2,250 median (shortest 458, longest 5,393) |
+| Items ingested | 8 in 14 days (0.57 per day) · most recent 2026-11-02 |
+| Content length | 2,794 characters average, 2,250 median (shortest 458, longest 5,393) |
 | Delivery mode | feed-fallback — the feed's summary, used because the article page could not be read |
-| Our requests to www.dol.gov | 340 request(s) · 330 answered · 10 declined (4xx) · 0 server declined (5xx) · 0 no response — 2.9% returned no content |
+| Our requests to www.dol.gov | 337 request(s) · 329 answered · 8 declined (4xx) · 0 server declined (5xx) · 0 no response — 2.4% returned no content |
 
-last answered request 2026-11-04T05:00:09.084+00:00 UTC.
+last answered request 2026-11-05T05:00:18.292+00:00 UTC.
 
-10 item(s) in the last 14 days; most recent 2026-11-02; 10 of 340 request(s) to www.dol.gov returned no content.
+8 item(s) in the last 14 days; most recent 2026-11-02; 8 of 337 request(s) to www.dol.gov returned no content.
 
 ### All time
 
-- **Our requests to www.dol.gov, all time (since 2026-07-30):** 2,641 request(s) · 2,588 answered · 53 returned no content
+- **Our requests to www.dol.gov, all time (since 2026-07-30):** 2,666 request(s) · 2,613 answered · 53 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.dol.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-06 | 0 | 26 | 191 |
 | 2026-10-07 | 1 | 27 | 209 |
 | 2026-10-08 | 1 | 27 | 144 |
 | 2026-10-09 | 1 | 27 | 145 |
@@ -122,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 | 26 | 151 |
 | 2026-11-02 | 1 | 26 | 140 |
 | 2026-11-03 | 0 | 25 | 151 |
-| 2026-11-04 | 0 | 1 | 389 |
+| 2026-11-04 | 0 | 25 | 119 |
+| 2026-11-05 | 0 | 1 | 341 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Labor Department news releases arrive through RSS feed in feed-fallback delivery mode, indicating article page fetches do not retrieve content and feed summaries serve as the delivery text. The current 14-day window shows 14 items at 1.0 per day, averaging 2,192 characters, most recent on October 2. The www.dol.gov host shows 4.0% request failure (14 of 348 requests returned no content). Compared to the assessment of September 5 (9 items at 0.64 per day, also feed-fallback, averaging 1,799 characters), collection volume has increased while delivery remains limited to feed summaries only.
+This source is measured in feed-fallback delivery mode, in which the feed summary is used because the article page could not be read. Over the 14-day window we recorded 8 items, about 0.6 per day, with a mean of 2,794 characters (median 2,250, range 458 to 5,393). Daily activity shows one item on 2026-11-02 and none on the other measured days. The most recent item is dated 2026-11-02. The www.dol.gov host returned no content for 2.4 percent of attempts (8 of 337). Compared with the 2026-10-06 assessment, which recorded 14 items at about 1.0 per day, a mean of 2,192 characters, a 4.0 percent host failure rate, and a last item of 2026-10-02, the item count and daily rate are lower, the mean size is higher, the host failure rate is lower, and the last item date has advanced. The registry notes record a probe on 2026-07-26 that verified the feed and one sample article.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

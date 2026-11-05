@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 40 item(s) in the last 14 days; most recent 2026-11-03; 0 of 328 request(s) to www.dhs.gov returned no content.
+**delivering** — 37 item(s) in the last 14 days; most recent 2026-11-03; 13 of 328 request(s) to www.dhs.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,24 +67,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 3 item(s) ingested
+Last 24 hours: 25 request(s) (12 answered, 13 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 40 in 14 days (2.86 per day) · most recent 2026-11-03 |
-| Content length | 408 characters average, 401 median (shortest 278, longest 618) |
+| Items ingested | 37 in 14 days (2.64 per day) · most recent 2026-11-03 |
+| Content length | 413 characters average, 401 median (shortest 280, longest 618) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.dhs.gov | 328 request(s) · 328 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.dhs.gov | 328 request(s) · 315 answered · 13 declined (4xx) · 0 server declined (5xx) · 0 no response — 4.0% returned no content |
 
-last answered request 2026-11-04T05:00:09.191+00:00 UTC.
+last answered request 2026-11-04T16:57:58.939+00:00 UTC.
 
-40 item(s) in the last 14 days; most recent 2026-11-03; 0 of 328 request(s) to www.dhs.gov returned no content.
+37 item(s) in the last 14 days; most recent 2026-11-03; 13 of 328 request(s) to www.dhs.gov returned no content.
 
 ### All time
 
-- **Our requests to www.dhs.gov, all time (since 2026-08-01):** 2,555 request(s) · 2,551 answered · 4 returned no content
+- **Our requests to www.dhs.gov, all time (since 2026-08-01):** 2,580 request(s) · 2,563 answered · 17 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.dhs.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-06 | 2 | 26 | 1442 |
 | 2026-10-07 | 4 | 27 | 556 |
 | 2026-10-08 | 3 | 25 | 341 |
 | 2026-10-09 | 4 | 25 | 275 |
@@ -123,12 +122,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 | 26 | 366 |
 | 2026-11-02 | 5 | 25 | 381 |
 | 2026-11-03 | 3 | 25 | 326 |
-| 2026-11-04 | 0 | 1 | 440 |
+| 2026-11-04 | 0 | 25 | 206 |
+| 2026-11-05 | 0 | 1 | 297 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The DHS news-release index carries departmental press-release teasers from the first page of a paginated listing, delivered in feed-only mode with no article fetching. Over 14 days, 29 items arrived at 2.07 per day, more than doubling the previous 1.14 per day. Text averaged 401 characters from the publisher's own summaries. The index paginates at 10 entries per page and we read page 1 only, so coverage is limited to items published within 1–2 poll cycles; releases beyond that window are not visible. All 338 requests to www.dhs.gov succeeded with 0% error rate, compared to the prior 1.2% error rate with 4 no-content responses. Items are dated from the publisher's markup. Most recent item published 2026-10-05.
+We read the DHS News Releases index in feed-only mode, with one listing fetch per poll and no article fetches. Over the 14-day window we recorded 37 items at 2.64 per day, up from 29 items at 2.07 per day in the prior assessment. Each entry carries a datetime attribute in DHS's markup, so items are dated from the publisher's own markup. Item text averaged 413 characters (median 401, range 280 to 618), taken from the listing teaser. The most recent item is dated 2026-11-03. Of 328 requests to www.dhs.gov, 315 returned content and 13 returned no content, an error rate of 4.0 percent. The prior assessment recorded 338 requests with no failures. On 2026-11-04, 12 of 25 requests returned no content, and 1 more did so on 2026-11-05. We read page 1 only, which holds 10 entries, so more than 10 new releases between polls would not be seen. Component agency releases are not carried in this index.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

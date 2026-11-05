@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 2 item(s) in the last 14 days; most recent 2026-10-29, delivered by email.
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-10-29, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,14 +73,14 @@ Last 24 hours: no items ingested
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-10-29 |
-| Content length | 1,482 characters average, 1,482 median (shortest 1,375, longest 1,590) |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-29 |
+| Content length | 1,375 characters average, 1,375 median (shortest 1,375, longest 1,375) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-29 |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-29 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-2 item(s) in the last 14 days; most recent 2026-10-29, delivered by email.
+1 item(s) in the last 14 days; most recent 2026-10-29, delivered by email.
 
 ### All time
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-06 | 0 |
 | 2026-10-07 | 0 |
 | 2026-10-08 | 1 |
 | 2026-10-09 | 0 |
@@ -122,11 +121,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-02 | 0 |
 | 2026-11-03 | 0 |
 | 2026-11-04 | 0 |
+| 2026-11-05 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-CMS Newsroom bulletins arrive via email carrying payment-rule announcements, coverage decisions, program guidance, and enrollment data. Over the 14-day measurement window, 2 items have been delivered at an average rate of 0.14 items per day, with the most recent delivery on 2026-10-01. Bulletins arrive as full-text email to the project mailbox with lengths around 1,400 characters (ranging 1,264 to 1,541). The email adapter confirms DKIM verification and archival of all subscribed content. No request-level statistics apply as this source delivers via email subscription. The collector reports no consecutive errors and normal operational status.
+CMS Newsroom bulletins are ingested by email with full text carried in each message, DKIM-verified and archived. Over the 14-day window we ingested 1 item, a rate of 0.07 per day, with the most recent dated 2026-10-29. The mailbox recorded 1 bulletin, with no errors or refused deliveries. The single measured item was 1,375 characters. None of the daily records shown for 2026-10-30 through 2026-11-05 contain an item. The collector reports no consecutive errors, and health reads delivering, with 7 days since the last item. Since the previous assessment on 2026-10-06, the 14-day count fell from 2 items at 0.14 per day, and the most recent item moved from 2026-10-01 to 2026-10-29. The previous length range of 1,264 to 1,541 characters includes the current item's length. The registry notes record that the HHS departmental subscription was awaiting email confirmation and that other related lists were confirmed but not yet registered.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

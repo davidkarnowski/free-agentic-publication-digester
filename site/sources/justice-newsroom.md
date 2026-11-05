@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 628 item(s) in the last 14 days; most recent 2026-11-03; 15 of 333 request(s) to www.justice.gov returned no content.
+**delivering** — 587 item(s) in the last 14 days; most recent 2026-11-04; 20 of 332 request(s) to www.justice.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,24 +69,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 27 request(s) (21 answered, 6 returned no content) · 59 item(s) ingested
+Last 24 hours: 24 request(s) (19 answered, 5 returned no content) · 44 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 628 in 14 days (44.86 per day) · most recent 2026-11-03 |
-| Content length | 322 characters average, 304 median (shortest 38, longest 2,374) |
+| Items ingested | 587 in 14 days (41.93 per day) · most recent 2026-11-04 |
+| Content length | 323 characters average, 306 median (shortest 38, longest 2,374) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.justice.gov | 333 request(s) · 318 answered · 10 declined (4xx) · 5 server declined (5xx) · 0 no response — 4.5% returned no content |
+| Our requests to www.justice.gov | 332 request(s) · 312 answered · 15 declined (4xx) · 5 server declined (5xx) · 0 no response — 6.0% returned no content |
 
-last answered request 2026-11-04T05:00:09.328+00:00 UTC.
+last answered request 2026-11-05T05:00:18.358+00:00 UTC.
 
-628 item(s) in the last 14 days; most recent 2026-11-03; 15 of 333 request(s) to www.justice.gov returned no content.
+587 item(s) in the last 14 days; most recent 2026-11-04; 20 of 332 request(s) to www.justice.gov returned no content.
 
 ### All time
 
-- **Our requests to www.justice.gov, all time (since 2026-07-30):** 2,595 request(s) · 2,559 answered · 36 returned no content
+- **Our requests to www.justice.gov, all time (since 2026-07-30):** 2,619 request(s) · 2,578 answered · 41 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.justice.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-06 | 32 | 26 | 346 |
 | 2026-10-07 | 72 | 27 | 469 |
 | 2026-10-08 | 88 | 26 | 398 |
 | 2026-10-09 | 26 | 25 | 214 |
@@ -125,12 +124,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 | 26 | 234 |
 | 2026-11-02 | 47 | 25 | 245 |
 | 2026-11-03 | 59 | 27 | 282 |
-| 2026-11-04 | 0 | 1 | 562 |
+| 2026-11-04 | 44 | 24 | 194 |
+| 2026-11-05 | 0 | 1 | 392 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Justice Department press releases arrive through an RSS feed (Office of Public Affairs channel, 25-item feed depth) in feed-only delivery mode, supplying titles and descriptions. The current 14-day window shows 635 items at roughly 45 per day, averaging 322 characters, most recent on October 5. Delivery is limited to feed summaries because sustained article page fetches trigger Akamai bot-check interstitials, documented as evidence. The www.justice.gov host shows 0% request failure. Compared to the assessment of September 5 (777 items at roughly 56 per day), both collection volume and daily rate have declined. The 25-item feed depth can under-cover heavy publication days.
+This source is measured in feed-only delivery mode, which the registry describes as the feed summary, since the source publishes no more than that through this channel. Over the 14-day window we recorded 587 items, about 42 per day, with a mean of 323 characters (median 306, range 38 to 2,374). Daily activity shows items on 2026-10-30 (95), 2026-11-02 (47), 2026-11-03 (59), and 2026-11-04 (44), with none on the other measured days. The most recent item is dated 2026-11-04. The www.justice.gov host returned no content for 6.0 percent of attempts (20 of 332). Registry notes record a 404 on a stale feed path on 2026-07-26, and challenge interstitials returned in place of article content during sustained article fetching on 2026-07-28; article fetching was not continued after that. The 25-item feed depth is recorded as a limit on heavy publication days. Compared with the 2026-10-06 assessment, which recorded 635 items at about 45 per day with a 0 percent host failure rate and a last item of 2026-10-05, the item count and daily rate are lower, the mean size is similar, and the host failure rate is higher.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

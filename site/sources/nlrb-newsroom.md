@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 2 item(s) in the last 14 days; most recent 2026-11-02; 0 of 329 request(s) to www.nlrb.gov returned no content.
+**delivering** — 3 item(s) in the last 14 days; most recent 2026-11-04; 5 of 335 request(s) to www.nlrb.gov returned no content.
 
-This label has held since 2026-10-30T14:53:55Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-10-30T14:53:55Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,24 +62,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 30 request(s) (25 answered, 5 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-11-02 |
-| Content length | 13,843 characters average, 13,843 median (shortest 11,683, longest 16,003) |
+| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-11-04 |
+| Content length | 12,932 characters average, 11,683 median (shortest 11,111, longest 16,003) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.nlrb.gov | 329 request(s) · 329 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.nlrb.gov | 335 request(s) · 330 answered · 0 declined (4xx) · 0 server declined (5xx) · 5 no response — 1.5% returned no content |
 
-last answered request 2026-11-04T05:00:10.266+00:00 UTC.
+last answered request 2026-11-05T05:00:18.845+00:00 UTC.
 
-2 item(s) in the last 14 days; most recent 2026-11-02; 0 of 329 request(s) to www.nlrb.gov returned no content.
+3 item(s) in the last 14 days; most recent 2026-11-04; 5 of 335 request(s) to www.nlrb.gov returned no content.
 
 ### All time
 
-- **Our requests to www.nlrb.gov, all time (since 2026-10-05):** 754 request(s) · 753 answered · 1 returned no content
+- **Our requests to www.nlrb.gov, all time (since 2026-10-05):** 784 request(s) · 778 answered · 6 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -89,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nlrb.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-06 | 1 | 28 | 509 |
 | 2026-10-07 | 0 | 26 | 888 |
 | 2026-10-08 | 1 | 27 | 469 |
 | 2026-10-09 | 0 | 25 | 509 |
@@ -118,7 +117,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 | 26 | 497 |
 | 2026-11-02 | 1 | 26 | 461 |
 | 2026-11-03 | 0 | 25 | 510 |
-| 2026-11-04 | 0 | 1 | 790 |
+| 2026-11-04 | 1 | 30 | 487 |
+| 2026-11-05 | 0 | 1 | 452 |
 
 ## Our ingestion assessment
 

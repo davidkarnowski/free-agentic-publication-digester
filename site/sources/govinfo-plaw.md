@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**degraded** — 4216 of 25750 request(s) to api.govinfo.gov returned no content (16.4%, at or above the 10% mark).
+**degraded** — 4141 of 24240 request(s) to api.govinfo.gov returned no content (17.1%, at or above the 10% mark).
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,23 +71,23 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 2,308 request(s) (1,960 answered, 348 returned no content) · no items ingested
+Last 24 hours: 2,552 request(s) (2,078 answered, 474 returned no content) · 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 16 in 14 days (1.14 per day) · most recent 2026-10-30 |
-| Content length | 4,603 characters average, 4,402 median (shortest 1,412, longest 11,309) |
-| Our requests to api.govinfo.gov | 25,750 request(s) · 21,534 answered · 0 declined (4xx) · 4,194 server declined (5xx) · 22 no response — 16.4% returned no content |
+| Items ingested | 17 in 14 days (1.21 per day) · most recent 2026-11-04 |
+| Content length | 4,650 characters average, 4,443 median (shortest 1,412, longest 11,309) |
+| Our requests to api.govinfo.gov | 24,240 request(s) · 20,099 answered · 0 declined (4xx) · 4,119 server declined (5xx) · 22 no response — 17.1% returned no content |
 
-last answered request 2026-11-04T05:00:07.582+00:00 UTC; this host serves 5 registered sources, so these figures are host-wide.
+last answered request 2026-11-05T05:00:16.330+00:00 UTC; this host serves 5 registered sources, so these figures are host-wide.
 
-4216 of 25750 request(s) to api.govinfo.gov returned no content (16.4%, at or above the 10% mark).
+4141 of 24240 request(s) to api.govinfo.gov returned no content (17.1%, at or above the 10% mark).
 
 ### All time
 
-- **Our requests to api.govinfo.gov, all time (since 2026-07-30):** 206,259 request(s) · 158,153 answered · 48,106 returned no content
+- **Our requests to api.govinfo.gov, all time (since 2026-07-30):** 208,811 request(s) · 160,231 answered · 48,580 returned no content
 
 This host serves 5 registered sources, so these figures are host-wide.
 
@@ -99,7 +99,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to api.govinfo.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-06 | 1 | 2451 | 615 |
 | 2026-10-07 | 1 | 2464 | 533 |
 | 2026-10-08 | 0 | 2343 | 489 |
 | 2026-10-09 | 0 | 1898 | 591 |
@@ -128,12 +127,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 | 486 | 326 |
 | 2026-11-02 | 0 | 442 | 352 |
 | 2026-11-03 | 0 | 2328 | 565 |
-| 2026-11-04 | 0 | 5 | 219 |
+| 2026-11-04 | 2 | 2550 | 584 |
+| 2026-11-05 | 0 | 7 | 211 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The Public and Private Laws collection continues via govinfo delta sync from July 25 baseline, reflecting minimal publishing activity. The current 14-day window shows 12 items at 0.86 per day, averaging 8,441 characters, most recent on October 2. This continues the documented low publication rate: the assessment of September 5 noted no slip laws published within the observation window, and current data shows continued sparse activity. The collection remains positioned to capture enacted laws as they are published by the Government Publishing Office.
+Over the 14-day window we recorded 17 public and private law items, about 1.2 per day, with a mean of 4,650 characters (median 4,443, range 1,412 to 11,309). Daily activity shows one item on 2026-10-30 and two on 2026-11-04, with none on the other measured days in that view. The most recent item is dated 2026-11-04. The shared api.govinfo.gov host returned no content for 17.1 percent of attempts, and the collection is marked degraded on that basis. The registry notes from the 2026-07-30 backfill state that no slip law had been listed since activation; the current measurement shows items in the window. Compared with the 2026-10-06 assessment, which recorded 12 items at about 0.86 per day, a mean of 8,441 characters, and a last item of 2026-10-02, the daily rate is higher, the mean size is lower, and the last item date has advanced.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

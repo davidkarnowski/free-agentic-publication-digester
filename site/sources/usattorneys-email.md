@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 444 item(s) in the last 14 days; most recent 2026-11-03, delivered by email.
+**delivering** — 465 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,20 +69,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 37 item(s) ingested
+Last 24 hours: 69 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 444 in 14 days (31.71 per day) · most recent 2026-11-03 |
-| Content length | 340 characters average, 316 median (shortest 35, longest 1,062) |
+| Items ingested | 465 in 14 days (33.21 per day) · most recent 2026-11-04 |
+| Content length | 343 characters average, 323 median (shortest 35, longest 1,062) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 111 bulletin(s), 0 subscription notice(s), 1 junk-folder message(s) refused on a failed or unaligned DKIM signature in the last 14 days; most recent message 2026-11-04 |
+| Mailbox | 112 bulletin(s), 0 subscription notice(s), 1 junk-folder message(s) refused on a failed or unaligned DKIM signature in the last 14 days; most recent message 2026-11-05 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-444 item(s) in the last 14 days; most recent 2026-11-03, delivered by email.
+465 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
 
 ### All time
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-06 | 63 |
 | 2026-10-07 | 48 |
 | 2026-10-08 | 54 |
 | 2026-10-09 | 58 |
@@ -123,12 +122,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 |
 | 2026-11-02 | 73 |
 | 2026-11-03 | 37 |
-| 2026-11-04 | 0 |
+| 2026-11-04 | 69 |
+| 2026-11-05 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-U.S. Attorneys' news arrives from the Executive Office for U.S. Attorneys at 35.36 items per day over 14 days, consistent with the 34.5 items per day observed in the prior assessment. We received 495 items with the most recent arriving 2026-10-05. The subscription delivers consolidated bulletins from all 93 districts with full-text releases varying in completeness. This represents EOUSA's all-districts distribution and provides fuller coverage than the web press page, which cannot be retrieved through article fetching. Text averaged 341 characters with a median of 314. No consecutive delivery failures have occurred.
+Our ingestion of U.S. Attorneys News runs through multi-item digest bulletins delivered to the project mailbox, each carrying one or more district releases, with DKIM verification. Over 14 days the mailbox recorded 112 bulletins and 113 messages, with no errors and one refused message. We recorded 465 items, or 33.21 per day, with the most recent on 2026-11-04. Daily detail shows 59 items on 2026-10-30, 1 on 2026-10-31, 73 on 2026-11-02, 37 on 2026-11-03 and 69 on 2026-11-04, with none on 2026-11-01 or 2026-11-05. The registry notes, from a 2026-07-30 evaluation, record that some releases arrived in teaser mode rather than with full text. Item text has a median of 323 characters, a minimum of 35 and a maximum of 1,062. Compared with the previous assessment, which recorded 495 items at 35.36 per day with a median of 314 characters, the daily rate and item count are slightly lower in this window, and the median text length is higher.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

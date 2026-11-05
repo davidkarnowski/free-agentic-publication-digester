@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 9 item(s) in the last 14 days; most recent 2026-11-02; 0 of 337 request(s) to www.ftc.gov returned no content.
+**delivering** — 7 item(s) in the last 14 days; most recent 2026-11-02; 0 of 335 request(s) to www.ftc.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -66,24 +66,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 9 in 14 days (0.64 per day) · most recent 2026-11-02 |
-| Content length | 12,953 characters average, 12,562 median (shortest 10,585, longest 16,730) |
+| Items ingested | 7 in 14 days (0.5 per day) · most recent 2026-11-02 |
+| Content length | 12,896 characters average, 11,648 median (shortest 10,585, longest 16,730) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.ftc.gov | 337 request(s) · 337 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.ftc.gov | 335 request(s) · 335 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-04T05:00:10.156+00:00 UTC.
+last answered request 2026-11-05T05:00:18.755+00:00 UTC.
 
-9 item(s) in the last 14 days; most recent 2026-11-02; 0 of 337 request(s) to www.ftc.gov returned no content.
+7 item(s) in the last 14 days; most recent 2026-11-02; 0 of 335 request(s) to www.ftc.gov returned no content.
 
 ### All time
 
-- **Our requests to www.ftc.gov, all time (since 2026-07-30):** 2,646 request(s) · 2,631 answered · 15 returned no content
+- **Our requests to www.ftc.gov, all time (since 2026-07-30):** 2,670 request(s) · 2,655 answered · 15 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.ftc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-06 | 1 | 27 | 238 |
 | 2026-10-07 | 1 | 28 | 475 |
 | 2026-10-08 | 4 | 30 | 294 |
 | 2026-10-09 | 0 | 26 | 252 |
@@ -122,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 | 26 | 240 |
 | 2026-11-02 | 1 | 25 | 226 |
 | 2026-11-03 | 0 | 26 | 194 |
-| 2026-11-04 | 0 | 1 | 635 |
+| 2026-11-04 | 0 | 24 | 206 |
+| 2026-11-05 | 0 | 1 | 307 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The FTC press-release RSS feed provides teaser descriptions with full article text extracted from linked pages. Over 14 days, 7 items arrived at 0.5 per day, a slight decline from the previous 0.57 per day. Extracted text averaged 12,598 characters per release. Publication remains sparse; individual items carry substantial scope covering complaints, settlements, and enforcement actions. All 342 requests to www.ftc.gov succeeded without error or no-content responses, compared to the prior 1.4% error rate with 5 no-content responses. Most recent item published 2026-10-05.
+We ingest the FTC Press Releases RSS feed in full mode, fetching each new item's page for article text. Over the 14-day window we recorded 7 items at 0.5 per day, the same count and daily rate as the prior assessment. Extracted article text averaged 12,896 characters (median 11,648, range 10,585 to 16,730), up from the 12,598 characters in the prior assessment. The most recent item moved from 2026-10-05 in the prior assessment to 2026-11-02. Of 335 requests to www.ftc.gov, all returned content, an error rate of 0 percent. The prior assessment recorded 342 requests with no errors. The feed's descriptions averaged about 520 characters at the 2026-07-26 probe, and the full text comes from the article pages.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 34 item(s) in the last 14 days; most recent 2026-11-03; 0 of 363 request(s) to www.cisa.gov returned no content.
+**delivering** — 14 item(s) in the last 14 days; most recent 2026-11-03; 13 of 344 request(s) to www.cisa.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,24 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 28 request(s) (28 answered, 0 returned no content) · 2 item(s) ingested
+Last 24 hours: 26 request(s) (13 answered, 13 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 34 in 14 days (2.43 per day) · most recent 2026-11-03 |
-| Content length | 93,488 characters average, 9,811 median (shortest 4,399, longest 2,399,704) |
+| Items ingested | 14 in 14 days (1.0 per day) · most recent 2026-11-03 |
+| Content length | 31,875 characters average, 4,538 median (shortest 4,399, longest 352,794) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.cisa.gov | 363 request(s) · 363 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.cisa.gov | 344 request(s) · 331 answered · 13 declined (4xx) · 0 server declined (5xx) · 0 no response — 3.8% returned no content |
 
-last answered request 2026-11-04T05:00:12.789+00:00 UTC.
+last answered request 2026-11-04T17:04:32.715+00:00 UTC.
 
-34 item(s) in the last 14 days; most recent 2026-11-03; 0 of 363 request(s) to www.cisa.gov returned no content.
+14 item(s) in the last 14 days; most recent 2026-11-03; 13 of 344 request(s) to www.cisa.gov returned no content.
 
 ### All time
 
-- **Our requests to www.cisa.gov, all time (since 2026-07-30):** 2,810 request(s) · 2,806 answered · 4 returned no content
+- **Our requests to www.cisa.gov, all time (since 2026-07-30):** 2,836 request(s) · 2,819 answered · 17 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.cisa.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-06 | 6 | 32 | 110 |
 | 2026-10-07 | 0 | 27 | 142 |
 | 2026-10-08 | 4 | 28 | 114 |
 | 2026-10-09 | 0 | 27 | 142 |
@@ -127,12 +126,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 | 25 | 150 |
 | 2026-11-02 | 0 | 25 | 156 |
 | 2026-11-03 | 2 | 28 | 130 |
-| 2026-11-04 | 0 | 1 | 194 |
+| 2026-11-04 | 0 | 26 | 124 |
+| 2026-11-05 | 0 | 1 | 212 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The cybersecurity-advisories feed delivered 27 items over 14 days at 1.93 per day, a decline from the prior 2.86 per day. Each item averages 9,480 characters of extracted text, with descriptions ranging up to 23,805 characters. All 361 requests succeeded, an improvement from the prior 1.0% no-response rate. Article page fetches are performed to capture layout and formatting; the feed's embedded full-text descriptions already carry the substance of each advisory.
+Our ingestion of CISA cybersecurity advisories runs through the all.xml RSS feed, with full article text fetched from each item's own page (delivery mode full). The registry notes record that a 2026-07-28 probe found the feed live and that its descriptions carry the advisory text. Over 14 days we recorded 14 items, or 1.0 per day, with the most recent on 2026-11-03; daily detail shows one item on 2026-10-30 and two on 2026-11-03. Item text has a median of 4,538 characters, a minimum of 4,399 and a maximum of 352,794. Of 344 requests, 13 returned no content (3.8 percent). Twelve of these fell on 2026-11-04, from 13:00 UTC onward, out of 26 requests that day, and one fell at 00:00 on 2026-11-05. Compared with the previous assessment, which recorded 27 items at 1.93 per day and 361 requests with a 1.0 percent no-response rate, the item rate is lower and the request failure rate is higher in this window.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

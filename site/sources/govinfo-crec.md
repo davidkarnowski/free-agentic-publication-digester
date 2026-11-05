@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**degraded** — 4216 of 25750 request(s) to api.govinfo.gov returned no content (16.4%, at or above the 10% mark).
+**degraded** — 4141 of 24240 request(s) to api.govinfo.gov returned no content (17.1%, at or above the 10% mark).
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-04T04:54:05Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,7 +71,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 2,308 request(s) (1,960 answered, 348 returned no content) · 68 item(s) ingested
+Last 24 hours: 2,552 request(s) (2,078 answered, 474 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -79,15 +79,15 @@ Last 24 hours: 2,308 request(s) (1,960 answered, 348 returned no content) · 68 
 |---|---|
 | Items ingested | 351 in 14 days (25.07 per day) · most recent 2026-11-03 |
 | Content length | 1,859 characters average, 1,365 median (shortest 53, longest 25,289) |
-| Our requests to api.govinfo.gov | 25,750 request(s) · 21,534 answered · 0 declined (4xx) · 4,194 server declined (5xx) · 22 no response — 16.4% returned no content |
+| Our requests to api.govinfo.gov | 24,240 request(s) · 20,099 answered · 0 declined (4xx) · 4,119 server declined (5xx) · 22 no response — 17.1% returned no content |
 
-last answered request 2026-11-04T05:00:07.582+00:00 UTC; this host serves 5 registered sources, so these figures are host-wide.
+last answered request 2026-11-05T05:00:16.330+00:00 UTC; this host serves 5 registered sources, so these figures are host-wide.
 
-4216 of 25750 request(s) to api.govinfo.gov returned no content (16.4%, at or above the 10% mark).
+4141 of 24240 request(s) to api.govinfo.gov returned no content (17.1%, at or above the 10% mark).
 
 ### All time
 
-- **Our requests to api.govinfo.gov, all time (since 2026-07-30):** 206,259 request(s) · 158,153 answered · 48,106 returned no content
+- **Our requests to api.govinfo.gov, all time (since 2026-07-30):** 208,811 request(s) · 160,231 answered · 48,580 returned no content
 
 This host serves 5 registered sources, so these figures are host-wide.
 
@@ -99,7 +99,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to api.govinfo.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-06 | 190 | 2451 | 615 |
 | 2026-10-07 | 80 | 2464 | 533 |
 | 2026-10-08 | 0 | 2343 | 489 |
 | 2026-10-09 | 0 | 1898 | 591 |
@@ -128,12 +127,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-01 | 0 | 486 | 326 |
 | 2026-11-02 | 0 | 442 | 352 |
 | 2026-11-03 | 68 | 2328 | 565 |
-| 2026-11-04 | 0 | 5 | 219 |
+| 2026-11-04 | 0 | 2550 | 584 |
+| 2026-11-05 | 0 | 7 | 211 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The Congressional Record continues to arrive through govinfo collections API delta sync at full coverage per the registry. The current 14-day measurement shows 2,360 items at roughly 169 per day, averaging 5,699 characters (range 90 to ~1.4 million), most recent on October 2. The underlying api.govinfo.gov host exhibits a 26.3% request failure rate, affecting this and all collections sharing that endpoint. Compared to the assessment of September 5 (566 items at roughly 40 per day), collection volume in this window has increased substantially. The daily activity from September 30 through October 2 shows concentrated ingestion with heavy request errors from midday forward each day; October 3 through 6 shows no items collected to date.
+Over the 14-day measurement window we recorded 351 Congressional Record items, about 25 per day, with a mean of 1,859 characters (median 1,365, range 53 to 25,289). Daily activity shows items on 2026-10-30 (92) and 2026-11-03 (68) and none on the other measured days. The most recent item is dated 2026-11-03. Requests to api.govinfo.gov, a host shared with five sources, returned no content for 17.1 percent of attempts (4,141 of 24,240), and the collection is marked degraded on that basis. Failed requests clustered in the middle hours of several days. Compared with the 2026-10-06 assessment, which recorded 2,360 items at about 169 per day, a mean of 5,699 characters, a 26.3 percent host failure rate, and a last item of 2026-10-02, the item count, daily rate, and mean size are lower, the host failure rate is lower, and the last item date has advanced. The registry notes record a coverage backfill on 2026-07-30 and no other incidents.
 
-_Model-written assessment of our own ingestion, generated 2026-10-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
