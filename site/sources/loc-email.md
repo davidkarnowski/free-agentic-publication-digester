@@ -6,7 +6,7 @@
 
 # Library of Congress (email)
 
-active · ingestion health: quiet · Legislative · Tier 3 · email bulletin · Library of Congress
+active · ingestion health: delivering · Legislative · Tier 3 · email bulletin · Library of Congress
 
 Official site: https://www.loc.gov/ · All sources: [sources.md](../sources.md)
 
@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-28, 8 days ago (quiet past 7 days).
+**delivering** — 3 item(s) in the last 14 days; most recent 2026-11-05, delivered by email.
 
-This label has held since 2026-09-28T13:19:06Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
+This label has held since 2026-11-05T15:54:14Z (UTC) and was last re-checked 2026-11-06T04:47:41Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,20 +67,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-10-28 |
-| Content length | 1,042 characters average, 1,078 median (shortest 756, longest 1,258) |
+| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-11-05 |
+| Content length | 973 characters average, 982 median (shortest 756, longest 1,180) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 4 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-28 |
+| Mailbox | 3 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-05 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-28, 8 days ago (quiet past 7 days).
+3 item(s) in the last 14 days; most recent 2026-11-05, delivered by email.
 
 ### All time
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-07 | 1 |
 | 2026-10-08 | 1 |
 | 2026-10-09 | 0 |
 | 2026-10-10 | 0 |
@@ -121,12 +120,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-02 | 0 |
 | 2026-11-03 | 0 |
 | 2026-11-04 | 0 |
-| 2026-11-05 | 0 |
+| 2026-11-05 | 1 |
+| 2026-11-06 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Since registration on 2026-09-26, with first delivery on 2026-09-28, our project mailbox has received Library of Congress (email) bulletins from the publisher's signup flow. Over the trailing 14-day window we recorded 7 bulletins, each producing one item, with 0 administrative messages, 0 errors, and 0 refusals. Bulletins arrive as email carrying the full item text, between 756 and 1258 characters (median 982, average 1020). Each message was DKIM-verified and archived, and the signing domain is service.govdelivery.com, the delivery platform. The daily activity shows items on 2026-10-26 and 2026-10-28, and 2026-10-28 is the most recent item date. The source is marked delivering, and the collector reports no consecutive errors, with its last successful cycle at 2026-10-30T03:51:14Z. Our inbox rule labels and ingests this mail, while the same message in the junk folder would be refused. Bulletins before registration were not backfilled. The previous assessment of 2026-09-29 recorded one bulletin of about 733 characters. Since then the window holds seven bulletins, all longer than that sample, and no errors or refusals have been recorded in either period. The registry notes record no incidents. This stream is the subscription's own measure of what it delivers, and we make no claim about coverage of the agency's full output.
+Library of Congress bulletins reach us by email from loc@service.govdelivery.com. The subscription was registered on 2026-09-26 through the publisher's own signup flow, and ingestion began with the first poll after deployment. First delivery was on 2026-09-28, and earlier bulletins were not backfilled. Each bulletin carries the full item text and is DKIM-verified, with the signing domain being the delivery platform's, service.govdelivery.com. Our inbox rule labels and ingests this mail, and the same message in the junk folder would be refused. In the current 14-day window we hold three items, one per bulletin, between 756 and 1180 characters, with a median of 982 and an average of 973, at 0.21 items per day. The most recent item is dated 2026-11-05, and the health label is delivering. The mailbox recorded three bulletins with no administrative messages, errors, or refusals, and the collector reports no consecutive errors. The previous assessment of 2026-10-30 counted seven bulletins in its window, with the most recent dated 2026-10-28 and an upper length bound of 1258 characters. We make no claim about coverage of the agency's full output. This stream measures only what this subscription delivers.
 
-_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-06 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

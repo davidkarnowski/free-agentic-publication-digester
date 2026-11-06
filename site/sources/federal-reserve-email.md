@@ -6,7 +6,7 @@
 
 # Federal Reserve Board Announcements (email)
 
-active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Federal Reserve Board
+active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Federal Reserve Board
 
 Official site: https://www.federalreserve.gov/newsevents.htm · All sources: [sources.md](../sources.md)
 
@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-16, 20 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-05, delivered by email.
 
-This label has held since 2026-10-24T04:12:35Z (UTC) and was last re-checked 2026-11-05T04:59:44Z (UTC).
+This label has held since 2026-11-05T16:28:41Z (UTC) and was last re-checked 2026-11-06T04:47:41Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -63,18 +63,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-16 |
-| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-29 |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-05 |
+| Content length | 577 characters average, 577 median (shortest 577, longest 577) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 3 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-05 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-16, 20 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-11-05, delivered by email.
 
 ### All time
 
@@ -86,7 +88,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-07 | 1 |
 | 2026-10-08 | 2 |
 | 2026-10-09 | 1 |
 | 2026-10-10 | 0 |
@@ -115,12 +116,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-02 | 0 |
 | 2026-11-03 | 0 |
 | 2026-11-04 | 0 |
-| 2026-11-05 | 0 |
+| 2026-11-05 | 1 |
+| 2026-11-06 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Federal Reserve Board announcements are delivered via email subscription confirmed 2026-07-29, with full message text archived to the mailbox; no external links are fetched. Two bulletins arrived over the 14-day window at 0.14 per day, averaging 540 characters each and DKIM-verified. A Federal Reserve Bank of New York alerts subscription is also active on the same address. Most recent bulletin dated 2026-10-16, nine days prior; none received in the past seven days. The mailbox records two bulletins with zero administrative messages, errors, or refused deliveries.
+Federal Reserve Board announcements reach us by email from frb-webannouncements@announcements.federalreserve.gov. The subscription was confirmed on 2026-07-29. The Board runs its own notification system rather than GovDelivery, and the registry notes the adapter does not assume a single platform. Bulletins carry the full message text and are DKIM-verified and archived at ingest. In the current 14-day window we hold one item of 577 characters, at a rate of 0.07 items per day, dated 2026-11-05, one day before the measurement. The health label is delivering. The mailbox recorded three bulletins with no administrative messages, errors, or refused deliveries. The registry notes that Federal Reserve Bank of New York alerts are also confirmed on the same address. The previous assessment of 2026-10-25 recorded two bulletins at 0.14 per day, averaging 540 characters, with the most recent dated 2026-10-16 and none in the prior seven days. Since then the window holds one item rather than two, the most recent item date has moved to 2026-11-05, the mailbox bulletin count has risen from two to three, and the average length is 577 characters.
 
-_Model-written assessment of our own ingestion, generated 2026-10-25 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-06 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
