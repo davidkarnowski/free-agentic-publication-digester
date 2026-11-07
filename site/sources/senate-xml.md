@@ -63,7 +63,7 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 **no response** — None of 330 request(s) to www.senate.gov in the last 14 days returned content.
 
-This label has held since 2026-10-24T20:48:55Z (UTC) and was last re-checked 2026-11-06T04:47:41Z (UTC).
+This label has held since 2026-11-06T05:19:07Z (UTC) and was last re-checked 2026-11-07T04:57:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -88,7 +88,7 @@ None of 330 request(s) to www.senate.gov in the last 14 days returned content.
 
 ### All time
 
-- **Our requests to www.senate.gov, all time (since 2026-08-01):** 2,646 request(s) · 2,299 answered · 347 returned no content
+- **Our requests to www.senate.gov, all time (since 2026-08-01):** 2,671 request(s) · 2,299 answered · 372 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.senate.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-08 | 0 | 26 | 197 |
 | 2026-10-09 | 0 | 25 | 146 |
 | 2026-10-10 | 0 | 25 | 253 |
 | 2026-10-11 | 0 | 26 | 203 |
@@ -127,12 +126,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-03 | 0 | 26 | 168 |
 | 2026-11-04 | 0 | 25 | 176 |
 | 2026-11-05 | 0 | 25 | 198 |
-| 2026-11-06 | 0 | 1 | 220 |
+| 2026-11-06 | 0 | 25 | 220 |
+| 2026-11-07 | 0 | 1 | 304 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The senate-votes adapter polls the published vote-menu XML and fetches individual per-vote records containing member tally data. No items were ingested over the 14-day window. The service returned no content on 43 of 327 requests (13.1% error rate), crossing the 10% degradation threshold. Errors began 2026-10-23 and continued through 2026-10-24 with sporadic recovery 2026-10-25. Most recent item dates 2026-10-01, 24 days prior. Last successful request occurred 2026-10-23. The index lists the complete session; the adapter bounds enumeration to seven-day lookback to control request volume.
+We ingest the Senate XML vote menu for the current session and fetch one per-vote record for each vote inside our seven-day lookback. At registration on 2026-07-31, the index listed 217 votes for the session, although its vote dates carry no year. In the 14-day window we ingested no items. The most recent item is dated 2026-10-01, 37 days before this measurement. Of 330 requests to www.senate.gov, none returned content, and the fetch summary classifies all 330 as client errors. The daily breakdown for 2026-11-01 through 2026-11-07 records 153 failed requests. Our most recent successful request was on 2026-10-23 at 10:18 UTC, and health reads no-response. The 2026-10-25 assessment recorded 43 of 327 requests (13.1 percent) that returned no content, with errors beginning 2026-10-23, and reported that this crossed our 10 percent degradation threshold. The share of requests without content is now 100 percent. From outside, we cannot tell whether these requests returned no content because of load, maintenance, or a limit the publisher sets.
 
-_Model-written assessment of our own ingestion, generated 2026-10-25 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-07 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

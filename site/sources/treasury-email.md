@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 74 item(s) in the last 14 days; most recent 2026-11-05, delivered by email.
+**delivering** — 82 item(s) in the last 14 days; most recent 2026-11-06, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-06T04:47:41Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-07T04:57:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -75,14 +75,14 @@ Last 24 hours: 8 item(s) ingested
 
 | Measure | Value |
 |---|---|
-| Items ingested | 74 in 14 days (5.29 per day) · most recent 2026-11-05 |
-| Content length | 1,485 characters average, 218 median (shortest 81, longest 18,153) |
+| Items ingested | 82 in 14 days (5.86 per day) · most recent 2026-11-06 |
+| Content length | 1,381 characters average, 218 median (shortest 81, longest 18,153) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 74 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-05 |
+| Mailbox | 82 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-06 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-74 item(s) in the last 14 days; most recent 2026-11-05, delivered by email.
+82 item(s) in the last 14 days; most recent 2026-11-06, delivered by email.
 
 ### All time
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-08 | 7 |
 | 2026-10-09 | 8 |
 | 2026-10-10 | 0 |
 | 2026-10-11 | 0 |
@@ -123,7 +122,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-03 | 9 |
 | 2026-11-04 | 9 |
 | 2026-11-05 | 8 |
-| 2026-11-06 | 0 |
+| 2026-11-06 | 8 |
+| 2026-11-07 | 0 |
 
 ## Our ingestion assessment
 

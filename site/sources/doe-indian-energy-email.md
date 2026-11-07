@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-29, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-29, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-15T19:33:11Z (UTC) and was last re-checked 2026-11-06T04:47:41Z (UTC).
+This label has held since 2026-11-06T05:19:07Z (UTC) and was last re-checked 2026-11-07T04:57:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -83,7 +83,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-29, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-29, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-08 | 0 |
 | 2026-10-09 | 0 |
 | 2026-10-10 | 0 |
 | 2026-10-11 | 0 |
@@ -125,11 +124,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-04 | 0 |
 | 2026-11-05 | 0 |
 | 2026-11-06 | 0 |
+| 2026-11-07 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Bulletins from indianenergy@public.govdelivery.com arrive in the project mailbox via GovDelivery and are ingested through the email adapter with DKIM verification and archival. Over the 14-day measurement window, two bulletins were received at an observed rate of 0.14 items per day, with content averaging 293 characters per item (ranging from 213 to 373 characters). Full item text is delivered inline. The mailbox shows two messages classified as bulletins with no errors, administrative messages, or refused items. The most recent bulletin arrived on 2026-10-15 at 15:27 UTC. The previous assessment dated 2026-10-14 reported the most recent item as 2026-10-05; a subsequent bulletin has now been delivered on 2026-10-15.
+Bulletins from indianenergy@public.govdelivery.com reach the project mailbox through GovDelivery and are ingested by the email adapter with DKIM verification and archival, with full item text delivered inline. The subscription was confirmed through the publisher's signup flow and registered on 2026-09-26, and earlier bulletins were not backfilled. The registry lists the status as planned, with coverage evaluation pending. Over the 14-day window we hold two bulletins at 0.14 per day, with lengths from 1,737 to 2,090 characters (median and average 1,914). The most recent is dated 2026-10-29. The mailbox recorded two messages with no errors, administrative messages, or refused items. Health reads quiet, nine days after the last item. Compared with the 2026-10-16 assessment, which measured two bulletins averaging 293 characters (range 213 to 373) with the most recent dated 2026-10-15, the count and rate are unchanged, the most recent date has moved to 2026-10-29, and item length has increased substantially.
 
-_Model-written assessment of our own ingestion, generated 2026-10-16 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-07 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

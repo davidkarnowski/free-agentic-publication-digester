@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 8 item(s) in the last 14 days; most recent 2026-11-05; 0 of 338 request(s) to www.ftc.gov returned no content.
+**delivering** — 9 item(s) in the last 14 days; most recent 2026-11-06; 0 of 339 request(s) to www.ftc.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-06T04:47:41Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-07T04:57:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -66,24 +66,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 28 request(s) (28 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 8 in 14 days (0.57 per day) · most recent 2026-11-05 |
-| Content length | 12,823 characters average, 11,980 median (shortest 10,585, longest 16,730) |
+| Items ingested | 9 in 14 days (0.64 per day) · most recent 2026-11-06 |
+| Content length | 13,109 characters average, 12,313 median (shortest 10,585, longest 16,730) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.ftc.gov | 338 request(s) · 338 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.ftc.gov | 339 request(s) · 339 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-06T05:00:32.393+00:00 UTC.
+last answered request 2026-11-07T05:00:26.889+00:00 UTC.
 
-8 item(s) in the last 14 days; most recent 2026-11-05; 0 of 338 request(s) to www.ftc.gov returned no content.
+9 item(s) in the last 14 days; most recent 2026-11-06; 0 of 339 request(s) to www.ftc.gov returned no content.
 
 ### All time
 
-- **Our requests to www.ftc.gov, all time (since 2026-07-30):** 2,698 request(s) · 2,683 answered · 15 returned no content
+- **Our requests to www.ftc.gov, all time (since 2026-07-30):** 2,724 request(s) · 2,709 answered · 15 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.ftc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-08 | 4 | 30 | 294 |
 | 2026-10-09 | 0 | 26 | 252 |
 | 2026-10-10 | 0 | 24 | 259 |
 | 2026-10-11 | 0 | 26 | 223 |
@@ -122,7 +121,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-03 | 0 | 26 | 194 |
 | 2026-11-04 | 0 | 24 | 206 |
 | 2026-11-05 | 1 | 28 | 254 |
-| 2026-11-06 | 0 | 1 | 227 |
+| 2026-11-06 | 1 | 26 | 301 |
+| 2026-11-07 | 0 | 1 | 253 |
 
 ## Our ingestion assessment
 

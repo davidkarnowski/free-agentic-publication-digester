@@ -59,7 +59,7 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 **delivering** — 10 item(s) in the last 14 days; most recent 2026-11-05; 0 of 330 request(s) to www.cftc.gov returned no content.
 
-This label has held since 2026-10-19T19:18:28Z (UTC) and was last re-checked 2026-11-06T04:47:41Z (UTC).
+This label has held since 2026-10-19T19:18:28Z (UTC) and was last re-checked 2026-11-07T04:57:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,7 +69,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 2 item(s) ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -80,13 +80,13 @@ Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 2 item(s) i
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to www.cftc.gov | 330 request(s) · 330 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-06T05:00:32.823+00:00 UTC.
+last answered request 2026-11-07T05:00:27.342+00:00 UTC.
 
 10 item(s) in the last 14 days; most recent 2026-11-05; 0 of 330 request(s) to www.cftc.gov returned no content.
 
 ### All time
 
-- **Our requests to www.cftc.gov, all time (since 2026-08-01):** 2,602 request(s) · 2,602 answered · 0 returned no content
+- **Our requests to www.cftc.gov, all time (since 2026-08-01):** 2,627 request(s) · 2,627 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.cftc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-08 | 0 | 26 | 76 |
 | 2026-10-09 | 2 | 25 | 69 |
 | 2026-10-10 | 0 | 26 | 57 |
 | 2026-10-11 | 0 | 25 | 64 |
@@ -125,7 +124,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-03 | 2 | 25 | 68 |
 | 2026-11-04 | 1 | 25 | 75 |
 | 2026-11-05 | 2 | 26 | 80 |
-| 2026-11-06 | 0 | 1 | 62 |
+| 2026-11-06 | 0 | 25 | 84 |
+| 2026-11-07 | 0 | 1 | 161 |
 
 ## Our ingestion assessment
 

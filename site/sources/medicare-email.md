@@ -6,7 +6,7 @@
 
 # Medicare (email)
 
-active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Health and Human Services (CMS)
+active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Health and Human Services (CMS)
 
 Official site: https://www.cms.gov/newsroom · All sources: [sources.md](../sources.md)
 
@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-29, 8 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-11-06, delivered by email.
 
-This label has held since 2026-10-07T18:52:44Z (UTC) and was last re-checked 2026-11-06T04:47:41Z (UTC).
+This label has held since 2026-11-06T17:03:21Z (UTC) and was last re-checked 2026-11-07T04:57:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,20 +62,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-29 |
-| Content length | 1,658 characters average, 1,658 median (shortest 1,658, longest 1,658) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-11-06 |
+| Content length | 1,578 characters average, 1,578 median (shortest 1,498, longest 1,658) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-29 |
+| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-06 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-29, 8 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-11-06, delivered by email.
 
 ### All time
 
@@ -87,7 +87,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-08 | 0 |
 | 2026-10-09 | 0 |
 | 2026-10-10 | 0 |
 | 2026-10-11 | 0 |
@@ -116,12 +115,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-03 | 0 |
 | 2026-11-04 | 0 |
 | 2026-11-05 | 0 |
-| 2026-11-06 | 0 |
+| 2026-11-06 | 1 |
+| 2026-11-07 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Email bulletins from medicare@subscriptions.medicare.gov arrive in the project mailbox and are ingested through the email adapter with DKIM verification. One bulletin arrived over 14 days at 0.07 items per day, with the most recent on 2026-10-07, averaging 1,507 characters. The mailbox shows 1 message classified as a bulletin with no errors or administrative messages. Since activation on 2026-10-01, the source has delivered beneficiary-facing program news consistent with the subscription topic. Compared to the assessment of 2026-10-02, which showed no items recorded at that time, the source has now delivered one bulletin dated 2026-10-07.
+Medicare bulletins reach the project mailbox from medicare@subscriptions.medicare.gov and are ingested by the email adapter with DKIM verification, with full item text in each message. The source was activated on 2026-10-01 on observed delivery, and the topic selection is recorded in the operator's subscription records. Over the 14-day window we hold two bulletins at 0.14 per day, with lengths from 1,498 to 1,658 characters (median and average 1,578). The most recent is dated 2026-11-06. The mailbox recorded two messages with no errors, administrative messages, or refused messages, and health reads delivering. Compared with the 2026-10-08 assessment, which counted one bulletin at 0.07 per day, dated 2026-10-07 and averaging 1,507 characters, the window now holds one more bulletin, the most recent date has moved to 2026-11-06, and the average length has risen to 1,578 characters.
 
-_Model-written assessment of our own ingestion, generated 2026-10-08 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-07 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -59,7 +59,7 @@ _Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It 
 
 **delivering** — 4 item(s) in the last 14 days; most recent 2026-11-05; 0 of 1324 request(s) to www.whitehouse.gov returned no content.
 
-This label has held since 2026-08-06T23:57:19Z (UTC) and was last re-checked 2026-11-06T04:47:41Z (UTC).
+This label has held since 2026-08-06T23:57:19Z (UTC) and was last re-checked 2026-11-07T04:57:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,7 +69,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 105 request(s) (105 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 100 request(s) (100 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -80,13 +80,13 @@ Last 24 hours: 105 request(s) (105 answered, 0 returned no content) · 1 item(s)
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.whitehouse.gov | 1,324 request(s) · 1,324 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-06T05:00:35.533+00:00 UTC; this host serves 4 registered sources, so these figures are host-wide.
+last answered request 2026-11-07T05:00:29.730+00:00 UTC; this host serves 4 registered sources, so these figures are host-wide.
 
 4 item(s) in the last 14 days; most recent 2026-11-05; 0 of 1324 request(s) to www.whitehouse.gov returned no content.
 
 ### All time
 
-- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 6,635 request(s) · 6,619 answered · 16 returned no content
+- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 6,735 request(s) · 6,719 answered · 16 returned no content
 
 This host serves 4 registered sources, so these figures are host-wide.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.whitehouse.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-08 | 0 | 104 | 69 |
 | 2026-10-09 | 1 | 101 | 80 |
 | 2026-10-10 | 0 | 100 | 76 |
 | 2026-10-11 | 0 | 100 | 73 |
@@ -127,12 +126,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-03 | 2 | 102 | 92 |
 | 2026-11-04 | 0 | 100 | 83 |
 | 2026-11-05 | 1 | 105 | 77 |
-| 2026-11-06 | 0 | 4 | 36 |
+| 2026-11-06 | 0 | 100 | 77 |
+| 2026-11-07 | 0 | 4 | 80 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The feed delivers RSS item descriptions averaging 691 characters as teasers, with full text fetched from item pages averaging 8,985 characters per delivery. In the past 14 days, 9 items arrived at 0.64 items per day, maintaining the rate observed in the previous assessment period. Average document size has continued to decline, now at 8,985 characters compared to 11,234 previously. The feed retains 30 items spanning approximately six weeks of history. Of 977 requests to www.whitehouse.gov for full content, 970 succeeded with no content in 7 cases (0.7% error rate). Feed entries carry publisher-supplied timestamps and unique identifiers. The most recent item arrived 2026-10-07.
+We ingest this RSS feed in full mode: we poll the feed, then fetch each new item's page for the full instrument text, because the feed descriptions are teasers of about 400 to 700 characters. Over the 14-day window we measured four items at 0.29 per day, with the most recent dated 2026-11-05. The daily breakdown for 2026-11-01 through 2026-11-07 records two items on 2026-11-03 and one on 2026-11-05. Document length had a median of 8,507 characters, an average of 10,135, and a range of 7,193 to 16,334. Of 1,324 requests to www.whitehouse.gov, none returned no content, and health reads delivering. Compared with the 2026-10-08 assessment, which counted nine items at 0.64 per day with an average of 8,985 characters and seven requests out of 977 that returned no content, the item count and rate are lower and the average length is higher. The feed holds 30 items spanning about six weeks.
 
-_Model-written assessment of our own ingestion, generated 2026-10-08 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-07 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**degraded** — 3825 of 23256 request(s) to api.govinfo.gov returned no content (16.4%, at or above the 10% mark).
+**degraded** — 3945 of 23610 request(s) to api.govinfo.gov returned no content (16.7%, at or above the 10% mark).
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-06T04:47:41Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-07T04:57:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,23 +71,23 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 2,057 request(s) (1,729 answered, 328 returned no content) · 782 item(s) ingested
+Last 24 hours: 2,609 request(s) (2,087 answered, 522 returned no content) · 1,080 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 8,931 in 14 days (637.93 per day) · most recent 2026-11-05 |
-| Content length | 11,497 characters average, 4,622 median (shortest 59, longest 947,976) |
-| Our requests to api.govinfo.gov | 23,256 request(s) · 19,431 answered · 0 declined (4xx) · 3,804 server declined (5xx) · 21 no response — 16.4% returned no content |
+| Items ingested | 8,991 in 14 days (642.21 per day) · most recent 2026-11-06 |
+| Content length | 11,886 characters average, 4,791 median (shortest 59, longest 947,976) |
+| Our requests to api.govinfo.gov | 23,610 request(s) · 19,665 answered · 0 declined (4xx) · 3,945 server declined (5xx) · 0 no response — 16.7% returned no content |
 
-last answered request 2026-11-06T05:00:31.290+00:00 UTC; this host serves 5 registered sources, so these figures are host-wide.
+last answered request 2026-11-07T05:00:24.754+00:00 UTC; this host serves 5 registered sources, so these figures are host-wide.
 
-3825 of 23256 request(s) to api.govinfo.gov returned no content (16.4%, at or above the 10% mark).
+3945 of 23610 request(s) to api.govinfo.gov returned no content (16.7%, at or above the 10% mark).
 
 ### All time
 
-- **Our requests to api.govinfo.gov, all time (since 2026-07-30):** 210,868 request(s) · 161,960 answered · 48,908 returned no content
+- **Our requests to api.govinfo.gov, all time (since 2026-07-30):** 213,477 request(s) · 164,047 answered · 49,430 returned no content
 
 This host serves 5 registered sources, so these figures are host-wide.
 
@@ -99,36 +99,36 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to api.govinfo.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-08 | 909 | 2343 | 489 |
-| 2026-10-09 | 1303 | 1898 | 591 |
-| 2026-10-10 | 871 | 2079 | 550 |
-| 2026-10-11 | 75 | 475 | 354 |
+| 2026-10-09 | 1305 | 1898 | 591 |
+| 2026-10-10 | 874 | 2079 | 550 |
+| 2026-10-11 | 76 | 475 | 354 |
 | 2026-10-12 | 16 | 448 | 344 |
-| 2026-10-13 | 37 | 447 | 296 |
-| 2026-10-14 | 934 | 2868 | 451 |
-| 2026-10-15 | 1426 | 3501 | 472 |
+| 2026-10-13 | 38 | 447 | 296 |
+| 2026-10-14 | 935 | 2868 | 451 |
+| 2026-10-15 | 1431 | 3501 | 472 |
 | 2026-10-16 | 963 | 2469 | 626 |
-| 2026-10-17 | 804 | 2140 | 573 |
-| 2026-10-18 | 902 | 2138 | 434 |
+| 2026-10-17 | 807 | 2140 | 573 |
+| 2026-10-18 | 904 | 2138 | 434 |
 | 2026-10-19 | 33 | 504 | 398 |
-| 2026-10-20 | 700 | 2440 | 384 |
-| 2026-10-21 | 821 | 2357 | 477 |
-| 2026-10-22 | 1888 | 4062 | 594 |
-| 2026-10-23 | 930 | 3041 | 562 |
-| 2026-10-24 | 1037 | 2255 | 541 |
+| 2026-10-20 | 703 | 2440 | 384 |
+| 2026-10-21 | 822 | 2357 | 477 |
+| 2026-10-22 | 1893 | 4062 | 594 |
+| 2026-10-23 | 932 | 3041 | 562 |
+| 2026-10-24 | 1038 | 2255 | 541 |
 | 2026-10-25 | 90 | 606 | 387 |
 | 2026-10-26 | 18 | 514 | 335 |
 | 2026-10-27 | 815 | 2542 | 666 |
 | 2026-10-28 | 1055 | 2535 | 526 |
-| 2026-10-29 | 921 | 2145 | 515 |
-| 2026-10-30 | 896 | 2168 | 523 |
-| 2026-10-31 | 1363 | 2621 | 555 |
+| 2026-10-29 | 923 | 2145 | 515 |
+| 2026-10-30 | 897 | 2168 | 523 |
+| 2026-10-31 | 1365 | 2621 | 555 |
 | 2026-11-01 | 38 | 486 | 326 |
 | 2026-11-02 | 16 | 442 | 352 |
-| 2026-11-03 | 828 | 2328 | 565 |
-| 2026-11-04 | 1072 | 2550 | 584 |
-| 2026-11-05 | 782 | 2037 | 574 |
-| 2026-11-06 | 0 | 27 | 166 |
+| 2026-11-03 | 832 | 2328 | 565 |
+| 2026-11-04 | 1075 | 2550 | 584 |
+| 2026-11-05 | 787 | 2037 | 574 |
+| 2026-11-06 | 1080 | 2631 | 820 |
+| 2026-11-07 | 0 | 5 | 304 |
 
 ## Our ingestion assessment
 
