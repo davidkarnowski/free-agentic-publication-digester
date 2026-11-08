@@ -913,6 +913,17 @@ def test_recorded_votes_empty_state_renders(digest):
     assert "| VOTES | 0 | 0 | 0 | 0 | 0 |" in md
 
 
+def test_votes_gap_note_applies_only_from_the_status_change():
+    """A digest before the change never gains the note; a day after it does,
+    while the Senate source is not active."""
+    assert not report._votes_gap_applies("2026-11-07")
+    assert report._votes_gap_applies("2026-11-08")
+    note = report.VOTES_GAP_NOTE
+    assert "does not mean that no votes were held" in note
+    assert "section 1.3" in note
+    assert "403" not in note  # the gap is stated; causes stay out of the digest
+
+
 def test_banned_word_in_vote_title_is_masked(conn, tmp_path):
     """A measure's own title is the chamber's text, quoted not endorsed."""
     add_vote(conn, "PR-senate-xml-dddddddd", number="00218", claimed=DATE,

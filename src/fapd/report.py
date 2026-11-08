@@ -30,7 +30,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from . import config, corroboration, fedcal, inference
+from . import config, corroboration, fedcal, inference, sources
 from .rules import CREC_FLOOR_CHAR_THRESHOLD
 from .sync import publication_date
 
@@ -928,6 +928,27 @@ def _vote_item_lines(row):
     return lines
 
 
+# Section 7's disclosure while its only source is unavailable (operator,
+# 2026-11-08). Without it "no recorded votes observed" could be read as "no
+# votes were held". States the gap, not a cause. It applies from the day the
+# source's status changed, and stops by itself when the source is active again.
+VOTES_GAP_SINCE = "2026-11-08"
+VOTES_GAP_NOTE = (
+    "Coverage note: this section has no active source. The Senate's"
+    " machine-readable vote record has not been available to this project's"
+    " automated client since 2026-10-23, and House votes are not yet ingested"
+    " here, so an empty listing does not mean that no votes were held. Votes"
+    " printed in the Congressional Record still appear in section 1.3."
+)
+
+
+def _votes_gap_applies(date):
+    if date < VOTES_GAP_SINCE:
+        return False
+    return not any(entry["id"] == "senate-xml" and entry["status"] == "active"
+                   for entry in sources.load_registry())
+
+
 def _votes_lines(conn, date):
     """Section 7: roll-call votes from the chambers' own XML records
     (GUIDE §3 "Recorded votes"). Zero LLM: every figure here is read from
@@ -948,6 +969,8 @@ def _votes_lines(conn, date):
         "which votes were printed.",
         "",
     ]
+    if _votes_gap_applies(date):
+        lines += [VOTES_GAP_NOTE, ""]
     if not rows:
         lines += ["No recorded votes dated this day were observed.", ""]
     by_chamber: dict = {}
