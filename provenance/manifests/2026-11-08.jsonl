@@ -1,0 +1,1 @@
+{"entries": 0, "manifest": "2026-11-08", "normalizer_version": 1, "note": "one line per fetch attempt incl. 304s/refusals/errors; hashes are of content as served to our identified client", "prev_manifest_sha256": "24ef8969fa98ea2bd17407571ea1eb2fc86f0f7db76815d59098f387a7b41bd9"}

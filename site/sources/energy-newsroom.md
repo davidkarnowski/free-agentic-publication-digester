@@ -6,7 +6,7 @@
 
 # Energy Press Releases
 
-active · ingestion health: quiet · Executive · Tier 1 · HTML index · Department of Energy
+active · ingestion health: delivering · Executive · Tier 1 · HTML index · Department of Energy
 
 Official site: https://www.energy.gov/newsroom · All sources: [sources.md](../sources.md)
 
@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-30, 8 days ago (quiet past 7 days).
+**delivering** — 7 item(s) in the last 14 days; most recent 2026-11-07; 0 of 329 request(s) to www.energy.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-11-07T04:57:24Z (UTC).
+This label has held since 2026-11-07T17:46:27Z (UTC) and was last re-checked 2026-11-08T04:59:51Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,24 +67,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-10-30 |
-| Content length | 421 characters average, 221 median (shortest 112, longest 915) |
+| Items ingested | 7 in 14 days (0.5 per day) · most recent 2026-11-07 |
+| Content length | 389 characters average, 194 median (shortest 112, longest 915) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.energy.gov | 330 request(s) · 330 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.energy.gov | 329 request(s) · 329 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-07T05:00:26.188+00:00 UTC.
+last answered request 2026-11-08T05:00:15.642+00:00 UTC.
 
-Most recent item 2026-10-30, 8 days ago (quiet past 7 days).
+7 item(s) in the last 14 days; most recent 2026-11-07; 0 of 329 request(s) to www.energy.gov returned no content.
 
 ### All time
 
-- **Our requests to www.energy.gov, all time (since 2026-09-28):** 1,005 request(s) · 1,005 answered · 0 returned no content
+- **Our requests to www.energy.gov, all time (since 2026-09-28):** 1,030 request(s) · 1,030 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.energy.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-09 | 0 | 25 | 88 |
 | 2026-10-10 | 3 | 26 | 78 |
 | 2026-10-11 | 0 | 26 | 100 |
 | 2026-10-12 | 0 | 25 | 121 |
@@ -123,12 +122,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-04 | 0 | 25 | 63 |
 | 2026-11-05 | 0 | 25 | 87 |
 | 2026-11-06 | 0 | 25 | 153 |
-| 2026-11-07 | 0 | 1 | 204 |
+| 2026-11-07 | 1 | 25 | 60 |
+| 2026-11-08 | 0 | 1 | 159 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest the Department of Energy newsroom through an HTML index listing, with one listing fetch per poll, the index_item_path hint /articles/ applied, and no article pages fetched (feed-only mode). Over the 14-day window we recorded 13 items carrying the publisher's own dates, most recently dated 2026-10-28, with a median of 192 characters and an average of 360. Before the /articles/ hint was registered, mega-menu topic and search links carried neighboring release dates and were picked up; the hint excludes them. The listing shows its first page only, and entries we cannot date are dropped rather than dated by observation. No machine-readable feed is advertised on this source. All 328 requests to www.energy.gov in the window were answered, with none failing. The registry notes record probes and activation steps but no delivery incidents. Since the 2026-09-29 assessment, which recorded 5 items and 13 successful requests, the item count is now 13 and the request total is 328, with no failures in either.
+We ingest the Department of Energy newsroom through an HTML index listing, with one listing fetch per poll (about one request per hour) using the index_item_path hint /articles/. Article pages are not fetched. The 14-day window holds 7 items carrying the publisher's own dates, the most recent dated 2026-11-07, with a median of 194 characters, an average of 389, and a range of 112 to 915. The seven-day daily breakdown records one item, on 2026-11-07. No machine-readable feed is advertised. All 329 requests to www.energy.gov were answered, with none failing. The registry notes record probes and an activation on 2026-09-28, but no delivery incidents. The listing shows its first page only, and entries we cannot date are dropped rather than dated by observation. Since the 2026-10-30 assessment, which recorded 13 items with the latest dated 2026-10-28, the window count is now 7. The median moved from 192 to 194 characters, the average from 360 to 389, and the request total from 328 to 329, with no failures in either assessment.
 
-_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-08 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

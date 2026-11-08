@@ -63,7 +63,7 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 **no response** — None of 330 request(s) to www.senate.gov in the last 14 days returned content.
 
-This label has held since 2026-11-06T05:19:07Z (UTC) and was last re-checked 2026-11-07T04:57:24Z (UTC).
+This label has held since 2026-11-06T05:19:07Z (UTC) and was last re-checked 2026-11-08T04:59:51Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -88,7 +88,7 @@ None of 330 request(s) to www.senate.gov in the last 14 days returned content.
 
 ### All time
 
-- **Our requests to www.senate.gov, all time (since 2026-08-01):** 2,671 request(s) · 2,299 answered · 372 returned no content
+- **Our requests to www.senate.gov, all time (since 2026-08-01):** 2,696 request(s) · 2,299 answered · 397 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.senate.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-09 | 0 | 25 | 146 |
 | 2026-10-10 | 0 | 25 | 253 |
 | 2026-10-11 | 0 | 26 | 203 |
 | 2026-10-12 | 0 | 25 | 229 |
@@ -127,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-04 | 0 | 25 | 176 |
 | 2026-11-05 | 0 | 25 | 198 |
 | 2026-11-06 | 0 | 25 | 220 |
-| 2026-11-07 | 0 | 1 | 304 |
+| 2026-11-07 | 0 | 25 | 227 |
+| 2026-11-08 | 0 | 1 | 315 |
 
 ## Our ingestion assessment
 

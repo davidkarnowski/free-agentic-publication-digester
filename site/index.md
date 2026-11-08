@@ -14,13 +14,13 @@ An automated, citation-bound, opinion-agnostic daily digest of official United S
 
 ## The last 7 days
 
+- [Daily Digest — 2026-11-07](2026-11-07.md) — The digest carries 43 appellate opinions, 960 district court opinions, five bankruptcy court opinions and one national court item, along with eight agency press releases.
 - [Daily Digest — 2026-11-06](2026-11-06.md) — On the congressional side, the digest carries nine House bills reported and seven introduced.
 - [Daily Digest — 2026-11-05](2026-11-05.md) — The digest carries no congressional floor proceedings or recorded votes; it records one bill introduced in the House.
 - [Daily Digest — 2026-11-04](2026-11-04.md) — The digest carries two public laws, both enacted in April 2021.
 - [Daily Digest — 2026-11-03](2026-11-03.md) — The digest carries 15 House and 4 Senate Congressional Record items, 6 Daily Digest entries, and 43 Extensions of Remarks.
 - [Daily Digest — 2026-11-02](2026-11-02.md) — The digest carries two presidential documents, both dated October 28, 2026.
 - [Daily Digest — 2026-11-01](2026-11-01.md) — This is a short review: few publications were observed for this digest day, and none met the digest's summary rules, so there are no item summaries to draw on.
-- [Daily Digest — 2026-10-31](2026-10-31.md) — The digest carries 12 bills introduced in the House.
 
 ## Earlier days
 

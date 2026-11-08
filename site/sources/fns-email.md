@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-30, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-30, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-30T22:47:15Z (UTC) and was last re-checked 2026-11-07T04:57:24Z (UTC).
+This label has held since 2026-11-07T05:22:07Z (UTC) and was last re-checked 2026-11-08T04:59:51Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -83,7 +83,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-30, 8 days ago (quiet past 7 days).
+Most recent item 2026-10-30, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-09 | 0 |
 | 2026-10-10 | 0 |
 | 2026-10-11 | 0 |
 | 2026-10-12 | 0 |
@@ -125,11 +124,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-05 | 0 |
 | 2026-11-06 | 0 |
 | 2026-11-07 | 0 |
+| 2026-11-08 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Food and Nutrition Service bulletins reach the project mailbox by email with full item text in each message. The 14-day window holds one measured item, dated 2026-10-30 at 18:00 UTC and measuring 2,283 characters, a rate of 0.07 per day. The mailbox records one bulletin message, with zero administrative messages, zero errors, and zero refused deliveries. The last message arrived 2026-10-30 at 22:36 UTC, and health reads delivering on that basis. Since the previous assessment on 2026-10-10, which recorded a single bulletin on 2026-10-01 at 14:22 UTC of approximately 1,240 characters with no further bulletins recorded, a second bulletin has now been recorded on 2026-10-30. Cadence still rests on only two observed deliveries. Ingestion began after the 2026-09-26 registration, and earlier bulletins were not backfilled. Gate-3 coverage evaluation remains pending, and the registry status is planned.
+We ingest Food and Nutrition Service bulletins through the email adapter from GovDelivery, sent by usda.fna@service.govdelivery.com, with full item text in each message. The 14-day window holds one bulletin, dated 2026-10-30 and measuring 2,283 characters, a rate of 0.07 per day. The mailbox shows one message and one bulletin, with no administrative messages, errors, or refused deliveries. The most recent message arrived 2026-10-30 at 22:36 UTC. Health now reads quiet, nine days after the last item, where the 2026-10-31 assessment read delivering. Across assessments, two bulletins have been observed, dated 2026-10-01 at about 1,240 characters and 2026-10-30. The 2026-10-01 bulletin falls outside the current window. Ingestion began after the 2026-09-26 registration, earlier bulletins were not backfilled, and the registry records no delivery incidents. The Gate-3 coverage evaluation remains pending, and the registry status is planned.
 
-_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-08 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
