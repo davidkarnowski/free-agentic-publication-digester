@@ -17,7 +17,7 @@ import yaml
 
 REGISTRY_PATH = Path(__file__).resolve().parents[2] / "sources" / "registry.yaml"
 
-OPTIONAL_FIELDS = ("adapter", "sender", "index_item_path", "index_exclude_path")
+OPTIONAL_FIELDS = ("change_note", "adapter", "sender", "index_item_path", "index_exclude_path")
 # per-source strategy (GUIDE §3).
 # `sender`: for type: email, the confirmed From address(es) — a string or a
 # list. It is the allowlist the mailbox adapter matches against: a message
@@ -156,6 +156,13 @@ def _validate(entry: dict, seen_ids: set[str], seen_senders: dict[str, str]) -> 
         if adapter not in allowed:
             _fail(entry, f"adapter {adapter!r} not in {allowed} "
                          f"for type {entry['type']!r}")
+
+    # A dated, reader-facing record of a status change, shown unfolded on the
+    # source card and page. `notes` keeps the fuller history.
+    change_note = entry.get("change_note")
+    if change_note is not None and (not isinstance(change_note, str)
+                                    or not _DATE_RE.match(change_note[:10])):
+        _fail(entry, "change_note must be a string beginning YYYY-MM-DD")
 
     for field in ("index_item_path", "index_exclude_path"):
         hint = entry.get(field)
@@ -307,7 +314,7 @@ def render_doc(entries: list[dict]) -> str:
                         _cell(e["type"]),
                         _STATUS_BADGES[e["status"]],
                         _cell(e["method"]),
-                        _cell(e["notes"]),
+                        _cell(" ".join(filter(None, (e.get("change_note"), e["notes"])))),
                     ]
                 )
                 + " |"

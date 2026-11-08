@@ -2224,6 +2224,16 @@ def _health_block(record):
     return f'<div class="src-stats">{"".join(parts)}</div>'
 
 
+def _change_note_html(entry):
+    """A dated status change, shown unfolded: a reader should not have to
+    open the registry record to learn that a source's standing changed."""
+    note = (entry.get("change_note") or "").strip()
+    if not note:
+        return ""
+    return ('<p class="src-desc"><strong>Status change:</strong> '
+            f"{html.escape(_redact_addresses(note))}</p>")
+
+
 def _source_card(entry, health_record=None):
     """One registry entry as a card: linked name, status chip + subtitle,
     the registry's descriptive text, its measured ingestion statistics and
@@ -2268,6 +2278,7 @@ def _source_card(entry, health_record=None):
         f"{html.escape(entry['name'])}</a></h4>"
         f'<p class="src-sub">{_status_chip(entry["status"])}{chip} {subtitle}</p>'
         f"{official}"
+        f"{_change_note_html(entry)}"
         f'<p class="src-desc">{html.escape(entry["description"])}</p>'
         f"{signup}"
         f"{_card_stats_block(health_record)}"
@@ -3320,6 +3331,7 @@ def _source_page_body(entry, record, *, description, assessment, state,
         (f'<p class="src-links"><a href="{html.escape(link, quote=True)}">'
          "Official site</a> · "
          '<a href="sources.html">All sources</a></p>'),
+        _change_note_html(entry),
         # -- What this source is ------------------------------------------
         "<h2>What this source is</h2>",
         f'<p class="src-desc">{html.escape(entry["description"])}</p>',
@@ -3474,6 +3486,9 @@ def _source_page_md(entry, record, *, description, assessment, state,
     lines += [f"| URL ({_md_escape(kind)}) | {_md_escape(url)} |"
               for kind, url in sorted(urls.items())]
     lines.append(f"| Registered | {entry['added']} |")
+    change_note = (entry.get("change_note") or "").strip()
+    if change_note:
+        lines.append(f"| Status change | {_md_escape(_redact_addresses(change_note))} |")
     notes = entry["notes"].strip()
     if notes:
         lines.append(f"| Registry notes | {_md_escape(_redact_addresses(notes))} |")

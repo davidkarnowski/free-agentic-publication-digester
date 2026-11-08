@@ -21,7 +21,8 @@ could not or chose not to ingest.
    with feed autodiscovery → item inventory → one sample article
    extracted) and writes structured findings under `data/probe/`. A
    blocked source is recorded `unavailable` with the observed behavior —
-   never evaded, never retried into submission.
+   never evaded, never retried into submission. A source that later changes
+   status also carries a dated `change_note`, shown unfolded on its card.
 3. **Content-evaluate:** from the probe findings, answer in the entry's
    notes: what does this source publish in total, and what fraction will
    ingestion see? (Feed depth vs. publication volume; teasers vs. full

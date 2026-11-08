@@ -947,3 +947,14 @@ live in `.claude/agents/fapd-*.md` (tracked).
   Same day, derived presentation only: the 2026-08-14 page ghosts its link
   to the day view that was never built, and every "Included because"
   rule id links to its entry on a generated `rules.html`.
+- **2026-11-08** — **The Senate roll-call source is unavailable, and status
+  changes are shown on the card** (operator). The vote menu answered 403 to
+  the identified client on every poll from 2026-10-23 11:16 UTC, 408 in a row,
+  while robots.txt on the host answered 200; the last good answer was
+  2026-10-23 10:18 UTC. The cause is not known. `senate-xml` moves to
+  `unavailable`, which stops the polling; nothing tries another path. A new
+  optional registry field, `change_note`, carries a dated status change and
+  renders unfolded on the source card and page, because `notes` sit folded on
+  the card. The source is to be re-probed in the future for a service update.
+  It was the only active source for the digest's recorded-votes section, so
+  that section lists no votes until a source returns.
