@@ -227,7 +227,7 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   ladder, and nothing load-bearing reads `last_result`. Never route a
   new durable fact through it.
 - **`evidence-commit.sh` fetches and rebases before it pushes, on
-  purpose** — the backend's `.git` is an rsynced snapshot baked by
+  purpose** — the backend's `.git` is a snapshot of the deployed commit baked by
   `Dockerfile.backend`, so its `origin/main` ref freezes at deploy time
   and never moves. Every operator commit made *after* a deploy turns the
   nightly push into a non-fast-forward: F-019 recorded this on

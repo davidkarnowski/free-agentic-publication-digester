@@ -1,8 +1,10 @@
 # The repo-export exclude list — what stays OUT of a backend build context.
-# Used by BOTH stagers so they cannot drift (pinned by tests/test_dev_stack.py):
-#   deploy/vps/scripts/deploy.sh  (second rsync: ./ -> $REMOTE_DIR/repo/)
+# Read by both build paths so they cannot drift (pinned by tests/test_dev_stack.py):
+#   deploy/vps/scripts/deploy.sh  (since 2026-11-09 the box checks out the
+#                                  pushed commit, so deploy.sh refuses to run
+#                                  if any of these paths is tracked)
 #   deploy/dev/scripts/dev-up.sh  (local stage:  ./ -> deploy/dev/repo/)
-# NOTE: this is NOT the bundle-rsync list in deploy.sh's first rsync — those
+# NOTE: this is NOT the bundle-sync list in deploy.sh — those
 # excludes protect the box's own state (.env, secrets/, repo/) and stay
 # inline where finding F-004 put them. The two lists exist for different
 # reasons; do not merge them.

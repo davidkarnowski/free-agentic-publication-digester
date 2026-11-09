@@ -218,8 +218,9 @@ anyway: the supervisor pauses collector workers during finalization
   `collector_state.evidence_push_*` with a bounded retry — a failure is a
   disclosed gap, not a lost day.
 - `fapd-web` serves `fapd-site:...:ro`. `deploy.sh` carries the test
-  gate, the two rsyncs (bundle + repo export via
-  `deploy/common/repo-excludes.txt`), the image build, and three
+  gate, the box's checkout of the pushed commit from GitHub (it uploads
+  nothing since 2026-11-09; the bundle is copied on the box from that
+  checkout), a build of only the images the commit touched, and three
   post-up steps (in-container site rebuild per F-009, /today rebuild,
   origin re-flip per F-008). No `/fapd-deploy` skill exists; deploy.sh
   is the runbook's script.

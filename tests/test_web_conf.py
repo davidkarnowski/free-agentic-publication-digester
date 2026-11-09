@@ -395,7 +395,7 @@ def test_deploy_sh_no_longer_ships_or_reloads_the_nginx_config():
     assert "nginx -s reload" not in code
     assert "deploy/vps/nginx/" not in code
     # SR-3: the bundle rsync excludes the host log directory
-    bundle_cmd = re.search(r"rsync -az --delete --exclude '\.DS_Store'.*?deploy/vps/ \"\$\{VPS\}", sh, re.DOTALL)
+    bundle_cmd = re.search(r"rsync -a --delete --exclude '\.DS_Store'.*?'\$REMOTE_DIR/repo/deploy/vps/'", sh, re.DOTALL)
     assert bundle_cmd and "--exclude 'logs/'" in bundle_cmd.group(0)
     verify = sh[sh.index("[4/4] verify"):]
     assert "https://fapd.info/.well-known/api-catalog" in verify
@@ -417,7 +417,11 @@ def test_deploy_sh_builds_the_mcp_service_creates_the_log_dir_and_verifies_disco
     build = sh[sh.index("[3/4]"):sh.index("[4/4]")]
     assert "mkdir -p logs" in build
     assert build.index("mkdir -p logs") < build.index("up -d")
-    assert "build backend mcp" in build
+    # Only what the commit touched (2026-11-09); --all, or an unknown
+    # previous commit, builds all three.
+    assert 'SERVICES="backend mcp web"' in build
+    assert "^packages/static-mcp/" in build and "^deploy/vps/web-image/" in build
+    assert "build --pull $SERVICES" in build
     assert "Docker-published ports bypass ufw" in build
     verify = sh[sh.index("[4/4] verify"):]
     assert "https://fapd.info/mcp" in verify and "server/discover" in verify

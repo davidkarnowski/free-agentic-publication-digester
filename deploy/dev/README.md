@@ -25,7 +25,7 @@ any code change — it restages and re-renders in one step.
 The **same backend image recipe as production** (`../vps/Dockerfile.backend`,
 byte-for-byte: same base, uv/Node/claude layers, `uv sync --frozen
 --no-dev`), built from a locally staged `repo/` using the same exclude
-list deploy.sh uses (`deploy/common/repo-excludes.txt` — one list, two
+list deploy.sh checks (`deploy/common/repo-excludes.txt` — one list, two
 stagers, drift-tested). The same nginx image (`deploy/vps/web-image/`, the
 official 1.30.6-alpine digest patched for CVE-2026-111497), the same
 site-volume handoff, and the same two post-up render commands deploy.sh

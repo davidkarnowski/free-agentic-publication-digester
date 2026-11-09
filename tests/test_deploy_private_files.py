@@ -70,11 +70,54 @@ def test_the_global_excludes_file_is_honored(tmp_path):
     assert "/TRAJECTORY.md" in _listed(repo, env)
 
 
-def test_both_exports_exclude_what_git_ignores():
-    for script in ("deploy/vps/scripts/deploy.sh", "deploy/dev/scripts/dev-up.sh"):
-        text = (PROJECT_ROOT / script).read_text(encoding="utf-8")
-        assert 'deploy/common/git-ignored.sh > "$GIT_IGNORED"' in text, script
-        assert '--exclude-from "$GIT_IGNORED"' in text, script
-        # the explicit floor stays: it names paths that must never ship even
-        # if an ignore rule is dropped by mistake
-        assert "deploy/common/repo-excludes.txt" in text, script
+def test_the_dev_export_excludes_what_git_ignores():
+    text = (PROJECT_ROOT / "deploy/dev/scripts/dev-up.sh").read_text(encoding="utf-8")
+    assert 'deploy/common/git-ignored.sh > "$GIT_IGNORED"' in text
+    assert '--exclude-from "$GIT_IGNORED"' in text
+    # the explicit floor stays: it names paths that must never ship even
+    # if an ignore rule is dropped by mistake
+    assert "deploy/common/repo-excludes.txt" in text
+
+
+def test_the_production_build_context_is_the_commit_and_nothing_else():
+    """Since 2026-11-09 deploy.sh exports nothing: the box checks out the
+    pushed commit and cleans it, so an ignored or untracked file cannot
+    reach the image at all. The floor is checked as "none of these paths is
+    tracked", which is what still could ship."""
+    text = (PROJECT_ROOT / "deploy/vps/scripts/deploy.sh").read_text(encoding="utf-8")
+    code = "\n".join(ln for ln in text.splitlines() if not ln.lstrip().startswith("#"))
+    assert "clean -ffdxq" in code
+    assert "status --porcelain --ignored" in code
+    assert "done < deploy/common/repo-excludes.txt" in code
+    assert "git-ignored.sh" not in code
+
+
+def test_deploy_uploads_nothing_from_this_machine():
+    """Operator, 2026-11-08: an ordinary update never needs a large upload.
+    No rsync or scp in deploy.sh may send local files to the box; the box
+    fetches the commit from GitHub, and deploy.sh refuses to run unless main
+    is what GitHub has."""
+    text = (PROJECT_ROOT / "deploy/vps/scripts/deploy.sh").read_text(encoding="utf-8")
+    code = "\n".join(ln for ln in text.splitlines() if not ln.lstrip().startswith("#"))
+    assert "scp " not in code
+    for line in code.splitlines():
+        if "rsync" in line:
+            assert line.lstrip().startswith('run "rsync'), line
+    assert '"${VPS}:' not in code
+    assert '[ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ]' in code
+    assert "fetch --quiet origin +refs/heads/main:refs/remotes/origin/main" in code
+
+
+def test_backend_image_installs_dependencies_once_and_never_the_dev_group():
+    """The dependency layer comes from the lockfile alone, before the code,
+    so a code change does not download every package again; UV_NO_DEV keeps
+    each `uv run` from syncing the dev tools at container start."""
+    lines = [ln for ln in (PROJECT_ROOT / "deploy/vps/Dockerfile.backend")
+             .read_text(encoding="utf-8").splitlines() if not ln.lstrip().startswith("#")]
+    body = "\n".join(lines)
+    assert "UV_NO_DEV=1" in body
+    lock_at = next(i for i, ln in enumerate(lines) if "COPY repo/pyproject.toml repo/uv.lock" in ln)
+    deps_at = next(i for i, ln in enumerate(lines) if "--no-install-project" in ln)
+    code_at = next(i for i, ln in enumerate(lines) if "COPY repo/ /app" in ln)
+    assert lock_at < deps_at < code_at
+    assert body.count("--mount=type=cache,target=/root/.cache/uv") == 2

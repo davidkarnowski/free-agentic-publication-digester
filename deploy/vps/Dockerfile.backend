@@ -39,12 +39,26 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && claude --version
 
 WORKDIR /app
-# deploy.sh rsyncs the tested working tree (incl. .git — evidence
-# commits push from here) to ./repo in the bundle; data/ and site/ are
-# volumes, .env arrives via env_file at run time, never at build time.
+# UV_NO_DEV: every `uv run` in this image, the entrypoint and each
+# `docker exec ... uv run`, leaves the dev group out. Without it uv synced
+# the dev tools (ruff, pytest, pygments: seven packages) from PyPI on every
+# backend start, although the image is built without them (review
+# 2026-09-18, item B; still happening 2026-11-08). UV_LINK_MODE=copy because
+# the uv cache below is a separate mount, so hard links cannot reach it.
+ENV UV_NO_DEV=1 UV_LINK_MODE=copy
+# The dependencies install BEFORE the code is copied, from the lockfile
+# alone, so a code-only change reuses this layer instead of downloading
+# every package again. The cache mount keeps uv's downloads on the build
+# host between builds, so a lockfile change fetches only what changed.
+COPY repo/pyproject.toml repo/uv.lock /app/
+RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-dev --no-install-project
+# deploy.sh checks the pushed commit out on the box (repo/, incl. .git —
+# evidence commits push from here) and cleans it to the tracked files;
+# data/ and site/ are volumes, .env arrives via env_file at run time,
+# never at build time.
 COPY repo/ /app
 RUN mkdir -p /app/static_assets && cp -r /app/site/assets/* /app/static_assets/ 2>/dev/null || true
-RUN uv sync --frozen --no-dev
+RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-dev
 
 # Evidence commits are authored by the pipeline's bot identity and push
 # over the mounted deploy key, which requires an SSH remote.

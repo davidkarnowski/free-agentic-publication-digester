@@ -89,11 +89,12 @@ def test_both_stagers_share_the_exclude_list():
 def test_deploy_bundle_rsync_excludes_the_host_log_directory():
     """SR-3 (agent-discovery security review): Phase 4B bind-mounts
     /opt/fapd/logs/ into fapd-web for the /mcp access log fail2ban
-    reads. The bundle rsync runs with --delete, so without this exclude
-    every deploy erases the host log directory — the F-004 class."""
+    reads. The bundle sync runs with --delete (on the box since 2026-11-09,
+    from the pulled checkout), so without this exclude every deploy erases
+    the host log directory — the F-004 class."""
     sh = (VPS / "scripts" / "deploy.sh").read_text(encoding="utf-8")
     assert "--exclude 'logs/'" in sh
-    assert sh.index("--exclude 'logs/'") < sh.index('deploy/vps/ "${VPS}:${REMOTE_DIR}/"')
+    assert sh.index("--exclude 'logs/'") < sh.index("'$REMOTE_DIR/repo/deploy/vps/' '$REMOTE_DIR/'")
 
 
 
@@ -105,7 +106,7 @@ def test_deploy_bundle_rsync_excludes_the_host_evidence_directory():
     sh = (VPS / "scripts" / "deploy.sh").read_text(encoding="utf-8")
     assert "--exclude 'evidence/'" in sh
     assert (sh.index("--exclude 'evidence/'")
-            < sh.index('deploy/vps/ "${VPS}:${REMOTE_DIR}/"'))
+            < sh.index("'$REMOTE_DIR/repo/deploy/vps/' '$REMOTE_DIR/'"))
 
 def _live_yaml(path):
     return "\n".join(ln for ln in path.read_text(encoding="utf-8").splitlines()
