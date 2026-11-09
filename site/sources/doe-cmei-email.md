@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-01, 38 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-01, 39 days ago (quiet past 7 days).
 
-This label has held since 2026-10-09T04:08:52Z (UTC) and was last re-checked 2026-11-08T04:59:51Z (UTC).
+This label has held since 2026-10-09T04:08:52Z (UTC) and was last re-checked 2026-11-09T04:48:02Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -77,7 +77,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-01, 38 days ago (quiet past 7 days).
+Most recent item 2026-10-01, 39 days ago (quiet past 7 days).
 
 ### All time
 
@@ -91,6 +91,6 @@ No requests and no items were recorded in the last 30 days, so there is nothing 
 
 **Model-written ingestion assessment**
 
-Bulletins arrive via three configured sender addresses (cmei-news@service.govdelivery.com, cmei@service.govdelivery.com, cmei-funding@service.govdelivery.com). Over the past six days, zero items were observed. The 14-day window shows two bulletins averaging 4,194 characters with full text delivery, most recently on 2026-10-01. The mailbox collector recorded zero errors and zero refused messages. Subscription was confirmed 2026-09-26; earlier bulletins already in the mailbox were not backfilled.
+Bulletins arrive in our project mailbox from three configured senders: cmei-news@service.govdelivery.com, cmei@service.govdelivery.com, and cmei-funding@service.govdelivery.com. The subscription was confirmed through the publisher's signup flow and registered on 2026-09-26. Earlier bulletins were not backfilled, and ingestion began at the first poll after deploy. The registry lists the govdelivery adapter, while the recorded method is the email adapter with raw RFC-5322 capture and DKIM verify-and-archive. Over the daily buckets shown (2026-11-03 through 2026-11-09) and the 14-day window, we recorded zero requests, zero items, and zero bulletins. The mailbox counters show zero messages, zero errors, and zero refusals, with no last-message timestamp. The registry's last item date is 2026-10-01. The collector reports zero consecutive errors, last cycle at 2026-11-09T04:45:16Z, and health quiet with 39 days since the last item. Registry notes still list a Gate-3 coverage evaluation as pending first ingested bulletins and name energy-newsroom as a related entry. At the previous assessment on 2026-10-10, we had recorded two bulletins averaging 4,194 characters with full text delivery, the latest on 2026-10-01. No new items appear in the current window, the days-since-last-item count has risen from 9 to 39, and no character measurements are available for the current window.
 
-_Model-written assessment of our own ingestion, generated 2026-10-10 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-09 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

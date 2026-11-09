@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-01, 38 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-01, 39 days ago (quiet past 7 days).
 
-This label has held since 2026-10-09T04:08:52Z (UTC) and was last re-checked 2026-11-08T04:59:51Z (UTC).
+This label has held since 2026-10-09T04:08:52Z (UTC) and was last re-checked 2026-11-09T04:48:02Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,7 +73,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-01, 38 days ago (quiet past 7 days).
+Most recent item 2026-10-01, 39 days ago (quiet past 7 days).
 
 ### All time
 
@@ -87,6 +87,6 @@ No requests and no items were recorded in the last 30 days, so there is nothing 
 
 **Model-written ingestion assessment**
 
-Bulletins arrive at the project mailbox from sender newsletter@updates.eac.gov. Over the past six days, zero items were observed. The 14-day measurement window shows one bulletin delivered on 2026-10-01, measuring 9,909 characters in full text. The mailbox collector recorded zero errors and zero refused messages. Subscription was confirmed 2026-07-29.
+Bulletins from sender newsletter@updates.eac.gov arrive in our project mailbox and are ingested by the email adapter, which keeps the raw RFC-5322 message and archives it after DKIM verification. The subscription was confirmed on 2026-07-29. The signup URL was not recorded because the address inferred from the sender did not resolve. The source is registered as planned and will activate on its first parsed bulletin. Across the daily buckets shown (2026-11-03 through 2026-11-09) and the 14-day window, we recorded zero requests, zero items, and zero bulletins. The mailbox counters read zero messages, zero errors, and zero refused messages, with no last-message timestamp, although the registry's last item date remains 2026-10-01. Character statistics are null. The collector reports zero consecutive errors, last cycle at 2026-11-09T04:45:16Z, and health quiet with 39 days since the last item. At the previous assessment on 2026-10-10, we had recorded one bulletin of 9,909 characters on 2026-10-01 and no items in the preceding six days. No new items have been observed since, and the days-since-last-item count has risen from 9 to 39.
 
-_Model-written assessment of our own ingestion, generated 2026-10-10 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-09 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
