@@ -206,7 +206,7 @@ No account, key or token exists or is needed.
 | Writes, model calls, outbound requests | Impossible by construction: no handler kind does them; read-only volume; read-only root filesystem; `internal` network (no egress) |
 | Path traversal | Parameters are validated against anchored patterns that can't match `/`, `\`, `..` or a leading `.` (enforced when the manifest loads); every resolved path must stay inside the site root, **after** symlink resolution |
 | Oversized or slow requests | nginx: POST only (405), `application/json` only (415), 64 KiB body cap (413), request buffering on, 2/10/15 s connect/send/read timeouts, `proxy_next_upstream off` (a POST is never replayed); server: body cap, socket timeout. The eight-stage validation layer is in the package README |
-| Flooding | Edge per-address limit, plus `fapd-web`'s `/mcp` zones (5 r/s, burst 20, 10 connections per address → 429), plus a server concurrency cap (503), plus the host `fapd-mcp` fail2ban jail: 20 rejected requests (400/403/405/413/415; never 404, and never 429 — a rate-limit hit is not abuse) in 10 minutes → 1 h ban in `DOCKER-USER`, doubling to at most a day (jail files in the operator's private host tree, not this repository; installed 2026-09-14) |
+| Flooding | Edge per-address limit, plus `fapd-web`'s `/mcp` rate and connection limits (→ 429), plus a server concurrency cap (503), plus a host-level block on repeated rejected requests; a rate-limit hit alone is never treated as abuse (configuration in the operator's private host tree, not this repository; installed 2026-09-14) |
 | DNS rebinding / browser misuse | `Origin` validated: only `https://fapd.info` and `https://www.fapd.info` are accepted when present (403 otherwise). Requests without `Origin` (server-side clients) are allowed. No CORS on `/mcp`. |
 | Privilege | Non-root user 10001, all capabilities dropped, `no-new-privileges`, PID and memory limits |
 | Information leakage | No tracebacks or filesystem paths in responses; no session IDs; `Cache-Control: no-store` |
@@ -229,13 +229,12 @@ neither log has to carry the other's field. Logs rotate at 5 MB × 3
 files, like every FAPD container.
 
 `fapd-web` additionally keeps a dedicated `/mcp` access log for the
-fail2ban jail (`/opt/fapd/logs/mcp-access.log`, `fapd_mcp` format):
+fail2ban jail (`fapd_mcp` format):
 client address, time, method and path, status, size, request time,
 User-Agent — never a body or argument. Rotated daily, kept 7 days.
 
 ```sh
 deploy/vps/scripts/vps-ssh.sh 'sudo timeout 20 docker logs --tail 50 fapd-mcp'     # read-only
-deploy/vps/scripts/vps-ssh.sh 'sudo tail -20 /opt/fapd/logs/mcp-access.log'
 ```
 
 ## 8. Operating it
