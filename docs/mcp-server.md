@@ -234,7 +234,7 @@ client address, time, method and path, status, size, request time,
 User-Agent — never a body or argument. Rotated daily, kept 7 days.
 
 ```sh
-deploy/vps/scripts/vps-ssh.sh 'sudo timeout 20 docker logs --tail 50 fapd-mcp'     # read-only
+deploy/vps/scripts/box.sh 'sudo timeout 20 docker logs --tail 50 fapd-mcp'     # read-only
 ```
 
 ## 8. Operating it
@@ -251,7 +251,7 @@ deploy/vps/scripts/vps-ssh.sh 'sudo timeout 20 docker logs --tail 50 fapd-mcp'  
 | The fail2ban jail (installed 2026-09-14) | files and installer in the operator's private host tree; verify with `fail2ban-client status fapd-mcp` and the `f2b-fapd-mcp` chain in `iptables -S DOCKER-USER` |
 | Health (read-only) | `/fapd-health`; or a `server/discover` POST (below); `docker port fapd-mcp` prints nothing |
 | Unban a legitimate client (operator) | `sudo fail2ban-client set fapd-mcp unbanip <addr>` |
-| Take it offline, keep the site | `vps-ssh.sh 'cd /opt/fapd && sudo docker compose stop mcp'` (operator-gated write) |
+| Take it offline, keep the site | `box.sh 'cd /opt/fapd && sudo docker compose stop mcp'` (operator-gated write) |
 
 ### Rehearsal and verification record
 

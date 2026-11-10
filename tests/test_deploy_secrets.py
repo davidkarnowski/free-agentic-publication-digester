@@ -1,22 +1,18 @@
-"""Guards for the in-project box coordinates (2026-08-07, plan P4).
+"""Guards for how this project reaches its server (2026-08-07, plan P4;
+rewritten 2026-11-10).
 
-The repository is public. `deploy/vps/deploy.env` holds the host, port,
-user and key path, lives inside the working tree for convenience, and
-must never leave it — not into git, and not into a container image.
-
-Design note: this file never contains a coordinate. The scan reads the
-operator's *local, uncommitted* deploy.env and asserts those exact values
-appear in zero tracked files, so the guard checks the real secret without
-becoming a place the secret is written down. On a machine with no env
-file (CI) that scan is vacuous and skips; the mechanism checks below
-always run.
+The repository is public. Since 2026-11-10 the project holds NO
+connection details at all: no key path, no login, no address, no port,
+in any tracked file or in its local env file. The connection comes from
+an external connector named in the gitignored deploy/vps/deploy.env
+(deploy/vps/scripts/_env.sh). These tests pin that, and pin that the env
+file still never leaves the working tree: not into git, not into a
+container image.
 """
 
 import re
 import subprocess
 from pathlib import Path
-
-import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 ENV_PATH = PROJECT_ROOT / "deploy" / "vps" / "deploy.env"
@@ -57,7 +53,7 @@ def test_deploy_env_never_reaches_the_bundle_rsync():
 def test_the_example_carries_placeholders_only():
     example = (PROJECT_ROOT / "deploy" / "vps"
                / "deploy.env.example").read_text(encoding="utf-8")
-    assert "user@host" in example
+    assert "user@host" not in example       # no login shape at all now
     # no resolvable host: nothing that looks like a real IPv4 or FQDN
     assert not re.search(r"\b\d{1,3}(\.\d{1,3}){3}\b", example)
     assert not re.search(r"@[\w.-]+\.(com|net|org|io|info)\b", example)
@@ -87,42 +83,83 @@ def test_no_tracked_file_carries_an_ssh_target():
     assert not offenders, f"SSH targets in tracked files: {offenders}"
 
 
-def test_the_configured_coordinates_appear_in_no_tracked_file():
-    """The real check. Reads the local, uncommitted env file and asserts
-    its values are absent from everything git tracks."""
-    if not ENV_PATH.exists():
-        pytest.skip("no deploy/vps/deploy.env on this machine (CI)")
+CONNECTION_KEYS = re.compile(
+    r"^\s*(export\s+)?(SSH_KEY|VPS|PORT|SSH_ALIAS)=|IdentityFile", re.MULTILINE)
+SCRIPTS = [PROJECT_ROOT / "deploy" / "vps" / "scripts" / "_env.sh",
+           DEPLOY_SH,
+           PROJECT_ROOT / "deploy" / "vps" / "scripts" / "box.sh",
+           PROJECT_ROOT / "deploy" / "dev" / "scripts" / "dev-seed.sh"]
 
-    secrets = {}
-    for line in ENV_PATH.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, _, value = line.partition("=")
-        value = value.strip().strip('"').strip("'")
-        # REMOTE_DIR is a path on the box and is documented publicly;
-        # PORT alone identifies nothing.
-        if key.strip() in {"VPS", "SSH_KEY"} and value:
-            secrets[key.strip()] = value
 
-    if not secrets:
-        pytest.skip("deploy.env carries no VPS/SSH_KEY to check")
+def _code(path):
+    return "\n".join(ln for ln in path.read_text(encoding="utf-8").splitlines()
+                     if not ln.lstrip().startswith("#"))
 
-    needles = set(secrets.values())
-    for value in list(secrets.values()):
-        if "@" in value:                    # user@host -> also check the host
-            needles.add(value.split("@", 1)[1])
 
+def test_no_env_file_holds_a_connection_value():
+    """The example always, and the operator's local file when it exists:
+    neither may carry a key path, login, address or port. _env.sh refuses
+    such a file at run time too; this catches it before anything runs."""
+    files = [PROJECT_ROOT / "deploy" / "vps" / "deploy.env.example"]
+    if ENV_PATH.exists():
+        files.append(ENV_PATH)
+    for path in files:
+        assert not CONNECTION_KEYS.search(path.read_text(encoding="utf-8")), path.name
+
+
+def test_env_sh_refuses_an_env_file_with_a_connection_value():
+    assert "SSH_KEY|VPS|PORT|SSH_ALIAS" in _code(SCRIPTS[0])
+    assert "exit 1" in _code(SCRIPTS[0])
+
+
+def test_env_sh_never_sources_the_env_file():
+    """grep, never `.`/source: a stale line cannot quietly come back."""
+    code = _code(SCRIPTS[0])
+    assert ". \"$FAPD_ENV_FILE\"" not in code
+    assert "source " not in code
+
+
+def test_no_script_carries_its_own_ssh_identity():
+    """Every connection goes through the connector: no script builds its
+    own ssh, scp or key options, and no script reads the retired
+    home-folder env file."""
+    for path in SCRIPTS:
+        code = _code(path)
+        if path == SCRIPTS[0]:      # _env.sh names the old keys to refuse them
+            code = "\n".join(ln for ln in code.splitlines()
+                             if not ("SSH_KEY" in ln and "VPS" in ln and "PORT" in ln))
+        for banned in ("SSH_KEY", "SSH_OPTS", "SCP_OPTS", "ssh -i", "IdentityFile",
+                       '"$VPS"', "${VPS}", ".fapd-deploy.env"):
+            assert banned not in code, f"{path.name}: {banned}"
+        for line in code.splitlines():
+            stripped = line.lstrip()
+            assert not stripped.startswith(("ssh ", "scp ", "exec ssh")), f"{path.name}: {line}"
+
+
+def test_the_old_wrapper_is_gone_and_box_sh_uses_the_connector():
+    scripts = PROJECT_ROOT / "deploy" / "vps" / "scripts"
+    assert not (scripts / "vps-ssh.sh").exists()
+    code = _code(scripts / "box.sh")
+    assert '. "$REPO_ROOT/deploy/vps/scripts/_env.sh"' in code
+    assert 'box "$@"' in code
+
+
+def test_no_tracked_file_points_at_a_private_key_or_the_old_env_file():
+    """A tracked path to a private key file, or to the retired
+    home-folder env file, is a connection detail in a public repo. Dated
+    plans and staged scripts are records of what was done then and are
+    never rewritten (CLAUDE.md §8), so they are out of scope."""
+    pattern = re.compile(r"(~|\$HOME|/Users/[^/\s]+)/\.ssh/id_|\.fapd-deploy\.env")
     offenders = []
     for path in _tracked_files():
+        rel = str(path.relative_to(PROJECT_ROOT))
+        if path == Path(__file__).resolve() or rel.startswith(
+                ("docs/ops/plan-", "scripts/staged/")):
+            continue
         try:
             text = path.read_text(encoding="utf-8", errors="ignore")
         except (OSError, UnicodeDecodeError):
             continue
-        for needle in needles:
-            if needle and needle in text:
-                offenders.append(f"{path.relative_to(PROJECT_ROOT)}")
-                break
-    assert not offenders, (
-        f"{len(offenders)} tracked file(s) contain configured box "
-        f"coordinates: {offenders[:5]}")
+        if pattern.search(text):
+            offenders.append(str(path.relative_to(PROJECT_ROOT)))
+    assert not offenders, f"key or env-file paths in tracked files: {offenders}"

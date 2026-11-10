@@ -420,7 +420,7 @@ live in `.claude/agents/fapd-*.md` (tracked).
 | Agent discovery documents (Content Signals, Link headers, API/AI catalogs, agent skills, auth.md, Markdown twins) | `publish._build_agent_surfaces`, `docs/ops/plan-2026-09-13-agent-discovery.md` |
 | MCP service | `docs/mcp-server.md`, `packages/static-mcp/`, `deploy/vps/mcp/`; fapd-web nginx config lives in the operator's private host tree (moved out 2026-09-21); host security jail: operator's private host tree, applied directly (2026-09-14) |
 | Local pre-deploy testing | `deploy/dev/README.md` (prod image + VPS data seed) |
-| VPS access (read-only checks) | `deploy/vps/scripts/vps-ssh.sh` + gitignored `deploy/vps/deploy.env` |
+| VPS access (read-only checks) | `deploy/vps/scripts/box.sh` through the connector named in gitignored `deploy/vps/deploy.env`; no key path, login or address in the project (2026-11-10) |
 | Accessibility method (before ANY HTML change) | `docs/accessibility-doctrine.md` → GUIDE §2a; findings in `docs/accessibility.md`, public claim in `docs/site/accessibility.md` |
 | Section-agent instructions | `docs/agents/` (§11) |
 | Forking: the publication clock and the working calendar | `docs/forking.md` → `config.py` (`FAPD_PUBLICATION_TZ` + labels), `fedcal.py` |

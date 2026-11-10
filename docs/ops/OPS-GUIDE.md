@@ -55,9 +55,11 @@ sqlite3 -readonly data/fapd.db "SELECT worker, last_ok_at, consecutive_errors
 
 ## VPS checks (read-only)
 
-Coordinates come from `deploy/vps/deploy.env` (gitignored — copy
-`deploy.env.example`, `chmod 0600`). `vps-ssh.sh` resolves them, so no
-command below carries a host. Network egress may need the tool sandbox
+The project holds no connection details (2026-11-10). `box.sh` runs each
+command through the external connector named in the gitignored
+`deploy/vps/deploy.env` (copy `deploy.env.example`, `chmod 0600`; the
+private deploy README names the connector), so no command below carries
+a host, login or key. Network egress may need the tool sandbox
 disabled.
 
 - **Clean up every process you start on the box before you finish.** Agent SSH sessions can drop
@@ -69,10 +71,10 @@ disabled.
 ```sh
 curl -sI https://fapd.info | head -1                 # HTTP/2 200
 
-deploy/vps/scripts/vps-ssh.sh 'sudo docker ps --format "{{.Names}}\t{{.Status}}" | grep fapd'
-deploy/vps/scripts/vps-ssh.sh 'sudo docker inspect fapd-web --format "{{json .NetworkSettings.Networks}}"'
+deploy/vps/scripts/box.sh 'sudo docker ps --format "{{.Names}}\t{{.Status}}" | grep fapd'
+deploy/vps/scripts/box.sh 'sudo docker inspect fapd-web --format "{{json .NetworkSettings.Networks}}"'
 #   ^ exactly fapd_edge, nothing else
-deploy/vps/scripts/vps-ssh.sh 'sudo certbot certificates 2>/dev/null | grep -A3 fapd.info'
+deploy/vps/scripts/box.sh 'sudo certbot certificates 2>/dev/null | grep -A3 fapd.info'
 ```
 
 ### Is the repo-managed web config live?
@@ -109,13 +111,13 @@ address the box's existing nginx jails do not ignore: one of them bans
 on a single `/.git` request.
 
 ```sh
-deploy/vps/scripts/vps-ssh.sh 'sudo docker ps --format "{{.Names}}\t{{.Status}}" | grep fapd-mcp'
+deploy/vps/scripts/box.sh 'sudo docker ps --format "{{.Names}}\t{{.Status}}" | grep fapd-mcp'
 #   ^ Up … (healthy) — the healthcheck is the package Dockerfile's GET /healthz
-deploy/vps/scripts/vps-ssh.sh 'sudo docker port fapd-mcp'
+deploy/vps/scripts/box.sh 'sudo docker port fapd-mcp'
 #   ^ prints NOTHING. Any output is a finding: a published port bypasses ufw.
-deploy/vps/scripts/vps-ssh.sh 'sudo docker inspect fapd-mcp --format "{{json .NetworkSettings.Networks}}"'
+deploy/vps/scripts/box.sh 'sudo docker inspect fapd-mcp --format "{{json .NetworkSettings.Networks}}"'
 #   ^ exactly fapd_mcp, nothing else; fapd-web lists fapd_edge and fapd_mcp
-deploy/vps/scripts/vps-ssh.sh 'sudo timeout 20 docker logs --tail 20 fapd-mcp'  # JSON lines; no IPs, no bodies
+deploy/vps/scripts/box.sh 'sudo timeout 20 docker logs --tail 20 fapd-mcp'  # JSON lines; no IPs, no bodies
 
 # A modern server/discover through the edge: 200 and serverInfo.name info.fapd/fapd
 curl -sS -w '\n%{http_code}\n' -X POST https://fapd.info/mcp \
@@ -126,9 +128,9 @@ curl -sS -w '\n%{http_code}\n' -X POST https://fapd.info/mcp \
 curl -sI https://fapd.info/mcp | head -1                # 405: POST only (JSON signpost body)
 
 # The fail2ban jail (after checkpoint C-6): running, WITH a chain
-deploy/vps/scripts/vps-ssh.sh 'sudo fail2ban-client status fapd-mcp'
-deploy/vps/scripts/vps-ssh.sh 'sudo iptables -S DOCKER-USER | grep -c f2b-fapd-mcp'   # >= 1
-deploy/vps/scripts/vps-ssh.sh 'sudo tail -5 /opt/fapd/logs/mcp-access.log'
+deploy/vps/scripts/box.sh 'sudo fail2ban-client status fapd-mcp'
+deploy/vps/scripts/box.sh 'sudo iptables -S DOCKER-USER | grep -c f2b-fapd-mcp'   # >= 1
+deploy/vps/scripts/box.sh 'sudo tail -5 /opt/fapd/logs/mcp-access.log'
 #   ^ first field is a client address (never the edge's 172.x); no request bodies
 ```
 
@@ -150,13 +152,13 @@ and the `eod` row read a clean success throughout (F-021).
 
 ```sh
 # 0 = everything published. >0 = a commit is stranded in the container.
-deploy/vps/scripts/vps-ssh.sh 'sudo docker exec fapd-backend sh -lc \
+deploy/vps/scripts/box.sh 'sudo docker exec fapd-backend sh -lc \
   "cd /app && export GIT_SSH_COMMAND=\"ssh -i /app/secrets/deploy_key \
    -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new\" \
    && git fetch -q origin main && git rev-list --count origin/main..HEAD"'
 
 # The durable state: pushed_at recent, error NULL, attempts 0.
-deploy/vps/scripts/vps-ssh.sh 'sudo docker exec fapd-backend python -c "
+deploy/vps/scripts/box.sh 'sudo docker exec fapd-backend python -c "
 import sqlite3
 c = sqlite3.connect(\"file:/app/data/fapd.db?mode=ro\", uri=True)
 c.row_factory = sqlite3.Row
@@ -202,12 +204,12 @@ digest's **Inference** row says only whether model layers ran; the
 cause lives here:
 
 ```sh
-deploy/vps/scripts/vps-ssh.sh 'sudo docker exec fapd-backend python -c "
+deploy/vps/scripts/box.sh 'sudo docker exec fapd-backend python -c "
 import sqlite3
 c = sqlite3.connect(\"file:/app/data/fapd.db?mode=ro\", uri=True)
 for r in c.execute(\"SELECT date, available, backend, models, layers FROM day_inference ORDER BY date DESC LIMIT 5\"): print(r)"'
 # and the reason, from the ledger:
-deploy/vps/scripts/vps-ssh.sh 'sudo docker exec fapd-backend python -c "
+deploy/vps/scripts/box.sh 'sudo docker exec fapd-backend python -c "
 import sqlite3
 c = sqlite3.connect(\"file:/app/data/llm_ledger.db?mode=ro\", uri=True)
 for r in c.execute(\"SELECT substr(ts_utc,1,16), backend, purpose, substr(error,1,100) FROM llm_calls WHERE error LIKE \x27provider unavailable%\x27 ORDER BY ts_utc DESC LIMIT 5\"): print(r)"'

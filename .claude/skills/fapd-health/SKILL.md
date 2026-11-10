@@ -10,10 +10,11 @@ source of truth. This skill never writes or restarts anything.
 
 ## Preconditions
 - Repo root; `data/fapd.db` exists for local checks.
-- For VPS checks: key loaded (`ssh-add -l`), and `deploy/vps/deploy.env`
-  present (gitignored — copy `deploy.env.example`, `chmod 0600`). Every
-  remote command runs through `deploy/vps/scripts/vps-ssh.sh '<cmd>'`,
-  which resolves coordinates itself. **Never read connection facts from
+- For VPS checks: `deploy/vps/deploy.env` present (gitignored — copy
+  `deploy.env.example`, `chmod 0600`) naming the connector. Every remote
+  command runs through `deploy/vps/scripts/box.sh '<cmd>'`; the project
+  holds no key path, login or address (2026-11-10). If the connector
+  says a key is not loaded, ask the operator; never look for a key. **Never read connection facts from
   another project's tree.**
 
 ## What to do when invoked

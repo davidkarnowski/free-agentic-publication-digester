@@ -16,20 +16,17 @@ set -euo pipefail
 cd "$(dirname "$0")/../../.."   # repo root
 DEV=deploy/dev
 
-[ -f "$HOME/.fapd-deploy.env" ] && . "$HOME/.fapd-deploy.env"
-: "${SSH_KEY:?set SSH_KEY - path to the box SSH key}"
-: "${VPS:?set VPS - user@host}"
-PORT="${PORT:-22}"
-SSH_OPTS=(-i "$SSH_KEY" -p "$PORT" -o BatchMode=yes -o StrictHostKeyChecking=accept-new)
-# scp's port flag is -P (lowercase -p means preserve-times and silently
-# eats the port number as a filename — found the hard way, first run).
-SCP_OPTS=(-i "$SSH_KEY" -P "$PORT" -o BatchMode=yes -o StrictHostKeyChecking=accept-new)
+# The connection comes from the external connector (deploy/vps/scripts/_env.sh);
+# no key path, login or address here.
+REPO_ROOT="$PWD"
+# shellcheck source=/dev/null
+. "$REPO_ROOT/deploy/vps/scripts/_env.sh"
 
 LOCAL_SEEDS="$(mktemp -d /tmp/fapd-seed.XXXXXX)"
 trap 'rm -rf "$LOCAL_SEEDS"' EXIT
 
 echo "==> [1/3] snapshot on the box (VACUUM INTO, inside the container)"
-ssh "${SSH_OPTS[@]}" "$VPS" "
+box "
   set -e
   sudo docker exec fapd-backend sh -c 'rm -rf /app/data/snap && mkdir -p /app/data/snap'
   for db in fapd fetch_log llm_ledger; do
@@ -42,8 +39,8 @@ ssh "${SSH_OPTS[@]}" "$VPS" "
 "
 
 echo "==> [2/3] pull snapshots"
-scp -C "${SCP_OPTS[@]}" "${VPS}:/tmp/fapd-seed/*.db" "$LOCAL_SEEDS/"
-ssh "${SSH_OPTS[@]}" "$VPS" "rm -rf /tmp/fapd-seed"
+rsync -az -e "$BOX_RSH" "box:/tmp/fapd-seed/" "$LOCAL_SEEDS/"
+box "rm -rf /tmp/fapd-seed"
 ls -lh "$LOCAL_SEEDS"
 
 echo "==> [3/3] load into the fapd-dev data volume"
@@ -56,6 +53,6 @@ docker run --rm \
   -v fapd-dev_fapd-data:/data \
   -v "$LOCAL_SEEDS":/seeds:ro \
   alpine sh -c "cp /seeds/*.db /data/ && rm -f /data/*.db-wal /data/*.db-shm \
-    && echo \"\$(date -u +%FT%TZ) from ${VPS%%@*}@$(echo "${VPS#*@}" | cut -c1-8)…\" > /data/SEEDED \
+    && echo \"\$(date -u +%FT%TZ) from production\" > /data/SEEDED \
     && cat /data/SEEDED"
 echo "==> seeded — run dev-up.sh to render against it"

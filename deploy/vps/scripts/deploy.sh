@@ -20,9 +20,10 @@
 set -euo pipefail
 cd "$(dirname "$0")/../../.."  # repo root (scripts -> vps -> deploy -> root)
 
-# Box coordinates: one resolver, shared with vps-ssh.sh so the two cannot
-# drift (this file carried its own inline lookup until 2026-08-07). The
-# public repo carries no server dossier facts (CLAUDE.md §13).
+# The connection: one resolver, shared with dev-seed.sh. Since 2026-11-10 it
+# holds no coordinates at all; every call goes through an external
+# connector that supplies the identity and the address (_env.sh). The public
+# repo carries no server dossier facts (CLAUDE.md §13).
 REPO_ROOT="$PWD"
 # shellcheck source=/dev/null
 . "$REPO_ROOT/deploy/vps/scripts/_env.sh"
@@ -36,7 +37,7 @@ esac
 die() { echo "deploy: $*" >&2; exit 1; }
 # One short ssh call per step: a long compound command loses its output when
 # the connection drops, and then nobody knows how far it got (2026-11-08).
-run() { ssh "${SSH_OPTS[@]}" "$VPS" "$@"; }
+run() { box "$@"; }
 
 echo "==> [0/4] preconditions"
 # The box deploys what GitHub has, so main here must BE what GitHub has. A

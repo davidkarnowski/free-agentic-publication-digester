@@ -1,61 +1,59 @@
-# Box coordinates, resolved once. Sourced by deploy.sh and vps-ssh.sh so
-# the two cannot drift — deploy.sh carried its own inline lookup until
-# 2026-08-07, and nothing else could reach the box at all.
+# How this project reaches its server. Sourced by deploy.sh and
+# dev-seed.sh so the two cannot drift.
 #
-# The repository is PUBLIC (CLAUDE.md §13): no host, port, user, or key
-# path is ever committed. The file this finds is gitignored, excluded
-# from BOTH rsync lists, and pinned by tests/test_deploy_secrets.py.
+# The repository holds NO connection details (2026-11-10): no key path,
+# no login, no address, no port. The connection comes from an external
+# connector command, named by FAPD_BOX_CONNECT in the gitignored
+# deploy/vps/deploy.env (or the environment). The connector supplies the
+# identity and the address and keeps them outside this repository; the
+# private deploy README says which connector to use. The contract:
 #
-# Lookup order — explicit override, then in-project, then the original
-# home-directory location, which keeps working for anyone already set up.
-#   1. $FAPD_DEPLOY_ENV
-#   2. deploy/vps/deploy.env   (in-project, gitignored, chmod 0600)
-#   3. ~/.fapd-deploy.env
+#   $FAPD_BOX_CONNECT ssh -- <command>   one command on the box, raw output,
+#                                        the remote exit status
+#   $FAPD_BOX_CONNECT rsh                an rsync/scp remote shell; it
+#                                        ignores the host word it is given
+#
+# The repository is PUBLIC (CLAUDE.md §13). tests/test_deploy_secrets.py
+# pins that no tracked file and no env file carries a key path, login,
+# address or port. deploy.env is read with grep, never sourced, so a
+# stale line cannot quietly reintroduce one; a file that still holds a
+# connection value is refused.
 #
 # Callers must set REPO_ROOT before sourcing.
 : "${REPO_ROOT:?_env.sh: set REPO_ROOT before sourcing}"
 
-FAPD_ENV_FILE=""
-for _candidate in "${FAPD_DEPLOY_ENV:-}" \
-                  "$REPO_ROOT/deploy/vps/deploy.env" \
-                  "$HOME/.fapd-deploy.env"; do
-    if [ -n "$_candidate" ] && [ -f "$_candidate" ]; then
-        FAPD_ENV_FILE="$_candidate"
-        # shellcheck disable=SC1090
-        . "$_candidate"
-        break
+FAPD_ENV_FILE="$REPO_ROOT/deploy/vps/deploy.env"
+_from_file() {  # the last VAR="value" line for $1 in deploy.env, unquoted
+    sed -n "s/^[[:space:]]*$1=\"\{0,1\}\([^\"]*\)\"\{0,1\}[[:space:]]*\$/\1/p" \
+        "$FAPD_ENV_FILE" | tail -1
+}
+if [ -f "$FAPD_ENV_FILE" ]; then
+    if grep -qE '^[[:space:]]*(export[[:space:]]+)?(SSH_KEY|VPS|PORT|SSH_ALIAS)=|IdentityFile|[[:space:]]-i[[:space:]]' \
+            "$FAPD_ENV_FILE"; then
+        echo "$FAPD_ENV_FILE still holds a connection value (SSH_KEY, VPS, PORT or a key)." >&2
+        echo "  Remove it: the connection comes from FAPD_BOX_CONNECT only." >&2
+        exit 1
     fi
-done
-unset _candidate
-
-if [ -z "$FAPD_ENV_FILE" ]; then
-    echo "No box coordinates found. Copy deploy/vps/deploy.env.example to" >&2
-    echo "  deploy/vps/deploy.env and fill it in (chmod 0600)." >&2
-    exit 1
+    [ -n "${FAPD_BOX_CONNECT:-}" ] || FAPD_BOX_CONNECT="$(_from_file FAPD_BOX_CONNECT)"
+    [ -n "${REMOTE_DIR:-}" ] || REMOTE_DIR="$(_from_file REMOTE_DIR)"
 fi
-
-# A warning, not a failure: the operator may have a reason, and refusing
-# to run would be worse than saying so.
-if [ "$(uname)" = "Darwin" ]; then
-    _mode="$(stat -f '%Lp' "$FAPD_ENV_FILE" 2>/dev/null || echo '')"
-else
-    _mode="$(stat -c '%a' "$FAPD_ENV_FILE" 2>/dev/null || echo '')"
-fi
-case "$_mode" in
-    ''|600|400) ;;
-    *) echo "WARNING: $FAPD_ENV_FILE is mode $_mode — chmod 0600 it." >&2 ;;
-esac
-unset _mode
-
-: "${SSH_KEY:?set SSH_KEY in $FAPD_ENV_FILE - path to the box SSH key}"
-: "${VPS:?set VPS in $FAPD_ENV_FILE - user@host}"
-PORT="${PORT:-22}"
+unset -f _from_file
 REMOTE_DIR="${REMOTE_DIR:-/opt/fapd}"
 
-# zsh does not word-split unquoted variables: a scalar $SSH_OPTS silently
-# falls back to port 22. Always an array, always quoted at the call site.
-# BatchMode fails fast instead of hanging on a prompt; accept-new because
-# a first connection from a fresh machine otherwise blocks on a question
-# nothing is there to answer.
-SSH_OPTS=(-i "$SSH_KEY" -p "$PORT" -o BatchMode=yes \
-          -o StrictHostKeyChecking=accept-new)
+if [ -z "${FAPD_BOX_CONNECT:-}" ]; then
+    echo "No connector: set FAPD_BOX_CONNECT in deploy/vps/deploy.env" >&2
+    echo "  (copy deploy.env.example; the private deploy README names the connector)." >&2
+    exit 1
+fi
+# $HOME may be written literally in deploy.env; expand only that.
+FAPD_BOX_CONNECT="${FAPD_BOX_CONNECT//\$HOME/$HOME}"
+# An array, so the command works the same under bash and zsh.
+read -r -a _BOX_CONNECT <<<"$FAPD_BOX_CONNECT"
+[ -x "${_BOX_CONNECT[0]}" ] || { echo "FAPD_BOX_CONNECT is not executable: ${_BOX_CONNECT[0]}" >&2; exit 1; }
+
+# One command on the box. Like every connection, it is read-only unless
+# the operator gave a go for the task.
+box() { "${_BOX_CONNECT[@]}" ssh -- "$@"; }
+
+# For rsync:  rsync -e "$BOX_RSH" box:/remote/dir/ local/
+BOX_RSH="$FAPD_BOX_CONNECT rsh"
