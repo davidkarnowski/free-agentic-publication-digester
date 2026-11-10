@@ -6,7 +6,7 @@
 
 # Election Assistance Commission (email)
 
-planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · U.S. Election Assistance Commission
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · U.S. Election Assistance Commission
 
 Official site: https://www.eac.gov/newsroom · All sources: [sources.md](../sources.md)
 
@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-01, 39 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-09, delivered by email.
 
-This label has held since 2026-10-09T04:08:52Z (UTC) and was last re-checked 2026-11-09T04:48:02Z (UTC).
+This label has held since 2026-11-09T16:18:55Z (UTC) and was last re-checked 2026-11-10T04:53:06Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,18 +62,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-01 |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-09 |
+| Content length | 9,778 characters average, 9,778 median (shortest 9,778, longest 9,778) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-09 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-01, 39 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-11-09, delivered by email.
 
 ### All time
 
@@ -81,12 +83,45 @@ Bulletins from this source are delivered to the project mailbox, so there are no
 
 ### Last 30 days, day by day
 
-No requests and no items were recorded in the last 30 days, so there is nothing to chart.
+Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publication day the digests use; the stored request stamps remain UTC.
+
+| Day | Items ingested |
+|---|---|
+| 2026-10-12 | 0 |
+| 2026-10-13 | 0 |
+| 2026-10-14 | 0 |
+| 2026-10-15 | 0 |
+| 2026-10-16 | 0 |
+| 2026-10-17 | 0 |
+| 2026-10-18 | 0 |
+| 2026-10-19 | 0 |
+| 2026-10-20 | 0 |
+| 2026-10-21 | 0 |
+| 2026-10-22 | 0 |
+| 2026-10-23 | 0 |
+| 2026-10-24 | 0 |
+| 2026-10-25 | 0 |
+| 2026-10-26 | 0 |
+| 2026-10-27 | 0 |
+| 2026-10-28 | 0 |
+| 2026-10-29 | 0 |
+| 2026-10-30 | 0 |
+| 2026-10-31 | 0 |
+| 2026-11-01 | 0 |
+| 2026-11-02 | 0 |
+| 2026-11-03 | 0 |
+| 2026-11-04 | 0 |
+| 2026-11-05 | 0 |
+| 2026-11-06 | 0 |
+| 2026-11-07 | 0 |
+| 2026-11-08 | 0 |
+| 2026-11-09 | 1 |
+| 2026-11-10 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Bulletins from sender newsletter@updates.eac.gov arrive in our project mailbox and are ingested by the email adapter, which keeps the raw RFC-5322 message and archives it after DKIM verification. The subscription was confirmed on 2026-07-29. The signup URL was not recorded because the address inferred from the sender did not resolve. The source is registered as planned and will activate on its first parsed bulletin. Across the daily buckets shown (2026-11-03 through 2026-11-09) and the 14-day window, we recorded zero requests, zero items, and zero bulletins. The mailbox counters read zero messages, zero errors, and zero refused messages, with no last-message timestamp, although the registry's last item date remains 2026-10-01. Character statistics are null. The collector reports zero consecutive errors, last cycle at 2026-11-09T04:45:16Z, and health quiet with 39 days since the last item. At the previous assessment on 2026-10-10, we had recorded one bulletin of 9,909 characters on 2026-10-01 and no items in the preceding six days. No new items have been observed since, and the days-since-last-item count has risen from 9 to 39.
+This source receives full-text subscription bulletins from newsletter@updates.eac.gov in the project mailbox, which are ingested by the email adapter with raw RFC-5322 capture and DKIM verification. Its registry status is "planned". The signup URL for this source is not recorded, as the inferred address did not resolve. The previous assessment, dated 2026-11-09, reported no items ingested in its 14-day window and stated that no new items had been observed since an item on 2026-10-01. The current measurement shows one item was delivered on 2026-11-09, making it the most recent item in the collection window. This item contained 9778 characters, and the mailbox recorded one bulletin with zero errors or refusals. This delivery results in a health status of "delivering", indicating an active reception of content.
 
-_Model-written assessment of our own ingestion, generated 2026-11-09 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-10 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

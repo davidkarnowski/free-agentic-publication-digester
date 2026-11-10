@@ -6,7 +6,7 @@
 
 # OMB Statements of Administration Policy
 
-active · ingestion health: quiet · Executive · Tier 1 · HTML index · Executive Office of the President
+active · ingestion health: delivering · Executive · Tier 1 · HTML index · Executive Office of the President
 
 Official site: https://www.whitehouse.gov/omb/statements-of-administration-policy/ · All sources: [sources.md](../sources.md)
 
@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-10-07 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-06, 34 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-09; 0 of 1329 request(s) to www.whitehouse.gov returned no content.
 
-This label has held since 2026-10-14T04:14:02Z (UTC) and was last re-checked 2026-11-09T04:48:02Z (UTC).
+This label has held since 2026-11-09T18:56:07Z (UTC) and was last re-checked 2026-11-10T04:53:06Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,22 +70,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 100 request(s) (100 answered, 0 returned no content) · no items ingested
+Last 24 hours: 109 request(s) (109 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-06 |
-| Our requests to www.whitehouse.gov | 1,320 request(s) · 1,320 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-09 |
+| Content length | 82 characters average, 82 median (shortest 82, longest 82) |
+| Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
+| Our requests to www.whitehouse.gov | 1,329 request(s) · 1,329 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-09T05:00:18.524+00:00 UTC; this host serves 4 registered sources, so these figures are host-wide.
+last answered request 2026-11-10T05:00:17.107+00:00 UTC; this host serves 4 registered sources, so these figures are host-wide.
 
-Most recent item 2026-10-06, 34 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-11-09; 0 of 1329 request(s) to www.whitehouse.gov returned no content.
 
 ### All time
 
-- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 6,935 request(s) · 6,919 answered · 16 returned no content
+- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 7,044 request(s) · 7,028 answered · 16 returned no content
 
 This host serves 4 registered sources, so these figures are host-wide.
 
@@ -97,7 +99,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.whitehouse.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-11 | 0 | 100 | 73 |
 | 2026-10-12 | 0 | 104 | 78 |
 | 2026-10-13 | 0 | 100 | 76 |
 | 2026-10-14 | 0 | 100 | 72 |
@@ -126,12 +127,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-06 | 0 | 100 | 77 |
 | 2026-11-07 | 0 | 100 | 67 |
 | 2026-11-08 | 0 | 100 | 72 |
-| 2026-11-09 | 0 | 4 | 134 |
+| 2026-11-09 | 1 | 109 | 92 |
+| 2026-11-10 | 0 | 4 | 129 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Activated 2026-10-06, this source polls an HTML index via the statements-of-administration-policy adapter in feed-only mode, extracting title, date, and PDF link for each SAP without downloading content. Three items were ingested during measurement, all dated before activation and filed as backfill. The index holds 194 SAP links spanning the administration's history; polling remains bounded to the adapter's 7-day lookback window. All 1,225 polling requests to www.whitehouse.gov succeeded except one (0.08% error rate), with the failure recorded 2026-10-10 at 15:00 UTC. Content averaged 176 characters per item. No new items have arrived in the collection window since activation; the most recent item on record dates 2026-10-06.
+This source, activated on 2026-10-06, parses an HTML index of Statements of Administration Policy (SAP) from a WordPress page in feed-only mode, recording each SAP's title, date, and PDF link without fetching the full PDF. Three items were initially ingested as backfill prior to activation. The previous assessment on 2026-10-15 noted no new items had arrived since activation, with the most recent item dated 2026-10-06, and an average content length of 176 characters. Since then, one new item was observed on 2026-11-09, making it the most recent delivery, with the current average item character count at 82. The system makes approximately 100 requests per day to www.whitehouse.gov, with zero failed requests reported during the current measurement period, a decrease from the one failed request recorded in the prior assessment.
 
-_Model-written assessment of our own ingestion, generated 2026-10-15 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-10 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -6,7 +6,7 @@
 
 # HHS Office on Women's Health (email)
 
-planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Health and Human Services, Office on Women's Health
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Health and Human Services, Office on Women's Health
 
 Official site: https://womenshealth.gov/ · All sources: [sources.md](../sources.md)
 
@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-26, 14 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-09, delivered by email.
 
-This label has held since 2026-11-03T05:15:27Z (UTC) and was last re-checked 2026-11-09T04:48:02Z (UTC).
+This label has held since 2026-11-09T20:01:09Z (UTC) and was last re-checked 2026-11-10T04:53:06Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,18 +68,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-26 |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-09 |
+| Content length | 70 characters average, 70 median (shortest 70, longest 70) |
+| Delivery mode | email-teaser — the bulletin carried a short teaser, not the full item |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-09 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-26, 14 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-11-09, delivered by email.
 
 ### All time
 
@@ -91,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-11 | 0 |
 | 2026-10-12 | 0 |
 | 2026-10-13 | 0 |
 | 2026-10-14 | 0 |
@@ -120,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-06 | 0 |
 | 2026-11-07 | 0 |
 | 2026-11-08 | 0 |
-| 2026-11-09 | 0 |
+| 2026-11-09 | 1 |
+| 2026-11-10 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The hhs-owh-email subscription, from sender owh@service.govdelivery.com, is ingested by the email adapter in full-text delivery mode, with DKIM verification and raw message capture. Its registry status reads planned. Bulletins in the mailbox before its 2026-09-26 registration were not backfilled. In the 14-day window we recorded one bulletin, 163 characters, delivered 2026-10-26, a rate of 0.07 per day. The mailbox counters show one bulletin and one message, with zero administrative messages, zero errors, and zero refused deliveries. The health status reads quiet, since the most recent item is nine days old. The registry lists Gate-3 coverage evaluation as pending. The previous assessment, dated 2026-10-27, recorded two items in its window at 153 to 163 characters, with a median of 158, and two bulletins in the mailbox counters. The current count is one fewer item and one fewer mailbox bulletin, and the most recent delivery date is unchanged at 2026-10-26.
+Bulletins from owh@service.govdelivery.com are delivered to the project mailbox and ingested by the email adapter, which includes DKIM verification and raw message capture. This source's registry status is "planned", and it is noted that bulletins observed prior to its 2026-09-26 registration were not backfilled. The previous assessment, dated 2026-11-04, recorded one bulletin of 163 characters delivered on 2026-10-26, with the delivery mode noted as full-text. The current measurement shows one item received on 2026-11-09, with a content length of 70 characters, and the delivery mode is now recorded as "email-teaser," indicating a change in the type of content received. The mailbox recorded one bulletin with zero errors or refusals, and the source's health status is now "delivering."
 
-_Model-written assessment of our own ingestion, generated 2026-11-04 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-10 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

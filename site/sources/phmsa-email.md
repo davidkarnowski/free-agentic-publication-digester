@@ -6,7 +6,7 @@
 
 # PHMSA (email)
 
-active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Transportation (PHMSA)
+active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Transportation (PHMSA)
 
 Official site: https://www.phmsa.dot.gov/news · All sources: [sources.md](../sources.md)
 
@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-07, 33 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-09, delivered by email.
 
-This label has held since 2026-10-15T04:13:10Z (UTC) and was last re-checked 2026-11-09T04:48:02Z (UTC).
+This label has held since 2026-11-09T19:44:29Z (UTC) and was last re-checked 2026-11-10T04:53:06Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,18 +62,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-07 |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-09 |
+| Content length | 1,306 characters average, 1,306 median (shortest 1,306, longest 1,306) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-09 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-07, 33 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-11-09, delivered by email.
 
 ### All time
 
@@ -81,12 +83,45 @@ Bulletins from this source are delivered to the project mailbox, so there are no
 
 ### Last 30 days, day by day
 
-No requests and no items were recorded in the last 30 days, so there is nothing to chart.
+Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publication day the digests use; the stored request stamps remain UTC.
+
+| Day | Items ingested |
+|---|---|
+| 2026-10-12 | 0 |
+| 2026-10-13 | 0 |
+| 2026-10-14 | 0 |
+| 2026-10-15 | 0 |
+| 2026-10-16 | 0 |
+| 2026-10-17 | 0 |
+| 2026-10-18 | 0 |
+| 2026-10-19 | 0 |
+| 2026-10-20 | 0 |
+| 2026-10-21 | 0 |
+| 2026-10-22 | 0 |
+| 2026-10-23 | 0 |
+| 2026-10-24 | 0 |
+| 2026-10-25 | 0 |
+| 2026-10-26 | 0 |
+| 2026-10-27 | 0 |
+| 2026-10-28 | 0 |
+| 2026-10-29 | 0 |
+| 2026-10-30 | 0 |
+| 2026-10-31 | 0 |
+| 2026-11-01 | 0 |
+| 2026-11-02 | 0 |
+| 2026-11-03 | 0 |
+| 2026-11-04 | 0 |
+| 2026-11-05 | 0 |
+| 2026-11-06 | 0 |
+| 2026-11-07 | 0 |
+| 2026-11-08 | 0 |
+| 2026-11-09 | 1 |
+| 2026-11-10 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Bulletins from phmsa.subscriptions@info.dot.gov arrive in the project mailbox via GovDelivery and are ingested through the email adapter with DKIM verification and archival. Since activation on 2026-10-01, two bulletins have been received at an observed rate of 0.14 items per day, with content averaging 2,005 characters per item (ranging from 1,167 to 2,843 characters). Full item text is delivered inline. The mailbox shows two messages classified as bulletins with no errors, administrative messages, or refused items. The most recent bulletin arrived on 2026-10-07 at 14:58 UTC. No bulletins have been received for nine days. The previous assessment dated 2026-10-08 reported the same most recent date, indicating no new deliveries since that time.
+This source delivers full-text subscription bulletins from phmsa.subscriptions@info.dot.gov to the project mailbox, which are then ingested by the email adapter with DKIM verification and raw message capture. The source was activated on 2026-10-01. The previous assessment, dated 2026-10-16, noted two bulletins received since activation, with the most recent on 2026-10-07, and an average content length of 2,005 characters for those items. The current measurement shows one item received on 2026-11-09, with a content length of 1306 characters, making it the most recent item delivered. The mailbox has recorded one bulletin with zero errors or refusals, and the source's health status is "delivering." A sibling departmental web newsroom continues to refuse our client.
 
-_Model-written assessment of our own ingestion, generated 2026-10-16 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-10 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 4 item(s) in the last 14 days; most recent 2026-11-05, delivered by email.
+**delivering** — 5 item(s) in the last 14 days; most recent 2026-11-09, delivered by email.
 
-This label has held since 2026-09-09T20:07:29Z (UTC) and was last re-checked 2026-11-09T04:48:02Z (UTC).
+This label has held since 2026-09-09T20:07:29Z (UTC) and was last re-checked 2026-11-10T04:53:06Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,20 +71,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-11-05 |
-| Content length | 1,321 characters average, 1,542 median (shortest 64, longest 2,135) |
+| Items ingested | 5 in 14 days (0.36 per day) · most recent 2026-11-09 |
+| Content length | 1,073 characters average, 1,133 median (shortest 64, longest 2,135) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 4 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-05 |
+| Mailbox | 5 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-09 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-4 item(s) in the last 14 days; most recent 2026-11-05, delivered by email.
+5 item(s) in the last 14 days; most recent 2026-11-09, delivered by email.
 
 ### All time
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-11 | 0 |
 | 2026-10-12 | 0 |
 | 2026-10-13 | 1 |
 | 2026-10-14 | 0 |
@@ -125,12 +124,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-06 | 0 |
 | 2026-11-07 | 0 |
 | 2026-11-08 | 0 |
-| 2026-11-09 | 0 |
+| 2026-11-09 | 1 |
+| 2026-11-10 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Subscription bulletins via GovDelivery deliver to the project mailbox with full text. Over 14 days, 6 items arrived at 0.43 per day, averaging 916 characters (ranging 71 to 2,576), with the most recent on 2026-10-09. All messages are DKIM-verified with zero errors or refusals. The previous assessment recorded 2 items with a median of 2,830 characters; the current window shows increased frequency but shorter average length. The HTTP press endpoint returns 403, making email subscription the only working channel. The Diversion Control Division mailing list remains unconfirmed.
+Subscription bulletins from dea@public.govdelivery.com are delivered as full-text emails to the project mailbox and ingested by the email adapter, which includes raw RFC-5322 capture and DKIM verification. The previous assessment, dated 2026-10-11, reported 6 items arriving over a 14-day period at 0.43 items per day, with an average length of 916 characters, and the most recent item on 2026-10-09. The current measurement shows 5 items received over the last 14 days, at a rate of 0.36 items per day, with an average of 1073 characters (ranging from 64 to 2135). The most recent item arrived on 2026-11-09. All messages received were DKIM-verified with zero errors or refusals recorded. A sibling HTTP press endpoint continues to return 403 to our client, and the Diversion Control Division mailing list remains unconfirmed.
 
-_Model-written assessment of our own ingestion, generated 2026-10-11 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-10 by gemini-2.5-flash, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
