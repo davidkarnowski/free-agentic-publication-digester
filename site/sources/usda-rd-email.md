@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-02, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-02, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-30T16:50:05Z (UTC) and was last re-checked 2026-11-10T04:53:06Z (UTC).
+This label has held since 2026-11-10T05:21:28Z (UTC) and was last re-checked 2026-11-11T04:46:20Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -83,7 +83,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-02, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-02, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-12 | 0 |
 | 2026-10-13 | 0 |
 | 2026-10-14 | 0 |
 | 2026-10-15 | 0 |
@@ -125,11 +124,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-08 | 0 |
 | 2026-11-09 | 0 |
 | 2026-11-10 | 0 |
+| 2026-11-11 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-USDA Rural Development bulletins reach the project mailbox by email from three configured sender addresses, with full item text in each message. The 14-day window holds three measured items at 0.21 per day, ranging from 2,551 to 4,320 characters, with a median of 4,105 and a mean of 3,659. The mailbox records five bulletin messages, with zero administrative messages, zero errors, and zero refused deliveries. The last message arrived 2026-10-30 at 16:33 UTC. The most recent item is dated 2026-10-30, and it is the only item in the daily breakdown from 2026-10-25 through 2026-10-31. Since the previous assessment on 2026-10-20, which recorded three items with the latest dated 2026-10-19 and a mean of 2,886 characters, the most recent item has advanced to 2026-10-30, the mailbox count has risen from four messages to five, and the window mean has increased to 3,659 characters. Ingestion began at the first poll after the 2026-09-26 registration, and earlier bulletins were not backfilled. Gate-3 coverage evaluation is pending, and the registry status is planned.
+USDA Rural Development bulletins reach the project mailbox from three configured sender addresses, and the email adapter ingests them with full item text, DKIM verification, and raw capture. Registration was 2026-09-26; earlier bulletins were not backfilled. The registry status is planned, with coverage evaluation pending. The 14-day window holds two items at 0.14 per day, measuring 4,320 and 8,537 characters (median and average 6,428). The mailbox records three bulletin messages in the window, with zero administrative messages, zero errors, and zero refused deliveries; the block does not state the cause of the difference from the two-item count. The most recent item is dated 2026-11-02, with the last message arriving at 21:32 UTC that day. Health reads quiet, nine days after the last item. Since the 2026-10-31 assessment, which measured three items at 0.21 per day with a mean of 3,659 characters and five mailbox messages, the item count fell from three to two, the rate fell from 0.21 to 0.14 per day, the mean rose to 6,428 characters, and the most recent item advanced from 2026-10-30 to 2026-11-02.
 
-_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

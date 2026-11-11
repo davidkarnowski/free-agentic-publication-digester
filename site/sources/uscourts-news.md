@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-02, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-02, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-11-02T17:31:13Z (UTC) and was last re-checked 2026-11-10T04:53:06Z (UTC).
+This label has held since 2026-11-10T05:21:28Z (UTC) and was last re-checked 2026-11-11T04:46:20Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,7 +70,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -81,13 +81,13 @@ Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items in
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to news.uscourts.gov | 333 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-10T05:00:15.492+00:00 UTC.
+last answered request 2026-11-11T05:00:18.170+00:00 UTC.
 
-Most recent item 2026-11-02, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-02, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to news.uscourts.gov, all time (since 2026-07-30):** 2,734 request(s) · 2,734 answered · 0 returned no content
+- **Our requests to news.uscourts.gov, all time (since 2026-07-30):** 2,759 request(s) · 2,759 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to news.uscourts.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-12 | 0 | 25 | 361 |
 | 2026-10-13 | 0 | 24 | 398 |
 | 2026-10-14 | 0 | 25 | 352 |
 | 2026-10-15 | 1 | 25 | 320 |
@@ -126,12 +125,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-07 | 0 | 25 | 284 |
 | 2026-11-08 | 0 | 27 | 297 |
 | 2026-11-09 | 0 | 26 | 1010 |
-| 2026-11-10 | 0 | 1 | 303 |
+| 2026-11-10 | 0 | 25 | 304 |
+| 2026-11-11 | 0 | 1 | 174 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest U.S. Courts News from the Judiciary News RSS feed at news.uscourts.gov/feed, activated 2026-07-28. We fetch each item's article page in full mode. Feed descriptions are about 174 characters. The registry records that an earlier 2026-07-26 probe of the uscourts.gov index returned HTTP 404, and attributes that to the site having moved. The documented feed was verified at its new host. In the 14-day window measured on 2026-11-03, we recorded two items: one dated 2026-10-22 at 18,565 characters, and one dated 2026-11-02 at 19,496 characters. The median is 19,030 characters, and the rate is 0.14 per day. All 331 requests to news.uscourts.gov in the window returned content, with no client or server errors. Health reads delivering. Since the previous assessment (2026-10-31), which recorded one item dated 2026-10-22 at 18,565 characters and a quiet health reading nine days after it, the 2026-11-02 item has been added. The 2026-10-15 item measured in that earlier assessment has left the window. The request count rose from 330 to 331, all returning content.
+We ingest U.S. Courts News from the Judiciary News RSS feed at news.uscourts.gov/feed, activated 2026-07-28, and fetch each item's article page in full. Feed descriptions are about 174 characters. The registry records that an earlier probe of the uscourts.gov index returned HTTP 404, attributed to the site having moved; the documented feed was verified at its new host. The 14-day window holds one item, dated 2026-11-02, at 19,496 characters, a rate of 0.07 per day. Health reads quiet, nine days after that item. All 333 requests to news.uscourts.gov returned content, with no client or server errors. Since the 2026-11-03 assessment, which recorded two items (18,565 characters dated 2026-10-22 and 19,496 characters dated 2026-11-02), the 2026-10-22 item has left the window, the rate fell from 0.14 to 0.07 per day, health now reads quiet where it read delivering, and the request count rose from 331 to 333.
 
-_Model-written assessment of our own ingestion, generated 2026-11-03 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-02, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-02, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-27T13:52:07Z (UTC) and was last re-checked 2026-11-10T04:53:06Z (UTC).
+This label has held since 2026-11-10T05:21:28Z (UTC) and was last re-checked 2026-11-11T04:46:20Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,7 +68,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · no items ingested
+Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -77,15 +77,15 @@ Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · no items in
 | Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-02 |
 | Content length | 8,334 characters average, 8,334 median (shortest 8,334, longest 8,334) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.nist.gov | 333 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.nist.gov | 332 request(s) · 332 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-10T05:00:15.298+00:00 UTC.
+last answered request 2026-11-11T05:00:17.157+00:00 UTC.
 
-Most recent item 2026-11-02, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-02, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.nist.gov, all time (since 2026-07-30):** 2,749 request(s) · 2,743 answered · 6 returned no content
+- **Our requests to www.nist.gov, all time (since 2026-07-30):** 2,773 request(s) · 2,767 answered · 6 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nist.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-12 | 0 | 26 | 159 |
 | 2026-10-13 | 0 | 24 | 153 |
 | 2026-10-14 | 0 | 25 | 150 |
 | 2026-10-15 | 0 | 25 | 141 |
@@ -124,12 +123,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-07 | 0 | 25 | 138 |
 | 2026-11-08 | 0 | 25 | 149 |
 | 2026-11-09 | 0 | 27 | 169 |
-| 2026-11-10 | 0 | 1 | 151 |
+| 2026-11-10 | 0 | 24 | 160 |
+| 2026-11-11 | 0 | 1 | 233 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest NIST News from the documented news RSS feed and fetch each linked article page for full text (delivery mode full). Feed descriptions are teasers of about 134 characters, so the fetched article is the content we retain. Over the past 14 days we measured two items at 0.14 per day, measuring 5,460 and 8,733 characters, an average of 7,096. The most recent is dated 2026-10-27, one day before this assessment. All 330 requests to www.nist.gov returned content, with no failed requests. The previous assessment, dated 2026-10-25, measured one item at 0.07 per day, carrying 5,460 characters, with a most recent item dated 2026-10-16. Since then the window count rose from one to two, the most recent item date moved to 2026-10-27, and the request count rose from 328 to 330 with no failures in either period.
+We ingest NIST News from the documented news RSS feed and fetch each linked article page for full text. Feed descriptions are teasers of about 134 characters, so the fetched article is the content we retain. The 14-day window holds one item, dated 2026-11-02, at 8,334 characters, a rate of 0.07 per day. Health reads quiet, nine days after that item. All 332 requests to www.nist.gov returned content, with no failed requests. Since the 2026-10-28 assessment, which measured two items (5,460 and 8,733 characters, most recently dated 2026-10-27) across 330 requests, the window count fell from two to one, the most recent item date moved to 2026-11-02, the window average rose from 7,096 to 8,334 characters, and the request count rose to 332 with no failures in either period.
 
-_Model-written assessment of our own ingestion, generated 2026-10-28 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

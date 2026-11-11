@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-02, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-02, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-11-02T16:44:39Z (UTC) and was last re-checked 2026-11-10T04:53:06Z (UTC).
+This label has held since 2026-11-10T05:21:28Z (UTC) and was last re-checked 2026-11-11T04:46:20Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -81,7 +81,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-02, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-02, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-12 | 0 |
 | 2026-10-13 | 0 |
 | 2026-10-14 | 0 |
 | 2026-10-15 | 0 |
@@ -123,11 +122,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-08 | 0 |
 | 2026-11-09 | 0 |
 | 2026-11-10 | 0 |
+| 2026-11-11 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest Bureau of the Fiscal Service media-relations bulletins through the email adapter. The sender is media-relations@fiscal.treasury.gov, and we keep raw RFC-5322 captures and verify DKIM. The subscription was confirmed through the publisher's signup flow and registered on 2026-09-26. The registry status is planned. Bulletins observed before registration were not backfilled. In the 14-day window measured on 2026-11-03, we recorded one bulletin, delivered 2026-11-02 at 16:43:48 UTC, carrying full item text at 4,853 characters. The mailbox recorded one message, with zero administrative messages, zero errors, and zero refused. No HTTP requests apply to this source, so health reads delivering from delivery recency alone. The gate-3 coverage evaluation is pending the first ingested bulletins. The registry lists treasury-email and treasury-newsroom as related entries that may publish the same news. A copy at the same URL merges as corroboration, and the same event at a different URL is listed separately. Since the previous assessment (2026-10-28), which recorded zero items and a no-data health reading with no bulletin in the last 180 days, the first bulletin has been ingested.
+We ingest Bureau of the Fiscal Service media-relations bulletins from media-relations@fiscal.treasury.gov through the email adapter, keeping raw RFC-5322 captures and verifying DKIM. Registration was 2026-09-26; earlier bulletins were not backfilled. The registry status is planned, with coverage evaluation pending. The 14-day window holds one bulletin, delivered 2026-11-02 at 16:43:48 UTC with full text at 4,853 characters, a rate of 0.07 per day. The mailbox recorded one bulletin message, with zero administrative messages, zero errors, and zero refused deliveries. No HTTP requests apply to this source, so health is read from delivery recency alone; it reads quiet, nine days after that bulletin, where it read delivering on 2026-11-03. Since the 2026-11-03 assessment, the window count and the bulletin itself are unchanged.
 
-_Model-written assessment of our own ingestion, generated 2026-11-03 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

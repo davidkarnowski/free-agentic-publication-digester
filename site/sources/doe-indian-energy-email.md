@@ -6,7 +6,7 @@
 
 # DOE Office of Indian Energy (email)
 
-planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Energy, Office of Indian Energy Policy and Programs
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Energy, Office of Indian Energy Policy and Programs
 
 Official site: https://www.energy.gov/indianenergy · All sources: [sources.md](../sources.md)
 
@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-29, 12 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-11-10, delivered by email.
 
-This label has held since 2026-11-06T05:19:07Z (UTC) and was last re-checked 2026-11-10T04:53:06Z (UTC).
+This label has held since 2026-11-10T18:05:09Z (UTC) and was last re-checked 2026-11-11T04:46:20Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,20 +70,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-10-29 |
-| Content length | 2,090 characters average, 2,090 median (shortest 2,090, longest 2,090) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-11-10 |
+| Content length | 1,192 characters average, 1,192 median (shortest 294, longest 2,090) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-10-29 |
+| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-10 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-29, 12 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-11-10, delivered by email.
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-12 | 0 |
 | 2026-10-13 | 0 |
 | 2026-10-14 | 0 |
 | 2026-10-15 | 1 |
@@ -124,12 +123,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-07 | 0 |
 | 2026-11-08 | 0 |
 | 2026-11-09 | 0 |
-| 2026-11-10 | 0 |
+| 2026-11-10 | 1 |
+| 2026-11-11 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Bulletins from indianenergy@public.govdelivery.com reach the project mailbox through GovDelivery and are ingested by the email adapter with DKIM verification and archival, with full item text delivered inline. The subscription was confirmed through the publisher's signup flow and registered on 2026-09-26, and earlier bulletins were not backfilled. The registry lists the status as planned, with coverage evaluation pending. Over the 14-day window we hold two bulletins at 0.14 per day, with lengths from 1,737 to 2,090 characters (median and average 1,914). The most recent is dated 2026-10-29. The mailbox recorded two messages with no errors, administrative messages, or refused items. Health reads quiet, nine days after the last item. Compared with the 2026-10-16 assessment, which measured two bulletins averaging 293 characters (range 213 to 373) with the most recent dated 2026-10-15, the count and rate are unchanged, the most recent date has moved to 2026-10-29, and item length has increased substantially.
+We ingest DOE Office of Indian Energy bulletins from indianenergy@public.govdelivery.com through the email adapter, with DKIM verification, raw capture, and full item text delivered inline. Registration was 2026-09-26; earlier bulletins were not backfilled. The registry status is planned, with coverage evaluation pending. The 14-day window holds two bulletins at 0.14 per day, measuring 294 and 2,090 characters (median and average 1,192). The mailbox recorded two bulletin messages, with zero administrative messages, zero errors, and zero refused deliveries. The most recent bulletin is dated 2026-11-10, arriving at 17:53 UTC, and health reads delivering. Since the 2026-11-07 assessment, which measured two bulletins from 1,737 to 2,090 characters (average 1,914) with the most recent dated 2026-10-29 and health reading quiet, the count and rate are unchanged, the most recent date moved to 2026-11-10, health now reads delivering, and the window's shortest bulletin is now 294 characters.
 
-_Model-written assessment of our own ingestion, generated 2026-11-07 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
