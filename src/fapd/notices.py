@@ -18,11 +18,13 @@ written atomically (a dotfile, then a rename), in a common notice shape
 any relay can read::
 
     {"v": 1, "kind": "fapd-eod-halted", "level": "alert",
-     "subject": "FAPD 2026-11-11: digest halted after 4 failed attempts",
+     "subject": "2026-11-11: digest halted after 4 failed attempts",
      "title": "...", "fields": {"Day": "2026-11-11", "Attempts": "4 of 4",
      "Detail": "..."}, "link": "https://<site>/", "queued_at": "...",
      "source": "fapd", "event": "eod.halted", "day": "2026-11-11"}
 
+The subject names the day and the event, not the project: whatever delivers
+the notice labels where it came from. The title, for the body, names both.
 The file takes the directory's owner and group, mode 0640: whoever owns the
 directory, and nobody else, can read it.
 """
@@ -57,7 +59,8 @@ def _text(value, limit):
     return " ".join(str(value).split())[:limit]
 
 
-def emit(event, day, title, detail="", facts=None, *, link=None, notice_dir=None, now=None):
+def emit(event, day, title, detail="", facts=None, *, subject=None, link=None, notice_dir=None,
+         now=None):
     """Write one notice. Returns its path, or None when notices are off or
     the write failed (logged, never raised)."""
     directory = config.NOTICE_DIR if notice_dir is None else notice_dir
@@ -75,7 +78,7 @@ def emit(event, day, title, detail="", facts=None, *, link=None, notice_dir=None
             fields["Detail"] = _text(detail, 400)
         notice = {
             "v": VERSION, "kind": "fapd-" + event.replace(".", "-").replace("_", "-"),
-            "level": EVENTS[event], "subject": _text(title, 110),
+            "level": EVENTS[event], "subject": _text(subject or title, 110),
             "title": _text(title, 160), "fields": fields, "queued_at": stamp,
             "source": "fapd", "event": event, "day": _text(day, 10),
         }
@@ -128,21 +131,24 @@ def _site_link(day=None):
 # halt, and the publication once it recovers.
 # ---------------------------------------------------------------------------
 
+def _event(event, day, subject, detail, facts, link=None):
+    """One end-of-day notice: the subject names the day and the event; the
+    title, for the body, also names the project."""
+    return emit(event, day, f"FAPD {subject}", detail, facts, subject=subject, link=link)
+
+
 def finalize_failed(day, attempts, max_attempts, exit_code):
     """The finalizer failed: a notice on the first attempt and on the halt,
     none for the retries between (they would repeat the first)."""
     if attempts >= max_attempts:
-        return emit(
-            "eod.halted", day,
-            f"FAPD {day}: digest halted after {attempts} failed attempts",
-            f"The day is not published and will not be retried. Fix the cause,"
+        return _event(
+            "eod.halted", day, f"{day}: digest halted after {attempts} failed attempts",
+            "The day is not published and will not be retried. Fix the cause,"
             f" then run scripts/collect.py --finalize {day} in the backend.",
-            {"Attempts": f"{attempts} of {max_attempts}",
-             "Last exit code": exit_code})
+            {"Attempts": f"{attempts} of {max_attempts}", "Last exit code": exit_code})
     if attempts == 1:
-        return emit(
-            "eod.failed", day,
-            f"FAPD {day}: end-of-day run failed, digest not yet published",
+        return _event(
+            "eod.failed", day, f"{day}: end-of-day run failed, digest not yet published",
             "The finalizer will try again on the next end-of-day cycle. The"
             " backend log names the stage and the reason.",
             {"Attempt": f"1 of {max_attempts}", "Exit code": exit_code})
@@ -153,18 +159,15 @@ def evidence_push_failed(day, attempts, max_attempts, exit_code):
     """The digest is live but its evidence commit did not reach the
     repository: a notice on the first failure and on the halt."""
     if attempts >= max_attempts:
-        return emit(
-            "eod.push_halted", day,
-            f"FAPD {day}: repository push halted after {attempts} attempts",
+        return _event(
+            "eod.push_halted", day, f"{day}: repository push halted after {attempts} attempts",
             "The digest is live on the site but not in the repository, and"
             " the push will not be retried. Fix the cause, then run"
             " deploy/vps/scripts/evidence-commit.sh in the backend.",
-            {"Attempts": f"{attempts} of {max_attempts}",
-             "Last exit code": exit_code})
+            {"Attempts": f"{attempts} of {max_attempts}", "Last exit code": exit_code})
     if attempts == 1:
-        return emit(
-            "eod.push_failed", day,
-            f"FAPD {day}: digest is live but not yet in the repository",
+        return _event(
+            "eod.push_failed", day, f"{day}: digest is live but not yet in the repository",
             "The evidence push failed and will be retried on idle cycles.",
             {"Attempt": f"1 of {max_attempts}", "Exit code": exit_code})
     return None
@@ -173,13 +176,11 @@ def evidence_push_failed(day, attempts, max_attempts, exit_code):
 def published(day, *, pushed, failed_attempts=0, failed_pushes=0):
     """The day is finalized (and pushed, when pushes are on). Sent every
     night; names a recovery when earlier attempts had failed."""
-    title = f"FAPD {day}: digest published"
+    subject = f"{day}: digest published"
     if failed_attempts:
-        title += f" after {failed_attempts} failed attempt(s)"
+        subject += f" after {failed_attempts} failed attempt(s)"
     elif failed_pushes:
-        title += f", repository push recovered after {failed_pushes} failure(s)"
+        subject += f", repository push recovered after {failed_pushes} failure(s)"
     facts = {"Repository": "pushed" if pushed else "push not configured"}
-    return emit("eod.published", day, title,
-                "Finalized and published." + (" Evidence is in the repository."
-                                              if pushed else ""),
-                facts, link=_site_link(day))
+    detail = "Finalized and published." + (" Evidence is in the repository." if pushed else "")
+    return _event("eod.published", day, subject, detail, facts, link=_site_link(day))

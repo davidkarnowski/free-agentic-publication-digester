@@ -34,7 +34,7 @@ def test_a_notice_has_the_common_shape_and_leaves_no_temp_file(tmp_path):
     assert [p.name for p in tmp_path.iterdir() if p.name.startswith(".")] == []
     (n,) = _read(tmp_path)
     assert n["v"] == 1 and n["kind"] == "fapd-eod-halted" and n["level"] == "alert"
-    assert n["subject"] == n["title"] == "FAPD 2026-11-11: halted"
+    assert n["subject"] == n["title"] == "FAPD 2026-11-11: halted"  # emit(): subject defaults to title
     assert n["fields"] == {"Day": "2026-11-11", "Attempts": "4 of 4", "Detail": "Fix it."}
     assert n["queued_at"] == "2026-11-12T05:13:15Z"
     assert (n["source"], n["event"], n["day"]) == ("fapd", "eod.halted", "2026-11-11")
@@ -86,7 +86,8 @@ def test_published_names_a_recovery_and_links_the_day(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "SITE_BASE_URL", "https://example.org")
     notices.published("2026-11-11", pushed=True, failed_attempts=4)
     (n,) = _read(tmp_path)
-    assert n["subject"] == "FAPD 2026-11-11: digest published after 4 failed attempt(s)"
+    assert n["subject"] == "2026-11-11: digest published after 4 failed attempt(s)"
+    assert n["title"] == "FAPD 2026-11-11: digest published after 4 failed attempt(s)"
     assert n["level"] == "ok" and n["link"] == "https://example.org/2026-11-11.html"
     assert n["fields"]["Repository"] == "pushed"
 
@@ -137,3 +138,14 @@ def test_a_notice_failure_never_fails_the_finalize(tmp_path, monkeypatch):
     assert result["ran"] and result["pushed"]
     row = conn.execute("SELECT finalized_date FROM collector_state WHERE worker='eod'").fetchone()
     assert row["finalized_date"] == "2026-11-11"
+
+
+def test_end_of_day_subjects_name_the_day_not_the_project(tmp_path, monkeypatch):
+    """Whatever delivers a notice labels its source; the subject carries
+    the day and the event, the title adds the project for the body."""
+    monkeypatch.setattr(config, "NOTICE_DIR", str(tmp_path))
+    notices.finalize_failed("2026-11-11", 4, 4, 1)
+    notices.evidence_push_failed("2026-11-11", 1, 3, 4)
+    for n in _read(tmp_path):
+        assert n["subject"].startswith("2026-11-11: ") and not n["subject"].startswith("FAPD")
+        assert n["title"] == "FAPD " + n["subject"]
