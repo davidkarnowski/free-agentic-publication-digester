@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 8 item(s) in the last 14 days; most recent 2026-11-10, delivered by email.
+**delivering** — 7 item(s) in the last 14 days; most recent 2026-11-10, delivered by email.
 
-This label has held since 2026-09-28T14:07:50Z (UTC) and was last re-checked 2026-11-11T04:46:20Z (UTC).
+This label has held since 2026-09-28T14:07:50Z (UTC) and was last re-checked 2026-11-12T19:56:10Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,20 +71,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 4 item(s) ingested
+Last 24 hours: no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 8 in 14 days (0.57 per day) · most recent 2026-11-10 |
-| Content length | 2,705 characters average, 2,541 median (shortest 1,294, longest 4,713) |
+| Items ingested | 7 in 14 days (0.5 per day) · most recent 2026-11-10 |
+| Content length | 2,742 characters average, 2,636 median (shortest 1,294, longest 4,713) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 9 bulletin(s), 0 subscription notice(s), 3 junk-folder message(s) refused on a failed or unaligned DKIM signature in the last 14 days; most recent message 2026-11-10 |
+| Mailbox | 8 bulletin(s), 0 subscription notice(s), 3 junk-folder message(s) refused on a failed or unaligned DKIM signature in the last 14 days; most recent message 2026-11-10 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-8 item(s) in the last 14 days; most recent 2026-11-10, delivered by email.
+7 item(s) in the last 14 days; most recent 2026-11-10, delivered by email.
 
 ### All time
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-13 | 1 |
 | 2026-10-14 | 0 |
 | 2026-10-15 | 1 |
 | 2026-10-16 | 0 |
@@ -126,6 +125,7 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-09 | 0 |
 | 2026-11-10 | 4 |
 | 2026-11-11 | 0 |
+| 2026-11-12 | 0 |
 
 ## Our ingestion assessment
 

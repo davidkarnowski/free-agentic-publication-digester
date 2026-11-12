@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-03, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-03, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-11-03T21:19:56Z (UTC) and was last re-checked 2026-11-11T04:46:20Z (UTC).
+This label has held since 2026-11-11T05:15:03Z (UTC) and was last re-checked 2026-11-12T19:56:10Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,7 +70,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 31 request(s) (31 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -79,15 +79,15 @@ Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items in
 | Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-03 |
 | Content length | 3,359 characters average, 3,359 median (shortest 3,359, longest 3,359) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.odni.gov | 331 request(s) · 331 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.odni.gov | 352 request(s) · 352 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-11T05:00:17.300+00:00 UTC.
+last answered request 2026-11-12T20:01:17.863+00:00 UTC.
 
-Most recent item 2026-11-03, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-03, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.odni.gov, all time (since 2026-08-01):** 2,789 request(s) · 2,789 answered · 0 returned no content
+- **Our requests to www.odni.gov, all time (since 2026-08-01):** 2,835 request(s) · 2,835 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.odni.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-13 | 0 | 25 | 201 |
 | 2026-10-14 | 0 | 25 | 168 |
 | 2026-10-15 | 0 | 26 | 121 |
 | 2026-10-16 | 0 | 25 | 126 |
@@ -126,12 +125,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-08 | 0 | 25 | 108 |
 | 2026-11-09 | 0 | 26 | 148 |
 | 2026-11-10 | 0 | 26 | 92 |
-| 2026-11-11 | 0 | 1 | 219 |
+| 2026-11-11 | 0 | 25 | 99 |
+| 2026-11-12 | 0 | 22 | 141 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The ODNI Newsroom press-release feed on www.odni.gov is ingested in full delivery mode, so each article is fetched from its own page. The registry records the host's 10-second crawl-delay as honored. In the 14-day window we recorded one item, 3,359 characters, dated 2026-11-03, a rate of 0.07 items per day, and the health status reads delivering. Of 329 requests to www.odni.gov, all were answered, with no failures. The registry notes that the originally registered feed address returned 404 in a probe on 2026-07-31, and that the source is now read through the press-release category feed. The previous assessment, dated 2026-10-12, recorded no items in its window, with its most recent item dated August 3, and 335 requests with no failures. The window now shows one new item, dated 2026-11-03.
+Our ODNI Newsroom ingestion reads the press-release category feed on www.odni.gov in full delivery mode, so each article is fetched from its own page, and the registry records the 10-second crawl-delay as honored. The 14-day window holds one item, 3,359 characters, dated 2026-11-03, a rate of 0.07 items per day. Health reads quiet, with the most recent item nine days old as of 2026-11-12. In that window we made 331 requests to www.odni.gov, all answered, with no client errors, server errors, or unanswered requests. The registry notes that the originally registered feed address returned 404 in a probe on 2026-07-31, and they record that the publisher's site has moved to a new domain and platform, which is why the source is now read through the category feed. Compared with the previous assessment dated 2026-11-04, the item count and most recent item date are unchanged, the request count rose from 329 to 331, and the health status changed from delivering to quiet.
 
-_Model-written assessment of our own ingestion, generated 2026-11-04 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-12 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

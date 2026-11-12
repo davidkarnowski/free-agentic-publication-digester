@@ -6,7 +6,7 @@
 
 # Federal Transit Administration (email)
 
-planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Transportation, Federal Transit Administration
+planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Transportation, Federal Transit Administration
 
 Official site: https://www.transit.dot.gov/ · All sources: [sources.md](../sources.md)
 
@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
+**quiet** — Most recent item 2026-11-04, 8 days ago (quiet past 7 days).
 
-This label has held since 2026-11-04T20:40:15Z (UTC) and was last re-checked 2026-11-11T04:46:20Z (UTC).
+This label has held since 2026-11-12T05:13:32Z (UTC) and was last re-checked 2026-11-12T19:56:10Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -83,7 +83,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-1 item(s) in the last 14 days; most recent 2026-11-04, delivered by email.
+Most recent item 2026-11-04, 8 days ago (quiet past 7 days).
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-13 | 0 |
 | 2026-10-14 | 0 |
 | 2026-10-15 | 0 |
 | 2026-10-16 | 0 |
@@ -125,11 +124,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-09 | 0 |
 | 2026-11-10 | 0 |
 | 2026-11-11 | 0 |
+| 2026-11-12 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Bulletins from the Federal Transit Administration are ingested through the email adapter from usdotfta@info.dot.gov, with delivery mode recorded as email-full, meaning each bulletin carried its full item text. The one item observed so far measured 183 characters. The subscription was registered on 2026-09-26 and the registry status is planned. Bulletins observed before registration were not backfilled. In the measured 14-day window the project mailbox recorded one message, classed as a bulletin, with no errors and no refused messages. The most recent item is dated 2026-11-04, and the last mailbox message was received at 2026-11-04T20:38:00Z. This corresponds to 0.07 items per day over the window. Health reads delivering, and the collector reports zero consecutive errors. The registry notes do not record any incident history for this source. The registry notes still list the gate-3 coverage evaluation as pending the first ingested bulletins. Since the previous assessment on 2026-10-28, which recorded zero items and a health reading of no-data, one bulletin has been ingested and health has moved to delivering. The registry status remains planned.
+Bulletins from the Federal Transit Administration are ingested through the email adapter from usdotfta@info.dot.gov, with delivery mode email-full, meaning each bulletin carried its full item text. In the 14-day window the project mailbox recorded one message, classed as a bulletin, with no errors and no refused messages. The one item measured 183 characters. The most recent item is dated 2026-11-04, the last mailbox message arrived at 2026-11-04T20:38:00Z, and the collector reports its last successful cycle at 2026-11-12T05:27:24Z with zero consecutive errors. This corresponds to 0.07 items per day. The previous assessment, dated 2026-11-05, read health as delivering; the current health reading is quiet, because the most recent item is 8 days old. The registry status remains planned, and the registry notes still list the gate-3 coverage evaluation as pending the first ingested bulletins. Bulletins observed before the 2026-09-26 registration were not backfilled, and the registry notes record no incident history.
 
-_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-12 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

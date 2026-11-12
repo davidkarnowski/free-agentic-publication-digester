@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-03, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-03, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-28T18:35:23Z (UTC) and was last re-checked 2026-11-11T04:46:20Z (UTC).
+This label has held since 2026-11-11T05:15:03Z (UTC) and was last re-checked 2026-11-12T19:56:10Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -81,7 +81,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-03, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-03, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-13 | 0 |
 | 2026-10-14 | 0 |
 | 2026-10-15 | 0 |
 | 2026-10-16 | 1 |
@@ -123,11 +122,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-09 | 0 |
 | 2026-11-10 | 0 |
 | 2026-11-11 | 0 |
+| 2026-11-12 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest DOT Inspector General bulletins by email into the project mailbox. The subscription was confirmed through the publisher's own signup flow, with sender news@updates.oig.dot.gov, and the source was registered 2026-09-26 with status planned. Bulletins arrive with the full item text. The registry notes state that bulletins observed before registration were not backfilled. In the 14-day window we recorded 2 bulletins, a rate of 0.14 per day, with the most recent dated 2026-10-28 and the last message received at 2026-10-28T18:25:10Z. Bulletins averaged 1,681 characters (median 1,681; range 1,652 to 1,710). The mailbox shows 2 messages, both bulletins, with no administrative messages, errors, or refused deliveries. The registry notes list a coverage evaluation as still pending. Compared with the previous assessment dated 2026-10-25, the 14-day count rose from one bulletin, received 2026-10-16, to two, and the most recent bulletin date moved from 2026-10-16 to 2026-10-28. Health is recorded as delivering.
+We ingest DOT Inspector General bulletins by email into the project mailbox, from sender news@updates.oig.dot.gov, after the subscription was confirmed through the publisher's own signup flow. The source was registered 2026-09-26 with status planned, and the registry notes that bulletins observed before registration were not backfilled. Bulletins arrive with the full item text. The mailbox shows one message, a bulletin, with no administrative messages, errors, or refused deliveries, last received 2026-11-03T18:20:04Z. In the 14-day window we recorded one bulletin, 2,193 characters, a rate of 0.07 per day, with the most recent dated 2026-11-03. Health reads quiet, with the most recent bulletin nine days old. Email sources have no request counts to report. The registry notes list a coverage evaluation as still pending the first ingested bulletins. Compared with the previous assessment dated 2026-10-29, the 14-day count fell from two bulletins to one, the most recent bulletin date moved from 2026-10-28 to 2026-11-03, the average size rose from 1,681 to 2,193 characters, and the health status changed from delivering to quiet.
 
-_Model-written assessment of our own ingestion, generated 2026-10-29 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-12 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
