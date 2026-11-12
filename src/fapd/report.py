@@ -155,6 +155,100 @@ def _first_nonempty_line(text):
     return None
 
 
+# ---------------------------------------------------------------------------
+# Outside text is text (2026-11-12)
+# ---------------------------------------------------------------------------
+# The digest's structure is made of line starts and links: "- **" opens an
+# item that must carry an "Included because:" line, "## " opens a section
+# (and the Contents block is built from those lines), and "[...](...)" is a
+# link. Text this module did not write (a publisher's title, a feed's link,
+# a model's summary or Day in Review) is inserted as text and can never
+# make any of that structure. Incident: the 2026-11-11 Day in Review ended
+# in five "- **D.C. Circuit:** …" bullets the compose prompt forbids; the
+# render read them as items with no inclusion rule and the day failed
+# validation on all four finalizer attempts. The gate was right; the
+# render had let prose impersonate structure. Stored text is never
+# changed; only its rendering is.
+
+_LINK_BRACKETS = str.maketrans({"[": "\\[", "]": "\\]"})
+
+
+def _escape_links(text):
+    """Brackets escaped, so the text cannot open a Markdown link, an
+    image or a link reference definition."""
+    return (text or "").translate(_LINK_BRACKETS)
+
+
+def _inline(text):
+    """Outside text for a position inside one line: whitespace collapsed,
+    so it cannot start a line of its own, and brackets escaped, so it
+    cannot make a link."""
+    if text is not None and not isinstance(text, str):
+        text = str(text)
+    return _escape_links(_one_line(text))
+
+
+_URL_UNSAFE_RE = re.compile(r"[\s()<>\"]")
+
+
+def _safe_url(url):
+    """A link destination taken from outside data, or None. Only an
+    http(s) URL is linked (a feed cannot hand the site a ``javascript:``
+    link); spaces, parentheses, angle brackets and quotes are
+    percent-encoded so the URL cannot end the Markdown link early."""
+    url = (url or "").strip()
+    if not re.match(r"https?://", url, re.IGNORECASE):
+        return None
+    return _URL_UNSAFE_RE.sub(lambda m: f"%{ord(m.group()):02X}", url)
+
+
+_LIST_MARKER_RE = re.compile(r"^(?:[-*+]\s+)+")
+_ORDERED_MARKER_RE = re.compile(r"^(\d{1,9})([.)])(?=\s|$)")
+# Headings, block quotes, table rows, code fences and thematic breaks.
+_BLOCK_START_RE = re.compile(r"^(?:#{1,6}(?=\s|$)|>|\||`{3,}|(?:[-*_=]\s*){3,}$)")
+
+
+def _prose_paragraph(text):
+    text = _inline(text)
+    ordered = _ORDERED_MARKER_RE.match(text)
+    if ordered:
+        return text[:ordered.end(1)] + "\\" + text[ordered.end(1):]
+    if _BLOCK_START_RE.match(text):
+        return "\\" + text
+    return text
+
+
+def _prose_block(text):
+    """Model prose for a block position (the Day in Review): plain
+    paragraphs, nothing else. Blank lines separate paragraphs and other
+    line breaks join; a bulleted line becomes its own paragraph with the
+    bullet marker dropped and every word kept; a paragraph that would
+    still open a block (heading, quote, numbered item, table row, fence,
+    rule) has its first character escaped. The prompt already asks for
+    paragraphs only (compose.py); this makes the render hold whatever
+    the model returns."""
+    paragraphs, current = [], []
+
+    def close():
+        if current:
+            paragraphs.append(_prose_paragraph(" ".join(current)))
+            current.clear()
+
+    for line in (text or "").splitlines():
+        line = line.strip()
+        if not line:
+            close()
+            continue
+        marker = _LIST_MARKER_RE.match(line)
+        if marker:
+            close()
+            line = line[marker.end():]
+        if line:
+            current.append(line)
+    close()
+    return "\n\n".join(p for p in paragraphs if p)
+
+
 def _utc_now():
     return dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -553,7 +647,7 @@ def _summary_tail(item):
     they were summarized)."""
     summary = item.get("summary")
     if summary:
-        return f" — {_one_line(summary)}"
+        return f" — {_inline(summary)}"
     return f" — {_RECORD_MARK}"
 
 
@@ -571,7 +665,7 @@ def _plain_line(item):
     plain = item.get("plain")
     if not plain:
         return []
-    return [f"  - *In plain terms:* {_one_line(plain)}"]
+    return [f"  - *In plain terms:* {_inline(plain)}"]
 
 
 # Display-only case normalization for ALL-CAPS source headings (disclosed in
@@ -705,7 +799,9 @@ def _prior_pub_lines(item):
     for p in priors:
         source = p.get("prior_source") or "another official source"
         when = p.get("prior_date") or "an earlier day"
-        url = p.get("prior_url")
+        source = _inline(source)
+        when = _inline(when)
+        url = _safe_url(p.get("prior_url"))
         reference = f"[{when}]({url})" if url else when
         lines.append(
             f"  - Corroborated across time: the same document was first"
@@ -777,15 +873,16 @@ def _agency_lines(conn, date):
     for r in rows:
         by_agency.setdefault(r["agency"] or "(unattributed)", []).append(r)
     for agency in sorted(by_agency, key=str.lower):
-        lines += [f"#### {agency}", ""]
+        lines += [f"#### {_inline(agency)}", ""]
         for r in by_agency[agency]:
             meta = r["_meta"]
             # The parsed UTC day, not a truncated raw header: slicing an
             # RFC-822 date rendered "Tue, 28 Jul 2026 ..." as "Tue, 28 Jul 26 1",
             # which misstates the year.
             claimed = r.get("_claimed_day") or _claimed_day(meta)
-            title = _one_line(r["title"])
-            url = meta.get("url")
+            title = _inline(r["title"])
+            url = _safe_url(meta.get("url"))
+            wayback = _safe_url(meta.get("wayback_url"))
             # An email bulletin sometimes carries a release that names no
             # canonical page. Citing an unrelated link would be worse than
             # citing none: the captured message is the source of record.
@@ -808,10 +905,10 @@ def _agency_lines(conn, date):
                     f" subscription, captured and {signed}"
                     + ("" if url else " (the bulletin named no canonical page)")
                 )
-            elif meta.get("wayback_url"):
+            elif wayback:
                 lines.append(
                     f"  - Source: agency newsroom (above) · "
-                    f"[independent archive]({meta['wayback_url']})"
+                    f"[independent archive]({wayback})"
                 )
             for dup in r.get("_corroborators") or ():
                 dmeta = dup["_meta"]
@@ -896,20 +993,20 @@ _TALLY_ORDER = ("Yea", "Nay", "Present", "Not Voting")
 
 def _vote_item_lines(row):
     details = row["_details"]
-    url = row["_meta"].get("url")
-    number = str(details.get("vote_number") or "").lstrip("0")
+    url = _safe_url(row["_meta"].get("url"))
+    number = _inline(str(details.get("vote_number") or "").lstrip("0"))
     subject = ": ".join(
-        p for p in (details.get("issue"), details.get("question")) if p)
+        _one_line(p) for p in (details.get("issue"), details.get("question")) if p)
     label = f"Vote {number}" if number else "Vote"
     if subject:
-        label += f" — {subject}"
+        label += f" — {_escape_links(subject)}"
     head = f"- **[{label}]({url})**" if url else f"- **{label}**"
     if details.get("result"):
-        head += f" — {_one_line(details['result'])}."
+        head += f" — {_inline(details['result'])}."
     lines = [head]
     title = _one_line(row["title"] or "")
     if title and title != subject:
-        lines.append(f"  - {title}")
+        lines.append(f"  - {_escape_links(title)}")
     tally = details.get("tally") or {}
     if tally:
         # Fixed order, not the stored dict's: metadata is serialized with
@@ -918,12 +1015,14 @@ def _vote_item_lines(row):
         ordered = [p for p in _TALLY_ORDER if p in tally]
         ordered += sorted(p for p in tally if p not in _TALLY_ORDER)
         lines.append("  - Tally: "
-                     + " · ".join(f"{p} {tally[p]}" for p in ordered))
+                     + " · ".join(f"{_inline(p)} {_inline(str(tally[p]))}"
+                                  for p in ordered))
     lines.append("  - Included because: VOTES-SEL-01 — "
                  + RULE_DESCRIPTIONS["VOTES-SEL-01"])
     source = "  - Source: the chamber's own roll-call record (linked above)"
-    if row["_meta"].get("wayback_url"):
-        source += f" · [independent archive]({row['_meta']['wayback_url']})"
+    wayback = _safe_url(row["_meta"].get("wayback_url"))
+    if wayback:
+        source += f" · [independent archive]({wayback})"
     lines.append(source)
     return lines
 
@@ -1017,14 +1116,15 @@ def _billaction_item_lines(row):
     from .agencies import _ordinal
 
     details = row["_details"]
-    url = row["_meta"].get("url")
-    title = _one_line(row["title"] or "") or details.get("designation") or "Bill action"
+    url = _safe_url(row["_meta"].get("url"))
+    title = (_inline(row["title"] or "") or _inline(details.get("designation") or "")
+             or "Bill action")
     head = f"- **[{title}]({url})**" if url else f"- **{title}**"
     lines = [head]
-    action = _one_line(details.get("action_text") or "")
+    action = _inline(details.get("action_text") or "")
     if action:
         lines.append(f"  - Action: {action}")
-    chamber = _one_line(details.get("origin_chamber") or "")
+    chamber = _inline(details.get("origin_chamber") or "")
     congress = _one_line(str(details.get("congress") or ""))
     context = []
     if congress.isdigit():
@@ -1037,8 +1137,9 @@ def _billaction_item_lines(row):
                  + RULE_DESCRIPTIONS["BILLACTIONS-SEL-01"])
     source = ("  - Source: the Library of Congress's bill-status record via the"
               " Congress.gov API; the bill page is linked above")
-    if row["_meta"].get("wayback_url"):
-        source += f" · [independent archive]({row['_meta']['wayback_url']})"
+    wayback = _safe_url(row["_meta"].get("wayback_url"))
+    if wayback:
+        source += f" · [independent archive]({wayback})"
     lines.append(source)
     return lines
 
@@ -1177,13 +1278,14 @@ def _presact_lines(conn, date, items):
 
 
 def _presact_item_lines(row, item=None):
-    """One presidential action. The title is the publisher's, verbatim.
+    """One presidential action. The title is the publisher's, verbatim
+    (its words, on one line: a line break in it must not split the item).
 
     `item` is the matching row from `_load_items` (summary/plain), when
     one exists — a pending/withdrawn action renders title-only, exactly
     as every section already handles an item with no stored summary."""
-    meta, url = row["_meta"], (row["_meta"].get("url") or "")
-    title = row["title"] or "(untitled)"
+    meta, url = row["_meta"], _safe_url(row["_meta"].get("url"))
+    title = _inline(row["title"]) or "(untitled)"
     head = f"- **{title}**" if not url else f"- **[{title}]({url})**"
     head += _summary_tail(item or {})
     lines = [head]
@@ -1201,8 +1303,9 @@ def _presact_item_lines(row, item=None):
     if row.get("_corroborators"):
         lines.append(f"  - Corroborated: also observed through"
                      f" {len(row['_corroborators'])} other White House feed(s)")
-    if meta.get("wayback_url"):
-        lines.append(f"  - [independent archive]({meta['wayback_url']})")
+    wayback = _safe_url(meta.get("wayback_url"))
+    if wayback:
+        lines.append(f"  - [independent archive]({wayback})")
     return lines
 
 
@@ -1301,7 +1404,7 @@ def _display_title(raw):
 
 def _crec_item_lines(item):
     raw = item["granule_title"] or _first_nonempty_line(item["text_head"]) or item["granule_id"]
-    title = _truncate(_display_title(raw))
+    title = _escape_links(_truncate(_display_title(raw)))
     return [
         f"- **{title}**{_summary_tail(item)}",
         *_plain_line(item),
@@ -1448,9 +1551,9 @@ def _bills_lines(conn, date, items):
     if selected:
         for item in selected:
             metadata = item["metadata"]
-            label = metadata.get("legis_num") or item["package_id"]
-            version = metadata.get("bill_version") or item["doc_type"] or "?"
-            title = _one_line(item["title"]) or "(untitled)"
+            label = _inline(metadata.get("legis_num")) or item["package_id"]
+            version = _inline(metadata.get("bill_version") or item["doc_type"]) or "?"
+            title = _inline(item["title"]) or "(untitled)"
             lines += [
                 f"- **{label} ({version}) — {title}**{_summary_tail(item)}",
                 *_plain_line(item),
@@ -1514,13 +1617,13 @@ def _fr_item_lines(item, date, out_dir, assets):
     metadata = item["metadata"]
     paren = granule_id
     if metadata.get("cfr"):
-        paren += f"; {metadata['cfr']}"
-    title = _one_line(item["title"]) or "(untitled)"
+        paren += f"; {_inline(metadata['cfr'])}"
+    title = _inline(item["title"]) or "(untitled)"
     head = f"- **{title}** ({paren}){_summary_tail(item)}"
     for key, label in (("action", "Action"), ("dates", "Dates")):
         value = metadata.get(key)
         if value:
-            head += f" {label}: {_one_line(value).rstrip('.')}."
+            head += f" {label}: {_inline(value).rstrip('.')}."
     lines = [head, *_plain_line(item), _included_line(item),
              _source_line(package_id, granule_id), *_prior_pub_lines(item)]
 
@@ -1644,11 +1747,11 @@ def _plaw_lines(conn, date, items):
     if laws:
         for item in laws:
             metadata = item["metadata"]
-            cite = (metadata.get("citations") or [item["package_id"]])[0]
-            head = (f"- **{cite} — {_one_line(item['title'] or '(untitled)')}**"
+            cite = _inline((metadata.get("citations") or [item["package_id"]])[0])
+            head = (f"- **{cite} — {_inline(item['title'] or '(untitled)')}**"
                     f"{_summary_tail(item)}")
             if metadata.get("approved_date"):
-                head += f" Approved: {metadata['approved_date']}."
+                head += f" Approved: {_inline(metadata['approved_date'])}."
             lines += [head, *_plain_line(item), _included_line(item),
                       _source_line(item["package_id"])]
         lines.append("")
@@ -1675,12 +1778,12 @@ def _by_court(subset):
 
 def _uscourts_item_lines(item):
     metadata = item["metadata"]
-    title = _one_line(item["title"]) or "(untitled)"
+    title = _inline(item["title"]) or "(untitled)"
     details = []
     if metadata.get("case_number"):
-        details.append(f"No. {metadata['case_number']}")
+        details.append(f"No. {_inline(metadata['case_number'])}")
     if metadata.get("date_filed"):
-        details.append(f"filed {metadata['date_filed']}")
+        details.append(f"filed {_inline(metadata['date_filed'])}")
     head = f"- **{title}**"
     if details:
         head += f" ({'; '.join(details)})"
@@ -2026,7 +2129,10 @@ def _methodology_lines(date, git_short):
         "summaries, derived only from the summary text shown beside them; items",
         "without one had no usable restatement. ALL-CAPS source headings are",
         "case-normalized for display; original casing is preserved at the source",
-        "link. Term definitions above are static, repo-versioned prose.*",
+        "link. Source titles and model-generated prose are shown as text: list,",
+        "heading or link markup inside them is displayed as plain paragraphs and",
+        "characters, never as digest structure. Term definitions above are",
+        "static, repo-versioned prose.*",
         "",
         "License: this digest's compilation and prose are",
         "[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (credit",
@@ -2124,8 +2230,14 @@ def _validate_lexicon(markdown, conn, date):
     officials = _lexicon_officials(conn, date)
     # URLs are citations, not prose — link slugs echo source headlines
     # (".../historic-multinational-medical-team...") and must not trip the
-    # gate. Strip markdown link destinations before scanning.
-    scan = re.sub(r"\]\(([^)\s]+)\)", "]( )", markdown)
+    # gate. Strip markdown link destinations before scanning. Only a real
+    # link's: an escaped "\]" is outside text (`_escape_links`), and the
+    # words after it are prose to scan, not a URL to skip.
+    scan = re.sub(r"(?<!\\)\]\(([^)\s]+)\)", "]( )", markdown)
+    # Read outside text as it was written: the render escapes its brackets
+    # (2026-11-12), and the official-span exemption matches the publisher's
+    # own string, which has none of those escapes.
+    scan = scan.replace("\\[", "[").replace("\\]", "]")
     exempt = _official_spans(scan, officials)
     for match in _BANNED_RE.finditer(scan):
         if not any(a <= match.start() and match.end() <= b for a, b in exempt):
@@ -2466,7 +2578,7 @@ def _day_in_review_lines(conn, date):
     return [
         "## Day in Review",
         "",
-        day["summary"].strip(),
+        _prose_block(day["summary"]),
         "",
         *basis,
         "",
@@ -2507,13 +2619,13 @@ def _inject_section_blurbs(lines, synopses, tags=None):
         out.append(line)
         key = _BLURB_HEADINGS.get(line.strip())
         if key and tags.get(key):
-            parts = " · ".join(tags[key]["mechanical"])
+            parts = " · ".join(_inline(t) for t in tags[key]["mechanical"])
             if tags[key]["llm"]:  # model-derived, labeled in place (GUIDE §2)
-                parts += " · model keys: " + " · ".join(tags[key]["llm"])
+                parts += " · model keys: " + " · ".join(_inline(t) for t in tags[key]["llm"])
             if parts:
                 out += ["", f"Tags: {parts}"]
         if key and synopses.get(key):
-            out += ["", f"*In plain terms: {_one_line(synopses[key])}*"]
+            out += ["", f"*In plain terms: {_inline(synopses[key])}*"]
     return out
 
 

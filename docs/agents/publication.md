@@ -135,6 +135,12 @@ docs/accessibility.md → this file.
 - `MAX_GRAPHICS_PER_ITEM = 2` with a disclosed remainder.
 - The lexicon gate deliberately does NOT mask the Day in Review or
   section synopses — compose prose gets the strictest scrutiny.
+- Outside text is text (2026-11-12; CLAUDE.md §9): titles, feed links and
+  model prose enter the digest only through `report._inline`,
+  `_prose_block` and `_safe_url`, and digest pages convert with
+  `publish._DIGEST_MD` (raw HTML shown as text). A model's stray list in
+  the Day in Review renders as paragraphs; the inclusion-line gate is
+  unchanged.
 - `build_today` does not write `style.css` (only `build_site` and `refresh_sources` do — the latter since fc7ab66, for the activity-graph grid) —
   a CSS change needs a site build to deploy; plan accordingly rather
   than moving the write.

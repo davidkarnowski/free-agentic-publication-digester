@@ -269,6 +269,23 @@ deploy/dev/scripts/dev-up.sh                  # local prod-image render at local
   once and goes to the operator as both. Interactive presentation works
   down the doctrine's ladder instead: semantic HTML, then a native
   element, then CSS-only. Do not "modernize" this.
+- **Outside text is text** (2026-11-12). Every string the renderer did
+  not write — a publisher's title, a feed's link, a model's summary,
+  synopsis, tag or Day in Review — goes into the digest through
+  `report._inline` (one line, brackets escaped), `report._prose_block`
+  (Day in Review: plain paragraphs; a bulleted line becomes its own
+  paragraph, other block starts are escaped) or `report._safe_url`
+  (http(s) only, percent-encoded), and digest pages convert with
+  `publish._DIGEST_MD`, which shows raw HTML and autolinks as text. A
+  digest's structure is line starts and links (`- **` is an item that
+  must carry an inclusion rule, `## ` a section and a Contents entry), so
+  text that can make either can forge the record; the 2026-11-11 Day in
+  Review's model-written `- **Court:**` bullets failed validation on all
+  four finalizer attempts. The fix is in the render, never the gate, and
+  the stored text is never changed. A new insertion point uses these
+  helpers; `_validate_lexicon` undoes the bracket escapes so official
+  titles keep their exemption. Do not "simplify" an insertion back to a
+  bare f-string.
 - **`scripts/digest.py` imports the analysis layer lazily** — report-only
   runs must work even if analysis modules break.
 - **`LLMClient._ensure_backend_column`** does an in-place ALTER — the

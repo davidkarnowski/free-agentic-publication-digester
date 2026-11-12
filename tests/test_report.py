@@ -1686,3 +1686,126 @@ def test_an_ordinary_review_keeps_its_footnote(conn):
     text = "\n".join(report._day_in_review_lines(conn, DATE))
     assert "Composed from the summarized items below" in text
     assert "A short review" not in text
+
+
+# ---------------------------------------------------------------------------
+# Outside text is text (2026-11-12): titles, feed links and model prose can
+# never make digest structure (items, sections, Contents entries, links).
+# ---------------------------------------------------------------------------
+
+def _store_model_review(conn, text):
+    conn.execute(
+        "INSERT INTO day_summaries (date, prompt_version, model, summary,"
+        " input_tokens, output_tokens, created_at, kind)"
+        " VALUES (?, ?, 'opus', ?, 0, 0, '2026-07-24T05:00:00Z', 'full')",
+        (DATE, config.COMPOSE_PROMPT_VERSION, text))
+    conn.commit()
+
+
+def test_day_in_review_bullets_render_as_paragraphs(conn, tmp_path):
+    """The 2026-11-11 incident: the compose model ended its judicial
+    paragraph in "- **Court:** …" bullets, which the prompt forbids. The
+    render read them as items without an inclusion rule, and the day
+    failed validation on every finalizer attempt. Each bullet now renders
+    as its own paragraph, words and bold label kept, and the day
+    validates."""
+    _store_model_review(conn, (
+        "The digest carries 50 appellate opinions.\n\n"
+        "- **D.C. Circuit:** affirmed an injunction barring the agency.\n"
+        "- **Fourth Circuit:** affirmed in part and reversed in part.\n"))
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert ("The digest carries 50 appellate opinions.\n\n"
+            "**D.C. Circuit:** affirmed an injunction barring the agency.\n\n"
+            "**Fourth Circuit:** affirmed in part and reversed in part.\n") in md
+    assert not re.search(r"^- \*\*(D\.C\.|Fourth) Circuit", md, re.MULTILINE)
+
+
+def test_day_in_review_cannot_forge_a_section_or_contents_entry(conn, tmp_path):
+    _store_model_review(
+        conn, "## 9. Forged Section\n\nA paragraph.\n\n> quoted\n\n1. numbered")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "\\## 9. Forged Section" in md
+    assert not re.search(r"^## 9\. Forged", md, re.MULTILINE)
+    assert "(#9-forged-section)" not in md  # no Contents entry
+    assert "\\> quoted" in md
+    assert "1\\. numbered" in md
+
+
+@pytest.mark.parametrize("raw, rendered", [
+    ("- **A:** one\n- **B:** two", "**A:** one\n\n**B:** two"),
+    ("* item\n+ item two", "item\n\nitem two"),
+    ("line one\nline two", "line one line two"),
+    ("## Heading", "\\## Heading"),
+    ("1. First", "1\\. First"),
+    ("2) Second", "2\\) Second"),
+    ("> quote", "\\> quote"),
+    ("---", "\\---"),
+    ("| a | b |", "\\| a | b |"),
+    ("```code", "\\```code"),
+    ("[x]: https://example.org", "\\[x\\]: https://example.org"),
+    ("See [this](https://example.org).", "See \\[this\\](https://example.org)."),
+    ("    indented code", "indented code"),
+    ("**Bold lead.** Then prose.", "**Bold lead.** Then prose."),
+])
+def test_prose_block_keeps_words_and_drops_structure(raw, rendered):
+    assert report._prose_block(raw) == rendered
+
+
+def test_outside_title_cannot_split_an_item_or_make_a_link(conn, tmp_path):
+    """A publisher's title is inserted as text: a line break in it cannot
+    start a forged item, and brackets in it cannot make a link."""
+    _add_presact(conn, "PA-odd-1",
+                 "Order on Trade\n- **Forged item** [click](https://example.org/x)",
+                 "EO", "Thu, 23 Jul 2026 21:07:00 +0000")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert not re.search(r"^- \*\*Forged item", md, re.MULTILINE)
+    assert "Order on Trade - **Forged item** \\[click\\](https://example.org/x)" in md
+
+
+def test_feed_link_must_be_http(conn, tmp_path):
+    _add_agency_release(conn, "PR-js-1", "Odd Release", "javascript:alert(1)", None)
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "javascript:" not in md
+    assert "- **Odd Release**" in md  # still listed, unlinked
+
+
+def test_feed_link_cannot_end_the_markdown_link_early(conn, tmp_path):
+    _add_agency_release(conn, "PR-paren-1", "Paren Release",
+                        "https://www.justice.gov/a (b)", None)
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "[Paren Release](https://www.justice.gov/a%20%28b%29)" in md
+
+
+def test_vote_subject_line_break_cannot_start_a_line(conn, tmp_path):
+    add_vote(conn, "PR-senate-xml-22222222", number="00218", claimed=DATE,
+             title="S. Res. 818; A resolution.", issue="S.Res. 818",
+             question="On the Resolution\n## 9. Forged")
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "**[Vote 218 — S.Res. 818: On the Resolution ## 9. Forged]" in md
+    assert not re.search(r"^## 9\. Forged", md, re.MULTILINE)
+
+
+def test_lexicon_exemption_holds_for_a_bracketed_official_title(conn, tmp_path):
+    """Brackets in an official title are escaped in the render; the
+    official-span exemption must still find the publisher's own string,
+    or a title would block the day the way the 2026-11-11 bullets did."""
+    pid, gid = "USCOURTS-ca5-26-06666", "USCOURTS-ca5-26-06666-0"
+    add_package(conn, pid, "USCOURTS")
+    add_text(conn, pid, gid, "USCOURTS", "APPELLATE",
+             title="Landmark [Legal] Foundation v. EPA",
+             metadata={"court_code": "ca5",
+                       "court_name": "United States Court of Appeals"
+                                     " for the Fifth Circuit",
+                       "case_number": "26-06666", "date_filed": DATE},
+             chars=9000)
+    add_summary(conn, pid, gid, "USCOURTS-SEL-01", "The court ruled for the agency.")
+    conn.commit()
+    md = report.render(conn, DATE, out_dir=tmp_path).read_text()
+    assert "Landmark \\[Legal\\] Foundation v. EPA" in md
+
+
+def test_lexicon_gate_still_reads_prose_after_an_escaped_bracket(conn):
+    """The link-destination strip skips only real links: words after an
+    escaped bracket are prose and stay in the scan."""
+    with pytest.raises(report.ValidationError, match="sweeping"):
+        report._validate_lexicon("A note \\[x\\](a sweeping change)\n", conn, DATE)

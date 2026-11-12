@@ -36,6 +36,24 @@ REPO_URL = ("https://github.com/davidkarnowski/"
 
 _MD = markdown.Markdown(extensions=["tables", "toc"])
 
+
+def _digest_markdown():
+    """The converter for digest pages: Markdown structure only, never raw
+    HTML. A digest carries text the project did not write (publishers'
+    titles, feed links, model prose), and Python-Markdown passes inline
+    and block HTML through by default, so a title holding a tag would
+    reach the page as markup. With the HTML and autolink handlers removed,
+    such text is escaped and shown as written. The renderer emits no HTML
+    of its own (report.py); the site's own pages, which do, keep `_MD`."""
+    md = markdown.Markdown(extensions=["tables", "toc"])
+    md.preprocessors.deregister("html_block")
+    for name in ("html", "autolink", "automail"):
+        md.inlinePatterns.deregister(name)
+    return md
+
+
+_DIGEST_MD = _digest_markdown()
+
 _PAGE = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1244,6 +1262,9 @@ def _teaser(md_text):
         return None
     rest = md_text[match.end():].strip()
     para = rest.split("\n\n", 1)[0].replace("\n", " ").strip()
+    # The teaser leaves Markdown for an HTML-escaped card, so the render's
+    # escapes of outside text (report._inline) come off here.
+    para = re.sub(r"\\([\\`*_{}\[\]()#+\-.!|>])", r"\1", para)
     return _first_sentence(para) or None
 
 
@@ -4186,8 +4207,8 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
     for i, path in enumerate(files):
         md_text = path.read_text(encoding="utf-8")
         teasers[path.stem] = _teaser(md_text)
-        _MD.reset()
-        body = _style_digest_body(_MD.convert(md_text))
+        _DIGEST_MD.reset()
+        body = _style_digest_body(_DIGEST_MD.convert(md_text))
         body = _inject_day_view_link(body, path.stem, md_text, out_dir)
         audio_asset = out_dir / "assets" / "audio" / f"digest-{path.stem}.mp3"
         if audio_asset.exists():

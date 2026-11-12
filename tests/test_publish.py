@@ -3250,3 +3250,34 @@ def test_today_hour_entries_is_the_one_grouping_rule():
     shape = [(e[0]["collection"], e[0]["package_id"], len(e)) for e in entries]
     assert shape == [("USCOURTS", "A", 2), ("FR", "F", 1), ("USCOURTS", "B", 1),
                      ("FR", "F", 1), ("AGENCYPR", "", 1), ("AGENCYPR", "", 1)]
+
+
+def test_digest_pages_show_outside_html_as_text(tmp_path):
+    """2026-11-12: a digest carries text the project did not write, so its
+    page never passes raw HTML or autolinks through; they show as text."""
+    d = tmp_path / "digests"
+    d.mkdir()
+    (d / "2026-07-03.md").write_text(
+        "# Daily Digest — 2026-07-03\n\n## 6. Agency Announcements\n\n"
+        "- **Title <img src=x onerror=alert(1)> <https://example.org/x>**\n"
+        "  - Included because: AGENCYPR-SEL-01 — test\n\n"
+        "Para <iframe src='https://example.org/f'></iframe> R&D &amp; more.\n")
+    out = tmp_path / "site"
+    publish.build_site(d, out)
+    page = (out / "2026-07-03.html").read_text()
+    assert "<img src=x" not in page
+    assert "&lt;img src=x onerror=alert(1)&gt;" in page
+    assert "<iframe" not in page
+    assert 'href="https://example.org/x"' not in page
+    assert "R&amp;D &amp; more." in page
+
+
+def test_site_pages_keep_their_own_html():
+    """Only digest pages lose raw HTML; the site's own documents keep it."""
+    assert "<b>x</b>" in publish._MD.reset().convert("a <b>x</b>")
+    assert "<b>x</b>" not in publish._DIGEST_MD.reset().convert("a <b>x</b>")
+
+
+def test_teaser_drops_markdown_escapes():
+    md = "## Day in Review\n\nThe \\[Act\\] passed the House. More text.\n"
+    assert publish._teaser(md).startswith("The [Act] passed the House")
