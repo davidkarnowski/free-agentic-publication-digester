@@ -108,6 +108,18 @@ def test_deploy_bundle_rsync_excludes_the_host_evidence_directory():
     assert (sh.index("--exclude 'evidence/'")
             < sh.index("'$REMOTE_DIR/repo/deploy/vps/' '$REMOTE_DIR/'"))
 
+def test_deploy_bundle_rsync_excludes_the_notice_directory():
+    """2026-11-12: /opt/fapd/notices/ is the operator-notice directory the
+    backend mounts (FAPD_NOTICE_DIR); it exists only on the box and belongs
+    to whatever reads it. The first deploy after it appeared deleted it:
+    the sync could not list it, but it was empty, and removing an empty
+    directory needs only write access to its parent. The F-004 class."""
+    sh = (VPS / "scripts" / "deploy.sh").read_text(encoding="utf-8")
+    assert "--exclude 'notices/'" in sh
+    assert (sh.index("--exclude 'notices/'")
+            < sh.index("'$REMOTE_DIR/repo/deploy/vps/' '$REMOTE_DIR/'"))
+
+
 def _live_yaml(path):
     return "\n".join(ln for ln in path.read_text(encoding="utf-8").splitlines()
                      if not ln.lstrip().startswith("#"))

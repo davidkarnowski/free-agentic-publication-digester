@@ -96,10 +96,14 @@ run "git -C '$REMOTE_DIR/repo' fsck --connectivity-only --no-dangling"
 # joined 2026-09-13 (security review SR-3): fapd-web bind-mounts
 # /opt/fapd/logs/ for the /mcp access log, and --delete would erase it on
 # every deploy. evidence/ joined 2026-09-26: incident material the operator
-# keeps on the box, mirrored by nothing in deploy/vps/.
+# keeps on the box, mirrored by nothing in deploy/vps/. notices/ joined
+# 2026-11-12: the operator-notice directory the backend mounts, owned by
+# whatever reads it; the first deploy after it appeared deleted it (it was
+# empty, so the directory's own permissions did not stop the removal).
 run "rsync -a --delete --exclude '.DS_Store' \
   --exclude '.env' --exclude 'secrets/' --exclude 'repo/' \
   --exclude 'deploy.env' --exclude 'logs/' --exclude 'evidence/' \
+  --exclude 'notices/' \
   '$REMOTE_DIR/repo/deploy/vps/' '$REMOTE_DIR/'"
 
 echo "==> [3/4] build + up on the box"
