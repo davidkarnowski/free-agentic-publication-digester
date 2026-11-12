@@ -975,3 +975,14 @@ live in `.claude/agents/fapd-*.md` (tracked).
   the card. The source is to be re-probed in the future for a service update.
   It was the only active source for the digest's recorded-votes section, so
   that section lists no votes until a source returns.
+- **2026-11-12** — **End-of-day events reach the operator as notices**
+  (operator). The 2026-11-11 digest failed all four finalizer attempts and
+  halted, and the only trace was the log until a health check read it. The
+  end-of-day worker now writes one small JSON notice per event (the first
+  failed attempt, the halt, a failed evidence push and its halt, and every
+  published day, naming a recovery) into `FAPD_NOTICE_DIR`
+  (`src/fapd/notices.py`). The project defines the notice and where it is
+  written, never how it travels: delivery is the operator's, outside this
+  repository, and nothing here names a service, an address or a method.
+  Best-effort: a notice that cannot be written is logged and never fails the
+  run. Same day: "outside text is text" (§9), after the same incident.

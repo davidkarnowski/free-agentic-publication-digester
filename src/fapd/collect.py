@@ -17,7 +17,7 @@ import random
 import threading
 import uuid
 
-from . import config, health
+from . import config, health, notices
 from .client import BudgetExceededError, redact_secrets
 from .sync import publication_date, utc_now_iso
 
@@ -863,6 +863,25 @@ class EODWorker(Worker):
                 """, (error,))
         conn.commit()
 
+    @staticmethod
+    def _push_attempts(conn):
+        row = conn.execute(
+            "SELECT evidence_push_attempts FROM collector_state"
+            " WHERE worker = 'eod'").fetchone()
+        return (row["evidence_push_attempts"] or 0) if row else 0
+
+    @staticmethod
+    def _failed_attempts(conn, target):
+        """Failed finalize attempts already recorded for `target` (0 for a
+        day that has not failed): what a published notice names as the
+        recovery."""
+        row = conn.execute(
+            "SELECT finalize_target, finalize_attempts FROM collector_state"
+            " WHERE worker = 'eod'").fetchone()
+        if not row or row["finalize_target"] != target:
+            return 0
+        return row["finalize_attempts"] or 0
+
     def _push_evidence(self, conn, target):
         """Run the evidence commit and record what happened. Returns True
         on a push that reached the remote."""
@@ -871,6 +890,9 @@ class EODWorker(Worker):
         self._record_evidence_push(conn, pushed,
                                    None if pushed else f"exit {rc}")
         if not pushed:
+            notices.evidence_push_failed(
+                target, self._push_attempts(conn),
+                config.EVIDENCE_PUSH_MAX_ATTEMPTS, rc)
             logger.error(
                 "EVIDENCE PUSH FAILED for %s (exit %s) — the digest is LIVE"
                 " on the site but the repository does not have it. The"
@@ -914,6 +936,9 @@ class EODWorker(Worker):
         logger.warning("evidence push pending for %s (attempt %d) — retrying",
                        finalized, row["evidence_push_attempts"] + 1)
         pushed = self._push_evidence(conn, finalized)
+        if pushed:
+            notices.published(finalized, pushed=True,
+                              failed_pushes=row["evidence_push_attempts"])
         if not pushed:
             attempts = conn.execute(
                 "SELECT evidence_push_attempts FROM collector_state"
@@ -953,6 +978,7 @@ class EODWorker(Worker):
 
     def _finalize(self, conn, cycle_id, target):
         logger.info("EOD finalizer firing for %s — pausing collectors", target)
+        failed_before = self._failed_attempts(conn, target)
         self.sup.pause_event.set()
         try:
             exit_code = self.sup.finalizer_runner(target)
@@ -961,6 +987,8 @@ class EODWorker(Worker):
                 pushed = self._push_evidence(conn, target)
             if exit_code != 0:
                 attempts = self._record_finalize_failure(conn, target)
+                notices.finalize_failed(target, attempts,
+                                        config.EOD_MAX_FINALIZE_ATTEMPTS, exit_code)
                 if attempts >= config.EOD_MAX_FINALIZE_ATTEMPTS:
                     # The loud disclosure the hard stop owes (GUIDE §2
                     # no-silent-omission, applied to operations): the day
@@ -974,6 +1002,9 @@ class EODWorker(Worker):
                         " nothing)", target, attempts, target)
                 raise RuntimeError(f"finalizer exited {exit_code} for {target}")
             self._record_finalized(conn, target)
+            if pushed is not False:  # a failed push sent its own notice
+                notices.published(target, pushed=bool(pushed),
+                                  failed_attempts=failed_before)
             journal_new(conn, "govinfo", cycle_id)  # late finalizer items
             journal_model_events(conn, cycle_id)
             return {"ran": True, "date": target, "finalized": target,

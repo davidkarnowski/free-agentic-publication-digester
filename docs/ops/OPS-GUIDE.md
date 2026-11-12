@@ -219,6 +219,17 @@ A day with `available=0` and a provider that should have worked is a
 finding; a day with `available=0` under `LLM_BACKEND=none` is the
 configuration working.
 
+### Operator notices
+
+With `FAPD_NOTICE_DIR` set in the backend's `.env` (to `/app/notices`,
+the mounted `notices/` directory), the end-of-day worker writes one small
+JSON notice per event: the first failed attempt for a day, its halt, a
+failed evidence push and its halt, and every published day (naming a
+recovery when earlier attempts failed). The file takes the directory's
+owner, mode 0640. How a notice reaches the operator is outside this
+repository. Writing one is best-effort and never fails the end-of-day run;
+an unwritable directory is logged as `notice … not written`.
+
 ## Cadence
 
 | When | What | Why |

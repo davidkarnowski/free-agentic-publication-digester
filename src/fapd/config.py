@@ -580,6 +580,12 @@ PUBLICATION_TZ_PLACE = os.environ.get("FAPD_PUBLICATION_TZ_PLACE", "").strip() o
 EOD_ET_HOUR = 0
 EVIDENCE_PUSH = os.environ.get("FAPD_EVIDENCE_PUSH", "") == "1"
 
+# Operator notices (2026-11-12, src/fapd/notices.py): one small JSON file
+# per end-of-day event (a failed run, a halt, a failed push, a published
+# day), written to this directory. How a notice reaches the operator is
+# the operator's own concern, outside this repository. Empty: off.
+NOTICE_DIR = os.environ.get("FAPD_NOTICE_DIR", "")
+
 # Hard stop for a repeatedly failing finalizer (review D5/R3, same shape
 # as MAX_ITEM_SUMMARY_ATTEMPTS): after this many failed finalize attempts
 # for ONE target day, that day is loudly disclosed as halted and not

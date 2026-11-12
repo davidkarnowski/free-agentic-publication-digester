@@ -117,6 +117,11 @@ services:
       - fapd-digests:/app/digests
       - fapd-provenance:/app/provenance
       - ./secrets:/app/secrets:ro # deploy key for evidence pushes (0600, root-owned dir)
+      # Operator notices (src/fapd/notices.py), on when FAPD_NOTICE_DIR in
+      # .env names /app/notices: one small JSON file per end-of-day event.
+      # Whatever delivers them reads this directory; it is the operator's,
+      # outside this repository.
+      - ./notices:/app/notices
       # The nightly security sweep runs on the HOST (systemd timer,
       # 03:40 UTC) and writes one JSON file here. READ-ONLY is the
       # point: the finalizer reports on this evidence and must never be
