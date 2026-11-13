@@ -12,7 +12,7 @@ import pytest
 from conftest import install_digest_day_default
 from PIL import Image
 
-from fapd import config, corroboration, db, inference, report
+from fapd import config, corroboration, db, inference, report, sources
 
 DATE = "2026-07-23"
 CREC_PKG = "CREC-2026-07-23"
@@ -913,15 +913,43 @@ def test_recorded_votes_empty_state_renders(digest):
     assert "| VOTES | 0 | 0 | 0 | 0 | 0 |" in md
 
 
-def test_votes_gap_note_applies_only_from_the_status_change():
-    """A digest before the change never gains the note; a day after it does,
-    while the Senate source is not active."""
-    assert not report._votes_gap_applies("2026-11-07")
-    assert report._votes_gap_applies("2026-11-08")
+def _registry_with(monkeypatch, **statuses):
+    """The real registry with the named sources' statuses replaced."""
+    entries = [dict(e, status=statuses.get(e["id"].replace("-", "_"), e["status"]))
+               for e in sources.load_registry()]
+    monkeypatch.setattr(sources, "load_registry", lambda: entries)
+
+
+def test_votes_gap_note_applies_only_from_the_status_change(monkeypatch):
+    """A digest before 2026-11-08 never gains a note; a day after it does
+    while a chamber has no active source."""
+    _registry_with(monkeypatch, senate_xml="unavailable", house_clerk_votes="planned")
+    assert report._votes_gap_note("2026-11-07") is None
+    assert report._votes_gap_note("2026-11-08") == report.VOTES_GAP_NOTE
     note = report.VOTES_GAP_NOTE
     assert "does not mean that no votes were held" in note
     assert "section 1.3" in note
-    assert "403" not in note  # the gap is stated; causes stay out of the digest
+
+
+def test_votes_gap_note_names_the_chamber_it_does_not_cover(monkeypatch):
+    """With the Senate's source back and the House not yet ingested, the note
+    must stay and say the listing is Senate only: a vanished note would let
+    one chamber's votes read as the day's votes (2026-11-13)."""
+    _registry_with(monkeypatch, senate_xml="active", house_clerk_votes="planned")
+    assert report._votes_gap_note("2026-11-13") == report.VOTES_HOUSE_GAP_NOTE
+    _registry_with(monkeypatch, senate_xml="unavailable", house_clerk_votes="active")
+    assert report._votes_gap_note("2026-11-13") == report.VOTES_SENATE_GAP_NOTE
+    _registry_with(monkeypatch, senate_xml="active", house_clerk_votes="active")
+    assert report._votes_gap_note("2026-11-13") is None
+    for note in (report.VOTES_GAP_NOTE, report.VOTES_HOUSE_GAP_NOTE,
+                 report.VOTES_SENATE_GAP_NOTE):
+        assert "section 1.3" in note
+        assert "403" not in note  # the gap is stated; causes stay out of the digest
+
+
+def test_votes_gap_note_follows_the_real_registry():
+    """Today's registry: the Senate's source is active, the House's is not."""
+    assert report._votes_gap_note("2026-11-13") == report.VOTES_HOUSE_GAP_NOTE
 
 
 def test_banned_word_in_vote_title_is_masked(conn, tmp_path):

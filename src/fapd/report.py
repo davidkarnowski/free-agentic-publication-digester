@@ -1027,11 +1027,15 @@ def _vote_item_lines(row):
     return lines
 
 
-# Section 7's disclosure while its only source is unavailable (operator,
-# 2026-11-08). Without it "no recorded votes observed" could be read as "no
-# votes were held". States the gap, not a cause. It applies from the day the
-# source's status changed, and stops by itself when the source is active again.
+# Section 7's disclosure of a chamber it does not cover (operator, 2026-11-08;
+# per chamber since 2026-11-13). Without it "no recorded votes observed" could
+# be read as "no votes were held", and a listing of one chamber's votes as the
+# whole of the day's votes. States the gap, not a cause. It applies from
+# 2026-11-08 and follows each chamber's source in the registry: it changes by
+# itself when a source becomes active or unavailable.
 VOTES_GAP_SINCE = "2026-11-08"
+# The registry entry that supplies each chamber's roll calls.
+VOTES_SOURCE_IDS = {"Senate": "senate-xml", "House": "house-clerk-votes"}
 VOTES_GAP_NOTE = (
     "Coverage note: this section has no active source. The Senate's"
     " machine-readable vote record has not been available to this project's"
@@ -1039,13 +1043,35 @@ VOTES_GAP_NOTE = (
     " here, so an empty listing does not mean that no votes were held. Votes"
     " printed in the Congressional Record still appear in section 1.3."
 )
+VOTES_HOUSE_GAP_NOTE = (
+    "Coverage note: House roll-call votes are not yet ingested here, so this"
+    " section lists Senate votes only. House votes printed in the Congressional"
+    " Record appear in section 1.3."
+)
+VOTES_SENATE_GAP_NOTE = (
+    "Coverage note: the Senate's machine-readable vote record is not currently"
+    " available to this project's automated client, so this section lists House"
+    " votes only. Senate votes printed in the Congressional Record appear in"
+    " section 1.3."
+)
 
 
-def _votes_gap_applies(date):
+def _votes_gap_note(date):
+    """The coverage note section 7 carries on `date`, or None when every
+    chamber's source is active (or the day predates the note)."""
     if date < VOTES_GAP_SINCE:
-        return False
-    return not any(entry["id"] == "senate-xml" and entry["status"] == "active"
-                   for entry in sources.load_registry())
+        return None
+    active = {entry["id"] for entry in sources.load_registry()
+              if entry["status"] == "active"}
+    senate = VOTES_SOURCE_IDS["Senate"] in active
+    house = VOTES_SOURCE_IDS["House"] in active
+    if senate and house:
+        return None
+    if senate:
+        return VOTES_HOUSE_GAP_NOTE
+    if house:
+        return VOTES_SENATE_GAP_NOTE
+    return VOTES_GAP_NOTE
 
 
 def _votes_lines(conn, date):
@@ -1068,8 +1094,9 @@ def _votes_lines(conn, date):
         "which votes were printed.",
         "",
     ]
-    if _votes_gap_applies(date):
-        lines += [VOTES_GAP_NOTE, ""]
+    gap_note = _votes_gap_note(date)
+    if gap_note:
+        lines += [gap_note, ""]
     if not rows:
         lines += ["No recorded votes dated this day were observed.", ""]
     by_chamber: dict = {}

@@ -986,3 +986,20 @@ live in `.claude/agents/fapd-*.md` (tracked).
   repository, and nothing here names a service, an address or a method.
   Best-effort: a notice that cannot be written is logged and never fails the
   run. Same day: "outside text is text" (§9), after the same incident.
+- **2026-11-13** — **The Senate roll-call source is active again, and
+  section 7's coverage note is per chamber** (operator). The 2026-11-08
+  ruling's re-probe was made once, from production, through the identified
+  client: the vote menu answered 200 with the whole session (262 votes). The
+  Senate had returned on 2026-11-09 and taken roll calls 257 to 262 by
+  2026-11-12; those days' digests are frozen and do not list them (a
+  corrections matter, never a re-render). `senate-xml` returns to `active`
+  with a dated `change_note`; the refusal's record moves into its notes. The
+  section 7 note no longer keys on the Senate source alone: it names
+  whichever chamber has no active source (`report._votes_gap_note`), because
+  with the Senate back and House votes not yet ingested, a vanished note would
+  let one chamber's votes read as the day's votes. Same session, rulings for
+  the work that follows on `feature/votes-readers`: House votes are found by
+  asking the Clerk for the next roll number, with the Congress.gov list as a
+  nightly cross-check; Senate roll calls read from the Congressional Record
+  are listed in section 7 on the day the Record is observed, only for votes
+  not already listed, after a GUIDE §3 amendment.

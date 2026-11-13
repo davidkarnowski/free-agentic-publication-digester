@@ -75,6 +75,11 @@ def test_registry_seeds_expected_active_sources():
         # Joomla and off dni.gov entirely; its WordPress press-release
         # category feed on odni.gov probes feed-ok with guids and full text:
         "odni-news",
+        # activated 2026-07-31 with the xml-index adapter: the first
+        # non-feed web source, and the first VOTES-collection source;
+        # unavailable 2026-11-08 to 2026-11-13 (the vote menu refused the
+        # client), active again on a fresh probe:
+        "senate-xml",
         # activated 2026-07-31 with the api adapter: Congress.gov's bill
         # endpoint, the first BILLACTIONS-collection source:
         "congress-gov-api",
@@ -186,7 +191,8 @@ def test_coverage_stats_per_tier_on_real_registry():
     # + nlrb-newsroom (10-05, on its documented press-release feed)
     # + omb-saps (10-06, Statements of Administration Policy)
     # - senate-xml (11-08, the vote menu refuses the client: now unavailable)
-    assert by_tier[1].get("active", 0) == 28
+    # + senate-xml (11-13, a fresh probe answered: active again)
+    assert by_tier[1].get("active", 0) == 29
 
 
 def test_coverage_stats_empty():
@@ -350,12 +356,16 @@ def test_web_adapters_match_agencies_registry():
     assert set(sources.WEB_ADAPTERS) == set(agencies.ADAPTERS)
 
 
-def test_senate_source_records_its_refusal_and_its_reprobe():
+def test_senate_source_records_its_refusal_and_its_return():
+    """The card says the source is back and that votes were missed while it
+    was not; the refusal itself stays on the record in the notes."""
     entry = next(e for e in sources.load_registry() if e["id"] == "senate-xml")
-    assert entry["status"] == "unavailable"
-    assert entry["change_note"].startswith("2026-11-08")
-    assert "403" in entry["change_note"]
-    assert "re-probed" in entry["change_note"]
+    assert entry["status"] == "active"
+    assert entry["change_note"].startswith("2026-11-13: returned to active")
+    assert "fresh probe through the identified client" in entry["change_note"]
+    assert "not listed in section 7" in entry["change_note"]
+    assert "2026-11-08: moved from active to unavailable" in entry["notes"]
+    assert "HTTP 403" in entry["notes"]
 
 
 def test_change_note_must_be_dated():
