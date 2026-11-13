@@ -210,7 +210,7 @@ No account, key or token exists or is needed.
 | DNS rebinding / browser misuse | `Origin` validated: only `https://fapd.info` and `https://www.fapd.info` are accepted when present (403 otherwise). Requests without `Origin` (server-side clients) are allowed. No CORS on `/mcp`. |
 | Privilege | Non-root user 10001, all capabilities dropped, `no-new-privileges`, PID and memory limits |
 | Information leakage | No tracebacks or filesystem paths in responses; no session IDs; `Cache-Control: no-store` |
-| Supply chain | Python standard library only; base image `python:3.12-slim`, swept with the backend under the CVE parity rule |
+| Supply chain | Python standard library only; base image `python:3.14-slim` (Debian trixie, the backend's Debian release), pinned to an exact patch release and digest, with the distribution's security updates applied at build; swept with the backend at every CVE check |
 | Scope creep | GUIDE §2a rule 4: any new capability (search, writes, model calls, outbound requests, accounts) is a new constitutional ruling, not a manifest edit |
 
 ## 7. Privacy and logs
