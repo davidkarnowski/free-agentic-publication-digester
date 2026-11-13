@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-11-09; 0 of 351 request(s) to www.fec.gov returned no content.
+**delivering** — 5 item(s) in the last 14 days; most recent 2026-11-09; 0 of 335 request(s) to www.fec.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-11-12T19:56:10Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-11-13T04:50:48Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,18 +73,18 @@ Last 24 hours: 30 request(s) (30 answered, 0 returned no content) · no items in
 
 | Measure | Value |
 |---|---|
-| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-11-09 |
-| Content length | 207 characters average, 216 median (shortest 80, longest 327) |
+| Items ingested | 5 in 14 days (0.36 per day) · most recent 2026-11-09 |
+| Content length | 232 characters average, 244 median (shortest 80, longest 327) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.fec.gov | 351 request(s) · 351 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.fec.gov | 335 request(s) · 335 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-12T20:01:16.841+00:00 UTC.
+last answered request 2026-11-13T05:00:13.391+00:00 UTC.
 
-6 item(s) in the last 14 days; most recent 2026-11-09; 0 of 351 request(s) to www.fec.gov returned no content.
+5 item(s) in the last 14 days; most recent 2026-11-09; 0 of 335 request(s) to www.fec.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fec.gov, all time (since 2026-09-28):** 1,149 request(s) · 1,149 answered · 0 returned no content
+- **Our requests to www.fec.gov, all time (since 2026-09-28):** 1,159 request(s) · 1,159 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fec.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-14 | 0 | 25 | 1015 |
 | 2026-10-15 | 1 | 25 | 952 |
 | 2026-10-16 | 1 | 26 | 1399 |
 | 2026-10-17 | 0 | 25 | 837 |
@@ -123,7 +122,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-09 | 1 | 26 | 108 |
 | 2026-11-10 | 0 | 25 | 268 |
 | 2026-11-11 | 0 | 25 | 910 |
-| 2026-11-12 | 0 | 21 | 107 |
+| 2026-11-12 | 0 | 30 | 120 |
+| 2026-11-13 | 0 | 1 | 278 |
 
 ## Our ingestion assessment
 

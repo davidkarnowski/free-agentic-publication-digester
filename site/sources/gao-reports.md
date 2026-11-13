@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 21 item(s) in the last 14 days; most recent 2026-11-12; 0 of 353 request(s) to www.gao.gov returned no content.
+**delivering** — 23 item(s) in the last 14 days; most recent 2026-11-12; 0 of 335 request(s) to www.gao.gov returned no content.
 
-This label has held since 2026-10-27T04:09:39Z (UTC) and was last re-checked 2026-11-12T19:56:10Z (UTC).
+This label has held since 2026-10-27T04:09:39Z (UTC) and was last re-checked 2026-11-13T04:50:48Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,24 +67,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 30 request(s) (30 answered, 0 returned no content) · 2 item(s) ingested
+Last 24 hours: 29 request(s) (29 answered, 0 returned no content) · 5 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 21 in 14 days (1.5 per day) · most recent 2026-11-12 |
-| Content length | 3,766 characters average, 3,667 median (shortest 598, longest 7,116) |
+| Items ingested | 23 in 14 days (1.64 per day) · most recent 2026-11-12 |
+| Content length | 3,741 characters average, 3,667 median (shortest 820, longest 7,116) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.gao.gov | 353 request(s) · 353 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.gao.gov | 335 request(s) · 335 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-12T20:01:17.051+00:00 UTC.
+last answered request 2026-11-13T05:00:13.533+00:00 UTC.
 
-21 item(s) in the last 14 days; most recent 2026-11-12; 0 of 353 request(s) to www.gao.gov returned no content.
+23 item(s) in the last 14 days; most recent 2026-11-12; 0 of 335 request(s) to www.gao.gov returned no content.
 
 ### All time
 
-- **Our requests to www.gao.gov, all time (since 2026-07-30):** 2,783 request(s) · 2,783 answered · 0 returned no content
+- **Our requests to www.gao.gov, all time (since 2026-07-30):** 2,792 request(s) · 2,792 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.gao.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-14 | 3 | 24 | 233 |
 | 2026-10-15 | 0 | 26 | 187 |
 | 2026-10-16 | 14 | 25 | 139 |
 | 2026-10-17 | 0 | 25 | 143 |
@@ -123,7 +122,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-09 | 6 | 26 | 195 |
 | 2026-11-10 | 6 | 26 | 142 |
 | 2026-11-11 | 0 | 25 | 132 |
-| 2026-11-12 | 2 | 21 | 235 |
+| 2026-11-12 | 5 | 29 | 237 |
+| 2026-11-13 | 0 | 1 | 360 |
 
 ## Our ingestion assessment
 

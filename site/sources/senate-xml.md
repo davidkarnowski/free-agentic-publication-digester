@@ -77,7 +77,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.senate.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-14 | 0 | 25 | 166 |
 | 2026-10-15 | 0 | 26 | 153 |
 | 2026-10-16 | 0 | 25 | 171 |
 | 2026-10-17 | 0 | 25 | 155 |
@@ -107,6 +106,7 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-10 | 0 | 0 | — |
 | 2026-11-11 | 0 | 0 | — |
 | 2026-11-12 | 0 | 0 | — |
+| 2026-11-13 | 0 | 0 | — |
 
 ## Our ingestion assessment
 
