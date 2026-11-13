@@ -10,13 +10,17 @@
 # base image predates, and the libbrotli1 check fails the build unless
 # curl's Brotli library carries the CVE-2026-111497 fix (DSA-6582-1; CISA
 # KEV 2026-10-27). deploy.sh builds with --pull. Re-pin at each sweep.
-FROM python:3.12.16-slim-trixie
+# Pinned by the image's index hash as well as the tag (2026-11-13): a tag
+# can be rebuilt under the same name, the hash cannot. uv, which installs
+# the locked dependencies, is pinned exactly for the same reason; bump it
+# deliberately, with its version checked, like any other dependency.
+FROM python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
 
 RUN apt-get update && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends git openssh-client curl \
     && rm -rf /var/lib/apt/lists/* \
     && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libbrotli1)" ge 1.1.0-2+deb13u1 \
-    && pip install --no-cache-dir uv
+    && pip install --no-cache-dir uv==0.13.8
 
 # The claude CLI (LLM_BACKEND=cli, the operator's decision 2026-07-30;
 # production again since 2026-08-24 after the vendor's 08-14..24 block —
