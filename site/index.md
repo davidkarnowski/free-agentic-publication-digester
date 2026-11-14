@@ -14,13 +14,13 @@ An automated, citation-bound, opinion-agnostic daily digest of official United S
 
 ## The last 7 days
 
+- [Daily Digest — 2026-11-13](2026-11-13.md) — The digest carries six roll-call vote records.
 - [Daily Digest — 2026-11-12](2026-11-12.md) — The digest carries 77 House and 43 Senate entries from the Congressional Record.
 - [Daily Digest — 2026-11-11](2026-11-11.md) — On the House floor, Representative Griffith called up H. Res. 1650, a closed rule for consideration of H.R. 1013, the Retirement Fairness for Charities and Educational Institutions Act of 2025.
 - [Daily Digest — 2026-11-10](2026-11-10.md) — On the House floor, the digest records two roll-call votes: Roll Call No. 315 passed H.R. 3978, which amends the Atomic Energy Act's definition of production facility, by 397 to 2, and Roll Call No. 316 passed H.R. 9612, the American Enrichment Deployment Act, by 394 to 3, both under suspension of the rules.
 - [Daily Digest — 2026-11-09](2026-11-09.md) — The digest carries two public laws.
 - [Daily Digest — 2026-11-08](2026-11-08.md) — This is a short review: few publications were observed for this digest day, and none met the digest's summary rules, so there are no item summaries to draw on.
 - [Daily Digest — 2026-11-07](2026-11-07.md) — The digest carries 43 appellate opinions, 960 district court opinions, five bankruptcy court opinions and one national court item, along with eight agency press releases.
-- [Daily Digest — 2026-11-06](2026-11-06.md) — On the congressional side, the digest carries nine House bills reported and seven introduced.
 
 ## Earlier days
 

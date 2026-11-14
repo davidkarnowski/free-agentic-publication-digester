@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 524 item(s) in the last 14 days; most recent 2026-11-12; 14 of 338 request(s) to www.justice.gov returned no content.
+**delivering** — 586 item(s) in the last 14 days; most recent 2026-11-13; 14 of 339 request(s) to www.justice.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-13T04:50:48Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-14T04:53:49Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,24 +69,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 31 request(s) (31 answered, 0 returned no content) · 73 item(s) ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 62 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 524 in 14 days (37.43 per day) · most recent 2026-11-12 |
-| Content length | 317 characters average, 300 median (shortest 40, longest 2,374) |
+| Items ingested | 586 in 14 days (41.86 per day) · most recent 2026-11-13 |
+| Content length | 313 characters average, 302 median (shortest 40, longest 2,374) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.justice.gov | 338 request(s) · 324 answered · 14 declined (4xx) · 0 server declined (5xx) · 0 no response — 4.1% returned no content |
+| Our requests to www.justice.gov | 339 request(s) · 325 answered · 14 declined (4xx) · 0 server declined (5xx) · 0 no response — 4.1% returned no content |
 
-last answered request 2026-11-13T05:00:12.808+00:00 UTC.
+last answered request 2026-11-14T05:01:14.319+00:00 UTC.
 
-524 item(s) in the last 14 days; most recent 2026-11-12; 14 of 338 request(s) to www.justice.gov returned no content.
+586 item(s) in the last 14 days; most recent 2026-11-13; 14 of 339 request(s) to www.justice.gov returned no content.
 
 ### All time
 
-- **Our requests to www.justice.gov, all time (since 2026-07-30):** 2,829 request(s) · 2,787 answered · 42 returned no content
+- **Our requests to www.justice.gov, all time (since 2026-07-30):** 2,855 request(s) · 2,813 answered · 42 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.justice.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-15 | 69 | 26 | 328 |
 | 2026-10-16 | 36 | 25 | 215 |
 | 2026-10-17 | 0 | 25 | 246 |
 | 2026-10-18 | 11 | 25 | 323 |
@@ -125,7 +124,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-10 | 74 | 25 | 379 |
 | 2026-11-11 | 12 | 25 | 233 |
 | 2026-11-12 | 73 | 31 | 294 |
-| 2026-11-13 | 0 | 1 | 746 |
+| 2026-11-13 | 62 | 26 | 482 |
+| 2026-11-14 | 0 | 1 | 297 |
 
 ## Our ingestion assessment
 
