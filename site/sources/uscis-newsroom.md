@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-06, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-06, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-11-14T04:53:49Z (UTC).
+This label has held since 2026-11-14T05:10:22Z (UTC) and was last re-checked 2026-11-15T04:47:17Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,7 +71,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -82,13 +82,13 @@ Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items in
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to www.uscis.gov | 335 request(s) · 305 answered · 30 declined (4xx) · 0 server declined (5xx) · 0 no response — 9.0% returned no content |
 
-last answered request 2026-11-14T05:01:15.501+00:00 UTC.
+last answered request 2026-11-15T05:00:18.246+00:00 UTC.
 
-Most recent item 2026-11-06, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-06, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.uscis.gov, all time (since 2026-09-28):** 1,187 request(s) · 1,157 answered · 30 returned no content
+- **Our requests to www.uscis.gov, all time (since 2026-09-28):** 1,212 request(s) · 1,182 answered · 30 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.uscis.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-16 | 0 | 27 | 157 |
 | 2026-10-17 | 0 | 24 | 144 |
 | 2026-10-18 | 0 | 25 | 151 |
 | 2026-10-19 | 2 | 25 | 135 |
@@ -127,12 +126,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-11 | 0 | 25 | 153 |
 | 2026-11-12 | 0 | 30 | 172 |
 | 2026-11-13 | 0 | 26 | 173 |
-| 2026-11-14 | 0 | 1 | 178 |
+| 2026-11-14 | 0 | 25 | 164 |
+| 2026-11-15 | 0 | 1 | 184 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest the USCIS newsroom through an HTML index filtered to the /newsroom/news-releases/ path, with one listing fetch per poll and no article pages fetched (feed-only mode). Before the path filter, sidebar links were picked up as items, and the filter excludes them. The host publishes a 10-second crawl-delay, which we honor. A correlated email channel, uscis-email, carries the same releases. Over the 14-day window we recorded 10 items, most recently dated 2026-10-29, with a median of 277 characters and an average of 282. The listing shows its first page only, and entries we cannot date are dropped rather than dated by observation. All 327 requests to www.uscis.gov were answered, with none failing, and the registry notes record no delivery incidents. The previous assessment covered the six days since activation, when we recorded 3 items averaging 297 characters. Since then the item count has risen to 10 and the average length is now 282 characters.
+The USCIS Newsroom is ingested using an HTML index adapter in feed-only mode, polling for listings on the /newsroom/news-releases/ path without fetching individual articles. No RSS/Atom feed is available from the source, necessitating HTML index diffing for ingestion. Hourly requests are observed, and a 10-second crawl-delay from the host's robots.txt is honored. During the current 14-day window, 3 items were recorded, with the most recent dated 2026-11-06, averaging 297 characters and a median of 292 characters. This contrasts with the previous assessment, which reported 10 items averaging 282 characters with a median of 277, and the last item dated 2026-10-29. The previous assessment noted no failed requests, but the current period shows 30 client errors out of 335 attempts, an error rate of 9.0%. Ingestion quirks include a filter applied to exclude sidebar links and the limitation of processing only the first page of the listing. Entries without a readable date are dropped. The uscis-email channel remains active, providing parallel coverage.
 
-_Model-written assessment of our own ingestion, generated 2026-10-30 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-15 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

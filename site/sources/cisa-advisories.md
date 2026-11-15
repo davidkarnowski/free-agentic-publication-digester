@@ -61,7 +61,7 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 **delivering** — 14 item(s) in the last 14 days; most recent 2026-11-13; 30 of 351 request(s) to www.cisa.gov returned no content.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-14T04:53:49Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-15T04:47:17Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,7 +71,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -82,13 +82,13 @@ Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · 1 item(s) i
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.cisa.gov | 351 request(s) · 321 answered · 30 declined (4xx) · 0 server declined (5xx) · 0 no response — 8.5% returned no content |
 
-last answered request 2026-11-14T05:01:16.705+00:00 UTC.
+last answered request 2026-11-15T05:00:18.621+00:00 UTC.
 
 14 item(s) in the last 14 days; most recent 2026-11-13; 30 of 351 request(s) to www.cisa.gov returned no content.
 
 ### All time
 
-- **Our requests to www.cisa.gov, all time (since 2026-07-30):** 3,082 request(s) · 3,048 answered · 34 returned no content
+- **Our requests to www.cisa.gov, all time (since 2026-07-30):** 3,107 request(s) · 3,073 answered · 34 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.cisa.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-16 | 4 | 30 | 115 |
 | 2026-10-17 | 0 | 25 | 128 |
 | 2026-10-18 | 0 | 25 | 148 |
 | 2026-10-19 | 0 | 25 | 109 |
@@ -127,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-11 | 0 | 25 | 112 |
 | 2026-11-12 | 5 | 34 | 167 |
 | 2026-11-13 | 1 | 27 | 242 |
-| 2026-11-14 | 0 | 1 | 85 |
+| 2026-11-14 | 0 | 25 | 214 |
+| 2026-11-15 | 0 | 1 | 240 |
 
 ## Our ingestion assessment
 
