@@ -624,6 +624,27 @@ def test_api_backend_missing_key_is_unavailable_at_construction(tmp_path, monkey
         client.complete("x", purpose="map:test")
 
 
+def test_api_backend_builds_the_installed_sdk_client_offline(monkeypatch):
+    # Every other API-backend test injects a fake client, so nothing else
+    # touches the installed SDK. This pins the three things AnthropicBackend
+    # takes from it: a client that constructs without a request, a callable
+    # messages.create, and HTTP errors that carry status_code (which
+    # classify_unavailable reads). A major SDK upgrade that moved any of
+    # them fails here, not on the first paid call (anthropic 0.120.2 to
+    # 2.8.0, 2026-11-16, which also moved the HTTP layer to httpx2).
+    anthropic = pytest.importorskip("anthropic")
+    httpx2 = pytest.importorskip("httpx2")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key-not-a-real-key")
+    backend = AnthropicBackend()
+    assert backend.unavailable is None
+    assert isinstance(backend._client, anthropic.Anthropic)
+    assert callable(backend._client.messages.create)
+    response = httpx2.Response(
+        503, request=httpx2.Request("POST", "https://api.anthropic.com/v1/messages"))
+    err = anthropic.APIStatusError("overloaded", response=response, body=None)
+    assert isinstance(err, anthropic.APIError) and err.status_code == 503
+
+
 def test_api_rate_limit_and_auth_errors_trip_the_breaker(tmp_path):
     class RateLimited(RuntimeError):
         status_code = 429
