@@ -31,20 +31,24 @@ RUN apt-get update && apt-get upgrade -y \
 # production again since 2026-08-24 after the vendor's 08-14..24 block —
 # GUIDE §6 r7 provider record): pipeline LLM calls bill the operator's
 # Claude subscription via a setup-token (CLAUDE_CODE_OAUTH_TOKEN in the
-# server-side .env) instead of API credits. Node 22 is the CLI's runtime
-# requirement. The image also serves the api/gemini/none backends, which
+# server-side .env) instead of API credits. Node is the CLI's runtime
+# (it requires Node 22 or later). The image also serves the api/gemini/none backends, which
 # need nothing installed here; dropping Node when the CLI is retired is
 # plan OPS-3 (docs/ops/plan-2026-08-24-eod-llm-resilience.md).
-# CVE sweep 2026-10-25: the Node 22 line must be 22.23.4 or later (the
-# October 2026 Brotli and related fixes), checked at build time so an old
-# NodeSource package cannot slip through; the claude CLI is pinned to an
-# exact version (>= 2.1.179, the fix for GHSA-pq7j-f95f-qfcv) instead of
-# whatever npm resolves on the day of the build. Re-pin at each sweep.
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+# Node 26 since 2026-11-16: the newest LTS line ("Lithium"), whose
+# 26.13.1 security release of 2026-11-10 carries the same OpenSSL 3.5.9 as
+# the Node 22 release it replaces (22 leaves maintenance in April 2027).
+# The floor is checked at build time so an old NodeSource package cannot
+# slip through (CVE sweep 2026-10-25 added the check, for the October 2026
+# Brotli fixes); raise it at each sweep, never lower it. The claude CLI is
+# pinned to an exact version (>= 2.1.179, the fix for GHSA-pq7j-f95f-qfcv)
+# instead of whatever npm resolves on the day of the build: the newest
+# release, re-checked against the registry and OSV at each sweep.
+RUN curl -fsSL https://deb.nodesource.com/setup_26.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/* \
-    && node -e 'const [a,b,c]=process.versions.node.split(".").map(Number); if (a!==22 || b<23 || (b===23 && c<4)) { console.error("node " + process.version + " is below 22.23.4"); process.exit(1) }' \
-    && npm install -g @anthropic-ai/claude-code@2.1.310 \
+    && node -e 'const [a,b,c]=process.versions.node.split(".").map(Number); if (a!==26 || b<13 || (b===13 && c<1)) { console.error("node " + process.version + " is not 26.13.1 or later on the 26 line"); process.exit(1) }' \
+    && npm install -g @anthropic-ai/claude-code@2.1.325 \
     && claude --version
 
 WORKDIR /app
