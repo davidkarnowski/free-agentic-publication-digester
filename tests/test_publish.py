@@ -5,7 +5,7 @@ import re
 import pytest
 from conftest import install_digest_day_default
 
-from fapd import publish
+from fapd import publish, report
 
 DIGEST_A = """# Daily Digest — 2026-07-01
 
@@ -3270,6 +3270,32 @@ def test_digest_pages_show_outside_html_as_text(tmp_path):
     assert "<iframe" not in page
     assert 'href="https://example.org/x"' not in page
     assert "R&amp;D &amp; more." in page
+
+
+def test_digest_pages_show_an_intraword_asterisk_as_written(tmp_path):
+    """2026-11-16: digests frozen before report escaped an intraword
+    asterisk carry it bare; the page keeps the bold title intact and shows
+    the asterisk, and a link destination is left alone."""
+    d = tmp_path / "digests"
+    d.mkdir()
+    (d / "2026-07-03.md").write_text(
+        "# Daily Digest — 2026-07-03\n\n## 3. Federal Courts\n\n"
+        "- **Berkeley*IEOR v. W.W. Grainger Inc.** (No. 24-02353)\n"
+        "  - Included because: USCOURTS-SEL-01 — test\n"
+        "  - Source: [opinion](https://example.org/a*b)\n\n"
+        "The court dismissed appeals in *USA v. Malik* today.\n")
+    out = tmp_path / "site"
+    publish.build_site(d, out)
+    page = (out / "2026-07-03.html").read_text()
+    assert "<strong>Berkeley*IEOR v. W.W. Grainger Inc.</strong>" in page
+    assert 'href="https://example.org/a*b"' in page
+    assert "<em>USA v. Malik</em>" in page
+
+
+def test_digest_page_escape_matches_the_renderer():
+    """The page conversion and report._escape_links use one rule."""
+    assert publish._DIGEST_INTRAWORD_RE.pattern.endswith(
+        "|" + report.INTRAWORD_ASTERISK_RE.pattern)
 
 
 def test_site_pages_keep_their_own_html():

@@ -171,12 +171,22 @@ def _first_nonempty_line(text):
 # changed; only its rendering is.
 
 _LINK_BRACKETS = str.maketrans({"[": "\\[", "]": "\\]"})
+# An asterisk between two letters or digits is never emphasis anyone meant
+# (a party's name, "Berkeley*IEOR"), but a Markdown parser may read it as
+# one: inside this module's own **bold** title, Python-Markdown 3.11 ended
+# the bold early and left stray italics (measured 2026-11-16 on the
+# 2026-09-22 digest). Escaped, it is shown as written. Asterisks at a word
+# boundary are left alone: model prose italicizes case names on purpose.
+# publish.py applies the same rule to digests frozen before this existed.
+INTRAWORD_ASTERISK_RE = re.compile(r"(?<=[^\W_])\*(?=[^\W_])")
 
 
 def _escape_links(text):
     """Brackets escaped, so the text cannot open a Markdown link, an
-    image or a link reference definition."""
-    return (text or "").translate(_LINK_BRACKETS)
+    image or a link reference definition; an asterisk inside a word
+    escaped, so it cannot open or close emphasis."""
+    text = (text or "").translate(_LINK_BRACKETS)
+    return INTRAWORD_ASTERISK_RE.sub(r"\\*", text)
 
 
 def _inline(text):
@@ -2262,9 +2272,10 @@ def _validate_lexicon(markdown, conn, date):
     # words after it are prose to scan, not a URL to skip.
     scan = re.sub(r"(?<!\\)\]\(([^)\s]+)\)", "]( )", markdown)
     # Read outside text as it was written: the render escapes its brackets
-    # (2026-11-12), and the official-span exemption matches the publisher's
-    # own string, which has none of those escapes.
-    scan = scan.replace("\\[", "[").replace("\\]", "]")
+    # (2026-11-12) and its intraword asterisks (2026-11-16), and the
+    # official-span exemption matches the publisher's own string, which has
+    # none of those escapes.
+    scan = scan.replace("\\[", "[").replace("\\]", "]").replace("\\*", "*")
     exempt = _official_spans(scan, officials)
     for match in _BANNED_RE.finditer(scan):
         if not any(a <= match.start() and match.end() <= b for a, b in exempt):

@@ -1790,6 +1790,17 @@ def test_outside_title_cannot_split_an_item_or_make_a_link(conn, tmp_path):
     assert "Order on Trade - **Forged item** \\[click\\](https://example.org/x)" in md
 
 
+def test_outside_text_cannot_make_emphasis_inside_a_word():
+    """2026-11-16: an asterisk inside a word ("Berkeley*IEOR", a party's
+    name) is escaped so it cannot end the item's bold title; asterisks at
+    a word boundary stay, because model prose italicizes case names."""
+    assert report._inline("Berkeley*IEOR v. W.W. Grainger Inc.") == (
+        "Berkeley\\*IEOR v. W.W. Grainger Inc.")
+    assert report._inline("in *USA v. Malik* the court") == "in *USA v. Malik* the court"
+    assert report._inline("UHF channel *14 for VHF channel *2") == (
+        "UHF channel *14 for VHF channel *2")
+
+
 def test_feed_link_must_be_http(conn, tmp_path):
     _add_agency_release(conn, "PR-js-1", "Odd Release", "javascript:alert(1)", None)
     md = report.render(conn, DATE, out_dir=tmp_path).read_text()

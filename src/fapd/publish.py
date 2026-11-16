@@ -54,6 +54,22 @@ def _digest_markdown():
 
 _DIGEST_MD = _digest_markdown()
 
+# report._escape_links escapes an asterisk inside a word (2026-11-16), so
+# outside text cannot open or close emphasis; digests frozen before that
+# carry it bare ("**Berkeley*IEOR v. W.W. Grainger Inc.**", 2026-09-22),
+# and Python-Markdown 3.11 reads it as emphasis. Their pages get the same
+# escape at conversion; the frozen markdown itself is never changed. A link
+# destination is skipped (a URL is not text). Same pattern as
+# report.INTRAWORD_ASTERISK_RE, pinned by test_publish.
+_DIGEST_INTRAWORD_RE = re.compile(r"\]\([^)\s]*\)|(?<=[^\W_])\*(?=[^\W_])")
+
+
+def _digest_page_markdown(md_text):
+    """A digest's markdown as the page converts it: intraword asterisks
+    escaped outside link destinations; everything else unchanged."""
+    return _DIGEST_INTRAWORD_RE.sub(
+        lambda m: m.group(0) if m.group(0).startswith("]") else "\\*", md_text)
+
 _PAGE = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -4208,7 +4224,7 @@ def build_site(digest_dir=None, out_dir=None, *, pipeline_db=None,
         md_text = path.read_text(encoding="utf-8")
         teasers[path.stem] = _teaser(md_text)
         _DIGEST_MD.reset()
-        body = _style_digest_body(_DIGEST_MD.convert(md_text))
+        body = _style_digest_body(_DIGEST_MD.convert(_digest_page_markdown(md_text)))
         body = _inject_day_view_link(body, path.stem, md_text, out_dir)
         audio_asset = out_dir / "assets" / "audio" / f"digest-{path.stem}.mp3"
         if audio_asset.exists():
