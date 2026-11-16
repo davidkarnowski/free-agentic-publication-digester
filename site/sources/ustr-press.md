@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 7 item(s) in the last 14 days; most recent 2026-11-13; 0 of 332 request(s) to ustr.gov returned no content.
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-11-13; 0 of 332 request(s) to ustr.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-11-15T04:47:17Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-11-16T04:48:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,18 +73,18 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 
 | Measure | Value |
 |---|---|
-| Items ingested | 7 in 14 days (0.5 per day) · most recent 2026-11-13 |
-| Content length | 113 characters average, 104 median (shortest 83, longest 150) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-11-13 |
+| Content length | 92 characters average, 92 median (shortest 83, longest 102) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to ustr.gov | 332 request(s) · 332 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-15T05:00:17.535+00:00 UTC.
+last answered request 2026-11-16T05:00:24.412+00:00 UTC.
 
-7 item(s) in the last 14 days; most recent 2026-11-13; 0 of 332 request(s) to ustr.gov returned no content.
+2 item(s) in the last 14 days; most recent 2026-11-13; 0 of 332 request(s) to ustr.gov returned no content.
 
 ### All time
 
-- **Our requests to ustr.gov, all time (since 2026-09-28):** 1,203 request(s) · 1,203 answered · 0 returned no content
+- **Our requests to ustr.gov, all time (since 2026-09-28):** 1,228 request(s) · 1,228 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -94,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to ustr.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-17 | 0 | 25 | 55 |
 | 2026-10-18 | 0 | 25 | 78 |
 | 2026-10-19 | 2 | 25 | 60 |
 | 2026-10-20 | 0 | 25 | 68 |
@@ -123,7 +122,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-12 | 0 | 29 | 81 |
 | 2026-11-13 | 1 | 26 | 66 |
 | 2026-11-14 | 0 | 25 | 73 |
-| 2026-11-15 | 0 | 1 | 64 |
+| 2026-11-15 | 0 | 25 | 64 |
+| 2026-11-16 | 0 | 1 | 60 |
 
 ## Our ingestion assessment
 

@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-08, 38 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-08, 39 days ago (quiet past 7 days).
 
-This label has held since 2026-10-16T04:16:49Z (UTC) and was last re-checked 2026-11-15T04:47:17Z (UTC).
+This label has held since 2026-10-16T04:16:49Z (UTC) and was last re-checked 2026-11-16T04:48:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -83,7 +83,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-08, 38 days ago (quiet past 7 days).
+Most recent item 2026-10-08, 39 days ago (quiet past 7 days).
 
 ### All time
 
@@ -97,6 +97,6 @@ No requests and no items were recorded in the last 30 days, so there is nothing 
 
 **Model-written ingestion assessment**
 
-Fogarty International Center bulletins have been delivered to the project mailbox via ficinfo@subscriptions.nih.gov subscription since activation on 2026-10-01. Two bulletins were received: one on 2026-10-06 carrying 1105 characters and one on 2026-10-08 carrying 680 characters, averaging 892 characters per message. Both arrived in full-text email format with DKIM verification recorded at ingest. No delivery errors, refusals, or administrative complications have been recorded. Delivery cadence was sparse: two days between the first and second bulletins, followed by nine days of quiet through the current measurement window ending 2026-10-17. Since the previous assessment on 2026-10-07, the second bulletin arrived on 2026-10-08; the source has produced no further activity since then. Ingestion relies entirely on direct mailbox delivery with no HTTP requests to external services, and health is measured from email arrival recency alone. Measured delivery behavior remains consistent with initial activation observations.
+The source is ingested from the project mailbox as email, with DKIM recorded per message at ingest. No HTTP requests are made, so health is read from delivery recency alone. Over the 14-day window ending 2026-11-16 we measured 0 items. The most recent item is dated 2026-10-08, 39 days before the measurement, and the health status is quiet. Because no items fell in the window, no size statistics are available for this measurement. The mailbox counts show 1 bulletin and 1 message in total, with no administrative messages, errors, or refused deliveries. The last mailbox message is timestamped 2026-11-03 13:16 UTC, which is later than the last item date, and the measurement does not show the cause of that difference. The registry notes record no incidents, and they note that bulletins arrived during the changeover window before activation on 2026-10-01. The previous assessment on 2026-10-17 recorded two bulletins, on 2026-10-06 (1,105 characters) and 2026-10-08 (680 characters), averaging 892 characters. The current mailbox bulletin count is 1, and no items have been recorded since 2026-10-08.
 
-_Model-written assessment of our own ingestion, generated 2026-10-17 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-16 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

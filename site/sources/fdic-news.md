@@ -61,7 +61,7 @@ _Model-written orientation, generated 2026-09-30 by haiku, prompt version 1. It 
 
 **delivering** — 3 item(s) in the last 14 days; most recent 2026-11-13; 1 of 335 request(s) to www.fdic.gov returned no content.
 
-This label has held since 2026-11-13T21:46:49Z (UTC) and was last re-checked 2026-11-15T04:47:17Z (UTC).
+This label has held since 2026-11-13T21:46:49Z (UTC) and was last re-checked 2026-11-16T04:48:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -82,13 +82,13 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to www.fdic.gov | 335 request(s) · 334 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.3% returned no content |
 
-last answered request 2026-11-15T05:00:17.050+00:00 UTC.
+last answered request 2026-11-16T05:00:24.144+00:00 UTC.
 
 3 item(s) in the last 14 days; most recent 2026-11-13; 1 of 335 request(s) to www.fdic.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fdic.gov, all time (since 2026-09-28):** 1,206 request(s) · 1,205 answered · 1 returned no content
+- **Our requests to www.fdic.gov, all time (since 2026-09-28):** 1,231 request(s) · 1,230 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fdic.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-17 | 0 | 25 | 202 |
 | 2026-10-18 | 0 | 25 | 217 |
 | 2026-10-19 | 0 | 24 | 222 |
 | 2026-10-20 | 0 | 25 | 299 |
@@ -127,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-12 | 0 | 31 | 263 |
 | 2026-11-13 | 1 | 26 | 292 |
 | 2026-11-14 | 0 | 25 | 200 |
-| 2026-11-15 | 0 | 1 | 197 |
+| 2026-11-15 | 0 | 25 | 201 |
+| 2026-11-16 | 0 | 1 | 494 |
 
 ## Our ingestion assessment
 

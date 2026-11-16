@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-11-13, delivered by email.
+**delivering** — 5 item(s) in the last 14 days; most recent 2026-11-13, delivered by email.
 
-This label has held since 2026-10-16T13:29:58Z (UTC) and was last re-checked 2026-11-15T04:47:17Z (UTC).
+This label has held since 2026-10-16T13:29:58Z (UTC) and was last re-checked 2026-11-16T04:48:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,14 +68,14 @@ Last 24 hours: no items ingested
 
 | Measure | Value |
 |---|---|
-| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-11-13 |
-| Content length | 1,290 characters average, 1,334 median (shortest 1,041, longest 1,510) |
+| Items ingested | 5 in 14 days (0.36 per day) · most recent 2026-11-13 |
+| Content length | 1,255 characters average, 1,329 median (shortest 1,041, longest 1,510) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 6 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-13 |
+| Mailbox | 5 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-13 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-6 item(s) in the last 14 days; most recent 2026-11-13, delivered by email.
+5 item(s) in the last 14 days; most recent 2026-11-13, delivered by email.
 
 ### All time
 
@@ -87,7 +87,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-17 | 0 |
 | 2026-10-18 | 0 |
 | 2026-10-19 | 0 |
 | 2026-10-20 | 0 |
@@ -117,11 +116,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-13 | 1 |
 | 2026-11-14 | 0 |
 | 2026-11-15 | 0 |
+| 2026-11-16 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The Natural Resources Conservation Service delivers subscription bulletins via GovDelivery (sender usdafarmers@public.govdelivery.com) to the project mailbox with full text. The source was activated 2026-10-01 after observed delivery. Over 14 days, 2 items arrived at 0.14 per day, with the most recent on 2026-10-16, averaging 1,204 characters and ranging from 1,193 to 1,216 characters. The mailbox records 2 messages as bulletins with zero administrative messages, errors, or refused deliveries. The registry notes that bulletins were received in the mailbox during late September before formal activation. The previous assessment on 2026-10-11 recorded a single bulletin on 2026-10-02; the current measurement shows a second bulletin delivered on 2026-10-16.
+The source is ingested from the project mailbox as email with full item text, and DKIM is verified and archived at ingest. Over the 14-day window ending 2026-11-16 we measured 5 items, or 0.36 per day, with the most recent on 2026-11-13 (last mailbox message 14:37 UTC), 3 days before the measurement. Items averaged 1,255 characters (median 1,329, range 1,041 to 1,510). The mailbox shows 5 bulletins and 5 messages, with no administrative messages, errors, or refused deliveries, and the collector reports zero consecutive errors. The registry notes record no incidents. They note that bulletins arrived during the late-September changeover window before activation on 2026-10-01. The previous assessment on 2026-10-17 recorded 2 items in its window, the most recent on 2026-10-16, averaging 1,204 characters (range 1,193 to 1,216), and 2 mailbox bulletins. Since then the window count has risen to 5, the mailbox bulletin count to 5, and the most recent item date has moved to 2026-11-13. Item sizes have also widened, with the maximum now 1,510 characters.
 
-_Model-written assessment of our own ingestion, generated 2026-10-17 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-16 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

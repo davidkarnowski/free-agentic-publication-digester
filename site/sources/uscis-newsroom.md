@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-06, 9 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-06, 10 days ago (quiet past 7 days).
 
-This label has held since 2026-11-14T05:10:22Z (UTC) and was last re-checked 2026-11-15T04:47:17Z (UTC).
+This label has held since 2026-11-14T05:10:22Z (UTC) and was last re-checked 2026-11-16T04:48:24Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -77,18 +77,18 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 
 | Measure | Value |
 |---|---|
-| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-11-06 |
-| Content length | 297 characters average, 292 median (shortest 220, longest 378) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-11-06 |
+| Content length | 299 characters average, 299 median (shortest 220, longest 378) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to www.uscis.gov | 335 request(s) · 305 answered · 30 declined (4xx) · 0 server declined (5xx) · 0 no response — 9.0% returned no content |
 
-last answered request 2026-11-15T05:00:18.246+00:00 UTC.
+last answered request 2026-11-16T05:00:25.800+00:00 UTC.
 
-Most recent item 2026-11-06, 9 days ago (quiet past 7 days).
+Most recent item 2026-11-06, 10 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.uscis.gov, all time (since 2026-09-28):** 1,212 request(s) · 1,182 answered · 30 returned no content
+- **Our requests to www.uscis.gov, all time (since 2026-09-28):** 1,237 request(s) · 1,207 answered · 30 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.uscis.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-17 | 0 | 24 | 144 |
 | 2026-10-18 | 0 | 25 | 151 |
 | 2026-10-19 | 2 | 25 | 135 |
 | 2026-10-20 | 2 | 25 | 133 |
@@ -127,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-12 | 0 | 30 | 172 |
 | 2026-11-13 | 0 | 26 | 173 |
 | 2026-11-14 | 0 | 25 | 164 |
-| 2026-11-15 | 0 | 1 | 184 |
+| 2026-11-15 | 0 | 25 | 175 |
+| 2026-11-16 | 0 | 1 | 204 |
 
 ## Our ingestion assessment
 
