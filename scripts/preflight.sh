@@ -30,13 +30,14 @@
 # WHERE THE ENVIRONMENTS STILL DIFFER, and why it is acceptable:
 #   - The workflow ran ubuntu-latest; this runs the operator's macOS.
 #   - The workflow took whatever CPython setup-uv resolved; this takes
-#     whatever the local uv resolves (3.14.7 at time of writing).
-#   `requires-python = ">=3.12"`, production runs 3.12.14 in the
-#   container, and the suite is pure-Python with no platform-specific
-#   assertions — so the gap is real but has never produced a divergence.
-#   --strict re-pins the interpreter to the lowest supported version to
-#   close it when that matters (before a release, or after touching
-#   anything version-sensitive).
+#     the minor version `.python-version` names (3.14, production's since
+#     2026-11-16), as the local uv resolves it, so the patch release can
+#     trail production's by a few.
+#   `requires-python = ">=3.12"` while production runs 3.14, and the suite
+#   is pure-Python with no platform-specific assertions — so the gap is
+#   real but has never produced a divergence. --strict re-runs everything
+#   on the lowest supported version, 3.12, to prove the floor still holds
+#   (before a release, or after touching anything version-sensitive).
 #
 # THE DRIFT THIS WAS WRITTEN AFTER
 # --------------------------------
@@ -48,7 +49,7 @@
 #
 # USAGE
 #   scripts/preflight.sh            # the gate
-#   scripts/preflight.sh --strict   # same, pinned to CPython 3.12
+#   scripts/preflight.sh --strict   # same, on CPython 3.12 (the floor)
 #   scripts/preflight.sh --quick    # lint + changed-file tests only;
 #                                   # NOT the gate, for inner-loop use
 
@@ -70,7 +71,7 @@ done
 PY_ARGS=()
 if [ "$STRICT" = 1 ]; then
   PY_ARGS=(--python 3.12)
-  echo "== preflight (strict: CPython 3.12, matching production) =="
+  echo "== preflight (strict: CPython 3.12, the lowest supported version) =="
 else
   echo "== preflight =="
 fi

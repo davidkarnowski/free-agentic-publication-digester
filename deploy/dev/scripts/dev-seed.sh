@@ -9,7 +9,7 @@
 # Copy COLD, never live (the 2026-07-30 cutover lesson: a live-WAL rsync
 # arrives corrupt — "malformed database schema"). VACUUM INTO takes a
 # read transaction and writes a checkpointed, WAL-free snapshot; the
-# python:3.12-slim image has no sqlite3 CLI, so snapshots are made with
+# python slim base image has no sqlite3 CLI, so snapshots are made with
 # the container's own Python. These are the canonical commands the ops
 # docs describe in prose (OB-11, docs/agents/corpus.md).
 set -euo pipefail
