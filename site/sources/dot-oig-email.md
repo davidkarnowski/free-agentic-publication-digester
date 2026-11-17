@@ -6,7 +6,7 @@
 
 # DOT Inspector General (email)
 
-planned · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Transportation, Office of Inspector General
+planned · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Transportation, Office of Inspector General
 
 Official site: https://www.oig.dot.gov/ · All sources: [sources.md](../sources.md)
 
@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-03, 13 days ago (quiet past 7 days).
+**delivering** — 3 item(s) in the last 14 days; most recent 2026-11-16, delivered by email.
 
-This label has held since 2026-11-11T05:15:03Z (UTC) and was last re-checked 2026-11-16T04:48:24Z (UTC).
+This label has held since 2026-11-16T14:34:56Z (UTC) and was last re-checked 2026-11-17T04:58:36Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,20 +68,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 3 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-03 |
-| Content length | 2,193 characters average, 2,193 median (shortest 2,193, longest 2,193) |
+| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-11-16 |
+| Content length | 2,080 characters average, 1,978 median (shortest 1,962, longest 2,301) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-03 |
+| Mailbox | 3 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-16 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-03, 13 days ago (quiet past 7 days).
+3 item(s) in the last 14 days; most recent 2026-11-16, delivered by email.
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-18 | 0 |
 | 2026-10-19 | 0 |
 | 2026-10-20 | 0 |
 | 2026-10-21 | 0 |
@@ -122,12 +121,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-13 | 0 |
 | 2026-11-14 | 0 |
 | 2026-11-15 | 0 |
-| 2026-11-16 | 0 |
+| 2026-11-16 | 3 |
+| 2026-11-17 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest DOT Inspector General bulletins by email into the project mailbox, from sender news@updates.oig.dot.gov, after the subscription was confirmed through the publisher's own signup flow. The source was registered 2026-09-26 with status planned, and the registry notes that bulletins observed before registration were not backfilled. Bulletins arrive with the full item text. The mailbox shows one message, a bulletin, with no administrative messages, errors, or refused deliveries, last received 2026-11-03T18:20:04Z. In the 14-day window we recorded one bulletin, 2,193 characters, a rate of 0.07 per day, with the most recent dated 2026-11-03. Health reads quiet, with the most recent bulletin nine days old. Email sources have no request counts to report. The registry notes list a coverage evaluation as still pending the first ingested bulletins. Compared with the previous assessment dated 2026-10-29, the 14-day count fell from two bulletins to one, the most recent bulletin date moved from 2026-10-28 to 2026-11-03, the average size rose from 1,681 to 2,193 characters, and the health status changed from delivering to quiet.
+We ingest DOT Inspector General bulletins by email into the project mailbox, from news@updates.oig.dot.gov, with full item text in each bulletin. The subscription was confirmed through the publisher's signup flow and registered 2026-09-26; bulletins observed before registration were not backfilled. The registry lists the status as planned and the coverage evaluation as pending the first ingested bulletins. The measured 14-day window now holds three items, all dated 2026-11-16, measuring between 1,962 and 2,301 characters, with a median of 1,978 and an average of 2,080, a rate of 0.21 per day. The mailbox shows three messages and three bulletins, with no administrative messages, errors, or refused deliveries, last received 2026-11-16T15:52:42Z. No delivery incidents are recorded in the registry. Health reads delivering. Compared with the 2026-11-12 assessment, which recorded one bulletin of 2,193 characters dated 2026-11-03 and a quiet health reading, the window count has risen from one to three, the most recent date has moved to 2026-11-16, and health has changed to delivering.
 
-_Model-written assessment of our own ingestion, generated 2026-11-12 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-17 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -6,7 +6,7 @@
 
 # National Highway Institute (email)
 
-active · ingestion health: no data · Executive · Tier 3 · email bulletin · Department of Transportation (FHWA / NHI)
+active · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Transportation (FHWA / NHI)
 
 Official site: https://www.nhi.fhwa.dot.gov/ · All sources: [sources.md](../sources.md)
 
@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-10-03 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**no data** — No bulletin recorded from this source in the last 180 days.
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-16, delivered by email.
 
-This label has held since 2026-10-01T21:38:40Z (UTC) and was last re-checked 2026-11-16T04:48:24Z (UTC).
+This label has held since 2026-11-16T16:15:21Z (UTC) and was last re-checked 2026-11-17T04:58:36Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -72,18 +72,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — none recorded in the lookback period |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-16 |
+| Content length | 1,019 characters average, 1,019 median (shortest 1,019, longest 1,019) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-16 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-No bulletin recorded from this source in the last 180 days.
+1 item(s) in the last 14 days; most recent 2026-11-16, delivered by email.
 
 ### All time
 
@@ -91,12 +93,45 @@ Bulletins from this source are delivered to the project mailbox, so there are no
 
 ### Last 30 days, day by day
 
-No requests and no items were recorded in the last 30 days, so there is nothing to chart.
+Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publication day the digests use; the stored request stamps remain UTC.
+
+| Day | Items ingested |
+|---|---|
+| 2026-10-19 | 0 |
+| 2026-10-20 | 0 |
+| 2026-10-21 | 0 |
+| 2026-10-22 | 0 |
+| 2026-10-23 | 0 |
+| 2026-10-24 | 0 |
+| 2026-10-25 | 0 |
+| 2026-10-26 | 0 |
+| 2026-10-27 | 0 |
+| 2026-10-28 | 0 |
+| 2026-10-29 | 0 |
+| 2026-10-30 | 0 |
+| 2026-10-31 | 0 |
+| 2026-11-01 | 0 |
+| 2026-11-02 | 0 |
+| 2026-11-03 | 0 |
+| 2026-11-04 | 0 |
+| 2026-11-05 | 0 |
+| 2026-11-06 | 0 |
+| 2026-11-07 | 0 |
+| 2026-11-08 | 0 |
+| 2026-11-09 | 0 |
+| 2026-11-10 | 0 |
+| 2026-11-11 | 0 |
+| 2026-11-12 | 0 |
+| 2026-11-13 | 0 |
+| 2026-11-14 | 0 |
+| 2026-11-15 | 0 |
+| 2026-11-16 | 1 |
+| 2026-11-17 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The National Highway Institute email subscription was activated on 2026-10-01 and is listed as active in tier 3. The measured mailbox record shows zero bulletins from this source, with no last message date and no measured message lengths. The health reading is no-data, meaning no bulletin was recorded in the last 180 days. The seven-day daily view shows no items, and the collector reports no consecutive errors. The registry describes the channel as a training-catalog feed rather than a press-release stream, and gives an example title from that catalog, but no bulletin from this source appears in the measured record. The previous assessment, dated 2026-10-02, recorded no items as of that date, and the current measurements likewise record none. No delivery cadence or format can be determined from the data.
+We ingest National Highway Institute bulletins by email from nhi@info.dot.gov through the email adapter into the project mailbox. The subscription was activated 2026-10-01 on observed delivery with operator approval and was made through DOT's own signup flow; DKIM is recorded per message at ingest. The registry describes this channel as a training-catalog feed rather than a press-release stream, and assigns it tier 3. The 14-day window holds one item, a bulletin dated 2026-11-16 measuring 1,019 characters, a rate of 0.07 per day, delivered with full item text. The mailbox shows one message and one bulletin, with no administrative messages, errors, or refused deliveries, last received 2026-11-16T16:07:03Z. No delivery incidents are recorded in the registry. Health reads delivering. Compared with the 2026-11-02 assessment, which recorded no bulletins and a no-data health reading, the first bulletin is now recorded and health has changed from no-data to delivering.
 
-_Model-written assessment of our own ingestion, generated 2026-11-02 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-17 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

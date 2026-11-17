@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-09-28, 49 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-09-28, 50 days ago (quiet past 7 days).
 
-This label has held since 2026-10-06T04:16:29Z (UTC) and was last re-checked 2026-11-16T04:48:24Z (UTC).
+This label has held since 2026-10-06T04:16:29Z (UTC) and was last re-checked 2026-11-17T04:58:36Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,22 +71,22 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
 | Items ingested | none in the last 14 days — most recent 2026-09-28 |
-| Our requests to www.cdc.gov | 335 request(s) · 335 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.cdc.gov | 336 request(s) · 336 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-16T05:00:25.043+00:00 UTC.
+last answered request 2026-11-17T05:00:31.548+00:00 UTC.
 
-Most recent item 2026-09-28, 49 days ago (quiet past 7 days).
+Most recent item 2026-09-28, 50 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.cdc.gov, all time (since 2026-09-28):** 1,234 request(s) · 1,233 answered · 1 returned no content
+- **Our requests to www.cdc.gov, all time (since 2026-09-28):** 1,260 request(s) · 1,259 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.cdc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-18 | 0 | 25 | 124 |
 | 2026-10-19 | 0 | 25 | 211 |
 | 2026-10-20 | 0 | 25 | 182 |
 | 2026-10-21 | 0 | 25 | 247 |
@@ -125,7 +124,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-13 | 0 | 26 | 393 |
 | 2026-11-14 | 0 | 25 | 379 |
 | 2026-11-15 | 0 | 25 | 176 |
-| 2026-11-16 | 0 | 1 | 558 |
+| 2026-11-16 | 0 | 26 | 409 |
+| 2026-11-17 | 0 | 1 | 122 |
 
 ## Our ingestion assessment
 
