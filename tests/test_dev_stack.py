@@ -152,10 +152,12 @@ def test_web_services_share_the_nginx_image_pin():
     assert prod["build"] == {"context": "./web-image"}
     assert dev["build"] == {"context": "../vps/web-image"}
     dockerfile = (VPS / "web-image" / "Dockerfile").read_text(encoding="utf-8")
-    pin = r"^FROM nginx:1\.30\.6-alpine@sha256:[0-9a-f]{64}$"
+    pin = r"^FROM nginx:1\.30\.7-alpine@sha256:[0-9a-f]{64}$"
     assert re.search(pin, dockerfile, re.MULTILINE)
     # The guard that makes a stale cache fail the build, not pass it.
     assert "need brotli-libs 1.2.1-r0" in dockerfile and "need curl 8.23.0-r0" in dockerfile
+    assert "need zlib 1.4-r0" in dockerfile and "need libxslt 1.1.43-r4" in dockerfile
+    assert "grep -q 'nginx/1.30.7$'" in dockerfile
     # The deploy-time syntax gate and the rehearsal used to be checked here
     # for the same pin. Both moved to the operator's private host tree with the config on 2026-09-21,
     # so the pin parity that remains in this repo is prod <-> dev, above.
