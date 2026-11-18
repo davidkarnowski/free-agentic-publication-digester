@@ -295,6 +295,14 @@ def _hours_before(now_iso, hours):
     return (t - _dt.timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+# Every item count here (and publish._DAILY_ITEMS_SQL) reads only
+# e.package_id, e.char_count and e.metadata, and p.digest_day or
+# p.first_seen_at, p.collection and p.package_id: the columns of the count
+# indexes (db._COUNT_INDEXES). That keeps each query inside those indexes.
+# A query that touches any other extracted_texts column goes back to the
+# row, which holds the full text, and on 2026-11-17 those reads cost about
+# 2.3 GiB per query every 15 minutes. tests/test_count_indexes.py pins
+# the plans.
 _WINDOW_ROWS_SQL = """
 SELECT p.collection AS collection,
        json_extract(e.metadata, '$.source_id') AS source_id,

@@ -458,7 +458,29 @@ def connect(db_path=None):
         "raw_bytes": "INTEGER",
         "raw_pruned_at": "TEXT",
     })
+    # After the column migrations, not in _DDL: idx_packages_digest_day
+    # names a column that a pre-2026-08-06 database gains only above.
+    conn.executescript(_COUNT_INDEXES)
     return conn
+
+
+# Covering indexes for the item counts (docs/schema.md, 2026-11-18). The
+# source-health refresh and the source pages count items per source over
+# a window, five queries every 15 minutes. Without these, each query read
+# every row of extracted_texts, and a WITHOUT ROWID table stores the full
+# text in the row, so every seek compared whole rows: about 2.3 GiB read
+# per query on production. With them the counts read only these indexes
+# and never the text. Building them reads the table once; the collector
+# opens one connection before its workers start so that happens with
+# nobody waiting (collect.Supervisor.run_forever).
+_COUNT_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_packages_digest_day
+    ON packages (digest_day, collection, package_id);
+CREATE INDEX IF NOT EXISTS idx_packages_first_seen
+    ON packages (first_seen_at, collection, package_id);
+CREATE INDEX IF NOT EXISTS idx_extracted_counts
+    ON extracted_texts (package_id, char_count, metadata);
+"""
 
 
 def _ensure_columns(conn, table, columns):

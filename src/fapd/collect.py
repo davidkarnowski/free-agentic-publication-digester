@@ -1172,6 +1172,16 @@ class Supervisor:
             conn.close()
 
     def run_forever(self):
+        # Open the database once before any worker starts, so a one-time
+        # schema step (the count indexes of 2026-11-18 read the whole
+        # extracted_texts table to build) runs with no worker waiting on
+        # it. Otherwise the first worker builds it while the rest time out
+        # on the busy lock. A failure here is only logged: each worker
+        # opens its own connection and reports its own failures.
+        try:
+            self.conn_factory().close()
+        except Exception as exc:  # noqa: BLE001 — never block start-up
+            logger.error("start-up: could not open the database: %r", exc)
         stop = threading.Event()
         threads = [threading.Thread(target=w.loop, args=(stop,),
                                     name=w.name, daemon=True)

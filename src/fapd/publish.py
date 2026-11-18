@@ -2735,6 +2735,8 @@ ALL_TIME_PROBE_NOTE = (
     "still logged and counted against our request budget."
 )
 
+# Index-only, like health's item counts: see the note above
+# health._WINDOW_ROWS_SQL before adding a column.
 _DAILY_ITEMS_SQL = """
 SELECT p.collection AS collection,
        json_extract(e.metadata, '$.source_id') AS source_id,

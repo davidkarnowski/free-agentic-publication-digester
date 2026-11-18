@@ -223,6 +223,17 @@ CREATE INDEX idx_packages_date_issued
 CREATE INDEX idx_packages_unfetched
     ON packages (fetch_status)
     WHERE fetch_status IN ('pending', 'failed');
+
+-- Item counts by window (2026-11-18): the source-health refresh and the
+-- source pages count items per source by filing day (digest_day) and by
+-- arrival (first_seen_at). Each index holds every packages column those
+-- counts read, so a window is answered from the index alone. Created in
+-- db.connect() after the column migrations, because digest_day is
+-- itself a migrated column.
+CREATE INDEX idx_packages_digest_day
+    ON packages (digest_day, collection, package_id);
+CREATE INDEX idx_packages_first_seen
+    ON packages (first_seen_at, collection, package_id);
 ```
 
 Not indexed: `title` (never searched in this store — discovery is the API's
@@ -493,7 +504,26 @@ logic changed). Re-extraction is replace-on-rerun per package
 (delete + insert) — idempotent, partial failures re-run harmlessly, and one
 bad package never blocks the rest (per-package isolation in `extract.run`).
 
-Index: `(collection, doc_type)` for digest selection queries.
+Indexes: `(collection, doc_type)` for digest selection queries, and
+`idx_extracted_counts (package_id, char_count, metadata)` for the item
+counts (2026-11-18).
+
+**Large rows, and why the counts need their own index.** In a `WITHOUT
+ROWID` table the whole row, `text` included, is the b-tree key. A row
+larger than about 1 KB spills into overflow pages, and SQLite reads a
+spilled key in full to compare it during a seek. Every lookup by
+`(package_id, granule_id)` therefore reads the full text of each row it
+compares on the way down, and a column stored after `text`
+(`char_count`) can only be reached by reading the text. Measured on
+2026-11-17: each of the five source-health counts read about 2.3 GiB of
+a 2.4 GB database, every 15 minutes. The counts read only `package_id`,
+`char_count` and `metadata`, so `idx_extracted_counts` answers them
+without touching the rows: on a dev copy, each count's page reads fell
+from about 258,000 to between 32 and 4,400. A count that needs another
+column must either be added to this index or pay for the text.
+`tests/test_count_indexes.py` pins the plans. Converting the table to a
+rowid table would end the seek cost for every reader. That rewrite is
+not done.
 
 ### `graphic_assets`
 
