@@ -25,7 +25,7 @@ RUN apt-get update && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends git openssh-client curl \
     && rm -rf /var/lib/apt/lists/* \
     && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libbrotli1)" ge 1.1.0-2+deb13u1 \
-    && pip install --no-cache-dir uv==0.13.8
+    && pip install --no-cache-dir uv==0.13.9
 
 # The claude CLI (LLM_BACKEND=cli, the operator's decision 2026-07-30;
 # production again since 2026-08-24 after the vendor's 08-14..24 block —
@@ -48,7 +48,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_26.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/* \
     && node -e 'const [a,b,c]=process.versions.node.split(".").map(Number); if (a!==26 || b<13 || (b===13 && c<1)) { console.error("node " + process.version + " is not 26.13.1 or later on the 26 line"); process.exit(1) }' \
-    && npm install -g @anthropic-ai/claude-code@2.1.325 \
+    && npm install -g @anthropic-ai/claude-code@2.1.327 \
     && claude --version
 
 WORKDIR /app
