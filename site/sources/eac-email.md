@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-09, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-09, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-11-09T16:18:55Z (UTC) and was last re-checked 2026-11-17T04:58:36Z (UTC).
+This label has held since 2026-11-17T05:27:36Z (UTC) and was last re-checked 2026-11-18T05:04:18Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -75,7 +75,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-09, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-09, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -87,7 +87,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-19 | 0 |
 | 2026-10-20 | 0 |
 | 2026-10-21 | 0 |
 | 2026-10-22 | 0 |
@@ -117,11 +116,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-15 | 0 |
 | 2026-11-16 | 0 |
 | 2026-11-17 | 0 |
+| 2026-11-18 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-This source receives full-text subscription bulletins from newsletter@updates.eac.gov in the project mailbox, which are ingested by the email adapter with raw RFC-5322 capture and DKIM verification. Its registry status is "planned". The signup URL for this source is not recorded, as the inferred address did not resolve. The previous assessment, dated 2026-11-09, reported no items ingested in its 14-day window and stated that no new items had been observed since an item on 2026-10-01. The current measurement shows one item was delivered on 2026-11-09, making it the most recent item in the collection window. This item contained 9778 characters, and the mailbox recorded one bulletin with zero errors or refusals. This delivery results in a health status of "delivering", indicating an active reception of content.
+We ingest Election Assistance Commission bulletins from newsletter@updates.eac.gov through the email adapter. The adapter captures the raw RFC-5322 message and verifies DKIM before parsing. Each bulletin carries the full item text. The registry status is planned. The subscription was confirmed 2026-07-29, and no signup URL is recorded because the address inferred from the sender did not resolve. The 14-day window holds one item, dated 2026-11-09, measuring 9,778 characters. The mailbox counter records one bulletin, with no errors and no refused messages, last received 2026-11-09T16:13:15Z. Health now reads quiet, because that item is nine days old at this measurement. The previous assessment, dated 2026-11-10, read delivering for the same item. The previous assessment also recorded no items in its window. The registry notes record no delivery incident.
 
-_Model-written assessment of our own ingestion, generated 2026-11-10 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-18 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -6,7 +6,7 @@
 
 # CDC Newsroom
 
-active · ingestion health: quiet · Executive · Tier 2 · HTML index · Department of Health and Human Services
+active · ingestion health: delivering · Executive · Tier 2 · HTML index · Department of Health and Human Services
 
 Official site: https://www.cdc.gov/media/index.html · All sources: [sources.md](../sources.md)
 
@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-09-28, 50 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-17; 0 of 335 request(s) to www.cdc.gov returned no content.
 
-This label has held since 2026-10-06T04:16:29Z (UTC) and was last re-checked 2026-11-17T04:58:36Z (UTC).
+This label has held since 2026-11-17T16:28:33Z (UTC) and was last re-checked 2026-11-18T05:04:18Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,22 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 23 request(s) (23 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-09-28 |
-| Our requests to www.cdc.gov | 336 request(s) · 336 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-17 |
+| Content length | 160 characters average, 160 median (shortest 160, longest 160) |
+| Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
+| Our requests to www.cdc.gov | 335 request(s) · 335 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-17T05:00:31.548+00:00 UTC.
+last answered request 2026-11-18T05:53:48.451+00:00 UTC.
 
-Most recent item 2026-09-28, 50 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-11-17; 0 of 335 request(s) to www.cdc.gov returned no content.
 
 ### All time
 
-- **Our requests to www.cdc.gov, all time (since 2026-09-28):** 1,260 request(s) · 1,259 answered · 1 returned no content
+- **Our requests to www.cdc.gov, all time (since 2026-09-28):** 1,284 request(s) · 1,283 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -96,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.cdc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-19 | 0 | 25 | 211 |
 | 2026-10-20 | 0 | 25 | 182 |
 | 2026-10-21 | 0 | 25 | 247 |
 | 2026-10-22 | 0 | 26 | 256 |
@@ -125,12 +126,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-14 | 0 | 25 | 379 |
 | 2026-11-15 | 0 | 25 | 176 |
 | 2026-11-16 | 0 | 26 | 409 |
-| 2026-11-17 | 0 | 1 | 122 |
+| 2026-11-17 | 1 | 24 | 349 |
+| 2026-11-18 | 0 | 1 | 103 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest the CDC Newsroom through the html-index adapter, which reads the media index listing once per poll and does not fetch article pages, so the text we hold is the text the listing provides. The source was activated on 2026-09-28. In the current measurement window (2026-10-31 through 2026-11-06) we recorded no items. The most recent item we hold is dated 2026-09-28, 39 days before the measurement, and the health label is quiet. Our fetch record shows 331 requests to www.cdc.gov, all answered, with no client or server errors and no unanswered requests. The host is shared with one other source. The previous assessment of 2026-10-07 recorded one item dated 2026-09-28 at 206 characters and 215 requests with no errors. Since then no new items have entered our record, and the request count is higher. The adapter reads only the first page of the listing, so entries published between polls beyond that page would not be seen. Entries without a readable date are dropped rather than assigned an observation date.
+We ingest the CDC Newsroom through the html-index adapter in feed-only mode. It reads the first page of the media index once per poll and records only entries whose dates the parser can read. Entries without a readable date are dropped rather than assigned an observation date, and article pages are not fetched. Activation was 2026-09-28. The 14-day window holds one item, dated 2026-11-17, measuring 160 characters, and health reads delivering. Our fetch record shows 335 requests to www.cdc.gov, all answered, with no client or server errors. The host is shared with one other source. On full days shown, request volume ran from about 24 to 30 per day. The registry notes record that the publisher's RSS path returned an HTML directory rather than a feed, so the html-index adapter was used. No incident is recorded. Compared with the previous assessment, which recorded no items in its window and a latest item of 2026-09-28 at 206 characters, one item dated 2026-11-17 has now entered our record. Requests rose from 331 to 335, with no errors in either measurement.
 
-_Model-written assessment of our own ingestion, generated 2026-11-06 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-18 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

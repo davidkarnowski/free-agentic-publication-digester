@@ -6,7 +6,7 @@
 
 # Children's Bureau — News From CB (email)
 
-active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Health and Human Services (ACF / Children's Bureau)
+active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Health and Human Services (ACF / Children's Bureau)
 
 Official site: https://www.acf.hhs.gov/cb · All sources: [sources.md](../sources.md)
 
@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-30, 18 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-17, delivered by email.
 
-This label has held since 2026-11-07T05:22:07Z (UTC) and was last re-checked 2026-11-17T04:58:36Z (UTC).
+This label has held since 2026-11-17T15:18:26Z (UTC) and was last re-checked 2026-11-18T05:04:18Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -72,18 +72,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-30 |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-17 |
+| Content length | 377 characters average, 377 median (shortest 377, longest 377) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-17 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-30, 18 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-11-17, delivered by email.
 
 ### All time
 
@@ -95,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-19 | 0 |
 | 2026-10-20 | 0 |
 | 2026-10-21 | 0 |
 | 2026-10-22 | 1 |
@@ -124,12 +125,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-14 | 0 |
 | 2026-11-15 | 0 |
 | 2026-11-16 | 0 |
-| 2026-11-17 | 0 |
+| 2026-11-17 | 1 |
+| 2026-11-18 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest Children's Bureau News From CB bulletins through the email adapter from GovDelivery, sent by newsfromcb@communications.childwelfare.gov, with full item text in each message. The source was activated 2026-10-01 on operator approval, after delivery was observed over the late-September changeover. The 14-day window holds one bulletin, dated 2026-10-30 and measuring 307 characters, a rate of 0.07 per day. The mailbox shows one message and one bulletin, with no administrative messages, errors, or refused deliveries. The last message arrived 2026-10-30 at 14:59 UTC. Health reads quiet, nine days after the last item. Since the 2026-10-31 assessment, which recorded two items measuring 268 and 307 characters, the window now records one item. The 268-character bulletin is not among the current measured items. The registry records no delivery incidents, and the status is active.
+We ingest Children's Bureau News From CB bulletins through the email adapter, sent by newsfromcb@communications.childwelfare.gov, with full item text in each message (delivery mode email-full). The source was activated 2026-10-01 on operator approval, after delivery was observed over the late-September changeover. It is subscribed through the publisher's own flow, and DKIM is recorded per message at ingest. The current 14-day window holds one bulletin, dated 2026-11-17 and measuring 377 characters, a rate of 0.07 per day. The last message arrived 2026-11-17 at 15:11 UTC. The mailbox shows one message and one bulletin, with no administrative messages, errors, or refused deliveries. The collector reports no consecutive errors, with the last cycle at 2026-11-18 05:06 UTC. Health reads delivering, one day after the last item. Since the 2026-11-08 assessment, which recorded one bulletin dated 2026-10-30 measuring 307 characters, the window now holds a different bulletin. The 307-character item is no longer in the window, and the 268-character bulletin noted in the earlier 2026-10-31 assessment is not among the current measured items. The registry records no delivery incidents, and the status is active.
 
-_Model-written assessment of our own ingestion, generated 2026-11-08 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-18 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

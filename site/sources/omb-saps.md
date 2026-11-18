@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-10-07 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-09, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-09, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-11-09T18:56:07Z (UTC) and was last re-checked 2026-11-17T04:58:36Z (UTC).
+This label has held since 2026-11-17T05:27:36Z (UTC) and was last re-checked 2026-11-18T05:04:18Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,7 +70,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 105 request(s) (105 answered, 0 returned no content) · no items ingested
+Last 24 hours: 96 request(s) (96 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -81,13 +81,13 @@ Last 24 hours: 105 request(s) (105 answered, 0 returned no content) · no items 
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
 | Our requests to www.whitehouse.gov | 1,351 request(s) · 1,350 answered · 1 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.1% returned no content |
 
-last answered request 2026-11-17T05:00:33.508+00:00 UTC; this host serves 4 registered sources, so these figures are host-wide.
+last answered request 2026-11-18T05:53:50.660+00:00 UTC; this host serves 4 registered sources, so these figures are host-wide.
 
-Most recent item 2026-11-09, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-09, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 7,777 request(s) · 7,760 answered · 17 returned no content
+- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 7,877 request(s) · 7,860 answered · 17 returned no content
 
 This host serves 4 registered sources, so these figures are host-wide.
 
@@ -99,7 +99,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.whitehouse.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-19 | 0 | 102 | 76 |
 | 2026-10-20 | 0 | 100 | 84 |
 | 2026-10-21 | 0 | 101 | 84 |
 | 2026-10-22 | 0 | 106 | 94 |
@@ -128,12 +127,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-14 | 0 | 96 | 80 |
 | 2026-11-15 | 0 | 100 | 78 |
 | 2026-11-16 | 0 | 105 | 79 |
-| 2026-11-17 | 0 | 4 | 63 |
+| 2026-11-17 | 0 | 100 | 72 |
+| 2026-11-18 | 0 | 4 | 96 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-This source, activated on 2026-10-06, parses an HTML index of Statements of Administration Policy (SAP) from a WordPress page in feed-only mode, recording each SAP's title, date, and PDF link without fetching the full PDF. Three items were initially ingested as backfill prior to activation. The previous assessment on 2026-10-15 noted no new items had arrived since activation, with the most recent item dated 2026-10-06, and an average content length of 176 characters. Since then, one new item was observed on 2026-11-09, making it the most recent delivery, with the current average item character count at 82. The system makes approximately 100 requests per day to www.whitehouse.gov, with zero failed requests reported during the current measurement period, a decrease from the one failed request recorded in the prior assessment.
+We ingest OMB Statements of Administration Policy through the html-index adapter in feed-only mode. It reads the dated listing on the White House OMB page and stores each statement's title, date, PDF link, and the bill numbers its title names, without fetching the PDF. Activation was 2026-10-06. The 14-day window holds one item, dated 2026-11-09, nine days before this measurement, and health reads quiet. Average record length is 82 characters. Across the measured period we made 1,351 attempts to www.whitehouse.gov, and 1,350 were answered. The one that returned no content was a client error on 2026-11-12. The host is shared with four other sources. On full days shown, request volume ran from 96 to 125 per day, and the recent 96 requests had no failures. The registry notes record no incident beyond that request. Compared with the previous assessment, average record length fell from 176 characters, the 2026-11-09 item is now the latest delivery, and recent failed requests went from one to zero.
 
-_Model-written assessment of our own ingestion, generated 2026-11-10 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-18 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
