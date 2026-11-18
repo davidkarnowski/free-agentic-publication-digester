@@ -313,13 +313,20 @@ JOIN packages p USING (package_id)
 WHERE p.digest_day >= ? AND p.digest_day <= ?
 """
 
+# The recency range (180 days) covers nearly every row, so this count reads
+# the count index in its own order and looks each package up, instead of
+# walking packages by date and seeking into the index once per package.
+# Those random seeks read the index's large court-opinion keys whole, again
+# and again: 580 MiB cold on production for a 142 MiB index (2026-11-18).
+# The scan is bounded by the index size: 28-46 MiB measured. SQLite never
+# reorders a CROSS JOIN, which is what holds the order.
 _RECENCY_SQL = """
 SELECT p.collection AS collection,
        json_extract(e.metadata, '$.source_id') AS source_id,
        MAX(p.digest_day) AS last_date,
        COUNT(*) AS items
 FROM extracted_texts e
-JOIN packages p USING (package_id)
+CROSS JOIN packages p ON p.package_id = e.package_id
 WHERE p.digest_day >= ? AND p.digest_day <= ?
 GROUP BY 1, 2
 """

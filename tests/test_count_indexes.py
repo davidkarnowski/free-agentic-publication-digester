@@ -43,7 +43,14 @@ def test_count_is_answered_from_the_indexes_alone(tmp_path, name):
             steps[words[1]] = line
     assert set(steps) == {"e", "p"}, plan
     assert "USING COVERING INDEX idx_extracted_counts" in steps["e"], plan
-    assert "USING COVERING INDEX idx_packages_" in steps["p"], plan
+    if name == "recency":
+        # Nearly every row: scan the count index in order, look each
+        # package up by its key (health._RECENCY_SQL says why).
+        assert plan[0].startswith("SCAN e USING COVERING INDEX"), plan
+        assert "sqlite_autoindex_packages_1 (package_id=?)" in steps["p"], plan
+    else:
+        # A window: walk only the window's packages, then the index.
+        assert "USING COVERING INDEX idx_packages_" in steps["p"], plan
     conn.close()
 
 
