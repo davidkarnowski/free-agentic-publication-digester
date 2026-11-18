@@ -13,15 +13,16 @@ name: fapd
 
 services:
   web:
-    # The official nginx 1.30.6-alpine image, pinned by digest, with the
+    # The official nginx 1.30.7-alpine image, pinned by digest, with the
     # Alpine fixes published since it was built installed at build time
-    # (web-image/Dockerfile says why it stays a local build). -p2: rebuilt
-    # 2026-11-16 on the 2026-11-05 base; -p1 stays on the box for rollback.
+    # (web-image/Dockerfile says why it stays a local build). 1.30.7-p1:
+    # 2026-11-18, the nginx security release; 1.30.6-p2 stays on the box for
+    # rollback.
     # Parity with the edge proxy (the current nginx STABLE branch); bump
     # both together during CVE sweeps, never just one.
     build:
       context: ./web-image
-    image: fapd-web:1.30.6-p2
+    image: fapd-web:1.30.7-p1
     container_name: fapd-web
     restart: unless-stopped
     expose: ["80"]                # private network only — never published

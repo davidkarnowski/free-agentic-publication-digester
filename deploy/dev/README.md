@@ -27,7 +27,7 @@ byte-for-byte: same base, uv/Node/claude layers, `uv sync --frozen
 --no-dev`), built from a locally staged `repo/` using the same exclude
 list deploy.sh checks (`deploy/common/repo-excludes.txt` — one list, two
 stagers, drift-tested). The same nginx image (`deploy/vps/web-image/`, the
-official 1.30.6-alpine digest patched for CVE-2026-111497), the same
+official 1.30.7-alpine digest plus Alpine's later fixes), the same
 site-volume handoff, and the same two post-up render commands deploy.sh
 runs on the box (F-009: the site volume seeds from the image only on
 first mount, so rendering is always explicit).
