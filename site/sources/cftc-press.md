@@ -57,9 +57,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-11-17; 0 of 336 request(s) to www.cftc.gov returned no content.
+**delivering** — 4 item(s) in the last 14 days; most recent 2026-11-17; 0 of 335 request(s) to www.cftc.gov returned no content.
 
-This label has held since 2026-10-19T19:18:28Z (UTC) and was last re-checked 2026-11-18T05:04:18Z (UTC).
+This label has held since 2026-10-19T19:18:28Z (UTC) and was last re-checked 2026-11-19T04:46:30Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,24 +69,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-11-17 |
-| Content length | 101 characters average, 90 median (shortest 79, longest 132) |
+| Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-11-17 |
+| Content length | 109 characters average, 110 median (shortest 84, longest 132) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.cftc.gov | 336 request(s) · 336 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.cftc.gov | 335 request(s) · 335 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-18T05:53:47.817+00:00 UTC.
+last answered request 2026-11-19T05:00:11.726+00:00 UTC.
 
-6 item(s) in the last 14 days; most recent 2026-11-17; 0 of 336 request(s) to www.cftc.gov returned no content.
+4 item(s) in the last 14 days; most recent 2026-11-17; 0 of 335 request(s) to www.cftc.gov returned no content.
 
 ### All time
 
-- **Our requests to www.cftc.gov, all time (since 2026-08-01):** 2,911 request(s) · 2,911 answered · 0 returned no content
+- **Our requests to www.cftc.gov, all time (since 2026-08-01):** 2,936 request(s) · 2,936 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.cftc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-20 | 1 | 25 | 66 |
 | 2026-10-21 | 1 | 25 | 83 |
 | 2026-10-22 | 0 | 25 | 62 |
 | 2026-10-23 | 0 | 26 | 63 |
@@ -125,12 +124,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-15 | 0 | 25 | 56 |
 | 2026-11-16 | 0 | 26 | 76 |
 | 2026-11-17 | 1 | 25 | 67 |
-| 2026-11-18 | 0 | 1 | 56 |
+| 2026-11-18 | 0 | 25 | 82 |
+| 2026-11-19 | 0 | 1 | 225 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The CFTC press-release index is accessed via the html-index adapter, which polls the HTML table of press releases once per poll cycle without fetching article pages (feed-only delivery mode). The index table carries approximately 37 releases spanning roughly five months of publishing; each row includes dual dating—a machine-readable datetime attribute and visible date text—so all entries are publisher-dated. Ingested content consists of headlines and release numbers, averaging 148 characters per item. Over the past 14 days, three items have been measured at a rate of 0.21 items per day, with the most recent dated 2026-10-19. All 329 polling requests to www.cftc.gov succeeded without error. The measured rate of 0.21 items per day represents a decrease from the prior assessment's 0.29 per day.
+We ingest the CFTC Press Releases index through the html-index adapter in feed-only mode, reading one HTML listing fetch per poll and no article pages. The source was activated on 2026-07-31. Each row of the press-release table states its date twice, as a machine-readable datetime attribute and as visible text, so every entry is dated by the publisher and none by observation. The stored text is the row itself, a headline with its release number, and the linked release body is not fetched. Over the 14-day window we recorded 4 items at 0.29 per day, the most recent dated 2026-11-17, with item text averaging 109 characters (range 84 to 132). The previous assessment recorded 3 items at 0.21 per day, the most recent dated 2026-10-19, and a 148-character average. All 335 requests to www.cftc.gov returned content, an error rate of 0.0 percent, compared with 329 successful requests and no errors in the previous window. The registry notes record the probes, the activation, and a table of about 37 releases, with no incidents. Health reads delivering, with the most recent item 2 days old.
 
-_Model-written assessment of our own ingestion, generated 2026-10-20 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-19 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

@@ -57,7 +57,7 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 **delivering** — 5 item(s) in the last 14 days; most recent 2026-11-14, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-18T05:04:18Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-19T04:46:30Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-20 | 2 |
 | 2026-10-21 | 0 |
 | 2026-10-22 | 2 |
 | 2026-10-23 | 2 |
@@ -122,6 +121,7 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-16 | 0 |
 | 2026-11-17 | 0 |
 | 2026-11-18 | 0 |
+| 2026-11-19 | 0 |
 
 ## Our ingestion assessment
 

@@ -6,7 +6,7 @@
 
 # GSA News Releases
 
-active · ingestion health: quiet · Executive · Tier 1 · HTML index · Independent agency
+active · ingestion health: delivering · Executive · Tier 1 · HTML index · Independent agency
 
 Official site: https://www.gsa.gov/about-us/newsroom/news-releases · All sources: [sources.md](../sources.md)
 
@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-04, 14 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-18; 0 of 333 request(s) to www.gsa.gov returned no content.
 
-This label has held since 2026-11-12T05:13:32Z (UTC) and was last re-checked 2026-11-18T05:04:18Z (UTC).
+This label has held since 2026-11-18T16:45:34Z (UTC) and was last re-checked 2026-11-19T04:46:30Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,22 +67,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-11-04 |
-| Our requests to www.gsa.gov | 335 request(s) · 335 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-18 |
+| Content length | 363 characters average, 363 median (shortest 363, longest 363) |
+| Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
+| Our requests to www.gsa.gov | 333 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-18T05:53:47.463+00:00 UTC.
+last answered request 2026-11-19T05:00:11.225+00:00 UTC.
 
-Most recent item 2026-11-04, 14 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-11-18; 0 of 333 request(s) to www.gsa.gov returned no content.
 
 ### All time
 
-- **Our requests to www.gsa.gov, all time (since 2026-09-28):** 1,291 request(s) · 1,281 answered · 10 returned no content
+- **Our requests to www.gsa.gov, all time (since 2026-09-28):** 1,315 request(s) · 1,305 answered · 10 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -92,7 +94,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.gsa.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-20 | 0 | 26 | 134 |
 | 2026-10-21 | 2 | 26 | 212 |
 | 2026-10-22 | 0 | 25 | 203 |
 | 2026-10-23 | 0 | 25 | 184 |
@@ -121,12 +122,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-15 | 0 | 25 | 229 |
 | 2026-11-16 | 0 | 24 | 235 |
 | 2026-11-17 | 0 | 25 | 176 |
-| 2026-11-18 | 0 | 1 | 183 |
+| 2026-11-18 | 1 | 24 | 308 |
+| 2026-11-19 | 0 | 1 | 295 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We read the GSA News Releases index through the html-index adapter in feed-only mode, with one listing fetch per poll and no article fetches. The source was activated on 2026-09-28, and the /about-us/ address redirects to /about-gsa/, which is the registered index. Entries the parser cannot date are dropped rather than dated by observation, and only the first listing page is read. Over the 14-day window we recorded 1 item at 0.07 per day, the most recent dated 2026-11-04, with item text averaging 336 characters. The previous assessment recorded 2 items at 0.14 per day and a 347-character average (range 336 to 358), so the item count and average have changed. Fetch totals show 334 requests with no content and an error rate of 0.0 percent. The previous assessment recorded 10 of 337 requests with no content and a 3.0 percent error rate, and noted that this difference was not reconciled; this assessment does not reconcile it either. Health reads quiet, with the most recent item 8 days old. The registry notes record probes, activation, and the redirect, and no incidents.
+We ingest the GSA News Releases index through the html-index adapter in feed-only mode, with one listing fetch per poll and no article fetches. The source was activated on 2026-09-28. The /about-us/ address redirects to /about-gsa/, which is the registered index. Only the first listing page is read, and entries the parser cannot date are dropped rather than dated by observation. Over the 14-day window we recorded 1 item at 0.07 per day, dated 2026-11-18, with item text of 363 characters. The previous assessment recorded 2 items at 0.14 per day, the most recent dated 2026-11-04, and a 347-character average with a range of 336 to 358, so the count, rate, most recent date, and average have changed. All 333 requests returned content, an error rate of 0.0 percent. The previous assessment recorded 10 of 337 requests with no content and a 3.0 percent error rate, a difference it did not reconcile and this assessment does not reconcile either. The registry notes record probes, the activation, and the redirect, with no incidents. Health reads delivering, with the most recent item 1 day old.
 
-_Model-written assessment of our own ingestion, generated 2026-11-12 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-19 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
