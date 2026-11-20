@@ -157,6 +157,9 @@ def test_web_services_share_the_nginx_image_pin():
     # The guard that makes a stale cache fail the build, not pass it.
     assert "need brotli-libs 1.2.1-r0" in dockerfile and "need curl 8.23.0-r0" in dockerfile
     assert "need zlib 1.4-r0" in dockerfile and "need libxslt 1.1.43-r4" in dockerfile
+    # 1.30.7-p2 (2026-11-20): openssl 3.5.9-r1 and libxml2 2.13.9-r3.
+    assert "need libssl3 3.5.9-r1" in dockerfile and "need libcrypto3 3.5.9-r1" in dockerfile
+    assert "need libxml2 2.13.9-r3" in dockerfile
     assert "grep -q 'nginx/1.30.7$'" in dockerfile
     # The deploy-time syntax gate and the rehearsal used to be checked here
     # for the same pin. Both moved to the operator's private host tree with the config on 2026-09-21,
