@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-11, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-11, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-21T13:53:36Z (UTC) and was last re-checked 2026-11-19T04:46:30Z (UTC).
+This label has held since 2026-11-19T05:06:27Z (UTC) and was last re-checked 2026-11-20T04:43:28Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -83,7 +83,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-11, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-11, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-21 | 1 |
 | 2026-10-22 | 0 |
 | 2026-10-23 | 0 |
 | 2026-10-24 | 0 |
@@ -125,11 +124,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-17 | 0 |
 | 2026-11-18 | 0 |
 | 2026-11-19 | 0 |
+| 2026-11-20 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-DOJ COPS Office bulletins deliver via GovDelivery to the project mailbox in full-text format from copsdonotreply@service.govdelivery.com or copsusdoj@service.govdelivery.com. Two bulletins were ingested during the 14-day window, most recently on 2026-10-21, measuring 417 and 659 characters. The email adapter reports zero errors and zero refused messages; all deliveries are DKIM-verified. Subscription was confirmed 2026-09-26. The prior assessment (2026-10-19) noted one parsed bulletin from 2026-10-10; one additional bulletin arrived on 2026-10-21. Bulletins were observed in the mailbox prior to formal registry entry; ingestion proceeded from the first collection cycle after deployment without backfilling pre-deployment messages.
+Our email adapter ingests the DOJ COPS Office GovDelivery bulletins in full-text delivery mode, from copsdonotreply@service.govdelivery.com and copsusdoj@service.govdelivery.com, with DKIM verify-and-archive capture. The registry entry is planned, tier 3, and was registered 2026-09-26. Ingestion began from the first poll after deploy, and bulletins sent before that were not backfilled. In the 14-day window we recorded two bulletins, measuring 625 and 639 characters with a median of 632, a rate of 0.14 per day. The most recent bulletin was delivered 2026-11-11, nine days before this assessment, and health status reads quiet. The mailbox counters show two messages, two bulletins, zero administrative messages, zero errors, and zero refused deliveries, with the last message received 2026-11-11 at 15:55 UTC. Compared with the previous assessment, the window no longer contains the 417- and 659-character bulletins from 2026-10-21, and the two bulletins now recorded are different items. The registry entry still lists the gate-3 coverage evaluation as pending, and it names justice-email and justice-newsroom as related entries that can publish the same news.
 
-_Model-written assessment of our own ingestion, generated 2026-10-22 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-20 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

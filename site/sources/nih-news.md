@@ -56,7 +56,7 @@ _Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It 
 
 **delivering** — 4 item(s) in the last 14 days; most recent 2026-11-18; 0 of 339 request(s) to www.nih.gov returned no content.
 
-This label has held since 2026-11-04T16:57:38Z (UTC) and was last re-checked 2026-11-19T04:46:30Z (UTC).
+This label has held since 2026-11-04T16:57:38Z (UTC) and was last re-checked 2026-11-20T04:43:28Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -66,7 +66,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 28 request(s) (28 answered, 0 returned no content) · 2 item(s) ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -77,13 +77,13 @@ Last 24 hours: 28 request(s) (28 answered, 0 returned no content) · 2 item(s) i
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.nih.gov | 339 request(s) · 339 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-19T05:00:14.921+00:00 UTC.
+last answered request 2026-11-20T05:01:19.740+00:00 UTC.
 
 4 item(s) in the last 14 days; most recent 2026-11-18; 0 of 339 request(s) to www.nih.gov returned no content.
 
 ### All time
 
-- **Our requests to www.nih.gov, all time (since 2026-08-06):** 2,742 request(s) · 2,742 answered · 0 returned no content
+- **Our requests to www.nih.gov, all time (since 2026-08-06):** 2,767 request(s) · 2,767 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nih.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-21 | 0 | 25 | 231 |
 | 2026-10-22 | 0 | 25 | 219 |
 | 2026-10-23 | 2 | 28 | 251 |
 | 2026-10-24 | 0 | 26 | 245 |
@@ -122,7 +121,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-16 | 1 | 26 | 214 |
 | 2026-11-17 | 0 | 25 | 254 |
 | 2026-11-18 | 2 | 27 | 295 |
-| 2026-11-19 | 0 | 1 | 82 |
+| 2026-11-19 | 0 | 25 | 278 |
+| 2026-11-20 | 0 | 1 | 235 |
 
 ## Our ingestion assessment
 

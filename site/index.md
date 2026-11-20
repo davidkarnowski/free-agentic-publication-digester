@@ -14,13 +14,13 @@ An automated, citation-bound, opinion-agnostic daily digest of official United S
 
 ## The last 7 days
 
+- [Daily Digest — 2026-11-19](2026-11-19.md) — The digest carries three recorded roll-call votes.
 - [Daily Digest — 2026-11-18](2026-11-18.md) — On the floor, the House passed H.R. 8483, placing California land into trust for the Barona Group of Capitan Grande Band of Mission Indians, 398-0, and H.R. 9600, approving a site for a Thomas Paine commemorative work, 365-36.
 - [Daily Digest — 2026-11-17](2026-11-17.md) — The digest carries 65 Senate floor items and one House extension of remarks.
 - [Daily Digest — 2026-11-16](2026-11-16.md) — The digest carries two recorded roll-call votes.
 - [Daily Digest — 2026-11-15](2026-11-15.md) — This is a short review: few publications were observed for this digest day, and none met the digest's summary rules, so there are no item summaries to draw on.
 - [Daily Digest — 2026-11-14](2026-11-14.md) — On Capitol Hill, the digest carries 21 bills introduced in the House of Representatives and 4 bills introduced in the Senate.
 - [Daily Digest — 2026-11-13](2026-11-13.md) — The digest carries six roll-call vote records.
-- [Daily Digest — 2026-11-12](2026-11-12.md) — The digest carries 77 House and 43 Senate entries from the Congressional Record.
 
 ## Earlier days
 
