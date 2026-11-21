@@ -6,7 +6,7 @@
 
 # Senate.gov XML services
 
-active · ingestion health: degraded · Legislative · Tier 1 · XML index · Secretary of the Senate (LIS)
+active · ingestion health: delivering · Legislative · Tier 1 · XML index · Secretary of the Senate (LIS)
 
 Official site: https://www.senate.gov/general/common/generic/XML_Availability.htm · All sources: [sources.md](../sources.md)
 
@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-11-14 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**degraded** — 38 of 217 request(s) to www.senate.gov returned no content (17.5%, at or above the 10% mark).
+**delivering** — 23 item(s) in the last 14 days; most recent 2026-11-20; 13 of 225 request(s) to www.senate.gov returned no content.
 
-This label has held since 2026-11-13T16:15:57Z (UTC) and was last re-checked 2026-11-20T04:43:28Z (UTC).
+This label has held since 2026-11-13T16:15:57Z (UTC) and was last re-checked 2026-11-21T04:52:57Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -72,24 +72,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 28 request(s) (28 answered, 0 returned no content) · 3 item(s) ingested
+Last 24 hours: 33 request(s) (33 answered, 0 returned no content) · 8 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 15 in 14 days (1.07 per day) · most recent 2026-11-19 |
-| Content length | 1,914 characters average, 2,044 median (shortest 144, longest 2,141) |
+| Items ingested | 23 in 14 days (1.64 per day) · most recent 2026-11-20 |
+| Content length | 1,798 characters average, 2,052 median (shortest 136, longest 2,141) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.senate.gov | 217 request(s) · 179 answered · 38 declined (4xx) · 0 server declined (5xx) · 0 no response — 17.5% returned no content |
+| Our requests to www.senate.gov | 225 request(s) · 212 answered · 13 declined (4xx) · 0 server declined (5xx) · 0 no response — 5.8% returned no content |
 
-last answered request 2026-11-20T05:01:19.443+00:00 UTC.
+last answered request 2026-11-21T05:00:16.255+00:00 UTC.
 
-38 of 217 request(s) to www.senate.gov returned no content (17.5%, at or above the 10% mark).
+23 item(s) in the last 14 days; most recent 2026-11-20; 13 of 225 request(s) to www.senate.gov returned no content.
 
 ### All time
 
-- **Our requests to www.senate.gov, all time (since 2026-08-01):** 2,887 request(s) · 2,478 answered · 409 returned no content
+- **Our requests to www.senate.gov, all time (since 2026-08-01):** 2,920 request(s) · 2,511 answered · 409 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -99,7 +99,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.senate.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-22 | 0 | 25 | 204 |
 | 2026-10-23 | 0 | 25 | 189 |
 | 2026-10-24 | 0 | 25 | 207 |
 | 2026-10-25 | 0 | 25 | 186 |
@@ -128,7 +127,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-17 | 1 | 26 | 195 |
 | 2026-11-18 | 3 | 27 | 332 |
 | 2026-11-19 | 3 | 28 | 297 |
-| 2026-11-20 | 0 | 1 | 286 |
+| 2026-11-20 | 8 | 33 | 252 |
+| 2026-11-21 | 0 | 1 | 142 |
 
 ## Our ingestion assessment
 

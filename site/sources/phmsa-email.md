@@ -6,7 +6,7 @@
 
 # PHMSA (email)
 
-active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Transportation (PHMSA)
+active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Transportation (PHMSA)
 
 Official site: https://www.phmsa.dot.gov/news · All sources: [sources.md](../sources.md)
 
@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-09, 11 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-11-20, delivered by email.
 
-This label has held since 2026-11-17T05:27:36Z (UTC) and was last re-checked 2026-11-20T04:43:28Z (UTC).
+This label has held since 2026-11-20T14:31:42Z (UTC) and was last re-checked 2026-11-21T04:52:57Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,20 +62,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-09 |
-| Content length | 1,306 characters average, 1,306 median (shortest 1,306, longest 1,306) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-11-20 |
+| Content length | 10,217 characters average, 10,217 median (shortest 1,306, longest 19,128) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-09 |
+| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-20 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-09, 11 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-11-20, delivered by email.
 
 ### All time
 
@@ -87,7 +87,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-22 | 0 |
 | 2026-10-23 | 0 |
 | 2026-10-24 | 0 |
 | 2026-10-25 | 0 |
@@ -116,12 +115,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-17 | 0 |
 | 2026-11-18 | 0 |
 | 2026-11-19 | 0 |
-| 2026-11-20 | 0 |
+| 2026-11-20 | 1 |
+| 2026-11-21 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest PHMSA bulletins from phmsa.subscriptions@info.dot.gov through the email adapter, which captures raw messages and verifies DKIM before parsing. Each bulletin carries the full item text in our record. The source was activated 2026-10-01 on observed delivery under operator approval, and the registry status is active. Exact topic selection is held in the operator's subscription records rather than the registry. The 14-day window holds one item, dated 2026-11-09, measuring 1,306 characters. The mailbox counter records one bulletin, with no errors and no refused messages, last received 2026-11-09T19:35:48Z. Health reads quiet, because the item is nine days old at this measurement. Compared with the previous assessment, which recorded two bulletins since activation, the latest dated 2026-10-07 and averaging 2,005 characters, the current window shows one bulletin at 1,306 characters. The registry notes record a sibling departmental transportation email, whose web newsroom refuses our client.
+We ingest PHMSA bulletins from phmsa.subscriptions@info.dot.gov through the email adapter in full-text delivery mode. The adapter captures each raw message and verifies DKIM before parsing. The source was activated 2026-10-01 on observed delivery under operator approval, and the registry status is active. Exact topic selection is held in the operator's subscription records rather than the registry. Two bulletins fall in the 14-day window, with lengths from 1,306 to 19,128 characters averaging 10,217, and the most recent is dated 2026-11-20. The mailbox records two bulletins and two messages, with no administrative messages, no errors, and no refused deliveries. Health reads delivering at 0.14 items per day. Compared with the previous assessment, which recorded one bulletin dated 2026-11-09 at 1,306 characters and read health as quiet, the window now holds two bulletins, a later bulletin dated 2026-11-20 has been received, and health has moved to delivering. The 1,306-character bulletin measured in the previous assessment is still within the window.
 
-_Model-written assessment of our own ingestion, generated 2026-11-18 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-21 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

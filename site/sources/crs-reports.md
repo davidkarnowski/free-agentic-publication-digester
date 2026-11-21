@@ -65,7 +65,7 @@ Not ingested: the registry status of this source is planned. Ingestion statistic
 
 ### All time
 
-- **Our requests to api.congress.gov, all time (since 2026-08-01):** 2,974 request(s) · 2,951 answered · 23 returned no content
+- **Our requests to api.congress.gov, all time (since 2026-08-01):** 2,998 request(s) · 2,975 answered · 23 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -75,7 +75,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to api.congress.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-22 | 0 | 25 | 530 |
 | 2026-10-23 | 0 | 25 | 251 |
 | 2026-10-24 | 0 | 26 | 258 |
 | 2026-10-25 | 0 | 25 | 574 |
@@ -104,4 +103,5 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-17 | 0 | 25 | 278 |
 | 2026-11-18 | 0 | 24 | 337 |
 | 2026-11-19 | 0 | 25 | 305 |
-| 2026-11-20 | 0 | 1 | 232 |
+| 2026-11-20 | 0 | 24 | 297 |
+| 2026-11-21 | 0 | 1 | 386 |

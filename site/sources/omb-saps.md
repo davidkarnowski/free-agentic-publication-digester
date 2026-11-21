@@ -6,7 +6,7 @@
 
 # OMB Statements of Administration Policy
 
-active · ingestion health: quiet · Executive · Tier 1 · HTML index · Executive Office of the President
+active · ingestion health: delivering · Executive · Tier 1 · HTML index · Executive Office of the President
 
 Official site: https://www.whitehouse.gov/omb/statements-of-administration-policy/ · All sources: [sources.md](../sources.md)
 
@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-10-07 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-09, 11 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-11-20; 1 of 1349 request(s) to www.whitehouse.gov returned no content.
 
-This label has held since 2026-11-17T05:27:36Z (UTC) and was last re-checked 2026-11-20T04:43:28Z (UTC).
+This label has held since 2026-11-20T13:52:44Z (UTC) and was last re-checked 2026-11-21T04:52:57Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,24 +70,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 104 request(s) (104 answered, 0 returned no content) · no items ingested
+Last 24 hours: 103 request(s) (103 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-09 |
-| Content length | 82 characters average, 82 median (shortest 82, longest 82) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-11-20 |
+| Content length | 104 characters average, 104 median (shortest 82, longest 126) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.whitehouse.gov | 1,346 request(s) · 1,345 answered · 1 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.1% returned no content |
+| Our requests to www.whitehouse.gov | 1,349 request(s) · 1,348 answered · 1 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.1% returned no content |
 
-last answered request 2026-11-20T05:01:21.236+00:00 UTC; this host serves 4 registered sources, so these figures are host-wide.
+last answered request 2026-11-21T05:00:17.255+00:00 UTC; this host serves 4 registered sources, so these figures are host-wide.
 
-Most recent item 2026-11-09, 11 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-11-20; 1 of 1349 request(s) to www.whitehouse.gov returned no content.
 
 ### All time
 
-- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 8,077 request(s) · 8,060 answered · 17 returned no content
+- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 8,180 request(s) · 8,163 answered · 17 returned no content
 
 This host serves 4 registered sources, so these figures are host-wide.
 
@@ -99,7 +99,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.whitehouse.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-22 | 0 | 106 | 94 |
 | 2026-10-23 | 0 | 105 | 67 |
 | 2026-10-24 | 0 | 100 | 77 |
 | 2026-10-25 | 0 | 104 | 76 |
@@ -128,12 +127,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-17 | 0 | 100 | 72 |
 | 2026-11-18 | 0 | 96 | 78 |
 | 2026-11-19 | 0 | 104 | 75 |
-| 2026-11-20 | 0 | 4 | 99 |
+| 2026-11-20 | 1 | 103 | 95 |
+| 2026-11-21 | 0 | 4 | 59 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest OMB Statements of Administration Policy through the html-index adapter in feed-only mode. It reads the dated listing on the White House OMB page and stores each statement's title, date, PDF link, and the bill numbers its title names, without fetching the PDF. Activation was 2026-10-06. The 14-day window holds one item, dated 2026-11-09, nine days before this measurement, and health reads quiet. Average record length is 82 characters. Across the measured period we made 1,351 attempts to www.whitehouse.gov, and 1,350 were answered. The one that returned no content was a client error on 2026-11-12. The host is shared with four other sources. On full days shown, request volume ran from 96 to 125 per day, and the recent 96 requests had no failures. The registry notes record no incident beyond that request. Compared with the previous assessment, average record length fell from 176 characters, the 2026-11-09 item is now the latest delivery, and recent failed requests went from one to zero.
+We ingest OMB Statements of Administration Policy from the White House OMB listing through the html-index adapter in feed-only mode. Each record holds the statement's title, date, PDF link, and the bill numbers its title names. The PDF is not fetched, so the position a statement states is not read by this entry. The source was activated 2026-10-06. The registry records that SAPs are not printed in the Federal Register and are not listed in the White House news listing or the presidential-action feeds. Two items fall in the 14-day window, the most recent dated 2026-11-20, and health reads delivering at 0.14 items per day. Record length ranges from 82 to 126 characters, averaging 104. Of 1,349 requests to www.whitehouse.gov, 1,348 were answered and one returned no content, recorded as a client error. The host is shared with four other sources. Compared with the previous assessment, the window has grown from one item to two, the latest delivery is now dated 2026-11-20 instead of 2026-11-09, average record length has risen from 82 to 104 characters, and health has moved from quiet to delivering. The no-content count remains one.
 
-_Model-written assessment of our own ingestion, generated 2026-11-18 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-21 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

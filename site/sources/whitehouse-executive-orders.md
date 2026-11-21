@@ -6,7 +6,7 @@
 
 # White House Executive Orders
 
-active · ingestion health: quiet · Executive · Tier 1 · RSS feed · Executive Office of the President
+active · ingestion health: delivering · Executive · Tier 1 · RSS feed · Executive Office of the President
 
 Official site: https://www.whitehouse.gov/presidential-actions/executive-orders/ · All sources: [sources.md](../sources.md)
 
@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-07 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-22, 29 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-20; 1 of 1349 request(s) to www.whitehouse.gov returned no content.
 
-This label has held since 2026-10-30T04:11:38Z (UTC) and was last re-checked 2026-11-20T04:43:28Z (UTC).
+This label has held since 2026-11-21T02:52:00Z (UTC) and was last re-checked 2026-11-21T04:52:57Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,22 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 104 request(s) (104 answered, 0 returned no content) · no items ingested
+Last 24 hours: 103 request(s) (103 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-22 |
-| Our requests to www.whitehouse.gov | 1,346 request(s) · 1,345 answered · 1 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.1% returned no content |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-20 |
+| Content length | 11,476 characters average, 11,476 median (shortest 11,476, longest 11,476) |
+| Delivery mode | full — full article text, fetched from the item's own page |
+| Our requests to www.whitehouse.gov | 1,349 request(s) · 1,348 answered · 1 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.1% returned no content |
 
-last answered request 2026-11-20T05:01:21.236+00:00 UTC; this host serves 4 registered sources, so these figures are host-wide.
+last answered request 2026-11-21T05:00:17.255+00:00 UTC; this host serves 4 registered sources, so these figures are host-wide.
 
-Most recent item 2026-10-22, 29 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-11-20; 1 of 1349 request(s) to www.whitehouse.gov returned no content.
 
 ### All time
 
-- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 8,077 request(s) · 8,060 answered · 17 returned no content
+- **Our requests to www.whitehouse.gov, all time (since 2026-08-06):** 8,180 request(s) · 8,163 answered · 17 returned no content
 
 This host serves 4 registered sources, so these figures are host-wide.
 
@@ -98,7 +100,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.whitehouse.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-22 | 2 | 106 | 94 |
 | 2026-10-23 | 0 | 105 | 67 |
 | 2026-10-24 | 0 | 100 | 77 |
 | 2026-10-25 | 0 | 104 | 76 |
@@ -127,12 +128,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-17 | 0 | 100 | 72 |
 | 2026-11-18 | 0 | 96 | 78 |
 | 2026-11-19 | 0 | 104 | 75 |
-| 2026-11-20 | 0 | 4 | 99 |
+| 2026-11-20 | 1 | 103 | 95 |
+| 2026-11-21 | 0 | 4 | 59 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest the executive-orders RSS feed of whitehouse.gov's presidential actions. It was registered 2026-08-06 as a separate entry from whitehouse-presidential-actions because each feed holds 30 items and this one reaches back further. Feed descriptions are teasers, so we fetch each item's page for full order text (delivery mode full). Measured lengths in the current window were 12,211, 13,917, and 17,341 characters, averaging 14,490; the previous assessment averaged 12,509. Over the past 14 days we measured three items at 0.21 per day, the most recent dated 2026-10-22, nine days before this assessment, and the health reading is quiet. The previous assessment recorded two items, the most recent dated 2026-10-16. Orders that also appear in the parent feed carry identical link URLs and merge through corroboration. Of 1,327 requests to www.whitehouse.gov, 1,326 returned content and one returned no content, the same single no-content count as the previous assessment. From outside, we cannot tell whether that was load, maintenance, or a limit set by the publisher.
+We ingest the executive-orders RSS feed of whitehouse.gov's presidential actions and fetch each item's page for full order text, because feed descriptions are teasers. The source was registered 2026-08-06 as a separate entry from the parent presidential-actions feed. At registration its feed spanned about five months, against about six weeks for the parent, and 24 of its 30 orders were absent from the parent. Orders shared with the parent carry identical link URLs and merge through corroboration. The 14-day window now holds one item, dated 2026-11-20, measuring 11,476 characters, and health reads delivering. The previous assessment measured three items in its window, the most recent dated 2026-10-22, averaging 14,490 characters, with health reading quiet. Of 1,349 requests to www.whitehouse.gov, 1,348 returned content and one returned no content, the same single no-content count as the previous assessment. From outside, we cannot tell whether that was load, maintenance, or a limit set by the publisher.
 
-_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-21 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

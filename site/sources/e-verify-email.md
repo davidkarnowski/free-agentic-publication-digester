@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-12, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-12, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-11-12T15:48:35Z (UTC) and was last re-checked 2026-11-20T04:43:28Z (UTC).
+This label has held since 2026-11-20T05:06:08Z (UTC) and was last re-checked 2026-11-21T04:52:57Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -79,7 +79,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-12, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-12, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-22 | 0 |
 | 2026-10-23 | 0 |
 | 2026-10-24 | 0 |
 | 2026-10-25 | 0 |
@@ -121,11 +120,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-18 | 0 |
 | 2026-11-19 | 0 |
 | 2026-11-20 | 0 |
+| 2026-11-21 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Bulletins from e-verify.uscis@messages.dhs.gov reach the project mailbox and are ingested by the email adapter in full-text delivery mode, with the full item text in each message and DKIM verified at ingest. The registry status is planned. The subscription was confirmed through the publisher's signup flow and registered on 2026-09-26, and ingestion began at the first poll after deployment, so earlier bulletins were not backfilled. Gate-3 coverage evaluation is pending. In the 14-day window we measured one item, dated 2026-11-12 and recorded in the 10:00 hour slot, measuring 1,719 characters. The mailbox recorded one message and one bulletin, with zero administrative messages, zero errors, and zero refused deliveries. Health reads delivering, with the most recent item at zero days and a rate of 0.07 items per day. The previous assessment of 2026-11-07 recorded one item dated 2026-10-29 at 1,335 characters, with health reading quiet nine days after that item. The current measured figures do not include that item. They show a single item dated 2026-11-12 instead, so the count remains one, but the item date, length, and health status differ. Email sources generate no polling requests, so health is read from mailbox activity alone.
+We ingest E-Verify bulletins from e-verify.uscis@messages.dhs.gov through the email adapter in full-text delivery mode, with DKIM verified at ingest. The registry status is planned. The subscription was confirmed through the publisher's signup flow and registered 2026-09-26. Ingestion began at the first poll after deployment, and earlier bulletins were not backfilled. The registry records gate-3 coverage evaluation as pending. In the 14-day window we measured one bulletin, dated 2026-11-12, at 1,719 characters. The mailbox shows one message, with no administrative messages, no errors, and no refused deliveries. Health reads quiet because the item is nine days old. The previous assessment, dated 2026-11-12, measured the same item at 1,719 characters and read health as delivering while the item was the most recent. Since then the item date and length are unchanged, and health has moved from delivering to quiet as the item aged.
 
-_Model-written assessment of our own ingestion, generated 2026-11-12 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-21 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

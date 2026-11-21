@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-12, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-12, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-01T14:01:43Z (UTC) and was last re-checked 2026-11-20T04:43:28Z (UTC).
+This label has held since 2026-11-20T05:06:08Z (UTC) and was last re-checked 2026-11-21T04:52:57Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -83,7 +83,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-12, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-12, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-22 | 1 |
 | 2026-10-23 | 1 |
 | 2026-10-24 | 0 |
 | 2026-10-25 | 0 |
@@ -125,11 +124,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-18 | 0 |
 | 2026-11-19 | 0 |
 | 2026-11-20 | 0 |
+| 2026-11-21 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The Department of Transportation email subscription delivered three bulletins to the project mailbox in the 14-day window ending 2026-11-02, the most recent on 2026-10-30. These arrived as short teasers rather than full item text. Measured lengths range from 131 to 391 characters, with a median of 141 and an average of 221. The seven-day daily view shows one item, on 2026-10-30. The collector reports no consecutive errors and no refused messages, and each message is captured with DKIM verification. The registry notes record the subscription as confirmed on 2026-07-29, with no bulletin observed at the first poll, and the registry lists the source as planned. The previous assessment, dated 2026-10-02, recorded one bulletin delivered on 2026-10-01 at 1,459 characters and described it as carrying full text. That bulletin falls outside the current window, so the current measurements contain only teaser-length bulletins.
+We ingest Department of Transportation bulletins from usdot@info.dot.gov through the email adapter, which captures each raw message and verifies DKIM at ingest. The registry status is planned. The subscription was confirmed 2026-07-29, and the registry notes that the modal-administration lists are subscribed but not yet split into their own entries. A sibling departmental newsroom returned HTTP 403 to our identified client. The current measurements show teaser-length delivery, and the registry records delivery mode as email-teaser. In the 14-day window we measured one bulletin, dated 2026-11-12, measuring 138 characters, with no errors and no refused messages in the mailbox. Health reads quiet, nine days after that item. The previous assessment recorded three bulletins in its window, the most recent dated 2026-10-30, with lengths from 131 to 391 characters. It also recorded a bulletin dated 2026-10-01 at 1,459 characters, which falls outside the current window and was described there as full text.
 
-_Model-written assessment of our own ingestion, generated 2026-11-02 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-21 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

@@ -6,7 +6,7 @@
 
 # NLRB News Releases
 
-active · ingestion health: delivering · Executive · Tier 1 · RSS feed · Independent agency
+active · ingestion health: quiet · Executive · Tier 1 · RSS feed · Independent agency
 
 Official site: https://www.nlrb.gov/news-publications/news/news-releases · All sources: [sources.md](../sources.md)
 
@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-13; 14 of 347 request(s) to www.nlrb.gov returned no content.
+**quiet** — Most recent item 2026-11-13, 8 days ago (quiet past 7 days).
 
-This label has held since 2026-10-30T14:53:55Z (UTC) and was last re-checked 2026-11-20T04:43:28Z (UTC).
+This label has held since 2026-10-30T14:53:55Z (UTC) and was last re-checked 2026-11-21T04:52:57Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,13 +73,13 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.nlrb.gov | 347 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 14 no response — 4.0% returned no content |
 
-last answered request 2026-11-20T05:01:18.082+00:00 UTC.
+last answered request 2026-11-21T05:00:14.560+00:00 UTC.
 
-1 item(s) in the last 14 days; most recent 2026-11-13; 14 of 347 request(s) to www.nlrb.gov returned no content.
+Most recent item 2026-11-13, 8 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.nlrb.gov, all time (since 2026-10-05):** 1,182 request(s) · 1,162 answered · 20 returned no content
+- **Our requests to www.nlrb.gov, all time (since 2026-10-05):** 1,207 request(s) · 1,187 answered · 20 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -89,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nlrb.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-22 | 0 | 24 | 469 |
 | 2026-10-23 | 0 | 25 | 506 |
 | 2026-10-24 | 0 | 25 | 530 |
 | 2026-10-25 | 0 | 26 | 415 |
@@ -118,7 +117,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-17 | 0 | 25 | 846 |
 | 2026-11-18 | 0 | 25 | 522 |
 | 2026-11-19 | 0 | 25 | 531 |
-| 2026-11-20 | 0 | 1 | 469 |
+| 2026-11-20 | 0 | 25 | 503 |
+| 2026-11-21 | 0 | 1 | 576 |
 
 ## Our ingestion assessment
 
