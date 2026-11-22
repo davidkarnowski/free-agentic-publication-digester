@@ -6,7 +6,7 @@
 
 # FSIS Recalls and Public Health Alerts (email)
 
-active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Agriculture (FSIS)
+active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Agriculture (FSIS)
 
 Official site: https://www.fsis.usda.gov/recalls · All sources: [sources.md](../sources.md)
 
@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 3 item(s) in the last 14 days; most recent 2026-11-14, delivered by email.
+**quiet** — Most recent item 2026-11-14, 8 days ago (quiet past 7 days).
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-21T04:52:57Z (UTC).
+This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-22T04:56:32Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -80,7 +80,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-3 item(s) in the last 14 days; most recent 2026-11-14, delivered by email.
+Most recent item 2026-11-14, 8 days ago (quiet past 7 days).
 
 ### All time
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-23 | 2 |
 | 2026-10-24 | 1 |
 | 2026-10-25 | 0 |
 | 2026-10-26 | 0 |
@@ -122,6 +121,7 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-19 | 0 |
 | 2026-11-20 | 0 |
 | 2026-11-21 | 0 |
+| 2026-11-22 | 0 |
 
 ## Our ingestion assessment
 

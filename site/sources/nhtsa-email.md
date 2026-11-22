@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-13, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-13, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-11-06T13:06:13Z (UTC) and was last re-checked 2026-11-21T04:52:57Z (UTC).
+This label has held since 2026-11-21T05:10:23Z (UTC) and was last re-checked 2026-11-22T04:56:32Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -76,7 +76,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-13, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-13, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -88,7 +88,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-23 | 0 |
 | 2026-10-24 | 0 |
 | 2026-10-25 | 0 |
 | 2026-10-26 | 0 |
@@ -118,11 +117,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-19 | 0 |
 | 2026-11-20 | 0 |
 | 2026-11-21 | 0 |
+| 2026-11-22 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-NHTSA bulletins reach the project mailbox from two GovDelivery sender lists, nhtsa@service.govdelivery.com and traffic_safety_marketing@service.govdelivery.com. Each message carries the full item text and is DKIM-verified and archived at ingest. Over the 14-day window we hold three bulletins at 0.21 per day, with lengths from 646 to 1,055 characters (median 683, average 795). The most recent is dated 2026-11-06. Our measurements are not broken down by sender. The mailbox recorded no administrative messages, errors, or refused messages. Compared with the 2026-11-06 assessment, which counted two bulletins at 0.14 per day, with the most recent dated 2026-10-28 and lengths from 646 to 683 characters, the window now holds one more bulletin, the most recent date has moved to 2026-11-06, and the upper length bound has risen to 1,055 characters. The registry notes that no press-release bulletin had been delivered as of activation on 2026-10-01. The sibling entry nhtsa-press has returned HTTP 403 to our identified client.
+NHTSA bulletins reach the project mailbox through the email adapter from two GovDelivery sender lists, nhtsa@service.govdelivery.com and traffic_safety_marketing@service.govdelivery.com, which share one registry entry activated 2026-10-01. Each bulletin carries the full item text (delivery mode email-full), and its DKIM result is recorded at ingest. Over the 14-day window we hold two bulletins, a rate of 0.14 per day, with lengths from 199 to 702 characters (median 450); the most recent is dated 2026-11-13, and health reads quiet. The mailbox recorded no administrative messages, errors, or refused messages. Our measurements are not broken down by sender. The registry notes that the press-release list had not delivered a bulletin as of activation, and describe the Traffic Safety Marketing stream as campaign and awareness content. The sibling entry nhtsa-press has answered HTTP 403 to our identified client. Compared with the 2026-11-07 assessment, which counted three bulletins at 0.21 per day, with lengths from 646 to 1,055 characters and the most recent dated 2026-11-06, the window now holds one fewer bulletin, the most recent date has moved to 2026-11-13, and the length range is 199 to 702 characters.
 
-_Model-written assessment of our own ingestion, generated 2026-11-07 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-22 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

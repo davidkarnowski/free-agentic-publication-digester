@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-11-14 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 23 item(s) in the last 14 days; most recent 2026-11-20; 13 of 225 request(s) to www.senate.gov returned no content.
+**delivering** — 23 item(s) in the last 14 days; most recent 2026-11-20; 1 of 239 request(s) to www.senate.gov returned no content.
 
-This label has held since 2026-11-13T16:15:57Z (UTC) and was last re-checked 2026-11-21T04:52:57Z (UTC).
+This label has held since 2026-11-21T05:10:23Z (UTC) and was last re-checked 2026-11-22T04:56:32Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -72,7 +72,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 33 request(s) (33 answered, 0 returned no content) · 8 item(s) ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -81,15 +81,15 @@ Last 24 hours: 33 request(s) (33 answered, 0 returned no content) · 8 item(s) i
 | Items ingested | 23 in 14 days (1.64 per day) · most recent 2026-11-20 |
 | Content length | 1,798 characters average, 2,052 median (shortest 136, longest 2,141) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.senate.gov | 225 request(s) · 212 answered · 13 declined (4xx) · 0 server declined (5xx) · 0 no response — 5.8% returned no content |
+| Our requests to www.senate.gov | 239 request(s) · 238 answered · 1 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.4% returned no content |
 
-last answered request 2026-11-21T05:00:16.255+00:00 UTC.
+last answered request 2026-11-22T05:00:17.585+00:00 UTC.
 
-23 item(s) in the last 14 days; most recent 2026-11-20; 13 of 225 request(s) to www.senate.gov returned no content.
+23 item(s) in the last 14 days; most recent 2026-11-20; 1 of 239 request(s) to www.senate.gov returned no content.
 
 ### All time
 
-- **Our requests to www.senate.gov, all time (since 2026-08-01):** 2,920 request(s) · 2,511 answered · 409 returned no content
+- **Our requests to www.senate.gov, all time (since 2026-08-01):** 2,946 request(s) · 2,537 answered · 409 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -99,7 +99,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.senate.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-23 | 0 | 25 | 189 |
 | 2026-10-24 | 0 | 25 | 207 |
 | 2026-10-25 | 0 | 25 | 186 |
 | 2026-10-26 | 0 | 25 | 180 |
@@ -128,12 +127,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-18 | 3 | 27 | 332 |
 | 2026-11-19 | 3 | 28 | 297 |
 | 2026-11-20 | 8 | 33 | 252 |
-| 2026-11-21 | 0 | 1 | 142 |
+| 2026-11-21 | 0 | 26 | 201 |
+| 2026-11-22 | 0 | 1 | 443 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Our senate-votes adapter reads the Senate XML vote menu for the current session and fetches one per-vote XML record for each vote inside the seven-day lookback. The formats we have ingested are the vote menu and per-vote XML records, averaging 2,066 characters. From 2026-10-23 the menu request answered HTTP 403 on every poll, reaching 408 consecutive refusals by 2026-11-08, when polling stopped under a status change; the cause is not known to us. The source returned to active on 2026-11-13 after a fresh probe through the identified client answered normally, and polling has resumed. In the 14-day window we recorded six items, a rate of 0.43 per day, with the most recent dated 2026-11-13. Of 210 requests to www.senate.gov, 189 returned no content (90.0 percent), and our health label reads degraded; all 21 requests in the most recent 24 hours returned content. Votes taken while the source was unavailable are not listed in section 7 of the digests for those days; their Congressional Record granules appear in section 1.3. Compared with the 2026-11-07 assessment, which recorded no items and 330 requests with none returning content, the window now holds six items and the most recent item has moved from 2026-10-01 to 2026-11-13.
+We ingest the Senate.gov XML services through the senate-votes adapter, which reads the current session's roll-call vote menu and fetches one per-vote XML record for each vote inside the seven-day lookback. We have ingested the vote menu and per-vote records, delivered in full, and item text averages 1,798 characters across the window. The 14-day window holds 23 items, a rate of 1.64 per day, with the most recent dated 2026-11-20, and health reads delivering. Of 239 requests to www.senate.gov, 238 returned content and one returned no content. From 2026-10-23 the vote menu answered HTTP 403 on every poll, reaching 408 consecutive HTTP 403 responses by 2026-11-08, when the source was set to unavailable; the cause is not known to us. A fresh probe through the identified client answered HTTP 200 on 2026-11-13, and the source returned to active. Votes taken during the unavailable period are not listed in digest section 7 for those days; their Congressional Record granules appear in section 1.3. Compared with the 2026-11-14 assessment, which recorded six items at 0.43 per day, with 189 of 210 requests returning no content and health reading degraded, the window now holds 23 items, the most recent date has moved from 2026-11-13 to 2026-11-20, and health reads delivering.
 
-_Model-written assessment of our own ingestion, generated 2026-11-14 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-22 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

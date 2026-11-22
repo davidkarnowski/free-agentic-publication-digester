@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-02, 19 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-02, 20 days ago (quiet past 7 days).
 
-This label has held since 2026-11-10T05:21:28Z (UTC) and was last re-checked 2026-11-21T04:52:57Z (UTC).
+This label has held since 2026-11-10T05:21:28Z (UTC) and was last re-checked 2026-11-22T04:56:32Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -77,15 +77,15 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Measure | Value |
 |---|---|
 | Items ingested | none in the last 14 days — most recent 2026-11-02 |
-| Our requests to news.uscourts.gov | 335 request(s) · 335 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to news.uscourts.gov | 333 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-21T05:00:16.474+00:00 UTC.
+last answered request 2026-11-22T05:00:17.620+00:00 UTC.
 
-Most recent item 2026-11-02, 19 days ago (quiet past 7 days).
+Most recent item 2026-11-02, 20 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to news.uscourts.gov, all time (since 2026-07-30):** 3,015 request(s) · 3,015 answered · 0 returned no content
+- **Our requests to news.uscourts.gov, all time (since 2026-07-30):** 3,040 request(s) · 3,040 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to news.uscourts.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-23 | 0 | 26 | 394 |
 | 2026-10-24 | 0 | 25 | 382 |
 | 2026-10-25 | 0 | 26 | 336 |
 | 2026-10-26 | 0 | 25 | 293 |
@@ -124,7 +123,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-18 | 0 | 24 | 545 |
 | 2026-11-19 | 0 | 25 | 668 |
 | 2026-11-20 | 0 | 25 | 422 |
-| 2026-11-21 | 0 | 1 | 456 |
+| 2026-11-21 | 0 | 25 | 515 |
+| 2026-11-22 | 0 | 1 | 477 |
 
 ## Our ingestion assessment
 

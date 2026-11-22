@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-14, 38 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-10-14, 39 days ago (quiet past 7 days).
 
-This label has held since 2026-10-22T04:14:08Z (UTC) and was last re-checked 2026-11-21T04:52:57Z (UTC).
+This label has held since 2026-10-22T04:14:08Z (UTC) and was last re-checked 2026-11-22T04:56:32Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,7 +62,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -71,13 +71,13 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Items ingested | none in the last 14 days — most recent 2026-10-14 |
 | Our requests to www.consumerfinance.gov | 333 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-21T05:00:14.882+00:00 UTC.
+last answered request 2026-11-22T05:00:16.219+00:00 UTC.
 
-Most recent item 2026-10-14, 38 days ago (quiet past 7 days).
+Most recent item 2026-10-14, 39 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.consumerfinance.gov, all time (since 2026-10-05):** 1,194 request(s) · 1,194 answered · 0 returned no content
+- **Our requests to www.consumerfinance.gov, all time (since 2026-10-05):** 1,220 request(s) · 1,220 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -87,7 +87,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.consumerfinance.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-23 | 0 | 26 | 115 |
 | 2026-10-24 | 0 | 26 | 115 |
 | 2026-10-25 | 0 | 25 | 90 |
 | 2026-10-26 | 0 | 24 | 84 |
@@ -116,12 +115,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-18 | 0 | 24 | 189 |
 | 2026-11-19 | 0 | 24 | 180 |
 | 2026-11-20 | 0 | 25 | 190 |
-| 2026-11-21 | 0 | 1 | 265 |
+| 2026-11-21 | 0 | 26 | 165 |
+| 2026-11-22 | 0 | 1 | 145 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The CFPB Newsroom source polls an RSS feed and fetches full article text from each item; feed descriptions are approximately 180-character teasers. Over 14 days, one item delivered at 0.07 per day, dated 2026-10-14. Extracted content measured 5,952 characters. All 327 polling requests to www.consumerfinance.gov succeeded with zero errors. The feed uses GUIDs based on the page's internal ID, enabling tracking across URL changes. Most days contain no new releases. The prior assessment (2026-10-15) measured 23 items over its 14-day window at 1.64 per day. The current window contains only one item, reflecting the rolling measurement scope and the absence of new deliveries for the past nine days. The enforcement-actions feed remains inactive pending clarification of date semantics.
+We ingest the CFPB Newsroom from the RSS feed at consumerfinance.gov/about-us/newsroom/feed/, activated 2026-10-05. Feed descriptions are about 180-character teasers, so we fetch each item's article page for full text (delivery mode full). Over the 14-day window we measured no items, a rate of 0.00 per day; the most recent item is dated 2026-10-14, 39 days before measurement, and health reads quiet. All 333 requests to www.consumerfinance.gov returned content with no errors. The registry notes describe the feed as holding about one release a month in 2026, and record that the first poll fetched 21 older releases once, which sorted to backfill. The enforcement-actions feed is not ingested, because it is not in date order and the meaning of its dates is unconfirmed. Compared with the 2026-10-23 assessment, which measured one item dated 2026-10-14 at 0.07 per day, with extracted content of 5,952 characters and 327 of 327 requests succeeding, the window now holds no items and the most recent date is unchanged.
 
-_Model-written assessment of our own ingestion, generated 2026-10-23 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-22 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
