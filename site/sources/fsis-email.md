@@ -6,7 +6,7 @@
 
 # FSIS Recalls and Public Health Alerts (email)
 
-active · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Agriculture (FSIS)
+active · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Agriculture (FSIS)
 
 Official site: https://www.fsis.usda.gov/recalls · All sources: [sources.md](../sources.md)
 
@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-14, 8 days ago (quiet past 7 days).
+**delivering** — 4 item(s) in the last 14 days; most recent 2026-11-22, delivered by email.
 
-This label has held since 2026-08-03T18:46:01Z (UTC) and was last re-checked 2026-11-22T04:56:32Z (UTC).
+This label has held since 2026-11-22T22:02:43Z (UTC) and was last re-checked 2026-11-23T04:49:04Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -67,20 +67,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-11-14 |
-| Content length | 2,492 characters average, 708 median (shortest 100, longest 6,668) |
+| Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-11-22 |
+| Content length | 2,056 characters average, 727 median (shortest 100, longest 6,668) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 4 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-14 |
+| Mailbox | 5 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-22 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-14, 8 days ago (quiet past 7 days).
+4 item(s) in the last 14 days; most recent 2026-11-22, delivered by email.
 
 ### All time
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-24 | 1 |
 | 2026-10-25 | 0 |
 | 2026-10-26 | 0 |
 | 2026-10-27 | 1 |
@@ -121,12 +120,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-19 | 0 |
 | 2026-11-20 | 0 |
 | 2026-11-21 | 0 |
-| 2026-11-22 | 0 |
+| 2026-11-22 | 1 |
+| 2026-11-23 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Our FSIS recall and public-health alert subscription is ingested by email, and each measured bulletin carried its full text, DKIM-verified and archived. Over the 14-day window we ingested 15 items at 1.07 per day, with the most recent dated 2026-11-04. The mailbox recorded 15 bulletins, with no administrative messages, errors, or refused deliveries. Item length ranged from 81 to 5,853 characters, averaging 911 with a median of 189. Among the seven daily records shown, 2026-10-30 and 2026-11-03 each held 3 items, 2026-11-02 and 2026-11-04 each held 1, and three days held none. The collector reports no consecutive errors and health reads delivering. Since the previous assessment on 2026-10-06, the 14-day count rose from 10 items at 0.71 per day, the most recent item moved from 2026-10-02 to 2026-11-04, the maximum length fell from 8,931 to 5,853 characters, and the median fell from 493 to 189. The registry notes record the subscription as confirmed on 2026-07-29, with a canonical fsis.usda.gov URL on the bulletin reviewed in that evaluation.
+Our FSIS recall and public-health alert subscription is ingested by email, and the measured bulletins carried full item text (delivery mode email-full). Over the 14-day window we ingested 4 items at 0.29 per day, with the most recent dated 2026-11-22. The mailbox recorded 5 bulletins, with no administrative messages, errors, or refused deliveries. Item length ranged from 100 to 6,668 characters, averaging 2,056 with a median of 727. Among the seven daily records shown, only 2026-11-22 held an item; the other six days held none. The collector reports no consecutive errors, with its last successful cycle at 2026-11-23T04:48:22Z, and health reads delivering. Since the previous assessment on 2026-11-05, the 14-day item count fell from 15 to 4, the daily rate fell from 1.07 to 0.29, the most recent item moved from 2026-11-04 to 2026-11-22, the average length rose from 911 to 2,056 characters, the median rose from 189 to 727, and the maximum rose from 5,853 to 6,668. The registry notes record the subscription as confirmed on 2026-07-29 and a Gate-3 coverage evaluation on 2026-07-30 that reviewed a bulletin carrying its canonical fsis.usda.gov URL. No other incidents are recorded in the registry notes.
 
-_Model-written assessment of our own ingestion, generated 2026-11-05 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-23 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
