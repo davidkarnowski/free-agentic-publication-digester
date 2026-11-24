@@ -6,7 +6,7 @@
 
 # USCIS Newsroom
 
-active · ingestion health: quiet · Executive · Tier 2 · HTML index · Department of Homeland Security
+active · ingestion health: delivering · Executive · Tier 2 · HTML index · Department of Homeland Security
 
 Official site: https://www.uscis.gov/newsroom · All sources: [sources.md](../sources.md)
 
@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-06, 17 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-23; 1 of 334 request(s) to www.uscis.gov returned no content.
 
-This label has held since 2026-11-14T05:10:22Z (UTC) and was last re-checked 2026-11-23T04:49:04Z (UTC).
+This label has held since 2026-11-23T15:58:00Z (UTC) and was last re-checked 2026-11-24T04:53:50Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,22 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-11-06 |
-| Our requests to www.uscis.gov | 333 request(s) · 332 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.3% returned no content |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-23 |
+| Content length | 454 characters average, 454 median (shortest 454, longest 454) |
+| Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
+| Our requests to www.uscis.gov | 334 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.3% returned no content |
 
-last answered request 2026-11-23T05:00:16.667+00:00 UTC.
+last answered request 2026-11-24T05:00:16.980+00:00 UTC.
 
-Most recent item 2026-11-06, 17 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-11-23; 1 of 334 request(s) to www.uscis.gov returned no content.
 
 ### All time
 
-- **Our requests to www.uscis.gov, all time (since 2026-09-28):** 1,413 request(s) · 1,382 answered · 31 returned no content
+- **Our requests to www.uscis.gov, all time (since 2026-09-28):** 1,439 request(s) · 1,408 answered · 31 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -96,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.uscis.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-25 | 0 | 26 | 135 |
 | 2026-10-26 | 0 | 25 | 125 |
 | 2026-10-27 | 0 | 25 | 147 |
 | 2026-10-28 | 1 | 25 | 157 |
@@ -125,12 +126,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-20 | 0 | 25 | 265 |
 | 2026-11-21 | 0 | 26 | 174 |
 | 2026-11-22 | 0 | 25 | 168 |
-| 2026-11-23 | 0 | 1 | 207 |
+| 2026-11-23 | 1 | 26 | 152 |
+| 2026-11-24 | 0 | 1 | 239 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The USCIS Newsroom is ingested using an HTML index adapter in feed-only mode, polling for listings on the /newsroom/news-releases/ path without fetching individual articles. No RSS/Atom feed is available from the source, necessitating HTML index diffing for ingestion. Hourly requests are observed, and a 10-second crawl-delay from the host's robots.txt is honored. During the current 14-day window, 3 items were recorded, with the most recent dated 2026-11-06, averaging 297 characters and a median of 292 characters. This contrasts with the previous assessment, which reported 10 items averaging 282 characters with a median of 277, and the last item dated 2026-10-29. The previous assessment noted no failed requests, but the current period shows 30 client errors out of 335 attempts, an error rate of 9.0%. Ingestion quirks include a filter applied to exclude sidebar links and the limitation of processing only the first page of the listing. Entries without a readable date are dropped. The uscis-email channel remains active, providing parallel coverage.
+We ingest the USCIS Newsroom through the HTML index adapter in feed-only mode, polling the /newsroom/news-releases/ path without fetching article pages. No RSS or Atom feed is advertised, and the 10-second crawl-delay in robots.txt is honored. The adapter reads the listing's first page only, filters sidebar links by the index path, and drops entries without a readable date. The window holds one item, dated 2026-11-23 and measured at 454 characters, a rate of 0.07 per day. Of 334 requests to www.uscis.gov, 333 returned content and one returned no content; the cause cannot be determined from outside, and no client errors were recorded. Health reads delivering. Compared with the 2026-11-15 assessment, which recorded three items averaging 297 characters with the most recent dated 2026-11-06, and reported 30 client errors in 335 attempts, the window count fell to one, the most recent date moved to 2026-11-23, the average length rose from 297 to 454 characters, and recorded request failures fell from 30 to 1. The uscis-email sibling entry remains active alongside it.
 
-_Model-written assessment of our own ingestion, generated 2026-11-15 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-24 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

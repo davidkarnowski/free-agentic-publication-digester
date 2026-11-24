@@ -6,7 +6,7 @@
 
 # NSF News
 
-active · ingestion health: quiet · Executive · Tier 2 · HTML index · Independent agency
+active · ingestion health: delivering · Executive · Tier 2 · HTML index · Independent agency
 
 Official site: https://www.nsf.gov/news · All sources: [sources.md](../sources.md)
 
@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-30 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-02, 21 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-11-23; 0 of 329 request(s) to www.nsf.gov returned no content.
 
-This label has held since 2026-11-10T05:21:28Z (UTC) and was last re-checked 2026-11-23T04:49:04Z (UTC).
+This label has held since 2026-11-23T22:04:10Z (UTC) and was last re-checked 2026-11-24T04:53:50Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,22 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-11-02 |
-| Our requests to www.nsf.gov | 331 request(s) · 331 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-11-23 |
+| Content length | 252 characters average, 252 median (shortest 246, longest 257) |
+| Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
+| Our requests to www.nsf.gov | 329 request(s) · 329 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-23T05:00:15.930+00:00 UTC.
+last answered request 2026-11-24T05:00:16.076+00:00 UTC.
 
-Most recent item 2026-11-02, 21 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-11-23; 0 of 329 request(s) to www.nsf.gov returned no content.
 
 ### All time
 
-- **Our requests to www.nsf.gov, all time (since 2026-09-28):** 1,408 request(s) · 1,408 answered · 0 returned no content
+- **Our requests to www.nsf.gov, all time (since 2026-09-28):** 1,432 request(s) · 1,432 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -96,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nsf.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-25 | 0 | 26 | 81 |
 | 2026-10-26 | 0 | 25 | 63 |
 | 2026-10-27 | 2 | 24 | 80 |
 | 2026-10-28 | 0 | 25 | 81 |
@@ -125,12 +126,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-20 | 0 | 25 | 79 |
 | 2026-11-21 | 0 | 25 | 141 |
 | 2026-11-22 | 0 | 25 | 80 |
-| 2026-11-23 | 0 | 1 | 61 |
+| 2026-11-23 | 2 | 24 | 79 |
+| 2026-11-24 | 0 | 1 | 93 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest NSF News through an HTML index adapter in feed-only mode: one listing fetch per poll, with no article pages fetched, since no machine-readable feed is advertised. The listing carries releases, podcasts, and features, and we read all of them. The adapter reads the listing's first page only, and entries it cannot date are dropped rather than dated by observation. Over the 14-day window we recorded one item, dated 2026-11-02, at 276 characters, a rate of 0.07 per day. Health reads quiet, nine days after that item. All 330 requests to www.nsf.gov were answered, with no failures, and the registry records no delivery incidents for this source. Since the 2026-10-30 assessment, which recorded four items with a median of 246 characters, the most recent dated 2026-10-27, and 326 requests, the window count fell from four to one and the most recent item date moved to 2026-11-02.
+We ingest NSF News through the HTML index adapter in feed-only mode, with one listing fetch per poll and no article pages, because no machine-readable feed is advertised. The listing carries releases, podcasts, and features, and all entries are read. The adapter reads the first page of the listing only, and entries it cannot date are dropped rather than dated by observation. Measured entries averaged 252 characters (median 252, range 246 to 257 across two items). The 14-day window holds two items, a rate of 0.14 per day, the most recent dated 2026-11-23. All 329 requests to www.nsf.gov were answered, none returning no content, and health reads delivering. Compared with the 2026-11-11 assessment, which recorded one item dated 2026-11-02 at 276 characters, the window count rose to two, the most recent date moved to 2026-11-23, and the average length fell from 276 to 252 characters. The source was activated 2026-09-28.
 
-_Model-written assessment of our own ingestion, generated 2026-11-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-24 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

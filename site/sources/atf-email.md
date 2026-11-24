@@ -6,7 +6,7 @@
 
 # ATF News (email)
 
-planned · ingestion health: quiet · Executive · Tier 2 · email bulletin · Department of Justice (ATF)
+planned · ingestion health: delivering · Executive · Tier 2 · email bulletin · Department of Justice (ATF)
 
 Official site: https://www.atf.gov/news · All sources: [sources.md](../sources.md)
 
@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-22, 32 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-23, delivered by email.
 
-This label has held since 2026-10-30T04:11:38Z (UTC) and was last re-checked 2026-11-23T04:49:04Z (UTC).
+This label has held since 2026-11-23T21:24:31Z (UTC) and was last re-checked 2026-11-24T04:53:50Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,18 +70,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-22 |
-| Mailbox | no message from this sender in the last 14 days |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-23 |
+| Content length | 622 characters average, 622 median (shortest 622, longest 622) |
+| Delivery mode | email-full — the bulletin carried the full item text |
+| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-23 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-10-22, 32 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-11-23, delivered by email.
 
 ### All time
 
@@ -89,12 +91,45 @@ Bulletins from this source are delivered to the project mailbox, so there are no
 
 ### Last 30 days, day by day
 
-No requests and no items were recorded in the last 30 days, so there is nothing to chart.
+Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publication day the digests use; the stored request stamps remain UTC.
+
+| Day | Items ingested |
+|---|---|
+| 2026-10-26 | 0 |
+| 2026-10-27 | 0 |
+| 2026-10-28 | 0 |
+| 2026-10-29 | 0 |
+| 2026-10-30 | 0 |
+| 2026-10-31 | 0 |
+| 2026-11-01 | 0 |
+| 2026-11-02 | 0 |
+| 2026-11-03 | 0 |
+| 2026-11-04 | 0 |
+| 2026-11-05 | 0 |
+| 2026-11-06 | 0 |
+| 2026-11-07 | 0 |
+| 2026-11-08 | 0 |
+| 2026-11-09 | 0 |
+| 2026-11-10 | 0 |
+| 2026-11-11 | 0 |
+| 2026-11-12 | 0 |
+| 2026-11-13 | 0 |
+| 2026-11-14 | 0 |
+| 2026-11-15 | 0 |
+| 2026-11-16 | 0 |
+| 2026-11-17 | 0 |
+| 2026-11-18 | 0 |
+| 2026-11-19 | 0 |
+| 2026-11-20 | 0 |
+| 2026-11-21 | 0 |
+| 2026-11-22 | 0 |
+| 2026-11-23 | 1 |
+| 2026-11-24 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest ATF News from GovDelivery bulletins that arrive by email from atf@service.govdelivery.com, with DKIM verification and raw RFC-5322 capture. Bulletins carry the full item text. In the current window one bulletin was recorded, dated 2026-10-22 and measuring 1,113 characters, a rate of 0.07 per day. The mailbox shows one message, no errors, and no refused messages. The health reading is quiet, nine days after that bulletin. The previous assessment recorded the same single bulletin, so no new deliveries have been recorded since then. That assessment also recorded an earlier bulletin on August 14, followed by no deliveries for more than two months before the 2026-10-22 bulletin. The registry status remains planned, and the subscription was confirmed 2026-07-29.
+ATF News reaches us as GovDelivery bulletins from atf@service.govdelivery.com through the email adapter, with DKIM verified and raw RFC-5322 capture; bulletins carry the full item text. The registry status remains planned, though the subscription was confirmed 2026-07-29 and the registry notes call for activation on the first parsed bulletin. The 14-day window holds one bulletin, dated 2026-11-23 and measured at 622 characters, a rate of 0.07 per day. The mailbox shows one message and one bulletin, with no administrative messages, errors, or refused messages; the last message arrived 2026-11-23T21:12:24Z. There are no requests to report, so health is read from delivery recency alone and reads delivering. Compared with the 2026-10-31 assessment, which recorded one bulletin dated 2026-10-22 at 1,113 characters, the window's single bulletin is now dated 2026-11-23 and measures 622 characters, and health moved from quiet to delivering.
 
-_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-24 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

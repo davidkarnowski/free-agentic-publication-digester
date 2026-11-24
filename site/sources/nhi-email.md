@@ -6,7 +6,7 @@
 
 # National Highway Institute (email)
 
-active · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of Transportation (FHWA / NHI)
+active · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of Transportation (FHWA / NHI)
 
 Official site: https://www.nhi.fhwa.dot.gov/ · All sources: [sources.md](../sources.md)
 
@@ -60,9 +60,9 @@ _Model-written orientation, generated 2026-10-03 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-16, delivered by email.
+**quiet** — Most recent item 2026-11-16, 8 days ago (quiet past 7 days).
 
-This label has held since 2026-11-16T16:15:21Z (UTC) and was last re-checked 2026-11-23T04:49:04Z (UTC).
+This label has held since 2026-11-16T16:15:21Z (UTC) and was last re-checked 2026-11-24T04:53:50Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -85,7 +85,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-1 item(s) in the last 14 days; most recent 2026-11-16, delivered by email.
+Most recent item 2026-11-16, 8 days ago (quiet past 7 days).
 
 ### All time
 
@@ -97,7 +97,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-25 | 0 |
 | 2026-10-26 | 0 |
 | 2026-10-27 | 0 |
 | 2026-10-28 | 0 |
@@ -127,6 +126,7 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-21 | 0 |
 | 2026-11-22 | 0 |
 | 2026-11-23 | 0 |
+| 2026-11-24 | 0 |
 
 ## Our ingestion assessment
 

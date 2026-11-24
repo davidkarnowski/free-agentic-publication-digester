@@ -6,7 +6,7 @@
 
 # FMC Press Releases
 
-active · ingestion health: quiet · Executive · Tier 3 · RSS feed · Independent agency
+active · ingestion health: delivering · Executive · Tier 3 · RSS feed · Independent agency
 
 Official site: https://www.fmc.gov/category/news-articles/press-releases/ · All sources: [sources.md](../sources.md)
 
@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-02, 21 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-23; 0 of 335 request(s) to www.fmc.gov returned no content.
 
-This label has held since 2026-11-10T05:21:28Z (UTC) and was last re-checked 2026-11-23T04:49:04Z (UTC).
+This label has held since 2026-11-23T19:38:34Z (UTC) and was last re-checked 2026-11-24T04:53:50Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,22 +62,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-11-02 |
-| Our requests to www.fmc.gov | 334 request(s) · 334 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-23 |
+| Content length | 3,215 characters average, 3,215 median (shortest 3,215, longest 3,215) |
+| Delivery mode | full — full article text, fetched from the item's own page |
+| Our requests to www.fmc.gov | 335 request(s) · 335 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-23T05:00:16.216+00:00 UTC.
+last answered request 2026-11-24T05:00:16.274+00:00 UTC.
 
-Most recent item 2026-11-02, 21 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-11-23; 0 of 335 request(s) to www.fmc.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fmc.gov, all time (since 2026-10-05):** 1,237 request(s) · 1,237 answered · 0 returned no content
+- **Our requests to www.fmc.gov, all time (since 2026-10-05):** 1,263 request(s) · 1,263 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -87,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fmc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-25 | 0 | 25 | 91 |
 | 2026-10-26 | 0 | 25 | 74 |
 | 2026-10-27 | 0 | 25 | 84 |
 | 2026-10-28 | 0 | 25 | 109 |
@@ -116,12 +117,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-20 | 0 | 25 | 90 |
 | 2026-11-21 | 0 | 26 | 85 |
 | 2026-11-22 | 0 | 25 | 84 |
-| 2026-11-23 | 0 | 1 | 99 |
+| 2026-11-23 | 1 | 26 | 96 |
+| 2026-11-24 | 0 | 1 | 98 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest FMC Press Releases by polling the press-release RSS feed and fetching each new release for full text. Feed descriptions are excerpts of about 680 characters, and each item carries the site's post ID as its GUID. The 14-day window holds one item, dated 2026-11-02, at 5,413 characters, a rate of 0.07 per day. Health reads quiet, nine days after that item. All 333 requests to www.fmc.gov returned content, with no client or server errors. The first poll after activation on 2026-10-05 fetched the ten items the registry lists from January to July 2026 once and sorted them to backfill. Since the 2026-11-03 assessment, the window still holds the same single item at 5,413 characters, the request count rose from 331 to 333 with zero errors, and health now reads quiet where it read delivering on 2026-11-03.
+We ingest FMC Press Releases from the press-release RSS feed in full mode, fetching each new release's page for full text, because feed descriptions are excerpts of about 680 characters. The 14-day window holds one item, dated 2026-11-23 and measured at 3,215 characters, a rate of 0.07 per day. All 335 requests to www.fmc.gov returned content, with no client or server errors recorded. Health reads delivering. Compared with the 2026-11-11 assessment, which recorded one item dated 2026-11-02 at 5,413 characters, the window's single item has changed: the most recent date moved to 2026-11-23 and the measured length is now 3,215 characters. The request count rose from 333 to 335 with zero errors, and health moved from quiet to delivering. The source was activated 2026-10-05, when the first poll fetched the ten items listed from January to July 2026 once and sorted them to backfill.
 
-_Model-written assessment of our own ingestion, generated 2026-11-11 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-24 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
