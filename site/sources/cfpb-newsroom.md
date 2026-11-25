@@ -6,7 +6,7 @@
 
 # CFPB Newsroom
 
-active · ingestion health: quiet · Executive · Tier 2 · RSS feed · Independent agency
+active · ingestion health: delivering · Executive · Tier 2 · RSS feed · Independent agency
 
 Official site: https://www.consumerfinance.gov/about-us/newsroom/ · All sources: [sources.md](../sources.md)
 
@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-10-14, 41 days ago (quiet past 7 days).
+**delivering** — 1 item(s) in the last 14 days; most recent 2026-11-24; 0 of 333 request(s) to www.consumerfinance.gov returned no content.
 
-This label has held since 2026-10-22T04:14:08Z (UTC) and was last re-checked 2026-11-24T04:53:50Z (UTC).
+This label has held since 2026-11-24T16:45:56Z (UTC) and was last re-checked 2026-11-25T04:59:26Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,22 +62,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | none in the last 14 days — most recent 2026-10-14 |
-| Our requests to www.consumerfinance.gov | 330 request(s) · 330 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-24 |
+| Content length | 8,403 characters average, 8,403 median (shortest 8,403, longest 8,403) |
+| Delivery mode | full — full article text, fetched from the item's own page |
+| Our requests to www.consumerfinance.gov | 333 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-24T05:00:15.988+00:00 UTC.
+last answered request 2026-11-25T05:00:14.756+00:00 UTC.
 
-Most recent item 2026-10-14, 41 days ago (quiet past 7 days).
+1 item(s) in the last 14 days; most recent 2026-11-24; 0 of 333 request(s) to www.consumerfinance.gov returned no content.
 
 ### All time
 
-- **Our requests to www.consumerfinance.gov, all time (since 2026-10-05):** 1,269 request(s) · 1,269 answered · 0 returned no content
+- **Our requests to www.consumerfinance.gov, all time (since 2026-10-05):** 1,296 request(s) · 1,296 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -87,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.consumerfinance.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-26 | 0 | 24 | 84 |
 | 2026-10-27 | 0 | 25 | 167 |
 | 2026-10-28 | 0 | 25 | 128 |
 | 2026-10-29 | 0 | 25 | 105 |
@@ -116,12 +117,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-21 | 0 | 26 | 165 |
 | 2026-11-22 | 0 | 24 | 146 |
 | 2026-11-23 | 0 | 25 | 208 |
-| 2026-11-24 | 0 | 1 | 240 |
+| 2026-11-24 | 1 | 27 | 107 |
+| 2026-11-25 | 0 | 1 | 116 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest the CFPB Newsroom from the RSS feed at consumerfinance.gov/about-us/newsroom/feed/, activated 2026-10-05. Feed descriptions are about 180-character teasers, so we fetch each item's article page for full text (delivery mode full). Over the 14-day window we measured no items, a rate of 0.00 per day; the most recent item is dated 2026-10-14, 39 days before measurement, and health reads quiet. All 333 requests to www.consumerfinance.gov returned content with no errors. The registry notes describe the feed as holding about one release a month in 2026, and record that the first poll fetched 21 older releases once, which sorted to backfill. The enforcement-actions feed is not ingested, because it is not in date order and the meaning of its dates is unconfirmed. Compared with the 2026-10-23 assessment, which measured one item dated 2026-10-14 at 0.07 per day, with extracted content of 5,952 characters and 327 of 327 requests succeeding, the window now holds no items and the most recent date is unchanged.
+The CFPB Newsroom is ingested from an RSS feed, with each item's full article text fetched from its individual page. The source was activated on 2026-10-05 after an RSS feed was identified, following initial registry notes indicating a lack of a machine-readable feed. Our system polls the feed multiple times daily, with no failed requests observed over the measurement window. The registry notes indicate an expected cadence of approximately one release per month. In the 14-day window, one item was recorded on 2026-11-24, at a rate of 0.07 items per day, with an average length of 8,403 characters. This differs from the 2026-11-22 assessment, which reported no items in its 14-day window, a most recent item dated 2026-10-14, and a quiet health status. The current health status is delivering. The enforcement-actions feed is not ingested due to date ordering and unconfirmed date meanings.
 
-_Model-written assessment of our own ingestion, generated 2026-11-22 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-25 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

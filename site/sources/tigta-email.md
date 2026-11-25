@@ -6,7 +6,7 @@
 
 # Treasury Inspector General for Tax Administration (email)
 
-active · ingestion health: quiet · Executive · Tier 3 · email bulletin · Department of the Treasury, Treasury Inspector General for Tax Administration
+active · ingestion health: delivering · Executive · Tier 3 · email bulletin · Department of the Treasury, Treasury Inspector General for Tax Administration
 
 Official site: https://www.tigta.gov/ · All sources: [sources.md](../sources.md)
 
@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-16, 8 days ago (quiet past 7 days).
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-11-24, delivered by email.
 
-This label has held since 2026-11-16T19:48:47Z (UTC) and was last re-checked 2026-11-24T04:53:50Z (UTC).
+This label has held since 2026-11-24T15:50:33Z (UTC) and was last re-checked 2026-11-25T04:59:26Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,20 +71,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: no items ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-16 |
-| Content length | 1,510 characters average, 1,510 median (shortest 1,510, longest 1,510) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-11-24 |
+| Content length | 1,560 characters average, 1,560 median (shortest 1,510, longest 1,609) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 1 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-16 |
+| Mailbox | 2 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-24 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-16, 8 days ago (quiet past 7 days).
+2 item(s) in the last 14 days; most recent 2026-11-24, delivered by email.
 
 ### All time
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-26 | 1 |
 | 2026-10-27 | 0 |
 | 2026-10-28 | 0 |
 | 2026-10-29 | 0 |
@@ -125,12 +124,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-21 | 0 |
 | 2026-11-22 | 0 |
 | 2026-11-23 | 0 |
-| 2026-11-24 | 0 |
+| 2026-11-24 | 1 |
+| 2026-11-25 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest Treasury Inspector General for Tax Administration bulletins through the email adapter. They arrive from tigta@service.govdelivery.com with full item text, and DKIM is verified against the service.govdelivery.com domain. The subscription was registered 2026-09-26 through the publisher's signup flow, and earlier bulletins were not backfilled. The 14-day window now holds one item, a bulletin dated 2026-11-16 measuring 1,510 characters, a rate of 0.07 per day. The mailbox shows one message and one bulletin, with no errors and no refused deliveries, last received 2026-11-16T19:39:04Z. The bulletin carries no web link, so the item cites the archived message. Mail routed to the junk folder would be refused, while the inbox rule labels and ingests it. The registry records the 2026-09-28 coverage evaluation as based on one bulletin announcing two audit reports, and states that it claims no coverage relationship to the agency's full output. No delivery incidents are recorded. Health reads delivering. Compared with the 2026-11-08 assessment, which recorded two bulletins, a rate of 0.14 per day, a most recent date of 2026-10-30, and a quiet health reading, the earlier bulletin is now outside the window, the count is one, and health has changed to delivering.
+Treasury Inspector General for Tax Administration bulletins are ingested by the email adapter from tigta@service.govdelivery.com, delivering full item text with DKIM verification against the service.govdelivery.com domain. The subscription was registered on 2026-09-26, and earlier bulletins were not backfilled. Bulletins do not contain web links, so the archived message itself is cited. In the current 14-day window, two items were recorded, with the most recent on 2026-11-24, at a rate of 0.14 items per day. The average item length is 1,560 characters. The mailbox has received two bulletins, with the last message on 2026-11-24. No delivery incidents, errors, or refused deliveries have been reported. Compared to the 2026-11-17 assessment, which reported one item on 2026-11-16 at 0.07 per day, this assessment shows an increased item count and slightly different character statistics, while the health status remains delivering.
 
-_Model-written assessment of our own ingestion, generated 2026-11-17 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-25 by gemini-2.5-flash, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

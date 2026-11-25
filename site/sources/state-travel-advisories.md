@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 2 item(s) in the last 14 days; most recent 2026-11-23; 1 of 329 request(s) to travel.state.gov returned no content.
+**delivering** — 4 item(s) in the last 14 days; most recent 2026-11-24; 1 of 328 request(s) to travel.state.gov returned no content.
 
-This label has held since 2026-11-23T22:04:10Z (UTC) and was last re-checked 2026-11-24T04:53:50Z (UTC).
+This label has held since 2026-11-23T22:04:10Z (UTC) and was last re-checked 2026-11-25T04:59:26Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -69,18 +69,18 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 2 item(s) i
 
 | Measure | Value |
 |---|---|
-| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-11-23 |
-| Content length | 654 characters average, 654 median (shortest 567, longest 741) |
+| Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-11-24 |
+| Content length | 1,979 characters average, 1,493 median (shortest 567, longest 4,364) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to travel.state.gov | 329 request(s) · 328 answered · 0 declined (4xx) · 1 server declined (5xx) · 0 no response — 0.3% returned no content |
+| Our requests to travel.state.gov | 328 request(s) · 327 answered · 0 declined (4xx) · 1 server declined (5xx) · 0 no response — 0.3% returned no content |
 
-last answered request 2026-11-24T05:00:14.589+00:00 UTC.
+last answered request 2026-11-25T05:00:13.930+00:00 UTC.
 
-2 item(s) in the last 14 days; most recent 2026-11-23; 1 of 329 request(s) to travel.state.gov returned no content.
+4 item(s) in the last 14 days; most recent 2026-11-24; 1 of 328 request(s) to travel.state.gov returned no content.
 
 ### All time
 
-- **Our requests to travel.state.gov, all time (since 2026-10-05):** 1,247 request(s) · 1,246 answered · 1 returned no content
+- **Our requests to travel.state.gov, all time (since 2026-10-05):** 1,272 request(s) · 1,271 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -90,7 +90,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to travel.state.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-26 | 1 | 25 | 264 |
 | 2026-10-27 | 0 | 25 | 290 |
 | 2026-10-28 | 0 | 25 | 296 |
 | 2026-10-29 | 0 | 25 | 289 |
@@ -119,7 +118,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-21 | 0 | 25 | 354 |
 | 2026-11-22 | 0 | 25 | 321 |
 | 2026-11-23 | 2 | 25 | 286 |
-| 2026-11-24 | 0 | 1 | 423 |
+| 2026-11-24 | 2 | 25 | 251 |
+| 2026-11-25 | 0 | 1 | 952 |
 
 ## Our ingestion assessment
 

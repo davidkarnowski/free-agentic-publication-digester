@@ -52,7 +52,7 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 **delivering** — 5 item(s) in the last 14 days; most recent 2026-11-23; 1 of 337 request(s) to www.fda.gov returned no content.
 
-This label has held since 2026-11-17T23:39:17Z (UTC) and was last re-checked 2026-11-24T04:53:50Z (UTC).
+This label has held since 2026-11-17T23:39:17Z (UTC) and was last re-checked 2026-11-25T04:59:26Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,7 +62,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · 2 item(s) ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -73,13 +73,13 @@ Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · 2 item(s) i
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.fda.gov | 337 request(s) · 336 answered · 0 declined (4xx) · 0 server declined (5xx) · 1 no response — 0.3% returned no content |
 
-last answered request 2026-11-24T05:00:16.553+00:00 UTC.
+last answered request 2026-11-25T05:00:15.516+00:00 UTC.
 
 5 item(s) in the last 14 days; most recent 2026-11-23; 1 of 337 request(s) to www.fda.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fda.gov, all time (since 2026-07-30):** 3,138 request(s) · 3,136 answered · 2 returned no content
+- **Our requests to www.fda.gov, all time (since 2026-07-30):** 3,164 request(s) · 3,162 answered · 2 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -89,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fda.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-26 | 0 | 25 | 134 |
 | 2026-10-27 | 0 | 25 | 136 |
 | 2026-10-28 | 0 | 25 | 221 |
 | 2026-10-29 | 0 | 25 | 144 |
@@ -118,7 +117,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-21 | 0 | 26 | 266 |
 | 2026-11-22 | 0 | 24 | 200 |
 | 2026-11-23 | 2 | 27 | 181 |
-| 2026-11-24 | 0 | 1 | 225 |
+| 2026-11-24 | 0 | 26 | 129 |
+| 2026-11-25 | 0 | 1 | 145 |
 
 ## Our ingestion assessment
 
