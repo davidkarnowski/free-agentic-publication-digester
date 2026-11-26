@@ -58,9 +58,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-02, 23 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-02, 24 days ago (quiet past 7 days).
 
-This label has held since 2026-11-10T05:21:28Z (UTC) and was last re-checked 2026-11-25T04:59:26Z (UTC).
+This label has held since 2026-11-10T05:21:28Z (UTC) and was last re-checked 2026-11-26T04:49:09Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,22 +70,22 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
 | Items ingested | none in the last 14 days — most recent 2026-11-02 |
-| Our requests to news.uscourts.gov | 332 request(s) · 332 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to news.uscourts.gov | 328 request(s) · 328 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-25T05:00:16.100+00:00 UTC.
+last answered request 2026-11-26T05:00:17.037+00:00 UTC.
 
-Most recent item 2026-11-02, 23 days ago (quiet past 7 days).
+Most recent item 2026-11-02, 24 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to news.uscourts.gov, all time (since 2026-07-30):** 3,115 request(s) · 3,115 answered · 0 returned no content
+- **Our requests to news.uscourts.gov, all time (since 2026-07-30):** 3,141 request(s) · 3,141 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to news.uscourts.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-27 | 0 | 25 | 339 |
 | 2026-10-28 | 0 | 25 | 519 |
 | 2026-10-29 | 0 | 25 | 423 |
 | 2026-10-30 | 0 | 27 | 540 |
@@ -124,7 +123,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-22 | 0 | 25 | 375 |
 | 2026-11-23 | 0 | 25 | 378 |
 | 2026-11-24 | 0 | 25 | 350 |
-| 2026-11-25 | 0 | 1 | 294 |
+| 2026-11-25 | 0 | 26 | 448 |
+| 2026-11-26 | 0 | 1 | 314 |
 
 ## Our ingestion assessment
 

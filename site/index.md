@@ -14,13 +14,13 @@ An automated, citation-bound, opinion-agnostic daily digest of official United S
 
 ## The last 7 days
 
+- [Daily Digest — 2026-11-25](2026-11-25.md) — The digest carries 38 House and 4 Senate Congressional Record items, along with 44 House and 17 Senate bill introductions.
 - [Daily Digest — 2026-11-24](2026-11-24.md) — The digest carries 2 enrolled bills, HR 2478 and HR 973, concerning financial exploitation prevention and lithium-ion battery safety standards.
 - [Daily Digest — 2026-11-23](2026-11-23.md) — On the congressional side, the digest carries one bill introduced in the House and one measure agreed to in the Senate.
 - [Daily Digest — 2026-11-22](2026-11-22.md) — This is a short review: few publications were observed for this digest day, and none met the digest's summary rules, so there are no item summaries to draw on.
 - [Daily Digest — 2026-11-21](2026-11-21.md) — The Senate floor record shows seven recorded votes on nominations.
 - [Daily Digest — 2026-11-20](2026-11-20.md) — The digest carries eight recorded roll call votes.
 - [Daily Digest — 2026-11-19](2026-11-19.md) — The digest carries three recorded roll-call votes.
-- [Daily Digest — 2026-11-18](2026-11-18.md) — On the floor, the House passed H.R. 8483, placing California land into trust for the Barona Group of Capitan Grande Band of Mission Indians, 398-0, and H.R. 9600, approving a site for a Thomas Paine commemorative work, 365-36.
 
 ## Earlier days
 

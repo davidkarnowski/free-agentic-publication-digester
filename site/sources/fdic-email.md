@@ -52,9 +52,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 7 item(s) in the last 14 days; most recent 2026-11-24, delivered by email.
+**delivering** — 9 item(s) in the last 14 days; most recent 2026-11-25, delivered by email.
 
-This label has held since 2026-10-26T16:09:20Z (UTC) and was last re-checked 2026-11-25T04:59:26Z (UTC).
+This label has held since 2026-10-26T16:09:20Z (UTC) and was last re-checked 2026-11-26T04:49:09Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -70,14 +70,14 @@ Last 24 hours: 2 item(s) ingested
 
 | Measure | Value |
 |---|---|
-| Items ingested | 7 in 14 days (0.5 per day) · most recent 2026-11-24 |
-| Content length | 1,848 characters average, 1,970 median (shortest 608, longest 3,476) |
+| Items ingested | 9 in 14 days (0.64 per day) · most recent 2026-11-25 |
+| Content length | 1,703 characters average, 1,922 median (shortest 608, longest 3,476) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 7 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-24 |
+| Mailbox | 9 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-25 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-7 item(s) in the last 14 days; most recent 2026-11-24, delivered by email.
+9 item(s) in the last 14 days; most recent 2026-11-25, delivered by email.
 
 ### All time
 
@@ -89,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-27 | 0 |
 | 2026-10-28 | 0 |
 | 2026-10-29 | 0 |
 | 2026-10-30 | 2 |
@@ -118,12 +117,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-22 | 0 |
 | 2026-11-23 | 0 |
 | 2026-11-24 | 2 |
-| 2026-11-25 | 0 |
+| 2026-11-25 | 2 |
+| 2026-11-26 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The fdic-email subscription, sender subscriptions@subscriptions.fdic.gov, has been confirmed since 2026-07-29 and is ingested by the email adapter as full-text bulletins, each DKIM-verified with the key archived. In the current 14-day window we recorded one item at 3,360 characters, most recently delivered 2026-10-26, a rate of 0.07 items per day. The mailbox shows one bulletin and one message, with zero errors and zero refused deliveries. The previous assessment, dated 2026-10-15, recorded two items at 0.14 per day, with content ranging from 1,128 to 1,622 characters, an average of 1,375, and a most recent delivery on 2026-10-05. Relative to that assessment, the item count in the window fell from two to one, the most recent delivery date moved to 2026-10-26, and the average extracted size rose from 1,375 to 3,360 characters. The collector reports no consecutive errors, with a last cycle at 2026-10-27T03:48:33Z. Registry notes record that same-URL copies from this channel and from fdic-news merge as corroboration.
+We ingest FDIC Press Releases through the email adapter from subscriptions@subscriptions.fdic.gov, confirmed 2026-07-29. Bulletins arrive as full-text messages to the project mailbox, each DKIM-verified with the key archived. The mailbox shows 9 bulletins and 9 messages, with no administrative messages, errors, or refused deliveries. In the 14-day window we recorded 9 items, a rate of 0.64 per day, sized from 608 to 3,476 characters (median 1,922, average 1,703). Two bulletins arrived in the 08:00 hour and two more in the 10:00 hour on 2026-11-24, and two arrived in the 16:00 hour on 2026-11-25. The most recent item is dated 2026-11-25, and health reads delivering. The collector reports zero consecutive errors, with its last cycle at 2026-11-26T04:46:25Z. The registry notes record that same-URL copies from this channel and from fdic-news merge as corroboration. No incident is recorded. Compared with the previous assessment of 2026-10-27, the item count in the window rose from 1 to 9, the most recent delivery moved from 2026-10-26 to 2026-11-25, and the average extracted size fell from 3,360 to 1,703 characters.
 
-_Model-written assessment of our own ingestion, generated 2026-10-27 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-26 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

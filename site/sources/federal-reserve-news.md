@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 9 item(s) in the last 14 days; most recent 2026-11-24; 7 of 341 request(s) to www.federalreserve.gov returned no content.
+**delivering** — 8 item(s) in the last 14 days; most recent 2026-11-25; 6 of 337 request(s) to www.federalreserve.gov returned no content.
 
-This label has held since 2026-10-28T18:35:23Z (UTC) and was last re-checked 2026-11-25T04:59:26Z (UTC).
+This label has held since 2026-10-28T18:35:23Z (UTC) and was last re-checked 2026-11-26T04:49:09Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -68,24 +68,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 27 request(s) (27 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 28 request(s) (28 answered, 0 returned no content) · 2 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 9 in 14 days (0.64 per day) · most recent 2026-11-24 |
-| Content length | 9,816 characters average, 9,499 median (shortest 9,090, longest 10,924) |
+| Items ingested | 8 in 14 days (0.57 per day) · most recent 2026-11-25 |
+| Content length | 9,864 characters average, 9,873 median (shortest 9,090, longest 10,816) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.federalreserve.gov | 341 request(s) · 334 answered · 7 declined (4xx) · 0 server declined (5xx) · 0 no response — 2.1% returned no content |
+| Our requests to www.federalreserve.gov | 337 request(s) · 331 answered · 6 declined (4xx) · 0 server declined (5xx) · 0 no response — 1.8% returned no content |
 
-last answered request 2026-11-25T05:00:14.612+00:00 UTC.
+last answered request 2026-11-26T05:00:15.222+00:00 UTC.
 
-9 item(s) in the last 14 days; most recent 2026-11-24; 7 of 341 request(s) to www.federalreserve.gov returned no content.
+8 item(s) in the last 14 days; most recent 2026-11-25; 6 of 337 request(s) to www.federalreserve.gov returned no content.
 
 ### All time
 
-- **Our requests to www.federalreserve.gov, all time (since 2026-07-30):** 3,162 request(s) · 3,130 answered · 32 returned no content
+- **Our requests to www.federalreserve.gov, all time (since 2026-07-30):** 3,190 request(s) · 3,158 answered · 32 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.federalreserve.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-27 | 0 | 25 | 97 |
 | 2026-10-28 | 1 | 26 | 104 |
 | 2026-10-29 | 1 | 26 | 102 |
 | 2026-10-30 | 0 | 25 | 73 |
@@ -124,7 +123,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-22 | 0 | 25 | 80 |
 | 2026-11-23 | 0 | 25 | 83 |
 | 2026-11-24 | 1 | 27 | 98 |
-| 2026-11-25 | 0 | 1 | 89 |
+| 2026-11-25 | 2 | 28 | 85 |
+| 2026-11-26 | 0 | 1 | 121 |
 
 ## Our ingestion assessment
 

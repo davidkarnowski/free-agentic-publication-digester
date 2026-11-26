@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-17, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-17, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-11-17T16:28:33Z (UTC) and was last re-checked 2026-11-25T04:59:26Z (UTC).
+This label has held since 2026-11-25T05:15:10Z (UTC) and was last re-checked 2026-11-26T04:49:09Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -80,15 +80,15 @@ Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items in
 | Items ingested | 1 in 14 days (0.07 per day) · most recent 2026-11-17 |
 | Content length | 160 characters average, 160 median (shortest 160, longest 160) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.cdc.gov | 333 request(s) · 333 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.cdc.gov | 329 request(s) · 329 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-25T05:00:16.055+00:00 UTC.
+last answered request 2026-11-26T05:00:16.728+00:00 UTC.
 
-Most recent item 2026-11-17, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-17, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.cdc.gov, all time (since 2026-09-28):** 1,460 request(s) · 1,459 answered · 1 returned no content
+- **Our requests to www.cdc.gov, all time (since 2026-09-28):** 1,486 request(s) · 1,485 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.cdc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-27 | 0 | 25 | 185 |
 | 2026-10-28 | 0 | 24 | 231 |
 | 2026-10-29 | 0 | 25 | 306 |
 | 2026-10-30 | 0 | 27 | 224 |
@@ -127,12 +126,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-22 | 0 | 25 | 207 |
 | 2026-11-23 | 0 | 25 | 290 |
 | 2026-11-24 | 0 | 26 | 212 |
-| 2026-11-25 | 0 | 1 | 850 |
+| 2026-11-25 | 0 | 26 | 223 |
+| 2026-11-26 | 0 | 1 | 615 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest the CDC Newsroom through the html-index adapter in feed-only mode. It reads the first page of the media index once per poll and records only entries whose dates the parser can read. Entries without a readable date are dropped rather than assigned an observation date, and article pages are not fetched. Activation was 2026-09-28. The 14-day window holds one item, dated 2026-11-17, measuring 160 characters, and health reads delivering. Our fetch record shows 335 requests to www.cdc.gov, all answered, with no client or server errors. The host is shared with one other source. On full days shown, request volume ran from about 24 to 30 per day. The registry notes record that the publisher's RSS path returned an HTML directory rather than a feed, so the html-index adapter was used. No incident is recorded. Compared with the previous assessment, which recorded no items in its window and a latest item of 2026-09-28 at 206 characters, one item dated 2026-11-17 has now entered our record. Requests rose from 331 to 335, with no errors in either measurement.
+We ingest the CDC Newsroom through the html-index adapter in feed-only mode, activated 2026-09-28. The adapter reads the first page of the media index once per poll, records only entries whose dates the parser can read, and does not fetch article pages. Entries without a readable date are dropped rather than given an observation date. The registry notes record that the publisher's RSS path returned an HTML feed-directory page rather than a feed. The 14-day window holds one item, dated 2026-11-17, measuring 160 characters, and health reads quiet, with 9 days since that item. In the daily view for 2026-11-20 through 2026-11-26, we recorded no items, with about 25 to 26 requests per day; 2026-11-26 is a partial day. Our fetch record shows 329 attempts to www.cdc.gov, all answered, with no client, server, or no-response errors. The host is shared with one other source. The registry notes record that only the first page of the listing is read, so more new entries between two polls than the page holds would not be seen. No incident is recorded. Compared with the previous assessment of 2026-11-18, the window still holds the one item dated 2026-11-17 at the same size, and the request count is 329 here against 335 in that assessment.
 
-_Model-written assessment of our own ingestion, generated 2026-11-18 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-26 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
