@@ -54,9 +54,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-18, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-18, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-09-30T21:44:29Z (UTC) and was last re-checked 2026-11-26T04:49:09Z (UTC).
+This label has held since 2026-11-26T05:06:08Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -79,7 +79,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-18, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-18, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-28 | 1 |
 | 2026-10-29 | 0 |
 | 2026-10-30 | 0 |
 | 2026-10-31 | 0 |
@@ -121,11 +120,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-24 | 0 |
 | 2026-11-25 | 0 |
 | 2026-11-26 | 0 |
+| 2026-11-27 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-National Institute of Food and Agriculture bulletins arrive by email to the project mailbox with full item text in each message. The 14-day window holds two measured items, a rate of 0.14 per day, with character counts of 7,285 and 8,450 and a mean and median of 7,868. The mailbox records two bulletin messages, with zero administrative messages, zero errors, and zero refused deliveries. The last message arrived 2026-10-28 at 21:39 UTC. The most recent item is dated 2026-10-28, three days before this assessment. The daily breakdown shows one item in the range from 2026-10-25 through 2026-10-31, at 17:00 UTC on 2026-10-28. Since the previous assessment on 2026-10-01, which recorded one bulletin dated 2026-09-30 at 17:00 UTC measuring 10,041 characters, the window now records two bulletins with the most recent dated 2026-10-28. The 2026-09-30 bulletin falls outside the current 14-day window. Ingestion began at the first poll after the 2026-09-26 registration, and earlier bulletins were not backfilled. Gate-3 coverage evaluation is pending, and the registry status is planned.
+We receive National Institute of Food and Agriculture bulletins by email from usda.nifa@public.govdelivery.com, registered on 2026-09-26 through the publisher's signup flow. Each message carries the full item text. Ingestion began at the first poll after registration, and earlier bulletins were not backfilled. The registry status is planned, and the Gate-3 coverage evaluation is pending. The 14-day window holds two items at 0.14 per day, with lengths of 1,512 and 9,228 characters (median and mean 5,370). The most recent item is dated 2026-11-18, and the mailbox records two bulletins with zero errors and zero refusals. The health measure reads quiet, nine days after the last item. Compared with the previous assessment, the rate is unchanged at 0.14 per day and the window still holds two items, but the most recent item date moved from 2026-10-28 to 2026-11-18. The two items measured previously, at 7,285 and 8,450 characters, are no longer in the window. The registry lists agriculture-email as a related entry that can publish the same news.
 
-_Model-written assessment of our own ingestion, generated 2026-10-31 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-27 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

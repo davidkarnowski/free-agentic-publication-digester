@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 44 item(s) in the last 14 days; most recent 2026-11-25, delivered by email.
+**delivering** — 45 item(s) in the last 14 days; most recent 2026-11-26, delivered by email.
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-11-26T04:49:09Z (UTC).
+This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,20 +71,20 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 4 item(s) ingested
+Last 24 hours: 1 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 44 in 14 days (3.14 per day) · most recent 2026-11-25 |
-| Content length | 242 characters average, 170 median (shortest 58, longest 904) |
+| Items ingested | 45 in 14 days (3.21 per day) · most recent 2026-11-26 |
+| Content length | 246 characters average, 171 median (shortest 58, longest 904) |
 | Delivery mode | email-full — the bulletin carried the full item text |
-| Mailbox | 46 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-25 |
+| Mailbox | 47 bulletin(s), 0 subscription notice(s) in the last 14 days; most recent message 2026-11-26 |
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-44 item(s) in the last 14 days; most recent 2026-11-25, delivered by email.
+45 item(s) in the last 14 days; most recent 2026-11-26, delivered by email.
 
 ### All time
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-28 | 0 |
 | 2026-10-29 | 9 |
 | 2026-10-30 | 1 |
 | 2026-10-31 | 0 |
@@ -125,12 +124,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-23 | 8 |
 | 2026-11-24 | 8 |
 | 2026-11-25 | 4 |
-| 2026-11-26 | 0 |
+| 2026-11-26 | 1 |
+| 2026-11-27 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We receive FAA Updates through the email adapter from the sender usafaa@info.dot.gov, with the subscription confirmed 2026-07-29 and the entry activated 2026-09-28. Bulletins carry full item text in the message, and each message is DKIM-verified and archived. The registry notes a coverage review of live delivery from 2026-08-05 to 2026-09-28 that found 81 items, all DKIM-verified; 11 linked to a web copy and the rest cite the archived message. The topic selection made at signup was not recorded, so we make no claim about coverage of the agency's full output. Over the past 14 days we measured 20 items at 1.43 per day, the most recent dated 2026-10-27. Item text ranges from 67 to 2,046 characters, with a median of 140. The mailbox recorded 24 bulletins, no errors, and no refusals. The previous assessment, dated 2026-09-27, measured 13 bulletins at about 0.93 per day, the most recent dated 2026-09-24, with lengths from 121 to 664 characters and a median of 175.
+We receive FAA Updates through the email adapter from usafaa@info.dot.gov, with the subscription confirmed on 2026-07-29 and the entry activated on 2026-09-28. Bulletins arrive with full item text, and each is DKIM-verified and archived. The registry records a coverage evaluation of 81 items from 2026-08-05 to 2026-09-28, mostly Orders, Notices, Advisory Circular update notifications, and event notices. The topic selection made at signup was not recorded, so we make no claim about coverage of the agency's full output. Over the 14-day window we measured 45 items at 3.21 per day, the most recent dated 2026-11-26. Item text averages 246 characters, with a median of 171 and a range of 58 to 904. The mailbox recorded 47 bulletins with no errors and no refusals. Daily counts for 2026-11-22 through 2026-11-26 were 4, 8, 8, 4, and 1. The registry notes that faa-newsroom returned HTTP 403 to our identified client and describes this source as the only working channel for the FAA; from outside we cannot tell whether that response reflects load, maintenance, or a limit the publisher sets. Since the previous assessment, the window count rose from 20 to 45, the rate from 1.43 to 3.21 per day, and the mailbox count from 24 to 47 bulletins, and the most recent item date moved from 2026-10-27 to 2026-11-26.
 
-_Model-written assessment of our own ingestion, generated 2026-10-28 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-27 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

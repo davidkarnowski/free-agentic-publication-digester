@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 7 item(s) in the last 14 days; most recent 2026-11-24; 0 of 329 request(s) to www.irs.gov returned no content.
+**delivering** — 5 item(s) in the last 14 days; most recent 2026-11-24; 0 of 328 request(s) to www.irs.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-11-26T04:49:09Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,24 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 26 request(s) (26 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 7 in 14 days (0.5 per day) · most recent 2026-11-24 |
-| Content length | 292 characters average, 282 median (shortest 215, longest 358) |
+| Items ingested | 5 in 14 days (0.36 per day) · most recent 2026-11-24 |
+| Content length | 301 characters average, 305 median (shortest 215, longest 358) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.irs.gov | 329 request(s) · 329 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.irs.gov | 328 request(s) · 328 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-26T05:00:16.686+00:00 UTC.
+last answered request 2026-11-27T05:00:15.959+00:00 UTC.
 
-7 item(s) in the last 14 days; most recent 2026-11-24; 0 of 329 request(s) to www.irs.gov returned no content.
+5 item(s) in the last 14 days; most recent 2026-11-24; 0 of 328 request(s) to www.irs.gov returned no content.
 
 ### All time
 
-- **Our requests to www.irs.gov, all time (since 2026-09-28):** 1,489 request(s) · 1,489 answered · 0 returned no content
+- **Our requests to www.irs.gov, all time (since 2026-09-28):** 1,514 request(s) · 1,514 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.irs.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-28 | 0 | 25 | 218 |
 | 2026-10-29 | 1 | 25 | 173 |
 | 2026-10-30 | 0 | 27 | 282 |
 | 2026-10-31 | 0 | 25 | 242 |
@@ -127,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-23 | 0 | 25 | 306 |
 | 2026-11-24 | 1 | 26 | 190 |
 | 2026-11-25 | 0 | 26 | 232 |
-| 2026-11-26 | 0 | 1 | 266 |
+| 2026-11-26 | 0 | 25 | 222 |
+| 2026-11-27 | 0 | 1 | 158 |
 
 ## Our ingestion assessment
 

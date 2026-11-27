@@ -56,7 +56,7 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 **no data** — No bulletin recorded from this source in the last 180 days.
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-11-26T04:49:09Z (UTC).
+This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -91,6 +91,6 @@ No requests and no items were recorded in the last 30 days, so there is nothing 
 
 **Model-written ingestion assessment**
 
-Bulletins from the Maritime Administration are ingested through the email adapter from marad@info.dot.gov. The subscription was registered on 2026-09-26, when no bulletin had been observed, so that the first bulletin would be attributed on arrival. The registry status is planned and the source activates on the first parsed bulletin. The measured 14-day window contains zero items and zero mailbox messages, with no last item date recorded and no character statistics. Health reads no-data because no bulletin has been recorded in the last 180 days, and the collector reports zero consecutive errors. Since the previous assessment on 2026-09-27, which also recorded zero items, nothing has changed.
+Maritime Administration bulletins are ingested through the email adapter from the sender marad@info.dot.gov. Each raw message is captured, and DKIM is verified and archived at ingest. The subscription was confirmed through the publisher's signup flow and registered on 2026-09-26. The registry status is planned, and the source is to be activated on the first parsed bulletin. Across the measured 14-day window and the daily activity from 2026-11-21 through 2026-11-27, we recorded zero bulletins and zero mailbox messages, with no last item date and no character statistics. No delivery cadence or formats have been observed. Health reads no-data because no bulletin has been recorded in the last 180 days. The collector reports zero consecutive errors, with the last successful cycle at 2026-11-27T04:49:34Z. The registry notes record no incidents. Compared with the previous assessment dated 2026-10-28, the counts are unchanged at zero items and zero messages.
 
-_Model-written assessment of our own ingestion, generated 2026-10-28 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-27 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

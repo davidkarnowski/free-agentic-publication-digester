@@ -57,7 +57,7 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 **no data** — No bulletin recorded from this source in the last 180 days.
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-11-26T04:49:09Z (UTC).
+This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -92,6 +92,6 @@ No requests and no items were recorded in the last 30 days, so there is nothing 
 
 **Model-written ingestion assessment**
 
-We receive Office of Financial Research bulletins through the email adapter from the sender updates@subscribe.financialresearch.gov, with the subscription confirmed 2026-07-29. The registry status remains planned. The mailbox records no messages and no bulletins from this sender. Our health measure reads no-data, with no bulletin recorded in the past 180 days. The collector reports no consecutive errors, and the mailbox has refused nothing. The previous assessment, dated 2026-09-27, also recorded no bulletins from this sender, so the measurements are unchanged since then. No item length or delivery mode has been measured for this source.
+We receive Office of Financial Research bulletins through the email adapter from updates@subscribe.financialresearch.gov, with the subscription confirmed on 2026-07-29. The registry status is planned, and no signup URL was recorded because the inferred address did not resolve. The mailbox shows zero messages, zero bulletins, zero errors, and zero refusals. The health measure reads no-data, since no bulletin has been recorded from this source in the last 180 days, and the collector reports no consecutive errors. No item length or delivery mode has been measured. The previous assessment recorded the same counts, so nothing has changed.
 
-_Model-written assessment of our own ingestion, generated 2026-10-28 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-27 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

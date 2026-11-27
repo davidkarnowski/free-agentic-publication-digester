@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 3 item(s) in the last 14 days; most recent 2026-11-25; 0 of 671 request(s) to www.occ.gov returned no content.
+**delivering** — 2 item(s) in the last 14 days; most recent 2026-11-25; 0 of 667 request(s) to www.occ.gov returned no content.
 
-This label has held since 2026-11-06T16:29:25Z (UTC) and was last re-checked 2026-11-26T04:49:09Z (UTC).
+This label has held since 2026-11-06T16:29:25Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -62,24 +62,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 56 request(s) (56 answered, 0 returned no content) · 1 item(s) ingested
+Last 24 hours: 50 request(s) (50 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 3 in 14 days (0.21 per day) · most recent 2026-11-25 |
-| Content length | 5,855 characters average, 5,409 median (shortest 5,314, longest 6,843) |
+| Items ingested | 2 in 14 days (0.14 per day) · most recent 2026-11-25 |
+| Content length | 6,126 characters average, 6,126 median (shortest 5,409, longest 6,843) |
 | Delivery mode | full — full article text, fetched from the item's own page |
-| Our requests to www.occ.gov | 671 request(s) · 671 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.occ.gov | 667 request(s) · 667 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-26T05:00:16.443+00:00 UTC; this host serves 2 registered sources, so these figures are host-wide.
+last answered request 2026-11-27T05:00:16.320+00:00 UTC; this host serves 2 registered sources, so these figures are host-wide.
 
-3 item(s) in the last 14 days; most recent 2026-11-25; 0 of 671 request(s) to www.occ.gov returned no content.
+2 item(s) in the last 14 days; most recent 2026-11-25; 0 of 667 request(s) to www.occ.gov returned no content.
 
 ### All time
 
-- **Our requests to www.occ.gov, all time (since 2026-10-05):** 2,653 request(s) · 2,652 answered · 1 returned no content
+- **Our requests to www.occ.gov, all time (since 2026-10-05):** 2,703 request(s) · 2,702 answered · 1 returned no content
 
 This host serves 2 registered sources, so these figures are host-wide.
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.occ.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-28 | 0 | 52 | 204 |
 | 2026-10-29 | 0 | 51 | 210 |
 | 2026-10-30 | 0 | 52 | 242 |
 | 2026-10-31 | 0 | 50 | 396 |
@@ -120,7 +119,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-23 | 0 | 50 | 208 |
 | 2026-11-24 | 0 | 52 | 217 |
 | 2026-11-25 | 1 | 56 | 204 |
-| 2026-11-26 | 0 | 2 | 280 |
+| 2026-11-26 | 0 | 50 | 209 |
+| 2026-11-27 | 0 | 2 | 220 |
 
 ## Our ingestion assessment
 

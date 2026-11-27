@@ -52,9 +52,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-08-03, 115 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-08-03, 116 days ago (quiet past 7 days).
 
-This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-11-26T04:49:09Z (UTC).
+This label has held since 2026-09-27T00:51:29Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -75,7 +75,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-08-03, 115 days ago (quiet past 7 days).
+Most recent item 2026-08-03, 116 days ago (quiet past 7 days).
 
 ### All time
 
@@ -89,6 +89,6 @@ No requests and no items were recorded in the last 30 days, so there is nothing 
 
 **Model-written ingestion assessment**
 
-The Week at State is ingested through the email adapter from usstatebpa@public.govdelivery.com. The subscription was confirmed on 2026-07-29 and the registry status is still planned. The registry describes this bulletin as a weekly summary rather than the daily press statements or briefing transcripts. Our measured history shows one item, dated 2026-08-03. The 14-day window and every daily bucket from 2026-10-22 through 2026-10-28 contain zero items. The last item is 86 days old as of this assessment, the mailbox shows zero messages with zero errors and zero refused messages, and no character statistics have been recorded. Since the previous assessment on 2026-09-27, which recorded 55 days without an item, no new bulletin has been ingested and the gap has grown to 86 days.
+We receive The Week at State through the email adapter from usstatebpa@public.govdelivery.com, with the subscription confirmed on 2026-07-29. The registry status is planned, and the registry describes this bulletin as a weekly summary rather than the daily press statements or briefing transcripts. Our measured history records one item, dated 2026-08-03. The 14-day window contains zero items, and the mailbox counters read zero messages, zero errors, and zero refusals. The measured history and the mailbox counters do not agree, and the record does not explain the difference. No character statistics have been recorded. The health measure reads quiet, with the last item 116 days old as of this assessment. The previous assessment put the gap at 86 days; no new bulletin has been ingested since, and the gap has grown by 30 days.
 
-_Model-written assessment of our own ingestion, generated 2026-10-28 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-27 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
