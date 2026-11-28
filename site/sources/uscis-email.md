@@ -55,9 +55,9 @@ _Model-written orientation, generated 2026-08-06 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-19, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-19, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-11-19T21:45:31Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
+This label has held since 2026-11-27T05:10:42Z (UTC) and was last re-checked 2026-11-28T04:50:27Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -80,7 +80,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-19, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-19, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -92,7 +92,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-29 | 0 |
 | 2026-10-30 | 0 |
 | 2026-10-31 | 0 |
 | 2026-11-01 | 0 |
@@ -122,11 +121,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-25 | 0 |
 | 2026-11-26 | 0 |
 | 2026-11-27 | 0 |
+| 2026-11-28 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Our email adapter ingests the uscis@messages.dhs.gov GovDelivery subscription in full-text delivery mode, with DKIM verification and raw message capture. The subscription was confirmed 2026-07-29. The registry notes that its scope overlaps the uscis.gov newsroom page, so that comparison remains part of coverage accounting. In the 14-day window we recorded one bulletin, 519 characters, a rate of 0.07 per day. The most recent item was delivered 2026-11-19, and the last message was received at 21:38 UTC that day. The mailbox counters show one message, one bulletin, zero administrative messages, zero errors, and zero refused deliveries. Health status now reads delivering, where the previous assessment recorded quiet. The 460-character bulletin from 2026-10-26 that the previous assessment described falls outside the current 14-day window, and the mailbox counters differ from the two bulletins and two messages recorded previously. The registry notes that the gate-3 coverage evaluation of the 2026-07-29 bulletins found one update, delivered as full text with its canonical uscis.gov URL.
+We ingest USCIS Updates from subscription bulletins sent by uscis@messages.dhs.gov to the project mailbox, in full-text delivery mode, through the email adapter with raw capture and DKIM verification. The subscription was confirmed 2026-07-29; the registry status is active and the tier is 2. Over the 14-day window we recorded one bulletin of 519 characters, a rate of 0.07 per day, dated 2026-11-19, with the last message received at 21:38:51 UTC that day. The mailbox counters show one message, one bulletin, zero errors, and zero refused deliveries. Health is recorded as quiet, with the most recent item 9 days old. The registry notes state that this subscription's scope overlaps the uscis.gov newsroom page, so that comparison remains part of coverage accounting. They also record that the gate-3 coverage evaluation of the 2026-07-29 bulletins found one update, delivered as full text with its canonical URL. Compared with the previous assessment dated 2026-11-20, the window count, length, and most recent item date are unchanged. That assessment recorded health as delivering, with the item one day old.
 
-_Model-written assessment of our own ingestion, generated 2026-11-20 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-28 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

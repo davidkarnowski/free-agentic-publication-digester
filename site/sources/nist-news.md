@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-19, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-19, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-11-18T16:45:34Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
+This label has held since 2026-11-27T05:10:42Z (UTC) and was last re-checked 2026-11-28T04:50:27Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -79,13 +79,13 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.nist.gov | 332 request(s) · 332 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-27T05:00:16.285+00:00 UTC.
+last answered request 2026-11-28T05:02:25.153+00:00 UTC.
 
-Most recent item 2026-11-19, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-19, 9 days ago (quiet past 7 days).
 
 ### All time
 
-- **Our requests to www.nist.gov, all time (since 2026-07-30):** 3,186 request(s) · 3,180 answered · 6 returned no content
+- **Our requests to www.nist.gov, all time (since 2026-07-30):** 3,211 request(s) · 3,205 answered · 6 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.nist.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-29 | 0 | 25 | 176 |
 | 2026-10-30 | 0 | 27 | 152 |
 | 2026-10-31 | 0 | 24 | 126 |
 | 2026-11-01 | 0 | 26 | 133 |
@@ -124,12 +123,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-24 | 0 | 26 | 133 |
 | 2026-11-25 | 0 | 27 | 140 |
 | 2026-11-26 | 0 | 25 | 127 |
-| 2026-11-27 | 0 | 1 | 143 |
+| 2026-11-27 | 0 | 25 | 125 |
+| 2026-11-28 | 0 | 1 | 136 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest NIST News from the documented news RSS feed and fetch each linked article page for full text, in full delivery mode. Feed descriptions are short teasers of about 134 characters, so the fetched article is the content we retain. Only the news feed is registered; the topic feeds that NIST documents are not. The source was activated on 2026-07-28. Over the 14-day window we recorded 1 item at 0.07 per day, dated 2026-11-18, at 11,590 characters. The previous assessment recorded 1 item at 0.07 per day, dated 2026-11-02, at 8,334 characters, so the window item and its length have changed. All 335 requests to www.nist.gov returned content, with no failed requests; the previous window recorded 332 requests and no failures. The registry notes record the probes and the activation, with no incidents. Health reads delivering, with the most recent item 1 day old.
+We ingest NIST News from the documented news RSS feed (registered 2026-07-26, activated 2026-07-28, status active, tier 2) and fetch each linked article page for full text in full delivery mode. Feed descriptions are teasers of about 134 characters, so the fetched article is the content we retain. Only the news feed is registered; the roughly 24 topic feeds listed in the agency's feed documentation are not. Over the 14-day window we recorded 2 items, a rate of 0.14 per day, with the most recent dated 2026-11-19. Extracted article text averaged 10,187 characters (range 8,784 to 11,590). All 332 requests to www.nist.gov returned content, with no failed requests. Health is recorded as quiet, with the most recent item 9 days old and no items in the past 7 days. Compared with the previous assessment dated 2026-11-19, which recorded one item dated 2026-11-18 at 11,590 characters, the window now holds two items, the most recent dated 2026-11-19. The registry notes record the probes and activation, with no incidents.
 
-_Model-written assessment of our own ingestion, generated 2026-11-19 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-28 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

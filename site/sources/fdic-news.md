@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-30 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 6 item(s) in the last 14 days; most recent 2026-11-24; 0 of 326 request(s) to www.fdic.gov returned no content.
+**delivering** — 9 item(s) in the last 14 days; most recent 2026-11-27; 0 of 327 request(s) to www.fdic.gov returned no content.
 
-This label has held since 2026-11-13T21:46:49Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
+This label has held since 2026-11-13T21:46:49Z (UTC) and was last re-checked 2026-11-28T04:50:27Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,24 +71,24 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · 3 item(s) ingested
 
 ### Last 14 days
 
 | Measure | Value |
 |---|---|
-| Items ingested | 6 in 14 days (0.43 per day) · most recent 2026-11-24 |
-| Content length | 113 characters average, 111 median (shortest 104, longest 132) |
+| Items ingested | 9 in 14 days (0.64 per day) · most recent 2026-11-27 |
+| Content length | 102 characters average, 111 median (shortest 57, longest 132) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to www.fdic.gov | 326 request(s) · 326 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to www.fdic.gov | 327 request(s) · 327 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-27T05:00:15.370+00:00 UTC.
+last answered request 2026-11-28T05:02:24.765+00:00 UTC.
 
-6 item(s) in the last 14 days; most recent 2026-11-24; 0 of 326 request(s) to www.fdic.gov returned no content.
+9 item(s) in the last 14 days; most recent 2026-11-27; 0 of 327 request(s) to www.fdic.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fdic.gov, all time (since 2026-09-28):** 1,506 request(s) · 1,505 answered · 1 returned no content
+- **Our requests to www.fdic.gov, all time (since 2026-09-28):** 1,532 request(s) · 1,531 answered · 1 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fdic.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-29 | 0 | 25 | 189 |
 | 2026-10-30 | 2 | 25 | 191 |
 | 2026-10-31 | 0 | 25 | 260 |
 | 2026-11-01 | 0 | 26 | 274 |
@@ -127,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-24 | 3 | 26 | 257 |
 | 2026-11-25 | 0 | 25 | 212 |
 | 2026-11-26 | 0 | 25 | 247 |
-| 2026-11-27 | 0 | 1 | 178 |
+| 2026-11-27 | 3 | 26 | 838 |
+| 2026-11-28 | 0 | 1 | 413 |
 
 ## Our ingestion assessment
 

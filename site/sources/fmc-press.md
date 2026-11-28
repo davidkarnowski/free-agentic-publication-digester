@@ -52,7 +52,7 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 **delivering** — 1 item(s) in the last 14 days; most recent 2026-11-23; 0 of 330 request(s) to www.fmc.gov returned no content.
 
-This label has held since 2026-11-23T19:38:34Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
+This label has held since 2026-11-23T19:38:34Z (UTC) and was last re-checked 2026-11-28T04:50:27Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,13 +73,13 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.fmc.gov | 330 request(s) · 330 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-27T05:00:15.735+00:00 UTC.
+last answered request 2026-11-28T05:02:24.832+00:00 UTC.
 
 1 item(s) in the last 14 days; most recent 2026-11-23; 0 of 330 request(s) to www.fmc.gov returned no content.
 
 ### All time
 
-- **Our requests to www.fmc.gov, all time (since 2026-10-05):** 1,340 request(s) · 1,340 answered · 0 returned no content
+- **Our requests to www.fmc.gov, all time (since 2026-10-05):** 1,366 request(s) · 1,366 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -89,7 +89,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.fmc.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-29 | 0 | 25 | 113 |
 | 2026-10-30 | 0 | 27 | 114 |
 | 2026-10-31 | 0 | 24 | 79 |
 | 2026-11-01 | 0 | 27 | 83 |
@@ -118,7 +117,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-24 | 0 | 25 | 69 |
 | 2026-11-25 | 0 | 27 | 83 |
 | 2026-11-26 | 0 | 25 | 85 |
-| 2026-11-27 | 0 | 1 | 94 |
+| 2026-11-27 | 0 | 26 | 85 |
+| 2026-11-28 | 0 | 1 | 78 |
 
 ## Our ingestion assessment
 

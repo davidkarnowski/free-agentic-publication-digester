@@ -51,9 +51,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-19, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-19, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-11-17T18:51:42Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
+This label has held since 2026-11-27T05:10:42Z (UTC) and was last re-checked 2026-11-28T04:50:27Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -76,7 +76,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-19, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-19, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -88,7 +88,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-29 | 0 |
 | 2026-10-30 | 0 |
 | 2026-10-31 | 0 |
 | 2026-11-01 | 0 |
@@ -118,11 +117,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-25 | 0 |
 | 2026-11-26 | 0 |
 | 2026-11-27 | 0 |
+| 2026-11-28 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest HUD Office of Inspector General bulletins from hudoig@info.hudoig.gov through the email adapter. Messages are full-text, captured raw and DKIM-verified before parsing, so no article fetch is made. The 14-day window holds one item, dated 2026-11-17, measuring 1,836 characters. The mailbox counter records one bulletin, with no errors and no refused messages, last received 2026-11-17T18:42:05Z. Health reads delivering. The registry status is planned, and the subscription was confirmed 2026-07-29. The registry notes record that the signup page returned HTTP 403 to our identified client. That response was recorded as observed and was not worked around. The department's newsroom also returned HTTP 403 to our client, and a HUD-NEWS-L signup did not complete. The registry describes this stream as Inspector General oversight material, not the department's own announcements. The 2026-07-31 coverage evaluations recorded bulletin-to-item matches. Compared with the previous assessment, which recorded one item dated 2026-10-13 at 4,202 characters, the current window holds a different item, dated 2026-11-17, at 1,836 characters.
+We ingest HUD Inspector General bulletins sent by hudoig@info.hudoig.gov to the project mailbox, in full-text delivery mode, through the email adapter with raw capture and DKIM verification. The subscription was confirmed 2026-07-29; the registry status is planned and the tier is 3. Over the 14-day window we recorded two bulletins, a rate of 0.14 per day, with an average of 1,858 characters (range 1,836 to 1,881) and the most recent dated 2026-11-19. The mailbox counters show two messages, two bulletins, zero errors, and zero refused deliveries. Health is recorded as quiet, with the most recent item 9 days old. The registry notes record that the signup page returned HTTP 403 to our identified client, and that this response is recorded as observed. They describe this stream as Inspector General oversight material, and describe it as partial coverage of the department, since the newsroom returned HTTP 403 to our client and a HUD-NEWS-L signup did not complete. Compared with the previous assessment dated 2026-11-18, which recorded one bulletin dated 2026-11-17 at 1,836 characters with health delivering, the window count rose from one to two, the most recent item date moved to 2026-11-19, and health is now recorded as quiet.
 
-_Model-written assessment of our own ingestion, generated 2026-11-18 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-28 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

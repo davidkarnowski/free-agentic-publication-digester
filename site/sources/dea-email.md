@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-08-05 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-19, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-19, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-09-09T20:07:29Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
+This label has held since 2026-11-27T05:10:42Z (UTC) and was last re-checked 2026-11-28T04:50:27Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -84,7 +84,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-19, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-19, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -96,7 +96,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-29 | 0 |
 | 2026-10-30 | 0 |
 | 2026-10-31 | 0 |
 | 2026-11-01 | 0 |
@@ -126,11 +125,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-25 | 0 |
 | 2026-11-26 | 0 |
 | 2026-11-27 | 0 |
+| 2026-11-28 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Subscription bulletins from dea@public.govdelivery.com are delivered as full-text emails to the project mailbox and ingested by the email adapter, which includes raw RFC-5322 capture and DKIM verification. The previous assessment, dated 2026-10-11, reported 6 items arriving over a 14-day period at 0.43 items per day, with an average length of 916 characters, and the most recent item on 2026-10-09. The current measurement shows 5 items received over the last 14 days, at a rate of 0.36 items per day, with an average of 1073 characters (ranging from 64 to 2135). The most recent item arrived on 2026-11-09. All messages received were DKIM-verified with zero errors or refusals recorded. A sibling HTTP press endpoint continues to return 403 to our client, and the Diversion Control Division mailing list remains unconfirmed.
+We ingest DEA Updates from subscription bulletins sent by dea@public.govdelivery.com to the project mailbox, in full-text delivery mode, through the email adapter with raw capture and DKIM verification. The subscription was confirmed 2026-07-29 and the source is registered as active, tier 2. Over the 14-day window we recorded one bulletin of 1,026 characters, a rate of 0.07 per day, dated 2026-11-19. The mailbox counters show one message, one bulletin, zero errors, and zero refused deliveries, with the last message received at 14:44:41 UTC that day. Health is recorded as quiet, with the most recent item 9 days old. The registry notes record that the sibling endpoint dea-press returns HTTP 403 to our identified client, and that the Diversion Control Division list is subscribed but awaiting email confirmation. Compared with the previous assessment dated 2026-11-10, which recorded 5 items at 0.36 per day averaging 1,073 characters with the most recent dated 2026-11-09, the window count fell to 1, the most recent item date moved to 2026-11-19, and the average length is now 1,026 characters.
 
-_Model-written assessment of our own ingestion, generated 2026-11-10 by gemini-2.5-flash, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-28 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

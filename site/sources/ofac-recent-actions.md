@@ -59,9 +59,9 @@ _Model-written orientation, generated 2026-09-29 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**delivering** — 4 item(s) in the last 14 days; most recent 2026-11-23; 0 of 329 request(s) to ofac.treasury.gov returned no content.
+**delivering** — 4 item(s) in the last 14 days; most recent 2026-11-23; 0 of 328 request(s) to ofac.treasury.gov returned no content.
 
-This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
+This label has held since 2026-09-28T18:49:43Z (UTC) and was last re-checked 2026-11-28T04:50:27Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -71,7 +71,7 @@ These figures describe this project's ingestion of this source — items we reco
 
 ### Last 24 hours
 
-Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · no items ingested
+Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items ingested
 
 ### Last 14 days
 
@@ -80,15 +80,15 @@ Last 24 hours: 24 request(s) (24 answered, 0 returned no content) · no items in
 | Items ingested | 4 in 14 days (0.29 per day) · most recent 2026-11-23 |
 | Content length | 120 characters average, 91 median (shortest 70, longest 229) |
 | Delivery mode | feed-only — the feed's own summary — the source publishes no more than this through this channel |
-| Our requests to ofac.treasury.gov | 329 request(s) · 329 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
+| Our requests to ofac.treasury.gov | 328 request(s) · 328 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-27T05:00:24.595+00:00 UTC.
+last answered request 2026-11-28T05:02:35.511+00:00 UTC.
 
-4 item(s) in the last 14 days; most recent 2026-11-23; 0 of 329 request(s) to ofac.treasury.gov returned no content.
+4 item(s) in the last 14 days; most recent 2026-11-23; 0 of 328 request(s) to ofac.treasury.gov returned no content.
 
 ### All time
 
-- **Our requests to ofac.treasury.gov, all time (since 2026-09-28):** 1,510 request(s) · 1,510 answered · 0 returned no content
+- **Our requests to ofac.treasury.gov, all time (since 2026-09-28):** 1,535 request(s) · 1,535 answered · 0 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -98,7 +98,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to ofac.treasury.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-29 | 1 | 24 | 9301 |
 | 2026-10-30 | 0 | 27 | 8973 |
 | 2026-10-31 | 0 | 25 | 9146 |
 | 2026-11-01 | 0 | 25 | 8968 |
@@ -127,7 +126,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-24 | 0 | 25 | 8939 |
 | 2026-11-25 | 0 | 27 | 9162 |
 | 2026-11-26 | 0 | 24 | 9285 |
-| 2026-11-27 | 0 | 1 | 8151 |
+| 2026-11-27 | 0 | 25 | 9010 |
+| 2026-11-28 | 0 | 1 | 10139 |
 
 ## Our ingestion assessment
 

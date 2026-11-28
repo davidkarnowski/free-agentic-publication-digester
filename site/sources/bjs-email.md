@@ -56,9 +56,9 @@ _Model-written orientation, generated 2026-09-27 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-19, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-19, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-11-12T19:19:38Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
+This label has held since 2026-11-27T05:10:42Z (UTC) and was last re-checked 2026-11-28T04:50:27Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -81,7 +81,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-19, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-19, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -93,7 +93,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-29 | 0 |
 | 2026-10-30 | 0 |
 | 2026-10-31 | 0 |
 | 2026-11-01 | 0 |
@@ -123,11 +122,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-25 | 0 |
 | 2026-11-26 | 0 |
 | 2026-11-27 | 0 |
+| 2026-11-28 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-Bulletins from juststats@public.govdelivery.com reach the project mailbox and are ingested by the email adapter in full-text delivery mode, with DKIM verified and the message archived at ingest. The registry status is planned. The subscription was confirmed through the publisher's signup flow and registered on 2026-09-26, and ingestion began at the first poll after deployment, so earlier bulletins were not backfilled. Gate-3 coverage evaluation is pending. In the 14-day window we measured two bulletins, both dated 2026-11-12 and recorded in the 14:00 and 15:00 hour slots, with lengths of 694 to 728 characters and a median of 711. The mailbox counters show two messages and two bulletins, with zero administrative messages, zero errors, and zero refused deliveries. Health reads delivering, with the most recent item at zero days and a rate of 0.14 items per day. Compared with the previous assessment of 2026-11-04, which recorded one bulletin of 1,446 characters delivered on 2026-10-26 and a health status of quiet, the window now holds two bulletins, the earlier item is outside the window, and the measured lengths are shorter. Email sources generate no polling requests, so health is read from delivery recency alone.
+We ingest Bureau of Justice Statistics bulletins sent by juststats@public.govdelivery.com to the project mailbox, in full-text delivery mode, through the email adapter with raw capture and DKIM verification. The subscription was confirmed through the publisher's signup flow and registered on 2026-09-26; ingestion began at the first poll after deployment, and earlier bulletins were not backfilled. The registry status remains planned and gate-3 coverage evaluation is pending. The registry measure records one item in the 14-day window, 1,773 characters, a rate of 0.07 per day, dated 2026-11-19. The mailbox counters record two bulletins and two messages, the last received 2026-11-24 at 21:50:32 UTC, with zero administrative messages, errors, or refused deliveries. The two measures differ, and the registry block does not record the cause. Health is recorded as quiet, with the most recent item 9 days old. The registry notes list justice-email and justice-newsroom as related entries. Compared with the previous assessment dated 2026-11-12, which recorded two bulletins dated 2026-11-12 with a median length of 711 characters and health as delivering, the item date moved to 2026-11-19 and the length is now 1,773 characters.
 
-_Model-written assessment of our own ingestion, generated 2026-11-12 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-28 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

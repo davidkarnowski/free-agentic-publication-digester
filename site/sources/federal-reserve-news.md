@@ -58,7 +58,7 @@ _Model-written orientation, generated 2026-08-04 by haiku, prompt version 1. It 
 
 **delivering** — 7 item(s) in the last 14 days; most recent 2026-11-25; 5 of 334 request(s) to www.federalreserve.gov returned no content.
 
-This label has held since 2026-10-28T18:35:23Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
+This label has held since 2026-10-28T18:35:23Z (UTC) and was last re-checked 2026-11-28T04:50:27Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -79,13 +79,13 @@ Last 24 hours: 25 request(s) (25 answered, 0 returned no content) · no items in
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.federalreserve.gov | 334 request(s) · 329 answered · 5 declined (4xx) · 0 server declined (5xx) · 0 no response — 1.5% returned no content |
 
-last answered request 2026-11-27T05:00:15.291+00:00 UTC.
+last answered request 2026-11-28T05:02:24.465+00:00 UTC.
 
 7 item(s) in the last 14 days; most recent 2026-11-25; 5 of 334 request(s) to www.federalreserve.gov returned no content.
 
 ### All time
 
-- **Our requests to www.federalreserve.gov, all time (since 2026-07-30):** 3,215 request(s) · 3,183 answered · 32 returned no content
+- **Our requests to www.federalreserve.gov, all time (since 2026-07-30):** 3,240 request(s) · 3,208 answered · 32 returned no content
 
 Request counts begin 2026-07-30, the day this service went into production; earlier development-machine traffic is excluded. Counts before 2026-08-03 include unmarked source-probe traffic; probes are labeled and excluded thereafter. Robots.txt checks, about one a day per host, are left out of these figures and of every health label: they fetch no publication, so a source's health rests on the requests that fetch its publications. They are still logged and counted against our request budget.
 
@@ -95,7 +95,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.federalreserve.gov | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-29 | 1 | 26 | 102 |
 | 2026-10-30 | 0 | 25 | 73 |
 | 2026-10-31 | 0 | 25 | 73 |
 | 2026-11-01 | 0 | 26 | 84 |
@@ -124,12 +123,13 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-24 | 1 | 27 | 98 |
 | 2026-11-25 | 2 | 28 | 85 |
 | 2026-11-26 | 0 | 25 | 52 |
-| 2026-11-27 | 0 | 1 | 106 |
+| 2026-11-27 | 0 | 25 | 65 |
+| 2026-11-28 | 0 | 1 | 140 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-We ingest the Federal Reserve Press Releases RSS feed (registered 2026-07-26, status active). The feed carries title-plus-teaser items averaging about 109 characters, and we fetch full article text from each linked page. In the 14-day window we recorded 2 items, a rate of 0.14 per day, with the most recent dated 2026-10-28, one day before this assessment. Extracted article text averaged 9,586 characters (median 9,586; range 9,373 to 9,799). Of 329 requests to www.federalreserve.gov, 328 returned content and 1 returned no content, recorded as a client error, for an error rate of 0.3%. The registry notes record the 2026-07-26 probe, which verified the feed end to end, and note that the email sibling federal-reserve-email was registered on 2026-07-29. Compared with the previous assessment dated 2026-10-25, the 14-day item count is unchanged at 2, the most recent item date moved from 2026-10-16 to 2026-10-28, average extracted length rose from about 9,316 to 9,586 characters, and the error rate fell from 0.6% to 0.3%. Health is recorded as delivering.
+We ingest the Federal Reserve Press Releases RSS feed (registered 2026-07-26, status active, tier 2). Feed items carry a title and a teaser averaging about 109 characters, and we fetch full article text from each linked page in full delivery mode. Over the 14-day window we recorded 7 items, a rate of 0.5 per day, with the most recent dated 2026-11-25. Extracted article text averaged 9,728 characters (median 9,710; range 9,090 to 10,713). Of 334 requests to www.federalreserve.gov, 329 returned content and 5 returned no content, recorded as client errors, for an error rate of 1.5%. The seven-day daily view shows one such failure, on 2026-11-22. The collector shows no consecutive errors. The registry notes record the 2026-07-26 probe and the registration on 2026-07-29 of the email sibling federal-reserve-email, with the web status unchanged. Compared with the previous assessment dated 2026-10-29, the 14-day item count rose from 2 to 7, the most recent item date moved from 2026-10-28 to 2026-11-25, average extracted length rose from 9,586 to 9,728 characters, and the error rate rose from 0.3% to 1.5%. Health is recorded as delivering.
 
-_Model-written assessment of our own ingestion, generated 2026-10-29 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-28 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._

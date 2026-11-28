@@ -50,9 +50,9 @@ _Model-written orientation, generated 2026-10-02 by haiku, prompt version 1. It 
 
 ## Ingestion health
 
-**quiet** — Most recent item 2026-11-19, 8 days ago (quiet past 7 days).
+**quiet** — Most recent item 2026-11-19, 9 days ago (quiet past 7 days).
 
-This label has held since 2026-10-16T13:29:58Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
+This label has held since 2026-11-27T05:10:42Z (UTC) and was last re-checked 2026-11-28T04:50:27Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -75,7 +75,7 @@ Last 24 hours: no items ingested
 
 Bulletins from this source are delivered to the project mailbox, so there are no requests to report. Its health is read from delivery recency alone.
 
-Most recent item 2026-11-19, 8 days ago (quiet past 7 days).
+Most recent item 2026-11-19, 9 days ago (quiet past 7 days).
 
 ### All time
 
@@ -87,7 +87,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested |
 |---|---|
-| 2026-10-29 | 1 |
 | 2026-10-30 | 1 |
 | 2026-10-31 | 0 |
 | 2026-11-01 | 0 |
@@ -117,11 +116,12 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-25 | 0 |
 | 2026-11-26 | 0 |
 | 2026-11-27 | 0 |
+| 2026-11-28 | 0 |
 
 ## Our ingestion assessment
 
 **Model-written ingestion assessment**
 
-The source is ingested from the project mailbox as email with full item text, and DKIM is verified and archived at ingest. Over the 14-day window ending 2026-11-16 we measured 5 items, or 0.36 per day, with the most recent on 2026-11-13 (last mailbox message 14:37 UTC), 3 days before the measurement. Items averaged 1,255 characters (median 1,329, range 1,041 to 1,510). The mailbox shows 5 bulletins and 5 messages, with no administrative messages, errors, or refused deliveries, and the collector reports zero consecutive errors. The registry notes record no incidents. They note that bulletins arrived during the late-September changeover window before activation on 2026-10-01. The previous assessment on 2026-10-17 recorded 2 items in its window, the most recent on 2026-10-16, averaging 1,204 characters (range 1,193 to 1,216), and 2 mailbox bulletins. Since then the window count has risen to 5, the mailbox bulletin count to 5, and the most recent item date has moved to 2026-11-13. Item sizes have also widened, with the maximum now 1,510 characters.
+We ingest this source by email: the email adapter reads bulletins from the project mailbox, each carrying full item text, and DKIM is verified and the raw message archived at ingest. Over the 14-day window ending 2026-11-28 we measured 3 items (0.21 per day), the most recent on 2026-11-19, 9 days before measurement. No items were recorded on any day from 2026-11-22 through 2026-11-28. Items averaged 1,224 characters (median 1,262, range 1,005 to 1,406). The mailbox shows 3 bulletins and 3 messages, with no errors, administrative messages, or refused deliveries, and the collector reports zero consecutive errors. Because delivery is by mailbox, no requests are recorded, and health is read from delivery recency alone; the current label is quiet. The registry notes record no incidents and note activation on 2026-10-01 on observed delivery, with bulletins received in the late-September changeover window before activation. Since the 2026-11-16 assessment, the window count fell from 5 to 3, the mailbox bulletin count from 5 to 3, and the most recent item date moved from 2026-11-13 to 2026-11-19. Average size fell from 1,255 to 1,224 characters.
 
-_Model-written assessment of our own ingestion, generated 2026-11-16 by haiku, prompt version 1, trigger: age-30d. It restates our measured figures and is not official-record content._
+_Model-written assessment of our own ingestion, generated 2026-11-28 by haiku, prompt version 1, trigger: health-change. It restates our measured figures and is not official-record content._

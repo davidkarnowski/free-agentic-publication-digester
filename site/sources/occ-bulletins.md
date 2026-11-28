@@ -52,7 +52,7 @@ _Model-written orientation, generated 2026-10-06 by haiku, prompt version 1. It 
 
 **delivering** — 2 item(s) in the last 14 days; most recent 2026-11-25; 0 of 667 request(s) to www.occ.gov returned no content.
 
-This label has held since 2026-11-06T16:29:25Z (UTC) and was last re-checked 2026-11-27T04:52:55Z (UTC).
+This label has held since 2026-11-06T16:29:25Z (UTC) and was last re-checked 2026-11-28T04:50:27Z (UTC).
 
 Counts are of our own requests, retries included. A 4xx or 5xx is the server declining to return content — that may be load, maintenance, on-demand generation, or a limit the publisher sets, and we cannot tell which from outside. Nothing here is a measurement of the publisher.
 
@@ -73,13 +73,13 @@ Last 24 hours: 50 request(s) (50 answered, 0 returned no content) · no items in
 | Delivery mode | full — full article text, fetched from the item's own page |
 | Our requests to www.occ.gov | 667 request(s) · 667 answered · 0 declined (4xx) · 0 server declined (5xx) · 0 no response — 0.0% returned no content |
 
-last answered request 2026-11-27T05:00:16.320+00:00 UTC; this host serves 2 registered sources, so these figures are host-wide.
+last answered request 2026-11-28T05:02:25.438+00:00 UTC; this host serves 2 registered sources, so these figures are host-wide.
 
 2 item(s) in the last 14 days; most recent 2026-11-25; 0 of 667 request(s) to www.occ.gov returned no content.
 
 ### All time
 
-- **Our requests to www.occ.gov, all time (since 2026-10-05):** 2,703 request(s) · 2,702 answered · 1 returned no content
+- **Our requests to www.occ.gov, all time (since 2026-10-05):** 2,753 request(s) · 2,752 answered · 1 returned no content
 
 This host serves 2 registered sources, so these figures are host-wide.
 
@@ -91,7 +91,6 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 
 | Day | Items ingested | Requests to www.occ.gov (host-wide) | Mean response time (ms) |
 |---|---|---|---|
-| 2026-10-29 | 0 | 51 | 210 |
 | 2026-10-30 | 0 | 52 | 242 |
 | 2026-10-31 | 0 | 50 | 396 |
 | 2026-11-01 | 0 | 52 | 206 |
@@ -120,7 +119,8 @@ Each day runs midnight to midnight on Eastern time (Washington, D.C.), the publi
 | 2026-11-24 | 0 | 52 | 217 |
 | 2026-11-25 | 1 | 56 | 204 |
 | 2026-11-26 | 0 | 50 | 209 |
-| 2026-11-27 | 0 | 2 | 220 |
+| 2026-11-27 | 0 | 50 | 203 |
+| 2026-11-28 | 0 | 2 | 208 |
 
 ## Our ingestion assessment
 
